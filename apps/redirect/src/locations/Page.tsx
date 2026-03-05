@@ -38,7 +38,7 @@ const Page = () => {
 
   const metricsItems = useMemo(() => {
     const locale = sdk.locales.default;
-    const active = allRedirects.filter((r) => !r.fields.active[locale]).length;
+    const active = allRedirects.filter((r) => r.fields.active[locale]).length;
     const inactive = allRedirects.filter((r) => !r.fields.active[locale]).length;
     const permanent = allRedirects.filter(
       (r) => r.fields.redirectType[locale] === 'Permanent (301)'
