@@ -64,18 +64,21 @@ export const ContentTypePickerModal = ({
         let skip = 0;
         const limit = 100;
 
-        let hasMore = true;
-        while (hasMore) {
+        while (true) {
           const response = await sdk.cma.contentType.getMany({
             spaceId: space.sys.id,
             environmentId: environment.sys.id,
             query: { limit, skip },
           });
 
-          allContentTypes.push(...(response.items || []));
+          const items = response.items ?? [];
+          allContentTypes.push(...items);
 
-          skip += limit;
-          hasMore = skip < (response.total || 0);
+          if (items.length < limit) break;
+
+          if (skip + items.length >= response.total) break;
+
+          skip += items.length;
         }
 
         setContentTypes(allContentTypes);
