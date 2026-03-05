@@ -45,23 +45,56 @@ export function createMockEditorInterface(
   } as unknown as EditorInterfaceProps;
 }
 
+function buildRedirectSys(id: string) {
+  return {
+    id,
+    type: 'Entry',
+    contentType: {
+      sys: { type: 'Link', linkType: 'ContentType', id: REDIRECT_CONTENT_TYPE_ID },
+    },
+    createdAt: '2026-01-01T00:00:00.000Z',
+    updatedAt: '2026-01-01T00:00:00.000Z',
+    version: 1,
+    space: { sys: { type: 'Link', linkType: 'Space', id: 'space-1' } },
+    environment: { sys: { type: 'Link', linkType: 'Environment', id: 'master' } },
+    automationTags: [],
+  };
+}
+
+interface MockRedirectFields {
+  fromTitle?: string;
+  toTitle?: string;
+  reason?: string;
+  type?: string;
+  active?: boolean;
+}
+
+export function createMockRedirect(id: string, fields: MockRedirectFields = {}): RedirectEntry {
+  const {
+    fromTitle = 'Source',
+    toTitle = 'Destination',
+    reason = 'Some reason',
+    type = 'Permanent (301)',
+    active = true,
+  } = fields;
+
+  return {
+    sys: buildRedirectSys(id),
+    fields: {
+      redirectFromContentTypes: { sys: { id: `from-${id}` }, title: fromTitle },
+      redirectToContentTypes: { sys: { id: `to-${id}` }, title: toTitle },
+      reason: { 'en-US': reason },
+      redirectType: { 'en-US': type },
+      active: { 'en-US': active },
+    },
+  } as unknown as RedirectEntry;
+}
+
 export function createMockRedirectForPage(count: number): RedirectEntry {
   const id = `test-id-${count}`;
 
   return {
-    sys: {
-      id,
-      type: 'Entry',
-      contentType: {
-        sys: { type: 'Link', linkType: 'ContentType', id: REDIRECT_CONTENT_TYPE_ID },
-      },
-      createdAt: '2026-01-01T00:00:00.000Z',
-      updatedAt: '2026-01-01T00:00:00.000Z',
-      version: 1,
-      space: { sys: { type: 'Link', linkType: 'Space', id: 'space-1' } },
-      environment: { sys: { type: 'Link', linkType: 'Environment', id: 'master' } },
-      automationTags: [],
-    },
+    sys: buildRedirectSys(id),
     fields: {
       title: { 'en-US': `Redirect title ${count}` },
       redirectFromContentTypes: {

@@ -17,3 +17,6 @@ export const CACHE_CONFIG = {
   // Don't refetch on window focus to avoid unnecessary API calls
   REFETCH_ON_WINDOW_FOCUS: false,
 } as const;
+
+export const TYPE_FILTER_OPTIONS = ['Permanent (301)', 'Temporary (302)'];
+export const STATUS_FILTER_OPTIONS = ['Active', 'Inactive'];

@@ -1,24 +1,80 @@
-import { useState, useMemo } from 'react';
-import { Text, Flex, TextLink, Badge, RelativeDateTime } from '@contentful/f36-components';
+import { useState, useMemo, SetStateAction } from 'react';
+import {
+  Text,
+  Flex,
+  TextLink,
+  Badge,
+  RelativeDateTime,
+  Box,
+  Stack,
+  Pill,
+} from '@contentful/f36-components';
 import { ArrowSquareOutIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { redirectsTableStyles as styles } from './RedirectsTable.styles';
 import { ContentTable } from './ContentTable';
 import { useRedirects } from '../hooks/useRedirects';
-import { ITEMS_PER_PAGE } from '../utils/consts';
+import { ITEMS_PER_PAGE, STATUS_FILTER_OPTIONS, TYPE_FILTER_OPTIONS } from '../utils/consts';
 import { TableColumn, RedirectEntry } from '../utils/types';
 import { truncateText } from '../utils/utils';
+import { SearchBar } from './SearchBar';
+import FilterMultiselect from './FilterMultiselect';
+
+const getSearchableFields = (redirect: RedirectEntry, locale: string): (string | undefined)[] => [
+  redirect.fields.redirectFromContentTypes?.title,
+  redirect.fields.redirectToContentTypes?.title,
+  redirect.fields.reason[locale],
+  redirect.fields.redirectFromContentTypes?.slug,
+  redirect.fields.redirectToContentTypes?.slug,
+];
 
 export const RedirectsTable = () => {
   const sdk = useSDK<PageAppSDK>();
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE);
-  const { redirects, total, isFetchingRedirects, fetchingRedirectsError, refetchRedirects } =
-    useRedirects(currentPage, itemsPerPage);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const { redirects, isFetchingRedirects, fetchingRedirectsError, refetchRedirects } = useRedirects(
+    currentPage,
+    itemsPerPage
+  );
+
+  const filteredRedirects = useMemo<RedirectEntry[]>(() => {
+    const locale = sdk.locales.default;
+    const lowerQuery = searchQuery.toLowerCase();
+
+    const filters: Array<(redirect: RedirectEntry) => boolean> = [];
+
+    if (searchQuery.length > 0) {
+      filters.push((redirect) =>
+        getSearchableFields(redirect, locale).some((field) =>
+          field?.toLowerCase().includes(lowerQuery)
+        )
+      );
+    }
+
+    if (typeFilter.length > 0) {
+      filters.push((redirect) => typeFilter.includes(redirect.fields.redirectType[locale]));
+    }
+
+    if (statusFilter.length > 0) {
+      filters.push((redirect) =>
+        statusFilter.includes(redirect.fields.active[locale] ? 'Active' : 'Inactive')
+      );
+    }
+
+    return redirects.filter((redirect) => filters.every((filter) => filter(redirect)));
+  }, [redirects, searchQuery, sdk.locales.default, typeFilter, statusFilter]);
 
   const handleEdit = () => {
     // todo: open edit modal
+  };
+
+  const handleSearchChange = (query: string) => {
+    setCurrentPage(0);
+    setSearchQuery(query);
   };
 
   const columns = useMemo<TableColumn<RedirectEntry>[]>(
@@ -96,28 +152,86 @@ export const RedirectsTable = () => {
         ),
       },
     ],
-    [sdk, refetchRedirects]
+    [sdk]
   );
 
+  const handleToggleFilter = (
+    value: string,
+    checked: boolean,
+    setFilter: (value: SetStateAction<string[]>) => void
+  ) => {
+    setCurrentPage(0);
+    setFilter((prev) =>
+      checked ? [...prev, value] : prev.filter((filterValue) => filterValue !== value)
+    );
+  };
+
   return (
-    <ContentTable
-      items={redirects}
-      total={total}
-      isFetching={isFetchingRedirects}
-      error={fetchingRedirectsError}
-      columns={columns}
-      itemsPerPage={itemsPerPage}
-      currentPage={currentPage}
-      onPageChange={setCurrentPage}
-      onViewPerPageChange={(itemsPerPage) => {
-        setCurrentPage(0);
-        setItemsPerPage(itemsPerPage);
-        refetchRedirects();
-      }}
-      testId="redirects-table"
-      errorMessage="Failed to load redirects"
-      emptyStateMessage="Redirects will appear here when they are created."
-      skeletonColumnCount={6}
-    />
+    <>
+      <Flex style={styles.filtersRow} alignItems="flex-end" marginBottom="spacingM" gap="spacingS">
+        <FilterMultiselect
+          type="type"
+          options={TYPE_FILTER_OPTIONS}
+          selectedItems={typeFilter}
+          setSelectedItems={setTypeFilter}
+          handleToggleFilter={handleToggleFilter}
+        />
+        <FilterMultiselect
+          type="status"
+          options={STATUS_FILTER_OPTIONS}
+          selectedItems={statusFilter}
+          setSelectedItems={setStatusFilter}
+          handleToggleFilter={handleToggleFilter}
+        />
+        <SearchBar
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          isDisabled={isFetchingRedirects}
+        />
+      </Flex>
+      {(typeFilter.length > 0 || statusFilter.length > 0) && (
+        <Box marginBottom="spacingM">
+          <Stack flexDirection="row" spacing="spacing2Xs" flexWrap="wrap">
+            {typeFilter.map((value) => (
+              <Pill
+                key={`type-pill-${value}`}
+                data-test-id={`type-pill-${value}`}
+                label={value}
+                isDraggable={false}
+                onClose={() => handleToggleFilter(value, false, setTypeFilter)}
+              />
+            ))}
+            {statusFilter.map((value) => (
+              <Pill
+                key={`status-pill-${value}`}
+                data-test-id={`status-pill-${value}`}
+                label={value}
+                isDraggable={false}
+                onClose={() => handleToggleFilter(value, false, setStatusFilter)}
+              />
+            ))}
+          </Stack>
+        </Box>
+      )}
+      <ContentTable
+        items={filteredRedirects}
+        total={filteredRedirects.length}
+        isFetching={isFetchingRedirects}
+        error={fetchingRedirectsError}
+        columns={columns}
+        itemsPerPage={itemsPerPage}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+        onViewPerPageChange={(itemsPerPage) => {
+          setCurrentPage(0);
+          setItemsPerPage(itemsPerPage);
+          refetchRedirects();
+        }}
+        testId="redirects-table"
+        errorMessage="Failed to load redirects"
+        emptyStateMessage="Redirects will appear here when they are created."
+        skeletonColumnCount={6}
+      />
+    </>
   );
 };
