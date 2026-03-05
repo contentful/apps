@@ -119,7 +119,9 @@ export const RedirectsTable = ({
             <TextLink
               onClick={() =>
                 sdk.navigator.openEntry(item.fields.redirectToContentTypes?.sys?.id ?? '')
-              }>
+              }
+              icon={<ArrowSquareOutIcon />}
+              alignIcon="end">
               {truncateText(item.fields.redirectToContentTypes?.title, 50)}
             </TextLink>
             <Text fontColor="gray500">/slug</Text>
