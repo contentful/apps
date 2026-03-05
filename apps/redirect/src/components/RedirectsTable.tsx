@@ -37,7 +37,7 @@ export const RedirectsTable = () => {
               alignIcon="end">
               {truncateText(item.fields.redirectFromContentTypes?.title, 50)}
             </TextLink>
-            <Text fontColor="gray500">/slug</Text>
+            <Text fontColor="gray500">/{item.fields.redirectFromContentTypes?.slug ?? '—'}</Text>
           </Flex>
         ),
       },
@@ -53,7 +53,7 @@ export const RedirectsTable = () => {
               }>
               {truncateText(item.fields.redirectToContentTypes?.title, 50)}
             </TextLink>
-            <Text fontColor="gray500">/slug</Text>
+            <Text fontColor="gray500">/{item.fields.redirectToContentTypes?.slug ?? '—'}</Text>
           </Flex>
         ),
       },
