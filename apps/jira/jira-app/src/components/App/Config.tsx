@@ -6,7 +6,13 @@ import InstanceStep from './Steps/InstanceStep';
 import ContentTypeStep from './Steps/ContentTypeStep';
 import JiraStep from './Steps/JiraStep';
 import { AppExtensionSDK } from '@contentful/app-sdk';
-import { JiraCloudResource, CloudProject, InstallationParameters } from '../../interfaces';
+import { Button, Paragraph } from '@contentful/f36-components';
+import {
+  JiraCloudResource,
+  CloudProject,
+  InstallationParameters,
+  JiraMyselfResponse,
+} from '../../interfaces';
 
 interface Props {
   token: string;
@@ -21,6 +27,8 @@ interface State {
   checkedResource: string;
   checkedProject: CloudProject | null;
   selectedContentTypes: string[];
+  /** Current Jira user for selected resource (proves connection) */
+  currentUser: JiraMyselfResponse | null;
 }
 
 export default class Config extends React.Component<Props, State> {
@@ -34,6 +42,7 @@ export default class Config extends React.Component<Props, State> {
       checkedResource: '',
       checkedProject: null,
       selectedContentTypes: [],
+      currentUser: null,
     };
   }
 
@@ -61,10 +70,16 @@ export default class Config extends React.Component<Props, State> {
       // we can assume the projectId is also invalid if it doesn't exist
       if (configResourceExistsInResources) {
         // eslint-disable-next-line react/no-did-mount-set-state
-        this.setState({
-          checkedResource: resourceId,
-          checkedProject: project,
-        });
+        this.setState(
+          {
+            checkedResource: resourceId,
+            checkedProject: project,
+          },
+          () => {
+            this.getProjects('');
+            this.fetchCurrentUser(resourceId);
+          }
+        );
       }
 
       app.setReady();
@@ -163,7 +178,19 @@ export default class Config extends React.Component<Props, State> {
   };
 
   pickResource = (id: string) => {
-    this.setState({ checkedResource: id });
+    this.setState({ checkedResource: id, currentUser: null }, () => {
+      if (id) {
+        this.getProjects('');
+        this.fetchCurrentUser(id);
+      }
+    });
+  };
+
+  fetchCurrentUser = async (cloudId: string) => {
+    const res = await JiraClient.getMyself(cloudId, this.props.token);
+    if (!res.error && res.user) {
+      this.setState({ currentUser: res.user });
+    }
   };
 
   pickProject = (project: CloudProject) => {
@@ -182,6 +209,10 @@ export default class Config extends React.Component<Props, State> {
     }
   };
 
+  handleDisconnect = () => {
+    this.props.reauth();
+  };
+
   render() {
     const { sdk } = this.props;
     const {
@@ -189,6 +220,18 @@ export default class Config extends React.Component<Props, State> {
     } = sdk;
     return (
       <div className="configuration" data-test-id="configuration">
+        <Paragraph marginBottom="spacingM">
+          Connected to Jira. To use a different account or fix connection issues, disconnect and
+          sign in again.
+        </Paragraph>
+        <Button
+          variant="negative"
+          size="small"
+          onClick={this.handleDisconnect}
+          testId="disconnect-jira">
+          Disconnect Jira account
+        </Button>
+        <div style={{ marginTop: 'var(--spacing-2xl)' }} />
         <InstanceStep
           pickResource={this.pickResource}
           resources={this.state.resources}
@@ -197,6 +240,7 @@ export default class Config extends React.Component<Props, State> {
           pickProject={this.pickProject}
           projects={this.state.projects}
           selectedProject={this.state.checkedProject}
+          currentUser={this.state.currentUser}
         />
         <JiraStep />
         <ContentTypeStep
