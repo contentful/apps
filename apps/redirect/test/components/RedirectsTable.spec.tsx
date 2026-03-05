@@ -4,23 +4,26 @@ import { mockSdk } from '../mocks';
 import { createMockRedirect, createMockRedirectForPage } from '../utils/testUtils';
 import { RedirectsTable } from '../../src/components/RedirectsTable';
 import { RedirectEntry } from '../../src/utils/types';
-
-let mockRedirects: RedirectEntry[] = [createMockRedirectForPage(0)];
+import { ITEMS_PER_PAGE } from '../../src/utils/consts';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
-vi.mock('../../src/hooks/useRedirects', () => ({
-  useRedirects: () => ({
-    redirects: mockRedirects,
-    total: mockRedirects.length,
-    isFetchingRedirects: false,
-    fetchingRedirectsError: null,
-    refetchRedirects: vi.fn(),
-    fetchedAt: new Date(),
-  }),
-}));
+function renderTable(redirects: RedirectEntry[] = [createMockRedirectForPage(0)]) {
+  return render(
+    <RedirectsTable
+      redirects={redirects}
+      isFetchingRedirects={false}
+      fetchingRedirectsError={null}
+      refetchRedirects={vi.fn()}
+      currentPage={0}
+      itemsPerPage={ITEMS_PER_PAGE}
+      onPageChange={vi.fn()}
+      onItemsPerPageChange={vi.fn()}
+    />
+  );
+}
 
 describe('RedirectsTable component', () => {
   beforeEach(() => {
@@ -36,7 +39,7 @@ describe('RedirectsTable component', () => {
   });
 
   it('calls sdk.navigator.openEntry with destination entry ID when clicking destination link', async () => {
-    render(<RedirectsTable />);
+    renderTable();
 
     const destinationLink = await screen.findByText('Field to title 0');
     fireEvent.click(destinationLink);
@@ -45,7 +48,7 @@ describe('RedirectsTable component', () => {
   });
 
   it('renders type and status filters and search input', () => {
-    render(<RedirectsTable />);
+    renderTable();
 
     waitFor(() => {
       expect(screen.getByText('Filter by type')).toBeInTheDocument();
@@ -55,7 +58,7 @@ describe('RedirectsTable component', () => {
   });
 
   it('updates type filter label when an option is selected', async () => {
-    render(<RedirectsTable />);
+    renderTable();
 
     const typeButton = await screen.findByText('Filter by type');
     fireEvent.click(typeButton);
@@ -67,7 +70,7 @@ describe('RedirectsTable component', () => {
   });
 
   it('updates status filter label when an option is selected', async () => {
-    render(<RedirectsTable />);
+    renderTable();
 
     const statusButton = await screen.findByText('Filter by status');
     fireEvent.click(statusButton);
@@ -98,20 +101,14 @@ describe('RedirectsTable component', () => {
       active: false,
     });
 
-    beforeEach(() => {
-      mockRedirects = [permanent, temporary, permanentInactive];
-    });
-
-    afterEach(() => {
-      mockRedirects = [createMockRedirectForPage(0)];
-    });
+    const mockRedirects = [permanent, temporary, permanentInactive];
 
     describe('search', () => {
       beforeEach(() => vi.useFakeTimers());
       afterEach(() => vi.useRealTimers());
 
       it('filters by source title', () => {
-        render(<RedirectsTable />);
+        renderTable(mockRedirects);
 
         fireEvent.change(screen.getByPlaceholderText('Search by title, slug or reason'), {
           target: { value: 'Homepage' },
@@ -124,7 +121,7 @@ describe('RedirectsTable component', () => {
       });
 
       it('filters by reason', () => {
-        render(<RedirectsTable />);
+        renderTable(mockRedirects);
 
         fireEvent.change(screen.getByPlaceholderText('Search by title, slug or reason'), {
           target: { value: 'Maintenance' },
@@ -137,7 +134,7 @@ describe('RedirectsTable component', () => {
       });
 
       it('shows no rows when query matches nothing', () => {
-        render(<RedirectsTable />);
+        renderTable(mockRedirects);
 
         fireEvent.change(screen.getByPlaceholderText('Search by title, slug or reason'), {
           target: { value: 'xyznonexistent' },
@@ -151,7 +148,7 @@ describe('RedirectsTable component', () => {
     });
 
     it('type filter shows only redirects with matching type', async () => {
-      render(<RedirectsTable />);
+      renderTable(mockRedirects);
 
       fireEvent.click(await screen.findByText('Filter by type'));
       fireEvent.click(await screen.findByTestId('cf-multiselect-list-item-type-Permanent (301)'));
@@ -164,7 +161,7 @@ describe('RedirectsTable component', () => {
     });
 
     it('status filter shows only active redirects', async () => {
-      render(<RedirectsTable />);
+      renderTable(mockRedirects);
 
       fireEvent.click(await screen.findByText('Filter by status'));
       fireEvent.click(await screen.findByTestId('cf-multiselect-list-item-type-Active'));

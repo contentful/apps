@@ -26,7 +26,7 @@ export const redirectsTableStyles = {
     textDecoration: 'none',
   },
   select: {
-    minWidth: '150px',
+    width: '15%',
   },
   filtersRow: {
     width: '100%',

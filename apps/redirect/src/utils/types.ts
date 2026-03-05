@@ -22,7 +22,26 @@ type RedirectEntryRef = {
   sys?: { type: string; linkType: string; id: string };
   title: string;
   slug: string | undefined;
+  [key: string]: any;
 };
+
+export interface VanityUrlEntry {
+  sys: {
+    id: string;
+    createdAt: string;
+  };
+  fields: {
+    title: Record<string, string>;
+    slug: Record<string, string>;
+    destinationEntry: {
+      sys?: { type: string; linkType: string; id: string };
+      fields?: { [key: string]: any };
+    };
+    description?: Record<string, string>;
+    campaignTag?: Record<string, string>;
+    expirationDate?: Record<string, string>;
+  };
+}
 
 export interface RedirectEntry {
   sys: {

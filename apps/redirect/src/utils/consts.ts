@@ -1,5 +1,7 @@
 export const REDIRECT_CONTENT_TYPE_ID = 'redirectAppRedirect';
 
+export const VANITY_URL_CONTENT_TYPE_ID = 'redirectAppVanityUrl';
+
 export const ITEMS_PER_PAGE = 5;
 
 export const PAGE_SIZE = 100;
