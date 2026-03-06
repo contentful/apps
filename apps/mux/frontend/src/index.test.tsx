@@ -19,13 +19,35 @@ vi.mock('contentful-management', () => ({
   })),
 }));
 
-// Mock the API client
-vi.mock('./util/apiClient', () => ({
-  default: vi.fn().mockImplementation(() => ({
-    get: vi.fn(() => Promise.resolve({ ok: true, json: () => Promise.resolve({ data: {} }) })),
-    post: vi.fn(() => Promise.resolve({ ok: true })),
-    del: vi.fn(() => Promise.resolve({ ok: true })),
-  })),
+// Mock the MuxApiService
+vi.mock('./util/muxApi', () => ({
+  MuxApiService: {
+    getInstance: vi.fn(() =>
+      Promise.resolve({
+        getAsset: vi.fn(() => Promise.resolve({ data: {} })),
+        createAsset: vi.fn(() => Promise.resolve({ data: {} })),
+        getUpload: vi.fn(() => Promise.resolve({ data: {} })),
+        createUpload: vi.fn(() => Promise.resolve({ id: 'upload-id', url: 'https://upload.url' })),
+        deleteTrack: vi.fn(() => Promise.resolve()),
+        createTrack: vi.fn(() => Promise.resolve({ data: {} })),
+        generateSubtitles: vi.fn(() => Promise.resolve({ data: {} })),
+        deleteStaticRendition: vi.fn(() => Promise.resolve()),
+        createStaticRendition: vi.fn(() => Promise.resolve()),
+        getSignedUrlTokens: vi.fn(() => Promise.resolve({ playbackToken: '', posterToken: '', storyboardToken: '' })),
+      })
+    ),
+  },
+  MuxApiError: class MuxApiError extends Error {
+    status?: number;
+    constructor(message: string, status?: number) {
+      super(message);
+      this.name = 'MuxApiError';
+      this.status = status;
+    }
+  },
+  addByURL: vi.fn(),
+  getUploadUrl: vi.fn(),
+  buildAssetSettings: vi.fn(),
 }));
 
 /*

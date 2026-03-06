@@ -19,7 +19,6 @@ import { Form, FormControl, TextInput } from '@contentful/f36-forms';
 import MuxPlayer from '@mux/mux-player-react';
 
 import Config from './locations/config';
-import ApiClient from './util/apiClient';
 
 import Menu from './components/menu';
 import PlayerCode from './components/PlayerCode';
@@ -48,24 +47,15 @@ import {
 import './index.css';
 import { createClient, PlainClientAPI } from 'contentful-management';
 import {
+  MuxApiService,
+  MuxApiError,
   addByURL,
   getUploadUrl,
-  deleteStaticRendition,
-  createStaticRendition,
-  uploadTrack,
-  deleteTrack,
-  generateAutoCaptions,
+  type SignedTokens,
 } from './util/muxApi';
 import Sidebar from './locations/Sidebar';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-interface SignedTokens {
-  licenseToken?: string;
-  playbackToken: string;
-  posterToken: string;
-  storyboardToken: string;
-}
 
 // Delete undefined keys and sort keys recursively
 function normalizeForDiff<T>(obj: T): T {
@@ -101,13 +91,12 @@ const updatePendingActions = (value, newPendingActions) => {
 };
 
 export class App extends React.Component<AppProps, AppState> {
-  apiClient: ApiClient;
   cmaClient: PlainClientAPI;
+  muxApi!: MuxApiService;
   resolveRef = createRef<(value: string | null) => void>();
   muxUploaderRef = createRef<any>(); // eslint-disable-line @typescript-eslint/no-explicit-any
   fileInputRef = React.createRef<HTMLInputElement>();
   muxPlayerRef = React.createRef<any>(); // eslint-disable-line @typescript-eslint/no-explicit-any
-  getSignedTokenActionId: string;
   private pollPending = false;
 
   constructor(props: AppProps) {
@@ -115,7 +104,6 @@ export class App extends React.Component<AppProps, AppState> {
 
     const { muxAccessTokenId, muxAccessTokenSecret } = this.props.sdk.parameters
       .installation as InstallationParams;
-    this.apiClient = new ApiClient(muxAccessTokenId, muxAccessTokenSecret);
 
     this.cmaClient = createClient(
       { apiAdapter: this.props.sdk.cmaAdapter },
@@ -128,7 +116,6 @@ export class App extends React.Component<AppProps, AppState> {
       }
     );
 
-    this.getSignedTokenActionId = '';
     const field = props.sdk.field.getValue();
 
     this.state = {
@@ -165,60 +152,42 @@ export class App extends React.Component<AppProps, AppState> {
 
   checkForValidAsset = async () => {
     if (!(this.state.value && this.state.value.assetId)) return false;
-    const res = await this.apiClient.get(`/video/v1/assets/${this.state.value.assetId}`);
-    if (!res) {
-      this.setState({
-        error: 'Error: Failed to get status update.',
-      });
-      return false;
-    }
-    if (res.status === 400) {
-      const json = await res.json();
-      if (json.error.messages[0].match(/mismatching environment/)) {
-        this.setState({
-          error: 'Error: it looks like your api keys are for the wrong environment',
-        });
+    try {
+      await this.muxApi.getAsset(this.state.value.assetId);
+      return true;
+    } catch (e) {
+      if (e instanceof MuxApiError) {
+        if (e.status === 400) {
+          if (e.message.match(/mismatching environment/)) {
+            this.setState({
+              error: 'Error: it looks like your api keys are for the wrong environment',
+            });
+            return false;
+          }
+          this.setState({ error: e.message, errorShowResetAction: true });
+          return false;
+        }
+        if (e.status === 401) {
+          this.setState({
+            error:
+              'Error: it looks like your api keys are not configured properly. Check App configuration.',
+          });
+          return false;
+        }
+        if (e.status === 404) {
+          this.setState({ error: 'Error: The video was not found.', errorShowResetAction: true });
+          return false;
+        }
+        this.setState({ error: 'API Check Error: ' + e.message, errorShowResetAction: true });
         return false;
       }
-      this.setState({
-        error: json.error.messages[0],
-        errorShowResetAction: true,
-      });
+      this.setState({ error: 'Error: Failed to get status update.' });
       return false;
     }
-    if (res.status === 401) {
-      this.setState({
-        error:
-          'Error: it looks like your api keys are not configured properly. Check App configuration.',
-      });
-      return false;
-    }
-    if (res.status === 404) {
-      this.setState({
-        error: 'Error: The video was not found.',
-        errorShowResetAction: true,
-      });
-      return false;
-    }
-
-    if (!res.ok) {
-      this.setState({
-        error: 'API Check Error: ' + res.statusText,
-        errorShowResetAction: true,
-      });
-      return false;
-    }
-    return true;
   };
 
   async componentDidMount() {
-    const appActionsResponse = await this.cmaClient.appAction.getManyForEnvironment({
-      environmentId: this.props.sdk.ids.environment,
-      spaceId: this.props.sdk.ids.space,
-    });
-
-    this.getSignedTokenActionId =
-      appActionsResponse.items.find((x) => x.name === 'getSignedUrlTokens')?.sys.id ?? '';
+    this.muxApi = await MuxApiService.getInstance(this.cmaClient, this.props.sdk);
 
     this.props.sdk.window.startAutoResizer();
 
@@ -415,21 +384,19 @@ export class App extends React.Component<AppProps, AppState> {
   onConfirmModal = async (options: ModalData) => {
     if (this.state.pendingUploadURL) {
       await addByURL({
-        apiClient: this.apiClient,
+        muxApi: this.muxApi,
         sdk: this.props.sdk,
         remoteURL: this.state.pendingUploadURL,
         options,
-        responseCheck: async (res) => await this.responseCheck(res),
         setAssetError: this.setAssetError,
         pollForAssetDetails: this.pollForAssetDetails,
       });
       this.setState({ pendingUploadURL: null });
     } else {
       const muxUploadUrl = await getUploadUrl(
-        this.apiClient,
+        this.muxApi,
         this.props.sdk,
-        options,
-        async (res) => await this.responseCheck(res)
+        options
       );
 
       if (!muxUploadUrl) {
@@ -487,33 +454,35 @@ export class App extends React.Component<AppProps, AppState> {
       throw Error('Something went wrong, because by this point we require an upload ID.');
     }
 
-    const result = await this.apiClient.get(`/video/v1/uploads/${this.state.value.uploadId}`);
+    try {
+      const muxUpload = await this.muxApi.getUpload(this.state.value.uploadId);
 
-    if (!this.responseCheck(result)) {
-      return;
-    }
+      if ('error' in muxUpload) {
+        this.setAssetError(muxUpload.error.messages[0]);
+        return;
+      }
 
-    const muxUpload = await result.json();
+      if (muxUpload.data?.status === 'errored') {
+        this.setAssetError(muxUpload.data.errors.messages[0]);
+        return;
+      }
 
-    if ('error' in muxUpload) {
-      this.setAssetError(muxUpload.error.messages[0]);
-      return;
-    }
-
-    if (muxUpload.data?.status === 'errored') {
-      this.setAssetError(muxUpload.data.errors.messages[0]);
-      return;
-    }
-
-    if (muxUpload && muxUpload.data['asset_id']) {
-      await this.props.sdk.field.setValue({
-        uploadId: muxUpload.data.id,
-        assetId: muxUpload.data['asset_id'],
-      });
-      await this.pollForAssetDetails();
-    } else {
-      await delay(350);
-      await this.pollForUploadDetails();
+      if (muxUpload && muxUpload.data['asset_id']) {
+        await this.props.sdk.field.setValue({
+          uploadId: muxUpload.data.id,
+          assetId: muxUpload.data['asset_id'],
+        });
+        await this.pollForAssetDetails();
+      } else {
+        await delay(350);
+        await this.pollForUploadDetails();
+      }
+    } catch (e) {
+      if (e instanceof MuxApiError) {
+        this.setAssetError(e.message);
+      } else {
+        this.setState({ error: 'Error: Failed to get upload status.' });
+      }
     }
   };
 
@@ -521,24 +490,7 @@ export class App extends React.Component<AppProps, AppState> {
     this.setState({ isTokenLoading: true });
 
     try {
-      if (!this.getSignedTokenActionId) {
-        throw new Error('App Action for Get Signed Token not found.');
-      }
-
-      const {
-        response: { body },
-      } = await this.cmaClient.appActionCall.createWithResponse(
-        {
-          organizationId: this.props.sdk.ids.organization,
-          appDefinitionId: this.props.sdk.ids.app!,
-          appActionId: this.getSignedTokenActionId,
-        },
-        { parameters: { playbackId, isDRM } }
-      );
-      const parsedBody = JSON.parse(body);
-      if (!parsedBody.ok) throw new Error(parsedBody.error);
-
-      const tokens = parsedBody.data as SignedTokens;
+      const tokens = await this.muxApi.getSignedUrlTokens(playbackId, isDRM);
       this.setState({ isTokenLoading: false });
       return tokens;
     } catch (e) {
@@ -575,49 +527,7 @@ export class App extends React.Component<AppProps, AppState> {
     if (!assetId) {
       throw Error('Something went wrong, we cannot getAsset without an assetId.');
     }
-    const res = await this.apiClient.get(`/video/v1/assets/${assetId}`);
-    if (!this.responseCheck(res)) {
-      return;
-    }
-    const asset = await res.json();
-    return asset;
-  };
-
-  responseCheck = async (res) => {
-    switch (true) {
-      case res.status === 401: {
-        const json = await res.json();
-        this.props.sdk.notifier.error(
-          'Looks like something is wrong with the Mux Access Token in the config. Are you sure the token ID and secret in the extension settings match the access token you created?'
-        );
-        this.setAssetError(json.error.messages[0]);
-        return false;
-      }
-
-      case res.status === 429:
-        this.props.sdk.notifier.error(
-          'Mux API rate limit exceeded. Try closing the browser and wait a few minutes.'
-        );
-        return false;
-
-      case !res.ok: {
-        // Try to get the specific error message from the response
-        try {
-          const errorData = await res.clone().json();
-          if (errorData?.error?.messages?.[0]) {
-            this.props.sdk.notifier.error(errorData.error.messages[0]);
-          } else {
-            this.props.sdk.notifier.error(`API Error. ${res.status} ${res.statusText}`);
-          }
-        } catch {
-          this.props.sdk.notifier.error(`API Error. ${res.status} ${res.statusText}`);
-        }
-        return false;
-      }
-
-      default:
-        return true;
-    }
+    return this.muxApi.getAsset(assetId);
   };
 
   resync = async (params?: ResyncParams) => {
@@ -696,19 +606,16 @@ export class App extends React.Component<AppProps, AppState> {
       const erroredTracks =
         'tracks' in asset ? asset.tracks.filter((track) => track.status === 'errored') : undefined;
 
-      // Notifly of the error and delete any failed tracks (like captions) so the track can be re-uploaded.
+      // Notify of the error and delete any failed tracks (like captions) so the track can be re-uploaded.
       if (erroredTracks && erroredTracks.length > 0) {
         this.props.sdk.notifier.error(erroredTracks[0].error.messages[0]);
-        const res = await this.apiClient.del(
-          `/video/v1/assets/${this.state.value.assetId}/tracks/${erroredTracks[0].id}`
-        );
-        if (res.status !== 204) {
-          try {
-            const deleteError = await res.clone().json();
-            this.props.sdk.notifier.error('Error deleting track: ' + deleteError.messages[0]);
-          } catch (error) {
-            const deleteError = await res.clone().text();
-            console.error(error, deleteError);
+        try {
+          await this.muxApi.deleteTrack(this.state.value.assetId, erroredTracks[0].id);
+        } catch (error) {
+          if (error instanceof MuxApiError) {
+            this.props.sdk.notifier.error('Error deleting track: ' + error.message);
+          } else {
+            console.error(error);
           }
         }
       }
@@ -823,7 +730,7 @@ export class App extends React.Component<AppProps, AppState> {
           throw new Error('No audio track found to generate subtitles');
         }
 
-        await generateAutoCaptions(this.apiClient, this.state.value.assetId, audioTrack.id, {
+        await this.muxApi.generateSubtitles(this.state.value.assetId, audioTrack.id, {
           language_code: languageCodeInput.value,
           name: nameInput.value,
         });
@@ -839,7 +746,7 @@ export class App extends React.Component<AppProps, AppState> {
           }),
         };
 
-        await uploadTrack(this.apiClient, this.state.value.assetId, options);
+        await this.muxApi.createTrack(this.state.value.assetId, options);
       }
 
       await this.resync();
@@ -856,23 +763,15 @@ export class App extends React.Component<AppProps, AppState> {
     if (!this.state.value?.assetId) return;
 
     try {
-      const res = await deleteTrack(this.apiClient, this.state.value.assetId, trackId);
-
-      if (res.status === 204) {
-        await this.resync();
-      } else {
-        const errorRes = await res.json();
-        if (errorRes.error?.messages?.[0]) {
-          this.props.sdk.notifier.error(errorRes.error.messages[0]);
-        }
-        this.resync({ silent: true });
-      }
+      await this.muxApi.deleteTrack(this.state.value.assetId, trackId);
+      await this.resync();
     } catch (error: unknown) {
       if (error instanceof Error) {
         this.props.sdk.notifier.error(error.message);
       } else {
         this.props.sdk.notifier.error('An unknown error occurred');
       }
+      this.resync({ silent: true });
     }
   };
 
@@ -1128,18 +1027,14 @@ export class App extends React.Component<AppProps, AppState> {
     if (!this.state.value || !this.state.value.assetId) return;
     const assetId = this.state.value.assetId;
 
-    const res = await deleteStaticRendition(this.apiClient, assetId, staticRenditionId);
-
-    if (res.status === 204) {
+    try {
+      await this.muxApi.deleteStaticRendition(assetId, staticRenditionId);
       await delay(500);
       await this.resync({ skipPlayerResync: true });
-    } else {
-      try {
-        const errorRes = await res.json();
-        if (errorRes.error?.messages?.[0]) {
-          this.props.sdk.notifier.error(errorRes.error.messages[0]);
-        }
-      } catch (e) {
+    } catch (e) {
+      if (e instanceof MuxApiError) {
+        this.props.sdk.notifier.error(e.message);
+      } else {
         this.props.sdk.notifier.error('Error deleting static rendition');
       }
       this.resync({ silent: true, skipPlayerResync: true });
@@ -1150,18 +1045,14 @@ export class App extends React.Component<AppProps, AppState> {
     if (!this.state.value || !this.state.value.assetId) return;
     const assetId = this.state.value.assetId;
 
-    const res = await createStaticRendition(this.apiClient, assetId, type);
-
-    if (res.status === 201) {
+    try {
+      await this.muxApi.createStaticRendition(assetId, type);
       await delay(500);
       await this.resync({ skipPlayerResync: true });
-    } else {
-      try {
-        const errorRes = await res.json();
-        if (errorRes.error?.messages?.[0]) {
-          this.props.sdk.notifier.error(errorRes.error.messages[0]);
-        }
-      } catch (e) {
+    } catch (e) {
+      if (e instanceof MuxApiError) {
+        this.props.sdk.notifier.error(e.message);
+      } else {
         this.props.sdk.notifier.error('Error creating static rendition');
       }
       this.resync({ silent: true, skipPlayerResync: true });
