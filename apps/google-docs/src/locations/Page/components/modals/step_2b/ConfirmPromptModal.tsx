@@ -1,14 +1,15 @@
 import { useEffect } from 'react';
 import {
   Button,
+  CopyButton,
   Modal,
-  Paragraph,
   Box,
   Text,
-  Textarea,
+  TextLink,
   Spinner,
   Note,
   Flex,
+  Pill,
 } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
@@ -25,16 +26,6 @@ interface ConfirmPromptModalProps {
   oauthToken: string;
 }
 
-const buildPromptText = (
-  documentId: string,
-  contentTypeIds: string[],
-  oauthToken: string
-): string => {
-  return `Analyze the following google docs document ${documentId} and extract the Contentful entries and assets for the following content types: ${contentTypeIds.join(
-    ', '
-  )} with the following oauth token: ${oauthToken}`;
-};
-
 export const ConfirmPromptModal = ({
   sdk,
   isOpen,
@@ -45,7 +36,6 @@ export const ConfirmPromptModal = ({
   oauthToken,
 }: ConfirmPromptModalProps) => {
   const contentTypeIds = selectedContentTypes.map((ct) => ct.sys.id);
-  const promptText = buildPromptText(documentId, contentTypeIds, oauthToken);
 
   const { isAnalyzing, analysisResult, error, analyze, clearAnalysis } = useAnalyzePrompt({
     sdk,
@@ -81,55 +71,103 @@ export const ConfirmPromptModal = ({
         <>
           <Modal.Header title="Confirm prompt" />
           <Modal.Content className={css({ minHeight: '400px' })}>
-            <Paragraph marginBottom="spacingM" color="gray700">
-              Review the prompt and optionally analyze the document before generating the preview.
-            </Paragraph>
-
-            <Box marginBottom="spacingM">
-              <Text fontWeight="fontWeightDemiBold" marginBottom="spacingXs" as="p">
-                Document ID
-              </Text>
-              <Text fontColor="gray700">{documentId}</Text>
-            </Box>
-
-            <Box marginBottom="spacingM">
-              <Text fontWeight="fontWeightDemiBold" marginBottom="spacingXs" as="p">
-                Selected Content Types
-              </Text>
-              <Text fontColor="gray700">
-                {selectedContentTypes.map((ct) => ct.name).join(', ')}
-              </Text>
-            </Box>
-
-            <Box marginBottom="spacingM">
-              <Text fontWeight="fontWeightDemiBold" marginBottom="spacingXs" as="p">
-                Prompt
-              </Text>
-              <Textarea
-                value={promptText}
-                isReadOnly
-                rows={3}
+            <Box marginBottom="spacingS">
+              <Flex justifyContent="space-between" alignItems="center" marginBottom="spacingXs">
+                <Text fontWeight="fontWeightDemiBold" as="p">
+                  Document ID
+                </Text>
+                <CopyButton value={documentId} label="Copy document id" isDisabled={!documentId} />
+              </Flex>
+              <Box
                 className={css({
                   fontFamily: 'monospace',
                   fontSize: '13px',
                   backgroundColor: '#f7f9fa',
-                })}
-              />
+                  padding: '8px 10px',
+                  borderRadius: '4px',
+                  wordBreak: 'break-all',
+                })}>
+                <Text fontColor="gray700">{documentId}</Text>
+              </Box>
             </Box>
 
-            <Box marginBottom="spacingM">
+            <Box marginBottom="spacingS">
+              <Flex justifyContent="space-between" alignItems="center" marginBottom="spacingXs">
+                <Text fontWeight="fontWeightDemiBold" as="p">
+                  Selected Content Type IDs
+                </Text>
+              </Flex>
+              {contentTypeIds.length > 0 ? (
+                <Flex
+                  flexWrap="wrap"
+                  className={css({
+                    gap: '6px',
+                    padding: '8px 10px',
+                    backgroundColor: '#f7f9fa',
+                    borderRadius: '4px',
+                  })}>
+                  {contentTypeIds.map((id) => (
+                    <Pill key={id} label={id} />
+                  ))}
+                </Flex>
+              ) : (
+                <Box
+                  className={css({
+                    padding: '8px 10px',
+                    backgroundColor: '#f7f9fa',
+                    borderRadius: '4px',
+                  })}>
+                  <Text fontColor="gray600">No content types selected</Text>
+                </Box>
+              )}
+            </Box>
+
+            <Box marginBottom="spacingS">
+              <Flex justifyContent="space-between" alignItems="center" marginBottom="spacingXs">
+                <Text fontWeight="fontWeightDemiBold" as="p">
+                  OAuth token
+                </Text>
+                <CopyButton value={oauthToken} label="Copy OAuth token" isDisabled={!oauthToken} />
+              </Flex>
+              <Box
+                className={css({
+                  fontFamily: 'monospace',
+                  fontSize: '13px',
+                  backgroundColor: '#f7f9fa',
+                  padding: '8px 10px',
+                  borderRadius: '4px',
+                  wordBreak: 'break-all',
+                })}>
+                <Text fontColor="gray700">{oauthToken}</Text>
+              </Box>
+            </Box>
+
+            <Box marginBottom="spacingS">
               <Flex justifyContent="space-between" alignItems="center" marginBottom="spacingXs">
                 <Text fontWeight="fontWeightDemiBold" as="p">
                   Analysis Result
                 </Text>
-                <Button
-                  variant="secondary"
-                  size="small"
-                  onClick={handleAnalyze}
-                  isLoading={isAnalyzing}
-                  isDisabled={isAnalyzing}>
-                  {analysisResult ? 'Re-analyze' : 'Analyze'}
-                </Button>
+                <Flex
+                  alignItems="center"
+                  className={css({
+                    gap: '8px',
+                  })}>
+                  <TextLink
+                    href="http://localhost:4111/workflows/googleDocsWorkflow/graph"
+                    target="_blank"
+                    rel="noreferrer"
+                    className={css({ fontSize: '12px' })}>
+                    View workflow in Mastra playground
+                  </TextLink>
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    onClick={handleAnalyze}
+                    isLoading={isAnalyzing}
+                    isDisabled={isAnalyzing}>
+                    Start workflow
+                  </Button>
+                </Flex>
               </Flex>
               {isAnalyzing && (
                 <Box
@@ -151,39 +189,45 @@ export const ConfirmPromptModal = ({
                 </Note>
               )}
               {analysisResult && !isAnalyzing && (
-                <Textarea
-                  value={analysisResult}
-                  isReadOnly
-                  rows={10}
+                <Box
                   className={css({
+                    padding: '8px 10px',
                     fontFamily: 'monospace',
                     fontSize: '13px',
                     backgroundColor: '#f7f9fa',
                     whiteSpace: 'pre-wrap',
-                  })}
-                />
+                    borderRadius: '4px',
+                    maxHeight: '260px',
+                    overflow: 'auto',
+                  })}>
+                  <Text as="pre" marginBottom="none">
+                    {analysisResult}
+                  </Text>
+                </Box>
               )}
               {!analysisResult && !isAnalyzing && !error && (
                 <Box
                   className={css({
-                    padding: '16px',
+                    padding: '8px 10px',
                     backgroundColor: '#f7f9fa',
                     borderRadius: '4px',
                     textAlign: 'center',
                   })}>
-                  <Text fontColor="gray600">Click "Analyze" to preview the document analysis</Text>
+                  <Text fontColor="gray600">
+                    Click "Start workflow" to preview the document analysis
+                  </Text>
                 </Box>
               )}
             </Box>
           </Modal.Content>
-          <Modal.Controls>
+          {/* <Modal.Controls>
             <Button onClick={handleClose} variant="secondary" isDisabled={isAnalyzing}>
               Back
             </Button>
             <Button onClick={handleConfirm} variant="primary" isDisabled={isAnalyzing}>
               Generate Preview
             </Button>
-          </Modal.Controls>
+          </Modal.Controls> */}
         </>
       )}
     </Modal>
