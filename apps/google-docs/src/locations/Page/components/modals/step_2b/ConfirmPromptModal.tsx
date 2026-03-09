@@ -9,6 +9,7 @@ import {
   Spinner,
   Note,
   Flex,
+  Pill,
 } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
