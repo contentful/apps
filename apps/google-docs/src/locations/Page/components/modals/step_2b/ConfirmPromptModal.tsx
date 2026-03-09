@@ -71,7 +71,7 @@ export const ConfirmPromptModal = ({
         <>
           <Modal.Header title="Confirm prompt" />
           <Modal.Content className={css({ minHeight: '400px' })}>
-            <Box marginBottom="spacingS">
+            <Box marginBottom="spacingXs">
               <Flex justifyContent="space-between" alignItems="center" marginBottom="spacingXs">
                 <Text fontWeight="fontWeightDemiBold" as="p">
                   Document ID
@@ -91,38 +91,24 @@ export const ConfirmPromptModal = ({
               </Box>
             </Box>
 
-            <Box marginBottom="spacingS">
+            <Box marginBottom="spacingXs">
               <Flex justifyContent="space-between" alignItems="center" marginBottom="spacingXs">
                 <Text fontWeight="fontWeightDemiBold" as="p">
                   Selected Content Type IDs
                 </Text>
               </Flex>
               {contentTypeIds.length > 0 ? (
-                <Flex
-                  flexWrap="wrap"
-                  className={css({
-                    gap: '6px',
-                    padding: '8px 10px',
-                    backgroundColor: '#f7f9fa',
-                    borderRadius: '4px',
-                  })}>
+                <Flex flexWrap="wrap" className={css({ gap: '6px' })}>
                   {contentTypeIds.map((id) => (
                     <Pill key={id} label={id} />
                   ))}
                 </Flex>
               ) : (
-                <Box
-                  className={css({
-                    padding: '8px 10px',
-                    backgroundColor: '#f7f9fa',
-                    borderRadius: '4px',
-                  })}>
-                  <Text fontColor="gray600">No content types selected</Text>
-                </Box>
+                <Text fontColor="gray600">No content types selected</Text>
               )}
             </Box>
 
-            <Box marginBottom="spacingS">
+            <Box marginBottom="spacingXs">
               <Flex justifyContent="space-between" alignItems="center" marginBottom="spacingXs">
                 <Text fontWeight="fontWeightDemiBold" as="p">
                   OAuth token
@@ -142,7 +128,7 @@ export const ConfirmPromptModal = ({
               </Box>
             </Box>
 
-            <Box marginBottom="spacingS">
+            <Box marginBottom="spacingXs">
               <Flex justifyContent="space-between" alignItems="center" marginBottom="spacingXs">
                 <Text fontWeight="fontWeightDemiBold" as="p">
                   Analysis Result
