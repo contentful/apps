@@ -117,9 +117,12 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       openModal(ModalType.CONTENT_TYPE_PICKER);
     };
 
-    const handleContentTypeSelected = (contentTypes: ContentTypeProps[]) => {
+    const handleContentTypeSelected = (contentTypeIdsCsv: string) => {
       closeModal(ModalType.CONTENT_TYPE_PICKER);
-      setSelectedContentTypes(contentTypes);
+      // TEMP workaround: we pass content type IDs as a comma-separated string to Mastra workflows.
+      // The modal already updates `selectedContentTypes` via `setSelectedContentTypes`, so we don't need to set it here.
+      void contentTypeIdsCsv;
+      // setSelectedContentTypes(contentTypes);
       openModal(ModalType.CONFIRM_PROMPT);
     };
 
