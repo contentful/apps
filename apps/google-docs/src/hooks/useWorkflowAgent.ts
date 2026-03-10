@@ -1,19 +1,19 @@
 import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import {
-  WORKFLOW_AGENT_ID,
   POLL_INTERVAL_MS,
   MAX_POLL_ATTEMPTS,
   USE_LOCAL_AGENTS_API,
+  WORKFLOW_AGENT_ID,
 } from '../utils/constants/agent';
 
-interface UseAnalyzePromptParams {
+interface UseWorkflowParams {
   sdk: PageAppSDK;
   documentId: string;
   oauthToken: string;
 }
 
-interface AnalyzePromptResult {
+interface WorkflowResult {
   isAnalyzing: boolean;
   analysisResult: string | null;
   error: string | null;
@@ -35,8 +35,8 @@ interface AgentRunData {
   error?: Record<string, unknown>;
 }
 
-const wait = (ms: number): Promise<void> => {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+const wait = async (ms: number): Promise<void> => {
+  await new Promise((resolve) => setTimeout(resolve, ms));
 };
 
 const getAgentPayload = (data: AgentRunData): string | null => {
@@ -107,21 +107,22 @@ const pollAgentRun = async (
 
     const payload = getAgentPayload(runData);
     if (payload) {
-      console.log('[Analyze Polling] Success - Assistant text content:\n\n' + payload);
+      // eslint-disable-next-line no-console -- developer workflow logging
+      console.log('[Workflow Polling] Success - Assistant text content:\n\n' + payload);
       return payload;
     }
 
     await wait(POLL_INTERVAL_MS);
   }
 
-  throw new Error('Analysis polling timeout');
+  throw new Error('Workflow polling timeout');
 };
 
-export const useAnalyzePrompt = ({
+export const useWorkflowAgent = ({
   sdk,
   documentId,
   oauthToken,
-}: UseAnalyzePromptParams): AnalyzePromptResult => {
+}: UseWorkflowParams): WorkflowResult => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -158,8 +159,7 @@ export const useAnalyzePrompt = ({
         ],
         metadata: {
           documentId,
-          // TEMP workaround: Mastra workflow inputs have issues with string[] in some UIs.
-          // Send as a single comma-separated string for now; API workflow normalizes it back to string[].
+          // TEMP workaround: send as comma-separated string for now; API workflow normalizes back to string[].
           contentTypeIds: contentTypeIdsCsv,
           // contentTypeIds,
           oauthToken,
@@ -168,8 +168,6 @@ export const useAnalyzePrompt = ({
       };
 
       try {
-        const startTime = Date.now();
-
         if (USE_LOCAL_AGENTS_API) {
           fetch(
             `http://localhost:4111/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${WORKFLOW_AGENT_ID}/generate`,
@@ -182,26 +180,24 @@ export const useAnalyzePrompt = ({
               body: JSON.stringify(payload),
             }
           ).catch((err) => {
-            console.error('Failed to start analyzer agent run:', err);
+            // eslint-disable-next-line no-console -- developer workflow logging
+            console.error('Failed to start workflow agent run:', err);
           });
         } else {
           sdk.cma.agent
             .generate({ agentId: WORKFLOW_AGENT_ID, spaceId, environmentId }, payload)
             .catch((err: unknown) => {
-              console.error('Failed to start analyzer agent run:', err);
+              // eslint-disable-next-line no-console -- developer workflow logging
+              console.error('Failed to start workflow agent run:', err);
             });
         }
 
         const result = await pollAgentRun(sdk, spaceId, environmentId, threadId);
-
-        const endTime = Date.now();
-        const totalSeconds = ((endTime - startTime) / 1000).toFixed(2);
-        console.log(`[Analyze] Completed in ${totalSeconds}s`);
-
         setAnalysisResult(result);
       } catch (err) {
-        console.error('Analysis failed:', err);
-        setError(err instanceof Error ? err.message : 'Analysis failed');
+        // eslint-disable-next-line no-console -- developer workflow logging
+        console.error('Workflow failed:', err);
+        setError(err instanceof Error ? err.message : 'Workflow failed');
       } finally {
         setIsAnalyzing(false);
       }

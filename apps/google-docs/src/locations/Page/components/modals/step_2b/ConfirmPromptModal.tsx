@@ -13,7 +13,7 @@ import {
 import { PageAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
 import { css } from '@emotion/css';
-import { useAnalyzePrompt } from '../../../../../hooks/useAnalyzePrompt';
+import { useWorkflowAgent } from '../../../../../hooks/useWorkflowAgent';
 
 interface ConfirmPromptModalProps {
   sdk: PageAppSDK;
@@ -37,7 +37,7 @@ export const ConfirmPromptModal = ({
   const contentTypeIds = selectedContentTypes.map((ct) => ct.sys.id);
   const contentTypeIdsCsv = contentTypeIds.join(', ');
 
-  const { isAnalyzing, analysisResult, error, analyze, clearAnalysis } = useAnalyzePrompt({
+  const { isAnalyzing, analysisResult, error, analyze, clearAnalysis } = useWorkflowAgent({
     sdk,
     documentId,
     oauthToken,
