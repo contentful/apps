@@ -217,9 +217,7 @@ const pollAgentRun = async (
       if (!response.ok) {
         throw new Error(`Failed to poll agent run: ${response.status} ${response.statusText}`);
       }
-      const responseData = await response.json();
-      console.log('responseData', responseData);
-      runData = responseData as AgentRunData;
+      runData = (await response.json()) as AgentRunData;
     } else {
       try {
         runData = (await sdk.cma.agentRun.get({
@@ -237,7 +235,6 @@ const pollAgentRun = async (
     }
     const assistantTextContent = getAgentPayload(runData);
     if (assistantTextContent) {
-      console.log('[Agent Polling] Success - Assistant text content:\n\n' + assistantTextContent);
       return parseAgentResponse(runData);
     }
 
