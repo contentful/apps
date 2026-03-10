@@ -18,31 +18,20 @@ import { ChartTooltip } from './ChartTooltip';
 export const ChartWrapper: React.FC<ChartWrapperProps> = ({
   data,
   xAxisDataKey,
+  chartLines,
+  chartLinesLabels,
   processedContentTypes,
   height = 400,
   legendTitle,
   inNewEntriesTab,
 }) => {
-  const contentTypesIds = useMemo<string[]>(() => {
-    if (processedContentTypes) {
-      return Array.from(processedContentTypes.keys());
-    }
-
-    if (data.length === 0) {
-      return [];
-    }
-
-    const firstPointKeys = Object.keys(data[0]);
-    return firstPointKeys.filter((key) => key !== xAxisDataKey).sort();
-  }, [data, xAxisDataKey, processedContentTypes]);
-
-  const contentTypesNames = useMemo<string[]>(() => {
-    return processedContentTypes ? Array.from(processedContentTypes.values()) : contentTypesIds;
-  }, [processedContentTypes, contentTypesIds]);
+  if (!chartLinesLabels) {
+    chartLinesLabels = chartLines;
+  }
 
   const colors = useMemo(() => {
-    return contentTypesIds.map((_, index) => CHART_COLORS[index % CHART_COLORS.length]);
-  }, [contentTypesIds]);
+    return chartLines.map((_, index) => CHART_COLORS[index % CHART_COLORS.length]);
+  }, [chartLines]);
 
   return (
     <Flex flexDirection="row" alignItems="flex-start">
@@ -56,18 +45,18 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
             textAnchor="end"
             height={80}
           />
-          <YAxis tick={{ fontSize: 12 }} />
+          <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
           <Tooltip
             content={
               <ChartTooltip
                 data={data}
-                valueKey={contentTypesIds[0]}
+                valueKey={chartLines[0]}
                 inNewEntriesTab={inNewEntriesTab}
                 processedContentTypes={processedContentTypes}
               />
             }
           />
-          {contentTypesIds.map((key, index) => (
+          {chartLines.map((key, index) => (
             <Line
               key={`${key}-${index}`}
               type="linear"
@@ -97,7 +86,7 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
             marginBottom="spacingXs">
             {legendTitle}
           </Text>
-          {contentTypesNames.map((name: string, index: number) => (
+          {chartLinesLabels.map((name: string, index: number) => (
             <Flex
               key={`${name}-${index}`}
               alignItems="center"

@@ -25,9 +25,11 @@ describe('MetricsCalculator', () => {
     it('uses default values when options are not provided', () => {
       const calculator = new MetricsCalculator([], []);
       const metrics = calculator.getAllMetrics();
-      const needsUpdateMetric = metrics.find((m) => m.title === 'Needs Update');
-      const recentlyPublishedMetric = metrics.find((m) => m.title === 'Recently Published');
-      const avgTimeMetric = metrics.find((m) => m.title === 'Average Time to Publish');
+      const needsUpdateMetric = metrics.find((m) => m.title === 'Needs update');
+      const recentlyPublishedMetric = metrics.find((m) => m.title === 'Recently published');
+      const avgTimeMetric = metrics.find(
+        (m) => m.title === 'Average time from draft to first publish'
+      );
 
       expect(needsUpdateMetric?.subtitle).toContain(`${NEEDS_UPDATE_MONTHS_RANGE.min} months`);
       expect(recentlyPublishedMetric?.subtitle).toContain(
@@ -43,9 +45,11 @@ describe('MetricsCalculator', () => {
         timeToPublishDays: 60,
       });
       const metrics = calculator.getAllMetrics();
-      const needsUpdateMetric = metrics.find((m) => m.title === 'Needs Update');
-      const recentlyPublishedMetric = metrics.find((m) => m.title === 'Recently Published');
-      const avgTimeMetric = metrics.find((m) => m.title === 'Average Time to Publish');
+      const needsUpdateMetric = metrics.find((m) => m.title === 'Needs update');
+      const recentlyPublishedMetric = metrics.find((m) => m.title === 'Recently published');
+      const avgTimeMetric = metrics.find(
+        (m) => m.title === 'Average time from draft to first publish'
+      );
 
       expect(needsUpdateMetric?.subtitle).toContain('12 months');
       expect(recentlyPublishedMetric?.subtitle).toContain('14 days');
@@ -62,7 +66,7 @@ describe('MetricsCalculator', () => {
       ];
 
       const calculator = new MetricsCalculator(entries, []);
-      const metric = calculator.getAllMetrics().find((m) => m.title === 'Total Published');
+      const metric = calculator.getAllMetrics().find((m) => m.title === 'Total published');
 
       expect(metric?.value).toBe('2');
     });
@@ -74,7 +78,7 @@ describe('MetricsCalculator', () => {
       ];
 
       const calculator = new MetricsCalculator(entries, []);
-      const metric = calculator.getAllMetrics().find((m) => m.title === 'Total Published');
+      const metric = calculator.getAllMetrics().find((m) => m.title === 'Total published');
 
       expect(metric?.subtitle).toContain('% publishing');
     });
@@ -83,7 +87,7 @@ describe('MetricsCalculator', () => {
       const entries: EntryProps[] = [{ sys: { publishedAt: daysAgo(10) } } as EntryProps];
 
       const calculator = new MetricsCalculator(entries, []);
-      const metric = calculator.getAllMetrics().find((m) => m.title === 'Total Published');
+      const metric = calculator.getAllMetrics().find((m) => m.title === 'Total published');
 
       expect(metric?.subtitle).toContain('New publishing this month');
     });
@@ -94,7 +98,7 @@ describe('MetricsCalculator', () => {
       ];
 
       const calculator = new MetricsCalculator(entries, []);
-      const metric = calculator.getAllMetrics().find((m) => m.title === 'Total Published');
+      const metric = calculator.getAllMetrics().find((m) => m.title === 'Total published');
 
       expect(metric?.value).toBe('0');
       expect(metric?.subtitle).toContain('0.0% publishing change MoM');
@@ -107,13 +111,13 @@ describe('MetricsCalculator', () => {
         {
           sys: {
             createdAt: daysAgo(20),
-            publishedAt: daysAgo(10), // 10 days to publish
+            firstPublishedAt: daysAgo(10), // 10 days to publish
           },
         } as EntryProps,
         {
           sys: {
             createdAt: daysAgo(15),
-            publishedAt: daysAgo(10), // 5 days to publish
+            firstPublishedAt: daysAgo(10), // 5 days to publish
           },
         } as EntryProps,
       ];
@@ -121,7 +125,9 @@ describe('MetricsCalculator', () => {
       const calculator = new MetricsCalculator(entries, [], {
         timeToPublishDays: 30,
       });
-      const metric = calculator.getAllMetrics().find((m) => m.title === 'Average Time to Publish');
+      const metric = calculator
+        .getAllMetrics()
+        .find((m) => m.title === 'Average time from draft to first publish');
 
       expect(metric?.value).toBe('7.5 days');
     });
@@ -139,7 +145,9 @@ describe('MetricsCalculator', () => {
       const calculator = new MetricsCalculator(entries, [], {
         timeToPublishDays: 30,
       });
-      const metric = calculator.getAllMetrics().find((m) => m.title === 'Average Time to Publish');
+      const metric = calculator
+        .getAllMetrics()
+        .find((m) => m.title === 'Average time from draft to first publish');
 
       expect(metric?.value).toBe('—');
       expect(metric?.subtitle).toContain('No entries published');
@@ -181,7 +189,7 @@ describe('MetricsCalculator', () => {
       const calculator = new MetricsCalculator(entries, [], {
         recentlyPublishedDays: 7,
       });
-      const metric = calculator.getAllMetrics().find((m) => m.title === 'Recently Published');
+      const metric = calculator.getAllMetrics().find((m) => m.title === 'Recently published');
 
       expect(metric?.value).toBe('2');
       expect(metric?.subtitle).toContain('7 days');
@@ -195,7 +203,7 @@ describe('MetricsCalculator', () => {
       const calculator = new MetricsCalculator(entries, [], {
         recentlyPublishedDays: 14,
       });
-      const metric = calculator.getAllMetrics().find((m) => m.title === 'Recently Published');
+      const metric = calculator.getAllMetrics().find((m) => m.title === 'Recently published');
 
       expect(metric?.value).toBe('1');
       expect(metric?.subtitle).toContain('14 days');
@@ -213,7 +221,7 @@ describe('MetricsCalculator', () => {
       const calculator = new MetricsCalculator(entries, [], {
         needsUpdateMonths: 6,
       });
-      const metric = calculator.getAllMetrics().find((m) => m.title === 'Needs Update');
+      const metric = calculator.getAllMetrics().find((m) => m.title === 'Needs update');
 
       expect(metric?.value).toBe('2');
       expect(metric?.subtitle).toContain('6 months');
@@ -227,7 +235,7 @@ describe('MetricsCalculator', () => {
       const calculator = new MetricsCalculator(entries, [], {
         needsUpdateMonths: 12,
       });
-      const metric = calculator.getAllMetrics().find((m) => m.title === 'Needs Update');
+      const metric = calculator.getAllMetrics().find((m) => m.title === 'Needs update');
 
       expect(metric?.value).toBe('1');
       expect(metric?.subtitle).toContain('12 months');
@@ -242,7 +250,7 @@ describe('MetricsCalculator', () => {
       const calculator = new MetricsCalculator(entries, [], {
         needsUpdateMonths: 6,
       });
-      const metric = calculator.getAllMetrics().find((m) => m.title === 'Needs Update');
+      const metric = calculator.getAllMetrics().find((m) => m.title === 'Needs update');
 
       expect(metric?.value).toBe('1');
     });
