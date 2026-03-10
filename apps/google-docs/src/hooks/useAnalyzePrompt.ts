@@ -140,6 +140,7 @@ export const useAnalyzePrompt = ({
       const spaceId = sdk.ids.space;
       const environmentId = sdk.ids.environment;
       const threadId = [crypto.randomUUID(), WORKFLOW_AGENT_ID].join('-');
+      const contentTypeIdsCsv = contentTypeIds.join(',');
 
       const payload = {
         messages: [
@@ -157,7 +158,10 @@ export const useAnalyzePrompt = ({
         ],
         metadata: {
           documentId,
-          contentTypeIds,
+          // TEMP workaround: Mastra workflow inputs have issues with string[] in some UIs.
+          // Send as a single comma-separated string for now; API workflow normalizes it back to string[].
+          contentTypeIds: contentTypeIdsCsv,
+          // contentTypeIds,
           oauthToken,
         },
         threadId,

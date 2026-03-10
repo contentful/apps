@@ -9,7 +9,6 @@ import {
   Spinner,
   Note,
   Flex,
-  Pill,
 } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
@@ -36,6 +35,7 @@ export const ConfirmPromptModal = ({
   oauthToken,
 }: ConfirmPromptModalProps) => {
   const contentTypeIds = selectedContentTypes.map((ct) => ct.sys.id);
+  const contentTypeIdsCsv = contentTypeIds.join(', ');
 
   const { isAnalyzing, analysisResult, error, analyze, clearAnalysis } = useAnalyzePrompt({
     sdk,
@@ -97,15 +97,17 @@ export const ConfirmPromptModal = ({
                   Selected Content Type IDs
                 </Text>
               </Flex>
-              {contentTypeIds.length > 0 ? (
-                <Flex flexWrap="wrap" className={css({ gap: '6px' })}>
-                  {contentTypeIds.map((id) => (
-                    <Pill key={id} label={id} />
-                  ))}
-                </Flex>
-              ) : (
-                <Text fontColor="gray600">No content types selected</Text>
-              )}
+              <Box
+                className={css({
+                  fontFamily: 'monospace',
+                  fontSize: '13px',
+                  backgroundColor: '#f7f9fa',
+                  padding: '8px 10px',
+                  borderRadius: '4px',
+                  wordBreak: 'break-all',
+                })}>
+                <Text fontColor="gray700">{contentTypeIdsCsv || 'No content types selected'}</Text>
+              </Box>
             </Box>
 
             <Box marginBottom="spacingXs">
