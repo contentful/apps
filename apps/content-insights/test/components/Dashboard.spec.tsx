@@ -115,8 +115,8 @@ describe('Dashboard component', () => {
   it('renders all metric cards', async () => {
     await renderWithAct(<Dashboard />, { wrapper: createWrapper() });
 
-    expect(screen.getByText('Total Published')).toBeInTheDocument();
-    expect(screen.getByText('Average Time to Publish')).toBeInTheDocument();
+    expect(screen.getByText('Total published')).toBeInTheDocument();
+    expect(screen.getByText('Average time from draft to first publish')).toBeInTheDocument();
   });
 
   it('calls refetchEntries, refetchScheduledActions, and refetchContentTypes when refresh button is clicked', async () => {
@@ -139,16 +139,16 @@ describe('Dashboard component', () => {
     it('renders components correctly', async () => {
       await renderWithAct(<Dashboard />, { wrapper: createWrapper() });
 
-      expect(screen.getByText('Content Publishing Trends')).toBeInTheDocument();
+      expect(screen.getByText('Content publishing trends')).toBeInTheDocument();
       const select = screen.getByRole('combobox');
       expect(select).toBeInTheDocument();
-      expect(screen.getByText('New Entries')).toBeInTheDocument();
+      expect(screen.getByText('New entries')).toBeInTheDocument();
     });
 
     it('default time range is "year"', async () => {
       await renderWithAct(<Dashboard />, { wrapper: createWrapper() });
 
-      expect(screen.getByText('Past Year')).toBeInTheDocument();
+      expect(screen.getByText('Past year')).toBeInTheDocument();
     });
 
     it('renders all TIME_RANGE_OPTIONS in dropdown', async () => {
@@ -159,11 +159,11 @@ describe('Dashboard component', () => {
       const select = screen.getByRole('combobox');
       await user.click(select);
 
-      expect(screen.getByText('Past Month')).toBeInTheDocument();
-      expect(screen.getByText('Past 3 Months')).toBeInTheDocument();
-      expect(screen.getByText('Past 6 Months')).toBeInTheDocument();
-      expect(screen.getByText('Past Year')).toBeInTheDocument();
-      expect(screen.getByText('Year to Date')).toBeInTheDocument();
+      expect(screen.getByText('Past month')).toBeInTheDocument();
+      expect(screen.getByText('Past 3 months')).toBeInTheDocument();
+      expect(screen.getByText('Past 6 months')).toBeInTheDocument();
+      expect(screen.getByText('Past year')).toBeInTheDocument();
+      expect(screen.getByText('Year to date')).toBeInTheDocument();
     });
   });
 });

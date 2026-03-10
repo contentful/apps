@@ -2,6 +2,7 @@ import { BaseAppSDK } from '@contentful/app-sdk';
 import { UserProps } from 'contentful-management';
 import { fetchScheduledActions } from './fetchScheduledActions';
 import { fetchUsersById } from './fetchUsersById';
+import { getEnvironmentId } from './sdkUtils';
 
 export interface ReleaseWithScheduledAction {
   id: string;
@@ -48,7 +49,9 @@ const fetchLaunchReleases = async (sdk: BaseAppSDK): Promise<Map<string, Release
     releasesMap.set(release.sys.id, {
       title: release.title,
       itemsCount: release.entities?.items?.length || 0,
-      viewUrl: `https://launch.contentful.com/spaces/${sdk.ids.space}/releases/${release.sys.id}`,
+      viewUrl: `https://launch.contentful.com/spaces/${
+        sdk.ids.space
+      }/environments/${getEnvironmentId(sdk)}/releases/${release.sys.id}`,
     });
   });
 
@@ -70,7 +73,9 @@ const fetchTimelineReleases = async (sdk: BaseAppSDK): Promise<Map<string, Relea
     releasesMap.set(release.sys.id, {
       title: release.title,
       itemsCount: release.entities?.items?.length || 0,
-      viewUrl: `https://app.contentful.com/spaces/${sdk.ids.space}/views/entries?release=${release.sys.id}`,
+      viewUrl: `https://app.contentful.com/spaces/${sdk.ids.space}/environments/${getEnvironmentId(
+        sdk
+      )}/views/entries?release=${release.sys.id}`,
     });
   });
 

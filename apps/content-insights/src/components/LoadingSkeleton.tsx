@@ -25,7 +25,7 @@ export const LoadingSkeleton = ({
 
       {/* Content Publishing Trends Section */}
       <Card padding="default" style={styles.sectionCard}>
-        <Subheading marginBottom="spacing2Xl">Content Publishing Trends</Subheading>
+        <Subheading marginBottom="spacing2Xl">Content publishing trends</Subheading>
         <Skeleton.Container>
           <Skeleton.Image width="100%" height="100px" />
         </Skeleton.Container>
@@ -34,7 +34,7 @@ export const LoadingSkeleton = ({
       {/* Upcoming Scheduled Releases Section */}
       {showReleasesSection && (
         <Card padding="default" style={styles.sectionCard}>
-          <Subheading marginBottom="spacing2Xl">Upcoming Scheduled Releases</Subheading>
+          <Subheading marginBottom="spacing2Xl">Upcoming scheduled releases</Subheading>
           <Skeleton.Container>
             <Skeleton.Image width="100%" height="100px" />
           </Skeleton.Container>

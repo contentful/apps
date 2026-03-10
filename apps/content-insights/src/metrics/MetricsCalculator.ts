@@ -80,7 +80,7 @@ export class MetricsCalculator {
     const { text, isNegative } = this.calculatePublishingChangeText(current, previous);
 
     return {
-      title: 'Total Published',
+      title: 'Total published',
       value: String(current),
       subtitle: text,
       isNegative,
@@ -93,7 +93,7 @@ export class MetricsCalculator {
     let sumDays = 0;
     let count = 0;
     for (const entry of this.entries) {
-      const publishedAt = parseDate(entry?.sys?.publishedAt);
+      const publishedAt = parseDate(entry?.sys?.firstPublishedAt);
       if (!publishedAt) continue;
       if (!isWithin(publishedAt, startThisPeriod, this.now)) continue;
 
@@ -110,7 +110,7 @@ export class MetricsCalculator {
     const avg = count === 0 ? undefined : sumDays / count;
 
     return {
-      title: 'Average Time to Publish',
+      title: 'Average time from draft to first publish',
       value: avg === undefined ? '—' : `${avg.toFixed(1)} days`,
       subtitle:
         count === 0
@@ -153,7 +153,7 @@ export class MetricsCalculator {
     }
 
     return {
-      title: 'Recently Published',
+      title: 'Recently published',
       value: String(count),
       subtitle: `In the last ${this.recentlyPublishedDays} days`,
       isNegative: false,
@@ -173,7 +173,7 @@ export class MetricsCalculator {
     }
 
     return {
-      title: 'Needs Update',
+      title: 'Needs update',
       value: String(count),
       subtitle: `Content older than ${this.needsUpdateMonths} months`,
       isNegative: false,

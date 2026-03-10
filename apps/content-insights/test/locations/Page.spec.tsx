@@ -70,7 +70,7 @@ describe('Page component', () => {
     render(<Page />);
 
     await waitFor(() => {
-      expect(screen.getByText('Content Publishing Trends')).toBeInTheDocument();
+      expect(screen.getByText('Content publishing trends')).toBeInTheDocument();
     });
   });
 });
