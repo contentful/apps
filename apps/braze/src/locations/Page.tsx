@@ -18,7 +18,7 @@ import { PageAppSDK } from '@contentful/app-sdk';
 import { fetchBrazeConnectedEntries } from '../utils/fetchBrazeConnectedEntries';
 import InformationWithLink from '../components/InformationWithLink';
 import { styles } from './Page.styles';
-import Splitter from '../components/Splitter';
+import { Splitter } from 'contentful-app-components';
 import { EntryProps } from 'contentful-management';
 import { Entry } from '../fields/Entry';
 import {
@@ -30,7 +30,7 @@ import {
   localizeFieldId,
   updateConfig,
 } from '../utils';
-import WarningOctagonIcon from '../components/WarningOctagonIcon';
+import { WarningOctagonIcon } from '@contentful/f36-icons';
 
 const getStatusBadge = (status: string) => {
   if (status.toLowerCase() === 'published') {
