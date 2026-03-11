@@ -36,6 +36,18 @@ export interface CloudProjectsResponse {
   projects: CloudProject[];
 }
 
+/** Current user from Jira REST API GET /rest/api/3/myself (for connection verification) */
+export interface JiraMyselfResponse {
+  displayName?: string;
+  emailAddress?: string;
+  accountId?: string;
+}
+
+export interface JiraMyselfApiResponse {
+  error: boolean;
+  user: JiraMyselfResponse | null;
+}
+
 export interface CloudProject {
   avatarUrls: {
     '48x48': string;

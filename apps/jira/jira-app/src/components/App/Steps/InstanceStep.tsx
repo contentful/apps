@@ -1,6 +1,6 @@
 import React from 'react';
-import { Heading, Paragraph, Select, Option, Autocomplete } from '@contentful/f36-components';
-import { JiraCloudResource, CloudProject } from '../../../interfaces';
+import { Heading, Paragraph, Select, Option, Autocomplete, Note } from '@contentful/f36-components';
+import { JiraCloudResource, CloudProject, JiraMyselfResponse } from '../../../interfaces';
 
 interface Props {
   resources: JiraCloudResource[];
@@ -10,6 +10,8 @@ interface Props {
   pickProject: (project: CloudProject) => void;
   selectedProject: CloudProject | null;
   queryProjects: (query: string) => void;
+  /** Current Jira user when connected (proves API connectivity) */
+  currentUser?: JiraMyselfResponse | null;
 }
 
 export default class InstanceStep extends React.Component<Props> {
@@ -31,12 +33,27 @@ export default class InstanceStep extends React.Component<Props> {
   }
 
   render() {
-    const { resources, pickResource, selectedResource, projects, selectedProject } = this.props;
+    const { resources, pickResource, selectedResource, projects, selectedProject, currentUser } =
+      this.props;
+    const showNoProjectsNote = selectedResource && projects.length === 0;
 
     return (
       <>
         <Heading>Configure</Heading>
+        {currentUser?.displayName && (
+          <Paragraph marginBottom="spacingM">
+            Connected as <strong>{currentUser.displayName}</strong>
+          </Paragraph>
+        )}
         <Paragraph>Select the Jira site and project you want to connect</Paragraph>
+        {showNoProjectsNote && (
+          <Note variant="warning" title="No projects in list" marginBottom="spacingM">
+            The connection to this Jira site is working, but no projects were returned. This often
+            happens when your Jira user has no &quot;Browse projects&quot; permission or your
+            instance restricts the Projects API. Ask your Jira admin to grant access to at least one
+            project, or try connecting with a different account.
+          </Note>
+        )}
         <div className="jira-config" data-test-id="instance-step">
           <div className="jira-config-row">
             <Select
