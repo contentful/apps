@@ -6,6 +6,7 @@ import {
   POLL_INTERVAL_MS,
   MAX_POLL_ATTEMPTS,
   USE_LOCAL_AGENTS_API,
+  LOCAL_AGENTS_API_BASE_URL,
 } from '../utils/constants/agent';
 import { PreviewEntry } from '../locations/Page/components/modals/step_3/types';
 import { getEntryTitle } from '../utils/getEntryTitle';
@@ -155,7 +156,7 @@ const startAgentRun = (sdk: PageAppSDK, params: AgentCallParams): string => {
 
   if (USE_LOCAL_AGENTS_API) {
     fetch(
-      `http://localhost:4111/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${AGENT_ID}/generate`,
+      `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${AGENT_ID}/generate`,
       {
         method: 'POST',
         headers: {
@@ -200,7 +201,7 @@ const pollAgentRun = async (
 
     if (USE_LOCAL_AGENTS_API) {
       const response = await fetch(
-        `http://localhost:4111/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}`,
+        `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}`,
         {
           headers: {
             'x-contentful-enable-alpha-feature': 'agents-api',
@@ -216,7 +217,6 @@ const pollAgentRun = async (
       if (!response.ok) {
         throw new Error(`Failed to poll agent run: ${response.status} ${response.statusText}`);
       }
-
       runData = (await response.json()) as AgentRunData;
     } else {
       try {
@@ -233,8 +233,8 @@ const pollAgentRun = async (
         throw error;
       }
     }
-
-    if (getAgentPayload(runData)) {
+    const assistantTextContent = getAgentPayload(runData);
+    if (assistantTextContent) {
       return parseAgentResponse(runData);
     }
 

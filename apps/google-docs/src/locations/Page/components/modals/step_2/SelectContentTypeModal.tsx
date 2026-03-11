@@ -16,7 +16,10 @@ interface ContentTypePickerModalProps {
   sdk: PageAppSDK;
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (contentTypes: ContentTypeProps[]) => void;
+  // TEMP workaround: Mastra workflow inputs have issues with string[] in some UIs.
+  // We pass a single comma-separated string of IDs for now.
+  onSelect: (contentTypeIdsCsv: string) => void;
+  // onSelect: (contentTypes: ContentTypeProps[]) => void;
   isSubmitting: boolean;
   selectedContentTypes: ContentTypeProps[];
   setSelectedContentTypes: (
@@ -52,20 +55,42 @@ export const ContentTypePickerModal = ({
 
   const showFetchError = hasFetchError && !isLoading;
 
+  const selectedContentTypeIdsCsv = useMemo(
+    () => selectedContentTypes.map((ct) => ct.sys.id).join(','),
+    [selectedContentTypes]
+  );
+
   useEffect(() => {
-    // Fetch content types when component mounts
     const fetchContentTypes = async () => {
       try {
         setIsLoading(true);
         setHasFetchError(false);
         const space = await sdk.cma.space.get({});
         const environment = await sdk.cma.environment.get({ spaceId: space.sys.id });
-        const contentTypesResponse = await sdk.cma.contentType.getMany({
-          spaceId: space.sys.id,
-          environmentId: environment.sys.id,
-        });
-        setContentTypes(contentTypesResponse.items || []);
-        setFilteredContentTypes(contentTypesResponse.items || []);
+
+        const allContentTypes: ContentTypeProps[] = [];
+        let skip = 0;
+        const limit = 100;
+
+        while (true) {
+          const response = await sdk.cma.contentType.getMany({
+            spaceId: space.sys.id,
+            environmentId: environment.sys.id,
+            query: { limit, skip },
+          });
+
+          const items = response.items ?? [];
+          allContentTypes.push(...items);
+
+          if (items.length < limit) break;
+
+          if (skip + items.length >= response.total) break;
+
+          skip += items.length;
+        }
+
+        setContentTypes(allContentTypes);
+        setFilteredContentTypes(allContentTypes);
       } catch (error) {
         console.error('Failed to fetch content types:', error);
         setHasFetchError(true);
@@ -104,12 +129,11 @@ export const ContentTypePickerModal = ({
 
   const onSearchValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value.toLowerCase().trim();
-    if (!searchTerm) {
-      setFilteredContentTypes(contentTypes);
-      return;
-    }
-    const filtered = contentTypes.filter((ct) => ct.name.toLowerCase().includes(searchTerm));
-    setFilteredContentTypes(filtered);
+    setFilteredContentTypes(
+      searchTerm
+        ? contentTypes.filter((ct) => ct.name.toLowerCase().includes(searchTerm))
+        : contentTypes
+    );
   };
 
   const getPlaceholderText = () => {
@@ -141,8 +165,8 @@ export const ContentTypePickerModal = ({
       setHasAttemptedSubmit(true);
       return;
     }
-
-    onSelect(selectedContentTypes);
+    onSelect(selectedContentTypeIdsCsv);
+    // onSelect(selectedContentTypes);
   };
 
   return (

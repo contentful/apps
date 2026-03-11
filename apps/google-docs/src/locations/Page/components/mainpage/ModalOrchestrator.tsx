@@ -9,6 +9,7 @@ import { ErrorModal } from '../modals/ErrorModal';
 import { createEntriesFromPreview, EntryCreationResult } from '../../../../services/entryService';
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
 import { ContentTypePickerModal } from '../modals/step_2/SelectContentTypeModal';
+import { ConfirmPromptModal } from '../modals/step_2b/ConfirmPromptModal';
 import { PreviewModal } from '../modals/step_3/PreviewModal';
 import { LoadingModal } from '../modals/LoadingModal';
 import { ContentTypeProps } from 'contentful-management';
@@ -116,9 +117,23 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       openModal(ModalType.CONTENT_TYPE_PICKER);
     };
 
-    const handleContentTypeSelected = async (contentTypes: ContentTypeProps[]) => {
+    const handleContentTypeSelected = (contentTypeIdsCsv: string) => {
       closeModal(ModalType.CONTENT_TYPE_PICKER);
-      const ids = contentTypes.map((ct) => ct.sys.id);
+      // TEMP workaround: we pass content type IDs as a comma-separated string to Mastra workflows.
+      // The modal already updates `selectedContentTypes` via `setSelectedContentTypes`, so we don't need to set it here.
+      void contentTypeIdsCsv;
+      // setSelectedContentTypes(contentTypes);
+      openModal(ModalType.CONFIRM_PROMPT);
+    };
+
+    const handleConfirmPromptBack = () => {
+      closeModal(ModalType.CONFIRM_PROMPT);
+      openModal(ModalType.CONTENT_TYPE_PICKER);
+    };
+
+    const handleConfirmPromptConfirm = async () => {
+      closeModal(ModalType.CONFIRM_PROMPT);
+      const ids = selectedContentTypes.map((ct) => ct.sys.id);
       lastSubmittedContentTypeIdsRef.current = ids;
       await submit(ids);
     };
@@ -228,6 +243,16 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           isSubmitting={isSubmitting}
           selectedContentTypes={selectedContentTypes}
           setSelectedContentTypes={setSelectedContentTypes}
+        />
+
+        <ConfirmPromptModal
+          sdk={sdk}
+          isOpen={modalStates.isConfirmPromptModalOpen}
+          onClose={handleConfirmPromptBack}
+          onConfirm={handleConfirmPromptConfirm}
+          documentId={documentId}
+          selectedContentTypes={selectedContentTypes}
+          oauthToken={oauthToken}
         />
 
         <ConfirmCancelModal
