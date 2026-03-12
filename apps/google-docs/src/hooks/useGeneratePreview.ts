@@ -8,7 +8,6 @@ import {
   USE_LOCAL_AGENTS_API,
   LOCAL_AGENTS_API_BASE_URL,
 } from '../utils/constants/agent';
-import { PreviewEntry } from '../locations/Page/components/modals/step_3/types';
 import { getEntryTitle } from '../utils/getEntryTitle';
 import { EntryToCreate, AssetToCreate } from '../../functions/agents/documentParserAgent/schema';
 

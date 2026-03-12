@@ -5,6 +5,7 @@ export enum ModalType {
   CONTENT_TYPE_PICKER = 'contentTypePicker',
   CONFIRM_CANCEL = 'confirmCancel',
   ERROR_PREVIEW = 'errorPreview',
+  SELECT_TABS = 'selectTabs',
 }
 
 export const useModalManagement = () => {
@@ -12,6 +13,7 @@ export const useModalManagement = () => {
   const [isContentTypePickerOpen, setIsContentTypePickerOpen] = useState<boolean>(false);
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState<boolean>(false);
   const [isErrorPreviewModalOpen, setIsErrorPreviewModalOpen] = useState<boolean>(false);
+  const [isSelectTabsModalOpen, setIsSelectTabsModalOpen] = useState<boolean>(false);
 
   const openModal = (modalType: ModalType) => {
     switch (modalType) {
@@ -26,6 +28,9 @@ export const useModalManagement = () => {
         break;
       case ModalType.ERROR_PREVIEW:
         setIsErrorPreviewModalOpen(true);
+        break;
+      case ModalType.SELECT_TABS:
+        setIsSelectTabsModalOpen(true);
         break;
     }
   };
@@ -44,6 +49,9 @@ export const useModalManagement = () => {
       case ModalType.ERROR_PREVIEW:
         setIsErrorPreviewModalOpen(false);
         break;
+      case ModalType.SELECT_TABS:
+        setIsSelectTabsModalOpen(false);
+        break;
     }
   };
 
@@ -53,6 +61,7 @@ export const useModalManagement = () => {
       isContentTypePickerOpen,
       isConfirmCancelModalOpen,
       isErrorPreviewModalOpen,
+      isSelectTabsModalOpen,
     },
     openModal,
     closeModal,

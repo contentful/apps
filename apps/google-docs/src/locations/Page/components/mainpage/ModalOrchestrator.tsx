@@ -10,6 +10,7 @@ import { ContentTypePickerModal } from '../modals/step_2/SelectContentTypeModal'
 import { LoadingModal } from '../modals/LoadingModal';
 import { ContentTypeProps } from 'contentful-management';
 import { ERROR_MESSAGES } from '../../../../utils/constants/messages';
+import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
@@ -105,6 +106,17 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const handleContentTypeSelected = (contentTypes: ContentTypeProps[]) => {
       closeModal(ModalType.CONTENT_TYPE_PICKER);
       setSelectedContentTypes(contentTypes);
+      openModal(ModalType.SELECT_TABS);
+    };
+
+    const handleSelectTabsContinue = () => {
+      closeModal(ModalType.SELECT_TABS);
+      // TODO: add preview step and redirect to it
+    };
+
+    const handleSelectTabsBack = () => {
+      closeModal(ModalType.SELECT_TABS);
+      openModal(ModalType.CONTENT_TYPE_PICKER);
     };
 
     const handleErrorPreviewModalClose = () => {
@@ -148,6 +160,14 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           isSubmitting={isSubmitting}
           selectedContentTypes={selectedContentTypes}
           setSelectedContentTypes={setSelectedContentTypes}
+        />
+
+        <SelectTabsModal
+          sdk={sdk}
+          isOpen={modalStates.isSelectTabsModalOpen}
+          onBack={handleSelectTabsBack}
+          onContinue={handleSelectTabsContinue}
+          onClose={() => closeModal(ModalType.SELECT_TABS)}
         />
 
         <ConfirmCancelModal

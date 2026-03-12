@@ -161,7 +161,7 @@ export const ContentTypePickerModal = ({
   };
 
   return (
-    <Modal title="Select content type(s)" isShown={isOpen} onClose={handleClose} size="medium">
+    <Modal title="Select content type(s)" isShown={isOpen} onClose={handleClose} size="large">
       {() => (
         <>
           <Modal.Header title="Select content type(s)" onClose={handleClose} />
