@@ -1,9 +1,8 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
 import { useModalManagement, ModalType } from '../../../../hooks/useModalManagement';
 import { useProgressTracking } from '../../../../hooks/useProgressTracking';
-import { useGeneratePreview } from '../../../../hooks/useGeneratePreview';
 import { ErrorModal } from '../modals/ErrorModal';
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
 import { ContentTypePickerModal } from '../modals/step_2/SelectContentTypeModal';
@@ -33,19 +32,8 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       pendingCloseAction,
       setPendingCloseAction,
     } = useProgressTracking();
-    const { submit, clearMessages, isSubmitting, error } = useGeneratePreview({
-      sdk,
-      documentId,
-      oauthToken,
-    });
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-    // Track previous submission state to detect completion
-    const prevIsSubmittingRef = useRef<boolean>(false);
-
-    // Track last submitted content type IDs for retry functionality
-    const lastSubmittedContentTypeIdsRef = useRef<string[]>([]);
-
-    // Expose startFlow method to parent
     useImperativeHandle(ref, () => ({
       startFlow: () => openModal(ModalType.UPLOAD),
     }));
@@ -54,7 +42,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       resetProgressTracking();
       closeModal(ModalType.UPLOAD);
       closeModal(ModalType.CONTENT_TYPE_PICKER);
-      clearMessages();
     };
 
     const handleUploadModalCloseRequest = (docId?: string) => {
@@ -109,28 +96,12 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
     const handleErrorPreviewModalClose = () => {
       closeModal(ModalType.ERROR_PREVIEW);
-      clearMessages();
       resetProgress();
     };
 
     const handleErrorPreviewModalRetry = async () => {
       closeModal(ModalType.ERROR_PREVIEW);
-      clearMessages();
-
-      if (lastSubmittedContentTypeIdsRef.current.length > 0) {
-        await submit(lastSubmittedContentTypeIdsRef.current);
-      }
     };
-
-    useEffect(() => {
-      const submissionJustCompleted = prevIsSubmittingRef.current && !isSubmitting;
-
-      if (submissionJustCompleted && error) {
-        openModal(ModalType.ERROR_PREVIEW);
-      }
-
-      prevIsSubmittingRef.current = isSubmitting;
-    }, [isSubmitting, openModal, error]);
 
     return (
       <>
