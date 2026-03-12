@@ -8,6 +8,7 @@ import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
 import { ContentTypePickerModal } from '../modals/step_2/SelectContentTypeModal';
 import { LoadingModal } from '../modals/LoadingModal';
 import { ERROR_MESSAGES } from '../../../../utils/constants/messages';
+import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
@@ -122,6 +123,14 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           isSubmitting={isSubmitting}
           selectedContentTypes={selectedContentTypes}
           setSelectedContentTypes={setSelectedContentTypes}
+        />
+
+        <SelectTabsModal
+          sdk={sdk}
+          isOpen={modalStates.isSelectTabsModalOpen}
+          onBack={handleSelectTabsBack}
+          onContinue={handleSelectTabsContinue}
+          onClose={() => closeModal(ModalType.SELECT_TABS)}
         />
 
         <ConfirmCancelModal
