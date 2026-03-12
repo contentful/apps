@@ -158,17 +158,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           selectedTabs={selectedTabs}
           setSelectedTabs={setSelectedTabs}
         />
-
-        <SelectTabsModal
-          isOpen={modalStates.isSelectTabsModalOpen}
-          onContinue={handleSelectTabsContinue}
-          onClose={handleSelectTabsCloseRequest}
-          availableTabs={availableTabs}
-          setAvailableTabs={setAvailableTabs}
-          selectedTabs={selectedTabs}
-          setSelectedTabs={setSelectedTabs}
-        />
-
+        
         <ConfirmCancelModal
           isOpen={modalStates.isConfirmCancelModalOpen}
           onConfirm={handleConfirmCancel}
