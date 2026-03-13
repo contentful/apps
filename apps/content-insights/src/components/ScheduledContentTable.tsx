@@ -10,6 +10,7 @@ import { EntryStatus, ScheduledContentItem } from '../utils/types';
 import { useScheduledContent } from '../hooks/useScheduledContent';
 import { EntryProps, ScheduledActionProps, ContentTypeProps } from 'contentful-management';
 import { ContentTable, TableColumn } from './ContentTable';
+import { getEnvironmentId } from '../utils/sdkUtils';
 
 enum BadgeVariant {
   Primary = 'primary',
@@ -53,21 +54,24 @@ export const ScheduledContentTable = ({
         label: 'Title',
         style: styles.titleCell,
         render: (item) => (
-          <EntryLink entryId={item.id} spaceId={sdk.ids.space}>
+          <EntryLink
+            entryId={item.id}
+            spaceId={sdk.ids.space}
+            environmentId={getEnvironmentId(sdk)}>
             {item.title}
           </EntryLink>
         ),
       },
       {
         id: 'scheduledDate',
-        label: 'Scheduled Date',
+        label: 'Scheduled date',
         style: styles.scheduledDateCell,
         render: (item) =>
           formatDateTimeWithTimezone(item.scheduledFor.datetime, item.scheduledFor.timezone),
       },
       {
         id: 'publishedDate',
-        label: 'Published Date',
+        label: 'Published date',
         style: styles.publishedDateCell,
         render: (item) => formatDateTimeWithTimezone(item.publishedDate || ''),
       },
@@ -79,7 +83,7 @@ export const ScheduledContentTable = ({
       },
       {
         id: 'contentType',
-        label: 'Content Type',
+        label: 'Content type',
         style: styles.contentTypeCell,
         render: (item) => item.contentType,
       },
@@ -103,6 +107,7 @@ export const ScheduledContentTable = ({
       currentPage={currentPage}
       onPageChange={setCurrentPage}
       testId="scheduled-content-table"
+      errorMessage="Failed to load scheduled content"
       skeletonColumnCount={5}
     />
   );

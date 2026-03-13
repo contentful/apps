@@ -89,9 +89,83 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       openModal(ModalType.CONTENT_TYPE_PICKER);
     };
 
-    const handleContentTypeSelected = (contentTypes: ContentTypeProps[]) => {
+    const handleContentTypeSelected = (contentTypeIdsCsv: string) => {
       closeModal(ModalType.CONTENT_TYPE_PICKER);
-      setSelectedContentTypes(contentTypes);
+      // TEMP workaround: we pass content type IDs as a comma-separated string to Mastra workflows.
+      // The modal already updates `selectedContentTypes` via `setSelectedContentTypes`, so we don't need to set it here.
+      void contentTypeIdsCsv;
+      // setSelectedContentTypes(contentTypes);
+      openModal(ModalType.CONFIRM_PROMPT);
+    };
+
+    const handleConfirmPromptBack = () => {
+      closeModal(ModalType.CONFIRM_PROMPT);
+      openModal(ModalType.CONTENT_TYPE_PICKER);
+    };
+
+    const handleConfirmPromptConfirm = async () => {
+      closeModal(ModalType.CONFIRM_PROMPT);
+      const ids = selectedContentTypes.map((ct) => ct.sys.id);
+      lastSubmittedContentTypeIdsRef.current = ids;
+      await submit(ids);
+    };
+
+    const handlePreviewModalConfirm = async (selectedEntries: PreviewEntry[]) => {
+      if (!selectedEntries || selectedEntries.length === 0) {
+        sdk.notifier.error('No entries to create');
+        return;
+      }
+
+      setSelectedEntriesCount(selectedEntries.length);
+
+      // Build a map of contentTypeId -> contentTypeName from selected entries to use in the review modal
+      const namesMap: Record<string, string> = {};
+      selectedEntries.forEach((previewEntry) => {
+        namesMap[previewEntry.entry.contentTypeId] = previewEntry.contentTypeName;
+      });
+      setContentTypeNamesMap(namesMap);
+
+      closeModal(ModalType.PREVIEW);
+      setIsCreatingEntries(true);
+      try {
+        const entries = selectedEntries.map((p) => p.entry);
+        const contentTypeIds = selectedEntries.map((entry) => entry.entry.contentTypeId);
+        const entryResult: EntryCreationResult = await createEntriesFromPreview(
+          sdk,
+          entries,
+          contentTypeIds,
+          assets
+        );
+
+        const createdCount = entryResult.createdEntries.length;
+
+        if (createdCount === 0) {
+          console.error('Entry creation errors:', entryResult.errors);
+          openModal(ModalType.ERROR_ENTRIES);
+          return;
+        }
+
+        setCreatedEntries(entryResult.createdEntries);
+        resetProgress();
+        openModal(ModalType.REVIEW);
+      } catch (error) {
+        closeModal(ModalType.PREVIEW);
+        console.error('Entry creation failed:', error);
+        openModal(ModalType.ERROR_ENTRIES);
+      } finally {
+        setIsCreatingEntries(false);
+      }
+    };
+
+    const handleErrorModalTryAgain = () => {
+      closeModal(ModalType.ERROR_ENTRIES);
+      // Reopen the preview modal so user can try again
+      openModal(ModalType.PREVIEW);
+    };
+
+    const handleErrorModalCancel = () => {
+      closeModal(ModalType.ERROR_ENTRIES);
+      resetProgress();
     };
 
     const handleErrorPreviewModalClose = () => {
