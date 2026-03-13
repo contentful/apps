@@ -170,10 +170,10 @@ export const ContentTypePickerModal = ({
   };
 
   return (
-    <Modal title="Select content type(s)" isShown={isOpen} onClose={() => {}} size="medium">
+    <Modal title="Select content type(s)" isShown={isOpen} onClose={handleClose} size="medium">
       {() => (
         <>
-          <Modal.Header title="Select content type(s)" />
+          <Modal.Header title="Select content type(s)" onClose={handleClose} />
           <Modal.Content className={css({ minHeight: '300px' })}>
             <Paragraph marginBottom="spacingM" color="gray700">
               Select the content type(s) you would like to use with this document.
