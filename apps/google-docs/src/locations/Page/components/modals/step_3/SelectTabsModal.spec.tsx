@@ -1,0 +1,147 @@
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { SelectTabsModal } from './SelectTabsModal';
+import { createMockSDK } from '../../../../../../test/mocks';
+import type { PageAppSDK } from '@contentful/app-sdk';
+
+const mockSdk = createMockSDK() as PageAppSDK;
+
+const defaultProps = {
+  sdk: mockSdk,
+  isOpen: true,
+  onBack: vi.fn(),
+  onContinue: vi.fn(),
+  onClose: vi.fn(),
+};
+
+const renderModal = (props = {}) => render(<SelectTabsModal {...defaultProps} {...props} />);
+
+const selectTab = async (tabId: string) => {
+  await waitFor(() => {
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle Multiselect' }));
+  });
+
+  const item = document.querySelector(`[data-test-id="cf-multiselect-list-item-${tabId}"]`);
+  const el = item?.closest('label')?.querySelector('input') as HTMLInputElement | null;
+
+  if (el) {
+    fireEvent.click(el);
+  }
+};
+
+describe('SelectTabsModal', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('Rendering', () => {
+    it('renders the modal title and description when open', async () => {
+      renderModal();
+
+      await waitFor(() => {
+        expect(screen.getByText('Select document tab(s)')).toBeTruthy();
+        expect(
+          screen.getByText(/The selected document contains multiple document tabs/)
+        ).toBeTruthy();
+      });
+    });
+
+    it('renders the Back and Next action buttons', async () => {
+      renderModal();
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Back' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Next' })).toBeTruthy();
+      });
+    });
+
+    it('does not render modal content when isOpen is false', async () => {
+      renderModal({ isOpen: false });
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText(/The selected document contains multiple document tabs/)
+        ).toBeNull();
+      });
+    });
+
+    it('loads and renders available tab options', async () => {
+      renderModal();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Toggle Multiselect' }));
+
+      await waitFor(() => {
+        expect(
+          document.querySelector('[data-test-id="cf-multiselect-list-item-tab-1"]')
+        ).toBeTruthy();
+        expect(
+          document.querySelector('[data-test-id="cf-multiselect-list-item-tab-2"]')
+        ).toBeTruthy();
+      });
+    });
+
+    it('shows a validation error when Next is clicked without selecting a tab', async () => {
+      renderModal();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+
+      await waitFor(() => {
+        expect(screen.getByText('You must select at least one tab.')).toBeTruthy();
+      });
+    });
+  });
+
+  describe('Tab selection', () => {
+    it('shows a selected tab as a pill after selecting it', async () => {
+      renderModal();
+
+      // One "Close" button exists on the modal header; selecting a tab adds a second for the pill
+      await waitFor(() => expect(screen.getAllByRole('button', { name: 'Close' })).toHaveLength(1));
+      await selectTab('tab-1');
+      await waitFor(() => expect(screen.getAllByRole('button', { name: 'Close' })).toHaveLength(2));
+    });
+
+    it('removes the pill when its close button is clicked', async () => {
+      renderModal();
+      await selectTab('tab-1');
+
+      const buttons = screen.getAllByRole('button', { name: 'Close' });
+      fireEvent.click(buttons[1]);
+
+      await waitFor(() => expect(screen.getAllByRole('button', { name: 'Close' })).toHaveLength(1));
+    });
+
+    it('calls onContinue after selecting a tab and clicking Next', async () => {
+      renderModal();
+      await selectTab('tab-1');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+
+      await waitFor(() => {
+        expect(defaultProps.onContinue).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  describe('Navigation callbacks', () => {
+    it('calls onBack when the Back button is clicked', async () => {
+      renderModal();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+
+      await waitFor(() => {
+        expect(defaultProps.onBack).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('calls onClose when the modal header close button is clicked', async () => {
+      renderModal();
+
+      fireEvent.click(screen.getByRole('button', { name: /close/i }));
+
+      await waitFor(() => {
+        expect(defaultProps.onClose).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+});
