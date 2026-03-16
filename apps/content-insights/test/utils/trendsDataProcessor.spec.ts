@@ -43,8 +43,8 @@ describe('trendsDataProcessor', () => {
 
       expect(result.length).toBeGreaterThan(0);
       expect(result[0]).toHaveProperty('date');
-      expect(result[0]).toHaveProperty('New Content');
-      expect(result.some((dataPoint) => (dataPoint['New Content'] as number) > 0)).toBe(true);
+      expect(result[0]).toHaveProperty('New content');
+      expect(result.some((dataPoint) => (dataPoint['New content'] as number) > 0)).toBe(true);
     });
 
     it('filters entries by content types when provided', () => {
@@ -73,7 +73,7 @@ describe('trendsDataProcessor', () => {
 
       // Should only count blogPost entries
       const totalCount = result.reduce(
-        (sum, dataPoint) => sum + (dataPoint['New Content'] as number),
+        (sum, dataPoint) => sum + (dataPoint['New content'] as number),
         0
       );
       expect(totalCount).toBe(1);
@@ -118,7 +118,7 @@ describe('trendsDataProcessor', () => {
 
       // Target month (1 month ago) is at index 2
       expect(result.length).toBeGreaterThanOrEqual(4);
-      expect(result[2]['New Content']).toBe(3);
+      expect(result[2]['New content']).toBe(3);
       expect(result[2]['avgTimeToPublish']).toBeCloseTo(4, 1);
     });
 
@@ -142,7 +142,7 @@ describe('trendsDataProcessor', () => {
       const result = generateNewEntriesChartData(entries, { timeRange: TimeRange.ThreeMonths });
 
       // Target month (1 month ago) is at index 2
-      expect(result[2]['New Content']).toBe(2);
+      expect(result[2]['New content']).toBe(2);
       expect(result[2]['avgTimeToPublish']).toBeUndefined();
     });
   });
@@ -232,7 +232,7 @@ describe('trendsDataProcessor', () => {
       const result = generateNewEntriesChartData([], { timeRange: TimeRange.Month });
 
       expect(result.length).toBeGreaterThan(0);
-      expect(result.every((dataPoint) => dataPoint['New Content'] === 0)).toBe(true);
+      expect(result.every((dataPoint) => dataPoint['New content'] === 0)).toBe(true);
     });
   });
 });

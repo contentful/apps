@@ -73,7 +73,9 @@ export function generateCreatorChartData(
     const creatorId = entry.sys.createdBy?.sys?.id;
     if (!creatorId) return null;
 
-    const creatorName = creatorsNames?.get(creatorId) || creatorId;
+    const creatorName = creatorsNames?.get(creatorId);
+    if (!creatorName) return null;
+
     creatorsSet.add(creatorName);
     return creatorName;
   });
@@ -319,7 +321,7 @@ function buildNewEntriesDataPoint(
 ): ChartDataPoint {
   const dataPoint: ChartDataPoint = {
     date: formatMonthYearDisplay(monthYear),
-    'New Content': currentMetrics.newContent,
+    'New content': currentMetrics.newContent,
   };
 
   if (currentMetrics.avgTimeToPublish !== undefined) {

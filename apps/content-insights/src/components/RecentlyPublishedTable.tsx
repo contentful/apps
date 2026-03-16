@@ -12,6 +12,7 @@ import {
 } from '../hooks/useRecentlyPublishedContent';
 import type { AppInstallationParameters } from '../locations/ConfigScreen';
 import { ContentTable, TableColumn } from './ContentTable';
+import { getEnvironmentId } from '../utils/sdkUtils';
 
 export const RecentlyPublishedTable = ({
   entries,
@@ -41,20 +42,23 @@ export const RecentlyPublishedTable = ({
         label: 'Title',
         style: styles.titleCell,
         render: (item) => (
-          <EntryLink entryId={item.id} spaceId={sdk.ids.space}>
+          <EntryLink
+            entryId={item.id}
+            spaceId={sdk.ids.space}
+            environmentId={getEnvironmentId(sdk)}>
             {item.title}
           </EntryLink>
         ),
       },
       {
         id: 'publishedDate',
-        label: 'Published Date',
+        label: 'Published date',
         style: styles.publishedDateCell,
         render: (item) => formatDateTimeWithTimezone(item.publishedDate || undefined),
       },
       {
         id: 'contentType',
-        label: 'Content Type',
+        label: 'Content type',
         style: styles.contentTypeCell,
         render: (item) => item.contentType,
       },
@@ -78,6 +82,7 @@ export const RecentlyPublishedTable = ({
       currentPage={currentPage}
       onPageChange={setCurrentPage}
       testId="recently-published-table"
+      errorMessage="Failed to load recently published content"
       skeletonColumnCount={5}
     />
   );

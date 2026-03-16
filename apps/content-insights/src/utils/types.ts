@@ -5,6 +5,8 @@ export type ChartDataPoint = Record<string, string | number>;
 export interface ChartWrapperProps {
   data: ChartDataPoint[];
   xAxisDataKey: string;
+  chartLines: string[];
+  chartLinesLabels?: string[];
   height?: number;
   legendTitle?: string;
   processedContentTypes?: Map<string, string>;

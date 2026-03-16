@@ -104,7 +104,7 @@ export function createMockChartData(count: number = 5): ChartDataPoint[] {
 
     data.push({
       date: monthYear,
-      'New Content': Math.floor(Math.random() * 20),
+      'New content': Math.floor(Math.random() * 20),
     });
   }
 

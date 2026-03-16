@@ -1,14 +1,12 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useImperativeHandle, useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
 import { useModalManagement, ModalType } from '../../../../hooks/useModalManagement';
 import { useProgressTracking } from '../../../../hooks/useProgressTracking';
-import { useGeneratePreview } from '../../../../hooks/useGeneratePreview';
 import { ErrorModal } from '../modals/ErrorModal';
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
 import { ContentTypePickerModal } from '../modals/step_2/SelectContentTypeModal';
 import { LoadingModal } from '../modals/LoadingModal';
-import { ContentTypeProps } from 'contentful-management';
 import { ERROR_MESSAGES } from '../../../../utils/constants/messages';
 import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 
@@ -34,19 +32,8 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       pendingCloseAction,
       setPendingCloseAction,
     } = useProgressTracking();
-    const { submit, clearMessages, isSubmitting, error } = useGeneratePreview({
-      sdk,
-      documentId,
-      oauthToken,
-    });
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-    // Track previous submission state to detect completion
-    const prevIsSubmittingRef = useRef<boolean>(false);
-
-    // Track last submitted content type IDs for retry functionality
-    const lastSubmittedContentTypeIdsRef = useRef<string[]>([]);
-
-    // Expose startFlow method to parent
     useImperativeHandle(ref, () => ({
       startFlow: () => openModal(ModalType.UPLOAD),
     }));
@@ -55,7 +42,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       resetProgressTracking();
       closeModal(ModalType.UPLOAD);
       closeModal(ModalType.CONTENT_TYPE_PICKER);
-      clearMessages();
     };
 
     const handleUploadModalCloseRequest = (docId?: string) => {
@@ -103,9 +89,12 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       openModal(ModalType.CONTENT_TYPE_PICKER);
     };
 
-    const handleContentTypeSelected = (contentTypes: ContentTypeProps[]) => {
+    const handleContentTypeSelected = (contentTypeIdsCsv: string) => {
       closeModal(ModalType.CONTENT_TYPE_PICKER);
-      setSelectedContentTypes(contentTypes);
+      // TEMP workaround: we pass content type IDs as a comma-separated string to Mastra workflows.
+      // The modal already updates `selectedContentTypes` via `setSelectedContentTypes`, so we don't need to set it here.
+      void contentTypeIdsCsv;
+      // setSelectedContentTypes(contentTypes);
       openModal(ModalType.SELECT_TABS);
     };
 
@@ -121,28 +110,12 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
     const handleErrorPreviewModalClose = () => {
       closeModal(ModalType.ERROR_PREVIEW);
-      clearMessages();
       resetProgress();
     };
 
     const handleErrorPreviewModalRetry = async () => {
       closeModal(ModalType.ERROR_PREVIEW);
-      clearMessages();
-
-      if (lastSubmittedContentTypeIdsRef.current.length > 0) {
-        await submit(lastSubmittedContentTypeIdsRef.current);
-      }
     };
-
-    useEffect(() => {
-      const submissionJustCompleted = prevIsSubmittingRef.current && !isSubmitting;
-
-      if (submissionJustCompleted && error) {
-        openModal(ModalType.ERROR_PREVIEW);
-      }
-
-      prevIsSubmittingRef.current = isSubmitting;
-    }, [isSubmitting, openModal, error]);
 
     return (
       <>
