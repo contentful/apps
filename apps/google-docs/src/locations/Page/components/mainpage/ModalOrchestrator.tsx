@@ -8,7 +8,7 @@ import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
 import { ContentTypePickerModal } from '../modals/step_2/SelectContentTypeModal';
 import { LoadingModal } from '../modals/LoadingModal';
 import { ERROR_MESSAGES } from '../../../../utils/constants/messages';
-import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
+import { SelectTabsModal, type DocumentTabProps } from '../modals/step_3/SelectTabsModal';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
@@ -98,9 +98,9 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       openModal(ModalType.SELECT_TABS);
     };
 
-    const handleSelectTabsContinue = () => {
+    const handleSelectTabsContinue = (_selectedTabs: DocumentTabProps[]) => {
       closeModal(ModalType.SELECT_TABS);
-      // TODO: add preview step and redirect to it
+      // TODO: add preview step and redirect to it, using selectedTabs
     };
 
     const handleSelectTabsBack = () => {
