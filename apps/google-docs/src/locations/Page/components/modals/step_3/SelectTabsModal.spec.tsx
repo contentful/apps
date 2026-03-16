@@ -39,10 +39,11 @@ describe('SelectTabsModal', () => {
       renderModal();
 
       await waitFor(() => {
-        expect(screen.getByText('Select document tab(s)')).toBeTruthy();
+        expect(screen.getByRole('heading', { name: 'Document tabs' })).toBeTruthy();
         expect(
           screen.getByText(/The selected document contains multiple document tabs/)
         ).toBeTruthy();
+        expect(screen.getByText(/Would you like to select which tabs should be used/)).toBeTruthy();
       });
     });
 
@@ -59,9 +60,7 @@ describe('SelectTabsModal', () => {
       renderModal({ isOpen: false });
 
       await waitFor(() => {
-        expect(
-          screen.queryByText(/The selected document contains multiple document tabs/)
-        ).toBeNull();
+        expect(screen.queryByText(/Would you like to select which tabs should be used/)).toBeNull();
       });
     });
 
@@ -82,11 +81,32 @@ describe('SelectTabsModal', () => {
 
     it('shows a validation error when Next is clicked without selecting a tab', async () => {
       renderModal();
+      // "Yes, select specific tabs" is selected by default
 
       fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 
       await waitFor(() => {
         expect(screen.getByText('You must select at least one tab.')).toBeTruthy();
+      });
+    });
+
+    it('calls onContinue with all tabs when No import all is selected', async () => {
+      renderModal();
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Toggle Multiselect' })).toBeTruthy();
+      });
+
+      fireEvent.click(screen.getByLabelText('No, import all tabs'));
+      fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+
+      await waitFor(() => {
+        expect(defaultProps.onContinue).toHaveBeenCalledTimes(1);
+        expect(defaultProps.onContinue).toHaveBeenCalledWith(
+          expect.arrayContaining([
+            expect.objectContaining({ tabId: 'tab-1', tabTitle: 'Introduction' }),
+          ])
+        );
       });
     });
   });
@@ -111,7 +131,7 @@ describe('SelectTabsModal', () => {
       await waitFor(() => expect(screen.getAllByRole('button', { name: 'Close' })).toHaveLength(1));
     });
 
-    it('calls onContinue after selecting a tab and clicking Next', async () => {
+    it('calls onContinue with selected tabs after selecting a tab and clicking Next', async () => {
       renderModal();
       await selectTab('tab-1');
 
@@ -119,6 +139,9 @@ describe('SelectTabsModal', () => {
 
       await waitFor(() => {
         expect(defaultProps.onContinue).toHaveBeenCalledTimes(1);
+        expect(defaultProps.onContinue).toHaveBeenCalledWith([
+          expect.objectContaining({ tabId: 'tab-1', tabTitle: 'Introduction' }),
+        ]);
       });
     });
   });
