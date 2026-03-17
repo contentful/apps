@@ -11,7 +11,13 @@ import {
   Radio,
 } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
-import { css } from '@emotion/css';
+import {
+  formWrapper,
+  modalControls,
+  multiselect,
+  multiselectOption,
+  pillsContainer,
+} from './SelectTabsModal.styles';
 
 interface SelectTabsModalProps {
   sdk: PageAppSDK;
@@ -26,6 +32,11 @@ export interface DocumentTabProps {
   tabTitle: string;
 }
 
+const TRUNCATE_LENGTH = 10;
+
+const truncateLabel = (label: string, maxLength: number = TRUNCATE_LENGTH): string =>
+  label.length > maxLength ? `${label.slice(0, maxLength)}...` : label;
+
 const MOCK_TABS: DocumentTabProps[] = [
   { tabId: 'tab-1', tabTitle: 'Introduction' },
   { tabId: 'tab-2', tabTitle: 'Chapter 1' },
@@ -34,56 +45,12 @@ const MOCK_TABS: DocumentTabProps[] = [
   { tabId: 'tab-5', tabTitle: 'References' },
   { tabId: 'tab-6', tabTitle: 'Chapter 3' },
   { tabId: 'tab-7', tabTitle: 'Chapter 4' },
-  { tabId: 'tab-8', tabTitle: 'Chapter 5' },
+  { tabId: 'tab-8', tabTitle: 'Long long label 1' },
   { tabId: 'tab-9', tabTitle: 'Chapter 6' },
   { tabId: 'tab-10', tabTitle: 'Chapter 7' },
   { tabId: 'tab-11', tabTitle: 'Chapter 8' },
   { tabId: 'tab-12', tabTitle: 'Chapter 9' },
-  { tabId: 'tab-13', tabTitle: 'Chapter 10' },
-  { tabId: 'tab-14', tabTitle: 'Chapter 11' },
-  { tabId: 'tab-15', tabTitle: 'Chapter 12' },
-  { tabId: 'tab-16', tabTitle: 'Chapter 13' },
-  { tabId: 'tab-17', tabTitle: 'Chapter 14' },
-  { tabId: 'tab-18', tabTitle: 'Chapter 15' },
-  { tabId: 'tab-19', tabTitle: 'Chapter 16' },
-  { tabId: 'tab-20', tabTitle: 'Chapter 17' },
-  { tabId: 'tab-21', tabTitle: 'Chapter 18' },
-  { tabId: 'tab-22', tabTitle: 'Chapter 19' },
-  { tabId: 'tab-23', tabTitle: 'Chapter 20' },
-  { tabId: 'tab-24', tabTitle: 'Chapter 21' },
-  { tabId: 'tab-25', tabTitle: 'Chapter 22' },
-  { tabId: 'tab-26', tabTitle: 'Chapter 23' },
-  { tabId: 'tab-27', tabTitle: 'Chapter 24' },
-  { tabId: 'tab-28', tabTitle: 'Chapter 25' },
-  { tabId: 'tab-29', tabTitle: 'Chapter 26' },
-  { tabId: 'tab-30', tabTitle: 'Chapter 27' },
-  { tabId: 'tab-31', tabTitle: 'Chapter 28' },
-  { tabId: 'tab-32', tabTitle: 'Chapter 29' },
-  { tabId: 'tab-33', tabTitle: 'Chapter 30' },
-  { tabId: 'tab-34', tabTitle: 'Chapter 31' },
-  { tabId: 'tab-35', tabTitle: 'Chapter 32' },
-  { tabId: 'tab-36', tabTitle: 'Chapter 33' },
-  { tabId: 'tab-37', tabTitle: 'Chapter 34' },
-  { tabId: 'tab-38', tabTitle: 'Chapter 35' },
-  { tabId: 'tab-39', tabTitle: 'Chapter 36' },
-  { tabId: 'tab-40', tabTitle: 'Chapter 37' },
-  { tabId: 'tab-41', tabTitle: 'Chapter 38' },
-  { tabId: 'tab-42', tabTitle: 'Chapter 39' },
-  { tabId: 'tab-43', tabTitle: 'Chapter 40' },
-  { tabId: 'tab-44', tabTitle: 'Chapter 41' },
-  { tabId: 'tab-45', tabTitle: 'Chapter 42' },
-  { tabId: 'tab-46', tabTitle: 'Chapter 43' },
-  { tabId: 'tab-47', tabTitle: 'Chapter 44' },
-  { tabId: 'tab-48', tabTitle: 'Chapter 45' },
-  { tabId: 'tab-49', tabTitle: 'Chapter 46' },
-  { tabId: 'tab-50', tabTitle: 'Chapter 47' },
-  { tabId: 'tab-51', tabTitle: 'Chapter 48' },
-  { tabId: 'tab-52', tabTitle: 'Chapter 49' },
-  { tabId: 'tab-53', tabTitle: 'Chapter 50' },
-  { tabId: 'tab-54', tabTitle: 'Chapter 51' },
-  { tabId: 'tab-55', tabTitle: 'Chapter 52' },
-  { tabId: 'tab-56', tabTitle: 'Chapter 53' },
-  { tabId: 'tab-57', tabTitle: 'Chapter 54' },
+  { tabId: 'tab-13', tabTitle: 'Long long label 2' },
 ];
 
 export const SelectTabsModal = ({
@@ -177,7 +144,12 @@ export const SelectTabsModal = ({
                 onChange={(e) => setSelectAllTabs(e.target.value === 'true')}>
                 <Radio value="false">Yes, select specific tabs</Radio>
                 {!selectAllTabs && (
-                  <Flex flexDirection="column" gap="spacingS" marginLeft="spacingL" fullWidth>
+                  <Flex
+                    flexDirection="column"
+                    gap="spacingS"
+                    marginLeft="spacingL"
+                    fullWidth
+                    className={formWrapper}>
                     <FormControl
                       isRequired
                       isInvalid={isInvalidSelectionError || hasFetchError}
@@ -185,15 +157,15 @@ export const SelectTabsModal = ({
                       <FormControl.Label>Document tabs</FormControl.Label>
                       <Checkbox.Group name="document-tabs" value={selectedTabs.map((t) => t.tabId)}>
                         <Multiselect
-                          className={css({ maxWidth: '60%' })}
+                          className={multiselect}
                           currentSelection={selectedTabs.map((tab) => tab.tabTitle)}
                           placeholder={isLoading ? 'Loading tabs...' : 'Select one or more'}
                           popoverProps={{
-                            listMaxHeight: 200,
+                            listMaxHeight: 300,
                           }}>
                           {availableTabs.map((tab) => (
                             <Multiselect.Option
-                              className={css({ padding: `0.25rem` })}
+                              className={multiselectOption}
                               key={tab.tabId}
                               value={tab.tabId}
                               itemId={tab.tabId}
@@ -219,17 +191,11 @@ export const SelectTabsModal = ({
                       )}
                     </FormControl>
                     {selectedTabs.length > 0 && (
-                      <Flex
-                        flexWrap="wrap"
-                        gap="spacingXs"
-                        className={css({
-                          maxHeight: '120px',
-                          overflowY: 'auto',
-                        })}>
+                      <Flex flexWrap="wrap" gap="spacingXs" className={pillsContainer}>
                         {selectedTabs.map((tab) => (
                           <Pill
                             key={tab.tabId}
-                            label={tab.tabTitle}
+                            label={truncateLabel(tab.tabTitle)}
                             onClose={() =>
                               setSelectedTabs((prev) => prev.filter((t) => t.tabId !== tab.tabId))
                             }
@@ -243,7 +209,7 @@ export const SelectTabsModal = ({
               </Radio.Group>
             </Flex>
           </Modal.Content>
-          <Modal.Controls style={{ paddingTop: '0' }}>
+          <Modal.Controls className={modalControls}>
             <Button onClick={handleBack} variant="secondary">
               Back
             </Button>
