@@ -2,6 +2,7 @@ node_modules
 .cache
 tags
 functions/credentials.txt
+functions/serverless.yml.bu
 functions/**/*.js
 functions/built
 functions/.serverless

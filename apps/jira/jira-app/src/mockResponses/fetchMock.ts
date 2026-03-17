@@ -26,11 +26,11 @@ fetchMock.get(
 );
 
 fetchMock.get(
-  'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/project/search?query=extensibility',
+  'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/project/search?query=extensibility',
   {
-    self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/project/search?maxResults=50&startAt=0',
+    self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/project/search?maxResults=50&startAt=0',
     nMKEPage:
-      'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/project/search?maxResults=50&startAt=50',
+      'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/project/search?maxResults=50&startAt=50',
     maxResults: 50,
     startAt: 0,
     total: 82,
@@ -38,7 +38,7 @@ fetchMock.get(
     values: [
       {
         expand: 'description,lead,issueTypes,url,projectKeys,permissions,insight',
-        self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/project/10555',
+        self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/project/10555',
         id: '10555',
         key: 'MKE',
         name: 'Project name 2',
@@ -53,7 +53,7 @@ fetchMock.get(
             'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/secure/projectavatar?size=medium&s=medium&pid=10555&avatarId=10981',
         },
         projectCategory: {
-          self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/projectCategory/10002',
+          self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/projectCategory/10002',
           id: '10002',
           name: 'Product Development',
           description: '',
@@ -75,7 +75,7 @@ fetchMock.get(
 );
 
 fetchMock.get(
-  'https://api.atlassian.com/ex/jira/cloud-id/rest/api/2/search?jql=issue.property%5BcontentfulLink%5D.records%20%3D%20%22ctf%3Atest-space%3Amaster%3Aundefined%22',
+  'https://api.atlassian.com/ex/jira/cloud-id/rest/api/3/search/jql?jql=issue.property%5BcontentfulLink%5D.records%20%3D%20%22ctf%3Atest-space%3Amaster%3Aundefined%22&fields=summary%2Cpriority%2Cassignee%2Cstatus%2Cissuetype',
   {
     expand: 'schema,names',
     startAt: 0,
@@ -85,12 +85,12 @@ fetchMock.get(
       {
         expand: 'operations,versionedRepresentations,editmeta,changelog,renderedFields',
         id: '10049',
-        self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issue/10049',
+        self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/issue/10049',
         key: 'KEY-50',
         fields: {
           statuscategorychangedate: '2019-11-15T10:16:15.928-0600',
           issuetype: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issuetype/10002',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/issuetype/10002',
             id: '10002',
             description: 'A small, distinct piece of work.',
             iconUrl:
@@ -103,7 +103,7 @@ fetchMock.get(
           customfield_10030: null,
           customfield_10031: null,
           project: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/project/10000',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/project/10000',
             id: '10000',
             key: 'KEY',
             name: 'Project Name',
@@ -128,7 +128,7 @@ fetchMock.get(
           workratio: -1,
           lastViewed: '2019-12-05T08:16:01.178-0600',
           watches: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issue/KEY-50/watchers',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/issue/KEY-50/watchers',
             watchCount: 1,
             isWatching: false,
           },
@@ -137,7 +137,7 @@ fetchMock.get(
           customfield_10021: null,
           customfield_10022: null,
           priority: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/priority/3',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/priority/3',
             iconUrl:
               'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/images/icons/priorities/medium.svg',
             name: 'Medium',
@@ -161,7 +161,7 @@ fetchMock.get(
           versions: [],
           issuelinks: [],
           assignee: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/user?accountId=111111111111111111111111',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/user?accountId=111111111111111111111111',
             name: 'dean.anderson',
             key: 'dean.anderson',
             accountId: '111111111111111111111111',
@@ -183,13 +183,13 @@ fetchMock.get(
           },
           updated: '2019-12-05T08:16:01.487-0600',
           status: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/status/10000',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/status/10000',
             description: '',
             iconUrl: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/',
             name: 'To Do',
             id: '10000',
             statusCategory: {
-              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/statuscategory/2',
+              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/statuscategory/2',
               id: 2,
               key: 'new',
               colorName: 'blue-gray',
@@ -211,7 +211,7 @@ fetchMock.get(
           customfield_10009: null,
           summary: 'Test issue 1',
           creator: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/user?accountId=111111111111111111111112',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/user?accountId=111111111111111111111112',
             name: 'marc.aurel',
             key: 'marc.aurel',
             accountId: '111111111111111111111112',
@@ -233,7 +233,7 @@ fetchMock.get(
           },
           subtasks: [],
           reporter: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/user?accountId=111111111111111111111112',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/user?accountId=111111111111111111111112',
             name: 'marc.aurel',
             key: 'marc.aurel',
             accountId: '111111111111111111111112',
@@ -263,7 +263,7 @@ fetchMock.get(
           duedate: null,
           progress: { progress: 0, total: 0 },
           votes: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issue/KEY-50/votes',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/issue/KEY-50/votes',
             votes: 0,
             hasVoted: false,
           },
@@ -272,12 +272,12 @@ fetchMock.get(
       {
         expand: 'operations,versionedRepresentations,editmeta,changelog,renderedFields',
         id: '10046',
-        self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issue/10046',
+        self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/issue/10046',
         key: 'KEY-47',
         fields: {
           statuscategorychangedate: '2019-11-22T04:27:01.559-0600',
           issuetype: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issuetype/10001',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/issuetype/10001',
             id: '10001',
             description: 'Functionality or a feature expressed as a user goal.',
             iconUrl:
@@ -289,7 +289,7 @@ fetchMock.get(
           timespent: null,
           customfield_10030: null,
           project: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/project/10000',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/project/10000',
             id: '10000',
             key: 'KEY',
             name: 'KEYIt',
@@ -314,7 +314,7 @@ fetchMock.get(
           resolutiondate: null,
           workratio: -1,
           watches: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issue/KEY-47/watchers',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/issue/KEY-47/watchers',
             watchCount: 1,
             isWatching: false,
           },
@@ -324,7 +324,7 @@ fetchMock.get(
           customfield_10021: null,
           customfield_10022: null,
           priority: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/priority/3',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/priority/3',
             iconUrl:
               'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/images/icons/priorities/medium.svg',
             name: 'Medium',
@@ -349,7 +349,7 @@ fetchMock.get(
           versions: [],
           issuelinks: [],
           assignee: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/user?accountId=5dcc3f7705b5ae0ddd6fe79e',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/user?accountId=5dcc3f7705b5ae0ddd6fe79e',
             name: 'fschultz02+KEYit',
             key: 'fschultz02+KEYit',
             accountId: '5dcc3f7705b5ae0ddd6fe79e',
@@ -370,13 +370,13 @@ fetchMock.get(
           },
           updated: '2019-11-22T04:27:01.558-0600',
           status: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/status/10000',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/status/10000',
             description: '',
             iconUrl: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/',
             name: 'To Do',
             id: '10000',
             statusCategory: {
-              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/statuscategory/2',
+              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/statuscategory/2',
               id: 2,
               key: 'new',
               colorName: 'blue-gray',
@@ -398,7 +398,7 @@ fetchMock.get(
           customfield_10009: null,
           summary: 'Update getting started page to reflect new release',
           creator: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/user?accountId=111111111111111111111112',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/user?accountId=111111111111111111111112',
             name: 'marc.aurel',
             key: 'marc.aurel',
             accountId: '111111111111111111111112',
@@ -420,7 +420,7 @@ fetchMock.get(
           },
           subtasks: [],
           reporter: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/user?accountId=111111111111111111111112',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/user?accountId=111111111111111111111112',
             name: 'marc.aurel',
             key: 'marc.aurel',
             accountId: '111111111111111111111112',
@@ -450,7 +450,7 @@ fetchMock.get(
           duedate: null,
           progress: { progress: 0, total: 0 },
           votes: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issue/KEY-47/votes',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/3/issue/KEY-47/votes',
             votes: 0,
             hasVoted: false,
           },
@@ -461,7 +461,7 @@ fetchMock.get(
 );
 
 fetchMock.get(
-  'https://api.atlassian.com/ex/jira/cloud-id/rest/api/2/search?jql=project%3D%221000%22%20AND%20issueKey%3D%22MKE-1389%22',
+  'https://api.atlassian.com/ex/jira/cloud-id/rest/api/3/search/jql?jql=project%3D%221000%22%20AND%20issueKey%3D%22MKE-1389%22&fields=summary%2Cpriority%2Cassignee%2Cstatus%2Cissuetype',
   {
     expand: 'names,schema',
     startAt: 0,
@@ -472,7 +472,7 @@ fetchMock.get(
         expand:
           'operations,versionedRepresentations,editmeta,changelog,renderedFields,customfield_10908.properties',
         id: '51858',
-        self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issue/51858',
+        self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/issue/51858',
         key: 'MKE-1389',
         fields: {
           customfield_11160: null,
@@ -522,7 +522,7 @@ fetchMock.get(
           customfield_10980: null,
           customfield_11035: null,
           customfield_11156: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/customFieldOption/11089',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/customFieldOption/11089',
             value: 'To be checked',
             id: '11089',
           },
@@ -545,7 +545,7 @@ fetchMock.get(
           customfield_10619: null,
           issuelinks: [],
           assignee: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/user?accountId=111111111111111111111111',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/user?accountId=111111111111111111111111',
             name: 'dean.anderson',
             key: 'dean.anderson',
             accountId: '111111111111111111111111',
@@ -567,14 +567,14 @@ fetchMock.get(
           },
           components: [
             {
-              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/component/10233',
+              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/component/10233',
               id: '10233',
               name: 'Apps',
               description:
                 'https://github.com/contentful/user_interface/tree/master/src/javascripts/app/settings/apps',
             },
             {
-              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/component/10232',
+              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/component/10232',
               id: '10232',
               name: 'Marketplace',
               description: 'https://www.contentful.com/developers/marketplace/',
@@ -620,18 +620,18 @@ fetchMock.get(
             {
               id: '52188',
               key: 'MKE-1414',
-              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issue/52188',
+              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/issue/52188',
               fields: {
                 summary: 'Build front end app',
                 status: {
-                  self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/status/10012',
+                  self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/status/10012',
                   description: '',
                   iconUrl:
                     'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/images/icons/status_generic.gif',
                   name: 'In progress',
                   id: '10012',
                   statusCategory: {
-                    self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/statuscategory/4',
+                    self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/statuscategory/4',
                     id: 4,
                     key: 'indeterminate',
                     colorName: 'yellow',
@@ -639,14 +639,14 @@ fetchMock.get(
                   },
                 },
                 priority: {
-                  self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/priority/3',
+                  self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/priority/3',
                   iconUrl:
                     'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/images/icons/priorities/medium.svg',
                   name: 'Medium',
                   id: '3',
                 },
                 issuetype: {
-                  self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issuetype/11206',
+                  self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/issuetype/11206',
                   id: '11206',
                   description: 'The sub-task of the issue',
                   iconUrl:
@@ -659,18 +659,18 @@ fetchMock.get(
             {
               id: '52192',
               key: 'MKE-1418',
-              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issue/52192',
+              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/issue/52192',
               fields: {
                 summary: 'Figure out if this needs to be done',
                 status: {
-                  self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/status/10850',
+                  self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/status/10850',
                   description: '',
                   iconUrl:
                     'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/',
                   name: 'To Do',
                   id: '10850',
                   statusCategory: {
-                    self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/statuscategory/2',
+                    self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/statuscategory/2',
                     id: 2,
                     key: 'new',
                     colorName: 'blue-gray',
@@ -678,14 +678,14 @@ fetchMock.get(
                   },
                 },
                 priority: {
-                  self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/priority/3',
+                  self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/priority/3',
                   iconUrl:
                     'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/images/icons/priorities/medium.svg',
                   name: 'Medium',
                   id: '3',
                 },
                 issuetype: {
-                  self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issuetype/11206',
+                  self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/issuetype/11206',
                   id: '11206',
                   description: 'The sub-task of the issue',
                   iconUrl:
@@ -702,7 +702,7 @@ fetchMock.get(
           customfield_11011: null,
           customfield_11132: null,
           reporter: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/user?accountId=557058%3A080f5211-c904-490c-8e55-93310f0f6e5b',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/user?accountId=557058%3A080f5211-c904-490c-8e55-93310f0f6e5b',
             name: 'julius.caesar',
             key: 'julius.caesar',
             accountId: '557058:080f5211-c904-490c-8e55-93310f0f6e5b',
@@ -749,12 +749,12 @@ fetchMock.get(
           customfield_10958: null,
           customfield_10959: null,
           votes: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issue/MKE-1389/votes',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/issue/MKE-1389/votes',
             votes: 0,
             hasVoted: false,
           },
           issuetype: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issuetype/11204',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/issuetype/11204',
             id: '11204',
             description: 'A user story. Created by Jira Software - do not edit or delete.',
             iconUrl:
@@ -765,7 +765,7 @@ fetchMock.get(
           },
           customfield_11120: null,
           project: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/project/10555',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/project/10555',
             id: '10555',
             key: 'MKE',
             name: '[PRD] Team MKEensibility',
@@ -782,7 +782,7 @@ fetchMock.get(
                 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/secure/projectavatar?size=medium&s=medium&pid=10555&avatarId=10981',
             },
             projectCategory: {
-              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/projectCategory/10002',
+              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/projectCategory/10002',
               id: '10002',
               description: '',
               name: 'Product Development',
@@ -811,7 +811,7 @@ fetchMock.get(
           customfield_10948: null,
           customfield_10949: null,
           watches: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issue/MKE-1389/watchers',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/issue/MKE-1389/watchers',
             watchCount: 1,
             isWatching: false,
           },
@@ -857,17 +857,17 @@ fetchMock.get(
           customfield_10922: null,
           customfield_10923: null,
           customfield_10924: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/customFieldOption/10622',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/customFieldOption/10622',
             value: 'TODO',
             id: '10622',
           },
           customfield_10925: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/customFieldOption/10625',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/customFieldOption/10625',
             value: 'TODO',
             id: '10625',
           },
           customfield_10926: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/customFieldOption/10627',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/customFieldOption/10627',
             value: 'TODO',
             id: '10627',
           },
@@ -895,7 +895,7 @@ fetchMock.get(
           customfield_10915: 13.0,
           customfield_10916: null,
           customfield_10918: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/customFieldOption/10615',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/customFieldOption/10615',
             value: 'Yes',
             id: '10615',
           },
@@ -908,7 +908,7 @@ fetchMock.get(
           customfield_10900: null,
           customfield_10908: null,
           priority: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/priority/3',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/priority/3',
             iconUrl:
               'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/images/icons/priorities/medium.svg',
             name: 'Medium',
@@ -918,14 +918,14 @@ fetchMock.get(
           customfield_10103: null,
           versions: [],
           status: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/status/10012',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/status/10012',
             description: '',
             iconUrl:
               'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/images/icons/status_generic.gif',
             name: 'In progress',
             id: '10012',
             statusCategory: {
-              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/statuscategory/4',
+              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/statuscategory/4',
               id: 4,
               key: 'indeterminate',
               colorName: 'yellow',
@@ -935,7 +935,7 @@ fetchMock.get(
           customfield_11090: null,
           customfield_11091: null,
           creator: {
-            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/user?accountId=557058%3A080f5211-c904-490c-8e55-93310f0f6e5b',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/3/user?accountId=557058%3A080f5211-c904-490c-8e55-93310f0f6e5b',
             name: 'julius.caesar',
             key: 'julius.caesar',
             accountId: '557058:080f5211-c904-490c-8e55-93310f0f6e5b',
@@ -1045,6 +1045,6 @@ fetchMock.get(
 );
 
 fetchMock.put(
-  'https://api.atlassian.com/ex/jira/cloud-id/rest/api/2/issue/MKE-1389/properties/contentfulLink',
+  'https://api.atlassian.com/ex/jira/cloud-id/rest/api/3/issue/MKE-1389/properties/contentfulLink',
   200
 );
