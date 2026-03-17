@@ -54,7 +54,6 @@ const getMessageColor = (index: number, totalMessages: number): ColorTokens => {
 };
 
 interface LoadingModalProps {
-  isOpen: boolean;
   step?: 'reviewingContentTypes' | 'creatingEntries';
   title: string;
   entriesCount?: number;
@@ -62,7 +61,6 @@ interface LoadingModalProps {
 }
 
 export const LoadingModal: React.FC<LoadingModalProps> = ({
-  isOpen,
   step,
   title,
   entriesCount,
@@ -88,57 +86,48 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
 
   const visibleMessages = useSequentialMessages({
     messages,
-    isActive: isOpen && step === 'reviewingContentTypes',
+    isActive: step === 'reviewingContentTypes',
   });
 
   return (
-    <Modal
-      isShown={isOpen}
-      onClose={() => {}}
-      size="medium"
-      shouldCloseOnOverlayClick={false}
-      shouldCloseOnEscapePress={false}>
-      {() => (
-        <>
-          <Modal.Header title={title} />
-          <Modal.Content>
-            {step === 'reviewingContentTypes' ? (
-              <Flex justifyContent="center">
-                <Flex
-                  flexDirection="row"
-                  alignItems="stretch"
-                  gap="spacingS"
-                  padding="spacingM"
-                  className={styles.loadingContainer}>
-                  <div className={styles.verticalBar} />
-                  <Flex flex={1} flexDirection="column" gap="spacingS" alignItems="flex-start">
-                    {visibleMessages.map((message, index) => (
-                      <Paragraph
-                        key={message}
-                        fontColor={getMessageColor(index, visibleMessages.length)}
-                        marginBottom="none"
-                        className={styles.message}>
-                        {message}
-                      </Paragraph>
-                    ))}
-                  </Flex>
-                </Flex>
+    <>
+      <Modal.Header title={title} />
+      <Modal.Content>
+        {step === 'reviewingContentTypes' ? (
+          <Flex justifyContent="center">
+            <Flex
+              flexDirection="row"
+              alignItems="stretch"
+              gap="spacingS"
+              padding="spacingM"
+              className={styles.loadingContainer}>
+              <div className={styles.verticalBar} />
+              <Flex flex={1} flexDirection="column" gap="spacingS" alignItems="flex-start">
+                {visibleMessages.map((message, index) => (
+                  <Paragraph
+                    key={message}
+                    fontColor={getMessageColor(index, visibleMessages.length)}
+                    marginBottom="none"
+                    className={styles.message}>
+                    {message}
+                  </Paragraph>
+                ))}
               </Flex>
-            ) : (
-              <>
-                <Paragraph marginBottom="spacingM" color="gray700">
-                  {entriesCount
-                    ? `Creating ${entriesCount} ${entriesCount === 1 ? 'entry' : 'entries'}...`
-                    : 'Creating entries...'}
-                </Paragraph>
-                <Skeleton.Container>
-                  <Skeleton.BodyText numberOfLines={4} />
-                </Skeleton.Container>
-              </>
-            )}
-          </Modal.Content>
-        </>
-      )}
-    </Modal>
+            </Flex>
+          </Flex>
+        ) : (
+          <>
+            <Paragraph marginBottom="spacingM" color="gray700">
+              {entriesCount
+                ? `Creating ${entriesCount} ${entriesCount === 1 ? 'entry' : 'entries'}...`
+                : 'Creating entries...'}
+            </Paragraph>
+            <Skeleton.Container>
+              <Skeleton.BodyText numberOfLines={4} />
+            </Skeleton.Container>
+          </>
+        )}
+      </Modal.Content>
+    </>
   );
 };

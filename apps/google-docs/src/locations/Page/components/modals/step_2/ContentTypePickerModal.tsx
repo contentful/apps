@@ -17,13 +17,11 @@ import { truncateLabel } from '../../../../../utils/utils';
 
 interface ContentTypePickerModalProps {
   sdk: PageAppSDK;
-  isOpen: boolean;
   onClose: () => void;
   // TEMP workaround: Mastra workflow inputs have issues with string[] in some UIs.
   // We pass a single comma-separated string of IDs for now.
   onSelect: (contentTypeIdsCsv: string) => void;
   // onSelect: (contentTypes: ContentTypeProps[]) => void;
-  isSubmitting: boolean;
   selectedContentTypes: ContentTypeProps[];
   setSelectedContentTypes: (
     contentTypes: ContentTypeProps[] | ((prev: ContentTypeProps[]) => ContentTypeProps[])
@@ -32,10 +30,8 @@ interface ContentTypePickerModalProps {
 
 export const ContentTypePickerModal = ({
   sdk,
-  isOpen,
   onClose,
   onSelect,
-  isSubmitting,
   selectedContentTypes,
   setSelectedContentTypes,
 }: ContentTypePickerModalProps) => {
@@ -107,11 +103,9 @@ export const ContentTypePickerModal = ({
   }, [sdk]);
 
   useEffect(() => {
-    if (isOpen) {
-      setHasAttemptedSubmit(false);
-      setSelectedContentTypes([]);
-    }
-  }, [isOpen, setSelectedContentTypes]);
+    setHasAttemptedSubmit(false);
+    setSelectedContentTypes([]);
+  }, [setSelectedContentTypes]);
 
   const onSearchValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value.toLowerCase().trim();
@@ -142,7 +136,6 @@ export const ContentTypePickerModal = ({
   };
 
   const handleClose = () => {
-    if (isSubmitting && !isInvalidSelection) return;
     onClose();
   };
 
@@ -156,93 +149,86 @@ export const ContentTypePickerModal = ({
   };
 
   return (
-    <Modal title="Select content type(s)" isShown={isOpen} onClose={handleClose} size="large">
-      {() => (
-        <>
-          <Modal.Header title="Select content type(s)" onClose={handleClose} />
-          <Modal.Content>
-            <Paragraph marginBottom="spacingM" color="gray700">
-              Select the content type(s) you would like to use with this document.
-            </Paragraph>
-            <FormControl
-              isRequired
-              isInvalid={isInvalidSelectionError || showFetchError}
-              marginBottom="none">
-              <FormControl.Label>Content type</FormControl.Label>
-              <Multiselect
-                className={multiselect}
-                searchProps={{
-                  searchPlaceholder: 'Search content types',
-                  onSearchValueChange,
-                }}
-                currentSelection={selectedContentTypes.map((ct) => ct.name)}
-                placeholder={getPlaceholderText()}
-                popoverProps={{
-                  listMaxHeight: 300,
-                  listRef: multiselectListRef,
-                }}>
-                {filteredContentTypes.map((ct) => (
-                  <Multiselect.Option
-                    className={css({ padding: `0.25rem` })}
-                    key={ct.sys.id}
-                    value={ct.sys.id}
-                    itemId={ct.sys.id}
-                    isChecked={selectedContentTypes.some(
-                      (selected) => selected.sys.id === ct.sys.id
-                    )}
-                    isDisabled={isLoading || isSubmitting}
-                    onSelectItem={handleSelectContentType}>
-                    {ct.name}
-                  </Multiselect.Option>
-                ))}
-              </Multiselect>
-              {showFetchError && (
-                <FormControl.ValidationMessage>
-                  Unable to load content types.
-                </FormControl.ValidationMessage>
-              )}
-              {isInvalidSelectionError && (
-                <FormControl.ValidationMessage>
-                  You must select at least one content type.
-                </FormControl.ValidationMessage>
-              )}
-            </FormControl>
+    <>
+      <Modal.Header title="Select content type(s)" onClose={handleClose} />
+      <Modal.Content>
+        <Paragraph marginBottom="spacingM" color="gray700">
+          Select the content type(s) you would like to use with this document.
+        </Paragraph>
+        <FormControl
+          isRequired
+          isInvalid={isInvalidSelectionError || showFetchError}
+          marginBottom="none">
+          <FormControl.Label>Content type</FormControl.Label>
+          <Multiselect
+            className={multiselect}
+            searchProps={{
+              searchPlaceholder: 'Search content types',
+              onSearchValueChange,
+            }}
+            currentSelection={selectedContentTypes.map((ct) => ct.name)}
+            placeholder={getPlaceholderText()}
+            popoverProps={{
+              listMaxHeight: 300,
+              listRef: multiselectListRef,
+            }}>
+            {filteredContentTypes.map((ct) => (
+              <Multiselect.Option
+                className={css({ padding: `0.25rem` })}
+                key={ct.sys.id}
+                value={ct.sys.id}
+                itemId={ct.sys.id}
+                isChecked={selectedContentTypes.some(
+                  (selected) => selected.sys.id === ct.sys.id
+                )}
+                isDisabled={isLoading}
+                onSelectItem={handleSelectContentType}>
+                {ct.name}
+              </Multiselect.Option>
+            ))}
+          </Multiselect>
+          {showFetchError && (
+            <FormControl.ValidationMessage>
+              Unable to load content types.
+            </FormControl.ValidationMessage>
+          )}
+          {isInvalidSelectionError && (
+            <FormControl.ValidationMessage>
+              You must select at least one content type.
+            </FormControl.ValidationMessage>
+          )}
+        </FormControl>
 
-            {selectedContentTypes.length > 0 && (
-              <Flex flexWrap="wrap" gap="spacingXs" marginTop="spacingS" className={pillsContainer}>
-                {selectedContentTypes.map((ct) => (
-                  <Pill
-                    key={ct.sys.id}
-                    label={truncateLabel(ct.name)}
-                    onClose={
-                      isSubmitting
-                        ? undefined
-                        : () =>
-                            setSelectedContentTypes(
-                              selectedContentTypes.filter(
-                                (selected) => selected.sys.id !== ct.sys.id
-                              )
-                            )
-                    }
-                  />
-                ))}
-              </Flex>
-            )}
-          </Modal.Content>
-          <Modal.Controls>
-            <Button onClick={handleClose} variant="secondary" isDisabled={isSubmitting}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleContinue}
-              variant="primary"
-              isDisabled={isLoading || isSubmitting}
-              isLoading={isSubmitting}>
-              Next
-            </Button>
-          </Modal.Controls>
-        </>
-      )}
-    </Modal>
+        {selectedContentTypes.length > 0 && (
+          <Flex flexWrap="wrap" gap="spacingXs" marginTop="spacingS" className={pillsContainer}>
+            {selectedContentTypes.map((ct) => (
+              <Pill
+                key={ct.sys.id}
+                label={truncateLabel(ct.name)}
+                onClose={
+                  () =>
+                    setSelectedContentTypes(
+                      selectedContentTypes.filter(
+                        (selected) => selected.sys.id !== ct.sys.id
+                      )
+                    )
+                }
+              />
+            ))}
+          </Flex>
+        )}
+      </Modal.Content>
+      <Modal.Controls>
+        <Button onClick={handleClose} variant="secondary">
+          Cancel
+        </Button>
+        <Button
+          onClick={handleContinue}
+          variant="primary"
+          isDisabled={isLoading}>
+          Next
+        </Button>
+      </Modal.Controls>
+    </>
   );
 };

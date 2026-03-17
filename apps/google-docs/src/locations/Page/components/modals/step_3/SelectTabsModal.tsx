@@ -101,90 +101,86 @@ export const SelectTabsModal = ({
   };
 
   return (
-    <Modal title="Document tabs" isShown={isOpen} onClose={onClose} size="large">
-      {() => (
-        <>
-          <Modal.Header title="Document tabs" onClose={onClose} />
-          <Modal.Content>
-            <Paragraph marginBottom="spacingM" color="gray700">
-              The selected document contains multiple document tabs. Would you like to select which
-              tabs should be used from your document? If no, all tabs will be imported.
-            </Paragraph>
+    <>
+      <Modal.Header title="Document tabs" onClose={onClose} />
+      <Modal.Content>
+        <Paragraph marginBottom="spacingM" color="gray700">
+          The selected document contains multiple document tabs. Would you like to select which tabs
+          should be used from your document? If no, all tabs will be imported.
+        </Paragraph>
 
-            <Flex flexDirection="column" gap="spacingS" marginBottom="spacingM">
-              <Radio.Group
-                name="tab-selection-mode"
-                value={useAllTabs === null ? '' : String(useAllTabs)}
-                onChange={(e) => setUseAllTabs(e.target.value === 'true')}>
-                <Radio value="false">Yes, select specific tabs</Radio>
-                {useAllTabs === false && (
-                  <Flex flexDirection="column" gap="spacingS" marginLeft="spacingL" fullWidth>
-                    <FormControl isRequired isInvalid={isInvalidSelectionError} marginBottom="none">
-                      <FormControl.Label>Document tabs</FormControl.Label>
-                      <Checkbox.Group name="document-tabs" value={selectedTabs.map((t) => t.tabId)}>
-                        <Multiselect
-                          className={multiselect}
-                          currentSelection={selectedTabs.map((tab) => tab.tabTitle)}
-                          placeholder={'Select one or more'}
-                          popoverProps={{
-                            listMaxHeight: 300,
-                            listRef: multiselectListRef,
-                          }}>
-                          {availableTabs.map((tab) => (
-                            <Multiselect.Option
-                              className={multiselectOption}
-                              key={tab.tabId}
-                              value={tab.tabId}
-                              itemId={tab.tabId}
-                              isChecked={selectedTabs.some(
-                                (selected) => selected.tabId === tab.tabId
-                              )}
-                              onSelectItem={handleSelectTab}>
-                              {tab.tabTitle}
-                            </Multiselect.Option>
-                          ))}
-                        </Multiselect>
-                      </Checkbox.Group>
-                      {isInvalidSelectionError && (
-                        <FormControl.ValidationMessage>
-                          You must select at least one tab.
-                        </FormControl.ValidationMessage>
-                      )}
-                    </FormControl>
-                    {selectedTabs.length > 0 && (
-                      <Flex flexWrap="wrap" gap="spacingXs" className={pillsContainer}>
-                        {selectedTabs.map((tab) => (
-                          <Pill
-                            key={tab.tabId}
-                            label={truncateLabel(tab.tabTitle)}
-                            onClose={() =>
-                              setSelectedTabs(selectedTabs.filter((t) => t.tabId !== tab.tabId))
-                            }
-                          />
-                        ))}
-                      </Flex>
-                    )}
+        <Flex flexDirection="column" gap="spacingS" marginBottom="spacingM">
+          <Radio.Group
+            name="tab-selection-mode"
+            value={useAllTabs === null ? '' : String(useAllTabs)}
+            onChange={(e) => setUseAllTabs(e.target.value === 'true')}>
+            <Radio value="false">Yes, select specific tabs</Radio>
+            {useAllTabs === false && (
+              <Flex flexDirection="column" gap="spacingS" marginLeft="spacingL" fullWidth>
+                <FormControl isRequired isInvalid={isInvalidSelectionError} marginBottom="none">
+                  <FormControl.Label>Document tabs</FormControl.Label>
+                  <Checkbox.Group name="document-tabs" value={selectedTabs.map((t) => t.tabId)}>
+                    <Multiselect
+                      className={multiselect}
+                      currentSelection={selectedTabs.map((tab) => tab.tabTitle)}
+                      placeholder={'Select one or more'}
+                      popoverProps={{
+                        listMaxHeight: 300,
+                        listRef: multiselectListRef,
+                      }}>
+                      {availableTabs.map((tab) => (
+                        <Multiselect.Option
+                          className={multiselectOption}
+                          key={tab.tabId}
+                          value={tab.tabId}
+                          itemId={tab.tabId}
+                          isChecked={selectedTabs.some(
+                            (selected) => selected.tabId === tab.tabId
+                          )}
+                          onSelectItem={handleSelectTab}>
+                          {tab.tabTitle}
+                        </Multiselect.Option>
+                      ))}
+                    </Multiselect>
+                  </Checkbox.Group>
+                  {isInvalidSelectionError && (
+                    <FormControl.ValidationMessage>
+                      You must select at least one tab.
+                    </FormControl.ValidationMessage>
+                  )}
+                </FormControl>
+                {selectedTabs.length > 0 && (
+                  <Flex flexWrap="wrap" gap="spacingXs" className={pillsContainer}>
+                    {selectedTabs.map((tab) => (
+                      <Pill
+                        key={tab.tabId}
+                        label={truncateLabel(tab.tabTitle)}
+                        onClose={() =>
+                          setSelectedTabs(selectedTabs.filter((t) => t.tabId !== tab.tabId))
+                        }
+                      />
+                    ))}
                   </Flex>
                 )}
-                <Radio value="true">No, import all tabs</Radio>
-              </Radio.Group>
-              {showNoRadioSelectedError && (
-                <FormControl.ValidationMessage>
-                  Please select an option.
-                </FormControl.ValidationMessage>
-              )}
-            </Flex>
-          </Modal.Content>
-          <Modal.Controls className={modalControls}>
-            <Button onClick={onClose} variant="secondary">
-              Cancel
-            </Button>
-            <Button onClick={handleContinue} variant="primary">
-              Next
-            </Button>
-          </Modal.Controls>
-        </>
-      )}
-    </Modal>
+              </Flex>
+            )}
+            <Radio value="true">No, import all tabs</Radio>
+          </Radio.Group>
+          {showNoRadioSelectedError && (
+            <FormControl.ValidationMessage>
+              Please select an option.
+            </FormControl.ValidationMessage>
+          )}
+        </Flex>
+      </Modal.Content>
+      <Modal.Controls className={modalControls}>
+        <Button onClick={onClose} variant="secondary">
+          Cancel
+        </Button>
+        <Button onClick={handleContinue} variant="primary">
+          Next
+        </Button>
+      </Modal.Controls>
+    </>
   );
 };
