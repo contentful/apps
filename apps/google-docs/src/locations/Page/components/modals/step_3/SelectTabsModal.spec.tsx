@@ -3,18 +3,23 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { SelectTabsModal } from './SelectTabsModal';
 import { createMockSDK } from '../../../../../../test/mocks';
 import type { PageAppSDK } from '@contentful/app-sdk';
+import { Modal } from '@contentful/f36-components';
 
 const mockSdk = createMockSDK() as PageAppSDK;
 
 const defaultProps = {
   sdk: mockSdk,
-  isOpen: true,
-  onBack: vi.fn(),
+  onCancel: vi.fn(),
   onContinue: vi.fn(),
   onClose: vi.fn(),
 };
 
-const renderModal = (props = {}) => render(<SelectTabsModal {...defaultProps} {...props} />);
+const renderModal = (props = {}) =>
+  render(
+    <Modal isShown={true} onClose={() => {}} size="large">
+      {() => <SelectTabsModal {...defaultProps} {...props} />}
+    </Modal>
+  );
 
 const selectTab = async (tabId: string) => {
   await waitFor(() => {
@@ -47,20 +52,12 @@ describe('SelectTabsModal', () => {
       });
     });
 
-    it('renders the Back and Next action buttons', async () => {
+    it('renders the Cancel and Next action buttons', async () => {
       renderModal();
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: 'Back' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Cancel' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Next' })).toBeTruthy();
-      });
-    });
-
-    it('does not render modal content when isOpen is false', async () => {
-      renderModal({ isOpen: false });
-
-      await waitFor(() => {
-        expect(screen.queryByText(/Would you like to select which tabs should be used/)).toBeNull();
       });
     });
 
@@ -147,13 +144,13 @@ describe('SelectTabsModal', () => {
   });
 
   describe('Navigation callbacks', () => {
-    it('calls onBack when the Back button is clicked', async () => {
+    it('calls onCancel when the Cancel button is clicked', async () => {
       renderModal();
 
-      fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
       await waitFor(() => {
-        expect(defaultProps.onBack).toHaveBeenCalledTimes(1);
+        expect(defaultProps.onCancel).toHaveBeenCalledTimes(1);
       });
     });
 
