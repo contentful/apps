@@ -29,7 +29,6 @@ export const ConfirmPromptModal = ({
   sdk,
   isOpen,
   onClose,
-  onConfirm,
   documentId,
   selectedContentTypes,
   oauthToken,
@@ -56,13 +55,6 @@ export const ConfirmPromptModal = ({
 
   const handleAnalyze = () => {
     analyze(contentTypeIds);
-  };
-
-  const handleConfirm = () => {
-    if (analysisResult) {
-      console.log('[ConfirmPromptModal] Analysis result before proceeding:', analysisResult);
-    }
-    onConfirm();
   };
 
   return (
@@ -202,7 +194,7 @@ export const ConfirmPromptModal = ({
                     textAlign: 'center',
                   })}>
                   <Text fontColor="gray600">
-                    Click "Start workflow" to preview the document analysis
+                    Click &quot;Start workflow&quot; to preview the document analysis
                   </Text>
                 </Box>
               )}

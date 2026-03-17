@@ -8,13 +8,17 @@
 if (typeof window !== 'undefined') {
   try {
     // Import jest-dom and matchers only in browser/DOM environment
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     require('@testing-library/jest-dom');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { configure } = require('@testing-library/react');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { expect } = require('vitest');
 
     // Try to import matchers - handle both default and named exports
     let matchers;
     try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const matchersModule = require('@testing-library/jest-dom/matchers');
       // Handle both default export and named export
       matchers = matchersModule.default || matchersModule;
@@ -35,7 +39,7 @@ if (typeof window !== 'undefined') {
     configure({
       testIdAttribute: 'data-test-id',
     });
-  } catch (error) {
+  } catch {
     // Silently fail if configuration fails (e.g., in Node.js environment)
     // This is expected for function tests that run in Node.js
   }

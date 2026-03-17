@@ -14,7 +14,7 @@ export const ErrorModal: React.FC<ErrorModalProps> = ({
   message,
   onClose,
   onTryAgain,
-}) => {
+}: ErrorModalProps) => {
   return (
     <Modal
       isShown={isOpen}

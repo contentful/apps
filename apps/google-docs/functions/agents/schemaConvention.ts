@@ -60,7 +60,6 @@ const ALTERNATIVE_REF_REGEXES = [
  */
 export function parseSchemaMarkers(documentText: string): ParsedSchema {
   const markers: SchemaMarker[] = [];
-  let position = 0;
 
   // Parse primary format: **!CT:...!** and **!REF:...!**
   let match;
@@ -194,9 +193,7 @@ export function removeSchemaMarkers(text: string): string {
 /**
  * Extracts text content from Google Docs JSON and parses schema markers
  */
-export function extractTextWithSchema(documentJson: unknown): {
-  schema: ParsedSchema;
-} {
+export function extractTextWithSchema(documentJson: unknown): ParsedSchema {
   // Extract plain text from Google Docs JSON
   const text = extractPlainText(documentJson);
 
@@ -293,7 +290,7 @@ export function generateSchemaGuidance(
     guidance += `Found ${schema.entryBoundaries.size} explicit entry marker(s):\n`;
 
     let index = 0;
-    for (const [_, boundary] of schema.entryBoundaries) {
+    for (const [, boundary] of schema.entryBoundaries) {
       index++;
       guidance += `  Entry ${index}: Content Type "${boundary.contentTypeId}" starts at position ${boundary.start}`;
       if (boundary.end) {

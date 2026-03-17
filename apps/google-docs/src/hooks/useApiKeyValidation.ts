@@ -74,7 +74,7 @@ export const useApiKeyValidation = (obfuscatedDisplay: string): UseApiKeyValidat
         });
         return false;
       }
-    } catch (error) {
+    } catch {
       updateValidationState({
         isValid: true,
         error: 'Unable to verify API key with OpenAI. Format validation passed.',

@@ -167,7 +167,6 @@ export class MarkdownParser {
           // Split by markers - use simple string split instead of regex to avoid escaping issues
           const parts: string[] = [];
           let remaining = value;
-          let lastIndex = 0;
 
           while (remaining.length > 0) {
             const startIndex = remaining.indexOf(UNDERLINE_START);

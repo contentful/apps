@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from 'react';
-import { Box, Flex, Heading, Paragraph, Note, Text } from '@contentful/f36-components';
+import { Box, Flex, Heading, Paragraph } from '@contentful/f36-components';
 import { css } from '@emotion/css';
 import tokens from '@contentful/f36-tokens';
 import { useSDK } from '@contentful/react-apps-toolkit';

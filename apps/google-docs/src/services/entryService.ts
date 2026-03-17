@@ -468,7 +468,7 @@ export async function createEntriesFromPreview(
   }
 
   // PASS 2: Update entries that have reference fields
-  for (const [entryId, { created, original }] of createdEntriesMap) {
+  for (const [entryId, { original }] of createdEntriesMap) {
     // Skip entries without references
     if (!entryHasReferences(original)) {
       continue;

@@ -34,6 +34,7 @@ export interface DocumentParserConfig {
 function stripUnusedDocumentMetadata(doc: any): any {
   if (!doc || typeof doc !== 'object') return doc;
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-vars
   const { documentStyle, revisionId, suggestedChanges, ...rest } = doc;
 
   return rest;
@@ -66,7 +67,7 @@ export async function createPreviewWithAgent(
   // SECURITY VALIDATION: Validate document content before sending to AI
   const documentSecurityCheck = validateGoogleDocJson(documentJson);
   // Extract schema markers from document
-  const { schema } = extractTextWithSchema(documentJson);
+  const schema = extractTextWithSchema(documentJson);
 
   if (!documentSecurityCheck.isValid) {
     const errorMessage = `Security validation failed for document: ${documentSecurityCheck.errors.join(
@@ -835,9 +836,9 @@ EXAMPLE: If the document has the word "bold" in it, do not invent bold text in y
 1. **SCAN FOR MULTIPLE ENTRIES FIRST** - Before extracting, analyze the document structure:
    - **STEP 1A**: Review ALL ${contentTypes.length} provided content type(s): ${contentTypeList}
    - **STEP 1B**: For EACH content type, explicitly check if the document contains content that matches that content type's structure
-   - **STEP 1C**: Write down which content types match: ${contentTypes
-     .map((ct, i) => `"${ct.name}"`)
-     .join(', ')} - Matching: _____
+  - **STEP 1C**: Write down which content types match: ${contentTypes
+    .map((ct) => `"${ct.name}"`)
+    .join(', ')} - Matching: _____
    - **STEP 1D**: If ${
      contentTypes.length > 1 ? '2 or more' : '1'
    } content type(s) match, you MUST create entries for ALL matching types

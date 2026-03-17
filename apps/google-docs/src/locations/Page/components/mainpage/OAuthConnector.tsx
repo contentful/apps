@@ -148,7 +148,7 @@ export const OAuthConnector = ({
       const urlWithParams = `${authorizeUrl}${separator}access_type=offline&prompt=consent`;
 
       popupWindowRef.current = window.open(urlWithParams, '_blank', 'height=700,width=450');
-    } catch (error) {
+    } catch {
       cleanup();
       setLoadingState(OAuthLoadingState.IDLE);
       sdk.notifier.error('Unable to connect to Google Drive. Please try again.');
@@ -164,7 +164,7 @@ export const OAuthConnector = ({
       await checkGoogleOAuthStatus(false);
 
       setIsHoveringConnected(false);
-    } catch (error) {
+    } catch {
       sdk.notifier.error('Unable to disconnect from Google Drive. Please try again.');
     } finally {
       setLoadingState(OAuthLoadingState.IDLE);

@@ -119,9 +119,9 @@ const Page = () => {
             <Note variant="primary" title="Optimization tip" className={styles.note}>
               <Flex flexDirection="column" alignItems="flex-start" gap="spacingS" fullWidth>
                 <Paragraph>
-                  Use context markers in your document to exclude content that shouldn't be added to
-                  an entry. The AI looks for these markers during extraction and ignores any content
-                  between them.
+                  Use context markers in your document to exclude content that shouldn&apos;t be
+                  added to an entry. The AI looks for these markers during extraction and ignores
+                  any content between them.
                 </Paragraph>
                 <Box>
                   <Text

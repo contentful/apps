@@ -107,7 +107,6 @@ const pollAgentRun = async (
 
     const payload = getAgentPayload(runData);
     if (payload) {
-      // eslint-disable-next-line no-console -- developer workflow logging
       console.log('[Workflow Polling] Success - Assistant text content:\n\n' + payload);
       return payload;
     }
@@ -180,14 +179,12 @@ export const useWorkflowAgent = ({
               body: JSON.stringify(payload),
             }
           ).catch((err) => {
-            // eslint-disable-next-line no-console -- developer workflow logging
             console.error('Failed to start workflow agent run:', err);
           });
         } else {
           sdk.cma.agent
             .generate({ agentId: WORKFLOW_AGENT_ID, spaceId, environmentId }, payload)
             .catch((err: unknown) => {
-              // eslint-disable-next-line no-console -- developer workflow logging
               console.error('Failed to start workflow agent run:', err);
             });
         }
@@ -195,7 +192,6 @@ export const useWorkflowAgent = ({
         const result = await pollAgentRun(sdk, spaceId, environmentId, threadId);
         setAnalysisResult(result);
       } catch (err) {
-        // eslint-disable-next-line no-console -- developer workflow logging
         console.error('Workflow failed:', err);
         setError(err instanceof Error ? err.message : 'Workflow failed');
       } finally {

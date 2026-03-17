@@ -52,11 +52,14 @@ export function useGoogleDocsPicker(
       // Create the document view - only show Google Docs
       const docsView = new google.picker.DocsView(google.picker.ViewId.DOCS);
       docsView.setMimeTypes('application/vnd.google-apps.document');
+      const origin = sdk.hostnames.webapp
+        ? `https://${sdk.hostnames.webapp}`
+        : 'https://app.contentful.com';
       const pickerBuilder = new google.picker.PickerBuilder()
         .setOAuthToken(accessToken)
         .setDeveloperKey(GOOGLE_PICKER_API_KEY)
         .addView(docsView)
-        .setOrigin(`https://${sdk.hostnames.webapp}` || 'https://app.contentful.com');
+        .setOrigin(origin);
 
       const picker = pickerBuilder.setCallback((data: any) => {
         if (data.action === google.picker.Action.PICKED) {

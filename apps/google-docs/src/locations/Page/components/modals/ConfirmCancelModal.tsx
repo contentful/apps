@@ -13,7 +13,7 @@ export const ConfirmCancelModal = ({ isOpen, onConfirm, onCancel }: ConfirmCance
         <>
           <Modal.Header title="You're about to lose your progress" onClose={onCancel} />
           <Modal.Content>
-            <Paragraph>No entries will be created and you'll need to start over.</Paragraph>
+            <Paragraph>No entries will be created and you&apos;ll need to start over.</Paragraph>
           </Modal.Content>
           <Modal.Controls>
             <Button onClick={onCancel} variant="secondary">
