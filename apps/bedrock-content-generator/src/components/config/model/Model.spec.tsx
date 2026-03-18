@@ -13,17 +13,14 @@ describe('Display Model', () => {
   it('renders', async () => {
     AIMock.mockImplementation(() => {
       return {
-        getModels: vi.fn().mockResolvedValue([
-          {
-            modelId: 'anthropic.claude-v2:1',
-          },
-          {
-            modelId: 'anthropic.claude-instant-v1',
-          },
-          {
-            modelId: 'meta.llama2-70b-chat-v1',
-          },
-        ]),
+        getModels: vi
+          .fn()
+          .mockResolvedValue([
+            { modelId: 'anthropic.claude-sonnet-4-6' },
+            { modelId: 'anthropic.claude-v2:1' },
+            { modelId: 'anthropic.claude-instant-v1' },
+            { modelId: 'meta.llama2-70b-chat-v1' },
+          ]),
         getModelAvailability: vi.fn().mockResolvedValue('AVAILABLE'),
       };
     });
@@ -42,8 +39,9 @@ describe('Display Model', () => {
       />
     );
     await waitFor(() => {
-      expect(getByText('Anthropic Claude v2.1')).toBeTruthy();
+      expect(getByText('Anthropic Claude Sonnet 4.6')).toBeTruthy();
     });
+    expect(getByText('Anthropic Claude v2.1')).toBeTruthy();
     expect(getByText('Anthropic Claude Instant v1.2')).toBeTruthy();
     expect(getByText('Meta Llama 2 70B')).toBeTruthy();
     unmount();

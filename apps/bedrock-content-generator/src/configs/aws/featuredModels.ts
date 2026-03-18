@@ -130,12 +130,21 @@ class MistralModel implements BedrockModel {
   }
 }
 
+/** Default/recommended model for new installs (must be first in featuredModels). */
+export const defaultModelId = 'anthropic.claude-sonnet-4-6';
+export const defaultModelDisplayName = 'Anthropic Claude Sonnet 4.6';
+
 export const featuredModels: BedrockModel[] = [
+  // Modern Claude models (recommended)
+  new ClaudeModel(defaultModelId, defaultModelDisplayName),
+  new ClaudeModel('anthropic.claude-sonnet-4-5-20250929-v1:0', 'Anthropic Claude Sonnet 4.5'),
+  new ClaudeModel('anthropic.claude-sonnet-4-20250514-v1:0', 'Anthropic Claude Sonnet 4'),
+  new ClaudeModel('anthropic.claude-3-5-haiku-20241022-v1:0', 'Anthropic Claude 3.5 Haiku'),
+  new ClaudeModel('anthropic.claude-3-haiku-20240307-v1:0', 'Anthropic Claude 3 Haiku'),
+  // Existing models (kept for backward compatibility)
   new ClaudeModel('anthropic.claude-3-sonnet-20240229-v1:0', 'Anthropic Claude v3 Sonnet'),
   new ClaudeModel('anthropic.claude-v2:1', 'Anthropic Claude v2.1'),
   new ClaudeModel('anthropic.claude-instant-v1', 'Anthropic Claude Instant v1.2'),
   new LlamaModel('meta.llama2-70b-chat-v1', 'Meta Llama 2 70B'),
   new MistralModel('mistral.mixtral-8x7b-instruct-v0:1', 'Mistral Mixtral 8x7B'),
 ];
-
-export const defaultModelId = featuredModels[0].id;
