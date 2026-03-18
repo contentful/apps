@@ -13,6 +13,7 @@ import { ContentTypeProps } from 'contentful-management';
 import { css } from '@emotion/css';
 import { useMultiselectScrollReflow } from '../../../../../hooks/useMultiselectReflow';
 import { multiselect, pillsContainer } from './ContentTypePickerModal.styles';
+import { truncateLabel } from '../../../../../utils/utils';
 
 interface ContentTypePickerModalProps {
   sdk: PageAppSDK;
@@ -212,7 +213,7 @@ export const ContentTypePickerModal = ({
                 {selectedContentTypes.map((ct) => (
                   <Pill
                     key={ct.sys.id}
-                    label={ct.name}
+                    label={truncateLabel(ct.name)}
                     onClose={
                       isSubmitting
                         ? undefined
