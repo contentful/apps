@@ -20,7 +20,7 @@ interface ContentTypePickerModalProps {
   onClose: () => void;
   // TEMP workaround: Mastra workflow inputs have issues with string[] in some UIs.
   // We pass a single comma-separated string of IDs for now.
-  onSelect: (contentTypeIdsCsv: string) => void;
+  onContinue: (contentTypeIdsCsv: string) => void;
   // onSelect: (contentTypes: ContentTypeProps[]) => void;
   selectedContentTypes: ContentTypeProps[];
   setSelectedContentTypes: (
@@ -31,7 +31,7 @@ interface ContentTypePickerModalProps {
 export const ContentTypePickerModal = ({
   sdk,
   onClose,
-  onSelect,
+  onContinue,
   selectedContentTypes,
   setSelectedContentTypes,
 }: ContentTypePickerModalProps) => {
@@ -144,7 +144,7 @@ export const ContentTypePickerModal = ({
       setHasAttemptedSubmit(true);
       return;
     }
-    onSelect(selectedContentTypeIdsCsv);
+    onContinue(selectedContentTypeIdsCsv);
     // onSelect(selectedContentTypes);
   };
 

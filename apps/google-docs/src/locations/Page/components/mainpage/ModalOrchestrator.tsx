@@ -106,7 +106,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setStepToRestoreAfterCancel(null);
     };
 
-    const handleContentTypeSelected = (contentTypeIdsCsv: string) => {
+    const handleContentTypeContinue = (contentTypeIdsCsv: string) => {
       // TEMP workaround: we pass content type IDs as a comma-separated string to Mastra workflows.
       // The modal already updates `selectedContentTypes` via `setSelectedContentTypes`, so we don't need to set it here.
       void contentTypeIdsCsv;
@@ -140,7 +140,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       handleStepCancel(step);
     };
 
-    const handleIncludeImagesConfirm = (includeImages: boolean) => {
+    const handleIncludeImagesContinue = (includeImages: boolean) => {
       // TODO: Wire `includeImages` into Agents resume endpoint payload once
       // suspend/resume APIs are available in the frontend.
       setIncludeImages(includeImages);
@@ -163,7 +163,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
             <ContentTypePickerModal
               sdk={sdk}
               onClose={closeStep(FlowStep.CONTENT_TYPE_PICKER)}
-              onSelect={handleContentTypeSelected}
+              onContinue={handleContentTypeContinue}
               selectedContentTypes={selectedContentTypes}
               setSelectedContentTypes={setSelectedContentTypes}
             />
@@ -184,7 +184,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
             <IncludeImagesModal
               includeImages={includeImages}
               setIncludeImages={setIncludeImages}
-              onConfirm={handleIncludeImagesConfirm}
+              onContinue={handleIncludeImagesContinue}
               onClose={closeStep(FlowStep.INCLUDE_IMAGES)}
             />
           );

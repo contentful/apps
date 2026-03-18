@@ -1,17 +1,27 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { useState } from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { Modal } from '@contentful/f36-components';
 import { IncludeImagesModal } from './IncludeImagesModal';
 
 const defaultProps = {
-  onConfirm: vi.fn(),
+  onContinue: vi.fn(),
   onClose: vi.fn(),
 };
 
 const renderModal = (props = {}) =>
   render(
     <Modal isShown={true} onClose={() => {}} size="large">
-      {() => <IncludeImagesModal {...defaultProps} {...props} />}
+      {() => (
+        <IncludeImagesModal
+          includeImages={null}
+          setIncludeImages={function (includeImages: boolean): void {
+            throw new Error('Function not implemented.');
+          }}
+          {...defaultProps}
+          {...props}
+        />
+      )}
     </Modal>
   );
 
@@ -35,27 +45,27 @@ describe('IncludeImagesModal', () => {
     });
   });
 
-  it('calls onConfirm(true) when include images is selected', async () => {
+  it('calls onContinue(true) when include images is selected', async () => {
     renderModal();
 
     fireEvent.click(screen.getByLabelText('Yes, include images'));
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 
     await waitFor(() => {
-      expect(defaultProps.onConfirm).toHaveBeenCalledTimes(1);
-      expect(defaultProps.onConfirm).toHaveBeenCalledWith(true);
+      expect(defaultProps.onContinue).toHaveBeenCalledTimes(1);
+      expect(defaultProps.onContinue).toHaveBeenCalledWith(true);
     });
   });
 
-  it('calls onConfirm(false) when do not include images is selected', async () => {
+  it('calls onContinue(false) when do not include images is selected', async () => {
     renderModal();
 
     fireEvent.click(screen.getByLabelText('No, do not include images'));
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 
     await waitFor(() => {
-      expect(defaultProps.onConfirm).toHaveBeenCalledTimes(1);
-      expect(defaultProps.onConfirm).toHaveBeenCalledWith(false);
+      expect(defaultProps.onContinue).toHaveBeenCalledTimes(1);
+      expect(defaultProps.onContinue).toHaveBeenCalledWith(false);
     });
   });
 
@@ -75,7 +85,7 @@ describe('IncludeImagesModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 
     await waitFor(() => {
-      expect(defaultProps.onConfirm).not.toHaveBeenCalled();
+      expect(defaultProps.onContinue).not.toHaveBeenCalled();
       expect(screen.getByText('You must choose an option.')).toBeTruthy();
     });
   });

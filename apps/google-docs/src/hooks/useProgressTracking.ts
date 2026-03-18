@@ -17,6 +17,7 @@ export const useProgressTracking = () => {
     setSelectedContentTypes([]);
     setAvailableTabs([]);
     setSelectedTabs([]);
+    setIncludeImages(null);
   }, []);
 
   return {

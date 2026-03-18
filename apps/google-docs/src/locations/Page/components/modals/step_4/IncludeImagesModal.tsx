@@ -4,24 +4,24 @@ import { Button, FormControl, Modal, Paragraph, Radio } from '@contentful/f36-co
 interface IncludeImagesModalProps {
   includeImages: boolean | null;
   setIncludeImages: (includeImages: boolean) => void;
-  onConfirm: (includeImages: boolean) => void;
+  onContinue: (includeImages: boolean) => void;
   onClose: () => void;
 }
 
 export const IncludeImagesModal = ({
   includeImages,
   setIncludeImages,
-  onConfirm,
+  onContinue,
   onClose,
 }: IncludeImagesModalProps) => {
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
-  const handleConfirm = () => {
+  const handleContinue = () => {
     if (includeImages === null) {
       setHasAttemptedSubmit(true);
       return;
     }
-    onConfirm(includeImages);
+    onContinue(includeImages);
   };
 
   return (
@@ -53,7 +53,7 @@ export const IncludeImagesModal = ({
         <Button onClick={onClose} variant="secondary">
           Cancel
         </Button>
-        <Button onClick={handleConfirm} variant="primary">
+        <Button onClick={handleContinue} variant="primary">
           Next
         </Button>
       </Modal.Controls>
