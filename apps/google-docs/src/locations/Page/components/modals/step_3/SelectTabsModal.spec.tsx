@@ -16,7 +16,13 @@ const defaultProps = {
 
 const renderModal = (props = {}) => render(<SelectTabsModal {...defaultProps} {...props} />);
 
+const selectYesSelectSpecificTabs = () => {
+  fireEvent.click(screen.getByLabelText('Yes, select specific tabs'));
+};
+
 const selectTab = async (tabId: string) => {
+  selectYesSelectSpecificTabs();
+
   await waitFor(() => {
     fireEvent.click(screen.getByRole('button', { name: 'Toggle Multiselect' }));
   });
@@ -67,6 +73,8 @@ describe('SelectTabsModal', () => {
     it('loads and renders available tab options', async () => {
       renderModal();
 
+      selectYesSelectSpecificTabs();
+
       fireEvent.click(screen.getByRole('button', { name: 'Toggle Multiselect' }));
 
       await waitFor(() => {
@@ -79,10 +87,20 @@ describe('SelectTabsModal', () => {
       });
     });
 
-    it('shows a validation error when Next is clicked without selecting a tab', async () => {
+    it('shows a validation error when Next is clicked without selecting a radio', async () => {
       renderModal();
-      // "Yes, select specific tabs" is selected by default
 
+      fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+
+      await waitFor(() => {
+        expect(screen.getByText('Please select an option.')).toBeTruthy();
+      });
+    });
+
+    it('shows a validation error when Next is clicked with "Yes, select specific tabs" but no tabs selected', async () => {
+      renderModal();
+
+      selectYesSelectSpecificTabs();
       fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 
       await waitFor(() => {
@@ -92,10 +110,6 @@ describe('SelectTabsModal', () => {
 
     it('calls onContinue with all tabs when No import all is selected', async () => {
       renderModal();
-
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: 'Toggle Multiselect' })).toBeTruthy();
-      });
 
       fireEvent.click(screen.getByLabelText('No, import all tabs'));
       fireEvent.click(screen.getByRole('button', { name: 'Next' }));

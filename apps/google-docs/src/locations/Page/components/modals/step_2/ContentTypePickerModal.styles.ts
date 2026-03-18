@@ -2,11 +2,7 @@ import { css } from '@emotion/css';
 import tokens from '@contentful/f36-tokens';
 
 export const multiselect = css({
-  maxWidth: '68%',
-});
-
-export const multiselectOption = css({
-  padding: tokens.spacing2Xs,
+  maxWidth: '74%',
 });
 
 export const pillsContainer = css({
@@ -21,8 +17,4 @@ export const pillsContainer = css({
     background: tokens.gray400,
     borderRadius: tokens.borderRadiusSmall,
   },
-});
-
-export const modalControls = css({
-  paddingTop: '0',
 });

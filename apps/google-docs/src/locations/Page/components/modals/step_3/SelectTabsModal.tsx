@@ -12,12 +12,14 @@ import {
 } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import {
-  formWrapper,
   modalControls,
   multiselect,
   multiselectOption,
   pillsContainer,
 } from './SelectTabsModal.styles';
+import { useMultiselectScrollReflow } from '../../../../../hooks/useMultiselectReflow';
+import { DocumentTabProps } from '../../../../../utils/types';
+import { truncateLabel } from '../../../../../utils/utils';
 
 interface SelectTabsModalProps {
   sdk: PageAppSDK;
@@ -26,16 +28,6 @@ interface SelectTabsModalProps {
   onContinue: (selectedTabs: DocumentTabProps[]) => void;
   onClose: () => void;
 }
-
-export interface DocumentTabProps {
-  tabId: string;
-  tabTitle: string;
-}
-
-const TRUNCATE_LENGTH = 10;
-
-const truncateLabel = (label: string, maxLength: number = TRUNCATE_LENGTH): string =>
-  label.length > maxLength ? `${label.slice(0, maxLength)}...` : label;
 
 const MOCK_TABS: DocumentTabProps[] = [
   { tabId: 'tab-1', tabTitle: 'Introduction' },
@@ -65,16 +57,19 @@ export const SelectTabsModal = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasFetchError, setHasFetchError] = useState<boolean>(false);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false);
-  const [selectAllTabs, setSelectAllTabs] = useState<boolean>(false);
+  const [selectAllTabs, setSelectAllTabs] = useState<boolean | null>(null);
+  const multiselectListRef = useMultiselectScrollReflow(selectedTabs);
 
   const isInvalidSelection = useMemo(
-    () => !selectAllTabs && selectedTabs.length === 0,
+    () => selectAllTabs === null || (selectAllTabs === false && selectedTabs.length === 0),
     [selectAllTabs, selectedTabs]
   );
+  const hasNoRadioSelected = selectAllTabs === null;
   const isInvalidSelectionError = useMemo(
     () => isInvalidSelection && hasAttemptedSubmit,
     [isInvalidSelection, hasAttemptedSubmit]
   );
+  const showNoRadioSelectedError = hasNoRadioSelected && hasAttemptedSubmit;
 
   useEffect(() => {
     const fetchTabs = async () => {
@@ -99,11 +94,13 @@ export const SelectTabsModal = ({
     if (isOpen) {
       setSelectedTabs([]);
       setHasAttemptedSubmit(false);
-      setSelectAllTabs(false);
+      setSelectAllTabs(null);
     }
   }, [isOpen]);
 
   const handleSelectTab = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setHasAttemptedSubmit(false);
+
     const { checked, value } = e.target;
     if (checked) {
       const tab = availableTabs.find((t) => t.tabId === value);
@@ -140,16 +137,11 @@ export const SelectTabsModal = ({
             <Flex flexDirection="column" gap="spacingS" marginBottom="spacingM">
               <Radio.Group
                 name="tab-selection-mode"
-                value={String(selectAllTabs)}
+                value={selectAllTabs === null ? '' : String(selectAllTabs)}
                 onChange={(e) => setSelectAllTabs(e.target.value === 'true')}>
                 <Radio value="false">Yes, select specific tabs</Radio>
-                {!selectAllTabs && (
-                  <Flex
-                    flexDirection="column"
-                    gap="spacingS"
-                    marginLeft="spacingL"
-                    fullWidth
-                    className={formWrapper}>
+                {selectAllTabs === false && (
+                  <Flex flexDirection="column" gap="spacingS" marginLeft="spacingL" fullWidth>
                     <FormControl
                       isRequired
                       isInvalid={isInvalidSelectionError || hasFetchError}
@@ -162,6 +154,7 @@ export const SelectTabsModal = ({
                           placeholder={isLoading ? 'Loading tabs...' : 'Select one or more'}
                           popoverProps={{
                             listMaxHeight: 300,
+                            listRef: multiselectListRef,
                           }}>
                           {availableTabs.map((tab) => (
                             <Multiselect.Option
@@ -207,6 +200,11 @@ export const SelectTabsModal = ({
                 )}
                 <Radio value="true">No, import all tabs</Radio>
               </Radio.Group>
+              {showNoRadioSelectedError && (
+                <FormControl.ValidationMessage>
+                  Please select an option.
+                </FormControl.ValidationMessage>
+              )}
             </Flex>
           </Modal.Content>
           <Modal.Controls className={modalControls}>

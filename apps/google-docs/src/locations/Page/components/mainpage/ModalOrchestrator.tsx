@@ -5,7 +5,7 @@ import { useModalManagement, ModalType } from '../../../../hooks/useModalManagem
 import { useProgressTracking } from '../../../../hooks/useProgressTracking';
 import { ErrorModal } from '../modals/ErrorModal';
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
-import { ContentTypePickerModal } from '../modals/step_2/SelectContentTypeModal';
+import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
 import { LoadingModal } from '../modals/LoadingModal';
 import { ERROR_MESSAGES } from '../../../../utils/constants/messages';
 import { SelectTabsModal, type DocumentTabProps } from '../modals/step_3/SelectTabsModal';

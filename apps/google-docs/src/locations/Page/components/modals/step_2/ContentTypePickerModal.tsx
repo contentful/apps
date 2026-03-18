@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import {
   Button,
   Flex,
@@ -11,6 +11,8 @@ import {
 import { PageAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
 import { css } from '@emotion/css';
+import { useMultiselectScrollReflow } from '../../../../../hooks/useMultiselectReflow';
+import { multiselect, pillsContainer } from './ContentTypePickerModal.styles';
 
 interface ContentTypePickerModalProps {
   sdk: PageAppSDK;
@@ -41,7 +43,7 @@ export const ContentTypePickerModal = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false);
   const [hasFetchError, setHasFetchError] = useState<boolean>(false);
-  const multiselectListRef = useRef<HTMLUListElement>(null);
+  const multiselectListRef = useMultiselectScrollReflow(selectedContentTypes);
 
   const isInvalidSelection = useMemo(
     () => selectedContentTypes.length === 0,
@@ -110,23 +112,6 @@ export const ContentTypePickerModal = ({
     }
   }, [isOpen, setSelectedContentTypes]);
 
-  useEffect(() => {
-    // Recalculate the Multiselect dropdown position when selection changes
-    if (multiselectListRef.current) {
-      const element = multiselectListRef.current;
-      const currentScroll = element.scrollTop;
-      const maxScroll = element.scrollHeight - element.clientHeight;
-
-      if (currentScroll >= maxScroll) {
-        element.scrollTop = currentScroll - 1;
-      } else {
-        element.scrollTop = currentScroll + 1;
-      }
-
-      element.scrollTop = currentScroll;
-    }
-  }, [selectedContentTypes]);
-
   const onSearchValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value.toLowerCase().trim();
     setFilteredContentTypes(
@@ -174,13 +159,17 @@ export const ContentTypePickerModal = ({
       {() => (
         <>
           <Modal.Header title="Select content type(s)" onClose={handleClose} />
-          <Modal.Content className={css({ minHeight: '300px' })}>
+          <Modal.Content>
             <Paragraph marginBottom="spacingM" color="gray700">
               Select the content type(s) you would like to use with this document.
             </Paragraph>
-            <FormControl isRequired isInvalid={isInvalidSelectionError || showFetchError}>
+            <FormControl
+              isRequired
+              isInvalid={isInvalidSelectionError || showFetchError}
+              marginBottom="none">
               <FormControl.Label>Content type</FormControl.Label>
               <Multiselect
+                className={multiselect}
                 searchProps={{
                   searchPlaceholder: 'Search content types',
                   onSearchValueChange,
@@ -188,6 +177,7 @@ export const ContentTypePickerModal = ({
                 currentSelection={selectedContentTypes.map((ct) => ct.name)}
                 placeholder={getPlaceholderText()}
                 popoverProps={{
+                  listMaxHeight: 300,
                   listRef: multiselectListRef,
                 }}>
                 {filteredContentTypes.map((ct) => (
@@ -218,7 +208,7 @@ export const ContentTypePickerModal = ({
             </FormControl>
 
             {selectedContentTypes.length > 0 && (
-              <Flex flexWrap="wrap" gap="spacingXs" marginTop="spacingS">
+              <Flex flexWrap="wrap" gap="spacingXs" marginTop="spacingS" className={pillsContainer}>
                 {selectedContentTypes.map((ct) => (
                   <Pill
                     key={ct.sys.id}
