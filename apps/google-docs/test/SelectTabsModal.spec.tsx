@@ -1,20 +1,28 @@
+import { useState } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { SelectTabsModal } from './SelectTabsModal';
-import { createMockSDK } from '../../../../../../test/mocks';
-import type { PageAppSDK } from '@contentful/app-sdk';
+import { SelectTabsModal } from '../src/locations/Page/components/modals/step_3/SelectTabsModal';
+import type { DocumentTabProps } from '../src/utils/types';
 
-const mockSdk = createMockSDK() as PageAppSDK;
+const onContinue = vi.fn();
+const onClose = vi.fn();
 
-const defaultProps = {
-  sdk: mockSdk,
-  isOpen: true,
-  onBack: vi.fn(),
-  onContinue: vi.fn(),
-  onClose: vi.fn(),
+const ModalWithState = (props: Record<string, unknown> = {}) => {
+  const [availableTabs, setAvailableTabs] = useState<DocumentTabProps[]>([]);
+  const [selectedTabs, setSelectedTabs] = useState<DocumentTabProps[]>([]);
+  return (
+    <SelectTabsModal
+      isOpen={true}
+      onContinue={onContinue}
+      onClose={onClose}
+      availableTabs={availableTabs}
+      setAvailableTabs={setAvailableTabs}
+      selectedTabs={selectedTabs}
+      setSelectedTabs={setSelectedTabs}
+      {...props}
+    />
+  );
 };
-
-const renderModal = (props = {}) => render(<SelectTabsModal {...defaultProps} {...props} />);
 
 const selectYesSelectSpecificTabs = () => {
   fireEvent.click(screen.getByLabelText('Yes, select specific tabs'));
@@ -42,7 +50,7 @@ describe('SelectTabsModal', () => {
 
   describe('Rendering', () => {
     it('renders the modal title and description when open', async () => {
-      renderModal();
+      render(<ModalWithState />);
 
       await waitFor(() => {
         expect(screen.getByRole('heading', { name: 'Document tabs' })).toBeTruthy();
@@ -53,17 +61,17 @@ describe('SelectTabsModal', () => {
       });
     });
 
-    it('renders the Back and Next action buttons', async () => {
-      renderModal();
+    it('renders the Cancel and Next action buttons', async () => {
+      render(<ModalWithState />);
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: 'Back' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Cancel' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Next' })).toBeTruthy();
       });
     });
 
     it('does not render modal content when isOpen is false', async () => {
-      renderModal({ isOpen: false });
+      render(<ModalWithState isOpen={false} />);
 
       await waitFor(() => {
         expect(screen.queryByText(/Would you like to select which tabs should be used/)).toBeNull();
@@ -71,7 +79,7 @@ describe('SelectTabsModal', () => {
     });
 
     it('loads and renders available tab options', async () => {
-      renderModal();
+      render(<ModalWithState />);
 
       selectYesSelectSpecificTabs();
 
@@ -88,7 +96,7 @@ describe('SelectTabsModal', () => {
     });
 
     it('shows a validation error when Next is clicked without selecting a radio', async () => {
-      renderModal();
+      render(<ModalWithState />);
 
       fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 
@@ -98,7 +106,7 @@ describe('SelectTabsModal', () => {
     });
 
     it('shows a validation error when Next is clicked with "Yes, select specific tabs" but no tabs selected', async () => {
-      renderModal();
+      render(<ModalWithState />);
 
       selectYesSelectSpecificTabs();
       fireEvent.click(screen.getByRole('button', { name: 'Next' }));
@@ -109,14 +117,14 @@ describe('SelectTabsModal', () => {
     });
 
     it('calls onContinue with all tabs when No import all is selected', async () => {
-      renderModal();
+      render(<ModalWithState />);
 
       fireEvent.click(screen.getByLabelText('No, import all tabs'));
       fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 
       await waitFor(() => {
-        expect(defaultProps.onContinue).toHaveBeenCalledTimes(1);
-        expect(defaultProps.onContinue).toHaveBeenCalledWith(
+        expect(onContinue).toHaveBeenCalledTimes(1);
+        expect(onContinue).toHaveBeenCalledWith(
           expect.arrayContaining([
             expect.objectContaining({ tabId: 'tab-1', tabTitle: 'Introduction' }),
           ])
@@ -127,7 +135,7 @@ describe('SelectTabsModal', () => {
 
   describe('Tab selection', () => {
     it('shows a selected tab as a pill after selecting it', async () => {
-      renderModal();
+      render(<ModalWithState />);
 
       // One "Close" button exists on the modal header; selecting a tab adds a second for the pill
       await waitFor(() => expect(screen.getAllByRole('button', { name: 'Close' })).toHaveLength(1));
@@ -136,7 +144,7 @@ describe('SelectTabsModal', () => {
     });
 
     it('removes the pill when its close button is clicked', async () => {
-      renderModal();
+      render(<ModalWithState />);
       await selectTab('tab-1');
 
       const buttons = screen.getAllByRole('button', { name: 'Close' });
@@ -146,14 +154,14 @@ describe('SelectTabsModal', () => {
     });
 
     it('calls onContinue with selected tabs after selecting a tab and clicking Next', async () => {
-      renderModal();
+      render(<ModalWithState />);
       await selectTab('tab-1');
 
       fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 
       await waitFor(() => {
-        expect(defaultProps.onContinue).toHaveBeenCalledTimes(1);
-        expect(defaultProps.onContinue).toHaveBeenCalledWith([
+        expect(onContinue).toHaveBeenCalledTimes(1);
+        expect(onContinue).toHaveBeenCalledWith([
           expect.objectContaining({ tabId: 'tab-1', tabTitle: 'Introduction' }),
         ]);
       });
@@ -161,23 +169,23 @@ describe('SelectTabsModal', () => {
   });
 
   describe('Navigation callbacks', () => {
-    it('calls onBack when the Back button is clicked', async () => {
-      renderModal();
+    it('calls onClose when the Cancel button is clicked', async () => {
+      render(<ModalWithState />);
 
-      fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
       await waitFor(() => {
-        expect(defaultProps.onBack).toHaveBeenCalledTimes(1);
+        expect(onClose).toHaveBeenCalledTimes(1);
       });
     });
 
     it('calls onClose when the modal header close button is clicked', async () => {
-      renderModal();
+      render(<ModalWithState />);
 
       fireEvent.click(screen.getByRole('button', { name: /close/i }));
 
       await waitFor(() => {
-        expect(defaultProps.onClose).toHaveBeenCalledTimes(1);
+        expect(onClose).toHaveBeenCalledTimes(1);
       });
     });
   });

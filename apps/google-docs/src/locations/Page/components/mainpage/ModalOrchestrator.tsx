@@ -28,6 +28,10 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setDocumentId,
       selectedContentTypes,
       setSelectedContentTypes,
+      availableTabs,
+      setAvailableTabs,
+      selectedTabs,
+      setSelectedTabs,
       hasProgress,
       resetProgress: resetProgressTracking,
       pendingCloseAction,
@@ -43,6 +47,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       resetProgressTracking();
       closeModal(ModalType.UPLOAD);
       closeModal(ModalType.CONTENT_TYPE_PICKER);
+      closeModal(ModalType.SELECT_TABS);
     };
 
     const handleUploadModalCloseRequest = (docId?: string) => {
@@ -99,7 +104,8 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       openModal(ModalType.SELECT_TABS);
     };
 
-    const handleSelectTabsContinue = (_selectedTabs: DocumentTabProps[]) => {
+    const handleSelectTabsContinue = (tabs: DocumentTabProps[]) => {
+      setSelectedTabs(tabs);
       closeModal(ModalType.SELECT_TABS);
       // TODO: add preview step and redirect to it, using selectedTabs
     };
@@ -137,11 +143,13 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         />
 
         <SelectTabsModal
-          sdk={sdk}
           isOpen={modalStates.isSelectTabsModalOpen}
-          onBack={handleSelectTabsBack}
           onContinue={handleSelectTabsContinue}
           onClose={() => closeModal(ModalType.SELECT_TABS)}
+          availableTabs={availableTabs}
+          setAvailableTabs={setAvailableTabs}
+          selectedTabs={selectedTabs}
+          setSelectedTabs={setSelectedTabs}
         />
 
         <ConfirmCancelModal

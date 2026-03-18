@@ -6,6 +6,7 @@ export const useProgressTracking = () => {
   const [documentId, setDocumentId] = useState<string>('');
   const [selectedContentTypes, setSelectedContentTypes] = useState<ContentTypeProps[]>([]);
   const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
+  const [availableTabs, setAvailableTabs] = useState<DocumentTabProps[]>([]);
   const [selectedTabs, setSelectedTabs] = useState<DocumentTabProps[]>([]);
 
   const hasProgress = documentId.trim().length > 0;
@@ -13,6 +14,7 @@ export const useProgressTracking = () => {
   const resetProgress = useCallback(() => {
     setDocumentId('');
     setSelectedContentTypes([]);
+    setAvailableTabs([]);
     setSelectedTabs([]);
   }, []);
 
@@ -21,6 +23,8 @@ export const useProgressTracking = () => {
     setDocumentId,
     selectedContentTypes,
     setSelectedContentTypes,
+    availableTabs,
+    setAvailableTabs,
     selectedTabs,
     setSelectedTabs,
     hasProgress,

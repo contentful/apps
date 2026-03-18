@@ -10,7 +10,6 @@ import {
   Multiselect,
   Radio,
 } from '@contentful/f36-components';
-import { PageAppSDK } from '@contentful/app-sdk';
 import {
   modalControls,
   multiselect,
@@ -22,11 +21,13 @@ import { DocumentTabProps } from '../../../../../utils/types';
 import { truncateLabel } from '../../../../../utils/utils';
 
 interface SelectTabsModalProps {
-  sdk: PageAppSDK;
   isOpen: boolean;
-  onBack: () => void;
   onContinue: (selectedTabs: DocumentTabProps[]) => void;
   onClose: () => void;
+  availableTabs: DocumentTabProps[];
+  setAvailableTabs: React.Dispatch<React.SetStateAction<DocumentTabProps[]>>;
+  selectedTabs: DocumentTabProps[];
+  setSelectedTabs: React.Dispatch<React.SetStateAction<DocumentTabProps[]>>;
 }
 
 const MOCK_TABS: DocumentTabProps[] = [
@@ -46,25 +47,23 @@ const MOCK_TABS: DocumentTabProps[] = [
 ];
 
 export const SelectTabsModal = ({
-  sdk,
   isOpen,
-  onBack,
   onContinue,
   onClose,
+  availableTabs,
+  setAvailableTabs,
+  selectedTabs,
+  setSelectedTabs,
 }: SelectTabsModalProps) => {
-  const [availableTabs, setAvailableTabs] = useState<DocumentTabProps[]>([]);
-  const [selectedTabs, setSelectedTabs] = useState<DocumentTabProps[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [hasFetchError, setHasFetchError] = useState<boolean>(false);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false);
-  const [selectAllTabs, setSelectAllTabs] = useState<boolean | null>(null);
+  const [useAllTabs, setUseAllTabs] = useState<boolean | null>(null);
   const multiselectListRef = useMultiselectScrollReflow(selectedTabs);
 
   const isInvalidSelection = useMemo(
-    () => selectAllTabs === null || (selectAllTabs === false && selectedTabs.length === 0),
-    [selectAllTabs, selectedTabs]
+    () => useAllTabs === null || (useAllTabs === false && selectedTabs.length === 0),
+    [useAllTabs, selectedTabs]
   );
-  const hasNoRadioSelected = selectAllTabs === null;
+  const hasNoRadioSelected = useAllTabs === null;
   const isInvalidSelectionError = useMemo(
     () => isInvalidSelection && hasAttemptedSubmit,
     [isInvalidSelection, hasAttemptedSubmit]
@@ -72,31 +71,13 @@ export const SelectTabsModal = ({
   const showNoRadioSelectedError = hasNoRadioSelected && hasAttemptedSubmit;
 
   useEffect(() => {
-    const fetchTabs = async () => {
-      try {
-        setIsLoading(true);
-        setHasFetchError(false);
-        // TODO: Replace with actual API call to fetch document tabs
-        setAvailableTabs(MOCK_TABS);
-      } catch (error) {
-        console.error('Failed to fetch tabs:', error);
-        setHasFetchError(true);
-        setAvailableTabs([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchTabs();
-  }, [sdk]);
-
-  useEffect(() => {
     if (isOpen) {
+      setAvailableTabs(MOCK_TABS);
       setSelectedTabs([]);
       setHasAttemptedSubmit(false);
-      setSelectAllTabs(null);
+      setUseAllTabs(null);
     }
-  }, [isOpen]);
+  }, [isOpen, setAvailableTabs, setSelectedTabs]);
 
   const handleSelectTab = (e: React.ChangeEvent<HTMLInputElement>) => {
     setHasAttemptedSubmit(false);
@@ -110,16 +91,12 @@ export const SelectTabsModal = ({
     }
   };
 
-  const handleBack = () => {
-    onBack();
-  };
-
   const handleContinue = () => {
     if (isInvalidSelection) {
       setHasAttemptedSubmit(true);
       return;
     }
-    const tabsToUse = selectAllTabs ? availableTabs : selectedTabs;
+    const tabsToUse = useAllTabs ? availableTabs : selectedTabs;
     onContinue(tabsToUse);
   };
 
@@ -137,21 +114,18 @@ export const SelectTabsModal = ({
             <Flex flexDirection="column" gap="spacingS" marginBottom="spacingM">
               <Radio.Group
                 name="tab-selection-mode"
-                value={selectAllTabs === null ? '' : String(selectAllTabs)}
-                onChange={(e) => setSelectAllTabs(e.target.value === 'true')}>
+                value={useAllTabs === null ? '' : String(useAllTabs)}
+                onChange={(e) => setUseAllTabs(e.target.value === 'true')}>
                 <Radio value="false">Yes, select specific tabs</Radio>
-                {selectAllTabs === false && (
+                {useAllTabs === false && (
                   <Flex flexDirection="column" gap="spacingS" marginLeft="spacingL" fullWidth>
-                    <FormControl
-                      isRequired
-                      isInvalid={isInvalidSelectionError || hasFetchError}
-                      marginBottom="none">
+                    <FormControl isRequired isInvalid={isInvalidSelectionError} marginBottom="none">
                       <FormControl.Label>Document tabs</FormControl.Label>
                       <Checkbox.Group name="document-tabs" value={selectedTabs.map((t) => t.tabId)}>
                         <Multiselect
                           className={multiselect}
                           currentSelection={selectedTabs.map((tab) => tab.tabTitle)}
-                          placeholder={isLoading ? 'Loading tabs...' : 'Select one or more'}
+                          placeholder={'Select one or more'}
                           popoverProps={{
                             listMaxHeight: 300,
                             listRef: multiselectListRef,
@@ -165,18 +139,12 @@ export const SelectTabsModal = ({
                               isChecked={selectedTabs.some(
                                 (selected) => selected.tabId === tab.tabId
                               )}
-                              isDisabled={isLoading}
                               onSelectItem={handleSelectTab}>
                               {tab.tabTitle}
                             </Multiselect.Option>
                           ))}
                         </Multiselect>
                       </Checkbox.Group>
-                      {hasFetchError && (
-                        <FormControl.ValidationMessage>
-                          Unable to load document tabs.
-                        </FormControl.ValidationMessage>
-                      )}
                       {isInvalidSelectionError && (
                         <FormControl.ValidationMessage>
                           You must select at least one tab.
@@ -208,14 +176,10 @@ export const SelectTabsModal = ({
             </Flex>
           </Modal.Content>
           <Modal.Controls className={modalControls}>
-            <Button onClick={handleBack} variant="secondary">
-              Back
+            <Button onClick={onClose} variant="secondary">
+              Cancel
             </Button>
-            <Button
-              onClick={handleContinue}
-              variant="primary"
-              isDisabled={isLoading}
-              isLoading={isLoading}>
+            <Button onClick={handleContinue} variant="primary">
               Next
             </Button>
           </Modal.Controls>
