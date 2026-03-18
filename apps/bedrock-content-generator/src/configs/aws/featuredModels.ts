@@ -4,7 +4,7 @@ import { InvokeModelCommandInput } from '@aws-sdk/client-bedrock-runtime';
 export function getInferenceProfilePrefix(region: string): 'us' | 'eu' | 'global' {
   if (region.startsWith('eu-')) return 'eu';
   if (region.startsWith('us-') || region.startsWith('ca-')) return 'us';
-  return 'us';
+  return 'global';
 }
 
 export interface BedrockModel {
@@ -55,7 +55,8 @@ class ClaudeModel implements BedrockModel {
     maxTokens?: number,
     region?: string
   ): InvokeModelCommandInput {
-    const modelId = this.getInvokeId && region ? this.getInvokeId(region) : this.id;
+    const modelId =
+      this.getInvokeId && region !== undefined ? this.getInvokeId(region) : this.id;
     const messages = [
       {
         role: 'user',
