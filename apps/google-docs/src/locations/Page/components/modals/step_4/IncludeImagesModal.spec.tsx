@@ -5,7 +5,7 @@ import { IncludeImagesModal } from './IncludeImagesModal';
 
 const defaultProps = {
   onConfirm: vi.fn(),
-  onCancel: vi.fn(),
+  onClose: vi.fn(),
 };
 
 const renderModal = (props = {}) =>
@@ -59,13 +59,13 @@ describe('IncludeImagesModal', () => {
     });
   });
 
-  it('calls onCancel when Cancel is clicked', async () => {
+  it('calls onClose when Cancel is clicked', async () => {
     renderModal();
 
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
     await waitFor(() => {
-      expect(defaultProps.onCancel).toHaveBeenCalledTimes(1);
+      expect(defaultProps.onClose).toHaveBeenCalledTimes(1);
     });
   });
 

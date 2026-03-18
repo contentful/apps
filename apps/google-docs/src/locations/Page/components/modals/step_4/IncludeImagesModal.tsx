@@ -3,10 +3,10 @@ import { Button, FormControl, Modal, Paragraph, Radio } from '@contentful/f36-co
 
 interface IncludeImagesModalProps {
   onConfirm: (includeImages: boolean) => void;
-  onCancel: () => void;
+  onClose: () => void;
 }
 
-export const IncludeImagesModal = ({ onConfirm, onCancel }: IncludeImagesModalProps) => {
+export const IncludeImagesModal = ({ onConfirm, onClose }: IncludeImagesModalProps) => {
   const [includeImages, setIncludeImages] = useState<boolean | null>(null);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
@@ -20,7 +20,7 @@ export const IncludeImagesModal = ({ onConfirm, onCancel }: IncludeImagesModalPr
 
   return (
     <>
-      <Modal.Header title="Images" onClose={onCancel} />
+      <Modal.Header title="Images" onClose={onClose} />
       <Modal.Content>
         <Paragraph>
           The selected document contains images. Should the images be imported from your document?
@@ -44,7 +44,7 @@ export const IncludeImagesModal = ({ onConfirm, onCancel }: IncludeImagesModalPr
         </FormControl>
       </Modal.Content>
       <Modal.Controls>
-        <Button onClick={onCancel} variant="secondary">
+        <Button onClick={onClose} variant="secondary">
           Cancel
         </Button>
         <Button onClick={handleConfirm} variant="primary">

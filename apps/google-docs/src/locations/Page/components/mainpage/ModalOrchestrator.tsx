@@ -7,9 +7,10 @@ import { ErrorModal } from '../modals/ErrorModal';
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
 import { LoadingModal } from '../modals/LoadingModal';
 import { ERROR_MESSAGES } from '../../../../utils/constants/messages';
-import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
+import { SelectTabsModal} from '../modals/step_3/SelectTabsModal';
 import { DocumentTabProps } from '../../../../utils/types';
 import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
+import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
@@ -81,10 +82,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
       setIsUploadModalOpen(false);
       requestDiscardFlow(null);
-    };
-
-    const handleContentTypePickerCloseRequest = () => {
-      requestDiscardFlow(FlowStep.CONTENT_TYPE_PICKER);
     };
 
     const handleConfirmCancel = () => {
@@ -165,7 +162,9 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
               {flowStep === FlowStep.CONTENT_TYPE_PICKER && (
                 <ContentTypePickerModal
                   sdk={sdk}
-                  onClose={handleContentTypePickerCloseRequest}
+                  onClose={() => {
+                    handleStepCancel(FlowStep.CONTENT_TYPE_PICKER);
+                  }}
                   onSelect={handleContentTypeSelected}
                   selectedContentTypes={selectedContentTypes}
                   setSelectedContentTypes={setSelectedContentTypes}
@@ -186,7 +185,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
               {flowStep === FlowStep.INCLUDE_IMAGES && (
                 <IncludeImagesModal
                   onConfirm={handleIncludeImagesConfirm}
-                  onCancel={() => handleStepCancel(FlowStep.INCLUDE_IMAGES)}
+                  onClose={() => handleStepCancel(FlowStep.INCLUDE_IMAGES)}
                 />
               )}
 
