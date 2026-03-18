@@ -11,11 +11,110 @@
     },
     {
       "id": "getSignedUrlTokens",
-      "name": "Get signed URL tokens",
+      "name": "getSignedUrlTokens",
       "description": "This action returns signed JWT tokens for securing Mux video playback.",
       "path": "functions/src/getSignedUrlTokens.js",
       "entryFile": "functions/src/getSignedUrlTokens.ts",
       "allowNetworks": ["api.contentful.com", "https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "getAsset",
+      "name": "getAsset",
+      "description": "Fetches a Mux asset by ID.",
+      "path": "functions/src/getAsset.js",
+      "entryFile": "functions/src/getAsset.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "createAsset",
+      "name": "createAsset",
+      "description": "Creates a new Mux asset from a URL or upload settings.",
+      "path": "functions/src/createAsset.js",
+      "entryFile": "functions/src/createAsset.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "createUpload",
+      "name": "createUpload",
+      "description": "Creates a Mux direct upload URL.",
+      "path": "functions/src/createUpload.js",
+      "entryFile": "functions/src/createUpload.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "getUpload",
+      "name": "getUpload",
+      "description": "Fetches a Mux upload by ID to check its status.",
+      "path": "functions/src/getUpload.js",
+      "entryFile": "functions/src/getUpload.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "deleteStaticRendition",
+      "name": "deleteStaticRendition",
+      "description": "Deletes a static MP4 rendition from a Mux asset.",
+      "path": "functions/src/deleteStaticRendition.js",
+      "entryFile": "functions/src/deleteStaticRendition.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "createStaticRendition",
+      "name": "createStaticRendition",
+      "description": "Creates a static MP4 rendition for a Mux asset.",
+      "path": "functions/src/createStaticRendition.js",
+      "entryFile": "functions/src/createStaticRendition.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "createTrack",
+      "name": "createTrack",
+      "description": "Adds a caption or audio track to a Mux asset.",
+      "path": "functions/src/createTrack.js",
+      "entryFile": "functions/src/createTrack.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "deleteTrack",
+      "name": "deleteTrack",
+      "description": "Deletes a track from a Mux asset.",
+      "path": "functions/src/deleteTrack.js",
+      "entryFile": "functions/src/deleteTrack.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "generateSubtitles",
+      "name": "generateSubtitles",
+      "description": "Generates auto-captions for a Mux asset track.",
+      "path": "functions/src/generateSubtitles.js",
+      "entryFile": "functions/src/generateSubtitles.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "getSigningKey",
+      "name": "getSigningKey",
+      "description": "Validates that a Mux signing key exists.",
+      "path": "functions/src/getSigningKey.js",
+      "entryFile": "functions/src/getSigningKey.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "createSigningKey",
+      "name": "createSigningKey",
+      "description": "Creates a new Mux signing key for signed URLs.",
+      "path": "functions/src/createSigningKey.js",
+      "entryFile": "functions/src/createSigningKey.ts",
+      "allowNetworks": ["https://api.mux.com"],
       "accepts": ["appaction.call"]
     }
   ]

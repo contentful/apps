@@ -1,7 +1,7 @@
-import { FieldExtensionSDK } from '@contentful/app-sdk';
+import { AppExtensionSDK, FieldExtensionSDK } from '@contentful/app-sdk';
+import { PlainClientAPI } from 'contentful-management';
 import { ModalData } from '../components/AssetConfiguration/MuxAssetConfigurationModal';
-import ApiClient from './apiClient';
-import { InstallationParams, ResolutionType, AddByURLConfig } from './types';
+import { InstallationParams, ResolutionType } from './types';
 
 export interface AssetSettings {
   passthrough?: string;
@@ -44,7 +44,173 @@ interface AssetInput {
   name?: string;
 }
 
-function buildAssetSettings(options: ModalData, drmConfigurationId?: string): AssetSettings {
+export interface SignedTokens {
+  licenseToken?: string;
+  playbackToken: string;
+  posterToken: string;
+  storyboardToken: string;
+}
+
+export class MuxApiError extends Error {
+  status?: number;
+  constructor(message: string, status?: number) {
+    super(message);
+    this.name = 'MuxApiError';
+    this.status = status;
+  }
+}
+
+export class MuxApiService {
+  private static instance: MuxApiService | null = null;
+  private cmaClient: PlainClientAPI;
+  private sdk: FieldExtensionSDK | AppExtensionSDK;
+  private actionIds: Record<string, string> = {};
+
+  private constructor(
+    cmaClient: PlainClientAPI,
+    sdk: FieldExtensionSDK | AppExtensionSDK
+  ) {
+    this.cmaClient = cmaClient;
+    this.sdk = sdk;
+  }
+
+  static async getInstance(
+    cmaClient: PlainClientAPI,
+    sdk: FieldExtensionSDK | AppExtensionSDK
+  ): Promise<MuxApiService> {
+    if (!MuxApiService.instance) {
+      MuxApiService.instance = new MuxApiService(cmaClient, sdk);
+      await MuxApiService.instance.init();
+    }
+    return MuxApiService.instance;
+  }
+
+  private async init() {
+    const response = await this.cmaClient.appAction.getManyForEnvironment({
+      environmentId: this.sdk.ids.environment,
+      spaceId: this.sdk.ids.space,
+    });
+    for (const item of response.items) {
+      this.actionIds[item.name] = item.sys.id;
+    }
+  }
+
+  private async callAction<T>(
+    actionName: string,
+    parameters: Record<string, any>
+  ): Promise<T> {
+    const actionId = this.actionIds[actionName];
+    if (!actionId) {
+      throw new MuxApiError(`App Action '${actionName}' not found.`);
+    }
+
+    const {
+      response: { body },
+    } = await this.cmaClient.appActionCall.createWithResponse(
+      {
+        organizationId: this.sdk.ids.organization,
+        appDefinitionId: this.sdk.ids.app!,
+        appActionId: actionId,
+      },
+      { parameters }
+    );
+
+    const parsed = JSON.parse(body);
+    if (!parsed.ok) {
+      throw new MuxApiError(parsed.error || 'Unknown error', parsed.status);
+    }
+    return parsed.data as T;
+  }
+
+  // --- Asset operations ---
+
+  async getAsset(assetId: string): Promise<any> {
+    return this.callAction('getAsset', { assetId });
+  }
+
+  async createAsset(requestBody: any): Promise<any> {
+    return this.callAction('createAsset', { requestBody });
+  }
+
+  // --- Upload operations ---
+
+  async createUpload(requestBody: any): Promise<{ id: string; url: string }> {
+    return this.callAction('createUpload', { requestBody });
+  }
+
+  async getUpload(uploadId: string): Promise<any> {
+    return this.callAction('getUpload', { uploadId });
+  }
+
+  // --- Static rendition operations ---
+
+  async deleteStaticRendition(assetId: string, staticRenditionId: string): Promise<void> {
+    await this.callAction('deleteStaticRendition', { assetId, staticRenditionId });
+  }
+
+  async createStaticRendition(assetId: string, resolution: ResolutionType): Promise<void> {
+    await this.callAction('createStaticRendition', { assetId, resolution });
+  }
+
+  // --- Track operations ---
+
+  async createTrack(
+    assetId: string,
+    options: {
+      url: string;
+      name: string;
+      language_code: string;
+      type: 'text' | 'audio';
+      text_type?: string;
+      closed_captions?: boolean;
+    }
+  ): Promise<any> {
+    return this.callAction('createTrack', { assetId, trackOptions: options });
+  }
+
+  async deleteTrack(assetId: string, trackId: string): Promise<void> {
+    await this.callAction('deleteTrack', { assetId, trackId });
+  }
+
+  async generateSubtitles(
+    assetId: string,
+    trackId: string,
+    options: { language_code: string; name: string }
+  ): Promise<any> {
+    return this.callAction('generateSubtitles', { assetId, trackId, options });
+  }
+
+  // --- Signing key operations (credentials passed as params for config page) ---
+
+  async getSigningKey(params: {
+    muxAccessTokenId: string;
+    muxAccessTokenSecret: string;
+    signingKeyId: string;
+  }): Promise<boolean> {
+    const result = await this.callAction<{ exists: boolean }>('getSigningKey', params);
+    return result.exists;
+  }
+
+  async createSigningKey(params: {
+    muxAccessTokenId: string;
+    muxAccessTokenSecret: string;
+  }): Promise<{ id: string; private_key: string }> {
+    return this.callAction('createSigningKey', params);
+  }
+
+  // --- Signed URL tokens ---
+
+  async getSignedUrlTokens(playbackId: string, isDRM = false): Promise<SignedTokens> {
+    return this.callAction<SignedTokens>('getSignedUrlTokens', { playbackId, isDRM });
+  }
+}
+
+// --- Helper functions (pure data transformation, stays in frontend) ---
+
+export function buildAssetSettings(
+  options: ModalData,
+  drmConfigurationId?: string
+): AssetSettings {
   const selectedPolicy = options.playbackPolicies[0];
   const hasDRM = selectedPolicy === 'drm';
   const settings: AssetSettings = {
@@ -114,15 +280,23 @@ function buildAssetSettings(options: ModalData, drmConfigurationId?: string): As
   return settings;
 }
 
+// --- Orchestration functions (frontend logic + action calls) ---
+
 export async function addByURL({
-  apiClient,
+  muxApi,
   sdk,
   remoteURL,
   options,
-  responseCheck,
   setAssetError,
   pollForAssetDetails,
-}: AddByURLConfig) {
+}: {
+  muxApi: MuxApiService;
+  sdk: FieldExtensionSDK;
+  remoteURL: string;
+  options: ModalData;
+  setAssetError: (msg: string) => void;
+  pollForAssetDetails: () => Promise<void>;
+}) {
   const { muxDRMConfigurationId } = sdk.parameters.installation as InstallationParams;
 
   // Validate DRM configuration if DRM is selected
@@ -156,13 +330,7 @@ export async function addByURL({
     }
   }
 
-  const result = await apiClient.post('/video/v1/assets', JSON.stringify(requestBody));
-
-  if (!(await responseCheck(result))) {
-    return;
-  }
-
-  const muxUpload = await result.json();
+  const muxUpload = await muxApi.createAsset(requestBody);
 
   if ('error' in muxUpload) {
     setAssetError(muxUpload.error.messages[0]);
@@ -181,10 +349,9 @@ export async function addByURL({
 }
 
 export async function getUploadUrl(
-  apiClient: ApiClient,
+  muxApi: MuxApiService,
   sdk: FieldExtensionSDK,
-  options: ModalData,
-  responseCheck: (res: Response) => boolean | Promise<boolean>
+  options: ModalData
 ) {
   const { muxEnableAudioNormalize, muxDRMConfigurationId } = sdk.parameters
     .installation as InstallationParams;
@@ -208,94 +375,11 @@ export async function getUploadUrl(
     new_asset_settings: newAssetSettings,
   };
 
-  const res = await apiClient.post('/video/v1/uploads', JSON.stringify(requestBody));
-
-  if (!(await responseCheck(res))) {
-    return;
-  }
-
-  const { data: muxUpload } = await res.json();
+  const muxUpload = await muxApi.createUpload(requestBody);
 
   await sdk.field.setValue({
     uploadId: muxUpload.id,
   });
 
   return muxUpload.url;
-}
-
-export async function deleteStaticRendition(
-  apiClient: ApiClient,
-  assetId: string,
-  staticRenditionId: string
-) {
-  return await apiClient.del(`/video/v1/assets/${assetId}/static-renditions/${staticRenditionId}`);
-}
-
-export async function createStaticRendition(
-  apiClient: ApiClient,
-  assetId: string,
-  type: ResolutionType
-) {
-  return await apiClient.post(
-    `/video/v1/assets/${assetId}/static-renditions`,
-    JSON.stringify({ resolution: type })
-  );
-}
-
-export async function uploadTrack(
-  apiClient: ApiClient,
-  assetId: string,
-  options: {
-    url: string;
-    name: string;
-    language_code: string;
-    type: 'text' | 'audio';
-    text_type?: string;
-    closed_captions?: boolean;
-  }
-) {
-  const result = await apiClient.post(
-    `/video/v1/assets/${assetId}/tracks`,
-    JSON.stringify(options)
-  );
-
-  if (!result.ok) {
-    const error = await result.json();
-    throw new Error(error.error?.messages?.[0] || 'Error uploading track');
-  }
-
-  return await result.json();
-}
-
-export async function deleteTrack(apiClient: ApiClient, assetId: string, trackId: string) {
-  return await apiClient.del(`/video/v1/assets/${assetId}/tracks/${trackId}`);
-}
-
-export async function generateAutoCaptions(
-  apiClient: ApiClient,
-  assetId: string,
-  trackId: string,
-  options: {
-    language_code: string;
-    name: string;
-  }
-) {
-  const result = await apiClient.post(
-    `/video/v1/assets/${assetId}/tracks/${trackId}/generate-subtitles`,
-    JSON.stringify({
-      generated_subtitles: [
-        {
-          language_code: options.language_code,
-          name: options.name,
-        },
-      ],
-    })
-  );
-
-  if (!result.ok) {
-    const error = await result.json();
-    throw new Error(error.error?.messages?.[0] || 'Error generating subtitles');
-  }
-
-  return await result.json();
 }
