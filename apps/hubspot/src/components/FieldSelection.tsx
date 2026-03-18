@@ -1,5 +1,5 @@
 import { Box, Checkbox, Paragraph, Text, Tooltip } from '@contentful/f36-components';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import tokens from '@contentful/f36-tokens';
 import { useMemo } from 'react';
 import { SdkField } from '../utils/fieldsProcessing';

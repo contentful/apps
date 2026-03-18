@@ -236,7 +236,7 @@ describe('Config Screen component', () => {
 
   describe('Content type installation', () => {
     const selectContentTypes = async (user: UserEvent) => {
-      const autocomplete = screen.getByPlaceholderText('Search');
+      const autocomplete = screen.getByPlaceholderText('Search content types');
       await user.click(autocomplete);
       await user.type(autocomplete, 'Blog');
       const option = await screen.findByText('Blog Post');
@@ -247,7 +247,7 @@ describe('Config Screen component', () => {
       await fillScreen();
       const user = userEvent.setup();
 
-      const autocomplete = screen.getByPlaceholderText('Search');
+      const autocomplete = screen.getByPlaceholderText('Search content types');
       await user.click(autocomplete);
 
       const blogPost = await screen.findByText('Blog Post');
@@ -271,7 +271,7 @@ describe('Config Screen component', () => {
       const user = userEvent.setup();
       await fillScreen(user);
       await selectContentTypes(user);
-      await waitFor(() => expect(screen.getByTestId('pill-blogPost')).toBeTruthy());
+      await waitFor(() => expect(screen.getByLabelText('Blog Post')).toBeTruthy());
 
       const result = await saveAppInstallation();
 
@@ -300,7 +300,7 @@ describe('Config Screen component', () => {
       const user = userEvent.setup();
       await fillScreen(user);
       await selectContentTypes(user);
-      await waitFor(() => expect(screen.getByTestId('pill-blogPost')).toBeTruthy());
+      await waitFor(() => expect(screen.getByLabelText('Blog Post')).toBeTruthy());
 
       mockSdk.cma.editorInterface.get.mockRejectedValueOnce(
         new Error('Failed to get editor interface')

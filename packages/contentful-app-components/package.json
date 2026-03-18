@@ -1,0 +1,8 @@
+{
+  "name": "contentful-app-components",
+  "version": "1.0.0",
+  "description": "Shared components and hooks for Contentful apps",
+  "license": "MIT",
+  "author": "Contentful GmbH",
+  "private": true
+}
