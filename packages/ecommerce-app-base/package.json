@@ -14,6 +14,10 @@
     "url": "https://github.com/contentful/apps.git",
     "directory": "packages/ecommerce-app-base"
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com/"
+  },
   "devDependencies": {
     "@babel/preset-env": "^7.22.10",
     "@babel/preset-react": "^7.22.5",
