@@ -80,8 +80,8 @@ If the ngrok URL changed since last time, update the **Callback URL** in the Atl
 
 | Symptom | Cause | Fix |
 |--------|--------|-----|
-| **502 from ngrok** | Lambda handler failed (e.g. unsupported runtime). | Runtime is set to `nodejs18.x` for serverless-offline. Restart dev. |
-| **“Unsupported runtime”** in Lambda logs | serverless-offline may not support the chosen runtime. | Ensure `functions/serverless.yml` uses a runtime supported by your serverless-offline version (e.g. `nodejs18.x` for v13.x). |
+| **502 from ngrok** | Lambda handler failed (e.g. unsupported runtime). | Runtime is set to `nodejs22.x` for serverless-offline. Restart dev. |
+| **“Unsupported runtime”** in Lambda logs | serverless-offline may not support the chosen runtime. | Ensure `functions/serverless.yml` uses a runtime supported by your serverless-offline version (e.g. `nodejs22.x` for v13.x). |
 | **“redirect_uri is not registered”** | Atlassian received a different callback URL than the one you added. | In Atlassian, set Callback URL to exactly what the dev server prints: `https://YOUR_NGROK_URL/test/auth` (must be `/test/auth`, not `/dev/auth`). |
 | **“scopes have not been added”** | Jira API scopes missing in Atlassian app. | In Atlassian app → Permissions → Jira API, add `read:jira-user`, `read:jira-work`, `write:jira-work`. |
 | **ngrok failed** (no token) | `NGROK_AUTHTOKEN` not set. | Add it to `.env` from [ngrok dashboard](https://dashboard.ngrok.com/get-started/your-authtoken). Or run ngrok manually: `ngrok http 3000`, then `NGROK_URL=https://xxx.ngrok-free.app npm run dev`. |
@@ -101,6 +101,6 @@ If the ngrok URL changed since last time, update the **Callback URL** in the Atl
 
 ## Maintenance notes
 
-- **Runtime:** Local and production use `nodejs18.x`; serverless-offline 13.x supports it. To use nodejs20.x, ensure serverless-offline and Node are compatible.
+- **Runtime:** Local and production use `nodejs22.x`; serverless-offline 13.x supports it.
 - **Callback URL:** Always use `/test/auth` (not `/dev/auth`) in serverless config for the test stage; serverless-offline mounts routes under the stage name.
 - **OAuth credentials:** Stored in `.env` (gitignored). For production, the app uses AWS Secrets Manager; the deploy pipeline and roles are outside this repo.
