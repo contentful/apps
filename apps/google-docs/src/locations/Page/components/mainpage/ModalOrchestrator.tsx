@@ -28,9 +28,11 @@ interface ModalOrchestratorProps {
   oauthToken: string;
 }
 
+const MOCK_HAS_PENDING_IMAGES_REVIEW = true;
+const MOCK_TABS_ENABLED = true;
+
 export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrchestratorProps>(
   ({ sdk, oauthToken }, ref) => {
-    const MOCK_HAS_PENDING_IMAGES_REVIEW = true;
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
     const [isErrorPreviewModalOpen, setIsErrorPreviewModalOpen] = useState(false);
@@ -48,6 +50,8 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       resetProgress: resetProgressTracking,
       pendingCloseAction,
       setPendingCloseAction,
+      includeImages,
+      setIncludeImages,
     } = useProgressTracking();
 
     useImperativeHandle(ref, () => ({
@@ -81,7 +85,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       }
 
       setIsUploadModalOpen(false);
-      requestDiscardFlow(null);
+      requestDiscardFlow();
     };
 
     const handleConfirmCancel = () => {
@@ -107,7 +111,12 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       // The modal already updates `selectedContentTypes` via `setSelectedContentTypes`, so we don't need to set it here.
       void contentTypeIdsCsv;
       // setSelectedContentTypes(contentTypes);
-      setFlowStep(FlowStep.SELECT_TABS);
+      if (MOCK_TABS_ENABLED) {
+        setFlowStep(FlowStep.SELECT_TABS);
+        return;
+      } else {
+        handleSelectTabsContinue([]);
+      }
     };
 
     const handleSelectTabsContinue = (_selectedTabs: DocumentTabProps[]) => {
@@ -123,14 +132,18 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     };
 
     const handleStepCancel = (step: FlowStep | null) => {
-      if (!step || step === FlowStep.LOADING) return;
+      if (step === null) return;
       requestDiscardFlow(step);
+    };
+
+    const closeStep = (step: FlowStep) => () => {
+      handleStepCancel(step);
     };
 
     const handleIncludeImagesConfirm = (includeImages: boolean) => {
       // TODO: Wire `includeImages` into Agents resume endpoint payload once
       // suspend/resume APIs are available in the frontend.
-      console.log('[ModalOrchestrator] Mock includeImages choice:', includeImages);
+      setIncludeImages(includeImages);
       setFlowStep(FlowStep.LOADING);
     };
 
@@ -141,6 +154,52 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
     const handleErrorPreviewModalRetry = () => {
       setIsErrorPreviewModalOpen(false);
+    };
+
+    const renderFlowStep = () => {
+      switch (flowStep) {
+        case FlowStep.CONTENT_TYPE_PICKER:
+          return (
+            <ContentTypePickerModal
+              sdk={sdk}
+              onClose={closeStep(FlowStep.CONTENT_TYPE_PICKER)}
+              onSelect={handleContentTypeSelected}
+              selectedContentTypes={selectedContentTypes}
+              setSelectedContentTypes={setSelectedContentTypes}
+            />
+          );
+        case FlowStep.SELECT_TABS:
+          return (
+            <SelectTabsModal
+            onContinue={handleSelectTabsContinue}
+            onClose={() => handleStepCancel(FlowStep.SELECT_TABS)}
+            availableTabs={availableTabs}
+            setAvailableTabs={setAvailableTabs}
+            selectedTabs={selectedTabs}
+            setSelectedTabs={setSelectedTabs}
+          />
+          );
+        case FlowStep.INCLUDE_IMAGES:
+          return (
+            <IncludeImagesModal
+              includeImages={includeImages}
+              setIncludeImages={setIncludeImages}
+              onConfirm={handleIncludeImagesConfirm}
+              onClose={closeStep(FlowStep.INCLUDE_IMAGES)}
+            />
+          );
+        case FlowStep.LOADING:
+          return (
+            <LoadingModal
+              step="reviewingContentTypes"
+              title="Preparing your preview"
+              onClose={closeStep(FlowStep.LOADING)}
+              contentTypeCount={selectedContentTypes.length}
+            />
+          );
+        default:
+          return null;
+      }
     };
 
     return (
@@ -157,47 +216,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           size={'large'}
           shouldCloseOnOverlayClick={false}
           shouldCloseOnEscapePress={flowStep !== FlowStep.LOADING}>
-          {() => (
-            <>
-              {flowStep === FlowStep.CONTENT_TYPE_PICKER && (
-                <ContentTypePickerModal
-                  sdk={sdk}
-                  onClose={() => {
-                    handleStepCancel(FlowStep.CONTENT_TYPE_PICKER);
-                  }}
-                  onSelect={handleContentTypeSelected}
-                  selectedContentTypes={selectedContentTypes}
-                  setSelectedContentTypes={setSelectedContentTypes}
-                />
-              )}
-
-              {flowStep === FlowStep.SELECT_TABS && (
-                <SelectTabsModal
-                  onContinue={handleSelectTabsContinue}
-                  onClose={() => handleStepCancel(FlowStep.SELECT_TABS)}
-                  availableTabs={availableTabs}
-                  setAvailableTabs={setAvailableTabs}
-                  selectedTabs={selectedTabs}
-                  setSelectedTabs={setSelectedTabs}
-                />
-              )}
-
-              {flowStep === FlowStep.INCLUDE_IMAGES && (
-                <IncludeImagesModal
-                  onConfirm={handleIncludeImagesConfirm}
-                  onClose={() => handleStepCancel(FlowStep.INCLUDE_IMAGES)}
-                />
-              )}
-
-              {flowStep === FlowStep.LOADING && (
-                <LoadingModal
-                  step="reviewingContentTypes"
-                  title="Preparing your preview"
-                  contentTypeCount={selectedContentTypes.length}
-                />
-              )}
-            </>
-          )}
+          {renderFlowStep}
         </Modal>
 
         <ConfirmCancelModal

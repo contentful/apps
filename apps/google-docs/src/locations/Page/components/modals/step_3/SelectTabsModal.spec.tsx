@@ -9,7 +9,6 @@ const mockSdk = createMockSDK() as PageAppSDK;
 
 const defaultProps = {
   sdk: mockSdk,
-  onCancel: vi.fn(),
   onContinue: vi.fn(),
   onClose: vi.fn(),
 };
@@ -144,13 +143,13 @@ describe('SelectTabsModal', () => {
   });
 
   describe('Navigation callbacks', () => {
-    it('calls onCancel when the Cancel button is clicked', async () => {
+    it('calls onClose when the Cancel button is clicked', async () => {
       renderModal();
 
       fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
       await waitFor(() => {
-        expect(defaultProps.onCancel).toHaveBeenCalledTimes(1);
+        expect(defaultProps.onClose).toHaveBeenCalledTimes(1);
       });
     });
 

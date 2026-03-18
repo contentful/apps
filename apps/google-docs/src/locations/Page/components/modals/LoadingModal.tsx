@@ -58,6 +58,7 @@ interface LoadingModalProps {
   title: string;
   entriesCount?: number;
   contentTypeCount?: number;
+  onClose: () => void;
 }
 
 export const LoadingModal: React.FC<LoadingModalProps> = ({
@@ -65,6 +66,7 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
   title,
   entriesCount,
   contentTypeCount,
+  onClose,
 }) => {
   const messages = useMemo(() => {
     if (step === 'reviewingContentTypes') {
@@ -91,7 +93,7 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
 
   return (
     <>
-      <Modal.Header title={title} />
+      <Modal.Header title={title} onClose={onClose} />
       <Modal.Content>
         {step === 'reviewingContentTypes' ? (
           <Flex justifyContent="center">

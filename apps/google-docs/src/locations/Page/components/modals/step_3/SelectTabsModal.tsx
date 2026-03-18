@@ -21,7 +21,6 @@ import { DocumentTabProps } from '../../../../../utils/types';
 import { truncateLabel } from '../../../../../utils/utils';
 
 interface SelectTabsModalProps {
-  isOpen: boolean;
   onContinue: (selectedTabs: DocumentTabProps[]) => void;
   onClose: () => void;
   availableTabs: DocumentTabProps[];
@@ -47,7 +46,6 @@ const MOCK_TABS: DocumentTabProps[] = [
 ];
 
 export const SelectTabsModal = ({
-  isOpen,
   onContinue,
   onClose,
   availableTabs,
@@ -71,13 +69,11 @@ export const SelectTabsModal = ({
   const showNoRadioSelectedError = hasNoRadioSelected && hasAttemptedSubmit;
 
   useEffect(() => {
-    if (isOpen) {
       setAvailableTabs(MOCK_TABS);
       setSelectedTabs([]);
       setHasAttemptedSubmit(false);
       setUseAllTabs(null);
-    }
-  }, [isOpen, setAvailableTabs, setSelectedTabs]);
+  }, [setAvailableTabs, setSelectedTabs]);
 
   const handleSelectTab = (e: React.ChangeEvent<HTMLInputElement>) => {
     setHasAttemptedSubmit(false);

@@ -2,12 +2,18 @@ import { useState } from 'react';
 import { Button, FormControl, Modal, Paragraph, Radio } from '@contentful/f36-components';
 
 interface IncludeImagesModalProps {
+  includeImages: boolean | null;
+  setIncludeImages: (includeImages: boolean) => void;
   onConfirm: (includeImages: boolean) => void;
   onClose: () => void;
 }
 
-export const IncludeImagesModal = ({ onConfirm, onClose }: IncludeImagesModalProps) => {
-  const [includeImages, setIncludeImages] = useState<boolean | null>(null);
+export const IncludeImagesModal = ({
+  includeImages,
+  setIncludeImages,
+  onConfirm,
+  onClose,
+}: IncludeImagesModalProps) => {
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
   const handleConfirm = () => {
