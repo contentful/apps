@@ -55,8 +55,7 @@ class ClaudeModel implements BedrockModel {
     maxTokens?: number,
     region?: string
   ): InvokeModelCommandInput {
-    const modelId =
-      this.getInvokeId && region !== undefined ? this.getInvokeId(region) : this.id;
+    const modelId = this.getInvokeId && region !== undefined ? this.getInvokeId(region) : this.id;
     const messages = [
       {
         role: 'user',
