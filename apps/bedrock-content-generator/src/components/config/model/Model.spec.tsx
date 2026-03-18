@@ -80,9 +80,7 @@ describe('Display Model', () => {
       expect(getByText('Anthropic Claude v2.1')).toBeTruthy();
     });
     await waitFor(() => {
-      expect(
-        getByText(/The models .*, Meta Llama 2 70B, .* are not available in the abc region./)
-      ).toBeTruthy();
+      expect(getByText(/Meta Llama 2 70B.*are not available in the abc region\./)).toBeTruthy();
     });
     await waitFor(() => {
       expect(
