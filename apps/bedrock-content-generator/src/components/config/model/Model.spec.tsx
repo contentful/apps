@@ -60,7 +60,8 @@ describe('Display Model', () => {
         getModelAvailability: vi
           .fn()
           .mockResolvedValueOnce('AVAILABLE')
-          .mockResolvedValueOnce('NOT_IN_ACCOUNT'),
+          .mockResolvedValueOnce('NOT_IN_ACCOUNT')
+          .mockResolvedValue('AVAILABLE'),
       };
     });
     const { getByText, unmount, findByText } = render(
@@ -80,9 +81,7 @@ describe('Display Model', () => {
       expect(getByText('Anthropic Claude v2.1')).toBeTruthy();
     });
     await waitFor(() => {
-      expect(
-        getByText(/The models .*, Meta Llama 2 70B, .* are not available in the abc region./)
-      ).toBeTruthy();
+      expect(getByText(/Meta Llama 2 70B.*are not available in the abc region\./)).toBeTruthy();
     });
     await waitFor(() => {
       expect(
