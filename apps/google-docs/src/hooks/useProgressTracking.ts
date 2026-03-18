@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { ContentTypeProps } from 'contentful-management';
-import { DocumentTabProps } from '../locations/Page/components/modals/step_3/SelectTabsModal';
+import { DocumentTabProps } from '../utils/types';
 
 export const useProgressTracking = () => {
   const [documentId, setDocumentId] = useState<string>('');
