@@ -60,7 +60,8 @@ describe('Display Model', () => {
         getModelAvailability: vi
           .fn()
           .mockResolvedValueOnce('AVAILABLE')
-          .mockResolvedValueOnce('NOT_IN_ACCOUNT'),
+          .mockResolvedValueOnce('NOT_IN_ACCOUNT')
+          .mockResolvedValue('AVAILABLE'),
       };
     });
     const { getByText, unmount, findByText } = render(
