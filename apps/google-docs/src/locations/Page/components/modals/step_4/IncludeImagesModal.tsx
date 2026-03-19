@@ -44,7 +44,7 @@ export const IncludeImagesModal = ({
           </Radio.Group>
           {hasAttemptedSubmit && includeImages === null && (
             <FormControl.ValidationMessage>
-              You must choose an option.
+              You must select an option.
             </FormControl.ValidationMessage>
           )}
         </FormControl>

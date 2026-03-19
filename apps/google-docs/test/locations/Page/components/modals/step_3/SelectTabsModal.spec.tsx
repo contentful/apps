@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Modal } from '@contentful/f36-components';
-import { SelectTabsModal } from '../src/locations/Page/components/modals/step_3/SelectTabsModal';
-import type { DocumentTabProps } from '../src/utils/types';
+import { SelectTabsModal } from '../../../../../../src/locations/Page/components/modals/step_3/SelectTabsModal';
+import type { DocumentTabProps } from '../../../../../../src/utils/types';
 
 const onContinue = vi.fn();
 const onClose = vi.fn();
@@ -28,6 +28,7 @@ const ModalWithState = (props: { isShown?: boolean } = {}) => {
   const { isShown = true } = props;
   const [availableTabs, setAvailableTabs] = useState<DocumentTabProps[]>(MOCK_TABS);
   const [selectedTabs, setSelectedTabs] = useState<DocumentTabProps[]>([]);
+  const [useAllTabs, setUseAllTabs] = useState<boolean | null>(null);
   return (
     <Modal isShown={isShown} onClose={() => {}} size="large">
       {() => (
@@ -38,6 +39,8 @@ const ModalWithState = (props: { isShown?: boolean } = {}) => {
           setAvailableTabs={setAvailableTabs}
           selectedTabs={selectedTabs}
           setSelectedTabs={setSelectedTabs}
+          useAllTabs={useAllTabs}
+          setUseAllTabs={setUseAllTabs}
         />
       )}
     </Modal>
