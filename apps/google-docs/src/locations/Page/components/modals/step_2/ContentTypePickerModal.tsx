@@ -102,11 +102,6 @@ export const ContentTypePickerModal = ({
     fetchContentTypes();
   }, [sdk]);
 
-  useEffect(() => {
-    setHasAttemptedSubmit(false);
-    setSelectedContentTypes([]);
-  }, [setSelectedContentTypes]);
-
   const onSearchValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value.toLowerCase().trim();
     setFilteredContentTypes(

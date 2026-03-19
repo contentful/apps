@@ -28,6 +28,7 @@ const ModalWithState = (props: { isShown?: boolean } = {}) => {
   const { isShown = true } = props;
   const [availableTabs, setAvailableTabs] = useState<DocumentTabProps[]>(MOCK_TABS);
   const [selectedTabs, setSelectedTabs] = useState<DocumentTabProps[]>([]);
+  const [useAllTabs, setUseAllTabs] = useState<boolean | null>(null);
   return (
     <Modal isShown={isShown} onClose={() => {}} size="large">
       {() => (
@@ -38,6 +39,8 @@ const ModalWithState = (props: { isShown?: boolean } = {}) => {
           setAvailableTabs={setAvailableTabs}
           selectedTabs={selectedTabs}
           setSelectedTabs={setSelectedTabs}
+          useAllTabs={useAllTabs}
+          setUseAllTabs={setUseAllTabs}
         />
       )}
     </Modal>
