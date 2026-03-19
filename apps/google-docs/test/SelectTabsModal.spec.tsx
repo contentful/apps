@@ -139,7 +139,7 @@ describe('SelectTabsModal', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 
       await waitFor(() => {
-        expect(screen.getByText('Please select an option.')).toBeTruthy();
+        expect(screen.getByText('You must select an option.')).toBeTruthy();
       });
     });
 

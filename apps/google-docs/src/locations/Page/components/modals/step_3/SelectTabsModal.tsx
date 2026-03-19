@@ -58,7 +58,7 @@ export const SelectTabsModal = ({
   const multiselectListRef = useMultiselectScrollReflow(selectedTabs);
 
   const isInvalidSelection = useMemo(
-    () => useAllTabs === null || (useAllTabs === false && selectedTabs.length === 0),
+    () => useAllTabs === null || (!useAllTabs && selectedTabs.length === 0),
     [useAllTabs, selectedTabs]
   );
   const hasNoRadioSelected = useAllTabs === null;
@@ -161,7 +161,9 @@ export const SelectTabsModal = ({
             <Radio value="true">No, import all tabs</Radio>
           </Radio.Group>
           {showNoRadioSelectedError && (
-            <FormControl.ValidationMessage>Please select an option.</FormControl.ValidationMessage>
+            <FormControl.ValidationMessage>
+              You must select an option.
+            </FormControl.ValidationMessage>
           )}
         </Flex>
       </Modal.Content>
