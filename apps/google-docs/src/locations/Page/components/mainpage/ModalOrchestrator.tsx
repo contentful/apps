@@ -7,7 +7,7 @@ import { ErrorModal } from '../modals/ErrorModal';
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
 import { LoadingModal } from '../modals/LoadingModal';
 import { ERROR_MESSAGES } from '../../../../utils/constants/messages';
-import { SelectTabsModal} from '../modals/step_3/SelectTabsModal';
+import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 import { DocumentTabProps } from '../../../../utils/types';
 import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
 import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
@@ -170,13 +170,13 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         case FlowStep.SELECT_TABS:
           return (
             <SelectTabsModal
-            onContinue={handleSelectTabsContinue}
-            onClose={() => handleStepCancel(FlowStep.SELECT_TABS)}
-            availableTabs={availableTabs}
-            setAvailableTabs={setAvailableTabs}
-            selectedTabs={selectedTabs}
-            setSelectedTabs={setSelectedTabs}
-          />
+              onContinue={handleSelectTabsContinue}
+              onClose={() => handleStepCancel(FlowStep.SELECT_TABS)}
+              availableTabs={availableTabs}
+              setAvailableTabs={setAvailableTabs}
+              selectedTabs={selectedTabs}
+              setSelectedTabs={setSelectedTabs}
+            />
           );
         case FlowStep.INCLUDE_IMAGES:
           return (

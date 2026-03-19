@@ -178,9 +178,7 @@ export const ContentTypePickerModal = ({
                 key={ct.sys.id}
                 value={ct.sys.id}
                 itemId={ct.sys.id}
-                isChecked={selectedContentTypes.some(
-                  (selected) => selected.sys.id === ct.sys.id
-                )}
+                isChecked={selectedContentTypes.some((selected) => selected.sys.id === ct.sys.id)}
                 isDisabled={isLoading}
                 onSelectItem={handleSelectContentType}>
                 {ct.name}
@@ -205,13 +203,10 @@ export const ContentTypePickerModal = ({
               <Pill
                 key={ct.sys.id}
                 label={truncateLabel(ct.name)}
-                onClose={
-                  () =>
-                    setSelectedContentTypes(
-                      selectedContentTypes.filter(
-                        (selected) => selected.sys.id !== ct.sys.id
-                      )
-                    )
+                onClose={() =>
+                  setSelectedContentTypes(
+                    selectedContentTypes.filter((selected) => selected.sys.id !== ct.sys.id)
+                  )
                 }
               />
             ))}
@@ -222,10 +217,7 @@ export const ContentTypePickerModal = ({
         <Button onClick={handleClose} variant="secondary">
           Cancel
         </Button>
-        <Button
-          onClick={handleContinue}
-          variant="primary"
-          isDisabled={isLoading}>
+        <Button onClick={handleContinue} variant="primary" isDisabled={isLoading}>
           Next
         </Button>
       </Modal.Controls>
