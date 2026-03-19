@@ -8,6 +8,7 @@ export const useProgressTracking = () => {
   const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
   const [availableTabs, setAvailableTabs] = useState<DocumentTabProps[]>([]);
   const [selectedTabs, setSelectedTabs] = useState<DocumentTabProps[]>([]);
+  const [includeImages, setIncludeImages] = useState<boolean | null>(null);
 
   const hasProgress = documentId.trim().length > 0;
 
@@ -16,6 +17,7 @@ export const useProgressTracking = () => {
     setSelectedContentTypes([]);
     setAvailableTabs([]);
     setSelectedTabs([]);
+    setIncludeImages(null);
   }, []);
 
   return {
@@ -31,5 +33,7 @@ export const useProgressTracking = () => {
     resetProgress,
     pendingCloseAction,
     setPendingCloseAction,
+    includeImages,
+    setIncludeImages,
   };
 };

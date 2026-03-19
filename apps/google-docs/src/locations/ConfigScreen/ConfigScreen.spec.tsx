@@ -23,22 +23,9 @@ describe('Config Screen component', () => {
       const { getByText } = render(<ConfigScreen />);
       expect(
         getByText(
-          'Connect Google Drive to Contentful to seamlessly connect content, eliminating copy-paste, reducing errors, and speeding up your publishing workflow.'
+          'Connect Google Drive to Contentful to seamlessly sync content, eliminate copy-paste, reduce errors, and speed up your publishing workflow.'
         )
       ).toBeTruthy();
-    });
-
-    it('renders the optimization tip note', () => {
-      const { getByText } = render(<ConfigScreen />);
-      expect(getByText('Optimization tip')).toBeTruthy();
-      expect(getByText(/Use context markers in your document to exclude content/)).toBeTruthy();
-    });
-
-    it('renders the example section with code block', () => {
-      const { getByText } = render(<ConfigScreen />);
-      expect(getByText('Example')).toBeTruthy();
-      expect(getByText(/\[\[CTX\]\]/)).toBeTruthy();
-      expect(getByText(/\[\[\/CTX\]\]/)).toBeTruthy();
     });
   });
 

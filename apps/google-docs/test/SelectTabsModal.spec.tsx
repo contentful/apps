@@ -1,26 +1,46 @@
-import { useState } from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import React, { useState } from 'react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { Modal } from '@contentful/f36-components';
 import { SelectTabsModal } from '../src/locations/Page/components/modals/step_3/SelectTabsModal';
 import type { DocumentTabProps } from '../src/utils/types';
 
 const onContinue = vi.fn();
 const onClose = vi.fn();
 
-const ModalWithState = (props: Record<string, unknown> = {}) => {
-  const [availableTabs, setAvailableTabs] = useState<DocumentTabProps[]>([]);
+const MOCK_TABS: DocumentTabProps[] = [
+  { tabId: 'tab-1', tabTitle: 'Introduction' },
+  { tabId: 'tab-2', tabTitle: 'Chapter 1' },
+  { tabId: 'tab-3', tabTitle: 'Chapter 2' },
+  { tabId: 'tab-4', tabTitle: 'Appendix' },
+  { tabId: 'tab-5', tabTitle: 'References' },
+  { tabId: 'tab-6', tabTitle: 'Chapter 3' },
+  { tabId: 'tab-7', tabTitle: 'Chapter 4' },
+  { tabId: 'tab-8', tabTitle: 'Long long label 1' },
+  { tabId: 'tab-9', tabTitle: 'Chapter 6' },
+  { tabId: 'tab-10', tabTitle: 'Chapter 7' },
+  { tabId: 'tab-11', tabTitle: 'Chapter 8' },
+  { tabId: 'tab-12', tabTitle: 'Chapter 9' },
+  { tabId: 'tab-13', tabTitle: 'Long long label 2' },
+];
+
+const ModalWithState = (props: { isShown?: boolean } = {}) => {
+  const { isShown = true } = props;
+  const [availableTabs, setAvailableTabs] = useState<DocumentTabProps[]>(MOCK_TABS);
   const [selectedTabs, setSelectedTabs] = useState<DocumentTabProps[]>([]);
   return (
-    <SelectTabsModal
-      isOpen={true}
-      onContinue={onContinue}
-      onClose={onClose}
-      availableTabs={availableTabs}
-      setAvailableTabs={setAvailableTabs}
-      selectedTabs={selectedTabs}
-      setSelectedTabs={setSelectedTabs}
-      {...props}
-    />
+    <Modal isShown={isShown} onClose={() => {}} size="large">
+      {() => (
+        <SelectTabsModal
+          onContinue={onContinue}
+          onClose={onClose}
+          availableTabs={availableTabs}
+          setAvailableTabs={setAvailableTabs}
+          selectedTabs={selectedTabs}
+          setSelectedTabs={setSelectedTabs}
+        />
+      )}
+    </Modal>
   );
 };
 
@@ -32,14 +52,26 @@ const selectTab = async (tabId: string) => {
   selectYesSelectSpecificTabs();
 
   await waitFor(() => {
-    fireEvent.click(screen.getByRole('button', { name: 'Toggle Multiselect' }));
+    expect(screen.getByRole('button', { name: /toggle multiselect/i })).toBeTruthy();
+  });
+
+  await act(async () => {
+    fireEvent.click(screen.getByRole('button', { name: /toggle multiselect/i }));
+  });
+
+  await waitFor(() => {
+    expect(
+      document.querySelector(`[data-test-id="cf-multiselect-list-item-${tabId}"]`)
+    ).toBeTruthy();
   });
 
   const item = document.querySelector(`[data-test-id="cf-multiselect-list-item-${tabId}"]`);
   const el = item?.closest('label')?.querySelector('input') as HTMLInputElement | null;
 
   if (el) {
-    fireEvent.click(el);
+    await act(async () => {
+      fireEvent.click(el);
+    });
   }
 };
 
@@ -70,8 +102,8 @@ describe('SelectTabsModal', () => {
       });
     });
 
-    it('does not render modal content when isOpen is false', async () => {
-      render(<ModalWithState isOpen={false} />);
+    it('does not render modal content when isShown is false', async () => {
+      render(<ModalWithState isShown={false} />);
 
       await waitFor(() => {
         expect(screen.queryByText(/Would you like to select which tabs should be used/)).toBeNull();
@@ -83,7 +115,13 @@ describe('SelectTabsModal', () => {
 
       selectYesSelectSpecificTabs();
 
-      fireEvent.click(screen.getByRole('button', { name: 'Toggle Multiselect' }));
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /toggle multiselect/i })).toBeTruthy();
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: /toggle multiselect/i }));
+      });
 
       await waitFor(() => {
         expect(
@@ -101,7 +139,7 @@ describe('SelectTabsModal', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 
       await waitFor(() => {
-        expect(screen.getByText('Please select an option.')).toBeTruthy();
+        expect(screen.getByText('You must select an option.')).toBeTruthy();
       });
     });
 
