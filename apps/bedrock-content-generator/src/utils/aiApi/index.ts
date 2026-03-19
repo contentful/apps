@@ -15,8 +15,11 @@ class AI {
   private bedrockClient: BedrockClient;
   private bedrockRuntimeClient: BedrockRuntimeClient;
 
+  private region: string;
+
   constructor(accessKeyID: string, secretAccessKey: string, region: string, model?: BedrockModel) {
     this.decoder = new TextDecoder('utf-8');
+    this.region = region;
 
     const config = {
       region,
@@ -40,9 +43,10 @@ class AI {
     prompt: string
   ): Promise<AsyncGenerator<string, void, unknown> | undefined> => {
     const model = this.model!;
-    console.log(`modelId: ${model.id}`);
+    const invokeInput = model.invokeCommand(systemPrompt, prompt, 2048, this.region);
+    console.log(`modelId: ${invokeInput.modelId}`);
     const stream = await this.bedrockRuntimeClient.send(
-      new InvokeModelWithResponseStreamCommand(model.invokeCommand(systemPrompt, prompt, 2048))
+      new InvokeModelWithResponseStreamCommand(invokeInput)
     );
 
     if (!stream.body) return;
@@ -74,7 +78,8 @@ class AI {
   ) => {
     try {
       console.log(model);
-      await this.bedrockRuntimeClient.send(new InvokeModelCommand(model.invokeCommand('', '', 1)));
+      const invokeInput = model.invokeCommand('', '', 1, this.region);
+      await this.bedrockRuntimeClient.send(new InvokeModelCommand(invokeInput));
     } catch (e: unknown) {
       if (!(e instanceof Error)) {
         return Error('An unexpected error has occurred');
