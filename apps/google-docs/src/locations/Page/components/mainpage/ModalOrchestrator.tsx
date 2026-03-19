@@ -5,9 +5,11 @@ import { useModalManagement, ModalType } from '../../../../hooks/useModalManagem
 import { useProgressTracking } from '../../../../hooks/useProgressTracking';
 import { ErrorModal } from '../modals/ErrorModal';
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
-import { ContentTypePickerModal } from '../modals/step_2/SelectContentTypeModal';
 import { LoadingModal } from '../modals/LoadingModal';
 import { ERROR_MESSAGES } from '../../../../utils/constants/messages';
+import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
+import { DocumentTabProps } from '../../../../utils/types';
+import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
@@ -26,6 +28,10 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setDocumentId,
       selectedContentTypes,
       setSelectedContentTypes,
+      availableTabs,
+      setAvailableTabs,
+      selectedTabs,
+      setSelectedTabs,
       hasProgress,
       resetProgress: resetProgressTracking,
       pendingCloseAction,
@@ -41,6 +47,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       resetProgressTracking();
       closeModal(ModalType.UPLOAD);
       closeModal(ModalType.CONTENT_TYPE_PICKER);
+      closeModal(ModalType.SELECT_TABS);
     };
 
     const handleUploadModalCloseRequest = (docId?: string) => {
@@ -74,6 +81,18 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       }
     };
 
+    const handleSelectTabsCloseRequest = () => {
+      if (hasProgress) {
+        closeModal(ModalType.SELECT_TABS);
+        setPendingCloseAction(() => () => {
+          resetProgress();
+        });
+        openModal(ModalType.CONFIRM_CANCEL);
+      } else {
+        closeModal(ModalType.SELECT_TABS);
+      }
+    };
+
     const handleConfirmCancel = () => {
       closeModal(ModalType.CONFIRM_CANCEL);
       if (pendingCloseAction) {
@@ -94,7 +113,13 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       // The modal already updates `selectedContentTypes` via `setSelectedContentTypes`, so we don't need to set it here.
       void contentTypeIdsCsv;
       // setSelectedContentTypes(contentTypes);
-      // TODO : open content tabs step
+      openModal(ModalType.SELECT_TABS);
+    };
+
+    const handleSelectTabsContinue = (tabs: DocumentTabProps[]) => {
+      setSelectedTabs(tabs);
+      closeModal(ModalType.SELECT_TABS);
+      // TODO: add preview step and redirect to it, using selectedTabs
     };
 
     const handleErrorPreviewModalClose = () => {
@@ -122,6 +147,16 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           isSubmitting={isSubmitting}
           selectedContentTypes={selectedContentTypes}
           setSelectedContentTypes={setSelectedContentTypes}
+        />
+
+        <SelectTabsModal
+          isOpen={modalStates.isSelectTabsModalOpen}
+          onContinue={handleSelectTabsContinue}
+          onClose={handleSelectTabsCloseRequest}
+          availableTabs={availableTabs}
+          setAvailableTabs={setAvailableTabs}
+          selectedTabs={selectedTabs}
+          setSelectedTabs={setSelectedTabs}
         />
 
         <ConfirmCancelModal
