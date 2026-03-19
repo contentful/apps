@@ -25,9 +25,9 @@ interface SelectTabsModalProps {
   onContinue: (selectedTabs: DocumentTabProps[]) => void;
   onClose: () => void;
   availableTabs: DocumentTabProps[];
-  setAvailableTabs: React.Dispatch<React.SetStateAction<DocumentTabProps[]>>;
+  setAvailableTabs: (tabs: DocumentTabProps[]) => void;
   selectedTabs: DocumentTabProps[];
-  setSelectedTabs: React.Dispatch<React.SetStateAction<DocumentTabProps[]>>;
+  setSelectedTabs: (tabs: DocumentTabProps[]) => void;
 }
 
 const MOCK_TABS: DocumentTabProps[] = [
