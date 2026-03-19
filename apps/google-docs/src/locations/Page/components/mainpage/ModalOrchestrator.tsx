@@ -127,7 +127,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
-      // TODO: add preview step and redirect to it, using selectedTabs
       setFlowStep(FlowStep.LOADING);
     };
 

@@ -2,28 +2,34 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { Modal } from '@contentful/f36-components';
-import { IncludeImagesModal } from './IncludeImagesModal';
+import { IncludeImagesModal } from '../../../../../../src/locations/Page/components/modals/step_4/IncludeImagesModal';
+import React from 'react';
 
 const defaultProps = {
   onContinue: vi.fn(),
   onClose: vi.fn(),
 };
 
-const renderModal = (props = {}) =>
-  render(
-    <Modal isShown={true} onClose={() => {}} size="large">
-      {() => (
-        <IncludeImagesModal
-          includeImages={null}
-          setIncludeImages={function (includeImages: boolean): void {
-            throw new Error('Function not implemented.');
-          }}
-          {...defaultProps}
-          {...props}
-        />
-      )}
-    </Modal>
-  );
+const renderModal = (initialIncludeImages: boolean | null = null, props = {}) => {
+  const TestHarness = () => {
+    const [includeImages, setIncludeImages] = useState<boolean | null>(initialIncludeImages);
+
+    return (
+      <Modal isShown={true} onClose={() => {}} size="large">
+        {() => (
+          <IncludeImagesModal
+            includeImages={includeImages}
+            setIncludeImages={setIncludeImages}
+            {...defaultProps}
+            {...props}
+          />
+        )}
+      </Modal>
+    );
+  };
+
+  return render(<TestHarness />);
+};
 
 describe('IncludeImagesModal', () => {
   beforeEach(() => {
