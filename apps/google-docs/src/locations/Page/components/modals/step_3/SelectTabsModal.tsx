@@ -69,10 +69,10 @@ export const SelectTabsModal = ({
   const showNoRadioSelectedError = hasNoRadioSelected && hasAttemptedSubmit;
 
   useEffect(() => {
-      setAvailableTabs(MOCK_TABS);
-      setSelectedTabs([]);
-      setHasAttemptedSubmit(false);
-      setUseAllTabs(null);
+    setAvailableTabs(MOCK_TABS);
+    setSelectedTabs([]);
+    setHasAttemptedSubmit(false);
+    setUseAllTabs(null);
   }, [setAvailableTabs, setSelectedTabs]);
 
   const handleSelectTab = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,9 +130,7 @@ export const SelectTabsModal = ({
                           key={tab.tabId}
                           value={tab.tabId}
                           itemId={tab.tabId}
-                          isChecked={selectedTabs.some(
-                            (selected) => selected.tabId === tab.tabId
-                          )}
+                          isChecked={selectedTabs.some((selected) => selected.tabId === tab.tabId)}
                           onSelectItem={handleSelectTab}>
                           {tab.tabTitle}
                         </Multiselect.Option>
@@ -163,9 +161,7 @@ export const SelectTabsModal = ({
             <Radio value="true">No, import all tabs</Radio>
           </Radio.Group>
           {showNoRadioSelectedError && (
-            <FormControl.ValidationMessage>
-              Please select an option.
-            </FormControl.ValidationMessage>
+            <FormControl.ValidationMessage>Please select an option.</FormControl.ValidationMessage>
           )}
         </Flex>
       </Modal.Content>
