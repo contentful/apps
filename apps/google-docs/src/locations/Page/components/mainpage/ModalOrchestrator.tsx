@@ -81,6 +81,18 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       }
     };
 
+    const handleSelectTabsCloseRequest = () => {
+      if (hasProgress) {
+        closeModal(ModalType.SELECT_TABS);
+        setPendingCloseAction(() => () => {
+          resetProgress();
+        });
+        openModal(ModalType.CONFIRM_CANCEL);
+      } else {
+        closeModal(ModalType.SELECT_TABS);
+      }
+    };
+
     const handleConfirmCancel = () => {
       closeModal(ModalType.CONFIRM_CANCEL);
       if (pendingCloseAction) {
@@ -108,11 +120,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setSelectedTabs(tabs);
       closeModal(ModalType.SELECT_TABS);
       // TODO: add preview step and redirect to it, using selectedTabs
-    };
-
-    const handleSelectTabsBack = () => {
-      closeModal(ModalType.SELECT_TABS);
-      openModal(ModalType.CONTENT_TYPE_PICKER);
     };
 
     const handleErrorPreviewModalClose = () => {
@@ -145,7 +152,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         <SelectTabsModal
           isOpen={modalStates.isSelectTabsModalOpen}
           onContinue={handleSelectTabsContinue}
-          onClose={() => closeModal(ModalType.SELECT_TABS)}
+          onClose={handleSelectTabsCloseRequest}
           availableTabs={availableTabs}
           setAvailableTabs={setAvailableTabs}
           selectedTabs={selectedTabs}
