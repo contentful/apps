@@ -19,7 +19,7 @@
     "@types/jest": "27.5.0",
     "@types/react": "19.0.10",
     "@types/react-dom": "19.0.4",
-    "jest": "27.5.1",
+    "jest": "30.2.0",
     "react": "19.0.1",
     "react-dom": "19.0.1",
     "rimraf": "3.0.2",
