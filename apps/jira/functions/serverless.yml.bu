@@ -23,7 +23,7 @@ custom:
     securityPolicy: tls_1_2
 provider:
   name: aws
-  runtime: nodejs22.x
+  runtime: nodejs16.x
   stage: '${opt:stage, ''test''}'
   region: us-east-1
   deploymentBucket:

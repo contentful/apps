@@ -1,53 +1,106 @@
-Jira App
-===
+# Jira App
 
-## Local Development
+Contentful app that links entries to Jira issues. Requires the [Contentful Jira companion app](https://marketplace.atlassian.com/apps/1221865/contentful) installed in Jira and this app installed in a Contentful space.
 
-In order to develop locally Jira App you need to run locally both the Jira Contentful 
-Application (living in `jira-app`), and the Lambda functions (in `functions`) which handle 
-[Atlassian's OAuth Flow](https://developer.atlassian.com/server/jira/platform/oauth/).
+---
 
-Technologies involved are:
-* [serverless](https://github.com/serverless/serverless):
-to run the Lambda function on your machine by means of the 
-[offline plugin](https://github.com/dherault/serverless-offline)
-* [ngrok](https://ngrok.com/):
-to create a public URL to be used as OAUTH URI
+## Quick start (first time or after long break)
 
+**Interactive setup** (recommended):
 
-### Launching the script
-
-Launching the application locally namely means
-
+```bash
+cd apps/jira
+npm run setup
 ```
+
+The setup script checks dependencies and `.env`, prints the Atlassian checklist, and can start the dev server. Use it whenever you’re unsure what’s configured.
+
+**Manual one-time setup** is below; for “I just want to run it” see [Running locally](#running-locally).
+
+---
+
+## One-time setup (runbook)
+
+Do this once per machine (or when `.env` / Atlassian app are missing).
+
+### 1. Install dependencies
+
+```bash
+cd apps/jira
+npm install
+cd functions && npm install && cd ..
+```
+
+### 2. Environment (`.env`)
+
+```bash
+cp .env.example .env
+```
+
+Edit `apps/jira/.env` and set:
+
+| Variable | Where to get it |
+|----------|------------------|
+| `NGROK_AUTHTOKEN` | [ngrok dashboard](https://dashboard.ngrok.com/get-started/your-authtoken) (free signup: [signup](https://dashboard.ngrok.com/signup)) |
+| `ATLASSIAN_APP_CLIENT_ID` | [Atlassian Developer Console](https://developer.atlassian.com/console/myapps/) → your app → Settings / Credentials |
+| `ATLASSIAN_APP_CLIENT_SECRET` | Same place as client ID |
+
+### 3. Atlassian app (OAuth)
+
+1. Go to [developer.atlassian.com/console/myapps](https://developer.atlassian.com/console/myapps/) and open (or create) your app.
+2. **Authorization** → **Callback URLs**  
+   Add (replace with your ngrok URL once dev is running):
+   - `https://YOUR_NGROK_URL/test/auth`  
+   The dev server prints the exact URL when you run `npm run dev` (“In Atlassian OAuth callback URL use: …”).
+3. **Permissions** → **Jira API** → add these scopes:
+   - `read:jira-user`
+   - `read:jira-work`
+   - `write:jira-work`
+4. **Save changes.**
+
+---
+
+## Running locally
+
+From `apps/jira`:
+
+```bash
 PORT=1234 npm run dev
 ```
 
-This script expects the following environment variables to be set
+- **Frontend:** http://localhost:1234  
+- **Lambda (serverless-offline):** http://localhost:3000  
+- **Auth callback:** `https://YOUR_NGROK_URL/test/auth` (printed in the terminal)
 
-| Variable                      | Description                                                               |
-| ---                           | ---                                                                       |
-| `ATLASSIAN_APP_CLIENT_ID`     | Client Id of the Atlassian Application you will use for local development |
-| `ATLASSIAN_APP_CLIENT_SECRET` | Client Secret of the same Atlassian Application                           |
+If the ngrok URL changed since last time, update the **Callback URL** in the Atlassian app to match the printed URL.
 
-Parameters above can be retrieved from Atlassian Developer Portal after setting 
-up an Atlassian Application as per the following section.
+---
 
-### Setting up an Atlassian Application
+## Troubleshooting
 
-* Login into your Atlassian Developer account
-* Go [to the apps view](https://developer.atlassian.com/apps)
-* Create a new app
-[![Screen-Shot-2020-09-30-at-14-51-16.png](https://i.postimg.cc/1zyybQLn/Screen-Shot-2020-09-30-at-14-51-16.png)](https://postimg.cc/K1sXgdcx)
-* Add `Jira platform REST API` 
-* Enable all the permissions (this is going to be only local, so doesn't matter)
-* Click on `OAuth 2.0 (3LO)`
-[![Screen-Shot-2020-09-30-at-14-52-55.png](https://i.postimg.cc/8Ph5YtjY/Screen-Shot-2020-09-30-at-14-52-55.png)](https://postimg.cc/qzv4hccc)
-* Paste the Lamba URL you get when you launch development script
-[![Screen-Shot-2020-09-30-at-14-55-16.png](https://i.postimg.cc/zX1DTK0F/Screen-Shot-2020-09-30-at-14-55-16.png)](https://postimg.cc/BtMG0LWj)
-in the Callback URL
-[![Screen-Shot-2020-09-30-at-14-56-29.png](https://i.postimg.cc/rwwk9JWx/Screen-Shot-2020-09-30-at-14-56-29.png)](https://postimg.cc/ZC22b6w5)
+| Symptom | Cause | Fix |
+|--------|--------|-----|
+| **502 from ngrok** | Lambda handler failed (e.g. unsupported runtime). | Runtime is set to `nodejs22.x` for serverless-offline. Restart dev. |
+| **“Unsupported runtime”** in Lambda logs | serverless-offline may not support the chosen runtime. | Ensure `functions/serverless.yml` uses a runtime supported by your serverless-offline version (e.g. `nodejs22.x` for v13.x). |
+| **“redirect_uri is not registered”** | Atlassian received a different callback URL than the one you added. | In Atlassian, set Callback URL to exactly what the dev server prints: `https://YOUR_NGROK_URL/test/auth` (must be `/test/auth`, not `/dev/auth`). |
+| **“scopes have not been added”** | Jira API scopes missing in Atlassian app. | In Atlassian app → Permissions → Jira API, add `read:jira-user`, `read:jira-work`, `write:jira-work`. |
+| **ngrok failed** (no token) | `NGROK_AUTHTOKEN` not set. | Add it to `.env` from [ngrok dashboard](https://dashboard.ngrok.com/get-started/your-authtoken). Or run ngrok manually: `ngrok http 3000`, then `NGROK_URL=https://xxx.ngrok-free.app npm run dev`. |
+| **rimraf: command not found** (Lambda) | Dependencies not installed in `functions`. | Run `cd apps/jira/functions && npm install`. |
+| **Frontend on wrong port** | Vite was using default 3000. | Use `PORT=1234 npm run dev` so the app is on 1234 and Lambda on 3000. |
 
-### Caveats
-* Everytime you restart the development script it regenerates the Ngrok URL, so you need to 
-redo last step of the list above
+---
+
+## Repo layout
+
+- **`jira-app/`** – Contentful UI (Vite + React). Runs in Contentful; talks to Jira REST API and to the Lambda for OAuth.
+- **`functions/`** – Lambda (serverless): OAuth callback and token exchange, `connect.json` for the Jira companion app. Run locally with serverless-offline.
+- **`scripts/dev.js`** – Starts ngrok (if `NGROK_AUTHTOKEN` set), patches serverless.yml for serverless-offline, runs Lambda + app.
+- **`scripts/setup.js`** – Interactive setup: checks deps and `.env`, prints Atlassian checklist, optionally starts dev.
+
+---
+
+## Maintenance notes
+
+- **Runtime:** Local and production use `nodejs22.x`; serverless-offline 13.x supports it.
+- **Callback URL:** Always use `/test/auth` (not `/dev/auth`) in serverless config for the test stage; serverless-offline mounts routes under the stage name.
+- **OAuth credentials:** Stored in `.env` (gitignored). For production, the app uses AWS Secrets Manager; the deploy pipeline and roles are outside this repo.
