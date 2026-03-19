@@ -85,9 +85,9 @@ export const SelectTabsModal = ({
     const { checked, value } = e.target;
     if (checked) {
       const tab = availableTabs.find((t) => t.tabId === value);
-      if (tab) setSelectedTabs((prev) => [...prev, tab]);
+      if (tab) setSelectedTabs([...selectedTabs, tab]);
     } else {
-      setSelectedTabs((prev) => prev.filter((t) => t.tabId !== value));
+      setSelectedTabs(selectedTabs.filter((t) => t.tabId !== value));
     }
   };
 
@@ -158,7 +158,7 @@ export const SelectTabsModal = ({
                             key={tab.tabId}
                             label={truncateLabel(tab.tabTitle)}
                             onClose={() =>
-                              setSelectedTabs((prev) => prev.filter((t) => t.tabId !== tab.tabId))
+                              setSelectedTabs(selectedTabs.filter((t) => t.tabId !== tab.tabId))
                             }
                           />
                         ))}
