@@ -18,12 +18,14 @@ describe('ConfigScreen', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSdk.app.getCurrentState.mockResolvedValue({});
+    mockSdk.app.getParameters.mockResolvedValue({});
     mockSdk.app.setReady.mockResolvedValue();
     mockSdk.app.onConfigure.mockImplementation((cb: () => Promise<any>) => {
       // Simulate Contentful's onConfigure callback registration
       mockSdk._onConfigure = cb;
     });
     mockSdk.ids.space = 'test-space';
+    mockSdk.parameters.installation.slugFieldId = 'slug';
     mockSdk.cma = mockCma;
     mockCma.contentType = {
       getMany: vi.fn().mockResolvedValue({ items: [] }),
@@ -40,6 +42,8 @@ describe('ConfigScreen', () => {
       expect(screen.getByText('Set up Closest Preview')).toBeInTheDocument();
       expect(screen.getByText('Assign content types')).toBeInTheDocument();
       expect(screen.getByText('Content types')).toBeInTheDocument();
+      expect(screen.getByText('Preview field')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('slug')).toBeInTheDocument();
       expect(
         screen.getByText(
           'Closest Preview allows users to quickly navigate to the closest page level element for a given entry in order to preview the item.'
@@ -106,6 +110,9 @@ describe('ConfigScreen', () => {
     });
 
     expect(result).toEqual({
+      parameters: {
+        slugFieldId: 'slug',
+      },
       targetState: {
         EditorInterface: {
           blogPost: {
@@ -127,10 +134,56 @@ describe('ConfigScreen', () => {
     });
 
     expect(result).toEqual({
+      parameters: {
+        slugFieldId: 'slug',
+      },
       targetState: {
         EditorInterface: {},
       },
     });
+  });
+
+  it('loads and saves a custom preview field id', async () => {
+    mockSdk.app.getParameters.mockResolvedValue({
+      slugFieldId: 'url',
+    });
+
+    render(<ConfigScreen />);
+
+    expect(await screen.findByDisplayValue('url')).toBeInTheDocument();
+
+    const result = await act(async () => {
+      return await saveAppInstallation();
+    });
+
+    expect(result).toEqual({
+      parameters: {
+        slugFieldId: 'url',
+      },
+      targetState: {
+        EditorInterface: {},
+      },
+    });
+  });
+
+  it('passes the custom preview field id into content type filtering', async () => {
+    mockSdk.app.getParameters.mockResolvedValue({
+      slugFieldId: 'url',
+    });
+    mockCma.contentType.getMany.mockResolvedValue({
+      items: [
+        { sys: { id: 'page' }, name: 'Page', fields: [{ id: 'url', type: 'Symbol' }] },
+        { sys: { id: 'component' }, name: 'Component', fields: [{ id: 'title', type: 'Symbol' }] },
+      ],
+    });
+
+    render(<ConfigScreen />);
+
+    const autocomplete = await screen.findByPlaceholderText('Search content types');
+    await userEvent.click(autocomplete);
+
+    expect(screen.queryByText('Page')).not.toBeInTheDocument();
+    expect(await screen.findByText('Component')).toBeInTheDocument();
   });
 
   it('registers onConfigure callback on mount', async () => {
