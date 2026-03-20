@@ -4,7 +4,7 @@ export interface ContentType {
 }
 
 export interface AppInstallationParameters {
-  slugFieldId: string;
+  slugFieldId?: string;
 }
 
 export const DEFAULT_SLUG_FIELD_ID = 'slug';

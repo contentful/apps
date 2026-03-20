@@ -21,6 +21,7 @@ const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({
     slugFieldId: DEFAULT_SLUG_FIELD_ID,
   });
+  const normalizedSlugFieldId = parameters.slugFieldId?.trim() || DEFAULT_SLUG_FIELD_ID;
 
   const onConfigure = useCallback(async () => {
     const editorInterface = selectedContentTypes.reduce((acc, contentType) => {
@@ -36,14 +37,14 @@ const ConfigScreen = () => {
 
     return {
       parameters: {
-        slugFieldId: parameters.slugFieldId.trim() || DEFAULT_SLUG_FIELD_ID,
+        slugFieldId: normalizedSlugFieldId,
       },
       targetState: {
         ...currentState,
         EditorInterface: editorInterface,
       },
     };
-  }, [parameters.slugFieldId, sdk, selectedContentTypes]);
+  }, [normalizedSlugFieldId, sdk, selectedContentTypes]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -51,15 +52,20 @@ const ConfigScreen = () => {
 
   useEffect(() => {
     (async () => {
-      const currentParameters = await sdk.app.getParameters<AppInstallationParameters>();
+      try {
+        const currentParameters = await sdk.app.getParameters<AppInstallationParameters>();
 
-      if (currentParameters) {
-        setParameters({
-          slugFieldId: currentParameters.slugFieldId || DEFAULT_SLUG_FIELD_ID,
-        });
+        if (currentParameters) {
+          setParameters({
+            slugFieldId: currentParameters.slugFieldId || DEFAULT_SLUG_FIELD_ID,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load app installation parameters:', error);
+        sdk.notifier.error('Failed to load Closest Preview configuration. Please try again.');
+      } finally {
+        sdk.app.setReady();
       }
-
-      sdk.app.setReady();
     })();
   }, [sdk]);
 
@@ -113,14 +119,14 @@ const ConfigScreen = () => {
               <ContentTypeMultiSelect
                 selectedContentTypes={selectedContentTypes}
                 setSelectedContentTypes={setSelectedContentTypes}
-                slugFieldId={parameters.slugFieldId.trim() || DEFAULT_SLUG_FIELD_ID}
+                slugFieldId={normalizedSlugFieldId}
                 sdk={sdk}
                 cma={sdk.cma}
               />
             </FormControl>
           </Box>
           <Note variant="neutral">
-            This app treats content types with a populated <code>{parameters.slugFieldId}</code>{' '}
+            This app treats content types with a populated <code>{normalizedSlugFieldId}</code>{' '}
             field as previewable pages. Leave the default value if your page entries already use{' '}
             <code>{DEFAULT_SLUG_FIELD_ID}</code>.
           </Note>

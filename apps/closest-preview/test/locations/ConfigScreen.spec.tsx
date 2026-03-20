@@ -182,8 +182,23 @@ describe('ConfigScreen', () => {
     const autocomplete = await screen.findByPlaceholderText('Search content types');
     await userEvent.click(autocomplete);
 
-    expect(screen.queryByText('Page')).not.toBeInTheDocument();
     expect(await screen.findByText('Component')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText('Page')).not.toBeInTheDocument();
+    });
+  });
+
+  it('still becomes ready when loading parameters fails', async () => {
+    mockSdk.app.getParameters.mockRejectedValue(new Error('boom'));
+
+    render(<ConfigScreen />);
+
+    await waitFor(() => {
+      expect(mockSdk.notifier.error).toHaveBeenCalledWith(
+        'Failed to load Closest Preview configuration. Please try again.'
+      );
+      expect(mockSdk.app.setReady).toHaveBeenCalled();
+    });
   });
 
   it('registers onConfigure callback on mount', async () => {
