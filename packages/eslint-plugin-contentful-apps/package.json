@@ -16,6 +16,10 @@
     "url": "https://github.com/contentful/apps.git",
     "directory": "packages/eslint-plugin-contentful-apps"
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com/"
+  },
   "author": "Contentful GmbH",
   "license": "MIT",
   "description": "Eslint plugin for Contentful App Framework Apps",

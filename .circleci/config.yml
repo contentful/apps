@@ -13,11 +13,17 @@ commands:
       - run:
           name: Setup GitHub packages
           command: |
+            if [ -f ./.npmrc ]; then mv ./.npmrc ./.npmrc.bak; fi
             echo "//npm.pkg.github.com/:_authToken=${GITHUB_PACKAGES_WRITE_TOKEN}" > ~/.npmrc
             echo "@contentful:registry=https://npm.pkg.github.com" >> ~/.npmrc
       - run:
           name: Publish packages
           command: npm run publish-packages
+      - run:
+          name: Restore .npmrc
+          when: always
+          command: |
+            if [ -f ./.npmrc.bak ]; then mv ./.npmrc.bak ./.npmrc; fi
 
   set_since:
     steps:
