@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.1](https://github.com/contentful/apps/compare/@contentful/dam-app-base@4.0.0...@contentful/dam-app-base@4.0.1) (2026-03-20)
+
+### Bug Fixes
+
+- restore GitHub Packages publishing for [@contentful](https://github.com/contentful) packages [EXT-00] ([#10709](https://github.com/contentful/apps/issues/10709)) ([46e2959](https://github.com/contentful/apps/commit/46e2959833816488191e352d6c041127103b5b7c))
+
 # [4.0.0](https://github.com/contentful/apps/compare/@contentful/dam-app-base@3.0.17...@contentful/dam-app-base@4.0.0) (2026-02-02)
 
 - feat(dam-app-base)!: upgrade to React 19 and Forma 36 v5 (#10510) ([232eecf](https://github.com/contentful/apps/commit/232eecf345b0c63861422c55d19a2e0121652da4)), closes [#10510](https://github.com/contentful/apps/issues/10510)
