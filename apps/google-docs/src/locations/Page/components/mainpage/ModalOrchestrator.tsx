@@ -1,8 +1,8 @@
 import { forwardRef, useImperativeHandle, useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { Modal } from '@contentful/f36-components';
+import { ContentTypeProps } from 'contentful-management';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
-import { useProgressTracking } from '../../../../hooks/useProgressTracking';
 import { ErrorModal } from '../modals/ErrorModal';
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
 import { LoadingModal } from '../modals/LoadingModal';
@@ -37,43 +37,38 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
     const [isErrorPreviewModalOpen, setIsErrorPreviewModalOpen] = useState(false);
     const [flowStep, setFlowStep] = useState<FlowStep | null>(null);
-    const [stepToRestoreAfterCancel, setStepToRestoreAfterCancel] = useState<FlowStep | null>(null);
-    const {
-      setDocumentId,
-      selectedContentTypes,
-      setSelectedContentTypes,
-      availableTabs,
-      setAvailableTabs,
-      selectedTabs,
-      setSelectedTabs,
-      hasProgress,
-      resetProgress: resetProgressTracking,
-      pendingCloseAction,
-      setPendingCloseAction,
-      includeImages,
-      setIncludeImages,
-    } = useProgressTracking();
+    const [documentId, setDocumentId] = useState<string>('');
+    const [selectedContentTypes, setSelectedContentTypes] = useState<ContentTypeProps[]>([]);
+    const [availableTabs, setAvailableTabs] = useState<DocumentTabProps[]>([]);
+    const [selectedTabs, setSelectedTabs] = useState<DocumentTabProps[]>([]);
+    const [useAllTabs, setUseAllTabs] = useState<boolean | null>(null);
+    const [includeImages, setIncludeImages] = useState<boolean | null>(null);
+
+    const hasProgressToLose = documentId.trim().length > 0;
 
     useImperativeHandle(ref, () => ({
       startFlow: () => setIsUploadModalOpen(true),
     }));
 
     const resetProgress = () => {
-      resetProgressTracking();
+      setDocumentId('');
+      setSelectedContentTypes([]);
+      setAvailableTabs([]);
+      setSelectedTabs([]);
+      setUseAllTabs(null);
+      setIncludeImages(null);
       setFlowStep(null);
       setIsUploadModalOpen(false);
     };
 
-    const requestDiscardFlow = (restoreStep: FlowStep | null = null) => {
-      setFlowStep(null);
-      if (!hasProgress) {
-        setStepToRestoreAfterCancel(null);
-        return;
-      }
-
-      setStepToRestoreAfterCancel(restoreStep);
-      setPendingCloseAction(() => resetProgress);
+    const showDiscardConfirmation = () => {
+      if (!hasProgressToLose) return;
       setIsConfirmCancelModalOpen(true);
+    };
+
+    const closeModalAndReset = (setOpen: (open: boolean) => void) => () => {
+      setOpen(false);
+      resetProgress();
     };
 
     const handleUploadModalCloseRequest = (docId?: string) => {
@@ -85,25 +80,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       }
 
       setIsUploadModalOpen(false);
-      requestDiscardFlow();
-    };
-
-    const handleConfirmCancel = () => {
-      setIsConfirmCancelModalOpen(false);
-      if (pendingCloseAction) {
-        pendingCloseAction();
-        setPendingCloseAction(null);
-      }
-      setStepToRestoreAfterCancel(null);
-    };
-
-    const handleKeepCreating = () => {
-      setIsConfirmCancelModalOpen(false);
-      setPendingCloseAction(null);
-      if (stepToRestoreAfterCancel) {
-        setFlowStep(stepToRestoreAfterCancel);
-      }
-      setStepToRestoreAfterCancel(null);
+      showDiscardConfirmation();
     };
 
     const handleContentTypeContinue = (contentTypeIdsCsv: string) => {
@@ -130,29 +107,11 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setFlowStep(FlowStep.LOADING);
     };
 
-    const handleStepCancel = (step: FlowStep | null) => {
-      if (step === null) return;
-      requestDiscardFlow(step);
-    };
-
-    const closeStep = (step: FlowStep) => () => {
-      handleStepCancel(step);
-    };
-
     const handleIncludeImagesContinue = (includeImages: boolean) => {
       // TODO: Wire `includeImages` into Agents resume endpoint payload once
       // suspend/resume APIs are available in the frontend.
       setIncludeImages(includeImages);
       setFlowStep(FlowStep.LOADING);
-    };
-
-    const handleErrorPreviewModalClose = () => {
-      setIsErrorPreviewModalOpen(false);
-      resetProgress();
-    };
-
-    const handleErrorPreviewModalRetry = () => {
-      setIsErrorPreviewModalOpen(false);
     };
 
     const renderFlowStep = () => {
@@ -161,7 +120,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           return (
             <ContentTypePickerModal
               sdk={sdk}
-              onClose={closeStep(FlowStep.CONTENT_TYPE_PICKER)}
+              onClose={showDiscardConfirmation}
               onContinue={handleContentTypeContinue}
               selectedContentTypes={selectedContentTypes}
               setSelectedContentTypes={setSelectedContentTypes}
@@ -171,11 +130,13 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           return (
             <SelectTabsModal
               onContinue={handleSelectTabsContinue}
-              onClose={() => handleStepCancel(FlowStep.SELECT_TABS)}
+              onClose={showDiscardConfirmation}
               availableTabs={availableTabs}
               setAvailableTabs={setAvailableTabs}
               selectedTabs={selectedTabs}
               setSelectedTabs={setSelectedTabs}
+              useAllTabs={useAllTabs}
+              setUseAllTabs={setUseAllTabs}
             />
           );
         case FlowStep.INCLUDE_IMAGES:
@@ -184,7 +145,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
               includeImages={includeImages}
               setIncludeImages={setIncludeImages}
               onContinue={handleIncludeImagesContinue}
-              onClose={closeStep(FlowStep.INCLUDE_IMAGES)}
+              onClose={showDiscardConfirmation}
             />
           );
         case FlowStep.LOADING:
@@ -192,7 +153,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
             <LoadingModal
               step="reviewingContentTypes"
               title="Preparing your preview"
-              onClose={closeStep(FlowStep.LOADING)}
+              onClose={showDiscardConfirmation}
               contentTypeCount={selectedContentTypes.length}
             />
           );
@@ -211,7 +172,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
         <Modal
           isShown={flowStep !== null}
-          onClose={() => handleStepCancel(flowStep)}
+          onClose={showDiscardConfirmation}
           size={'large'}
           shouldCloseOnOverlayClick={false}
           shouldCloseOnEscapePress={flowStep !== FlowStep.LOADING}>
@@ -220,16 +181,16 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
         <ConfirmCancelModal
           isOpen={isConfirmCancelModalOpen}
-          onConfirm={handleConfirmCancel}
-          onCancel={handleKeepCreating}
+          onConfirm={closeModalAndReset(setIsConfirmCancelModalOpen)}
+          onCancel={() => setIsConfirmCancelModalOpen(false)}
         />
 
         <ErrorModal
           isOpen={isErrorPreviewModalOpen}
-          onClose={handleErrorPreviewModalClose}
+          onClose={closeModalAndReset(setIsErrorPreviewModalOpen)}
           title="Unable to generate preview"
           message={ERROR_MESSAGES.GENERIC_ERROR}
-          onTryAgain={handleErrorPreviewModalRetry}
+          onTryAgain={() => setIsErrorPreviewModalOpen(false)}
         />
       </>
     );

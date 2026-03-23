@@ -92,7 +92,7 @@ describe('IncludeImagesModal', () => {
 
     await waitFor(() => {
       expect(defaultProps.onContinue).not.toHaveBeenCalled();
-      expect(screen.getByText('You must choose an option.')).toBeTruthy();
+      expect(screen.getByText('You must select an option.')).toBeTruthy();
     });
   });
 });

@@ -27,6 +27,8 @@ interface SelectTabsModalProps {
   setAvailableTabs: (tabs: DocumentTabProps[]) => void;
   selectedTabs: DocumentTabProps[];
   setSelectedTabs: (tabs: DocumentTabProps[]) => void;
+  useAllTabs: boolean | null;
+  setUseAllTabs: (value: boolean | null) => void;
 }
 
 const MOCK_TABS: DocumentTabProps[] = [
@@ -52,9 +54,10 @@ export const SelectTabsModal = ({
   setAvailableTabs,
   selectedTabs,
   setSelectedTabs,
+  useAllTabs,
+  setUseAllTabs,
 }: SelectTabsModalProps) => {
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false);
-  const [useAllTabs, setUseAllTabs] = useState<boolean | null>(null);
   const multiselectListRef = useMultiselectScrollReflow(selectedTabs);
 
   const isInvalidSelection = useMemo(
@@ -70,10 +73,8 @@ export const SelectTabsModal = ({
 
   useEffect(() => {
     setAvailableTabs(MOCK_TABS);
-    setSelectedTabs([]);
     setHasAttemptedSubmit(false);
-    setUseAllTabs(null);
-  }, [setAvailableTabs, setSelectedTabs]);
+  }, [setAvailableTabs]);
 
   const handleSelectTab = (e: React.ChangeEvent<HTMLInputElement>) => {
     setHasAttemptedSubmit(false);
