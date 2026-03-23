@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.46](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.45...@contentful/ecommerce-app-base@4.0.46) (2026-03-20)
+
+### Bug Fixes
+
+- restore GitHub Packages publishing for [@contentful](https://github.com/contentful) packages [EXT-00] ([#10709](https://github.com/contentful/apps/issues/10709)) ([46e2959](https://github.com/contentful/apps/commit/46e2959833816488191e352d6c041127103b5b7c))
+
 ## [4.0.45](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.42...@contentful/ecommerce-app-base@4.0.45) (2026-01-09)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base
