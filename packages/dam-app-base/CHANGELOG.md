@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.2](https://github.com/contentful/apps/compare/@contentful/dam-app-base@4.0.1...@contentful/dam-app-base@4.0.2) (2026-03-24)
+
+### Bug Fixes
+
+- update LICENSE copyright years and add missing LICENSE file [EXT-00] ([#10733](https://github.com/contentful/apps/issues/10733)) ([9698d35](https://github.com/contentful/apps/commit/9698d351999aa34fc422ec9e71a346eb945f5083))
+
 ## [4.0.1](https://github.com/contentful/apps/compare/@contentful/dam-app-base@4.0.0...@contentful/dam-app-base@4.0.1) (2026-03-20)
 
 ### Bug Fixes
