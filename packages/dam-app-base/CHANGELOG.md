@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.3](https://github.com/contentful/apps/compare/@contentful/dam-app-base@4.0.2...@contentful/dam-app-base@4.0.3) (2026-03-24)
+
+### Bug Fixes
+
+- **dam-app-base:** remove scoped registry override, fix warning message typo [EXT-00] ([#10734](https://github.com/contentful/apps/issues/10734)) ([8932c7a](https://github.com/contentful/apps/commit/8932c7a844f6261cc82d93cf1634fea17cad5473))
+
 ## [4.0.2](https://github.com/contentful/apps/compare/@contentful/dam-app-base@4.0.1...@contentful/dam-app-base@4.0.2) (2026-03-24)
 
 ### Bug Fixes
