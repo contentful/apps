@@ -8,7 +8,7 @@ import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
 import { LoadingModal } from '../modals/LoadingModal';
 import { ERROR_MESSAGES } from '../../../../utils/constants/messages';
 import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
-import { DocumentTabProps } from '../../../../utils/types';
+import { DocumentTabProps, DocumentScopeSuspendPayload } from '../../../../utils/types';
 import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
 import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
 import { useWorkflowAgent } from '../../../../hooks/useWorkflowAgent';
@@ -29,9 +29,6 @@ interface ModalOrchestratorProps {
   oauthToken: string;
 }
 
-const MOCK_HAS_PENDING_IMAGES_REVIEW = true;
-const MOCK_TABS_ENABLED = true;
-
 export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrchestratorProps>(
   ({ sdk, oauthToken }, ref) => {
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -44,7 +41,8 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const [selectedTabs, setSelectedTabs] = useState<DocumentTabProps[]>([]);
     const [useAllTabs, setUseAllTabs] = useState<boolean | null>(null);
     const [includeImages, setIncludeImages] = useState<boolean | null>(null);
-    const { startWorkflow, error: workflowError } = useWorkflowAgent({
+    const [requiresImageSelection, setRequiresImageSelection] = useState(false);
+    const { startWorkflow } = useWorkflowAgent({
       sdk,
       documentId,
       oauthToken,
@@ -63,6 +61,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setSelectedTabs([]);
       setUseAllTabs(null);
       setIncludeImages(null);
+      setRequiresImageSelection(false);
       setFlowStep(null);
       setIsUploadModalOpen(false);
     };
@@ -89,11 +88,42 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       showDiscardConfirmation();
     };
 
+    const showDocumentScopeReview = (suspendPayload?: DocumentScopeSuspendPayload) => {
+      setAvailableTabs(
+        (suspendPayload?.tabs ?? []).map((tab) => ({
+          tabId: tab.id ?? '',
+          tabTitle: tab.title ?? '',
+        }))
+      );
+      setSelectedTabs([]);
+      setUseAllTabs(null);
+      setIncludeImages(null);
+      setRequiresImageSelection(Boolean(suspendPayload?.requiresImageSelection));
+
+      if (suspendPayload?.requiresTabSelection) {
+        setFlowStep(FlowStep.SELECT_TABS);
+        return;
+      }
+
+      if (suspendPayload?.requiresImageSelection) {
+        setFlowStep(FlowStep.INCLUDE_IMAGES);
+        return;
+      }
+
+      setFlowStep(null);
+    };
+
     const handleContentTypeContinue = async (contentTypeIds: string[]) => {
       setFlowStep(FlowStep.LOADING);
 
       try {
-        await startWorkflow(contentTypeIds);
+        const workflowRun = await startWorkflow(contentTypeIds);
+
+        setFlowStep(FlowStep.LOADING);
+        if (workflowRun.status === 'PENDING_REVIEW') {
+          showDocumentScopeReview(workflowRun.suspendPayload);
+          return;
+        }
       } catch (error) {
         // eslint-disable-next-line no-console -- developer workflow logging
         console.error('Failed to start Google Docs workflow:', error);
@@ -103,9 +133,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     };
 
     const handleSelectTabsContinue = (_selectedTabs: DocumentTabProps[]) => {
-      // TODO: Replace this mock branch with Agents API run-status polling when
-      // `PENDING_REVIEW` / suspend state is available in the frontend.
-      if (MOCK_HAS_PENDING_IMAGES_REVIEW) {
+      if (requiresImageSelection) {
         setFlowStep(FlowStep.INCLUDE_IMAGES);
         return;
       }

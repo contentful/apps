@@ -7,6 +7,7 @@ import {
   USE_LOCAL_AGENTS_API,
   WORKFLOW_AGENT_ID,
 } from '../utils/constants/agent';
+import { AgentRunMessage, DocumentScopeSuspendPayload, WorkflowRunResult } from '../utils/types';
 
 interface UseWorkflowParams {
   sdk: PageAppSDK;
@@ -17,7 +18,7 @@ interface UseWorkflowParams {
 interface WorkflowHook {
   isAnalyzing: boolean;
   error: string | null;
-  startWorkflow: (contentTypeIds: string[]) => Promise<void>;
+  startWorkflow: (contentTypeIds: string[]) => Promise<WorkflowRunResult>;
 }
 
 type WorkflowRunStatus = 'IN_PROGRESS' | 'FAILED' | 'COMPLETED' | 'PENDING_REVIEW' | 'DRAFT';
@@ -50,15 +51,7 @@ interface AgentRunData {
     suspendPayload?: Record<string, unknown>;
   };
   payload?: string;
-  messages?: Array<{
-    role: string;
-    content?: {
-      parts?: Array<{
-        type: string;
-        text?: string;
-      }>;
-    };
-  }>;
+  messages?: AgentRunMessage[];
   error?: Record<string, unknown>;
 }
 
@@ -66,6 +59,120 @@ const wait = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
 };
 
+const getRunStatus = (runData: AgentRunData): WorkflowRunStatus | null => {
+  return runData.sys?.status ?? runData.metadata?.status ?? null;
+};
+
+const getAgentPayload = (runData: AgentRunData): string | null => {
+  if (runData.payload && typeof runData.payload === 'string') {
+    return runData.payload;
+  }
+
+  if (!runData.messages || !Array.isArray(runData.messages)) {
+    return null;
+  }
+
+  const assistantMessage = runData.messages.find((message) => message.role === 'assistant');
+  if (!assistantMessage?.content?.parts) {
+    return null;
+  }
+
+  const textPart = assistantMessage.content.parts.find((part) => part.type === 'text' && part.text);
+  return textPart?.text || null;
+};
+
+const getRunErrorMessage = (runData: AgentRunData): string => {
+  const payload = getAgentPayload(runData);
+  if (payload) {
+    return payload;
+  }
+
+  const errorMessage = runData.error?.message;
+  if (typeof errorMessage === 'string' && errorMessage.trim().length > 0) {
+    return errorMessage;
+  }
+
+  return 'Workflow failed';
+};
+
+const getSuspendPayload = (runData: AgentRunData): DocumentScopeSuspendPayload | undefined =>
+  runData.metadata?.suspendPayload as DocumentScopeSuspendPayload | undefined;
+
+const getWorkflowRunResult = (runData: AgentRunData, runId: string): WorkflowRunResult | null => {
+  const status = getRunStatus(runData);
+
+  switch (status) {
+    case 'FAILED':
+      throw new Error(getRunErrorMessage(runData));
+
+    case 'PENDING_REVIEW': {
+      const suspendPayload = getSuspendPayload(runData);
+      if (!suspendPayload) {
+        throw new Error('Workflow paused for review, but suspend payload was missing.');
+      }
+
+      return {
+        status,
+        runId,
+        suspendPayload,
+        messages: runData.messages ?? [],
+      };
+    }
+
+    case 'COMPLETED':
+      return {
+        status,
+        runId,
+        messages: runData.messages ?? [],
+      };
+
+    default:
+      return null;
+  }
+};
+
+const fetchRunData = async (
+  sdk: PageAppSDK,
+  spaceId: string,
+  environmentId: string,
+  runId: string
+): Promise<AgentRunData | null> => {
+  if (USE_LOCAL_AGENTS_API) {
+    const response = await fetch(
+      `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}`,
+      {
+        headers: {
+          'x-contentful-enable-alpha-feature': 'agents-api',
+        },
+      }
+    );
+
+    if (response.status === 404) {
+      return null;
+    }
+
+    if (!response.ok) {
+      throw new Error(`Failed to poll agent run: ${response.status} ${response.statusText}`);
+    }
+
+    return (await response.json()) as AgentRunData;
+  }
+
+  try {
+    return (await sdk.cma.agentRun.get({
+      spaceId,
+      environmentId,
+      runId,
+    })) as AgentRunData;
+  } catch (error: unknown) {
+    const err = error as { code?: string };
+    if (err?.code === 'NotFound') {
+      return null;
+    }
+
+    throw error;
+  }
+};
 const startAgentRun = async (
   sdk: PageAppSDK,
   spaceId: string,
@@ -109,51 +216,19 @@ const pollAgentRun = async (
   spaceId: string,
   environmentId: string,
   runId: string
-): Promise<string | null> => {
+): Promise<WorkflowRunResult> => {
   await wait(POLL_INTERVAL_MS);
 
   for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
-    let runData: AgentRunData;
-
-    if (USE_LOCAL_AGENTS_API) {
-      const response = await fetch(
-        `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}`,
-        {
-          headers: {
-            'x-contentful-enable-alpha-feature': 'agents-api',
-          },
-        }
-      );
-
-      if (response.status === 404) {
-        await wait(POLL_INTERVAL_MS);
-        continue;
-      }
-
-      if (!response.ok) {
-        throw new Error(`Failed to poll agent run: ${response.status} ${response.statusText}`);
-      }
-
-      runData = (await response.json()) as AgentRunData;
-    } else {
-      try {
-        runData = (await sdk.cma.agentRun.get({
-          spaceId,
-          environmentId,
-          runId,
-        })) as AgentRunData;
-      } catch (error: unknown) {
-        const err = error as { code?: string };
-        if (err?.code === 'NotFound') {
-          await wait(POLL_INTERVAL_MS);
-          continue;
-        }
-        throw error;
-      }
+    const runData = await fetchRunData(sdk, spaceId, environmentId, runId);
+    if (!runData) {
+      await wait(POLL_INTERVAL_MS);
+      continue;
     }
 
-    if (status === 'PENDING_REVIEW') {
-      console.log('Workflow paused for review. Suspend/resume UI is not wired yet.');
+    const workflowRun = getWorkflowRunResult(runData, runId);
+    if (workflowRun) {
+      return workflowRun;
     }
 
     await wait(POLL_INTERVAL_MS);
@@ -206,10 +281,11 @@ export const useWorkflowAgent = ({
 
       try {
         const runId = await startAgentRun(sdk, spaceId, environmentId, payload, threadId);
-        await pollAgentRun(sdk, spaceId, environmentId, runId);
+        return await pollAgentRun(sdk, spaceId, environmentId, runId);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Workflow failed';
         setError(errorMessage);
+        throw err instanceof Error ? err : new Error(errorMessage);
       } finally {
         setIsAnalyzing(false);
       }
