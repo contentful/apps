@@ -18,10 +18,7 @@ import { truncateLabel } from '../../../../../utils/utils';
 interface ContentTypePickerModalProps {
   sdk: PageAppSDK;
   onClose: () => void;
-  // TEMP workaround: Mastra workflow inputs have issues with string[] in some UIs.
-  // We pass a single comma-separated string of IDs for now.
-  onContinue: (contentTypeIdsCsv: string) => void;
-  // onSelect: (contentTypes: ContentTypeProps[]) => void;
+  onContinue: (contentTypeIds: string[]) => void;
   selectedContentTypes: ContentTypeProps[];
   setSelectedContentTypes: (
     contentTypes: ContentTypeProps[] | ((prev: ContentTypeProps[]) => ContentTypeProps[])
@@ -54,8 +51,8 @@ export const ContentTypePickerModal = ({
 
   const showFetchError = hasFetchError && !isLoading;
 
-  const selectedContentTypeIdsCsv = useMemo(
-    () => selectedContentTypes.map((ct) => ct.sys.id).join(','),
+  const selectedContentTypeIds = useMemo(
+    () => selectedContentTypes.map((ct) => ct.sys.id),
     [selectedContentTypes]
   );
 
@@ -139,8 +136,7 @@ export const ContentTypePickerModal = ({
       setHasAttemptedSubmit(true);
       return;
     }
-    onContinue(selectedContentTypeIdsCsv);
-    // onSelect(selectedContentTypes);
+    onContinue(selectedContentTypeIds);
   };
 
   return (

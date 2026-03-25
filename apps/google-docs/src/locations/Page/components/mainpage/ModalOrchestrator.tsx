@@ -11,6 +11,7 @@ import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 import { DocumentTabProps } from '../../../../utils/types';
 import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
 import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
+import { useWorkflowAgent } from '../../../../hooks/useWorkflowAgent';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
@@ -43,6 +44,11 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const [selectedTabs, setSelectedTabs] = useState<DocumentTabProps[]>([]);
     const [useAllTabs, setUseAllTabs] = useState<boolean | null>(null);
     const [includeImages, setIncludeImages] = useState<boolean | null>(null);
+    const { startWorkflow, error: workflowError } = useWorkflowAgent({
+      sdk,
+      documentId,
+      oauthToken,
+    });
 
     const hasProgressToLose = documentId.trim().length > 0;
 
@@ -83,16 +89,16 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       showDiscardConfirmation();
     };
 
-    const handleContentTypeContinue = (contentTypeIdsCsv: string) => {
-      // TEMP workaround: we pass content type IDs as a comma-separated string to Mastra workflows.
-      // The modal already updates `selectedContentTypes` via `setSelectedContentTypes`, so we don't need to set it here.
-      void contentTypeIdsCsv;
-      // setSelectedContentTypes(contentTypes);
-      if (MOCK_TABS_ENABLED) {
-        setFlowStep(FlowStep.SELECT_TABS);
-        return;
-      } else {
-        handleSelectTabsContinue([]);
+    const handleContentTypeContinue = async (contentTypeIds: string[]) => {
+      setFlowStep(FlowStep.LOADING);
+
+      try {
+        await startWorkflow(contentTypeIds);
+      } catch (error) {
+        // eslint-disable-next-line no-console -- developer workflow logging
+        console.error('Failed to start Google Docs workflow:', error);
+        setFlowStep(null);
+        setIsErrorPreviewModalOpen(true);
       }
     };
 

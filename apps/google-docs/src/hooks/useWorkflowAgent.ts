@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import {
+  LOCAL_AGENTS_API_BASE_URL,
   POLL_INTERVAL_MS,
   MAX_POLL_ATTEMPTS,
   USE_LOCAL_AGENTS_API,
@@ -13,15 +14,41 @@ interface UseWorkflowParams {
   oauthToken: string;
 }
 
-interface WorkflowResult {
+interface WorkflowHook {
   isAnalyzing: boolean;
-  analysisResult: string | null;
   error: string | null;
-  analyze: (contentTypeIds: string[]) => Promise<void>;
-  clearAnalysis: () => void;
+  startWorkflow: (contentTypeIds: string[]) => Promise<void>;
+}
+
+type WorkflowRunStatus = 'IN_PROGRESS' | 'FAILED' | 'COMPLETED' | 'PENDING_REVIEW' | 'DRAFT';
+
+interface AgentGeneratePayload {
+  messages: Array<{
+    role: 'user';
+    parts: Array<{
+      type: 'text';
+      text: string;
+    }>;
+  }>;
+  metadata: {
+    documentId: string;
+    contentTypeIds: string;
+    oauthToken: string;
+  };
+  threadId: string;
 }
 
 interface AgentRunData {
+  sys?: {
+    id?: string;
+    status?: WorkflowRunStatus;
+  };
+  metadata?: {
+    status?: WorkflowRunStatus;
+    workflowId?: string;
+    workflowRunId?: string;
+    suspendPayload?: Record<string, unknown>;
+  };
   payload?: string;
   messages?: Array<{
     role: string;
@@ -39,22 +66,42 @@ const wait = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
 };
 
-const getAgentPayload = (data: AgentRunData): string | null => {
-  if (data.payload && typeof data.payload === 'string') {
-    return data.payload;
+const startAgentRun = async (
+  sdk: PageAppSDK,
+  spaceId: string,
+  environmentId: string,
+  payload: AgentGeneratePayload,
+  threadId: string
+): Promise<string> => {
+  if (USE_LOCAL_AGENTS_API) {
+    const response = await fetch(
+      `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${WORKFLOW_AGENT_ID}/generate`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-contentful-enable-alpha-feature': 'agents-api',
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to start workflow agent run: ${response.status} ${response.statusText}`
+      );
+    }
+
+    const runData = (await response.json()) as AgentRunData;
+    return runData.sys?.id || threadId;
   }
 
-  if (!data.messages || !Array.isArray(data.messages)) {
-    return null;
-  }
+  const runData = (await sdk.cma.agent.generate(
+    { agentId: WORKFLOW_AGENT_ID, spaceId, environmentId },
+    payload
+  )) as AgentRunData;
 
-  const assistantMessage = data.messages.find((m) => m.role === 'assistant');
-  if (!assistantMessage?.content?.parts) {
-    return null;
-  }
-
-  const textPart = assistantMessage.content.parts.find((p) => p.type === 'text' && p.text);
-  return textPart?.text || null;
+  return runData.sys?.id || threadId;
 };
 
 const pollAgentRun = async (
@@ -62,7 +109,7 @@ const pollAgentRun = async (
   spaceId: string,
   environmentId: string,
   runId: string
-): Promise<string> => {
+): Promise<string | null> => {
   await wait(POLL_INTERVAL_MS);
 
   for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
@@ -70,7 +117,7 @@ const pollAgentRun = async (
 
     if (USE_LOCAL_AGENTS_API) {
       const response = await fetch(
-        `http://localhost:4111/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}`,
+        `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}`,
         {
           headers: {
             'x-contentful-enable-alpha-feature': 'agents-api',
@@ -105,11 +152,8 @@ const pollAgentRun = async (
       }
     }
 
-    const payload = getAgentPayload(runData);
-    if (payload) {
-      // eslint-disable-next-line no-console -- developer workflow logging
-      console.log('[Workflow Polling] Success - Assistant text content:\n\n' + payload);
-      return payload;
+    if (status === 'PENDING_REVIEW') {
+      console.log('Workflow paused for review. Suspend/resume UI is not wired yet.');
     }
 
     await wait(POLL_INTERVAL_MS);
@@ -122,28 +166,21 @@ export const useWorkflowAgent = ({
   sdk,
   documentId,
   oauthToken,
-}: UseWorkflowParams): WorkflowResult => {
+}: UseWorkflowParams): WorkflowHook => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const clearAnalysis = useCallback(() => {
-    setAnalysisResult(null);
-    setError(null);
-  }, []);
-
-  const analyze = useCallback(
+  const startWorkflow = useCallback(
     async (contentTypeIds: string[]) => {
       setIsAnalyzing(true);
       setError(null);
-      setAnalysisResult(null);
 
       const spaceId = sdk.ids.space;
       const environmentId = sdk.ids.environment;
       const threadId = [crypto.randomUUID(), WORKFLOW_AGENT_ID].join('-');
       const contentTypeIdsCsv = contentTypeIds.join(',');
 
-      const payload = {
+      const payload: AgentGeneratePayload = {
         messages: [
           {
             role: 'user' as const,
@@ -168,36 +205,11 @@ export const useWorkflowAgent = ({
       };
 
       try {
-        if (USE_LOCAL_AGENTS_API) {
-          fetch(
-            `http://localhost:4111/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${WORKFLOW_AGENT_ID}/generate`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'x-contentful-enable-alpha-feature': 'agents-api',
-              },
-              body: JSON.stringify(payload),
-            }
-          ).catch((err) => {
-            // eslint-disable-next-line no-console -- developer workflow logging
-            console.error('Failed to start workflow agent run:', err);
-          });
-        } else {
-          sdk.cma.agent
-            .generate({ agentId: WORKFLOW_AGENT_ID, spaceId, environmentId }, payload)
-            .catch((err: unknown) => {
-              // eslint-disable-next-line no-console -- developer workflow logging
-              console.error('Failed to start workflow agent run:', err);
-            });
-        }
-
-        const result = await pollAgentRun(sdk, spaceId, environmentId, threadId);
-        setAnalysisResult(result);
+        const runId = await startAgentRun(sdk, spaceId, environmentId, payload, threadId);
+        await pollAgentRun(sdk, spaceId, environmentId, runId);
       } catch (err) {
-        // eslint-disable-next-line no-console -- developer workflow logging
-        console.error('Workflow failed:', err);
-        setError(err instanceof Error ? err.message : 'Workflow failed');
+        const errorMessage = err instanceof Error ? err.message : 'Workflow failed';
+        setError(errorMessage);
       } finally {
         setIsAnalyzing(false);
       }
@@ -207,9 +219,7 @@ export const useWorkflowAgent = ({
 
   return {
     isAnalyzing,
-    analysisResult,
     error,
-    analyze,
-    clearAnalysis,
+    startWorkflow,
   };
 };
