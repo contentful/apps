@@ -155,6 +155,7 @@ const fetchRunData = async (
       {
         headers: {
           'x-contentful-enable-alpha-feature': 'agents-api',
+          'X-Contentful-App-Definition-Id': '653vTnuQw3j5onU1tUoH6t',
         },
       }
     );
@@ -201,6 +202,7 @@ const resumeAgentRun = async (
         headers: {
           'Content-Type': 'application/json',
           'x-contentful-enable-alpha-feature': 'agents-api',
+          'X-Contentful-App-Definition-Id': '653vTnuQw3j5onU1tUoH6t',
         },
         body: JSON.stringify({ resumePayload }),
       }
@@ -242,6 +244,7 @@ const startAgentRun = async (
         headers: {
           'Content-Type': 'application/json',
           'x-contentful-enable-alpha-feature': 'agents-api',
+          'X-Contentful-App-Definition-Id': '653vTnuQw3j5onU1tUoH6t',
         },
         body: JSON.stringify(payload),
       }
