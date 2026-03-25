@@ -7,7 +7,12 @@ import {
   USE_LOCAL_AGENTS_API,
   WORKFLOW_AGENT_ID,
 } from '../utils/constants/agent';
-import { AgentRunMessage, DocumentScopeSuspendPayload, WorkflowRunResult } from '../utils/types';
+import {
+  AgentRunMessage,
+  DocumentScopeResumePayload,
+  DocumentScopeSuspendPayload,
+  WorkflowRunResult,
+} from '../utils/types';
 
 interface UseWorkflowParams {
   sdk: PageAppSDK;
@@ -19,6 +24,10 @@ interface WorkflowHook {
   isAnalyzing: boolean;
   error: string | null;
   startWorkflow: (contentTypeIds: string[]) => Promise<WorkflowRunResult>;
+  resumeWorkflow: (
+    runId: string,
+    resumePayload: DocumentScopeResumePayload
+  ) => Promise<WorkflowRunResult>;
 }
 
 type WorkflowRunStatus = 'IN_PROGRESS' | 'FAILED' | 'COMPLETED' | 'PENDING_REVIEW' | 'DRAFT';
@@ -98,7 +107,10 @@ const getRunErrorMessage = (runData: AgentRunData): string => {
 const getSuspendPayload = (runData: AgentRunData): DocumentScopeSuspendPayload | undefined =>
   runData.metadata?.suspendPayload as DocumentScopeSuspendPayload | undefined;
 
-const getWorkflowRunResult = (runData: AgentRunData, runId: string): WorkflowRunResult | null => {
+const getWorkflowRunResult = (
+  runData: AgentRunData,
+  threadId: string
+): WorkflowRunResult | null => {
   const status = getRunStatus(runData);
 
   switch (status) {
@@ -113,7 +125,7 @@ const getWorkflowRunResult = (runData: AgentRunData, runId: string): WorkflowRun
 
       return {
         status,
-        runId,
+        runId: threadId,
         suspendPayload,
         messages: runData.messages ?? [],
       };
@@ -122,7 +134,7 @@ const getWorkflowRunResult = (runData: AgentRunData, runId: string): WorkflowRun
     case 'COMPLETED':
       return {
         status,
-        runId,
+        runId: threadId,
         messages: runData.messages ?? [],
       };
 
@@ -173,6 +185,48 @@ const fetchRunData = async (
     throw error;
   }
 };
+
+const resumeAgentRun = async (
+  sdk: PageAppSDK,
+  spaceId: string,
+  environmentId: string,
+  runId: string,
+  resumePayload: DocumentScopeResumePayload
+): Promise<void> => {
+  if (USE_LOCAL_AGENTS_API) {
+    const response = await fetch(
+      `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}/resume`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-contentful-enable-alpha-feature': 'agents-api',
+        },
+        body: JSON.stringify({ resumePayload }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to resume agent run: ${response.status} ${response.statusText}`);
+    }
+
+    return;
+  }
+
+  const agentRunApi = sdk.cma.agentRun as {
+    resume?: (
+      params: { spaceId: string; environmentId: string; runId: string },
+      body: { resumePayload: DocumentScopeResumePayload }
+    ) => Promise<unknown>;
+  };
+
+  if (!agentRunApi.resume) {
+    throw new Error('Agent run resume is not available in the current SDK.');
+  }
+
+  await agentRunApi.resume({ spaceId, environmentId, runId }, { resumePayload });
+};
+
 const startAgentRun = async (
   sdk: PageAppSDK,
   spaceId: string,
@@ -200,6 +254,7 @@ const startAgentRun = async (
     }
 
     const runData = (await response.json()) as AgentRunData;
+
     return runData.sys?.id || threadId;
   }
 
@@ -293,9 +348,32 @@ export const useWorkflowAgent = ({
     [sdk, documentId, oauthToken]
   );
 
+  const resumeWorkflow = useCallback(
+    async (runId: string, resumePayload: DocumentScopeResumePayload) => {
+      setIsAnalyzing(true);
+      setError(null);
+
+      const spaceId = sdk.ids.space;
+      const environmentId = sdk.ids.environment;
+
+      try {
+        await resumeAgentRun(sdk, spaceId, environmentId, runId, resumePayload);
+        return await pollAgentRun(sdk, spaceId, environmentId, runId);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Workflow failed';
+        setError(errorMessage);
+        throw err instanceof Error ? err : new Error(errorMessage);
+      } finally {
+        setIsAnalyzing(false);
+      }
+    },
+    [sdk]
+  );
+
   return {
     isAnalyzing,
     error,
     startWorkflow,
+    resumeWorkflow,
   };
 };

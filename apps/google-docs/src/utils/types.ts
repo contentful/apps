@@ -1,3 +1,5 @@
+// This file contains the types for the document scope review state, resume payload, and workflow run result.
+
 export interface DocumentTabProps {
   tabId: string;
   tabTitle: string;
@@ -38,3 +40,24 @@ export interface WorkflowRunResult {
   messages: AgentRunMessage[];
   suspendPayload?: DocumentScopeSuspendPayload;
 }
+
+export interface DocumentScopeResumePayload {
+  includeImages?: boolean;
+  selectedTabIds?: string[];
+}
+
+export interface DocumentScopeReviewState {
+  availableTabs: DocumentTabProps[];
+  selectedTabs: DocumentTabProps[];
+  useAllTabs: boolean | null;
+  includeImages: boolean | null;
+  requiresImageSelection: boolean;
+}
+
+export const initialDocumentScopeReviewState: DocumentScopeReviewState = {
+  availableTabs: [],
+  selectedTabs: [],
+  useAllTabs: null,
+  includeImages: null,
+  requiresImageSelection: false,
+};
