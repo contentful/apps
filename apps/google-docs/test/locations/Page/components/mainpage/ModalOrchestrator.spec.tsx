@@ -6,7 +6,11 @@ import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
 } from '../../../../../src/locations/Page/components/mainpage/ModalOrchestrator';
+import { WorkflowRunResult, RunStatus } from '../../../../../src/utils/types';
 import { mockSdk } from '../../../../mocks';
+
+const mockStartWorkflow = vi.fn();
+const mockResumeWorkflow = vi.fn();
 
 vi.mock('../../../../../src/locations/Page/components/modals/step_1/SelectDocumentModal', () => ({
   __esModule: true,
@@ -23,6 +27,15 @@ vi.mock('../../../../../src/locations/Page/components/modals/step_1/SelectDocume
       </Box>
     );
   },
+}));
+
+vi.mock('../../../../../src/hooks/useWorkflowAgent', () => ({
+  useWorkflowAgent: () => ({
+    isAnalyzing: false,
+    error: null,
+    startWorkflow: mockStartWorkflow,
+    resumeWorkflow: mockResumeWorkflow,
+  }),
 }));
 
 const mockContentTypes = [
@@ -42,6 +55,30 @@ const defaultProps = {
 describe('ModalOrchestrator', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockStartWorkflow.mockResolvedValue({
+      status: RunStatus.PENDING_REVIEW,
+      runId: 'run-123',
+      messages: [],
+      suspendPayload: {
+        reason: 'Needs document scope review',
+        documentId: 'mock-doc-id-123',
+        requiresImageSelection: true,
+        requiresTabSelection: true,
+        imageCount: 2,
+        inlineObjectCount: 2,
+        positionedObjectCount: 0,
+        tabCount: 2,
+        tabs: [
+          { id: 'tab-1', title: 'Introduction', index: 0 },
+          { id: 'tab-2', title: 'Appendix', index: 1 },
+        ],
+      },
+    } satisfies WorkflowRunResult);
+    mockResumeWorkflow.mockResolvedValue({
+      status: RunStatus.COMPLETED,
+      runId: 'run-123',
+      messages: [],
+    } satisfies WorkflowRunResult);
     vi.mocked(mockSdk.cma.space.get).mockResolvedValue({ sys: { id: 'test-space-id' } });
     vi.mocked(mockSdk.cma.environment.get).mockResolvedValue({ sys: { id: 'test-env-id' } });
     vi.mocked(mockSdk.cma.contentType.getMany).mockResolvedValue({
@@ -140,7 +177,15 @@ describe('ModalOrchestrator', () => {
     });
   });
 
-  it('progresses through flow: ContentTypePicker -> SelectTabs -> IncludeImages -> Loading', async () => {
+  it('starts the workflow after selecting content types and shows the document scope review steps', async () => {
+    let resolveStartWorkflow: ((value: WorkflowRunResult) => void) | undefined;
+    mockStartWorkflow.mockImplementation(
+      () =>
+        new Promise<WorkflowRunResult>((resolve) => {
+          resolveStartWorkflow = resolve;
+        })
+    );
+
     const ref = createRef<ModalOrchestratorHandle>();
     render(<ModalOrchestrator ref={ref} {...defaultProps} />);
 
@@ -170,6 +215,30 @@ describe('ModalOrchestrator', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 
     await waitFor(() => {
+      expect(mockStartWorkflow).toHaveBeenCalledWith(['ct-1']);
+    });
+
+    resolveStartWorkflow?.({
+      status: RunStatus.PENDING_REVIEW,
+      runId: 'run-123',
+      messages: [],
+      suspendPayload: {
+        reason: 'Needs document scope review',
+        documentId: 'mock-doc-id-123',
+        requiresImageSelection: true,
+        requiresTabSelection: true,
+        imageCount: 2,
+        inlineObjectCount: 2,
+        positionedObjectCount: 0,
+        tabCount: 2,
+        tabs: [
+          { id: 'tab-1', title: 'Introduction', index: 0 },
+          { id: 'tab-2', title: 'Appendix', index: 1 },
+        ],
+      },
+    });
+
+    await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'Document tabs' })).toBeTruthy();
     });
 
@@ -184,7 +253,11 @@ describe('ModalOrchestrator', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Preparing your preview' })).toBeTruthy();
+      expect(mockResumeWorkflow).toHaveBeenCalledWith('run-123', {
+        includeImages: true,
+        selectedTabIds: ['tab-1', 'tab-2'],
+      });
+      expect(screen.queryByRole('heading', { name: 'Preparing your preview' })).toBeNull();
     });
   });
 });

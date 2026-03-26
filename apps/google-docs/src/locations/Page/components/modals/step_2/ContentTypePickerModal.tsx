@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Button,
   Flex,
@@ -18,10 +18,7 @@ import { truncateLabel } from '../../../../../utils/utils';
 interface ContentTypePickerModalProps {
   sdk: PageAppSDK;
   onClose: () => void;
-  // TEMP workaround: Mastra workflow inputs have issues with string[] in some UIs.
-  // We pass a single comma-separated string of IDs for now.
-  onContinue: (contentTypeIdsCsv: string) => void;
-  // onSelect: (contentTypes: ContentTypeProps[]) => void;
+  onContinue: (contentTypeIds: string[]) => Promise<void>;
   selectedContentTypes: ContentTypeProps[];
   setSelectedContentTypes: (
     contentTypes: ContentTypeProps[] | ((prev: ContentTypeProps[]) => ContentTypeProps[])
@@ -37,32 +34,20 @@ export const ContentTypePickerModal = ({
 }: ContentTypePickerModalProps) => {
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
   const [filteredContentTypes, setFilteredContentTypes] = useState<ContentTypeProps[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false);
   const [hasFetchError, setHasFetchError] = useState<boolean>(false);
   const multiselectListRef = useMultiselectScrollReflow(selectedContentTypes);
-
-  const isInvalidSelection = useMemo(
-    () => selectedContentTypes.length === 0,
-    [selectedContentTypes]
-  );
-
-  const isInvalidSelectionError = useMemo(
-    () => isInvalidSelection && hasAttemptedSubmit,
-    [isInvalidSelection, hasAttemptedSubmit]
-  );
-
-  const showFetchError = hasFetchError && !isLoading;
-
-  const selectedContentTypeIdsCsv = useMemo(
-    () => selectedContentTypes.map((ct) => ct.sys.id).join(','),
-    [selectedContentTypes]
-  );
+  const isSelectionEmpty = selectedContentTypes.length === 0;
+  const showSelectionError = isSelectionEmpty && hasAttemptedSubmit;
+  const showFetchError = hasFetchError && !isFetching;
+  const selectedContentTypeIds = selectedContentTypes.map((ct) => ct.sys.id);
 
   useEffect(() => {
     const fetchContentTypes = async () => {
       try {
-        setIsLoading(true);
+        setIsFetching(true);
         setHasFetchError(false);
         const space = await sdk.cma.space.get({});
         const environment = await sdk.cma.environment.get({ spaceId: space.sys.id });
@@ -95,7 +80,7 @@ export const ContentTypePickerModal = ({
         setHasFetchError(true);
         setContentTypes([]);
       } finally {
-        setIsLoading(false);
+        setIsFetching(false);
       }
     };
 
@@ -112,7 +97,7 @@ export const ContentTypePickerModal = ({
   };
 
   const getPlaceholderText = () => {
-    if (isLoading) return 'Loading content types...';
+    if (isFetching) return 'Loading content types...';
     if (contentTypes.length === 0) return 'No content types in space';
     if (selectedContentTypes.length === 0) return 'Select one or more';
     return `${selectedContentTypes.length} selected`;
@@ -130,29 +115,30 @@ export const ContentTypePickerModal = ({
     }
   };
 
-  const handleClose = () => {
-    onClose();
-  };
-
-  const handleContinue = () => {
-    if (isInvalidSelection) {
+  const handleContinue = async () => {
+    if (isSelectionEmpty) {
       setHasAttemptedSubmit(true);
       return;
     }
-    onContinue(selectedContentTypeIdsCsv);
-    // onSelect(selectedContentTypes);
+
+    setIsSubmitting(true);
+    try {
+      await onContinue(selectedContentTypeIds);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <>
-      <Modal.Header title="Select content type(s)" onClose={handleClose} />
+      <Modal.Header title="Select content type(s)" onClose={onClose} />
       <Modal.Content>
         <Paragraph marginBottom="spacingM" color="gray700">
           Select the content type(s) you would like to use with this document.
         </Paragraph>
         <FormControl
           isRequired
-          isInvalid={isInvalidSelectionError || showFetchError}
+          isInvalid={showSelectionError || showFetchError}
           marginBottom="none">
           <FormControl.Label>Content type</FormControl.Label>
           <Multiselect
@@ -174,7 +160,7 @@ export const ContentTypePickerModal = ({
                 value={ct.sys.id}
                 itemId={ct.sys.id}
                 isChecked={selectedContentTypes.some((selected) => selected.sys.id === ct.sys.id)}
-                isDisabled={isLoading}
+                isDisabled={isFetching || isSubmitting}
                 onSelectItem={handleSelectContentType}>
                 {ct.name}
               </Multiselect.Option>
@@ -185,7 +171,7 @@ export const ContentTypePickerModal = ({
               Unable to load content types.
             </FormControl.ValidationMessage>
           )}
-          {isInvalidSelectionError && (
+          {showSelectionError && (
             <FormControl.ValidationMessage>
               You must select at least one content type.
             </FormControl.ValidationMessage>
@@ -209,10 +195,14 @@ export const ContentTypePickerModal = ({
         )}
       </Modal.Content>
       <Modal.Controls>
-        <Button onClick={handleClose} variant="secondary">
+        <Button onClick={onClose} variant="secondary" isDisabled={isSubmitting}>
           Cancel
         </Button>
-        <Button onClick={handleContinue} variant="primary" isDisabled={isLoading}>
+        <Button
+          onClick={handleContinue}
+          variant="primary"
+          isDisabled={isFetching || isSubmitting}
+          isLoading={isSubmitting}>
           Next
         </Button>
       </Modal.Controls>

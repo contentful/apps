@@ -7,10 +7,17 @@ import { ErrorModal } from '../modals/ErrorModal';
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
 import { LoadingModal } from '../modals/LoadingModal';
 import { ERROR_MESSAGES } from '../../../../utils/constants/messages';
+import { CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS } from '../../../../utils/constants/agent';
 import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
-import { DocumentTabProps } from '../../../../utils/types';
+import {
+  DocumentTabProps,
+  DocumentScopeResumePayload,
+  DocumentScopeSuspendPayload,
+  RunStatus,
+} from '../../../../utils/types';
 import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
 import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
+import { useWorkflowAgent } from '../../../../hooks/useWorkflowAgent';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
@@ -28,9 +35,6 @@ interface ModalOrchestratorProps {
   oauthToken: string;
 }
 
-const MOCK_HAS_PENDING_IMAGES_REVIEW = true;
-const MOCK_TABS_ENABLED = true;
-
 export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrchestratorProps>(
   ({ sdk, oauthToken }, ref) => {
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -43,6 +47,13 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const [selectedTabs, setSelectedTabs] = useState<DocumentTabProps[]>([]);
     const [useAllTabs, setUseAllTabs] = useState<boolean | null>(null);
     const [includeImages, setIncludeImages] = useState<boolean | null>(null);
+    const [requiresImageSelection, setRequiresImageSelection] = useState(false);
+    const [activeRunId, setActiveRunId] = useState<string | null>(null);
+    const { startWorkflow, resumeWorkflow } = useWorkflowAgent({
+      sdk,
+      documentId,
+      oauthToken,
+    });
 
     const hasProgressToLose = documentId.trim().length > 0;
 
@@ -50,13 +61,19 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       startFlow: () => setIsUploadModalOpen(true),
     }));
 
-    const resetProgress = () => {
-      setDocumentId('');
-      setSelectedContentTypes([]);
+    const resetDocumentScopeReview = () => {
       setAvailableTabs([]);
       setSelectedTabs([]);
       setUseAllTabs(null);
       setIncludeImages(null);
+      setRequiresImageSelection(false);
+    };
+
+    const resetProgress = () => {
+      setDocumentId('');
+      setSelectedContentTypes([]);
+      resetDocumentScopeReview();
+      setActiveRunId(null);
       setFlowStep(null);
       setIsUploadModalOpen(false);
     };
@@ -71,6 +88,11 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       resetProgress();
     };
 
+    const showWorkflowError = () => {
+      setFlowStep(null);
+      setIsErrorPreviewModalOpen(true);
+    };
+
     const handleUploadModalCloseRequest = (docId?: string) => {
       if (docId) {
         setDocumentId(docId);
@@ -83,35 +105,114 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       showDiscardConfirmation();
     };
 
-    const handleContentTypeContinue = (contentTypeIdsCsv: string) => {
-      // TEMP workaround: we pass content type IDs as a comma-separated string to Mastra workflows.
-      // The modal already updates `selectedContentTypes` via `setSelectedContentTypes`, so we don't need to set it here.
-      void contentTypeIdsCsv;
-      // setSelectedContentTypes(contentTypes);
-      if (MOCK_TABS_ENABLED) {
+    const showDocumentScopeReview = (suspendPayload?: DocumentScopeSuspendPayload) => {
+      setAvailableTabs(
+        (suspendPayload?.tabs ?? []).map((tab) => ({
+          tabId: tab.id ?? '',
+          tabTitle: tab.title ?? '',
+        }))
+      );
+      setSelectedTabs([]);
+      setUseAllTabs(null);
+      setIncludeImages(null);
+      setRequiresImageSelection(Boolean(suspendPayload?.requiresImageSelection));
+
+      if (suspendPayload?.requiresTabSelection) {
         setFlowStep(FlowStep.SELECT_TABS);
         return;
-      } else {
-        handleSelectTabsContinue([]);
       }
-    };
 
-    const handleSelectTabsContinue = (_selectedTabs: DocumentTabProps[]) => {
-      // TODO: Replace this mock branch with Agents API run-status polling when
-      // `PENDING_REVIEW` / suspend state is available in the frontend.
-      if (MOCK_HAS_PENDING_IMAGES_REVIEW) {
+      if (suspendPayload?.requiresImageSelection) {
         setFlowStep(FlowStep.INCLUDE_IMAGES);
         return;
       }
 
-      setFlowStep(FlowStep.LOADING);
+      setFlowStep(null);
     };
 
-    const handleIncludeImagesContinue = (includeImages: boolean) => {
-      // TODO: Wire `includeImages` into Agents resume endpoint payload once
-      // suspend/resume APIs are available in the frontend.
-      setIncludeImages(includeImages);
+    const handleWorkflowResult = (workflowRun: {
+      runId: string;
+      status: RunStatus.PENDING_REVIEW | RunStatus.COMPLETED;
+      suspendPayload?: DocumentScopeSuspendPayload;
+    }) => {
+      setActiveRunId(workflowRun.runId);
+
+      if (workflowRun.status === RunStatus.PENDING_REVIEW) {
+        showDocumentScopeReview(workflowRun.suspendPayload);
+        return;
+      }
+
+      setFlowStep(null);
+    };
+
+    const continueWorkflow = async (
+      resumePayloadOverrides?: Partial<DocumentScopeResumePayload>
+    ) => {
+      if (!activeRunId) {
+        throw new Error('Workflow run id is missing for resume.');
+      }
+
+      const resumePayload: DocumentScopeResumePayload = {
+        ...(selectedTabs.length > 0
+          ? { selectedTabIds: selectedTabs.map((tab) => tab.tabId) }
+          : {}),
+        ...(includeImages !== null ? { includeImages } : {}),
+        ...resumePayloadOverrides,
+      };
+
       setFlowStep(FlowStep.LOADING);
+
+      const workflowRun = await resumeWorkflow(activeRunId, resumePayload);
+      handleWorkflowResult(workflowRun);
+    };
+
+    const startWorkflowWithDelayedLoading = async (contentTypeIds: string[]) => {
+      let isStartPending = true;
+      const loadingModalTimeout = window.setTimeout(() => {
+        if (isStartPending) {
+          setFlowStep(FlowStep.LOADING);
+        }
+      }, CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS);
+
+      try {
+        return await startWorkflow(contentTypeIds);
+      } finally {
+        isStartPending = false;
+        window.clearTimeout(loadingModalTimeout);
+      }
+    };
+
+    const handleContentTypeContinue = async (contentTypeIds: string[]) => {
+      try {
+        handleWorkflowResult(await startWorkflowWithDelayedLoading(contentTypeIds));
+      } catch {
+        showWorkflowError();
+      }
+    };
+
+    const handleSelectTabsContinue = async (selectedTabs: DocumentTabProps[]) => {
+      setSelectedTabs(selectedTabs);
+
+      if (requiresImageSelection) {
+        setFlowStep(FlowStep.INCLUDE_IMAGES);
+        return;
+      }
+
+      try {
+        await continueWorkflow({ selectedTabIds: selectedTabs.map((tab) => tab.tabId) });
+      } catch {
+        showWorkflowError();
+      }
+    };
+
+    const handleIncludeImagesContinue = async (includeImages: boolean) => {
+      setIncludeImages(includeImages);
+
+      try {
+        await continueWorkflow({ includeImages });
+      } catch {
+        showWorkflowError();
+      }
     };
 
     const renderFlowStep = () => {
@@ -132,7 +233,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
               onContinue={handleSelectTabsContinue}
               onClose={showDiscardConfirmation}
               availableTabs={availableTabs}
-              setAvailableTabs={setAvailableTabs}
               selectedTabs={selectedTabs}
               setSelectedTabs={setSelectedTabs}
               useAllTabs={useAllTabs}
@@ -176,7 +276,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           size={'large'}
           shouldCloseOnOverlayClick={false}
           shouldCloseOnEscapePress={flowStep !== FlowStep.LOADING}>
-          {renderFlowStep}
+          {renderFlowStep()}
         </Modal>
 
         <ConfirmCancelModal

@@ -24,34 +24,16 @@ interface SelectTabsModalProps {
   onContinue: (selectedTabs: DocumentTabProps[]) => void;
   onClose: () => void;
   availableTabs: DocumentTabProps[];
-  setAvailableTabs: (tabs: DocumentTabProps[]) => void;
   selectedTabs: DocumentTabProps[];
   setSelectedTabs: (tabs: DocumentTabProps[]) => void;
   useAllTabs: boolean | null;
   setUseAllTabs: (value: boolean | null) => void;
 }
 
-const MOCK_TABS: DocumentTabProps[] = [
-  { tabId: 'tab-1', tabTitle: 'Introduction' },
-  { tabId: 'tab-2', tabTitle: 'Chapter 1' },
-  { tabId: 'tab-3', tabTitle: 'Chapter 2' },
-  { tabId: 'tab-4', tabTitle: 'Appendix' },
-  { tabId: 'tab-5', tabTitle: 'References' },
-  { tabId: 'tab-6', tabTitle: 'Chapter 3' },
-  { tabId: 'tab-7', tabTitle: 'Chapter 4' },
-  { tabId: 'tab-8', tabTitle: 'Long long label 1' },
-  { tabId: 'tab-9', tabTitle: 'Chapter 6' },
-  { tabId: 'tab-10', tabTitle: 'Chapter 7' },
-  { tabId: 'tab-11', tabTitle: 'Chapter 8' },
-  { tabId: 'tab-12', tabTitle: 'Chapter 9' },
-  { tabId: 'tab-13', tabTitle: 'Long long label 2' },
-];
-
 export const SelectTabsModal = ({
   onContinue,
   onClose,
   availableTabs,
-  setAvailableTabs,
   selectedTabs,
   setSelectedTabs,
   useAllTabs,
@@ -72,9 +54,8 @@ export const SelectTabsModal = ({
   const showNoRadioSelectedError = hasNoRadioSelected && hasAttemptedSubmit;
 
   useEffect(() => {
-    setAvailableTabs(MOCK_TABS);
     setHasAttemptedSubmit(false);
-  }, [setAvailableTabs]);
+  }, [availableTabs]);
 
   const handleSelectTab = (e: React.ChangeEvent<HTMLInputElement>) => {
     setHasAttemptedSubmit(false);
