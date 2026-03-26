@@ -1,5 +1,13 @@
 // This file contains the types for the document scope review state, resume payload, and workflow run result.
 
+export enum RunStatus {
+  IN_PROGRESS = 'IN_PROGRESS',
+  FAILED = 'FAILED',
+  COMPLETED = 'COMPLETED',
+  PENDING_REVIEW = 'PENDING_REVIEW',
+  DRAFT = 'DRAFT',
+}
+
 export interface DocumentTabProps {
   tabId: string;
   tabTitle: string;
@@ -35,7 +43,7 @@ export interface DocumentScopeSuspendPayload {
 }
 
 export interface WorkflowRunResult {
-  status: 'PENDING_REVIEW' | 'COMPLETED';
+  status: RunStatus.PENDING_REVIEW | RunStatus.COMPLETED;
   runId: string;
   messages: AgentRunMessage[];
   suspendPayload?: DocumentScopeSuspendPayload;

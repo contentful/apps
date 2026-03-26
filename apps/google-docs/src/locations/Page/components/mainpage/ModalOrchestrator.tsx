@@ -14,6 +14,7 @@ import {
   DocumentScopeSuspendPayload,
   DocumentScopeReviewState,
   initialDocumentScopeReviewState,
+  RunStatus,
 } from '../../../../utils/types';
 import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
 import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
@@ -85,9 +86,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       resetProgress();
     };
 
-    const showWorkflowError = (error: unknown, message: string) => {
-      // eslint-disable-next-line no-console -- developer workflow logging
-      console.error(message, error);
+    const showWorkflowError = () => {
       setFlowStep(null);
       setIsErrorPreviewModalOpen(true);
     };
@@ -137,12 +136,12 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
     const handleWorkflowResult = (workflowRun: {
       runId: string;
-      status: 'PENDING_REVIEW' | 'COMPLETED';
+      status: RunStatus.PENDING_REVIEW | RunStatus.COMPLETED;
       suspendPayload?: DocumentScopeSuspendPayload;
     }) => {
       setActiveRunId(workflowRun.runId);
 
-      if (workflowRun.status === 'PENDING_REVIEW') {
+      if (workflowRun.status === RunStatus.PENDING_REVIEW) {
         showDocumentScopeReview(workflowRun.suspendPayload);
         return;
       }
@@ -179,7 +178,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       try {
         handleWorkflowResult(await startWorkflow(contentTypeIds));
       } catch (error) {
-        showWorkflowError(error, 'Failed to start Google Docs workflow:');
+        showWorkflowError();
       }
     };
 
@@ -194,7 +193,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       try {
         await continueWorkflow({ selectedTabIds: selectedTabs.map((tab) => tab.tabId) });
       } catch (error) {
-        showWorkflowError(error, 'Failed to resume Google Docs workflow:');
+        showWorkflowError();
       }
     };
 
@@ -204,7 +203,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       try {
         await continueWorkflow({ includeImages });
       } catch (error) {
-        showWorkflowError(error, 'Failed to resume Google Docs workflow:');
+        showWorkflowError();
       }
     };
 

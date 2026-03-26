@@ -11,6 +11,7 @@ import {
   DocumentScopeResumePayload,
   DocumentScopeSuspendPayload,
   WorkflowRunResult,
+  RunStatus,
 } from '../utils/types';
 
 interface UseWorkflowParams {
@@ -28,8 +29,6 @@ interface WorkflowHook {
     resumePayload: DocumentScopeResumePayload
   ) => Promise<WorkflowRunResult>;
 }
-
-type WorkflowRunStatus = 'IN_PROGRESS' | 'FAILED' | 'COMPLETED' | 'PENDING_REVIEW' | 'DRAFT';
 
 interface AgentGeneratePayload {
   messages: Array<{
@@ -50,10 +49,10 @@ interface AgentGeneratePayload {
 interface AgentRunData {
   sys?: {
     id?: string;
-    status?: WorkflowRunStatus;
+    status?: RunStatus;
   };
   metadata?: {
-    status?: WorkflowRunStatus;
+    status?: RunStatus;
     workflowId?: string;
     workflowRunId?: string;
     suspendPayload?: Record<string, unknown>;
@@ -67,7 +66,7 @@ const wait = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
 };
 
-const getRunStatus = (runData: AgentRunData): WorkflowRunStatus | null => {
+const getRunStatus = (runData: AgentRunData): RunStatus | null => {
   return runData.sys?.status ?? runData.metadata?.status ?? null;
 };
 
@@ -113,10 +112,10 @@ const getWorkflowRunResult = (
   const status = getRunStatus(runData);
 
   switch (status) {
-    case 'FAILED':
+    case RunStatus.FAILED:
       throw new Error(getRunErrorMessage(runData));
 
-    case 'PENDING_REVIEW': {
+    case RunStatus.PENDING_REVIEW: {
       const suspendPayload = getSuspendPayload(runData);
       if (!suspendPayload) {
         throw new Error('Workflow paused for review, but suspend payload was missing.');
@@ -130,7 +129,7 @@ const getWorkflowRunResult = (
       };
     }
 
-    case 'COMPLETED':
+    case RunStatus.COMPLETED:
       return {
         status,
         runId: threadId,

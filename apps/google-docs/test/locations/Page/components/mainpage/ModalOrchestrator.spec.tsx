@@ -6,7 +6,7 @@ import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
 } from '../../../../../src/locations/Page/components/mainpage/ModalOrchestrator';
-import { WorkflowRunResult } from '../../../../../src/utils/types';
+import { WorkflowRunResult, RunStatus } from '../../../../../src/utils/types';
 import { mockSdk } from '../../../../mocks';
 
 const mockStartWorkflow = vi.fn();
@@ -56,7 +56,7 @@ describe('ModalOrchestrator', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockStartWorkflow.mockResolvedValue({
-      status: 'PENDING_REVIEW',
+      status: RunStatus.PENDING_REVIEW,
       runId: 'run-123',
       messages: [],
       suspendPayload: {
@@ -75,7 +75,7 @@ describe('ModalOrchestrator', () => {
       },
     } satisfies WorkflowRunResult);
     mockResumeWorkflow.mockResolvedValue({
-      status: 'COMPLETED',
+      status: RunStatus.COMPLETED,
       runId: 'run-123',
       messages: [],
     } satisfies WorkflowRunResult);
@@ -220,7 +220,7 @@ describe('ModalOrchestrator', () => {
     });
 
     resolveStartWorkflow?.({
-      status: 'PENDING_REVIEW',
+      status: RunStatus.PENDING_REVIEW,
       runId: 'run-123',
       messages: [],
       suspendPayload: {
