@@ -4,7 +4,6 @@ import {
   LOCAL_AGENTS_API_BASE_URL,
   POLL_INTERVAL_MS,
   MAX_POLL_ATTEMPTS,
-  USE_LOCAL_AGENTS_API,
   WORKFLOW_AGENT_ID,
 } from '../utils/constants/agent';
 import {
@@ -149,7 +148,7 @@ const fetchRunData = async (
   environmentId: string,
   runId: string
 ): Promise<AgentRunData | null> => {
-  if (USE_LOCAL_AGENTS_API) {
+  if (LOCAL_AGENTS_API_BASE_URL) {
     const response = await fetch(
       `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}`,
       {
@@ -194,7 +193,7 @@ const resumeAgentRun = async (
   runId: string,
   resumePayload: DocumentScopeResumePayload
 ): Promise<void> => {
-  if (USE_LOCAL_AGENTS_API) {
+  if (LOCAL_AGENTS_API_BASE_URL) {
     const response = await fetch(
       `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}/resume`,
       {
@@ -236,7 +235,7 @@ const startAgentRun = async (
   payload: AgentGeneratePayload,
   threadId: string
 ): Promise<string> => {
-  if (USE_LOCAL_AGENTS_API) {
+  if (LOCAL_AGENTS_API_BASE_URL) {
     const response = await fetch(
       `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${WORKFLOW_AGENT_ID}/generate`,
       {
