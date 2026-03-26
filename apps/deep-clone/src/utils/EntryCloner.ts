@@ -3,6 +3,26 @@ import { CMAClient } from '@contentful/app-sdk';
 import { AppParameters } from '@/vite-env';
 
 type ReferenceMap = Record<string, EntryProps>;
+type EntryLink = {
+  sys: {
+    type: 'Link';
+    linkType: 'Entry';
+    id: string;
+  };
+};
+type RichTextNode = {
+  nodeType?: string;
+  data?: {
+    target?: {
+      sys?: {
+        type?: string;
+        linkType?: string;
+        id?: string;
+      };
+    };
+  };
+  content?: unknown[];
+};
 
 class EntryCloner {
   private references: ReferenceMap = {};
@@ -141,10 +161,10 @@ class EntryCloner {
   private async inspectField(fieldValue: any): Promise<void> {
     if (!fieldValue) return;
 
-    if (this.isReferenceArray(fieldValue)) {
+    if (Array.isArray(fieldValue)) {
       await Promise.all(
-        fieldValue.map((f: any) => {
-          return this.inspectField(f);
+        fieldValue.map((nestedValue) => {
+          return this.inspectField(nestedValue);
         })
       );
       return;
@@ -152,16 +172,32 @@ class EntryCloner {
 
     if (this.isReference(fieldValue)) {
       await this.findReferences(fieldValue.sys.id);
+      return;
+    }
+
+    if (this.isRichTextNode(fieldValue)) {
+      const embeddedEntryTarget = this.getEmbeddedEntryTarget(fieldValue);
+      if (embeddedEntryTarget) {
+        await this.findReferences(embeddedEntryTarget.sys.id);
+      }
+
+      if (Array.isArray(fieldValue.content)) {
+        await Promise.all(
+          fieldValue.content.map((nestedValue) => {
+            return this.inspectField(nestedValue);
+          })
+        );
+      }
     }
   }
 
   private async updateReferencesOnField(fieldValue: any): Promise<boolean> {
     if (!fieldValue) return false;
 
-    if (this.isReferenceArray(fieldValue)) {
+    if (Array.isArray(fieldValue)) {
       const didUpdateArray = await Promise.all(
-        fieldValue.map((f: any) => {
-          return this.updateReferencesOnField(f);
+        fieldValue.map((nestedValue) => {
+          return this.updateReferencesOnField(nestedValue);
         })
       );
       return didUpdateArray.some((didUpdate) => didUpdate);
@@ -173,6 +209,30 @@ class EntryCloner {
         fieldValue.sys.id = clone.sys.id;
         return true;
       }
+      return false;
+    }
+
+    if (this.isRichTextNode(fieldValue)) {
+      let didUpdate = false;
+      const embeddedEntryTarget = this.getEmbeddedEntryTarget(fieldValue);
+      if (embeddedEntryTarget) {
+        const clone = this.clones[embeddedEntryTarget.sys.id];
+        if (clone !== undefined) {
+          embeddedEntryTarget.sys.id = clone.sys.id;
+          didUpdate = true;
+        }
+      }
+
+      if (Array.isArray(fieldValue.content)) {
+        const didUpdateChildren = await Promise.all(
+          fieldValue.content.map((nestedValue) => {
+            return this.updateReferencesOnField(nestedValue);
+          })
+        );
+        didUpdate ||= didUpdateChildren.some((childDidUpdate) => childDidUpdate);
+      }
+
+      return didUpdate;
     }
 
     return false;
@@ -188,7 +248,9 @@ class EntryCloner {
       (await this.cma.contentType.get({ contentTypeId: contentTypeId }));
     this.contentTypes[contentTypeId] = contentType;
 
-    const titleField = contentType.fields.find((field) => field.id === contentType.displayField);
+    const titleField = contentType.fields.find(
+      (field: ContentTypeProps['fields'][number]) => field.id === contentType.displayField
+    );
 
     // Update title field for the clone
     if (titleField && entryFields[titleField.id]) {
@@ -204,11 +266,20 @@ class EntryCloner {
     return entryFields;
   }
 
-  private isReferenceArray(fieldValue: any): boolean {
-    return Array.isArray(fieldValue) && fieldValue.some((f: any) => this.isReference(f));
+  private isRichTextNode(fieldValue: unknown): fieldValue is RichTextNode {
+    return typeof fieldValue === 'object' && fieldValue !== null && 'nodeType' in fieldValue;
   }
 
-  private isReference(fieldValue: any): boolean {
+  private getEmbeddedEntryTarget(node: RichTextNode): EntryLink | undefined {
+    const target = node.data?.target;
+    if (target && this.isReference(target)) {
+      return target;
+    }
+
+    return undefined;
+  }
+
+  private isReference(fieldValue: any): fieldValue is EntryLink {
     return fieldValue.sys && fieldValue.sys.type === 'Link' && fieldValue.sys.linkType === 'Entry';
   }
 }
