@@ -1,4 +1,4 @@
-import type { HoursOfOperation, DayHours } from "../../types";
+import type { HoursOfOperation, DayHours } from '../../types';
 
 export const mockClosedDay: DayHours = {
   isOpen: false,
@@ -15,15 +15,15 @@ export const mock24HourDay: DayHours = {
 export const mockRegularDay: DayHours = {
   isOpen: true,
   is24Hours: false,
-  slots: [{ open: "09:00", close: "17:00" }],
+  slots: [{ open: '09:00', close: '17:00' }],
 };
 
 export const mockSplitDay: DayHours = {
   isOpen: true,
   is24Hours: false,
   slots: [
-    { open: "09:00", close: "12:00" },
-    { open: "13:00", close: "17:00" },
+    { open: '09:00', close: '12:00' },
+    { open: '13:00', close: '17:00' },
   ],
 };
 

@@ -1,8 +1,8 @@
-import { useCallback } from "react";
-import { Flex, Select, IconButton, Text } from "@contentful/f36-components";
-import { CloseIcon } from "@contentful/f36-icons";
-import { ClockFormat, TimeSlot } from "../types";
-import { getTimeOptions } from "../utils/time";
+import { useCallback } from 'react';
+import { Flex, Select, IconButton, Text } from '@contentful/f36-components';
+import { CloseIcon } from '@contentful/f36-icons';
+import { ClockFormat, TimeSlot } from '../types';
+import { getTimeOptions } from '../utils/time';
 
 interface TimeSlotInputProps {
   slot: TimeSlot;
@@ -21,7 +21,7 @@ function TimeSlotInput({
   onChange,
   onRemove,
   canRemove,
-  clockFormat = "12h",
+  clockFormat = '12h',
 }: TimeSlotInputProps) {
   const timeOptions = getTimeOptions(clockFormat);
 
@@ -32,7 +32,7 @@ function TimeSlotInput({
         open: e.target.value,
       });
     },
-    [slot, onChange],
+    [slot, onChange]
   );
 
   const handleCloseChange = useCallback(
@@ -42,7 +42,7 @@ function TimeSlotInput({
         close: e.target.value,
       });
     },
-    [slot, onChange],
+    [slot, onChange]
   );
 
   return (
@@ -52,9 +52,8 @@ function TimeSlotInput({
         value={slot.open}
         onChange={handleOpenChange}
         size="small"
-        style={{ minWidth: "110px" }}
-        aria-label="Open time"
-      >
+        style={{ minWidth: '110px' }}
+        aria-label="Open time">
         {timeOptions.map((option) => (
           <Select.Option key={option.value} value={option.value}>
             {option.label}
@@ -67,9 +66,8 @@ function TimeSlotInput({
         value={slot.close}
         onChange={handleCloseChange}
         size="small"
-        style={{ minWidth: "110px" }}
-        aria-label="Close time"
-      >
+        style={{ minWidth: '110px' }}
+        aria-label="Close time">
         {timeOptions.map((option) => (
           <Select.Option key={option.value} value={option.value}>
             {option.label}

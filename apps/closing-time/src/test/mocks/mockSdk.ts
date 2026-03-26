@@ -1,14 +1,10 @@
-import { vi } from "vitest";
-import type {
-  ConfigAppSDK,
-  DialogAppSDK,
-  FieldAppSDK,
-} from "@contentful/app-sdk";
+import { vi } from 'vitest';
+import type { ConfigAppSDK, DialogAppSDK, FieldAppSDK } from '@contentful/app-sdk';
 import type {
   AppInstallationParameters,
   HoursOfOperation,
   DialogInvocationParameters,
-} from "../../types";
+} from '../../types';
 
 /**
  * Creates a mock FieldAppSDK for testing Field component
@@ -17,7 +13,7 @@ export function createMockFieldSdk(
   options: {
     fieldValue?: HoursOfOperation | null;
     installationParameters?: AppInstallationParameters;
-  } = {},
+  } = {}
 ): FieldAppSDK {
   const { fieldValue = null, installationParameters = {} } = options;
 
@@ -25,11 +21,11 @@ export function createMockFieldSdk(
 
   return {
     ids: {
-      app: "test-app-id",
-      space: "test-space-id",
-      environment: "test-environment-id",
-      entry: "test-entry-id",
-      field: "test-field-id",
+      app: 'test-app-id',
+      space: 'test-space-id',
+      environment: 'test-environment-id',
+      entry: 'test-entry-id',
+      field: 'test-field-id',
     },
     field: {
       getValue: vi.fn(() => currentValue),
@@ -41,20 +37,17 @@ export function createMockFieldSdk(
         currentValue = null;
         return Promise.resolve();
       }),
-      onValueChanged: vi.fn(
-        (callback: (value: HoursOfOperation | null) => void) => {
-          callback(currentValue);
-          return () => {};
-        },
-      ),
-      id: "hours",
-      type: "Object",
-      locale: "en-US",
+      onValueChanged: vi.fn((callback: (value: HoursOfOperation | null) => void) => {
+        callback(currentValue);
+        return () => {};
+      }),
+      id: 'hours',
+      type: 'Object',
+      locale: 'en-US',
     },
     dialogs: {
-      openCurrentApp: vi.fn(
-        (options?: { parameters?: DialogInvocationParameters }) =>
-          Promise.resolve(options?.parameters?.hours ?? null),
+      openCurrentApp: vi.fn((options?: { parameters?: DialogInvocationParameters }) =>
+        Promise.resolve(options?.parameters?.hours ?? null)
       ),
     },
     parameters: {
@@ -76,15 +69,15 @@ export function createMockDialogSdk(
   options: {
     invocationParameters?: DialogInvocationParameters;
     installationParameters?: AppInstallationParameters;
-  } = {},
+  } = {}
 ): DialogAppSDK {
   const { invocationParameters, installationParameters = {} } = options;
 
   return {
     ids: {
-      app: "test-app-id",
-      space: "test-space-id",
-      environment: "test-environment-id",
+      app: 'test-app-id',
+      space: 'test-space-id',
+      environment: 'test-environment-id',
     },
     parameters: {
       installation: installationParameters,
@@ -121,13 +114,9 @@ export function createMockConfigSdk(
         sys?: { version?: number };
       }
     >;
-  } = {},
+  } = {}
 ): ConfigAppSDK<AppInstallationParameters> {
-  const {
-    parameters = null,
-    contentTypes = [],
-    editorInterfaces = {},
-  } = options;
+  const { parameters = null, contentTypes = [], editorInterfaces = {} } = options;
   const contentTypesById = contentTypes.reduce<
     Record<
       string,
@@ -146,18 +135,16 @@ export function createMockConfigSdk(
   }, {});
 
   let configureHandler: (() => unknown | Promise<unknown>) | undefined;
-  let completionHandler:
-    | ((err: null | { message: string }) => void | Promise<void>)
-    | undefined;
+  let completionHandler: ((err: null | { message: string }) => void | Promise<void>) | undefined;
 
   return {
     ids: {
-      app: "test-app-id",
-      space: "test-space-id",
-      environment: "test-environment-id",
+      app: 'test-app-id',
+      space: 'test-space-id',
+      environment: 'test-environment-id',
     },
-      app: {
-        getParameters: vi.fn(() => Promise.resolve(parameters)),
+    app: {
+      getParameters: vi.fn(() => Promise.resolve(parameters)),
       getCurrentState: vi.fn(() => Promise.resolve({ EditorInterface: {} })),
       onConfigure: vi.fn((handler) => {
         configureHandler = handler;
@@ -172,7 +159,7 @@ export function createMockConfigSdk(
       contentType: {
         getMany: vi.fn(() => Promise.resolve({ items: contentTypes })),
         get: vi.fn(({ contentTypeId }: { contentTypeId: string }) =>
-          Promise.resolve(contentTypesById[contentTypeId]),
+          Promise.resolve(contentTypesById[contentTypeId])
         ),
         update: vi.fn(
           (
@@ -181,7 +168,7 @@ export function createMockConfigSdk(
               name: string;
               fields: Array<{ id: string; name: string; type: string }>;
               sys?: { version?: number; publishedVersion?: number };
-            },
+            }
           ) => {
             const current = contentTypesById[contentTypeId];
             const nextVersion = (current?.sys.version ?? 1) + 1;
@@ -195,13 +182,10 @@ export function createMockConfigSdk(
             };
             contentTypesById[contentTypeId] = updated;
             return Promise.resolve(updated);
-          },
+          }
         ),
         publish: vi.fn(
-          (
-            { contentTypeId }: { contentTypeId: string },
-            value: { sys?: { version?: number } },
-          ) => {
+          ({ contentTypeId }: { contentTypeId: string }, value: { sys?: { version?: number } }) => {
             const current = contentTypesById[contentTypeId];
             const published = {
               ...current,
@@ -212,7 +196,7 @@ export function createMockConfigSdk(
             };
             contentTypesById[contentTypeId] = published;
             return Promise.resolve(published);
-          },
+          }
         ),
       },
       editorInterface: {
@@ -221,8 +205,8 @@ export function createMockConfigSdk(
             editorInterfaces[contentTypeId] ?? {
               controls: [],
               sys: { version: 1 },
-            },
-          ),
+            }
+          )
         ),
         update: vi.fn(
           (
@@ -234,7 +218,7 @@ export function createMockConfigSdk(
                 widgetNamespace?: string;
               }>;
               sys?: { version?: number };
-            },
+            }
           ) => {
             const current = editorInterfaces[contentTypeId] ?? {
               controls: [],
@@ -248,7 +232,7 @@ export function createMockConfigSdk(
             };
             editorInterfaces[contentTypeId] = next;
             return Promise.resolve(next);
-          },
+          }
         ),
       },
     },

@@ -1,16 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Box,
-  Checkbox,
-  Flex,
-  Pill,
-  Text,
-} from "@contentful/f36-components";
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  SearchIcon,
-} from "@contentful/f36-icons";
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Box, Checkbox, Flex, Pill, Text } from '@contentful/f36-components';
+import { ChevronDownIcon, ChevronUpIcon, SearchIcon } from '@contentful/f36-icons';
 
 interface ContentTypeOption {
   id: string;
@@ -30,7 +20,7 @@ function ContentTypePicker({
   onSelectionChange,
 }: ContentTypePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const selectedContentTypes = useMemo(() => {
@@ -47,13 +37,13 @@ function ContentTypePicker({
     }
 
     return contentTypes.filter((contentType) =>
-      contentType.name.toLowerCase().includes(normalizedQuery),
+      contentType.name.toLowerCase().includes(normalizedQuery)
     );
   }, [contentTypes, query]);
 
   const triggerLabel = useMemo(() => {
     if (selectedContentTypes.length === 0) {
-      return "Select one or more";
+      return 'Select one or more';
     }
 
     if (selectedContentTypes.length === 1) {
@@ -65,17 +55,14 @@ function ContentTypePicker({
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
-        setQuery("");
+        setQuery('');
       }
     }
 
-    document.addEventListener("mousedown", handlePointerDown);
-    return () => document.removeEventListener("mousedown", handlePointerDown);
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
   }, []);
 
   const toggleContentType = (contentTypeId: string) => {
@@ -84,12 +71,12 @@ function ContentTypePicker({
     onSelectionChange(
       isSelected
         ? selectedContentTypeIds.filter((id) => id !== contentTypeId)
-        : [...selectedContentTypeIds, contentTypeId],
+        : [...selectedContentTypeIds, contentTypeId]
     );
   };
 
   return (
-    <Box ref={containerRef} style={{ position: "relative", width: "100%" }}>
+    <Box ref={containerRef} style={{ position: 'relative', width: '100%' }}>
       <button
         type="button"
         aria-expanded={isOpen}
@@ -97,89 +84,81 @@ function ContentTypePicker({
           setIsOpen((open) => {
             const nextOpen = !open;
             if (!nextOpen) {
-              setQuery("");
+              setQuery('');
             }
             return nextOpen;
           });
         }}
         style={{
-          width: "100%",
-          minHeight: "44px",
-          padding: "9px 14px",
-          border: "1px solid #cfd9e5",
-          borderRadius: "6px",
-          backgroundColor: "#ffffff",
-          color: "#1a2433",
-          cursor: "pointer",
-          textAlign: "left",
-          position: "relative",
+          width: '100%',
+          minHeight: '44px',
+          padding: '9px 14px',
+          border: '1px solid #cfd9e5',
+          borderRadius: '6px',
+          backgroundColor: '#ffffff',
+          color: '#1a2433',
+          cursor: 'pointer',
+          textAlign: 'left',
+          position: 'relative',
           zIndex: 3,
-        }}
-      >
+        }}>
         <Flex alignItems="center" justifyContent="space-between">
-          <Text style={{ fontSize: "14px", lineHeight: "20px", fontWeight: 500 }}>
+          <Text style={{ fontSize: '14px', lineHeight: '20px', fontWeight: 500 }}>
             {triggerLabel}
           </Text>
-          {isOpen ? (
-            <ChevronUpIcon variant="muted" />
-          ) : (
-            <ChevronDownIcon variant="muted" />
-          )}
+          {isOpen ? <ChevronUpIcon variant="muted" /> : <ChevronDownIcon variant="muted" />}
         </Flex>
       </button>
 
       {isOpen && (
         <Box
           style={{
-            position: "absolute",
-            top: "40px",
+            position: 'absolute',
+            top: '40px',
             left: 0,
             right: 0,
             zIndex: 2,
-            border: "1px solid #cfd9e5",
-            borderRadius: "6px",
-            backgroundColor: "#ffffff",
-            boxShadow: "0 8px 24px rgba(20, 28, 41, 0.12)",
-            padding: "4px 0",
-            maxHeight: "280px",
-            overflowY: "auto",
-          }}
-        >
-          <Box style={{ padding: "0 12px 4px" }}>
+            border: '1px solid #cfd9e5',
+            borderRadius: '6px',
+            backgroundColor: '#ffffff',
+            boxShadow: '0 8px 24px rgba(20, 28, 41, 0.12)',
+            padding: '4px 0',
+            maxHeight: '280px',
+            overflowY: 'auto',
+          }}>
+          <Box style={{ padding: '0 12px 4px' }}>
             <Box
               style={{
-                position: "relative",
-                margin: "-4px -12px 0",
-                padding: "10px 16px",
-                borderBottom: "1px solid #edf2f7",
-              }}
-            >
+                position: 'relative',
+                margin: '-4px -12px 0',
+                padding: '10px 16px',
+                borderBottom: '1px solid #edf2f7',
+              }}>
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search content types"
                 style={{
-                  width: "100%",
-                  border: "none",
-                  outline: "none",
-                  backgroundColor: "transparent",
-                  color: "#536171",
-                  fontSize: "14px",
-                  lineHeight: "20px",
+                  width: '100%',
+                  border: 'none',
+                  outline: 'none',
+                  backgroundColor: 'transparent',
+                  color: '#536171',
+                  fontSize: '14px',
+                  lineHeight: '20px',
                   fontWeight: 400,
-                  paddingRight: "36px",
-                  fontFamily: "inherit",
+                  paddingRight: '36px',
+                  fontFamily: 'inherit',
                 }}
               />
               <Box
                 style={{
-                  position: "absolute",
-                  top: "50%",
-                  right: "16px",
-                  transform: "translateY(-50%)",
-                  pointerEvents: "none",
-                }}
-              >
+                  position: 'absolute',
+                  top: '50%',
+                  right: '16px',
+                  transform: 'translateY(-50%)',
+                  pointerEvents: 'none',
+                }}>
                 <SearchIcon variant="muted" />
               </Box>
             </Box>
@@ -189,23 +168,20 @@ function ContentTypePicker({
             <Box
               key={contentType.id}
               style={{
-                padding: "8px 16px",
-              }}
-            >
+                padding: '8px 16px',
+              }}>
               <Flex alignItems="center" gap="spacingM">
                 <Checkbox
                   isChecked={selectedContentTypeIds.includes(contentType.id)}
                   onChange={() => toggleContentType(contentType.id)}
                 />
-                <Text style={{ fontSize: "14px", lineHeight: "20px" }}>
-                  {contentType.name}
-                </Text>
+                <Text style={{ fontSize: '14px', lineHeight: '20px' }}>{contentType.name}</Text>
               </Flex>
             </Box>
           ))}
 
           {filteredContentTypes.length === 0 && (
-            <Box style={{ padding: "12px" }}>
+            <Box style={{ padding: '12px' }}>
               <Text fontColor="gray600">No content types match your search.</Text>
             </Box>
           )}
@@ -224,9 +200,7 @@ function ContentTypePicker({
                 key={contentType.id}
                 label={contentType.name}
                 onClose={() =>
-                  onSelectionChange(
-                    selectedContentTypeIds.filter((id) => id !== contentType.id),
-                  )
+                  onSelectionChange(selectedContentTypeIds.filter((id) => id !== contentType.id))
                 }
               />
             ))}

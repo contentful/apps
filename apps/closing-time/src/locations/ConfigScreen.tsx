@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { ConfigAppSDK } from "@contentful/app-sdk";
-import { useSDK } from "@contentful/react-apps-toolkit";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ConfigAppSDK } from '@contentful/app-sdk';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import {
   Box,
   Flex,
@@ -14,9 +14,9 @@ import {
   Stack,
   Switch,
   TextInput,
-} from "@contentful/f36-components";
-import ContentTypePicker from "../components/ContentTypePicker";
-import DayRow from "../components/DayRow";
+} from '@contentful/f36-components';
+import ContentTypePicker from '../components/ContentTypePicker';
+import DayRow from '../components/DayRow';
 import {
   AppInstallationParameters,
   ClockFormat,
@@ -25,9 +25,9 @@ import {
   DayHours,
   DayOfWeek,
   HoursOfOperation,
-} from "../types";
-import { ensureUniqueFieldId, slugifyFieldId } from "../utils/contentTypes";
-import { cloneHours, normalizeHours } from "../utils/hours";
+} from '../types';
+import { ensureUniqueFieldId, slugifyFieldId } from '../utils/contentTypes';
+import { cloneHours, normalizeHours } from '../utils/hours';
 
 interface ContentTypeWithJsonFields {
   id: string;
@@ -37,12 +37,12 @@ interface ContentTypeWithJsonFields {
 }
 
 const DEFAULT_INSTALLATION_PARAMETERS: Required<AppInstallationParameters> = {
-  clockFormat: "12h",
+  clockFormat: '12h',
   selectedContentTypeIds: [],
   useCustomDefaults: false,
   defaultHours: cloneHours(DEFAULT_HOURS),
-  managedFieldId: "storeHours",
-  managedFieldName: "Store hours",
+  managedFieldId: 'storeHours',
+  managedFieldName: 'Store hours',
 };
 
 function getConfigureErrorMessage(error: unknown) {
@@ -51,10 +51,10 @@ function getConfigureErrorMessage(error: unknown) {
   }
 
   if (
-    typeof error === "object" &&
+    typeof error === 'object' &&
     error !== null &&
-    "message" in error &&
-    typeof (error as { message?: unknown }).message === "string"
+    'message' in error &&
+    typeof (error as { message?: unknown }).message === 'string'
   ) {
     return (error as { message: string }).message;
   }
@@ -62,25 +62,25 @@ function getConfigureErrorMessage(error: unknown) {
   try {
     return JSON.stringify(error);
   } catch {
-    return "Failed to apply Closing Time to the selected content types.";
+    return 'Failed to apply Closing Time to the selected content types.';
   }
 }
 
 function isVersionMismatchError(error: unknown) {
   if (
-    typeof error === "object" &&
+    typeof error === 'object' &&
     error !== null &&
-    "status" in error &&
+    'status' in error &&
     (error as { status?: unknown }).status === 409
   ) {
     return true;
   }
 
   if (
-    typeof error === "object" &&
+    typeof error === 'object' &&
     error !== null &&
-    "name" in error &&
-    (error as { name?: unknown }).name === "VersionMismatch"
+    'name' in error &&
+    (error as { name?: unknown }).name === 'VersionMismatch'
   ) {
     return true;
   }
@@ -88,32 +88,26 @@ function isVersionMismatchError(error: unknown) {
   const message =
     error instanceof Error
       ? error.message
-      : typeof error === "object" &&
-          error !== null &&
-          "message" in error &&
-          typeof (error as { message?: unknown }).message === "string"
-        ? (error as { message: string }).message
-        : "";
+      : typeof error === 'object' &&
+        error !== null &&
+        'message' in error &&
+        typeof (error as { message?: unknown }).message === 'string'
+      ? (error as { message: string }).message
+      : '';
 
-  return message.toLowerCase().includes("version");
+  return message.toLowerCase().includes('version');
 }
 
 function ConfigScreen() {
   const sdk = useSDK<ConfigAppSDK<AppInstallationParameters>>();
-  const [clockFormat, setClockFormat] = useState<ClockFormat>("12h");
-  const [contentTypes, setContentTypes] = useState<ContentTypeWithJsonFields[]>(
-    [],
-  );
-  const [selectedContentTypeIds, setSelectedContentTypeIds] = useState<
-    string[]
-  >([]);
+  const [clockFormat, setClockFormat] = useState<ClockFormat>('12h');
+  const [contentTypes, setContentTypes] = useState<ContentTypeWithJsonFields[]>([]);
+  const [selectedContentTypeIds, setSelectedContentTypeIds] = useState<string[]>([]);
   const [managedFieldName, setManagedFieldName] = useState(
-    DEFAULT_INSTALLATION_PARAMETERS.managedFieldName,
+    DEFAULT_INSTALLATION_PARAMETERS.managedFieldName
   );
   const [useCustomDefaults, setUseCustomDefaults] = useState(false);
-  const [defaultHours, setDefaultHours] = useState<HoursOfOperation>(
-    cloneHours(DEFAULT_HOURS),
-  );
+  const [defaultHours, setDefaultHours] = useState<HoursOfOperation>(cloneHours(DEFAULT_HOURS));
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -122,18 +116,13 @@ function ConfigScreen() {
     setError(null);
 
     try {
-      const currentParameters =
-        (await sdk.app.getParameters()) ?? DEFAULT_INSTALLATION_PARAMETERS;
+      const currentParameters = (await sdk.app.getParameters()) ?? DEFAULT_INSTALLATION_PARAMETERS;
       const savedContentTypeIds = currentParameters.selectedContentTypeIds ?? [];
-      const savedDefaultHours = normalizeHours(
-        currentParameters.defaultHours,
-        DEFAULT_HOURS,
-      );
+      const savedDefaultHours = normalizeHours(currentParameters.defaultHours, DEFAULT_HOURS);
 
-      setClockFormat(currentParameters.clockFormat ?? "12h");
+      setClockFormat(currentParameters.clockFormat ?? '12h');
       setManagedFieldName(
-        currentParameters.managedFieldName ??
-          DEFAULT_INSTALLATION_PARAMETERS.managedFieldName,
+        currentParameters.managedFieldName ?? DEFAULT_INSTALLATION_PARAMETERS.managedFieldName
       );
       setUseCustomDefaults(currentParameters.useCustomDefaults ?? false);
       setDefaultHours(savedDefaultHours);
@@ -149,7 +138,7 @@ function ConfigScreen() {
       const availableContentTypes = await Promise.all(
         (response.items ?? []).map(async (contentType) => {
           const jsonFieldIds = (contentType.fields ?? [])
-            .filter((field) => field.type === "Object")
+            .filter((field) => field.type === 'Object')
             .map((field) => field.id);
 
           const editorInterface = (await sdk.cma.editorInterface.get({
@@ -163,8 +152,7 @@ function ConfigScreen() {
           };
 
           const appAssignedToAnyField = (editorInterface.controls ?? []).some(
-            (entry) =>
-              entry.widgetNamespace === "app" && entry.widgetId === sdk.ids.app,
+            (entry) => entry.widgetNamespace === 'app' && entry.widgetId === sdk.ids.app
           );
 
           return {
@@ -173,25 +161,24 @@ function ConfigScreen() {
             jsonFieldIds,
             fields: contentType.fields ?? [],
             initiallyAssigned:
-              appAssignedToAnyField ||
-              savedContentTypeIds.includes(contentType.sys.id),
+              appAssignedToAnyField || savedContentTypeIds.includes(contentType.sys.id),
           };
-        }),
+        })
       );
 
       setContentTypes(
         availableContentTypes.map(({ initiallyAssigned, ...contentType }) => ({
           ...contentType,
-        })),
+        }))
       );
       setSelectedContentTypeIds(
         availableContentTypes
           .filter((contentType) => contentType.initiallyAssigned)
-          .map((contentType) => contentType.id),
+          .map((contentType) => contentType.id)
       );
     } catch (loadError) {
       console.error(loadError);
-      setError("Failed to load content types and app configuration.");
+      setError('Failed to load content types and app configuration.');
     } finally {
       setIsLoading(false);
       sdk.app.setReady();
@@ -206,9 +193,7 @@ function ConfigScreen() {
     async (configParameters: AppInstallationParameters) => {
       const assignedFields = await Promise.all(
         contentTypes.map(async (contentType) => {
-          const assignApp = configParameters.selectedContentTypeIds?.includes(
-            contentType.id,
-          );
+          const assignApp = configParameters.selectedContentTypeIds?.includes(contentType.id);
           const contentTypeDetails = (await sdk.cma.contentType.get({
             contentTypeId: contentType.id,
           })) as {
@@ -229,31 +214,27 @@ function ConfigScreen() {
             };
 
           let editorInterface = await getEditorInterface();
-          const fieldName = configParameters.managedFieldName?.trim() ?? "";
-          const baseFieldId =
-            configParameters.managedFieldId ?? slugifyFieldId(fieldName);
+          const fieldName = configParameters.managedFieldName?.trim() ?? '';
+          const baseFieldId = configParameters.managedFieldId ?? slugifyFieldId(fieldName);
           const existingAppControl = (editorInterface.controls ?? []).find(
-            (control) =>
-              control.widgetNamespace === "app" && control.widgetId === sdk.ids.app,
+            (control) => control.widgetNamespace === 'app' && control.widgetId === sdk.ids.app
           );
 
           let managedField =
-            contentTypeDetails.fields.find(
-              (field) => field.id === existingAppControl?.fieldId,
-            ) ??
+            contentTypeDetails.fields.find((field) => field.id === existingAppControl?.fieldId) ??
             contentTypeDetails.fields.find((field) => field.id === baseFieldId) ??
             contentTypeDetails.fields.find((field) => field.name === fieldName);
 
-          if (managedField && managedField.type !== "Object") {
+          if (managedField && managedField.type !== 'Object') {
             throw new Error(
-              `${contentTypeDetails.name} already has a field named "${fieldName}" that is not a JSON field.`,
+              `${contentTypeDetails.name} already has a field named "${fieldName}" that is not a JSON field.`
             );
           }
 
           if (assignApp && !managedField) {
             const newFieldId = ensureUniqueFieldId(
               baseFieldId,
-              contentTypeDetails.fields.map((field) => field.id),
+              contentTypeDetails.fields.map((field) => field.id)
             );
             const updatedContentType = {
               ...contentTypeDetails,
@@ -262,7 +243,7 @@ function ConfigScreen() {
                 {
                   id: newFieldId,
                   name: fieldName,
-                  type: "Object",
+                  type: 'Object',
                   localized: false,
                   required: false,
                   validations: [],
@@ -273,44 +254,42 @@ function ConfigScreen() {
             };
             const updatedResult = (await sdk.cma.contentType.update(
               { contentTypeId: contentType.id },
-              updatedContentType as never,
+              updatedContentType as never
             )) as { sys?: { version?: number } };
 
             if (updatedResult.sys?.version) {
-              await sdk.cma.contentType.publish(
-                { contentTypeId: contentType.id },
-                { sys: { version: updatedResult.sys.version } } as never,
-              );
+              await sdk.cma.contentType.publish({ contentTypeId: contentType.id }, {
+                sys: { version: updatedResult.sys.version },
+              } as never);
             }
 
             managedField = {
               id: newFieldId,
               name: fieldName,
-              type: "Object",
+              type: 'Object',
             };
           }
 
-          const untouchedControls = (editorInterface.controls ?? []).filter(
-            (control) => {
-              const isClosingTimeControl =
-                control.widgetNamespace === "app" && control.widgetId === sdk.ids.app;
-              const targetsManagedField =
-                managedField !== undefined && control.fieldId === managedField.id;
+          const untouchedControls = (editorInterface.controls ?? []).filter((control) => {
+            const isClosingTimeControl =
+              control.widgetNamespace === 'app' && control.widgetId === sdk.ids.app;
+            const targetsManagedField =
+              managedField !== undefined && control.fieldId === managedField.id;
 
-              return !isClosingTimeControl && !targetsManagedField;
-            },
-          );
+            return !isClosingTimeControl && !targetsManagedField;
+          });
 
-          const updatedControls = assignApp && managedField
-            ? [
-                ...untouchedControls,
-                {
-                  fieldId: managedField.id,
-                  widgetId: sdk.ids.app,
-                  widgetNamespace: "app",
-                },
-              ]
-            : untouchedControls;
+          const updatedControls =
+            assignApp && managedField
+              ? [
+                  ...untouchedControls,
+                  {
+                    fieldId: managedField.id,
+                    widgetId: sdk.ids.app,
+                    widgetNamespace: 'app',
+                  },
+                ]
+              : untouchedControls;
 
           const nextEditorInterface = {
             ...editorInterface,
@@ -320,7 +299,7 @@ function ConfigScreen() {
           try {
             await sdk.cma.editorInterface.update(
               { contentTypeId: contentType.id },
-              nextEditorInterface as never,
+              nextEditorInterface as never
             );
           } catch (error) {
             if (!isVersionMismatchError(error)) {
@@ -328,20 +307,17 @@ function ConfigScreen() {
             }
 
             editorInterface = await getEditorInterface();
-            await sdk.cma.editorInterface.update(
-              { contentTypeId: contentType.id },
-              {
-                ...editorInterface,
-                controls: updatedControls,
-              } as never,
-            );
+            await sdk.cma.editorInterface.update({ contentTypeId: contentType.id }, {
+              ...editorInterface,
+              controls: updatedControls,
+            } as never);
           }
 
           return {
             contentTypeId: contentType.id,
             fieldId: assignApp && managedField ? managedField.id : null,
           };
-        }),
+        })
       );
 
       return assignedFields.reduce<Record<string, string[]>>((acc, assignment) => {
@@ -354,17 +330,17 @@ function ConfigScreen() {
         return acc;
       }, {});
     },
-    [contentTypes, sdk],
+    [contentTypes, sdk]
   );
 
   const onConfigure = useCallback(async () => {
     if (selectedContentTypeIds.length === 0) {
-      sdk.notifier.error("Select at least one content type before installing.");
+      sdk.notifier.error('Select at least one content type before installing.');
       return false;
     }
 
     if (!managedFieldName.trim()) {
-      sdk.notifier.error("Enter a field name for the JSON field to create.");
+      sdk.notifier.error('Enter a field name for the JSON field to create.');
       return false;
     }
 
@@ -383,7 +359,9 @@ function ConfigScreen() {
       const currentState = await sdk.app.getCurrentState();
 
       const targetState = {
-        EditorInterface: contentTypes.reduce<Record<string, { controls?: Array<{ fieldId: string }> }>>(
+        EditorInterface: contentTypes.reduce<
+          Record<string, { controls?: Array<{ fieldId: string }> }>
+        >(
           (acc, contentType) => {
             const fields = assignedFields[contentType.id] ?? [];
 
@@ -394,7 +372,7 @@ function ConfigScreen() {
           },
           {
             ...(currentState?.EditorInterface ?? {}),
-          },
+          }
         ),
       };
 
@@ -433,15 +411,12 @@ function ConfigScreen() {
       }));
   }, [contentTypes]);
 
-  const handleDefaultDayChange = useCallback(
-    (day: DayOfWeek, dayHours: DayHours) => {
-      setDefaultHours((currentHours) => ({
-        ...currentHours,
-        [day]: dayHours,
-      }));
-    },
-    [],
-  );
+  const handleDefaultDayChange = useCallback((day: DayOfWeek, dayHours: DayHours) => {
+    setDefaultHours((currentHours) => ({
+      ...currentHours,
+      [day]: dayHours,
+    }));
+  }, []);
 
   const handleCopyDefaultsToAll = useCallback((sourceDay: DayOfWeek) => {
     setDefaultHours((currentHours) => {
@@ -465,15 +440,13 @@ function ConfigScreen() {
       const nextHours = cloneHours(currentHours);
       const sourceHours = currentHours[sourceDay];
 
-      ["monday", "tuesday", "wednesday", "thursday", "friday"].forEach(
-        (day) => {
-          nextHours[day as DayOfWeek] = {
-            isOpen: sourceHours.isOpen,
-            is24Hours: sourceHours.is24Hours,
-            slots: sourceHours.slots.map((slot) => ({ ...slot })),
-          };
-        },
-      );
+      ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'].forEach((day) => {
+        nextHours[day as DayOfWeek] = {
+          isOpen: sourceHours.isOpen,
+          is24Hours: sourceHours.is24Hours,
+          slots: sourceHours.slots.map((slot) => ({ ...slot })),
+        };
+      });
 
       return nextHours;
     });
@@ -496,43 +469,38 @@ function ConfigScreen() {
   }
 
   return (
-    <Flex justifyContent="center" style={{ width: "100%" }}>
+    <Flex justifyContent="center" style={{ width: '100%' }}>
       <Box
         style={{
-          width: "900px",
-          maxWidth: "100%",
-          padding: "48px 24px 64px",
-        }}
-      >
+          width: '900px',
+          maxWidth: '100%',
+          padding: '48px 24px 64px',
+        }}>
         <Form>
           <Stack
             flexDirection="column"
             spacing="spacingXl"
             alignItems="stretch"
-            style={{ width: "100%", textAlign: "left" }}
-          >
-            <Box style={{ width: "100%", maxWidth: "760px" }}>
+            style={{ width: '100%', textAlign: 'left' }}>
+            <Box style={{ width: '100%', maxWidth: '760px' }}>
               <Heading marginBottom="spacingS">Set up Closing Time</Heading>
-              <Paragraph marginBottom="none" style={{ maxWidth: "720px" }}>
-                Configure where Closing Time appears and how authors should see
-                store hours while editing content.
+              <Paragraph marginBottom="none" style={{ maxWidth: '720px' }}>
+                Configure where Closing Time appears and how authors should see store hours while
+                editing content.
               </Paragraph>
             </Box>
 
-            <Box style={{ width: "100%", maxWidth: "760px" }}>
+            <Box style={{ width: '100%', maxWidth: '760px' }}>
               <Heading as="h2" marginBottom="spacingS">
                 Assign content types
               </Heading>
               <Paragraph marginBottom="spacingM">
-                Select the content type(s) you want to use with Closing Time.
-                You can change this anytime by navigating to the &quot;Fields&quot;
-                tab in your content model and unassigning the app from the JSON
-                field.
+                Select the content type(s) you want to use with Closing Time. You can change this
+                anytime by navigating to the &quot;Fields&quot; tab in your content model and
+                unassigning the app from the JSON field.
               </Paragraph>
               {pickerOptions.length === 0 ? (
-                <Note variant="warning">
-                  No content types were found in this space yet.
-                </Note>
+                <Note variant="warning">No content types were found in this space yet.</Note>
               ) : (
                 <FormControl>
                   <FormControl.Label>Content types</FormControl.Label>
@@ -545,19 +513,14 @@ function ConfigScreen() {
               )}
             </Box>
 
-            <Box style={{ width: "100%", maxWidth: "760px" }}>
+            <Box style={{ width: '100%', maxWidth: '760px' }}>
               <Heading as="h2" marginBottom="spacingS">
                 Configure defaults
               </Heading>
               <Paragraph marginBottom="spacingM">
-                Set the field name and choose how authors should see hours
-                while editing content.
+                Set the field name and choose how authors should see hours while editing content.
               </Paragraph>
-              <Stack
-                flexDirection="column"
-                spacing="spacingM"
-                alignItems="stretch"
-              >
+              <Stack flexDirection="column" spacing="spacingM" alignItems="stretch">
                 <FormControl>
                   <FormControl.Label>JSON field name</FormControl.Label>
                   <TextInput
@@ -566,8 +529,8 @@ function ConfigScreen() {
                     placeholder="Store hours"
                   />
                   <FormControl.HelpText>
-                    Closing Time will create this JSON field on each selected
-                    content type if it does not already exist.
+                    Closing Time will create this JSON field on each selected content type if it
+                    does not already exist.
                   </FormControl.HelpText>
                 </FormControl>
 
@@ -575,28 +538,25 @@ function ConfigScreen() {
                   <FormControl.Label>Time display format</FormControl.Label>
                   <Select
                     value={clockFormat}
-                    onChange={(event) =>
-                      setClockFormat(event.target.value as ClockFormat)
-                    }
-                  >
+                    onChange={(event) => setClockFormat(event.target.value as ClockFormat)}>
                     <Select.Option value="12h">12-hour clock</Select.Option>
                     <Select.Option value="24h">24-hour clock</Select.Option>
                   </Select>
                   <FormControl.HelpText>
-                    Stored values stay in `HH:MM` JSON format. This only changes
-                    how authors see times in the field summary and editor.
+                    Stored values stay in `HH:MM` JSON format. This only changes how authors see
+                    times in the field summary and editor.
                   </FormControl.HelpText>
                 </FormControl>
               </Stack>
             </Box>
 
-            <Box style={{ width: "100%", maxWidth: "760px" }}>
+            <Box style={{ width: '100%', maxWidth: '760px' }}>
               <Heading as="h2" marginBottom="spacingS">
                 Default hours
               </Heading>
               <Paragraph marginBottom="spacingM">
-                Choose whether Closing Time should prefill each day with custom
-                opening hours the first time authors open an empty field.
+                Choose whether Closing Time should prefill each day with custom opening hours the
+                first time authors open an empty field.
               </Paragraph>
               <Flex alignItems="flex-start" gap="spacingM">
                 <Switch
@@ -609,8 +569,8 @@ function ConfigScreen() {
                     Set default hours before install
                   </Paragraph>
                   <Paragraph marginTop="none" marginBottom="none">
-                    Enable default opening and closing hours for each day. If
-                    disabled, Closing Time keeps the current built-in defaults.
+                    Enable default opening and closing hours for each day. If disabled, Closing Time
+                    keeps the current built-in defaults.
                   </Paragraph>
                 </Box>
               </Flex>
@@ -618,35 +578,29 @@ function ConfigScreen() {
               {useCustomDefaults && (
                 <Box marginTop="spacingM">
                   <Paragraph marginBottom="spacingM">
-                    Configure the initial hours authors should see the first
-                    time they open Closing Time on an empty field.
+                    Configure the initial hours authors should see the first time they open Closing
+                    Time on an empty field.
                   </Paragraph>
                   <Box
                     style={{
-                      backgroundColor: "#f7f9fa",
-                      border: "1px solid #d3dce6",
-                      borderRadius: "6px",
-                      padding: "16px",
-                    }}
-                  >
+                      backgroundColor: '#f7f9fa',
+                      border: '1px solid #d3dce6',
+                      borderRadius: '6px',
+                      padding: '16px',
+                    }}>
                     <Stack
                       flexDirection="column"
                       spacing="spacingM"
                       alignItems="stretch"
-                      style={{ width: "100%" }}
-                    >
+                      style={{ width: '100%' }}>
                       {DAYS_OF_WEEK.map((day) => (
                         <DayRow
                           key={day}
                           day={day}
                           dayHours={defaultHours[day]}
-                          onChange={(dayHours) =>
-                            handleDefaultDayChange(day, dayHours)
-                          }
+                          onChange={(dayHours) => handleDefaultDayChange(day, dayHours)}
                           onCopyToAll={() => handleCopyDefaultsToAll(day)}
-                          onCopyToWeekdays={() =>
-                            handleCopyDefaultsToWeekdays(day)
-                          }
+                          onCopyToWeekdays={() => handleCopyDefaultsToWeekdays(day)}
                           clockFormat={clockFormat}
                         />
                       ))}

@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
-import { DialogAppSDK } from "@contentful/app-sdk";
-import { useSDK } from "@contentful/react-apps-toolkit";
-import { Button, Stack, Flex, Modal } from "@contentful/f36-components";
-import { css } from "emotion";
-import DayRow from "../components/DayRow";
+import { useState, useEffect, useCallback } from 'react';
+import { DialogAppSDK } from '@contentful/app-sdk';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { Button, Stack, Flex, Modal } from '@contentful/f36-components';
+import { css } from 'emotion';
+import DayRow from '../components/DayRow';
 import {
   AppInstallationParameters,
   HoursOfOperation,
@@ -12,25 +12,23 @@ import {
   DAYS_OF_WEEK,
   DEFAULT_SLOT,
   DialogInvocationParameters,
-} from "../types";
+} from '../types';
 
 const styles = {
   content: css({
     minHeight: 0,
-    overflowY: "auto",
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
+    overflowY: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
   }),
 };
 
 function Dialog() {
   const sdk = useSDK<DialogAppSDK>();
-  const installationParameters =
-    sdk.parameters.installation as AppInstallationParameters;
-  const clockFormat = installationParameters.clockFormat ?? "12h";
-  const invocationParams = sdk.parameters
-    .invocation as unknown as DialogInvocationParameters;
+  const installationParameters = sdk.parameters.installation as AppInstallationParameters;
+  const clockFormat = installationParameters.clockFormat ?? '12h';
+  const invocationParams = sdk.parameters.invocation as unknown as DialogInvocationParameters;
   const initialHours = invocationParams?.hours || ({} as HoursOfOperation);
 
   const [hours, setHours] = useState<HoursOfOperation>(initialHours);
@@ -67,26 +65,20 @@ function Dialog() {
         return updated;
       });
     },
-    [hours],
+    [hours]
   );
 
   /** Copies hours from one day to all days of the week */
   const handleCopyToAll = useCallback(
     (sourceDay: DayOfWeek) => copyHoursTodays(sourceDay, [...DAYS_OF_WEEK]),
-    [copyHoursTodays],
+    [copyHoursTodays]
   );
 
   /** Copies hours from one day to weekdays only (Mon-Fri) */
   const handleCopyToWeekdays = useCallback(
     (sourceDay: DayOfWeek) =>
-      copyHoursTodays(sourceDay, [
-        "monday",
-        "tuesday",
-        "wednesday",
-        "thursday",
-        "friday",
-      ]),
-    [copyHoursTodays],
+      copyHoursTodays(sourceDay, ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']),
+    [copyHoursTodays]
   );
 
   const handleSetAllClosed = useCallback(() => {
@@ -154,18 +146,14 @@ function Dialog() {
     <Modal isShown onClose={handleCancel} size="fullscreen">
       {() => (
         <>
-          <Modal.Header
-            title="Hours of operation"
-            onClose={handleCancel}
-          />
+          <Modal.Header title="Hours of operation" onClose={handleCancel} />
           <Modal.Content className={styles.content}>
             <Flex justifyContent="flex-end">
               <Button
                 variant="secondary"
                 size="small"
-                onClick={allClosed ? handleSetAllOpen : handleSetAllClosed}
-              >
-                {allClosed ? "Set all open" : "Set all closed"}
+                onClick={allClosed ? handleSetAllOpen : handleSetAllClosed}>
+                {allClosed ? 'Set all open' : 'Set all closed'}
               </Button>
             </Flex>
 
@@ -173,8 +161,7 @@ function Dialog() {
               flexDirection="column"
               spacing="spacingXs"
               alignItems="stretch"
-              style={{ width: "100%" }}
-            >
+              style={{ width: '100%' }}>
               {DAYS_OF_WEEK.map((day) => (
                 <DayRow
                   key={day}

@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback } from 'react';
 import {
   Box,
   Flex,
@@ -8,17 +8,10 @@ import {
   Button,
   IconButton,
   Menu,
-} from "@contentful/f36-components";
-import { PlusIcon, MoreHorizontalIcon } from "@contentful/f36-icons";
-import TimeSlotInput from "./TimeSlotInput";
-import {
-  ClockFormat,
-  DayOfWeek,
-  DayHours,
-  DAY_LABELS,
-  DEFAULT_SLOT,
-  TimeSlot,
-} from "../types";
+} from '@contentful/f36-components';
+import { PlusIcon, MoreHorizontalIcon } from '@contentful/f36-icons';
+import TimeSlotInput from './TimeSlotInput';
+import { ClockFormat, DayOfWeek, DayHours, DAY_LABELS, DEFAULT_SLOT, TimeSlot } from '../types';
 
 interface DayRowProps {
   day: DayOfWeek;
@@ -35,7 +28,7 @@ function DayRow({
   onChange,
   onCopyToAll,
   onCopyToWeekdays,
-  clockFormat = "12h",
+  clockFormat = '12h',
 }: DayRowProps) {
   const handleOpenChange = useCallback(
     (isOpen: boolean) => {
@@ -44,7 +37,7 @@ function DayRow({
         isOpen,
       });
     },
-    [dayHours, onChange],
+    [dayHours, onChange]
   );
 
   const handle24HoursChange = useCallback(
@@ -54,7 +47,7 @@ function DayRow({
         is24Hours,
       });
     },
-    [dayHours, onChange],
+    [dayHours, onChange]
   );
 
   const handleSlotChange = useCallback(
@@ -66,13 +59,13 @@ function DayRow({
         slots: newSlots,
       });
     },
-    [dayHours, onChange],
+    [dayHours, onChange]
   );
 
   const handleAddSlot = useCallback(() => {
     const lastSlot = dayHours.slots[dayHours.slots.length - 1];
-    const newOpen = lastSlot ? lastSlot.close : "09:00";
-    const newClose = lastSlot ? "21:00" : "17:00";
+    const newOpen = lastSlot ? lastSlot.close : '09:00';
+    const newClose = lastSlot ? '21:00' : '17:00';
     onChange({
       ...dayHours,
       slots: [...dayHours.slots, { open: newOpen, close: newClose }],
@@ -94,60 +87,47 @@ function DayRow({
         slots: newSlots,
       });
     },
-    [dayHours, onChange],
+    [dayHours, onChange]
   );
 
   return (
     <Box
       style={{
-        width: "100%",
-        borderBottom: "1px solid #e5e5e5",
-        paddingBottom: "12px",
-        paddingTop: "8px",
-      }}
-    >
+        width: '100%',
+        borderBottom: '1px solid #e5e5e5',
+        paddingBottom: '12px',
+        paddingTop: '8px',
+      }}>
       <Box
         style={{
-          display: "grid",
-          width: "100%",
+          display: 'grid',
+          width: '100%',
           gridTemplateColumns: dayHours.isOpen
-            ? "140px 140px minmax(0, 1fr) 32px"
-            : "140px 120px minmax(0, 1fr) 32px",
-          alignItems: "start",
-          columnGap: "16px",
-        }}
-      >
+            ? '140px 140px minmax(0, 1fr) 32px'
+            : '140px 120px minmax(0, 1fr) 32px',
+          alignItems: 'start',
+          columnGap: '16px',
+        }}>
         {/* Day name and toggle */}
-        <Flex
-          alignItems="center"
-          gap="spacingS"
-          style={{ minHeight: "36px" }}
-        >
+        <Flex alignItems="center" gap="spacingS" style={{ minHeight: '36px' }}>
           <Switch
             id={`${day}-open`}
             isChecked={dayHours.isOpen}
             onChange={() => handleOpenChange(!dayHours.isOpen)}
             size="small"
           />
-          <Text
-            fontWeight="fontWeightMedium"
-            fontColor={dayHours.isOpen ? "gray900" : "gray500"}
-          >
+          <Text fontWeight="fontWeightMedium" fontColor={dayHours.isOpen ? 'gray900' : 'gray500'}>
             {DAY_LABELS[day]}
           </Text>
         </Flex>
 
         {/* 24 hours checkbox - fixed width column */}
-        <Flex
-          alignItems="center"
-          style={{ minHeight: "36px" }}
-        >
+        <Flex alignItems="center" style={{ minHeight: '36px' }}>
           {dayHours.isOpen ? (
             <Checkbox
               id={`${day}-24hours`}
               isChecked={dayHours.is24Hours}
-              onChange={() => handle24HoursChange(!dayHours.is24Hours)}
-            >
+              onChange={() => handle24HoursChange(!dayHours.is24Hours)}>
               Open 24 hours
             </Checkbox>
           ) : (
@@ -162,9 +142,8 @@ function DayRow({
           gap="spacingS"
           flexWrap="wrap"
           style={{
-            minHeight: "36px",
-          }}
-        >
+            minHeight: '36px',
+          }}>
           {dayHours.isOpen && !dayHours.is24Hours ? (
             <>
               {dayHours.slots.map((slot, index) => (
@@ -181,8 +160,7 @@ function DayRow({
                 variant="secondary"
                 size="small"
                 startIcon={<PlusIcon />}
-                onClick={handleAddSlot}
-              >
+                onClick={handleAddSlot}>
                 Add hours
               </Button>
             </>
@@ -194,7 +172,7 @@ function DayRow({
         </Flex>
 
         {/* Menu */}
-        <Flex alignItems="center" justifyContent="flex-end" style={{ minHeight: "36px" }}>
+        <Flex alignItems="center" justifyContent="flex-end" style={{ minHeight: '36px' }}>
           <Menu>
             <Menu.Trigger>
               <IconButton

@@ -1,40 +1,40 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import type { ConfigAppSDK } from "@contentful/app-sdk";
-import ConfigScreen from "./ConfigScreen";
-import { createMockConfigSdk } from "../test/mocks/mockSdk";
-import { mockDefaultHours } from "../test/mocks/mockHours";
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { ConfigAppSDK } from '@contentful/app-sdk';
+import ConfigScreen from './ConfigScreen';
+import { createMockConfigSdk } from '../test/mocks/mockSdk';
+import { mockDefaultHours } from '../test/mocks/mockHours';
 
 let mockSdk: ConfigAppSDK;
 
-vi.mock("@contentful/react-apps-toolkit", () => ({
+vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
-describe("ConfigScreen", () => {
+describe('ConfigScreen', () => {
   beforeEach(() => {
     mockSdk = createMockConfigSdk({
       parameters: {
-        clockFormat: "24h",
-        selectedContentTypeIds: ["store"],
+        clockFormat: '24h',
+        selectedContentTypeIds: ['store'],
         useCustomDefaults: true,
         defaultHours: mockDefaultHours,
-        managedFieldId: "storeHours",
-        managedFieldName: "Store hours",
+        managedFieldId: 'storeHours',
+        managedFieldName: 'Store hours',
       },
       contentTypes: [
         {
-          name: "Store",
-          sys: { id: "store" },
+          name: 'Store',
+          sys: { id: 'store' },
           fields: [
-            { id: "hours", name: "Hours", type: "Object" },
-            { id: "title", name: "Title", type: "Symbol" },
+            { id: 'hours', name: 'Hours', type: 'Object' },
+            { id: 'title', name: 'Title', type: 'Symbol' },
           ],
         },
         {
-          name: "Article",
-          sys: { id: "article" },
-          fields: [{ id: "title", name: "Title", type: "Symbol" }],
+          name: 'Article',
+          sys: { id: 'article' },
+          fields: [{ id: 'title', name: 'Title', type: 'Symbol' }],
         },
       ],
       editorInterfaces: {
@@ -48,33 +48,33 @@ describe("ConfigScreen", () => {
     });
   });
 
-  it("loads JSON fields and saved clock format", async () => {
+  it('loads JSON fields and saved clock format', async () => {
     render(<ConfigScreen />);
 
     await waitFor(() => {
-      expect(screen.getByText("Set default hours before install")).toBeInTheDocument();
+      expect(screen.getByText('Set default hours before install')).toBeInTheDocument();
     });
 
-    expect(screen.getAllByText("Store").length).toBeGreaterThan(0);
-    fireEvent.click(screen.getByRole("button", { name: /store/i }));
-    expect(screen.getAllByText("Article").length).toBeGreaterThan(0);
-    expect(screen.getByDisplayValue("24-hour clock")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("Store hours")).toBeInTheDocument();
-    expect(screen.getAllByRole("switch")[0]).toBeChecked();
+    expect(screen.getAllByText('Store').length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole('button', { name: /store/i }));
+    expect(screen.getAllByText('Article').length).toBeGreaterThan(0);
+    expect(screen.getByDisplayValue('24-hour clock')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Store hours')).toBeInTheDocument();
+    expect(screen.getAllByRole('switch')[0]).toBeChecked();
   });
 
-  it("rejects configure when no content type is selected", async () => {
+  it('rejects configure when no content type is selected', async () => {
     mockSdk = createMockConfigSdk({
       parameters: {
-        clockFormat: "12h",
+        clockFormat: '12h',
         selectedContentTypeIds: [],
-        managedFieldName: "Store hours",
+        managedFieldName: 'Store hours',
       },
       contentTypes: [
         {
-          name: "Store",
-          sys: { id: "store" },
-          fields: [{ id: "title", name: "Title", type: "Symbol" }],
+          name: 'Store',
+          sys: { id: 'store' },
+          fields: [{ id: 'title', name: 'Title', type: 'Symbol' }],
         },
       ],
     });
@@ -82,29 +82,31 @@ describe("ConfigScreen", () => {
     render(<ConfigScreen />);
 
     await waitFor(() => {
-      expect(screen.getByText("Content types")).toBeInTheDocument();
+      expect(screen.getByText('Content types')).toBeInTheDocument();
     });
 
-    const result = await (mockSdk as ConfigAppSDK & {
-      __invokeConfigure: () => Promise<unknown>;
-    }).__invokeConfigure();
+    const result = await (
+      mockSdk as ConfigAppSDK & {
+        __invokeConfigure: () => Promise<unknown>;
+      }
+    ).__invokeConfigure();
 
     expect(result).toBe(false);
     expect(mockSdk.notifier.error).toHaveBeenCalled();
   });
 
-  it("creates and assigns the managed JSON field during configure", async () => {
+  it('creates and assigns the managed JSON field during configure', async () => {
     mockSdk = createMockConfigSdk({
       parameters: {
-        clockFormat: "12h",
-        selectedContentTypeIds: ["article"],
-        managedFieldName: "Store hours",
+        clockFormat: '12h',
+        selectedContentTypeIds: ['article'],
+        managedFieldName: 'Store hours',
       },
       contentTypes: [
         {
-          name: "Article",
-          sys: { id: "article" },
-          fields: [{ id: "title", name: "Title", type: "Symbol" }],
+          name: 'Article',
+          sys: { id: 'article' },
+          fields: [{ id: 'title', name: 'Title', type: 'Symbol' }],
         },
       ],
       editorInterfaces: {
@@ -117,12 +119,14 @@ describe("ConfigScreen", () => {
     render(<ConfigScreen />);
 
     await waitFor(() => {
-      expect(screen.getByText("Content types")).toBeInTheDocument();
+      expect(screen.getByText('Content types')).toBeInTheDocument();
     });
 
-    const result = await (mockSdk as ConfigAppSDK & {
-      __invokeConfigure: () => Promise<unknown>;
-    }).__invokeConfigure();
+    const result = await (
+      mockSdk as ConfigAppSDK & {
+        __invokeConfigure: () => Promise<unknown>;
+      }
+    ).__invokeConfigure();
 
     expect(result).not.toBe(false);
     expect(mockSdk.cma.contentType.update).toHaveBeenCalled();
@@ -132,30 +136,30 @@ describe("ConfigScreen", () => {
         targetState: {
           EditorInterface: {
             article: {
-              controls: [{ fieldId: "storeHours" }],
+              controls: [{ fieldId: 'storeHours' }],
             },
           },
         },
-      }),
+      })
     );
   });
 
-  it("replaces an existing builtin control on the managed field", async () => {
+  it('replaces an existing builtin control on the managed field', async () => {
     mockSdk = createMockConfigSdk({
       parameters: {
-        clockFormat: "12h",
-        selectedContentTypeIds: ["storeDetails"],
-        managedFieldId: "storeHours",
-        managedFieldName: "Store hours",
+        clockFormat: '12h',
+        selectedContentTypeIds: ['storeDetails'],
+        managedFieldId: 'storeHours',
+        managedFieldName: 'Store hours',
       },
       contentTypes: [
         {
-          name: "Store Details",
-          sys: { id: "storeDetails" },
+          name: 'Store Details',
+          sys: { id: 'storeDetails' },
           fields: [
-            { id: "internalName", name: "Internal name", type: "Symbol" },
-            { id: "closingTime", name: "Closing time", type: "Object" },
-            { id: "storeHours", name: "Store hours", type: "Object" },
+            { id: 'internalName', name: 'Internal name', type: 'Symbol' },
+            { id: 'closingTime', name: 'Closing time', type: 'Object' },
+            { id: 'storeHours', name: 'Store hours', type: 'Object' },
           ],
         },
       ],
@@ -163,19 +167,19 @@ describe("ConfigScreen", () => {
         storeDetails: {
           controls: [
             {
-              fieldId: "internalName",
-              widgetId: "singleLine",
-              widgetNamespace: "builtin",
+              fieldId: 'internalName',
+              widgetId: 'singleLine',
+              widgetNamespace: 'builtin',
             },
             {
-              fieldId: "closingTime",
-              widgetId: "objectEditor",
-              widgetNamespace: "builtin",
+              fieldId: 'closingTime',
+              widgetId: 'objectEditor',
+              widgetNamespace: 'builtin',
             },
             {
-              fieldId: "storeHours",
-              widgetId: "objectEditor",
-              widgetNamespace: "builtin",
+              fieldId: 'storeHours',
+              widgetId: 'objectEditor',
+              widgetNamespace: 'builtin',
             },
           ],
         },
@@ -185,35 +189,37 @@ describe("ConfigScreen", () => {
     render(<ConfigScreen />);
 
     await waitFor(() => {
-      expect(screen.getByText("Content types")).toBeInTheDocument();
+      expect(screen.getByText('Content types')).toBeInTheDocument();
     });
 
-    const result = await (mockSdk as ConfigAppSDK & {
-      __invokeConfigure: () => Promise<unknown>;
-    }).__invokeConfigure();
+    const result = await (
+      mockSdk as ConfigAppSDK & {
+        __invokeConfigure: () => Promise<unknown>;
+      }
+    ).__invokeConfigure();
 
     expect(result).not.toBe(false);
     expect(mockSdk.cma.editorInterface.update).toHaveBeenCalledWith(
-      { contentTypeId: "storeDetails" },
+      { contentTypeId: 'storeDetails' },
       expect.objectContaining({
         controls: [
           {
-            fieldId: "internalName",
-            widgetId: "singleLine",
-            widgetNamespace: "builtin",
+            fieldId: 'internalName',
+            widgetId: 'singleLine',
+            widgetNamespace: 'builtin',
           },
           {
-            fieldId: "closingTime",
-            widgetId: "objectEditor",
-            widgetNamespace: "builtin",
+            fieldId: 'closingTime',
+            widgetId: 'objectEditor',
+            widgetNamespace: 'builtin',
           },
           {
-            fieldId: "storeHours",
-            widgetId: "test-app-id",
-            widgetNamespace: "app",
+            fieldId: 'storeHours',
+            widgetId: 'test-app-id',
+            widgetNamespace: 'app',
           },
         ],
-      }),
+      })
     );
   });
 });

@@ -3,7 +3,7 @@ export interface TimeSlot {
   close: string;
 }
 
-export type ClockFormat = "12h" | "24h";
+export type ClockFormat = '12h' | '24h';
 
 export interface DayHours {
   isOpen: boolean;
@@ -12,39 +12,39 @@ export interface DayHours {
 }
 
 export type DayOfWeek =
-  | "monday"
-  | "tuesday"
-  | "wednesday"
-  | "thursday"
-  | "friday"
-  | "saturday"
-  | "sunday";
+  | 'monday'
+  | 'tuesday'
+  | 'wednesday'
+  | 'thursday'
+  | 'friday'
+  | 'saturday'
+  | 'sunday';
 
 export type HoursOfOperation = Record<DayOfWeek, DayHours>;
 
 export const DAYS_OF_WEEK: DayOfWeek[] = [
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-  "saturday",
-  "sunday",
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
 ];
 
 export const DAY_LABELS: Record<DayOfWeek, string> = {
-  monday: "Monday",
-  tuesday: "Tuesday",
-  wednesday: "Wednesday",
-  thursday: "Thursday",
-  friday: "Friday",
-  saturday: "Saturday",
-  sunday: "Sunday",
+  monday: 'Monday',
+  tuesday: 'Tuesday',
+  wednesday: 'Wednesday',
+  thursday: 'Thursday',
+  friday: 'Friday',
+  saturday: 'Saturday',
+  sunday: 'Sunday',
 };
 
 export const DEFAULT_SLOT: TimeSlot = {
-  open: "09:00",
-  close: "17:00",
+  open: '09:00',
+  close: '17:00',
 };
 
 export const DEFAULT_DAY_HOURS: DayHours = {

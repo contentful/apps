@@ -4,7 +4,7 @@ import {
   DAYS_OF_WEEK,
   DayOfWeek,
   HoursOfOperation,
-} from "../types";
+} from '../types';
 
 export function cloneHours(hours: HoursOfOperation): HoursOfOperation {
   return DAYS_OF_WEEK.reduce((nextHours, day) => {
@@ -19,7 +19,7 @@ export function cloneHours(hours: HoursOfOperation): HoursOfOperation {
 }
 
 export function createFallbackDayHours(day: DayOfWeek) {
-  if (day === "saturday" || day === "sunday") {
+  if (day === 'saturday' || day === 'sunday') {
     return { isOpen: false, is24Hours: false, slots: [] };
   }
 
@@ -32,7 +32,7 @@ export function createFallbackDayHours(day: DayOfWeek) {
 
 export function normalizeHours(
   hours: HoursOfOperation | undefined,
-  fallbackHours: HoursOfOperation = DEFAULT_HOURS,
+  fallbackHours: HoursOfOperation = DEFAULT_HOURS
 ) {
   return DAYS_OF_WEEK.reduce((nextHours, day) => {
     const sourceDay = hours?.[day] ?? fallbackHours[day] ?? createFallbackDayHours(day);
