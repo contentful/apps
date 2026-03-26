@@ -12,8 +12,6 @@ import {
   DocumentTabProps,
   DocumentScopeResumePayload,
   DocumentScopeSuspendPayload,
-  DocumentScopeReviewState,
-  initialDocumentScopeReviewState,
   RunStatus,
 } from '../../../../utils/types';
 import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
@@ -44,9 +42,11 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const [flowStep, setFlowStep] = useState<FlowStep | null>(null);
     const [documentId, setDocumentId] = useState<string>('');
     const [selectedContentTypes, setSelectedContentTypes] = useState<ContentTypeProps[]>([]);
-    const [documentScopeReview, setDocumentScopeReview] = useState<DocumentScopeReviewState>(
-      initialDocumentScopeReviewState
-    );
+    const [availableTabs, setAvailableTabs] = useState<DocumentTabProps[]>([]);
+    const [selectedTabs, setSelectedTabs] = useState<DocumentTabProps[]>([]);
+    const [useAllTabs, setUseAllTabs] = useState<boolean | null>(null);
+    const [includeImages, setIncludeImages] = useState<boolean | null>(null);
+    const [requiresImageSelection, setRequiresImageSelection] = useState(false);
     const [activeRunId, setActiveRunId] = useState<string | null>(null);
     const { startWorkflow, resumeWorkflow } = useWorkflowAgent({
       sdk,
@@ -60,17 +60,18 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       startFlow: () => setIsUploadModalOpen(true),
     }));
 
-    const updateDocumentScopeReview = (updates: Partial<DocumentScopeReviewState>) => {
-      setDocumentScopeReview((currentState) => ({
-        ...currentState,
-        ...updates,
-      }));
+    const resetDocumentScopeReview = () => {
+      setAvailableTabs([]);
+      setSelectedTabs([]);
+      setUseAllTabs(null);
+      setIncludeImages(null);
+      setRequiresImageSelection(false);
     };
 
     const resetProgress = () => {
       setDocumentId('');
       setSelectedContentTypes([]);
-      setDocumentScopeReview(initialDocumentScopeReviewState);
+      resetDocumentScopeReview();
       setActiveRunId(null);
       setFlowStep(null);
       setIsUploadModalOpen(false);
@@ -103,31 +104,25 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       showDiscardConfirmation();
     };
 
-    const showSelectTabsStep = () => {
-      setFlowStep(FlowStep.SELECT_TABS);
-    };
-
-    const showIncludeImagesStep = () => {
-      setFlowStep(FlowStep.INCLUDE_IMAGES);
-    };
-
     const showDocumentScopeReview = (suspendPayload?: DocumentScopeSuspendPayload) => {
-      setDocumentScopeReview({
-        ...initialDocumentScopeReviewState,
-        availableTabs: (suspendPayload?.tabs ?? []).map((tab) => ({
+      setAvailableTabs(
+        (suspendPayload?.tabs ?? []).map((tab) => ({
           tabId: tab.id ?? '',
           tabTitle: tab.title ?? '',
-        })),
-        requiresImageSelection: Boolean(suspendPayload?.requiresImageSelection),
-      });
+        }))
+      );
+      setSelectedTabs([]);
+      setUseAllTabs(null);
+      setIncludeImages(null);
+      setRequiresImageSelection(Boolean(suspendPayload?.requiresImageSelection));
 
       if (suspendPayload?.requiresTabSelection) {
-        showSelectTabsStep();
+        setFlowStep(FlowStep.SELECT_TABS);
         return;
       }
 
       if (suspendPayload?.requiresImageSelection) {
-        showIncludeImagesStep();
+        setFlowStep(FlowStep.INCLUDE_IMAGES);
         return;
       }
 
@@ -157,12 +152,10 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       }
 
       const resumePayload: DocumentScopeResumePayload = {
-        ...(documentScopeReview.selectedTabs.length > 0
-          ? { selectedTabIds: documentScopeReview.selectedTabs.map((tab) => tab.tabId) }
+        ...(selectedTabs.length > 0
+          ? { selectedTabIds: selectedTabs.map((tab) => tab.tabId) }
           : {}),
-        ...(documentScopeReview.includeImages !== null
-          ? { includeImages: documentScopeReview.includeImages }
-          : {}),
+        ...(includeImages !== null ? { includeImages } : {}),
         ...resumePayloadOverrides,
       };
 
@@ -183,10 +176,10 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     };
 
     const handleSelectTabsContinue = async (selectedTabs: DocumentTabProps[]) => {
-      updateDocumentScopeReview({ selectedTabs });
+      setSelectedTabs(selectedTabs);
 
-      if (documentScopeReview.requiresImageSelection) {
-        showIncludeImagesStep();
+      if (requiresImageSelection) {
+        setFlowStep(FlowStep.INCLUDE_IMAGES);
         return;
       }
 
@@ -198,7 +191,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     };
 
     const handleIncludeImagesContinue = async (includeImages: boolean) => {
-      updateDocumentScopeReview({ includeImages });
+      setIncludeImages(includeImages);
 
       try {
         await continueWorkflow({ includeImages });
@@ -224,19 +217,19 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
             <SelectTabsModal
               onContinue={handleSelectTabsContinue}
               onClose={showDiscardConfirmation}
-              availableTabs={documentScopeReview.availableTabs}
-              setAvailableTabs={(availableTabs) => updateDocumentScopeReview({ availableTabs })}
-              selectedTabs={documentScopeReview.selectedTabs}
-              setSelectedTabs={(selectedTabs) => updateDocumentScopeReview({ selectedTabs })}
-              useAllTabs={documentScopeReview.useAllTabs}
-              setUseAllTabs={(useAllTabs) => updateDocumentScopeReview({ useAllTabs })}
+              availableTabs={availableTabs}
+              setAvailableTabs={setAvailableTabs}
+              selectedTabs={selectedTabs}
+              setSelectedTabs={setSelectedTabs}
+              useAllTabs={useAllTabs}
+              setUseAllTabs={setUseAllTabs}
             />
           );
         case FlowStep.INCLUDE_IMAGES:
           return (
             <IncludeImagesModal
-              includeImages={documentScopeReview.includeImages}
-              setIncludeImages={(includeImages) => updateDocumentScopeReview({ includeImages })}
+              includeImages={includeImages}
+              setIncludeImages={setIncludeImages}
               onContinue={handleIncludeImagesContinue}
               onClose={showDiscardConfirmation}
             />
@@ -269,7 +262,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           size={'large'}
           shouldCloseOnOverlayClick={false}
           shouldCloseOnEscapePress={flowStep !== FlowStep.LOADING}>
-          {renderFlowStep}
+          {renderFlowStep()}
         </Modal>
 
         <ConfirmCancelModal

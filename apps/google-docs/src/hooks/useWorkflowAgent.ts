@@ -231,9 +231,10 @@ const startAgentRun = async (
   sdk: PageAppSDK,
   spaceId: string,
   environmentId: string,
-  payload: AgentGeneratePayload,
-  threadId: string
+  payload: AgentGeneratePayload
 ): Promise<string> => {
+  let runData: AgentRunData;
+
   if (LOCAL_AGENTS_API_BASE_URL) {
     const response = await fetch(
       `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${WORKFLOW_AGENT_ID}/generate`,
@@ -254,17 +255,23 @@ const startAgentRun = async (
       );
     }
 
-    const runData = (await response.json()) as AgentRunData;
-
-    return runData.sys?.id || threadId;
+    runData = (await response.json()) as AgentRunData;
+  } else {
+    try {
+      runData = (await sdk.cma.agent.generate(
+        { agentId: WORKFLOW_AGENT_ID, spaceId, environmentId },
+        payload
+      )) as AgentRunData;
+    } catch (error) {
+      throw new Error(`Failed to start workflow agent run: ${error as Error}`);
+    }
   }
 
-  const runData = (await sdk.cma.agent.generate(
-    { agentId: WORKFLOW_AGENT_ID, spaceId, environmentId },
-    payload
-  )) as AgentRunData;
+  if (!runData.sys?.id) {
+    throw new Error('Agent run started but no run ID was returned');
+  }
 
-  return runData.sys?.id || threadId;
+  return runData.sys.id;
 };
 
 const pollAgentRun = async (
@@ -336,12 +343,12 @@ export const useWorkflowAgent = ({
       };
 
       try {
-        const runId = await startAgentRun(sdk, spaceId, environmentId, payload, threadId);
+        const runId = await startAgentRun(sdk, spaceId, environmentId, payload);
         return await pollAgentRun(sdk, spaceId, environmentId, runId);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Workflow failed';
-        setError(errorMessage);
-        throw err instanceof Error ? err : new Error(errorMessage);
+        const error = err instanceof Error ? err : new Error('Workflow failed');
+        setError(error.message);
+        throw error;
       } finally {
         setIsAnalyzing(false);
       }
@@ -361,9 +368,9 @@ export const useWorkflowAgent = ({
         await resumeAgentRun(sdk, spaceId, environmentId, runId, resumePayload);
         return await pollAgentRun(sdk, spaceId, environmentId, runId);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Workflow failed';
-        setError(errorMessage);
-        throw err instanceof Error ? err : new Error(errorMessage);
+        const error = err instanceof Error ? err : new Error('Workflow failed');
+        setError(error.message);
+        throw error;
       } finally {
         setIsAnalyzing(false);
       }
