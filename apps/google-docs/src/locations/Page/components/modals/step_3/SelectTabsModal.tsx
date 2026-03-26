@@ -24,7 +24,6 @@ interface SelectTabsModalProps {
   onContinue: (selectedTabs: DocumentTabProps[]) => void;
   onClose: () => void;
   availableTabs: DocumentTabProps[];
-  setAvailableTabs: (tabs: DocumentTabProps[]) => void;
   selectedTabs: DocumentTabProps[];
   setSelectedTabs: (tabs: DocumentTabProps[]) => void;
   useAllTabs: boolean | null;
@@ -35,7 +34,6 @@ export const SelectTabsModal = ({
   onContinue,
   onClose,
   availableTabs,
-  setAvailableTabs,
   selectedTabs,
   setSelectedTabs,
   useAllTabs,
@@ -57,7 +55,7 @@ export const SelectTabsModal = ({
 
   useEffect(() => {
     setHasAttemptedSubmit(false);
-  }, [availableTabs, setAvailableTabs]);
+  }, [availableTabs]);
 
   const handleSelectTab = (e: React.ChangeEvent<HTMLInputElement>) => {
     setHasAttemptedSubmit(false);

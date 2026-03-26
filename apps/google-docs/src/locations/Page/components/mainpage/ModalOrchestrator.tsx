@@ -7,6 +7,7 @@ import { ErrorModal } from '../modals/ErrorModal';
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
 import { LoadingModal } from '../modals/LoadingModal';
 import { ERROR_MESSAGES } from '../../../../utils/constants/messages';
+import { CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS } from '../../../../utils/constants/agent';
 import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 import {
   DocumentTabProps,
@@ -165,12 +166,26 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       handleWorkflowResult(workflowRun);
     };
 
-    const handleContentTypeContinue = async (contentTypeIds: string[]) => {
-      setFlowStep(FlowStep.LOADING);
+    const startWorkflowWithDelayedLoading = async (contentTypeIds: string[]) => {
+      let isStartPending = true;
+      const loadingModalTimeout = window.setTimeout(() => {
+        if (isStartPending) {
+          setFlowStep(FlowStep.LOADING);
+        }
+      }, CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS);
 
       try {
-        handleWorkflowResult(await startWorkflow(contentTypeIds));
-      } catch (error) {
+        return await startWorkflow(contentTypeIds);
+      } finally {
+        isStartPending = false;
+        window.clearTimeout(loadingModalTimeout);
+      }
+    };
+
+    const handleContentTypeContinue = async (contentTypeIds: string[]) => {
+      try {
+        handleWorkflowResult(await startWorkflowWithDelayedLoading(contentTypeIds));
+      } catch {
         showWorkflowError();
       }
     };
@@ -185,7 +200,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
       try {
         await continueWorkflow({ selectedTabIds: selectedTabs.map((tab) => tab.tabId) });
-      } catch (error) {
+      } catch {
         showWorkflowError();
       }
     };
@@ -195,7 +210,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
       try {
         await continueWorkflow({ includeImages });
-      } catch (error) {
+      } catch {
         showWorkflowError();
       }
     };
@@ -218,7 +233,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
               onContinue={handleSelectTabsContinue}
               onClose={showDiscardConfirmation}
               availableTabs={availableTabs}
-              setAvailableTabs={setAvailableTabs}
               selectedTabs={selectedTabs}
               setSelectedTabs={setSelectedTabs}
               useAllTabs={useAllTabs}

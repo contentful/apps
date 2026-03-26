@@ -117,8 +117,6 @@ const pollAgentRun = async (
   environmentId: string,
   runId: string
 ): Promise<WorkflowRunResult> => {
-  await wait(POLL_INTERVAL_MS);
-
   for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
     const runData = await getWorkflowRun(sdk, spaceId, environmentId, runId);
     if (!runData) {

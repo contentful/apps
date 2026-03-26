@@ -216,7 +216,6 @@ describe('ModalOrchestrator', () => {
 
     await waitFor(() => {
       expect(mockStartWorkflow).toHaveBeenCalledWith(['ct-1']);
-      expect(screen.getByRole('heading', { name: 'Preparing your preview' })).toBeTruthy();
     });
 
     resolveStartWorkflow?.({

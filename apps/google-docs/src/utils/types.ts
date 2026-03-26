@@ -24,8 +24,8 @@ export interface AgentRunMessage {
 }
 
 export interface DocTabOption {
-  id?: string;
-  title?: string;
+  id: string;
+  title: string;
   index?: number;
 }
 
