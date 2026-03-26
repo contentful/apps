@@ -1,21 +1,19 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { Button, Heading, Paragraph, Card, Layout, Flex, Note } from '@contentful/f36-components';
-import tokens from '@contentful/f36-tokens';
-import { ArrowRightIcon } from '@contentful/f36-icons';
-import { OAuthConnector } from './components/mainpage/OAuthConnector';
-import {
-  ModalOrchestrator,
-  ModalOrchestratorHandle,
-} from './components/mainpage/ModalOrchestrator';
+import { Layout } from '@contentful/f36-components';
+import { ModalOrchestrator } from './components/mainpage/ModalOrchestrator';
+import { MainPageView } from './components/mainpage/MainPageView';
+import { PreviewPageView } from './components/mainpage/PreviewPageView';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
-  const modalOrchestratorRef = useRef<ModalOrchestratorHandle>(null);
   const [oauthToken, setOauthToken] = useState<string>('');
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
   const [isOAuthLoading, setIsOAuthLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
+  const [previewTitle, setPreviewTitle] = useState('Create from document "Selected document"');
 
   const handleOauthTokenChange = (token: string) => {
     setOauthToken(token);
@@ -30,55 +28,48 @@ const Page = () => {
   };
 
   const handleSelectFile = () => {
-    modalOrchestratorRef.current?.startFlow();
+    setIsModalOpen(true);
+  };
+
+  const handlePreviewReady = (title: string) => {
+    setPreviewTitle(title);
+    setIsPreviewVisible(true);
+  };
+
+  const handleReturnToMainPage = () => {
+    // TODO: When we return to the main page we need to have the payload from the Backend to display the preview
+    setIsPreviewVisible(false);
+  };
+
+  const handlePreviewCancel = () => {
+    // TODO: When we cancel we want to tell the Backend to reset the flow and return to the main page
+    setIsPreviewVisible(false);
   };
 
   return (
     <>
-      <Layout variant="fullscreen" withBoxShadow={true} offsetTop={10}>
-        <Layout.Body>
-          <Flex
-            flexDirection="column"
-            gap="spacingXl"
-            style={{ maxWidth: '900px', margin: `${tokens.spacingL} auto` }}>
-            <Heading marginBottom="none">Google Drive</Heading>
-            <OAuthConnector
-              oauthToken={oauthToken}
-              onOAuthConnectedChange={handleOAuthConnectedChange}
-              isOAuthConnected={isOAuthConnected}
-              onOauthTokenChange={handleOauthTokenChange}
-              onLoadingStateChange={handleOAuthLoadingStateChange}
-            />
-            <Card padding="large">
-              {!isOAuthLoading && !isOAuthConnected && (
-                <Note variant="warning" style={{ marginBottom: tokens.spacingM }}>
-                  Please connect to Google Drive before selecting your file.
-                </Note>
-              )}
-              <Flex flexDirection="row" alignItems="center" justifyContent="space-between">
-                <Flex flexDirection="column" alignItems="flex-start">
-                  <Heading marginBottom="spacingS">Select your file</Heading>
-                  <Paragraph>
-                    Create entries using existing content types from a Google Drive file.
-                    <br />
-                    Get started by selecting the file you would like to use.
-                  </Paragraph>
-                </Flex>
-
-                <Button
-                  variant="primary"
-                  isDisabled={!oauthToken}
-                  onClick={handleSelectFile}
-                  endIcon={<ArrowRightIcon />}>
-                  Select your file
-                </Button>
-              </Flex>
-            </Card>
-          </Flex>
-        </Layout.Body>
+      <Layout withBoxShadow={true} offsetTop={10}>
+        {isPreviewVisible ? (
+          <PreviewPageView title={previewTitle} onCancel={handlePreviewCancel} />
+        ) : (
+          <MainPageView
+            oauthToken={oauthToken}
+            isOAuthConnected={isOAuthConnected}
+            isOAuthLoading={isOAuthLoading}
+            onOAuthConnectedChange={handleOAuthConnectedChange}
+            onOauthTokenChange={handleOauthTokenChange}
+            onLoadingStateChange={handleOAuthLoadingStateChange}
+            onSelectFile={handleSelectFile}
+          />
+        )}
       </Layout>
 
-      <ModalOrchestrator ref={modalOrchestratorRef} sdk={sdk} oauthToken={oauthToken} />
+      <ModalOrchestrator
+        sdk={sdk}
+        oauthToken={oauthToken}
+        onPreviewReady={handlePreviewReady}
+        onResetToMain={handleReturnToMainPage}
+      />
     </>
   );
 };

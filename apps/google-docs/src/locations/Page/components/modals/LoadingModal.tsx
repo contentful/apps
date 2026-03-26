@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { Modal, Paragraph, Skeleton, Flex } from '@contentful/f36-components';
 import { useSequentialMessages } from '../../../../hooks/useSequentialMessages';
 import tokens, { ColorTokens } from '@contentful/f36-tokens';
@@ -59,6 +59,7 @@ interface LoadingModalProps {
   entriesCount?: number;
   contentTypeCount?: number;
   onClose: () => void;
+  onCompleted: (success: string) => void;
 }
 
 export const LoadingModal: React.FC<LoadingModalProps> = ({
@@ -67,6 +68,7 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
   entriesCount,
   contentTypeCount,
   onClose,
+  onCompleted,
 }) => {
   const messages = useMemo(() => {
     if (step === 'reviewingContentTypes') {
