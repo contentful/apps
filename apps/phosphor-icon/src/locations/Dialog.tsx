@@ -144,16 +144,13 @@ function SelectedIconCard({
   mode: DialogSelectionMode;
 }) {
   const IconComponent = icon
-    ? (
-        PhosphorIcons as Record<string, React.ComponentType<{ size?: number; weight?: string }>>
-      )[icon.componentName]
+    ? (PhosphorIcons as Record<string, React.ComponentType<{ size?: number; weight?: string }>>)[
+        icon.componentName
+      ]
     : null;
 
   return (
-    <Box
-      className={styles.selectedCard}
-      padding="spacingM"
-    >
+    <Box className={styles.selectedCard} padding="spacingM">
       <Text fontColor="gray600" fontSize="fontSizeS">
         {mode === 'multi' ? 'Current selection' : 'Selected icon'}
       </Text>
@@ -215,7 +212,10 @@ const Dialog = () => {
 
   const previewCatalogEntry = useMemo(() => {
     const previewName =
-      previewIconName ?? selectedIcon?.name ?? selectedIconNames[selectedIconNames.length - 1] ?? null;
+      previewIconName ??
+      selectedIcon?.name ??
+      selectedIconNames[selectedIconNames.length - 1] ??
+      null;
     return previewName ? catalog.find((icon) => icon.name === previewName) ?? null : null;
   }, [catalog, previewIconName, selectedIcon, selectedIconNames]);
 
@@ -299,8 +299,7 @@ const Dialog = () => {
 
   return (
     <div className={`${styles.container} ${mode === 'single' ? styles.containerSingle : ''}`}>
-      <div
-        className={`${styles.topSection} ${mode === 'single' ? styles.topSectionSingle : ''}`}>
+      <div className={`${styles.topSection} ${mode === 'single' ? styles.topSectionSingle : ''}`}>
         <Box>
           <Heading marginBottom="spacingS">
             {mode === 'multi' ? 'Choose allowed icons' : 'Select a Phosphor icon'}
@@ -312,10 +311,7 @@ const Dialog = () => {
           </Paragraph>
           <Text fontColor="gray600">
             Source:{' '}
-            <a
-              href="https://phosphoricons.com/"
-              target="_blank"
-              rel="noopener noreferrer">
+            <a href="https://phosphoricons.com/" target="_blank" rel="noopener noreferrer">
               phosphoricons.com
             </a>
           </Text>
@@ -397,7 +393,9 @@ const Dialog = () => {
           <IconGrid
             icons={results}
             weight={weight}
-            selectedIconNames={mode === 'multi' ? selectedIconNames : selectedIcon ? [selectedIcon.name] : []}
+            selectedIconNames={
+              mode === 'multi' ? selectedIconNames : selectedIcon ? [selectedIcon.name] : []
+            }
             onSelect={handleSelect}
           />
         </div>

@@ -51,50 +51,51 @@ const Field = () => {
     return () => detach();
   }, [sdk.field]);
 
-  const fetchLatestInstallationParameters = useCallback(async (): Promise<AppInstallationParameters> => {
-    try {
-      if (!sdk.ids.app) {
-        throw new Error('Required app ID not available');
-      }
-
-      if (
-        sdk.cma?.appInstallation &&
-        typeof sdk.cma.appInstallation.getForOrganization === 'function' &&
-        sdk.ids.organization &&
-        sdk.ids.space &&
-        sdk.ids.environment
-      ) {
-        const appInstallation = await sdk.cma.appInstallation.getForOrganization({
-          appDefinitionId: sdk.ids.app,
-          organizationId: sdk.ids.organization,
-        });
-
-        const currentInstallation = appInstallation.items.find(
-          (installation) =>
-            installation.sys.space.sys.id === sdk.ids.space &&
-            installation.sys.environment.sys.id === sdk.ids.environment
-        );
-
-        if (currentInstallation?.parameters) {
-          return currentInstallation.parameters as AppInstallationParameters;
+  const fetchLatestInstallationParameters =
+    useCallback(async (): Promise<AppInstallationParameters> => {
+      try {
+        if (!sdk.ids.app) {
+          throw new Error('Required app ID not available');
         }
-      }
 
-      if (sdk.cma?.appInstallation && typeof sdk.cma.appInstallation.get === 'function') {
-        const appInstallation = await sdk.cma.appInstallation.get({
-          appDefinitionId: sdk.ids.app,
-        });
+        if (
+          sdk.cma?.appInstallation &&
+          typeof sdk.cma.appInstallation.getForOrganization === 'function' &&
+          sdk.ids.organization &&
+          sdk.ids.space &&
+          sdk.ids.environment
+        ) {
+          const appInstallation = await sdk.cma.appInstallation.getForOrganization({
+            appDefinitionId: sdk.ids.app,
+            organizationId: sdk.ids.organization,
+          });
 
-        if (appInstallation?.parameters) {
-          return appInstallation.parameters as AppInstallationParameters;
+          const currentInstallation = appInstallation.items.find(
+            (installation) =>
+              installation.sys.space.sys.id === sdk.ids.space &&
+              installation.sys.environment.sys.id === sdk.ids.environment
+          );
+
+          if (currentInstallation?.parameters) {
+            return currentInstallation.parameters as AppInstallationParameters;
+          }
         }
-      }
-    } catch (error) {
-      console.warn('Failed to fetch fresh installation parameters from CMA:', error);
-    }
 
-    return (sdk.parameters.installation as AppInstallationParameters) ?? {};
-  }, [sdk]);
+        if (sdk.cma?.appInstallation && typeof sdk.cma.appInstallation.get === 'function') {
+          const appInstallation = await sdk.cma.appInstallation.get({
+            appDefinitionId: sdk.ids.app,
+          });
+
+          if (appInstallation?.parameters) {
+            return appInstallation.parameters as AppInstallationParameters;
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to fetch fresh installation parameters from CMA:', error);
+      }
+
+      return (sdk.parameters.installation as AppInstallationParameters) ?? {};
+    }, [sdk]);
 
   const openDialog = useCallback(async () => {
     if (isOpeningDialog) {
@@ -104,32 +105,32 @@ const Field = () => {
     setIsOpeningDialog(true);
 
     try {
-    const installationParams = await fetchLatestInstallationParameters();
-    const enabledWeights = parseEnabledWeights(installationParams?.enabledWeights);
-    const positionOptions = parsePositionOptions(installationParams?.positionOptions);
-    const allowedIconNames =
-      installationParams?.iconAvailabilityMode === 'specific'
-        ? parseSelectedIconNames(installationParams?.selectedIconNames)
-        : [];
+      const installationParams = await fetchLatestInstallationParameters();
+      const enabledWeights = parseEnabledWeights(installationParams?.enabledWeights);
+      const positionOptions = parsePositionOptions(installationParams?.positionOptions);
+      const allowedIconNames =
+        installationParams?.iconAvailabilityMode === 'specific'
+          ? parseSelectedIconNames(installationParams?.selectedIconNames)
+          : [];
 
-    const dialogParams: DialogInvocationParameters = {
-      currentValue: value ?? undefined,
-      enabledWeights,
-      positionOptions,
-      mode: 'single',
-      allowedIconNames: allowedIconNames.length > 0 ? allowedIconNames : undefined,
-    };
+      const dialogParams: DialogInvocationParameters = {
+        currentValue: value ?? undefined,
+        enabledWeights,
+        positionOptions,
+        mode: 'single',
+        allowedIconNames: allowedIconNames.length > 0 ? allowedIconNames : undefined,
+      };
 
-    const result = await sdk.dialogs.openCurrentApp({
-      title: 'Select Phosphor Icon',
-      width: 'large',
-      minHeight: 680,
-      parameters: dialogParams,
-    });
+      const result = await sdk.dialogs.openCurrentApp({
+        title: 'Select Phosphor Icon',
+        width: 'large',
+        minHeight: 680,
+        parameters: dialogParams,
+      });
 
-    if (result) {
-      await sdk.field.setValue(result as IconFieldValue);
-    }
+      if (result) {
+        await sdk.field.setValue(result as IconFieldValue);
+      }
     } finally {
       setIsOpeningDialog(false);
     }
@@ -147,7 +148,11 @@ const Field = () => {
           <Paragraph marginTop="none" marginBottom="none" className={styles.helperCopy}>
             Pick an icon, then adjust its style and position before saving it to this JSON field.
           </Paragraph>
-          <Button variant="primary" onClick={openDialog} isLoading={isOpeningDialog} isDisabled={isOpeningDialog}>
+          <Button
+            variant="primary"
+            onClick={openDialog}
+            isLoading={isOpeningDialog}
+            isDisabled={isOpeningDialog}>
             Select icon
           </Button>
         </Box>
@@ -162,7 +167,11 @@ const Field = () => {
         Change updates the icon, style, and position without clearing the current selection first.
       </Paragraph>
       <Stack flexDirection="row" spacing="spacingS" marginTop="spacingM" className={styles.actions}>
-        <Button variant="secondary" onClick={openDialog} isLoading={isOpeningDialog} isDisabled={isOpeningDialog}>
+        <Button
+          variant="secondary"
+          onClick={openDialog}
+          isLoading={isOpeningDialog}
+          isDisabled={isOpeningDialog}>
           Change
         </Button>
         <Button variant="negative" onClick={handleRemove} isDisabled={isOpeningDialog}>

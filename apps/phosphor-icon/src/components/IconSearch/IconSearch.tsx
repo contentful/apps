@@ -7,11 +7,7 @@ interface IconSearchProps {
   placeholder?: string;
 }
 
-export function IconSearch({
-  value,
-  onChange,
-  placeholder = 'Search icons...',
-}: IconSearchProps) {
+export function IconSearch({ value, onChange, placeholder = 'Search icons...' }: IconSearchProps) {
   return (
     <TextInput
       value={value}

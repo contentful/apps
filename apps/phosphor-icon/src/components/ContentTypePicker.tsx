@@ -61,7 +61,9 @@ function ContentTypePicker({
             ? 'All content types selected'
             : 'Search content types'
         }
-        isDisabled={contentTypes.length > 0 && selectedContentTypeIds.length === contentTypes.length}
+        isDisabled={
+          contentTypes.length > 0 && selectedContentTypeIds.length === contentTypes.length
+        }
       />
 
       {selectedContentTypes.length > 0 && (

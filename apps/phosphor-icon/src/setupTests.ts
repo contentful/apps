@@ -2,13 +2,13 @@
 // allows you to do things like:
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
-import "@testing-library/jest-dom/vitest";
-import { configure } from "@testing-library/react";
-import { vi } from "vitest";
-import React from "react";
+import '@testing-library/jest-dom/vitest';
+import { configure } from '@testing-library/react';
+import { vi } from 'vitest';
+import React from 'react';
 
 configure({
-  testIdAttribute: "data-test-id",
+  testIdAttribute: 'data-test-id',
 });
 
 // Minimal ResizeObserver shim for jsdom environment used in tests
@@ -21,7 +21,7 @@ class ResizeObserver {
 global.ResizeObserver = ResizeObserver;
 
 // Lightweight mock for react-window Grid to avoid ResizeObserver/RAF churn in tests
-vi.mock("react-window", () => {
+vi.mock('react-window', () => {
   function Grid({
     cellComponent: Cell,
     cellProps,
@@ -39,7 +39,7 @@ vi.mock("react-window", () => {
         if (rendered >= maxRender) break;
         items.push(
           React.createElement(
-            "div",
+            'div',
             {
               key: `${row}-${col}`,
               style: { width: columnWidth, height: rowHeight },
@@ -50,18 +50,14 @@ vi.mock("react-window", () => {
               style: { width: columnWidth, height: rowHeight },
               ariaAttributes: {},
               ...cellProps,
-            }),
-          ),
+            })
+          )
         );
         rendered += 1;
       }
       if (rendered >= maxRender) break;
     }
-    return React.createElement(
-      "div",
-      { "data-testid": "mock-grid", style },
-      items,
-    );
+    return React.createElement('div', { 'data-testid': 'mock-grid', style }, items);
   }
 
   return { Grid };

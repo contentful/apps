@@ -11,7 +11,7 @@ export function useIconCatalog(): IconCatalogEntry[] {
     return icons.map((icon) => ({
       name: icon.name,
       componentName: icon.pascal_name,
-      tags: [...icon.tags].filter(tag => !tag.startsWith('*')), // Filter out special tags like "*new*"
+      tags: [...icon.tags].filter((tag) => !tag.startsWith('*')), // Filter out special tags like "*new*"
       categories: [...icon.categories],
     }));
   }, []);
