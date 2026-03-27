@@ -40,3 +40,23 @@ Open `http://localhost:3001/`, then point the Contentful app definition to that 
 npm run test:ci
 npm run build
 ```
+
+## Hosted build and deploy
+
+To create a shareable hosted build instead of running locally:
+
+```bash
+npm run build
+npm run deploy
+```
+
+The deploy script uploads the built app to the existing Phosphor Icon app definition:
+
+- app definition id: `21NU7HfPZfpcDRF1WeJJte`
+- required env vars: `DEFINITIONS_ORG_ID`, `CONTENTFUL_CMA_TOKEN`
+
+If you want to deploy to a staging/test definition instead, set `DEV_TESTING_ORG_ID`, `TEST_CMA_TOKEN`, and `STAGING_APP_ID`, then run:
+
+```bash
+npm run deploy:test
+```
