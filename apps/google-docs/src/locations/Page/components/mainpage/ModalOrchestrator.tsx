@@ -33,10 +33,12 @@ enum FlowStep {
 interface ModalOrchestratorProps {
   sdk: PageAppSDK;
   oauthToken: string;
+  onPreviewReady: (title: string) => void;
+  onResetToMain: () => void;
 }
 
 export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrchestratorProps>(
-  ({ sdk, oauthToken }, ref) => {
+  ({ sdk, oauthToken, onPreviewReady, onResetToMain }, ref) => {
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
     const [isErrorPreviewModalOpen, setIsErrorPreviewModalOpen] = useState(false);
@@ -86,6 +88,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const closeModalAndReset = (setOpen: (open: boolean) => void) => () => {
       setOpen(false);
       resetProgress();
+      onResetToMain();
     };
 
     const showWorkflowError = () => {
@@ -142,6 +145,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
+      onPreviewReady(workflowRun.suspendPayload?.title ?? documentId);
       setFlowStep(null);
     };
 
