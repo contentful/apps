@@ -262,7 +262,12 @@ describe('ModalOrchestrator', () => {
         selectedTabIds: ['tab-1', 'tab-2'],
       });
       expect(screen.queryByRole('heading', { name: 'Preparing your preview' })).toBeNull();
-      expect(defaultProps.onPreviewReady).toHaveBeenCalledWith('mock-doc-id-123');
+      expect(defaultProps.onPreviewReady).toHaveBeenCalledWith({
+        runId: 'run-123',
+        documentId: 'mock-doc-id-123',
+        title: 'mock-doc-id-123',
+        messages: [],
+      });
     });
   });
 });

@@ -5,6 +5,7 @@ import {
   AgentRunMessage,
   DocumentScopeResumePayload,
   DocumentScopeSuspendPayload,
+  PreviewPayload,
   WorkflowRunResult,
   RunStatus,
 } from '../utils/types';
@@ -30,6 +31,19 @@ interface WorkflowHook {
     runId: string,
     resumePayload: DocumentScopeResumePayload
   ) => Promise<WorkflowRunResult>;
+}
+
+interface ToolInvocationResultPart {
+  type: string;
+  toolInvocation?: {
+    result?: {
+      result?: {
+        normalizedDocument?: {
+          title?: string;
+        };
+      };
+    };
+  };
 }
 
 const wait = async (ms: number): Promise<void> => {
@@ -75,6 +89,63 @@ const getRunErrorMessage = (runData: AgentRunData): string => {
 const getSuspendPayload = (runData: AgentRunData): DocumentScopeSuspendPayload | undefined =>
   runData.metadata?.suspendPayload as DocumentScopeSuspendPayload | undefined;
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const parsePayloadJson = (payload: string | undefined): Record<string, unknown> | undefined => {
+  if (!payload) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(payload) as unknown;
+    return isRecord(parsed) ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const toStringOrUndefined = (value: unknown): string | undefined => {
+  return typeof value === 'string' && value.trim().length > 0 ? value : undefined;
+};
+
+const getNormalizedDocumentTitleFromMessages = (
+  messages: AgentRunMessage[]
+): string | undefined => {
+  const toolInvocationPart = messages
+    .flatMap((message) => message.content?.parts)
+    .find((part) => part && part.type === 'tool-invocation') as ToolInvocationResultPart;
+
+  const title = toolInvocationPart
+    ? toolInvocationPart.toolInvocation?.result?.result?.normalizedDocument?.title
+    : undefined;
+
+  return title;
+};
+
+const getPreviewPayload = (
+  runData: AgentRunData,
+  runId: string,
+  messages: AgentRunMessage[],
+  suspendPayload?: DocumentScopeSuspendPayload
+): PreviewPayload => {
+  const metadataPreviewPayload = runData.metadata?.previewPayload;
+  const parsedPayload = parsePayloadJson(runData.payload);
+  const source = (metadataPreviewPayload ?? parsedPayload) as Record<string, unknown> | undefined;
+
+  const documentIdFromSource = toStringOrUndefined(source?.documentId);
+  const normalizedDocumentTitle = getNormalizedDocumentTitleFromMessages(messages) ?? '';
+  const documentId = documentIdFromSource ?? suspendPayload?.documentId ?? '';
+
+  return {
+    runId,
+    documentId,
+    title: normalizedDocumentTitle,
+    messages,
+    ...(source ? { data: source } : {}),
+  };
+};
+
 const getWorkflowRunResult = (
   runData: AgentRunData,
   threadId: string
@@ -99,12 +170,17 @@ const getWorkflowRunResult = (
       };
     }
 
-    case RunStatus.COMPLETED:
+    case RunStatus.COMPLETED: {
+      const suspendPayload = getSuspendPayload(runData);
+      const messages = runData.messages ?? [];
+
       return {
         status,
         runId: threadId,
-        messages: runData.messages ?? [],
+        messages,
+        previewPayload: getPreviewPayload(runData, threadId, messages, suspendPayload),
       };
+    }
 
     default:
       return null;

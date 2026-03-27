@@ -8,6 +8,7 @@ import {
 } from './components/mainpage/ModalOrchestrator';
 import { MainPageView } from './components/mainpage/MainPageView';
 import { PreviewPageView } from './components/mainpage/PreviewPageView';
+import { PreviewPayload } from '../../utils/types';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -15,8 +16,7 @@ const Page = () => {
   const [oauthToken, setOauthToken] = useState<string>('');
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
   const [isOAuthLoading, setIsOAuthLoading] = useState(true);
-  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
-  const [previewTitle, setPreviewTitle] = useState('Selected document');
+  const [previewPayload, setPreviewPayload] = useState<PreviewPayload | null>(null);
 
   const handleOauthTokenChange = (token: string) => {
     setOauthToken(token);
@@ -34,26 +34,25 @@ const Page = () => {
     modalOrchestratorRef.current?.startFlow();
   };
 
-  const handlePreviewReady = (title: string) => {
-    setPreviewTitle(title);
-    setIsPreviewVisible(true);
+  const handlePreviewReady = (payload: PreviewPayload) => {
+    setPreviewPayload(payload);
   };
 
   const handleReturnToMainPage = () => {
-    // TODO: When we return to the main page we need to have the payload from the Backend to display the preview
-    setIsPreviewVisible(false);
+    setPreviewPayload(null);
   };
 
   const handlePreviewCancel = () => {
     // TODO: When we cancel we want to tell the Backend to reset the flow and return to the main page
-    setIsPreviewVisible(false);
+    // Clear payload to return to the main page state.
+    setPreviewPayload(null);
   };
 
   return (
     <>
       <Layout withBoxShadow={true} offsetTop={10}>
-        {isPreviewVisible ? (
-          <PreviewPageView title={previewTitle} onCancel={handlePreviewCancel} />
+        {previewPayload ? (
+          <PreviewPageView previewPayload={previewPayload} onCancel={handlePreviewCancel} />
         ) : (
           <MainPageView
             oauthToken={oauthToken}

@@ -1,12 +1,15 @@
 import { Button, Flex, Heading, Layout, Paragraph } from '@contentful/f36-components';
 import Splitter from './Splitter';
+import { PreviewPayload } from '../../../../utils/types';
 
 interface PreviewPageViewProps {
-  title: string;
+  previewPayload: PreviewPayload;
   onCancel: () => void;
 }
 
-export const PreviewPageView = ({ title, onCancel }: PreviewPageViewProps) => {
+export const PreviewPageView = ({ previewPayload, onCancel }: PreviewPageViewProps) => {
+  const title = previewPayload.title || previewPayload.documentId || 'Selected document';
+
   return (
     <>
       <Layout.Header title="Preview">

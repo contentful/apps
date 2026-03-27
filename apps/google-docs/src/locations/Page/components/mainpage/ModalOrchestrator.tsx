@@ -13,7 +13,9 @@ import {
   DocumentTabProps,
   DocumentScopeResumePayload,
   DocumentScopeSuspendPayload,
+  PreviewPayload,
   RunStatus,
+  WorkflowRunResult,
 } from '../../../../utils/types';
 import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
 import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
@@ -33,7 +35,7 @@ enum FlowStep {
 interface ModalOrchestratorProps {
   sdk: PageAppSDK;
   oauthToken: string;
-  onPreviewReady: (title: string) => void;
+  onPreviewReady: (previewPayload: PreviewPayload) => void;
   onResetToMain: () => void;
 }
 
@@ -133,11 +135,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setFlowStep(null);
     };
 
-    const handleWorkflowResult = (workflowRun: {
-      runId: string;
-      status: RunStatus.PENDING_REVIEW | RunStatus.COMPLETED;
-      suspendPayload?: DocumentScopeSuspendPayload;
-    }) => {
+    const handleWorkflowResult = (workflowRun: WorkflowRunResult) => {
       setActiveRunId(workflowRun.runId);
 
       if (workflowRun.status === RunStatus.PENDING_REVIEW) {
@@ -145,7 +143,14 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
-      onPreviewReady(workflowRun.suspendPayload?.title ?? documentId);
+      const previewPayload = workflowRun.previewPayload ?? {
+        runId: workflowRun.runId,
+        documentId,
+        title: workflowRun.suspendPayload?.title ?? documentId,
+        messages: [],
+      };
+
+      onPreviewReady(previewPayload);
       setFlowStep(null);
     };
 
