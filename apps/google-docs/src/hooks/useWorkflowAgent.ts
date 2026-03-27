@@ -46,6 +46,10 @@ interface ToolInvocationResultPart {
   };
 }
 
+const isToolInvocationResultPart = (value: unknown): value is ToolInvocationResultPart => {
+  return isRecord(value) && value.type === 'tool-invocation';
+};
+
 const wait = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
 };
@@ -114,7 +118,7 @@ const getNormalizedDocumentTitleFromMessages = (
 ): string | undefined => {
   const toolInvocationPart = messages
     .flatMap((message) => message.content?.parts)
-    .find((part) => part && part.type === 'tool-invocation') as ToolInvocationResultPart;
+    .find(isToolInvocationResultPart);
 
   const title = toolInvocationPart
     ? toolInvocationPart.toolInvocation?.result?.result?.normalizedDocument?.title
