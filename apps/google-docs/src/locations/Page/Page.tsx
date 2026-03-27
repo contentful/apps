@@ -1,10 +1,7 @@
 import { useRef, useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { Button, Heading, Paragraph, Card, Layout, Flex, Note } from '@contentful/f36-components';
-import tokens from '@contentful/f36-tokens';
-import { ArrowRightIcon } from '@contentful/f36-icons';
-import { OAuthConnector } from './components/mainpage/OAuthConnector';
+import { Layout } from '@contentful/f36-components';
 import {
   ModalOrchestrator,
   ModalOrchestratorHandle,

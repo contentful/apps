@@ -1,15 +1,5 @@
 import { ArrowRightIcon } from '@contentful/f36-icons';
-import {
-  Box,
-  Button,
-  Card,
-  Flex,
-  Heading,
-  Layout,
-  Note,
-  Paragraph,
-  Text,
-} from '@contentful/f36-components';
+import { Button, Card, Flex, Heading, Layout, Note, Paragraph } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { OAuthConnector } from './OAuthConnector';
 
