@@ -6,11 +6,19 @@ import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
 } from '../../../../../src/locations/Page/components/mainpage/ModalOrchestrator';
-import { WorkflowRunResult, RunStatus } from '../../../../../src/utils/types';
+import { PreviewPayload, WorkflowRunResult, RunStatus } from '../../../../../src/utils/types';
 import { mockSdk } from '../../../../mocks';
 
 const mockStartWorkflow = vi.fn();
 const mockResumeWorkflow = vi.fn();
+
+const mockPreviewPayload = {
+  runId: 'run-123',
+  documentId: 'mock-doc-id-123',
+  title: 'Mock Preview Title',
+  messages: [],
+  data: { source: 'workflow' },
+} satisfies PreviewPayload;
 
 vi.mock('../../../../../src/locations/Page/components/modals/step_1/SelectDocumentModal', () => ({
   __esModule: true,
@@ -82,6 +90,7 @@ describe('ModalOrchestrator', () => {
       status: RunStatus.COMPLETED,
       runId: 'run-123',
       messages: [],
+      previewPayload: mockPreviewPayload,
     } satisfies WorkflowRunResult);
     vi.mocked(mockSdk.cma.space.get).mockResolvedValue({ sys: { id: 'test-space-id' } });
     vi.mocked(mockSdk.cma.environment.get).mockResolvedValue({ sys: { id: 'test-env-id' } });
@@ -262,12 +271,7 @@ describe('ModalOrchestrator', () => {
         selectedTabIds: ['tab-1', 'tab-2'],
       });
       expect(screen.queryByRole('heading', { name: 'Preparing your preview' })).toBeNull();
-      expect(defaultProps.onPreviewReady).toHaveBeenCalledWith({
-        runId: 'run-123',
-        documentId: 'mock-doc-id-123',
-        title: 'mock-doc-id-123',
-        messages: [],
-      });
+      expect(defaultProps.onPreviewReady).toHaveBeenCalledWith(mockPreviewPayload);
     });
   });
 });
