@@ -51,10 +51,7 @@ export const IconCell = memo(function IconCell({
   style,
 }: IconCellProps) {
   const IconComponent = (
-    PhosphorIcons as Record<
-      string,
-      React.ComponentType<{ size?: number; weight?: string }>
-    >
+    PhosphorIcons as Record<string, React.ComponentType<{ size?: number; weight?: string }>>
   )[icon.componentName];
 
   return (
@@ -69,8 +66,7 @@ export const IconCell = memo(function IconCell({
         style={{
           width: '100%',
           height: '100%',
-        }}
-      >
+        }}>
         {IconComponent && <IconComponent size={32} weight={weight} />}
       </button>
     </div>

@@ -5,9 +5,7 @@ import { mockIconCatalog } from '../test/mocks/mockIcons';
 
 describe('useIconSearch', () => {
   it('returns all icons when query is empty', () => {
-    const { result } = renderHook(() =>
-      useIconSearch({ catalog: mockIconCatalog })
-    );
+    const { result } = renderHook(() => useIconSearch({ catalog: mockIconCatalog }));
 
     expect(result.current.results).toEqual(mockIconCatalog);
     expect(result.current.isSearching).toBe(false);
@@ -28,9 +26,7 @@ describe('useIconSearch', () => {
   });
 
   it('filters icons based on name search', () => {
-    const { result } = renderHook(() =>
-      useIconSearch({ catalog: mockIconCatalog })
-    );
+    const { result } = renderHook(() => useIconSearch({ catalog: mockIconCatalog }));
 
     act(() => {
       result.current.setQuery('airplane');
@@ -42,9 +38,7 @@ describe('useIconSearch', () => {
   });
 
   it('filters icons based on tag search', () => {
-    const { result } = renderHook(() =>
-      useIconSearch({ catalog: mockIconCatalog })
-    );
+    const { result } = renderHook(() => useIconSearch({ catalog: mockIconCatalog }));
 
     act(() => {
       result.current.setQuery('notification');
@@ -56,9 +50,7 @@ describe('useIconSearch', () => {
   });
 
   it('returns empty array when no matches found', () => {
-    const { result } = renderHook(() =>
-      useIconSearch({ catalog: mockIconCatalog })
-    );
+    const { result } = renderHook(() => useIconSearch({ catalog: mockIconCatalog }));
 
     act(() => {
       result.current.setQuery('xyznonexistent');
@@ -69,9 +61,7 @@ describe('useIconSearch', () => {
   });
 
   it('performs fuzzy matching', () => {
-    const { result } = renderHook(() =>
-      useIconSearch({ catalog: mockIconCatalog })
-    );
+    const { result } = renderHook(() => useIconSearch({ catalog: mockIconCatalog }));
 
     act(() => {
       result.current.setQuery('airplne'); // typo in "airplane"
@@ -83,9 +73,7 @@ describe('useIconSearch', () => {
   });
 
   it('updates query state correctly', () => {
-    const { result } = renderHook(() =>
-      useIconSearch({ catalog: mockIconCatalog })
-    );
+    const { result } = renderHook(() => useIconSearch({ catalog: mockIconCatalog }));
 
     act(() => {
       result.current.setQuery('test');

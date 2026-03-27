@@ -6,11 +6,13 @@ import type { IconFieldValue } from '../../types/icon';
 /**
  * Creates a mock FieldAppSDK for testing Field component
  */
-export function createMockFieldSdk(options: {
-  fieldValue?: IconFieldValue | null;
-  installationParameters?: AppInstallationParameters;
-  liveInstallationParameters?: AppInstallationParameters | null;
-} = {}): FieldAppSDK {
+export function createMockFieldSdk(
+  options: {
+    fieldValue?: IconFieldValue | null;
+    installationParameters?: AppInstallationParameters;
+    liveInstallationParameters?: AppInstallationParameters | null;
+  } = {}
+): FieldAppSDK {
   const {
     fieldValue = null,
     installationParameters = { enabledWeights: ['regular', 'bold', 'fill'] },
@@ -90,12 +92,12 @@ export function createMockFieldSdk(options: {
 /**
  * Creates a mock DialogAppSDK for testing Dialog component
  */
-export function createMockDialogSdk(options: {
-  invocationParameters?: DialogInvocationParameters;
-} = {}): DialogAppSDK {
-  const {
-    invocationParameters = { enabledWeights: ['regular', 'bold', 'fill'] }
-  } = options;
+export function createMockDialogSdk(
+  options: {
+    invocationParameters?: DialogInvocationParameters;
+  } = {}
+): DialogAppSDK {
+  const { invocationParameters = { enabledWeights: ['regular', 'bold', 'fill'] } } = options;
 
   return {
     ids: {
@@ -118,9 +120,11 @@ export function createMockDialogSdk(options: {
 /**
  * Creates a mock ConfigAppSDK for testing ConfigScreen component
  */
-export function createMockConfigSdk(options: {
-  installationParameters?: AppInstallationParameters | null;
-} = {}): ConfigAppSDK {
+export function createMockConfigSdk(
+  options: {
+    installationParameters?: AppInstallationParameters | null;
+  } = {}
+): ConfigAppSDK {
   const { installationParameters = null } = options;
 
   let onConfigureCallback: (() => Promise<unknown>) | null = null;

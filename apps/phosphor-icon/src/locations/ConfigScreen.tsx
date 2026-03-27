@@ -131,13 +131,9 @@ function IconStyleOption({
   onChange: () => void;
 }) {
   return (
-    <Checkbox
-      id={`weight-${weight}`}
-      isChecked={isChecked}
-      onChange={onChange}>
+    <Checkbox id={`weight-${weight}`} isChecked={isChecked} onChange={onChange}>
       <Flex alignItems="center" gap="spacingS">
-        <Box
-          className={styles.stylePreview}>
+        <Box className={styles.stylePreview}>
           <PhosphorIcons.PencilSimple size={20} weight={weight} />
         </Box>
         <span>{ICON_WEIGHT_LABELS[weight]}</span>
@@ -254,7 +250,9 @@ const ConfigScreen = () => {
 
   const removePositionOption = useCallback((positionOption: string) => {
     setPositionOptions((currentOptions) => {
-      const nextOptions = currentOptions.filter((currentOption) => currentOption !== positionOption);
+      const nextOptions = currentOptions.filter(
+        (currentOption) => currentOption !== positionOption
+      );
       return nextOptions.length > 0 ? nextOptions : currentOptions;
     });
   }, []);
@@ -356,12 +354,9 @@ const ConfigScreen = () => {
             )) as { sys?: { version?: number } };
 
             if (updatedResult.sys?.version) {
-              await sdk.cma.contentType.publish(
-                { contentTypeId: contentType.id },
-                {
-                  sys: { version: updatedResult.sys.version },
-                } as never
-              );
+              await sdk.cma.contentType.publish({ contentTypeId: contentType.id }, {
+                sys: { version: updatedResult.sys.version },
+              } as never);
             }
 
             managedField = {
@@ -374,7 +369,8 @@ const ConfigScreen = () => {
           const untouchedControls = (editorInterface.controls ?? []).filter((control) => {
             const isPhosphorControl =
               control.widgetNamespace === 'app' && control.widgetId === sdk.ids.app;
-            const targetsManagedField = managedField !== undefined && control.fieldId === managedField.id;
+            const targetsManagedField =
+              managedField !== undefined && control.fieldId === managedField.id;
 
             return !isPhosphorControl && !targetsManagedField;
           });
@@ -392,29 +388,25 @@ const ConfigScreen = () => {
               : untouchedControls;
 
           const shouldRemoveManagedField =
-            !assignApp && managedField !== undefined && existingAppControl?.fieldId === managedField.id;
+            !assignApp &&
+            managedField !== undefined &&
+            existingAppControl?.fieldId === managedField.id;
 
           try {
-            await sdk.cma.editorInterface.update(
-              { contentTypeId: contentType.id },
-              {
-                ...editorInterface,
-                controls: updatedControls,
-              } as never
-            );
+            await sdk.cma.editorInterface.update({ contentTypeId: contentType.id }, {
+              ...editorInterface,
+              controls: updatedControls,
+            } as never);
           } catch (updateError) {
             if (!isVersionMismatchError(updateError)) {
               throw updateError;
             }
 
             editorInterface = await getEditorInterface();
-            await sdk.cma.editorInterface.update(
-              { contentTypeId: contentType.id },
-              {
-                ...editorInterface,
-                controls: updatedControls,
-              } as never
-            );
+            await sdk.cma.editorInterface.update({ contentTypeId: contentType.id }, {
+              ...editorInterface,
+              controls: updatedControls,
+            } as never);
           }
 
           if (shouldRemoveManagedField) {
@@ -443,12 +435,9 @@ const ConfigScreen = () => {
             )) as { sys?: { version?: number } };
 
             if (omittedResult.sys?.version) {
-              await sdk.cma.contentType.publish(
-                { contentTypeId: contentType.id },
-                {
-                  sys: { version: omittedResult.sys.version },
-                } as never
-              );
+              await sdk.cma.contentType.publish({ contentTypeId: contentType.id }, {
+                sys: { version: omittedResult.sys.version },
+              } as never);
             }
 
             const deletableContentType = (await sdk.cma.contentType.get({
@@ -469,12 +458,9 @@ const ConfigScreen = () => {
             )) as { sys?: { version?: number } };
 
             if (updatedResult.sys?.version) {
-              await sdk.cma.contentType.publish(
-                { contentTypeId: contentType.id },
-                {
-                  sys: { version: updatedResult.sys.version },
-                } as never
-              );
+              await sdk.cma.contentType.publish({ contentTypeId: contentType.id }, {
+                sys: { version: updatedResult.sys.version },
+              } as never);
             }
           }
 
@@ -528,10 +514,13 @@ const ConfigScreen = () => {
       const assignedFields = await applyContentTypeAssignments(parameters);
       const currentState = await sdk.app.getCurrentState();
       const targetState = {
-        EditorInterface: contentTypes.reduce<Record<string, { controls?: Array<{ fieldId: string }> }>>(
+        EditorInterface: contentTypes.reduce<
+          Record<string, { controls?: Array<{ fieldId: string }> }>
+        >(
           (acc, contentType) => {
             const fields = assignedFields[contentType.id] ?? [];
-            acc[contentType.id] = fields.length > 0 ? { controls: fields.map((fieldId) => ({ fieldId })) } : {};
+            acc[contentType.id] =
+              fields.length > 0 ? { controls: fields.map((fieldId) => ({ fieldId })) } : {};
             return acc;
           },
           {
@@ -587,7 +576,8 @@ const ConfigScreen = () => {
             <Box className={styles.section}>
               <Heading marginBottom="spacingS">Set up Phosphor Icon</Heading>
               <Paragraph marginBottom="none">
-                Configure where the app appears, which icons editors can use, and how the picker should behave inside the entry field.
+                Configure where the app appears, which icons editors can use, and how the picker
+                should behave inside the entry field.
               </Paragraph>
             </Box>
 
@@ -596,7 +586,8 @@ const ConfigScreen = () => {
                 Assign content types
               </Heading>
               <Paragraph marginBottom="spacingM">
-                Select the content types that should receive the Phosphor Icon JSON field and app assignment automatically.
+                Select the content types that should receive the Phosphor Icon JSON field and app
+                assignment automatically.
               </Paragraph>
               {pickerOptions.length === 0 ? (
                 <Note variant="warning">No content types were found in this space yet.</Note>
@@ -617,7 +608,8 @@ const ConfigScreen = () => {
                 Set up rules
               </Heading>
               <Paragraph marginBottom="spacingM">
-                Choose which icon styles and position options editors can use when they open the picker.
+                Choose which icon styles and position options editors can use when they open the
+                picker.
               </Paragraph>
               <Stack spacing="spacingL" flexDirection="column">
                 <FormControl className={styles.fullWidth}>
@@ -644,7 +636,8 @@ const ConfigScreen = () => {
                   <Box className={styles.fullWidth}>
                     <FormControl.Label>Position options</FormControl.Label>
                     <FormControl.HelpText>
-                      Define the position options available to content editors. Add up to 10 options. Click the × on a pill to remove it.
+                      Define the position options available to content editors. Add up to 10
+                      options. Click the × on a pill to remove it.
                     </FormControl.HelpText>
                     <Flex gap="spacingS" marginTop="spacingM" alignItems="flex-start">
                       <TextInput
@@ -662,7 +655,9 @@ const ConfigScreen = () => {
                       <Button
                         variant="secondary"
                         onClick={addPositionOption}
-                        isDisabled={!newPositionOption.trim() || normalizedPositionOptions.length >= 10}>
+                        isDisabled={
+                          !newPositionOption.trim() || normalizedPositionOptions.length >= 10
+                        }>
                         Add
                       </Button>
                     </Flex>
@@ -687,7 +682,8 @@ const ConfigScreen = () => {
                 Limit available icons
               </Heading>
               <Paragraph marginBottom="spacingM">
-                Choose whether editors can search the full Phosphor library or only a curated set of icons.
+                Choose whether editors can search the full Phosphor library or only a curated set of
+                icons.
               </Paragraph>
               <Flex alignItems="flex-start" gap="spacingM">
                 <Switch
@@ -704,7 +700,8 @@ const ConfigScreen = () => {
                     Limit icons before install
                   </Paragraph>
                   <Paragraph marginTop="none" marginBottom="none">
-                    Enable a curated list of icons for editors. If disabled, Phosphor Icon keeps the full icon library available.
+                    Enable a curated list of icons for editors. If disabled, Phosphor Icon keeps the
+                    full icon library available.
                   </Paragraph>
                 </Box>
               </Flex>
@@ -715,7 +712,8 @@ const ConfigScreen = () => {
                     Choose allowed icons
                   </Button>
                   <Paragraph marginTop="spacingS" marginBottom="spacingS">
-                    Selected icons are saved with this configuration and will appear again the next time you edit the app settings.
+                    Selected icons are saved with this configuration and will appear again the next
+                    time you edit the app settings.
                   </Paragraph>
                   {selectedIconOptionLabels.length > 0 ? (
                     <>
@@ -737,7 +735,9 @@ const ConfigScreen = () => {
                       </Flex>
                     </>
                   ) : (
-                    <Note variant="warning">Choose at least one icon to finish this configuration.</Note>
+                    <Note variant="warning">
+                      Choose at least one icon to finish this configuration.
+                    </Note>
                   )}
                 </Box>
               )}
@@ -748,7 +748,9 @@ const ConfigScreen = () => {
                 Disclaimer
               </Heading>
               <Paragraph marginBottom="none">
-                Size and color are intentionally left out of this app so presentation stays in your frontend implementation. The stored JSON includes the icon name, React component name, style, and position.
+                Size and color are intentionally left out of this app so presentation stays in your
+                frontend implementation. The stored JSON includes the icon name, React component
+                name, style, and position.
               </Paragraph>
             </Box>
           </Stack>

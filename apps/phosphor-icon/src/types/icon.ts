@@ -2,14 +2,7 @@ export type IconWeight = 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duoto
 
 export type IconPosition = string;
 
-export const ICON_WEIGHTS: IconWeight[] = [
-  'thin',
-  'light',
-  'regular',
-  'bold',
-  'fill',
-  'duotone',
-];
+export const ICON_WEIGHTS: IconWeight[] = ['thin', 'light', 'regular', 'bold', 'fill', 'duotone'];
 
 export const ICON_WEIGHT_LABELS: Record<IconWeight, string> = {
   thin: 'Thin',
@@ -37,10 +30,7 @@ export interface IconCatalogEntry {
 }
 
 export function formatPositionLabel(position: string) {
-  const formattedPosition = position
-    .trim()
-    .replace(/[-_]+/g, ' ')
-    .toLowerCase();
+  const formattedPosition = position.trim().replace(/[-_]+/g, ' ').toLowerCase();
 
   return formattedPosition.charAt(0).toUpperCase() + formattedPosition.slice(1);
 }

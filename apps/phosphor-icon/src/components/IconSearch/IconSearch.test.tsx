@@ -10,9 +10,7 @@ describe('IconSearch', () => {
   });
 
   it('renders with custom placeholder', () => {
-    render(
-      <IconSearch value="" onChange={() => {}} placeholder="Find an icon" />
-    );
+    render(<IconSearch value="" onChange={() => {}} placeholder="Find an icon" />);
 
     expect(screen.getByPlaceholderText('Find an icon')).toBeInTheDocument();
   });
