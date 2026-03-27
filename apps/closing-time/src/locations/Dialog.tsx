@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useLayoutEffect, useCallback } from 'react';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { Button, Stack, Flex, Modal } from '@contentful/f36-components';
+import { Button, Stack, Flex, Box, Heading, IconButton } from '@contentful/f36-components';
+import { CloseIcon } from '@contentful/f36-icons';
 import { css } from 'emotion';
 import DayRow from '../components/DayRow';
 import {
@@ -15,12 +16,33 @@ import {
 } from '../types';
 
 const styles = {
+  root: css({
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    backgroundColor: '#ffffff',
+  }),
+  header: css({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '20px 24px',
+    borderBottom: '1px solid #e5ebf1',
+  }),
   content: css({
     minHeight: 0,
-    overflowY: 'auto',
     display: 'flex',
     flexDirection: 'column',
     gap: '12px',
+    flex: 1,
+    overflowY: 'auto',
+    padding: '24px',
+  }),
+  controls: css({
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '12px',
+    padding: '20px 24px 24px',
   }),
 };
 
@@ -33,7 +55,7 @@ function Dialog() {
 
   const [hours, setHours] = useState<HoursOfOperation>(initialHours);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     sdk.window.stopAutoResizer();
     sdk.window.updateHeight(800);
   }, [sdk.window]);
@@ -143,49 +165,55 @@ function Dialog() {
   }, [sdk]);
 
   return (
-    <Modal isShown onClose={handleCancel} size="fullscreen">
-      {() => (
-        <>
-          <Modal.Header title="Hours of operation" onClose={handleCancel} />
-          <Modal.Content className={styles.content}>
-            <Flex justifyContent="flex-end">
-              <Button
-                variant="secondary"
-                size="small"
-                onClick={allClosed ? handleSetAllOpen : handleSetAllClosed}>
-                {allClosed ? 'Set all open' : 'Set all closed'}
-              </Button>
-            </Flex>
+    <Box className={styles.root}>
+      <Box className={styles.header}>
+        <Heading marginBottom="none">Hours of operation</Heading>
+        <IconButton
+          variant="transparent"
+          icon={<CloseIcon />}
+          aria-label="Close dialog"
+          onClick={handleCancel}
+        />
+      </Box>
 
-            <Stack
-              flexDirection="column"
-              spacing="spacingXs"
-              alignItems="stretch"
-              style={{ width: '100%' }}>
-              {DAYS_OF_WEEK.map((day) => (
-                <DayRow
-                  key={day}
-                  day={day}
-                  dayHours={hours[day]}
-                  onChange={(dayHours) => handleDayChange(day, dayHours)}
-                  onCopyToAll={() => handleCopyToAll(day)}
-                  onCopyToWeekdays={() => handleCopyToWeekdays(day)}
-                  clockFormat={clockFormat}
-                />
-              ))}
-            </Stack>
-          </Modal.Content>
-          <Modal.Controls>
-            <Button variant="transparent" size="small" onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button variant="primary" size="small" onClick={handleConfirm}>
-              Save hours
-            </Button>
-          </Modal.Controls>
-        </>
-      )}
-    </Modal>
+      <Box className={styles.content}>
+        <Flex justifyContent="flex-end">
+          <Button
+            variant="secondary"
+            size="small"
+            onClick={allClosed ? handleSetAllOpen : handleSetAllClosed}>
+            {allClosed ? 'Set all open' : 'Set all closed'}
+          </Button>
+        </Flex>
+
+        <Stack
+          flexDirection="column"
+          spacing="spacingXs"
+          alignItems="stretch"
+          style={{ width: '100%' }}>
+          {DAYS_OF_WEEK.map((day) => (
+            <DayRow
+              key={day}
+              day={day}
+              dayHours={hours[day]}
+              onChange={(dayHours) => handleDayChange(day, dayHours)}
+              onCopyToAll={() => handleCopyToAll(day)}
+              onCopyToWeekdays={() => handleCopyToWeekdays(day)}
+              clockFormat={clockFormat}
+            />
+          ))}
+        </Stack>
+      </Box>
+
+      <Box className={styles.controls}>
+        <Button variant="transparent" size="small" onClick={handleCancel}>
+          Cancel
+        </Button>
+        <Button variant="primary" size="small" onClick={handleConfirm}>
+          Save hours
+        </Button>
+      </Box>
+    </Box>
   );
 }
 
