@@ -17,9 +17,11 @@ describe('Field', () => {
     mockSdk = createMockFieldSdk({ fieldValue: mockDefaultHours });
   });
 
-  it('renders the Edit Hours of Operation button', () => {
+  it('renders the Edit hours of operation button', () => {
     render(<Field />);
-    expect(screen.getByRole('button', { name: /edit hours of operation/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Edit hours of operation' })
+    ).toBeInTheDocument();
   });
 
   it('displays open days count badge', () => {

@@ -46,13 +46,24 @@ function TimeSlotInput({
   );
 
   return (
-    <Flex alignItems="center" gap="spacingS">
+    <Flex
+      alignItems="center"
+      gap="spacingS"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: canRemove
+          ? 'minmax(0, 1fr) auto minmax(0, 1fr) auto'
+          : 'minmax(0, 1fr) auto minmax(0, 1fr)',
+        width: '100%',
+        maxWidth: '520px',
+        justifyItems: 'stretch',
+      }}>
       <Select
         id="open-time"
         value={slot.open}
         onChange={handleOpenChange}
         size="small"
-        style={{ minWidth: '110px' }}
+        style={{ minWidth: 0, width: '100%' }}
         aria-label="Open time">
         {timeOptions.map((option) => (
           <Select.Option key={option.value} value={option.value}>
@@ -66,7 +77,7 @@ function TimeSlotInput({
         value={slot.close}
         onChange={handleCloseChange}
         size="small"
-        style={{ minWidth: '110px' }}
+        style={{ minWidth: 0, width: '100%' }}
         aria-label="Close time">
         {timeOptions.map((option) => (
           <Select.Option key={option.value} value={option.value}>

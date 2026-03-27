@@ -103,8 +103,8 @@ function DayRow({
           display: 'grid',
           width: '100%',
           gridTemplateColumns: dayHours.isOpen
-            ? '140px 140px minmax(0, 1fr) 32px'
-            : '140px 120px minmax(0, 1fr) 32px',
+            ? '140px 124px minmax(0, 1fr) 40px'
+            : '140px 120px minmax(0, 1fr) 40px',
           alignItems: 'start',
           columnGap: '16px',
         }}>
@@ -138,11 +138,13 @@ function DayRow({
         {/* Time slots - fixed position, hidden when 24 hours or closed */}
         <Flex
           flexGrow={1}
-          alignItems="center"
+          alignItems="flex-start"
+          flexDirection="column"
           gap="spacingS"
-          flexWrap="wrap"
           style={{
             minHeight: '36px',
+            minWidth: 0,
+            paddingRight: '8px',
           }}>
           {dayHours.isOpen && !dayHours.is24Hours ? (
             <>
@@ -172,7 +174,10 @@ function DayRow({
         </Flex>
 
         {/* Menu */}
-        <Flex alignItems="center" justifyContent="flex-end" style={{ minHeight: '36px' }}>
+        <Flex
+          alignItems="center"
+          justifyContent="flex-end"
+          style={{ minHeight: '36px', width: '40px' }}>
           <Menu>
             <Menu.Trigger>
               <IconButton

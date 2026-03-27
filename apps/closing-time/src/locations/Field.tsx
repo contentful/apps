@@ -75,7 +75,7 @@ function Field() {
       <Stack flexDirection="column" spacing="spacingS" alignItems="flex-start">
         <Stack flexDirection="row" spacing="spacingS" alignItems="center">
           <Button variant="secondary" startIcon={<ClockIcon />} onClick={handleEditHours}>
-            Edit Hours of Operation
+            Edit hours of operation
           </Button>
           <Badge variant={openDaysCount > 0 ? 'positive' : 'secondary'}>
             {openDaysCount} {openDaysCount === 1 ? 'day' : 'days'} open
