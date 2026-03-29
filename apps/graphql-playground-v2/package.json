@@ -33,7 +33,7 @@
     "@types/react": "^17.0.69",
     "@types/react-dom": "^17.0.22",
     "@vitejs/plugin-react": "^4.1.1",
-    "happy-dom": "9.20.3",
+    "happy-dom": "20.8.9",
     "typescript": "^5.2.2",
     "vitest": "^0.34.6"
   }
