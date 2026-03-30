@@ -7,35 +7,47 @@ import type { IconCatalogEntry, IconWeight } from '../../types/icon';
 
 const CELL_SIZE = 80;
 const MIN_COLUMNS = 4;
+const MIN_VISIBLE_ROWS = 2;
+const DEFAULT_MAX_VISIBLE_ROWS = 4;
 
 const styles = {
   container: css({
-    flex: 1,
-    minHeight: '300px',
+    position: 'relative',
+    width: '100%',
     backgroundColor: '#ffffff',
     borderRadius: '6px',
     border: '1px solid #d3dce6',
     overflow: 'hidden',
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      height: '1px',
+      backgroundColor: '#d3dce6',
+      pointerEvents: 'none',
+    },
   }),
   loading: css({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     height: '100%',
-    minHeight: '300px',
+    minHeight: `${CELL_SIZE * MIN_VISIBLE_ROWS}px`,
   }),
   empty: css({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     height: '100%',
-    minHeight: '300px',
+    minHeight: `${CELL_SIZE * MIN_VISIBLE_ROWS}px`,
     padding: '20px',
   }),
   gridWrapper: css({
     width: '100%',
     height: '100%',
-    minHeight: '300px',
+    overflow: 'hidden',
   }),
 };
 
@@ -45,6 +57,7 @@ interface IconGridProps {
   selectedIconNames: string[];
   onSelect: (icon: IconCatalogEntry) => void;
   isLoading?: boolean;
+  maxVisibleRows?: number;
 }
 
 interface CellProps {
@@ -96,6 +109,7 @@ export function IconGrid({
   selectedIconNames,
   onSelect,
   isLoading = false,
+  maxVisibleRows = DEFAULT_MAX_VISIBLE_ROWS,
 }: IconGridProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(600);
@@ -136,9 +150,11 @@ export function IconGrid({
 
   const columnCount = Math.max(MIN_COLUMNS, Math.floor(containerWidth / CELL_SIZE));
   const rowCount = Math.ceil(icons.length / columnCount);
+  const visibleRows = Math.min(Math.max(rowCount, MIN_VISIBLE_ROWS), maxVisibleRows);
+  const gridHeight = visibleRows * CELL_SIZE - 1;
 
   return (
-    <div className={styles.container} ref={containerRef}>
+    <div className={styles.container} ref={containerRef} style={{ height: `${gridHeight}px` }}>
       <div className={styles.gridWrapper}>
         <Grid
           cellComponent={CellComponent}
@@ -153,7 +169,12 @@ export function IconGrid({
           columnWidth={CELL_SIZE}
           rowCount={rowCount}
           rowHeight={CELL_SIZE}
-          style={{ width: '100%', height: '100%' }}
+          style={{
+            width: '100%',
+            height: `${gridHeight}px`,
+            overflowX: 'hidden',
+            overflowY: rowCount > visibleRows ? 'auto' : 'hidden',
+          }}
         />
       </div>
     </div>

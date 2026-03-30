@@ -29,7 +29,7 @@ describe('Dialog', () => {
   it('renders the single-icon dialog heading', () => {
     render(<Dialog />);
 
-    expect(screen.getByText('Select a Phosphor icon')).toBeInTheDocument();
+    expect(screen.getByText('Select a Phosphor Icon')).toBeInTheDocument();
   });
 
   it('keeps the selected icon while changing weight and position', () => {

@@ -40,13 +40,21 @@ const styles = {
     width: '100%',
     maxWidth: '760px',
     margin: '0 auto',
+    gridTemplateRows: 'auto auto auto auto',
+    paddingBottom: '0',
+    gap: '12px',
   }),
   footer: css({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: '12px',
-    borderTop: '1px solid #cfd9e5',
+    paddingTop: '8px',
+    borderTop: 'none',
+  }),
+  footerSingle: css({
+    justifyContent: 'flex-end',
+    paddingTop: '8px',
+    borderTop: 'none',
   }),
   topSection: css({
     display: 'grid',
@@ -82,19 +90,20 @@ const styles = {
     minHeight: 0,
     overflow: 'hidden',
     display: 'grid',
-    gridTemplateRows: '144px minmax(0, 1fr)',
+    gridTemplateRows: '72px minmax(0, 1fr)',
     gap: '12px',
   }),
   bodySingle: css({
-    gridTemplateRows: 'minmax(420px, 1fr)',
+    gridTemplateRows: 'auto',
+    alignContent: 'start',
   }),
   chipTray: css({
     border: '1px solid #cfd9e5',
     borderRadius: '8px',
     backgroundColor: '#f7f9fa',
-    padding: '12px',
-    minHeight: '144px',
-    maxHeight: '144px',
+    padding: '10px 12px',
+    minHeight: '72px',
+    maxHeight: '72px',
     overflowY: 'auto',
     boxSizing: 'border-box',
   }),
@@ -102,6 +111,10 @@ const styles = {
     minHeight: 0,
     overflow: 'auto',
     display: 'flex',
+  }),
+  gridAreaSingle: css({
+    overflow: 'visible',
+    display: 'block',
   }),
   selectedCard: css({
     border: '1px solid #cfd9e5',
@@ -302,7 +315,7 @@ const Dialog = () => {
       <div className={`${styles.topSection} ${mode === 'single' ? styles.topSectionSingle : ''}`}>
         <Box>
           <Heading marginBottom="spacingS">
-            {mode === 'multi' ? 'Choose allowed icons' : 'Select a Phosphor icon'}
+            {mode === 'multi' ? 'Choose allowed icons' : 'Select a Phosphor Icon'}
           </Heading>
           <Paragraph marginBottom="spacingS">
             {mode === 'multi'
@@ -389,7 +402,7 @@ const Dialog = () => {
           </div>
         ) : null}
 
-        <div className={styles.gridArea}>
+        <div className={`${styles.gridArea} ${mode === 'single' ? styles.gridAreaSingle : ''}`}>
           <IconGrid
             icons={results}
             weight={weight}
@@ -397,11 +410,12 @@ const Dialog = () => {
               mode === 'multi' ? selectedIconNames : selectedIcon ? [selectedIcon.name] : []
             }
             onSelect={handleSelect}
+            maxVisibleRows={mode === 'single' ? 6 : 4}
           />
         </div>
       </div>
 
-      <div className={styles.footer}>
+      <div className={`${styles.footer} ${mode === 'single' ? styles.footerSingle : ''}`}>
         <Text fontColor="gray600">
           {mode === 'multi' ? `${selectedIconNames.length} icon(s) selected` : ''}
         </Text>

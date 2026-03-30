@@ -72,18 +72,42 @@ describe('ConfigScreen', () => {
     expect(screen.getByRole('switch')).toBeChecked();
   });
 
+  it('supports large content type lists without truncating the dropdown options', async () => {
+    mockSdk = createMockConfigSdk({
+      contentTypes: Array.from({ length: 150 }, (_, index) => ({
+        name: `Content Type ${index + 1}`,
+        sys: { id: `content-type-${index + 1}` },
+        fields: [],
+      })),
+    }) as ConfigAppSDK<AppInstallationParameters> & {
+      __invokeConfigure: () => Promise<unknown>;
+    };
+
+    render(<ConfigScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /select one or more/i })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /select one or more/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Content Type 150')).toBeInTheDocument();
+    });
+  });
+
   it('returns the expected parameters from onConfigure', async () => {
     render(<ConfigScreen />);
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search content types')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /select one or more/i })).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByPlaceholderText('Search content types'));
+    fireEvent.click(screen.getByRole('button', { name: /select one or more/i }));
     await waitFor(() => {
-      expect(screen.getByText('Article')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Search content types')).toBeInTheDocument();
     });
-    fireEvent.click(screen.getByText('Article'));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Article' }));
 
     fireEvent.click(screen.getByRole('checkbox', { name: /duotone/i }));
     fireEvent.change(screen.getByPlaceholderText('Add position option...'), {
