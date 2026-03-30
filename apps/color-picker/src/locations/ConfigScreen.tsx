@@ -1,3 +1,18 @@
+import {
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import {
   Button,
@@ -46,6 +61,39 @@ const ConfigScreen = () => {
     ],
   });
   const sdk = useSDK<ConfigAppSDK>();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleColorsDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) {
+      return;
+    }
+    setParameters((prev) => {
+      const colors = prev.themes[0].colors;
+      const oldIndex = colors.findIndex((c) => c.id === active.id);
+      const newIndex = colors.findIndex((c) => c.id === over.id);
+      if (oldIndex === -1 || newIndex === -1) {
+        return prev;
+      }
+      return {
+        ...prev,
+        themes: [
+          {
+            ...prev.themes[0],
+            colors: arrayMove(colors, oldIndex, newIndex),
+          },
+        ],
+      };
+    });
+  }, []);
 
   const addSwatch = () => {
     setParameters({
@@ -146,17 +194,27 @@ const ConfigScreen = () => {
           <div>
             <Subheading marginBottom="spacingXs">Theme</Subheading>
             <Paragraph>
-              Optionally, specify a set of predefined colors that editors can choose from.
+              Optionally, specify a set of predefined colors that editors can choose from. Drag the
+              handle beside each row to change the order shown in the entry editor.
             </Paragraph>
 
-            {parameters.themes[0].colors.map((swatch) => (
-              <SwatchEditor
-                key={swatch.id}
-                swatch={swatch}
-                onChange={updateSwatch}
-                onRemove={removeSwatch}
-              />
-            ))}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleColorsDragEnd}>
+              <SortableContext
+                items={parameters.themes[0].colors.map((c) => c.id)}
+                strategy={verticalListSortingStrategy}>
+                {parameters.themes[0].colors.map((swatch) => (
+                  <SwatchEditor
+                    key={swatch.id}
+                    swatch={swatch}
+                    onChange={updateSwatch}
+                    onRemove={removeSwatch}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
 
             <Button size="small" startIcon={<PlusIcon />} onClick={addSwatch}>
               Add color

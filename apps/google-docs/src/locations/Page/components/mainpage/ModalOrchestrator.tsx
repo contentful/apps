@@ -1,23 +1,33 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { forwardRef, useImperativeHandle, useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
-import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
-import { useModalManagement, ModalType } from '../../../../hooks/useModalManagement';
-import { useProgressTracking } from '../../../../hooks/useProgressTracking';
-import { useGeneratePreview } from '../../../../hooks/useGeneratePreview';
-import { ReviewEntriesModal } from '../modals/step_4/ReviewEntriesModal';
-import { ErrorModal } from '../modals/ErrorModal';
-import { createEntriesFromPreview, EntryCreationResult } from '../../../../services/entryService';
-import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
-import { ContentTypePickerModal } from '../modals/step_2/SelectContentTypeModal';
-import { ConfirmPromptModal } from '../modals/step_2b/ConfirmPromptModal';
-import { PreviewModal } from '../modals/step_3/PreviewModal';
-import { LoadingModal } from '../modals/LoadingModal';
+import { Modal } from '@contentful/f36-components';
 import { ContentTypeProps } from 'contentful-management';
+import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
+import { ErrorModal } from '../modals/ErrorModal';
+import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
+import { LoadingModal } from '../modals/LoadingModal';
 import { ERROR_MESSAGES } from '../../../../utils/constants/messages';
-import { PreviewEntry } from '../modals/step_3/types';
+import { CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS } from '../../../../utils/constants/agent';
+import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
+import {
+  DocumentTabProps,
+  DocumentScopeResumePayload,
+  DocumentScopeSuspendPayload,
+  RunStatus,
+} from '../../../../utils/types';
+import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
+import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
+import { useWorkflowAgent } from '../../../../hooks/useWorkflowAgent';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
+}
+
+enum FlowStep {
+  CONTENT_TYPE_PICKER = 'contentTypePicker',
+  SELECT_TABS = 'selectTabs',
+  INCLUDE_IMAGES = 'includeImages',
+  LOADING = 'loading',
 }
 
 interface ModalOrchestratorProps {
@@ -27,286 +37,260 @@ interface ModalOrchestratorProps {
 
 export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrchestratorProps>(
   ({ sdk, oauthToken }, ref) => {
-    const { modalStates, openModal, closeModal } = useModalManagement();
-    const [isCreatingEntries, setIsCreatingEntries] = useState<boolean>(false);
-    const [selectedEntriesCount, setSelectedEntriesCount] = useState<number>(0);
-    const [createdEntries, setCreatedEntries] = useState<EntryCreationResult['createdEntries']>([]);
-    const [contentTypeNamesMap, setContentTypeNamesMap] = useState<Record<string, string>>({});
-    const {
+    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+    const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
+    const [isErrorPreviewModalOpen, setIsErrorPreviewModalOpen] = useState(false);
+    const [flowStep, setFlowStep] = useState<FlowStep | null>(null);
+    const [documentId, setDocumentId] = useState<string>('');
+    const [selectedContentTypes, setSelectedContentTypes] = useState<ContentTypeProps[]>([]);
+    const [availableTabs, setAvailableTabs] = useState<DocumentTabProps[]>([]);
+    const [selectedTabs, setSelectedTabs] = useState<DocumentTabProps[]>([]);
+    const [useAllTabs, setUseAllTabs] = useState<boolean | null>(null);
+    const [includeImages, setIncludeImages] = useState<boolean | null>(null);
+    const [requiresImageSelection, setRequiresImageSelection] = useState(false);
+    const [activeRunId, setActiveRunId] = useState<string | null>(null);
+    const { startWorkflow, resumeWorkflow } = useWorkflowAgent({
+      sdk,
       documentId,
-      setDocumentId,
-      selectedContentTypes,
-      setSelectedContentTypes,
-      hasProgress,
-      resetProgress: resetProgressTracking,
-      pendingCloseAction,
-      setPendingCloseAction,
-    } = useProgressTracking();
-    const { previewEntries, assets, submit, clearMessages, isSubmitting, error } =
-      useGeneratePreview({
-        sdk,
-        documentId,
-        oauthToken,
-      });
+      oauthToken,
+    });
 
-    // Track previous submission state to detect completion
-    const prevIsSubmittingRef = useRef<boolean>(false);
+    const hasProgressToLose = documentId.trim().length > 0;
 
-    // Track last submitted content type IDs for retry functionality
-    const lastSubmittedContentTypeIdsRef = useRef<string[]>([]);
-
-    // Expose startFlow method to parent
     useImperativeHandle(ref, () => ({
-      startFlow: () => openModal(ModalType.UPLOAD),
+      startFlow: () => setIsUploadModalOpen(true),
     }));
 
+    const resetDocumentScopeReview = () => {
+      setAvailableTabs([]);
+      setSelectedTabs([]);
+      setUseAllTabs(null);
+      setIncludeImages(null);
+      setRequiresImageSelection(false);
+    };
+
     const resetProgress = () => {
-      resetProgressTracking();
-      closeModal(ModalType.UPLOAD);
-      closeModal(ModalType.CONTENT_TYPE_PICKER);
-      clearMessages();
+      setDocumentId('');
+      setSelectedContentTypes([]);
+      resetDocumentScopeReview();
+      setActiveRunId(null);
+      setFlowStep(null);
+      setIsUploadModalOpen(false);
+    };
+
+    const showDiscardConfirmation = () => {
+      if (!hasProgressToLose) return;
+      setIsConfirmCancelModalOpen(true);
+    };
+
+    const closeModalAndReset = (setOpen: (open: boolean) => void) => () => {
+      setOpen(false);
+      resetProgress();
+    };
+
+    const showWorkflowError = () => {
+      setFlowStep(null);
+      setIsErrorPreviewModalOpen(true);
     };
 
     const handleUploadModalCloseRequest = (docId?: string) => {
-      // If docId is provided, user clicked "Next" - save document ID and proceed to content type picker
       if (docId) {
         setDocumentId(docId);
-        closeModal(ModalType.UPLOAD);
-        openModal(ModalType.CONTENT_TYPE_PICKER);
+        setIsUploadModalOpen(false);
+        setFlowStep(FlowStep.CONTENT_TYPE_PICKER);
         return;
       }
 
-      // User clicked "Cancel" - If there's progress and user is trying to cancel, show confirmation
-      if (hasProgress) {
-        closeModal(ModalType.UPLOAD);
-        setPendingCloseAction(() => () => {
-          resetProgress();
-        });
-        openModal(ModalType.CONFIRM_CANCEL);
-      } else {
-        // No progress, reset to getting started page
-        closeModal(ModalType.UPLOAD);
-      }
+      setIsUploadModalOpen(false);
+      showDiscardConfirmation();
     };
 
-    const handleContentTypePickerCloseRequest = () => {
-      // If there's progress, show confirmation
-      if (hasProgress) {
-        closeModal(ModalType.CONTENT_TYPE_PICKER);
-        setPendingCloseAction(() => () => {
-          resetProgress();
-        });
-        openModal(ModalType.CONFIRM_CANCEL);
-      } else {
-        // No progress, close directly
-        closeModal(ModalType.CONTENT_TYPE_PICKER);
-      }
-    };
+    const showDocumentScopeReview = (suspendPayload?: DocumentScopeSuspendPayload) => {
+      setAvailableTabs(
+        (suspendPayload?.tabs ?? []).map((tab) => ({
+          tabId: tab.id ?? '',
+          tabTitle: tab.title ?? '',
+        }))
+      );
+      setSelectedTabs([]);
+      setUseAllTabs(null);
+      setIncludeImages(null);
+      setRequiresImageSelection(Boolean(suspendPayload?.requiresImageSelection));
 
-    const handleConfirmCancel = () => {
-      closeModal(ModalType.CONFIRM_CANCEL);
-      if (pendingCloseAction) {
-        pendingCloseAction();
-        setPendingCloseAction(null);
-      }
-    };
-
-    const handleKeepCreating = () => {
-      closeModal(ModalType.CONFIRM_CANCEL);
-      setPendingCloseAction(null);
-      openModal(ModalType.CONTENT_TYPE_PICKER);
-    };
-
-    const handleContentTypeSelected = (contentTypeIdsCsv: string) => {
-      closeModal(ModalType.CONTENT_TYPE_PICKER);
-      // TEMP workaround: we pass content type IDs as a comma-separated string to Mastra workflows.
-      // The modal already updates `selectedContentTypes` via `setSelectedContentTypes`, so we don't need to set it here.
-      void contentTypeIdsCsv;
-      // setSelectedContentTypes(contentTypes);
-      openModal(ModalType.CONFIRM_PROMPT);
-    };
-
-    const handleConfirmPromptBack = () => {
-      closeModal(ModalType.CONFIRM_PROMPT);
-      openModal(ModalType.CONTENT_TYPE_PICKER);
-    };
-
-    const handleConfirmPromptConfirm = async () => {
-      closeModal(ModalType.CONFIRM_PROMPT);
-      const ids = selectedContentTypes.map((ct) => ct.sys.id);
-      lastSubmittedContentTypeIdsRef.current = ids;
-      await submit(ids);
-    };
-
-    const handlePreviewModalConfirm = async (selectedEntries: PreviewEntry[]) => {
-      if (!selectedEntries || selectedEntries.length === 0) {
-        sdk.notifier.error('No entries to create');
+      if (suspendPayload?.requiresTabSelection) {
+        setFlowStep(FlowStep.SELECT_TABS);
         return;
       }
 
-      setSelectedEntriesCount(selectedEntries.length);
+      if (suspendPayload?.requiresImageSelection) {
+        setFlowStep(FlowStep.INCLUDE_IMAGES);
+        return;
+      }
 
-      // Build a map of contentTypeId -> contentTypeName from selected entries to use in the review modal
-      const namesMap: Record<string, string> = {};
-      selectedEntries.forEach((previewEntry) => {
-        namesMap[previewEntry.entry.contentTypeId] = previewEntry.contentTypeName;
-      });
-      setContentTypeNamesMap(namesMap);
+      setFlowStep(null);
+    };
 
-      closeModal(ModalType.PREVIEW);
-      setIsCreatingEntries(true);
+    const handleWorkflowResult = (workflowRun: {
+      runId: string;
+      status: RunStatus.PENDING_REVIEW | RunStatus.COMPLETED;
+      suspendPayload?: DocumentScopeSuspendPayload;
+    }) => {
+      setActiveRunId(workflowRun.runId);
+
+      if (workflowRun.status === RunStatus.PENDING_REVIEW) {
+        showDocumentScopeReview(workflowRun.suspendPayload);
+        return;
+      }
+
+      setFlowStep(null);
+    };
+
+    const continueWorkflow = async (
+      resumePayloadOverrides?: Partial<DocumentScopeResumePayload>
+    ) => {
+      if (!activeRunId) {
+        throw new Error('Workflow run id is missing for resume.');
+      }
+
+      const resumePayload: DocumentScopeResumePayload = {
+        ...(selectedTabs.length > 0
+          ? { selectedTabIds: selectedTabs.map((tab) => tab.tabId) }
+          : {}),
+        ...(includeImages !== null ? { includeImages } : {}),
+        ...resumePayloadOverrides,
+      };
+
+      setFlowStep(FlowStep.LOADING);
+
+      const workflowRun = await resumeWorkflow(activeRunId, resumePayload);
+      handleWorkflowResult(workflowRun);
+    };
+
+    const startWorkflowWithDelayedLoading = async (contentTypeIds: string[]) => {
+      let isStartPending = true;
+      const loadingModalTimeout = window.setTimeout(() => {
+        if (isStartPending) {
+          setFlowStep(FlowStep.LOADING);
+        }
+      }, CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS);
+
       try {
-        const entries = selectedEntries.map((p) => p.entry);
-        const contentTypeIds = selectedEntries.map((entry) => entry.entry.contentTypeId);
-        const entryResult: EntryCreationResult = await createEntriesFromPreview(
-          sdk,
-          entries,
-          contentTypeIds,
-          assets
-        );
-
-        const createdCount = entryResult.createdEntries.length;
-
-        if (createdCount === 0) {
-          console.error('Entry creation errors:', entryResult.errors);
-          openModal(ModalType.ERROR_ENTRIES);
-          return;
-        }
-
-        setCreatedEntries(entryResult.createdEntries);
-        resetProgress();
-        openModal(ModalType.REVIEW);
-      } catch (error) {
-        closeModal(ModalType.PREVIEW);
-        console.error('Entry creation failed:', error);
-        openModal(ModalType.ERROR_ENTRIES);
+        return await startWorkflow(contentTypeIds);
       } finally {
-        setIsCreatingEntries(false);
+        isStartPending = false;
+        window.clearTimeout(loadingModalTimeout);
       }
     };
 
-    const handleErrorModalTryAgain = () => {
-      closeModal(ModalType.ERROR_ENTRIES);
-      // Reopen the preview modal so user can try again
-      openModal(ModalType.PREVIEW);
-    };
-
-    const handleErrorModalCancel = () => {
-      closeModal(ModalType.ERROR_ENTRIES);
-      resetProgress();
-    };
-
-    const handleErrorPreviewModalClose = () => {
-      closeModal(ModalType.ERROR_PREVIEW);
-      clearMessages();
-      resetProgress();
-    };
-
-    const handleErrorPreviewModalRetry = async () => {
-      closeModal(ModalType.ERROR_PREVIEW);
-      clearMessages();
-
-      if (lastSubmittedContentTypeIdsRef.current.length > 0) {
-        await submit(lastSubmittedContentTypeIdsRef.current);
+    const handleContentTypeContinue = async (contentTypeIds: string[]) => {
+      try {
+        handleWorkflowResult(await startWorkflowWithDelayedLoading(contentTypeIds));
+      } catch {
+        showWorkflowError();
       }
     };
 
-    // Close the ContentTypePickerModal when submission completes and open preview modal
-    useEffect(() => {
-      const submissionJustCompleted = prevIsSubmittingRef.current && !isSubmitting;
+    const handleSelectTabsContinue = async (selectedTabs: DocumentTabProps[]) => {
+      setSelectedTabs(selectedTabs);
 
-      if (submissionJustCompleted) {
-        // Check if there was an error during submission
-        if (error) {
-          openModal(ModalType.ERROR_PREVIEW);
-        } else if (previewEntries && previewEntries.length > 0) {
-          // Open preview modal if we have entries
-          openModal(ModalType.PREVIEW);
-        }
+      if (requiresImageSelection) {
+        setFlowStep(FlowStep.INCLUDE_IMAGES);
+        return;
       }
 
-      prevIsSubmittingRef.current = isSubmitting;
-    }, [isSubmitting, closeModal, openModal, previewEntries, error]);
+      try {
+        await continueWorkflow({ selectedTabIds: selectedTabs.map((tab) => tab.tabId) });
+      } catch {
+        showWorkflowError();
+      }
+    };
+
+    const handleIncludeImagesContinue = async (includeImages: boolean) => {
+      setIncludeImages(includeImages);
+
+      try {
+        await continueWorkflow({ includeImages });
+      } catch {
+        showWorkflowError();
+      }
+    };
+
+    const renderFlowStep = () => {
+      switch (flowStep) {
+        case FlowStep.CONTENT_TYPE_PICKER:
+          return (
+            <ContentTypePickerModal
+              sdk={sdk}
+              onClose={showDiscardConfirmation}
+              onContinue={handleContentTypeContinue}
+              selectedContentTypes={selectedContentTypes}
+              setSelectedContentTypes={setSelectedContentTypes}
+            />
+          );
+        case FlowStep.SELECT_TABS:
+          return (
+            <SelectTabsModal
+              onContinue={handleSelectTabsContinue}
+              onClose={showDiscardConfirmation}
+              availableTabs={availableTabs}
+              selectedTabs={selectedTabs}
+              setSelectedTabs={setSelectedTabs}
+              useAllTabs={useAllTabs}
+              setUseAllTabs={setUseAllTabs}
+            />
+          );
+        case FlowStep.INCLUDE_IMAGES:
+          return (
+            <IncludeImagesModal
+              includeImages={includeImages}
+              setIncludeImages={setIncludeImages}
+              onContinue={handleIncludeImagesContinue}
+              onClose={showDiscardConfirmation}
+            />
+          );
+        case FlowStep.LOADING:
+          return (
+            <LoadingModal
+              step="reviewingContentTypes"
+              title="Preparing your preview"
+              onClose={showDiscardConfirmation}
+              contentTypeCount={selectedContentTypes.length}
+            />
+          );
+        default:
+          return null;
+      }
+    };
 
     return (
       <>
         <SelectDocumentModal
           oauthToken={oauthToken}
-          isOpen={modalStates.isUploadModalOpen}
+          isOpen={isUploadModalOpen}
           onClose={handleUploadModalCloseRequest}
         />
-        <ContentTypePickerModal
-          sdk={sdk}
-          isOpen={modalStates.isContentTypePickerOpen}
-          onClose={handleContentTypePickerCloseRequest}
-          onSelect={handleContentTypeSelected}
-          isSubmitting={isSubmitting}
-          selectedContentTypes={selectedContentTypes}
-          setSelectedContentTypes={setSelectedContentTypes}
-        />
 
-        <ConfirmPromptModal
-          sdk={sdk}
-          isOpen={modalStates.isConfirmPromptModalOpen}
-          onClose={handleConfirmPromptBack}
-          onConfirm={handleConfirmPromptConfirm}
-          documentId={documentId}
-          selectedContentTypes={selectedContentTypes}
-          oauthToken={oauthToken}
-        />
+        <Modal
+          isShown={flowStep !== null}
+          onClose={showDiscardConfirmation}
+          size={'large'}
+          shouldCloseOnOverlayClick={false}
+          shouldCloseOnEscapePress={flowStep !== FlowStep.LOADING}>
+          {renderFlowStep()}
+        </Modal>
 
         <ConfirmCancelModal
-          isOpen={modalStates.isConfirmCancelModalOpen}
-          onConfirm={handleConfirmCancel}
-          onCancel={handleKeepCreating}
-        />
-
-        <LoadingModal
-          isOpen={isSubmitting}
-          step="reviewingContentTypes"
-          title="Preparing your preview"
-          contentTypeCount={selectedContentTypes.length}
-        />
-
-        <PreviewModal
-          isOpen={modalStates.isPreviewModalOpen}
-          onClose={() => closeModal(ModalType.PREVIEW)}
-          previewEntries={previewEntries}
-          onCreateEntries={handlePreviewModalConfirm}
-          isLoading={isSubmitting}
-          isCreatingEntries={isCreatingEntries}
-        />
-
-        <LoadingModal
-          isOpen={isCreatingEntries}
-          step="creatingEntries"
-          title="Create entries"
-          entriesCount={selectedEntriesCount}
+          isOpen={isConfirmCancelModalOpen}
+          onConfirm={closeModalAndReset(setIsConfirmCancelModalOpen)}
+          onCancel={() => setIsConfirmCancelModalOpen(false)}
         />
 
         <ErrorModal
-          isOpen={modalStates.isErrorPreviewModalOpen}
-          onClose={handleErrorPreviewModalClose}
+          isOpen={isErrorPreviewModalOpen}
+          onClose={closeModalAndReset(setIsErrorPreviewModalOpen)}
           title="Unable to generate preview"
           message={ERROR_MESSAGES.GENERIC_ERROR}
-          onTryAgain={handleErrorPreviewModalRetry}
-        />
-
-        <ReviewEntriesModal
-          isOpen={modalStates.isReviewModalOpen}
-          onClose={() => closeModal(ModalType.REVIEW)}
-          createdEntries={createdEntries}
-          contentTypeNamesMap={contentTypeNamesMap}
-          spaceId={sdk.ids.space}
-          defaultLocale={sdk.locales.default}
-        />
-
-        <ErrorModal
-          isOpen={modalStates.isErrorEntriesModalOpen}
-          onClose={handleErrorModalCancel}
-          title="Unable to create entries"
-          message={ERROR_MESSAGES.CREATE_ENTRIES_ERROR}
-          onTryAgain={handleErrorModalTryAgain}
+          onTryAgain={() => setIsErrorPreviewModalOpen(false)}
         />
       </>
     );

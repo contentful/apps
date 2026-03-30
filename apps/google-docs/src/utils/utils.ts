@@ -1,0 +1,9 @@
+export const truncateLabel = (label: string, maxLength: number = 10): string => {
+  if (label.length <= maxLength) return label;
+
+  const halfLength = Math.floor(maxLength / 2);
+  const firstHalf = label.slice(0, halfLength).trim();
+  const secondHalf = label.slice(label.length - halfLength).trim();
+
+  return `${firstHalf}...${secondHalf}`;
+};

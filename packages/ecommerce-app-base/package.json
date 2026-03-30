@@ -1,7 +1,7 @@
 {
   "name": "@contentful/ecommerce-app-base",
   "description": "Library to quickly build an app to integrate your e-commerce system of choice with Contentful",
-  "version": "4.0.45",
+  "version": "4.0.47",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "author": "Contentful GmbH",
@@ -13,6 +13,10 @@
     "type": "git",
     "url": "https://github.com/contentful/apps.git",
     "directory": "packages/ecommerce-app-base"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com/"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.22.10",

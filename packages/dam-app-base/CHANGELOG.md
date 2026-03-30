@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.3](https://github.com/contentful/apps/compare/@contentful/dam-app-base@4.0.2...@contentful/dam-app-base@4.0.3) (2026-03-24)
+
+### Bug Fixes
+
+- **dam-app-base:** remove scoped registry override, fix warning message typo [EXT-00] ([#10734](https://github.com/contentful/apps/issues/10734)) ([8932c7a](https://github.com/contentful/apps/commit/8932c7a844f6261cc82d93cf1634fea17cad5473))
+
+## [4.0.2](https://github.com/contentful/apps/compare/@contentful/dam-app-base@4.0.1...@contentful/dam-app-base@4.0.2) (2026-03-24)
+
+### Bug Fixes
+
+- update LICENSE copyright years and add missing LICENSE file [EXT-00] ([#10733](https://github.com/contentful/apps/issues/10733)) ([9698d35](https://github.com/contentful/apps/commit/9698d351999aa34fc422ec9e71a346eb945f5083))
+
+## [4.0.1](https://github.com/contentful/apps/compare/@contentful/dam-app-base@4.0.0...@contentful/dam-app-base@4.0.1) (2026-03-20)
+
+### Bug Fixes
+
+- restore GitHub Packages publishing for [@contentful](https://github.com/contentful) packages [EXT-00] ([#10709](https://github.com/contentful/apps/issues/10709)) ([46e2959](https://github.com/contentful/apps/commit/46e2959833816488191e352d6c041127103b5b7c))
+
 # [4.0.0](https://github.com/contentful/apps/compare/@contentful/dam-app-base@3.0.17...@contentful/dam-app-base@4.0.0) (2026-02-02)
 
 - feat(dam-app-base)!: upgrade to React 19 and Forma 36 v5 (#10510) ([232eecf](https://github.com/contentful/apps/commit/232eecf345b0c63861422c55d19a2e0121652da4)), closes [#10510](https://github.com/contentful/apps/issues/10510)

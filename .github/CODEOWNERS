@@ -1,10 +1,10 @@
-# team marketplace owns all code in this repository by default
+# team marketplace and 10 pines own all code in this repository by default
 
-* @contentful/team-marketplace
+* @contentful/team-marketplace @contentful/team-10-pines
 
 # team tundra co-owns examples and function examples
 
-examples @contentful/team-extensibility @contentful/team-marketplace
+examples @contentful/team-extensibility @contentful/team-marketplace @contentful/team-10-pines
 function-examples @contentful/team-extensibility
 
 # team entity-architecture co-owns delivery function examples
