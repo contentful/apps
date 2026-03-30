@@ -41,7 +41,7 @@ const Page = () => {
             flexDirection="column"
             gap="spacingXl"
             style={{ maxWidth: '900px', margin: `${tokens.spacingL} auto` }}>
-            <Heading marginBottom="none">Google Drive</Heading>
+            <Heading marginBottom="none">Drive Integration</Heading>
             <OAuthConnector
               oauthToken={oauthToken}
               onOAuthConnectedChange={handleOAuthConnectedChange}
@@ -52,14 +52,14 @@ const Page = () => {
             <Card padding="large">
               {!isOAuthLoading && !isOAuthConnected && (
                 <Note variant="warning" style={{ marginBottom: tokens.spacingM }}>
-                  Please connect to Google Drive before selecting your file.
+                  Please connect to Drive Integration before selecting your file.
                 </Note>
               )}
               <Flex flexDirection="row" alignItems="center" justifyContent="space-between">
                 <Flex flexDirection="column" alignItems="flex-start">
                   <Heading marginBottom="spacingS">Select your file</Heading>
                   <Paragraph>
-                    Create entries using existing content types from a Google Drive file.
+                    Create entries using existing content types from a Drive Integration file.
                     <br />
                     Get started by selecting the file you would like to use.
                   </Paragraph>
