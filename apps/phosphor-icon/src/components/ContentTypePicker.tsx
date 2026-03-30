@@ -118,7 +118,7 @@ function ContentTypePicker({
           zIndex: 3,
         }}>
         <Flex alignItems="center" justifyContent="space-between">
-          <Text style={{ fontSize: '14px', lineHeight: '20px', fontWeight: 500 }}>
+          <Text style={{ fontSize: '14px', lineHeight: '20px', fontWeight: 400 }}>
             {triggerLabel}
           </Text>
           {isOpen ? <ChevronUpIcon variant="muted" /> : <ChevronDownIcon variant="muted" />}
@@ -187,8 +187,11 @@ function ContentTypePicker({
               style={{
                 padding: '8px 16px',
               }}>
-              <Checkbox isChecked={areAllFilteredSelected} onChange={toggleAllFiltered}>
-                Select all
+              <Checkbox
+                isChecked={areAllFilteredSelected}
+                onChange={toggleAllFiltered}
+                style={{ fontWeight: 400 }}>
+                <span style={{ fontWeight: 400 }}>Select all</span>
               </Checkbox>
             </Box>
           )}
@@ -201,8 +204,9 @@ function ContentTypePicker({
               }}>
               <Checkbox
                 isChecked={selectedContentTypeIds.includes(contentType.id)}
-                onChange={() => toggleContentType(contentType.id)}>
-                {contentType.name}
+                onChange={() => toggleContentType(contentType.id)}
+                style={{ fontWeight: 400 }}>
+                <span style={{ fontWeight: 400 }}>{contentType.name}</span>
               </Checkbox>
             </Box>
           ))}

@@ -151,7 +151,7 @@ export function IconGrid({
   const columnCount = Math.max(MIN_COLUMNS, Math.floor(containerWidth / CELL_SIZE));
   const rowCount = Math.ceil(icons.length / columnCount);
   const visibleRows = Math.min(Math.max(rowCount, MIN_VISIBLE_ROWS), maxVisibleRows);
-  const gridHeight = visibleRows * CELL_SIZE - 1;
+  const gridHeight = visibleRows * CELL_SIZE;
 
   return (
     <div className={styles.container} ref={containerRef} style={{ height: `${gridHeight}px` }}>
