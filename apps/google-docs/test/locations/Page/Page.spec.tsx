@@ -21,7 +21,7 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
   ModalOrchestrator: require('react').forwardRef(
     (
       props: {
-        onPreviewReady: (payload: { title: string; data: Record<string, unknown> }) => void;
+        onPreviewReady: (payload: { documentTitle: string; data: Record<string, unknown> }) => void;
         onResetToMain: () => void;
         oauthToken: string;
       },
@@ -40,7 +40,7 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
           <button
             onClick={() =>
               props.onPreviewReady({
-                title: 'Document from workflow',
+                documentTitle: 'Document from workflow',
                 data: {},
               })
             }

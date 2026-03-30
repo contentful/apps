@@ -24,7 +24,7 @@ export interface AgentRunMessage {
 }
 
 export interface PreviewPayload {
-  title: string;
+  documentTitle: string;
   data: Record<string, unknown>;
 }
 

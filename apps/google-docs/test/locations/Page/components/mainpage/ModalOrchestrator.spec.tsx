@@ -13,7 +13,7 @@ const mockStartWorkflow = vi.fn();
 const mockResumeWorkflow = vi.fn();
 
 const mockWorkflowPayload = {
-  title: 'Mock Preview Title',
+  documentTitle: 'Mock Preview Title',
   data: { source: 'workflow' },
 } satisfies PreviewPayload;
 

@@ -143,11 +143,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
-      const payload = workflowRun.payload ?? {
-        title: workflowRun.suspendPayload?.title ?? documentId,
-        data: {},
-      };
-
+      const payload = workflowRun.payload ?? { documentTitle: '', data: {} };
       onPreviewReady(payload);
       setFlowStep(null);
     };
@@ -283,7 +279,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           size={'large'}
           shouldCloseOnOverlayClick={false}
           shouldCloseOnEscapePress={flowStep !== FlowStep.LOADING}>
-          {renderFlowStep()}
+          {renderFlowStep}
         </Modal>
 
         <ConfirmCancelModal

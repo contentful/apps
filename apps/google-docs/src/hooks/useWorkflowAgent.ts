@@ -33,23 +33,6 @@ interface WorkflowHook {
   ) => Promise<WorkflowRunResult>;
 }
 
-interface ToolInvocationResultPart {
-  type: string;
-  toolInvocation?: {
-    result?: {
-      result?: {
-        normalizedDocument?: {
-          title?: string;
-        };
-      };
-    };
-  };
-}
-
-const isToolInvocationResultPart = (value: unknown): value is ToolInvocationResultPart => {
-  return isRecord(value) && value.type === 'tool-invocation';
-};
-
 const wait = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
 };
@@ -109,28 +92,6 @@ const parsePayloadJson = (payload: string | undefined): Record<string, unknown> 
   }
 };
 
-const getDocumentTitleFromMessages = (messages: AgentRunMessage[]): string | undefined => {
-  const toolInvocationPart = messages
-    .flatMap((message) => message.content?.parts)
-    .find(isToolInvocationResultPart);
-
-  const title = toolInvocationPart
-    ? toolInvocationPart.toolInvocation?.result?.result?.normalizedDocument?.title
-    : undefined;
-
-  return title;
-};
-
-const getPreviewPayload = (runData: AgentRunData): PreviewPayload => {
-  const messages = runData.messages ?? [];
-  const parsedPayload = parsePayloadJson(runData.payload);
-
-  return {
-    title: getDocumentTitleFromMessages(messages) ?? '',
-    data: parsedPayload ?? {},
-  };
-};
-
 const getWorkflowRunResult = (
   runData: AgentRunData,
   threadId: string
@@ -162,7 +123,10 @@ const getWorkflowRunResult = (
         status,
         runId: threadId,
         messages,
-        payload: getPreviewPayload(runData),
+        payload: {
+          documentTitle: 'Mock title',
+          data: {},
+        },
       };
     }
 

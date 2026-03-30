@@ -8,7 +8,7 @@ interface PreviewPageViewProps {
 }
 
 export const PreviewPageView = ({ payload, onCancel }: PreviewPageViewProps) => {
-  const title = payload.title.trim() ? payload.title : 'Selected document';
+  const title = payload.documentTitle.trim() ? payload.documentTitle : 'Selected document';
 
   return (
     <>
