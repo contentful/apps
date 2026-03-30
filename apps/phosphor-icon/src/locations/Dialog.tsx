@@ -11,6 +11,7 @@ import {
   Stack,
   Text,
 } from '@contentful/f36-components';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { css } from 'emotion';
 import * as PhosphorIcons from '@phosphor-icons/react';
 import { DialogAppSDK } from '@contentful/app-sdk';
@@ -40,7 +41,7 @@ const styles = {
     width: '100%',
     maxWidth: '760px',
     margin: '0 auto',
-    gridTemplateRows: 'auto auto auto auto',
+    gridTemplateRows: 'auto auto minmax(0, 1fr) auto',
     paddingBottom: '0',
     gap: '12px',
   }),
@@ -94,8 +95,8 @@ const styles = {
     gap: '12px',
   }),
   bodySingle: css({
-    gridTemplateRows: 'auto',
-    alignContent: 'start',
+    gridTemplateRows: 'minmax(0, 1fr)',
+    minHeight: 0,
   }),
   chipTray: css({
     border: '1px solid #cfd9e5',
@@ -113,8 +114,9 @@ const styles = {
     display: 'flex',
   }),
   gridAreaSingle: css({
-    overflow: 'visible',
-    display: 'block',
+    minHeight: 0,
+    overflow: 'auto',
+    display: 'flex',
   }),
   selectedCard: css({
     border: '1px solid #cfd9e5',
@@ -144,6 +146,12 @@ const styles = {
   }),
   minControl: css({
     minWidth: '180px',
+  }),
+  sourceLink: css({
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '4px',
+    textDecoration: 'none',
   }),
 };
 
@@ -324,8 +332,13 @@ const Dialog = () => {
           </Paragraph>
           <Text fontColor="gray600">
             Source:{' '}
-            <a href="https://phosphoricons.com/" target="_blank" rel="noopener noreferrer">
-              phosphoricons.com
+            <a
+              className={styles.sourceLink}
+              href="https://phosphoricons.com/"
+              target="_blank"
+              rel="noopener noreferrer">
+              <span>Phosphor Icons</span>
+              <ExternalLinkIcon size="tiny" />
             </a>
           </Text>
         </Box>
