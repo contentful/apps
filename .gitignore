@@ -15,6 +15,7 @@ examples/**/package-lock.json
 .env
 .cursorindexingignore
 .specstory
+.worktrees/
 */example-app
 apps-migration-scripts/reports/
 apps-migration-scripts/logs/

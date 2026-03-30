@@ -50,11 +50,13 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 const defaultProps = {
   sdk: mockSdk,
   oauthToken: 'mock-oauth-token',
+  onReviewPayloadReady: vi.fn(),
 };
 
 describe('ModalOrchestrator', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    defaultProps.onReviewPayloadReady = vi.fn();
     mockStartWorkflow.mockResolvedValue({
       status: RunStatus.PENDING_REVIEW,
       runId: 'run-123',
@@ -78,6 +80,12 @@ describe('ModalOrchestrator', () => {
       status: RunStatus.COMPLETED,
       runId: 'run-123',
       messages: [],
+      reviewPayload: {
+        documentTitle: 'Test doc',
+        reviewSummary: 'Review completed',
+        entries: [],
+        assets: [],
+      },
     } satisfies WorkflowRunResult);
     vi.mocked(mockSdk.cma.space.get).mockResolvedValue({ sys: { id: 'test-space-id' } });
     vi.mocked(mockSdk.cma.environment.get).mockResolvedValue({ sys: { id: 'test-env-id' } });
@@ -178,6 +186,8 @@ describe('ModalOrchestrator', () => {
   });
 
   it('starts the workflow after selecting content types and shows the document scope review steps', async () => {
+    const consoleInfoSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
+
     let resolveStartWorkflow: ((value: WorkflowRunResult) => void) | undefined;
     mockStartWorkflow.mockImplementation(
       () =>
@@ -257,7 +267,26 @@ describe('ModalOrchestrator', () => {
         includeImages: true,
         selectedTabIds: ['tab-1', 'tab-2'],
       });
+      expect(consoleInfoSpy).toHaveBeenCalledWith('Google Docs workflow completed run:', {
+        status: RunStatus.COMPLETED,
+        runId: 'run-123',
+        messages: [],
+        reviewPayload: {
+          documentTitle: 'Test doc',
+          reviewSummary: 'Review completed',
+          entries: [],
+          assets: [],
+        },
+      });
+      expect(defaultProps.onReviewPayloadReady).toHaveBeenCalledWith({
+        documentTitle: 'Test doc',
+        reviewSummary: 'Review completed',
+        entries: [],
+        assets: [],
+      });
       expect(screen.queryByRole('heading', { name: 'Preparing your preview' })).toBeNull();
     });
+
+    consoleInfoSpy.mockRestore();
   });
 });

@@ -11,6 +11,7 @@ import { CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS } from '../../../../utils/constant
 import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 import {
   DocumentTabProps,
+  ReviewPayload,
   DocumentScopeResumePayload,
   DocumentScopeSuspendPayload,
   RunStatus,
@@ -33,10 +34,11 @@ enum FlowStep {
 interface ModalOrchestratorProps {
   sdk: PageAppSDK;
   oauthToken: string;
+  onReviewPayloadReady: (reviewPayload: ReviewPayload) => void;
 }
 
 export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrchestratorProps>(
-  ({ sdk, oauthToken }, ref) => {
+  ({ sdk, oauthToken, onReviewPayloadReady }, ref) => {
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
     const [isErrorPreviewModalOpen, setIsErrorPreviewModalOpen] = useState(false);
@@ -134,6 +136,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       runId: string;
       status: RunStatus.PENDING_REVIEW | RunStatus.COMPLETED;
       suspendPayload?: DocumentScopeSuspendPayload;
+      reviewPayload?: ReviewPayload;
     }) => {
       setActiveRunId(workflowRun.runId);
 
@@ -142,6 +145,11 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
+      // eslint-disable-next-line no-console -- temporary frontend logging for completed workflow runs
+      console.info('Google Docs workflow completed run:', workflowRun);
+      if (workflowRun.reviewPayload) {
+        onReviewPayloadReady(workflowRun.reviewPayload);
+      }
       setFlowStep(null);
     };
 

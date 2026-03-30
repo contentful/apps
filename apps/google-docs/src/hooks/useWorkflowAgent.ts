@@ -5,6 +5,7 @@ import {
   AgentRunMessage,
   DocumentScopeResumePayload,
   DocumentScopeSuspendPayload,
+  ReviewPayload,
   WorkflowRunResult,
   RunStatus,
 } from '../utils/types';
@@ -75,6 +76,22 @@ const getRunErrorMessage = (runData: AgentRunData): string => {
 const getSuspendPayload = (runData: AgentRunData): DocumentScopeSuspendPayload | undefined =>
   runData.metadata?.suspendPayload as DocumentScopeSuspendPayload | undefined;
 
+const getReviewPayload = (runData: AgentRunData): ReviewPayload | undefined =>
+  runData.metadata?.reviewPayload as ReviewPayload | undefined;
+
+const logRunDebugInfo = (label: string, runData: AgentRunData, runId: string, attempt?: number) => {
+  // eslint-disable-next-line no-console -- temporary frontend logging to verify thread and workflow polling ids
+  console.info(label, {
+    runId,
+    attempt,
+    status: getRunStatus(runData),
+    agentRunId: runData.sys?.id,
+    workflowId: runData.metadata?.workflowId,
+    workflowRunId: runData.metadata?.workflowRunId,
+    metadataStatus: runData.metadata?.status,
+  });
+};
+
 const getWorkflowRunResult = (
   runData: AgentRunData,
   threadId: string
@@ -104,6 +121,7 @@ const getWorkflowRunResult = (
         status,
         runId: threadId,
         messages: runData.messages ?? [],
+        reviewPayload: getReviewPayload(runData),
       };
 
     default:
@@ -120,9 +138,13 @@ const pollAgentRun = async (
   for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
     const runData = await getWorkflowRun(sdk, spaceId, environmentId, runId);
     if (!runData) {
+      // eslint-disable-next-line no-console -- temporary frontend logging to verify polling attempts
+      console.info('Google Docs workflow poll returned no run data yet', { runId, attempt });
       await wait(POLL_INTERVAL_MS);
       continue;
     }
+
+    logRunDebugInfo('Google Docs workflow poll result', runData, runId, attempt);
 
     const workflowRun = getWorkflowRunResult(runData, runId);
     if (workflowRun) {
@@ -178,7 +200,14 @@ export const useWorkflowAgent = ({
       };
 
       try {
+        // eslint-disable-next-line no-console -- temporary frontend logging to verify agent run id used for polling
+        console.info('Starting Google Docs workflow agent run', { threadId, contentTypeIds });
         const runId = await startAgentRun(sdk, spaceId, environmentId, payload);
+        // eslint-disable-next-line no-console -- temporary frontend logging to verify generate response id
+        console.info('Started Google Docs workflow agent run', {
+          requestedThreadId: threadId,
+          runId,
+        });
         return await pollAgentRun(sdk, spaceId, environmentId, runId);
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Workflow failed');
@@ -200,6 +229,8 @@ export const useWorkflowAgent = ({
       const environmentId = sdk.ids.environment;
 
       try {
+        // eslint-disable-next-line no-console -- temporary frontend logging to verify resume uses the thread-backed agent run id
+        console.info('Resuming Google Docs workflow agent run', { runId, resumePayload });
         await resumeWorkflowRun(sdk, spaceId, environmentId, runId, resumePayload);
         return await pollAgentRun(sdk, spaceId, environmentId, runId);
       } catch (err) {

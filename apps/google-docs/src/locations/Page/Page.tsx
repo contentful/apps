@@ -5,10 +5,12 @@ import { Button, Heading, Paragraph, Card, Layout, Flex, Note } from '@contentfu
 import tokens from '@contentful/f36-tokens';
 import { ArrowRightIcon } from '@contentful/f36-icons';
 import { OAuthConnector } from './components/mainpage/OAuthConnector';
+import { ReviewPage } from './components/review-page/ReviewPage';
 import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
 } from './components/mainpage/ModalOrchestrator';
+import { ReviewPayload } from '../../utils/types';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -16,6 +18,7 @@ const Page = () => {
   const [oauthToken, setOauthToken] = useState<string>('');
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
   const [isOAuthLoading, setIsOAuthLoading] = useState(true);
+  const [reviewPayload, setReviewPayload] = useState<ReviewPayload | null>(null);
 
   const handleOauthTokenChange = (token: string) => {
     setOauthToken(token);
@@ -32,6 +35,10 @@ const Page = () => {
   const handleSelectFile = () => {
     modalOrchestratorRef.current?.startFlow();
   };
+
+  if (reviewPayload) {
+    return <ReviewPage reviewPayload={reviewPayload} />;
+  }
 
   return (
     <>
@@ -78,7 +85,12 @@ const Page = () => {
         </Layout.Body>
       </Layout>
 
-      <ModalOrchestrator ref={modalOrchestratorRef} sdk={sdk} oauthToken={oauthToken} />
+      <ModalOrchestrator
+        ref={modalOrchestratorRef}
+        sdk={sdk}
+        oauthToken={oauthToken}
+        onReviewPayloadReady={setReviewPayload}
+      />
     </>
   );
 };

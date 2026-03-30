@@ -42,14 +42,172 @@ export interface DocumentScopeSuspendPayload {
   tabs?: DocTabOption[];
 }
 
+export interface ReviewPayload {
+  documentTitle?: string;
+  reviewSummary?: string;
+  summary?: string;
+  entries?: ReviewEntry[];
+  assets?: ReviewAsset[];
+  unmappedBlockIds?: string[];
+  normalizedDocument?: NormalizedDocument;
+  contentTables?: NormalizedTable[];
+  referenceGraph?: ReferenceGraph;
+  headingCorrections?: number;
+  agentCorrections?: number;
+  agentCorrectionDetails?: ReviewCorrection[];
+  contentTypes?: GoogleDocsContentType[];
+  mappingPlan?: MappingPlan;
+  [key: string]: unknown;
+}
+
 export interface WorkflowRunResult {
   status: RunStatus.PENDING_REVIEW | RunStatus.COMPLETED;
   runId: string;
   messages: AgentRunMessage[];
   suspendPayload?: DocumentScopeSuspendPayload;
+  reviewPayload?: ReviewPayload;
 }
 
 export interface DocumentScopeResumePayload {
   includeImages?: boolean;
   selectedTabIds?: string[];
+}
+
+export interface TextRunStyles {
+  bold?: true;
+  italic?: true;
+  underline?: true;
+  strikethrough?: true;
+  superscript?: true;
+  subscript?: true;
+  linkUrl?: string;
+}
+
+export interface TextRun {
+  text: string;
+  styles: TextRunStyles;
+}
+
+export interface NormalizedContentBlock {
+  id: string;
+  position: number;
+  type: 'paragraph' | 'heading' | 'listItem';
+  headingLevel?: number;
+  bullet?: { nestingLevel: number; ordered: boolean };
+  textRuns: TextRun[];
+  designValueIds: string[];
+  imageIds: string[];
+  captionForImageId?: string;
+}
+
+export interface NormalizedImage {
+  id?: string;
+  url: string;
+  altText?: string;
+  title?: string;
+  fileName?: string;
+  contentType?: string;
+  width?: number;
+  height?: number;
+  blockId?: string;
+  tableId?: string;
+}
+
+export interface NormalizedTable {
+  id: string;
+  position: number;
+  headers: string[];
+  rows: Array<{ cells: string[] }>;
+  designValueIds: string[];
+  imageIds: string[];
+}
+
+export interface NormalizedDocument {
+  documentId: string;
+  title?: string;
+  designValues: Array<{
+    id: string;
+    type: string;
+    value: Record<string, unknown>;
+    appliesTo: string[];
+  }>;
+  contentBlocks: NormalizedContentBlock[];
+  images: NormalizedImage[];
+  tables: NormalizedTable[];
+  assets: ReviewAsset[];
+}
+
+export interface ReviewAsset {
+  url?: string;
+  title?: string;
+  fileName?: string;
+  contentType?: string;
+  [key: string]: unknown;
+}
+
+export interface ReviewEntry {
+  tempId?: string;
+  contentTypeId: string;
+  fields: Record<string, Record<string, unknown>>;
+}
+
+export interface ReviewCorrection {
+  entryIndex: number;
+  fieldId: string;
+  action: string;
+  path?: string;
+  before?: unknown;
+  after?: unknown;
+}
+
+export interface ReferenceGraph {
+  nodes: Array<Record<string, unknown>>;
+  edges: Array<Record<string, unknown>>;
+  hasCircularDependency: boolean;
+}
+
+export interface GoogleDocsContentTypeField {
+  id: string;
+  name?: string;
+  type: string;
+  required?: boolean;
+  linkType?: string;
+  items?: {
+    type?: string;
+    linkType?: string;
+  };
+}
+
+export interface GoogleDocsContentType {
+  sys: {
+    id: string;
+  };
+  displayField?: string;
+  name?: string;
+  description?: string | null;
+  fields: GoogleDocsContentTypeField[];
+}
+
+export interface FieldMapping {
+  fieldId: string;
+  fieldType: string;
+  sourceBlockIds: string[];
+  sourceTableIds: string[];
+  sourceAssetIds: string[];
+  sourceEntryIds?: string[];
+  sourceTableRowLabel?: string;
+  confidence: number;
+  transformNotes?: string;
+}
+
+export interface MappingEntry {
+  contentTypeId: string;
+  tempId?: string;
+  fieldMappings: FieldMapping[];
+}
+
+export interface MappingPlan {
+  entries: MappingEntry[];
+  unmappedBlockIds: string[];
+  summary: string;
 }
