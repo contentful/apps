@@ -19,9 +19,7 @@ describe('Field', () => {
 
   it('renders the Edit hours of operation button', () => {
     render(<Field />);
-    expect(
-      screen.getByRole('button', { name: 'Edit hours of operation' })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Edit hours of operation' })).toBeInTheDocument();
   });
 
   it('displays open days count badge', () => {
