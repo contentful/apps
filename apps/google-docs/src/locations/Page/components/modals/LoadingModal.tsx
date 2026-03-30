@@ -71,7 +71,7 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
   const messages = useMemo(() => {
     if (step === 'reviewingContentTypes') {
       const baseMessages = [
-        'Fetching Google document...',
+        'Fetching document...',
         'Analyzing document structure...',
         'Processing document with AI...',
         contentTypeCount

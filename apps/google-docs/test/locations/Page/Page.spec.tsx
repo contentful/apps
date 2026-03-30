@@ -10,11 +10,11 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 describe('Page component', () => {
-  it('renders the Google Drive heading', async () => {
+  it('renders the Drive Integration heading', async () => {
     const { getByRole } = render(<Page />);
 
     await waitFor(() => {
-      expect(getByRole('heading', { name: 'Google Drive' })).toBeTruthy();
+      expect(getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
     });
   });
 });

@@ -56,11 +56,11 @@ const ConfigScreen = () => {
         className={styles.body}>
         <Box>
           <Heading className={styles.heading} marginBottom="spacingS">
-            Google Drive app
+            Drive Integration
           </Heading>
           <Paragraph>
-            Connect Google Drive to Contentful to seamlessly sync content, eliminate copy-paste,
-            reduce errors, and speed up your publishing workflow.
+            Connect Drive Integration to Contentful to seamlessly sync content, eliminate
+            copy-paste, reduce errors, and speed up your publishing workflow.
           </Paragraph>
         </Box>
       </Flex>

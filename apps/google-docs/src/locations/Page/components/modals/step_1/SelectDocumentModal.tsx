@@ -57,7 +57,7 @@ export default function SelectDocumentModal({
     }
   }, [isOpen, oauthToken]);
 
-  // This component no longer renders a modal since the Google Picker
+  // This component no longer renders a modal since the file picker
   // opens as a separate popup. Return null as there's nothing to render.
   return null;
 }

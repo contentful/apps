@@ -4,7 +4,7 @@ import tokens from '@contentful/f36-tokens';
 import { CheckCircleIcon } from '@contentful/f36-icons';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import googleDriveLogo from '../../../../assets/google-drive.png';
+import googleDriveLogo from '../../../../assets/drive-integration.svg';
 import { callAppActionWithResult } from '../../../../utils/appAction';
 
 type OAuthConnectorProps = {
@@ -151,7 +151,7 @@ export const OAuthConnector = ({
     } catch (error) {
       cleanup();
       setLoadingState(OAuthLoadingState.IDLE);
-      sdk.notifier.error('Unable to connect to Google Drive. Please try again.');
+      sdk.notifier.error('Unable to connect to Drive Integration. Please try again.');
     }
   };
 
@@ -165,7 +165,7 @@ export const OAuthConnector = ({
 
       setIsHoveringConnected(false);
     } catch (error) {
-      sdk.notifier.error('Unable to disconnect from Google Drive. Please try again.');
+      sdk.notifier.error('Unable to disconnect from Drive Integration. Please try again.');
     } finally {
       setLoadingState(OAuthLoadingState.IDLE);
     }
@@ -223,10 +223,10 @@ export const OAuthConnector = ({
             borderRadius: tokens.borderRadiusMedium,
             backgroundColor: tokens.gray100,
           }}>
-          <Image src={googleDriveLogo} alt="Google Drive" height="28px" width="32px" />
+          <Image src={googleDriveLogo} alt="Drive Integration" height="28px" width="32px" />
         </Flex>
         <Text fontSize="fontSizeL" fontWeight="fontWeightMedium" lineHeight="lineHeightL">
-          Google Drive
+          Drive Integration
         </Text>
       </Flex>
       <Flex
