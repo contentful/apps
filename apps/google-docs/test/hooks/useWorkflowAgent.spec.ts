@@ -70,8 +70,9 @@ describe('useWorkflowAgent', () => {
     expect(workflowResult).toMatchObject({
       status: RunStatus.COMPLETED,
       runId: 'run-123',
-      previewPayload: {
+      payload: {
         title: 'Positioned Object Example',
+        data: {},
       },
     });
   });

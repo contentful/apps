@@ -44,7 +44,7 @@ const Page = () => {
 
   const handlePreviewCancel = () => {
     // TODO: When we cancel we want to tell the Backend to reset the flow and return to the main page
-    // Clear payload to return to the main page state.
+    // Clear preview state to return to the main page state.
     setPreviewPayload(null);
   };
 
@@ -52,7 +52,7 @@ const Page = () => {
     <>
       <Layout withBoxShadow={true} offsetTop={10}>
         {previewPayload ? (
-          <PreviewPageView previewPayload={previewPayload} onCancel={handlePreviewCancel} />
+          <PreviewPageView payload={previewPayload} onCancel={handlePreviewCancel} />
         ) : (
           <MainPageView
             oauthToken={oauthToken}

@@ -35,7 +35,7 @@ enum FlowStep {
 interface ModalOrchestratorProps {
   sdk: PageAppSDK;
   oauthToken: string;
-  onPreviewReady: (previewPayload: PreviewPayload) => void;
+  onPreviewReady: (payload: PreviewPayload) => void;
   onResetToMain: () => void;
 }
 
@@ -143,14 +143,12 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
-      const previewPayload = workflowRun.previewPayload ?? {
-        runId: workflowRun.runId,
-        documentId,
+      const payload = workflowRun.payload ?? {
         title: workflowRun.suspendPayload?.title ?? documentId,
-        messages: [],
+        data: {},
       };
 
-      onPreviewReady(previewPayload);
+      onPreviewReady(payload);
       setFlowStep(null);
     };
 

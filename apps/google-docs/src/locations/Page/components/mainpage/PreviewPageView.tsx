@@ -3,12 +3,12 @@ import Splitter from './Splitter';
 import { PreviewPayload } from '../../../../utils/types';
 
 interface PreviewPageViewProps {
-  previewPayload: PreviewPayload;
+  payload: PreviewPayload;
   onCancel: () => void;
 }
 
-export const PreviewPageView = ({ previewPayload, onCancel }: PreviewPageViewProps) => {
-  const title = previewPayload.title || previewPayload.documentId || 'Selected document';
+export const PreviewPageView = ({ payload, onCancel }: PreviewPageViewProps) => {
+  const title = payload.title.trim() ? payload.title : 'Selected document';
 
   return (
     <>

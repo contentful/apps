@@ -109,13 +109,7 @@ const parsePayloadJson = (payload: string | undefined): Record<string, unknown> 
   }
 };
 
-const toStringOrUndefined = (value: unknown): string | undefined => {
-  return typeof value === 'string' && value.trim().length > 0 ? value : undefined;
-};
-
-const getNormalizedDocumentTitleFromMessages = (
-  messages: AgentRunMessage[]
-): string | undefined => {
+const getDocumentTitleFromMessages = (messages: AgentRunMessage[]): string | undefined => {
   const toolInvocationPart = messages
     .flatMap((message) => message.content?.parts)
     .find(isToolInvocationResultPart);
@@ -127,26 +121,13 @@ const getNormalizedDocumentTitleFromMessages = (
   return title;
 };
 
-const getPreviewPayload = (
-  runData: AgentRunData,
-  runId: string,
-  messages: AgentRunMessage[],
-  suspendPayload?: DocumentScopeSuspendPayload
-): PreviewPayload => {
-  const metadataPreviewPayload = runData.metadata?.previewPayload;
+const getPreviewPayload = (runData: AgentRunData): PreviewPayload => {
+  const messages = runData.messages ?? [];
   const parsedPayload = parsePayloadJson(runData.payload);
-  const source = (metadataPreviewPayload ?? parsedPayload) as Record<string, unknown> | undefined;
-
-  const documentIdFromSource = toStringOrUndefined(source?.documentId);
-  const normalizedDocumentTitle = getNormalizedDocumentTitleFromMessages(messages) ?? '';
-  const documentId = documentIdFromSource ?? suspendPayload?.documentId ?? '';
 
   return {
-    runId,
-    documentId,
-    title: normalizedDocumentTitle,
-    messages,
-    ...(source ? { data: source } : {}),
+    title: getDocumentTitleFromMessages(messages) ?? '',
+    data: parsedPayload ?? {},
   };
 };
 
@@ -175,14 +156,13 @@ const getWorkflowRunResult = (
     }
 
     case RunStatus.COMPLETED: {
-      const suspendPayload = getSuspendPayload(runData);
       const messages = runData.messages ?? [];
 
       return {
         status,
         runId: threadId,
         messages,
-        previewPayload: getPreviewPayload(runData, threadId, messages, suspendPayload),
+        payload: getPreviewPayload(runData),
       };
     }
 
