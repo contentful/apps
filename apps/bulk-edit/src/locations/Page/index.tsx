@@ -698,6 +698,7 @@ const Page = () => {
         isSaving={isSaving}
         totalUpdateCount={totalUpdateCount}
         editionCount={editionCount}
+        sdk={sdk}
       />
       <UndoBulkEditModal
         isOpen={isUndoModalOpen}

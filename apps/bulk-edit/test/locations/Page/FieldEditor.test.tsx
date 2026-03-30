@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { i18n } from '@lingui/core';
 import { FieldEditor } from '../../../src/locations/Page/components/FieldEditor';
@@ -639,6 +639,158 @@ describe('FieldEditor', () => {
       );
 
       expect(screen.getByDisplayValue(value)).toBeInTheDocument();
+    });
+  });
+
+  describe('Reference (Link) field editor', () => {
+    const mockSelectSingleEntry = vi.fn();
+    const sdkWithDialogs = {
+      ...mockSdk,
+      dialogs: { selectSingleEntry: mockSelectSingleEntry },
+    };
+
+    beforeEach(() => {
+      mockSelectSingleEntry.mockReset();
+    });
+
+    it('renders "No entry selected" when value is empty', () => {
+      const field = createField('Link');
+      render(
+        <FieldEditor
+          field={field}
+          value={null}
+          onChange={mockOnChange}
+          locales={mockSdk.locales}
+          sdk={sdkWithDialogs}
+        />
+      );
+      expect(screen.getByText('No entry selected')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Select entry' })).toBeInTheDocument();
+    });
+
+    it('renders the entry id and change/clear buttons when a link value is set', () => {
+      const field = createField('Link');
+      const linkValue = { sys: { type: 'Link', linkType: 'Entry', id: 'abc123' } };
+      render(
+        <FieldEditor
+          field={field}
+          value={linkValue}
+          onChange={mockOnChange}
+          locales={mockSdk.locales}
+          sdk={sdkWithDialogs}
+        />
+      );
+      expect(screen.getByText('abc123')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Change entry' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Clear' })).toBeInTheDocument();
+    });
+
+    it('calls onChange with link object when entry is selected', async () => {
+      const field = createField('Link');
+      mockSelectSingleEntry.mockResolvedValue({ sys: { id: 'xyz789' } });
+      render(
+        <FieldEditor
+          field={field}
+          value={null}
+          onChange={mockOnChange}
+          locales={mockSdk.locales}
+          sdk={sdkWithDialogs}
+        />
+      );
+      fireEvent.click(screen.getByRole('button', { name: 'Select entry' }));
+      await vi.waitFor(() => {
+        expect(mockOnChange).toHaveBeenCalledWith({
+          sys: { type: 'Link', linkType: 'Entry', id: 'xyz789' },
+        });
+      });
+    });
+
+    it('calls onChange with null when Clear is clicked', async () => {
+      const field = createField('Link');
+      const linkValue = { sys: { type: 'Link', linkType: 'Entry', id: 'abc123' } };
+      render(
+        <FieldEditor
+          field={field}
+          value={linkValue}
+          onChange={mockOnChange}
+          locales={mockSdk.locales}
+          sdk={sdkWithDialogs}
+        />
+      );
+      fireEvent.click(screen.getByRole('button', { name: 'Clear' }));
+      expect(mockOnChange).toHaveBeenCalledWith(null);
+    });
+
+    it('does not call onChange when dialog is dismissed', async () => {
+      const field = createField('Link');
+      mockSelectSingleEntry.mockResolvedValue(null);
+      render(
+        <FieldEditor
+          field={field}
+          value={null}
+          onChange={mockOnChange}
+          locales={mockSdk.locales}
+          sdk={sdkWithDialogs}
+        />
+      );
+      fireEvent.click(screen.getByRole('button', { name: 'Select entry' }));
+      await vi.waitFor(() => {
+        expect(mockSelectSingleEntry).toHaveBeenCalledTimes(1);
+      });
+      expect(mockOnChange).not.toHaveBeenCalled();
+    });
+
+    it('passes allowed content types from field validations to the dialog', async () => {
+      const field = {
+        ...createField('Link'),
+        validations: [{ linkContentType: ['blogPost', 'article'] }],
+      };
+      mockSelectSingleEntry.mockResolvedValue({ sys: { id: 'ent1' } });
+      render(
+        <FieldEditor
+          field={field}
+          value={null}
+          onChange={mockOnChange}
+          locales={mockSdk.locales}
+          sdk={sdkWithDialogs}
+        />
+      );
+      fireEvent.click(screen.getByRole('button', { name: 'Select entry' }));
+      await vi.waitFor(() => {
+        expect(mockSelectSingleEntry).toHaveBeenCalledWith({ contentTypes: ['blogPost', 'article'] });
+      });
+    });
+
+    it('shows error note when sdk is not provided', () => {
+      const field = createField('Link');
+      render(
+        <FieldEditor
+          field={field}
+          value={null}
+          onChange={mockOnChange}
+          locales={mockSdk.locales}
+        />
+      );
+      expect(screen.getByText('SDK unavailable for reference field.')).toBeInTheDocument();
+    });
+
+    it('shows error message when dialog rejects', async () => {
+      const field = createField('Link');
+      mockSelectSingleEntry.mockRejectedValue(new Error('Network failure'));
+      render(
+        <FieldEditor
+          field={field}
+          value={null}
+          onChange={mockOnChange}
+          locales={mockSdk.locales}
+          sdk={sdkWithDialogs}
+        />
+      );
+      fireEvent.click(screen.getByRole('button', { name: 'Select entry' }));
+      await vi.waitFor(() => {
+        expect(screen.getByText('Failed to open entry selector. Please try again.')).toBeInTheDocument();
+      });
+      expect(mockOnChange).not.toHaveBeenCalled();
     });
   });
 });

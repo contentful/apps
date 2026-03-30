@@ -160,7 +160,13 @@ export const getEntryUrl = (entry: Entry, spaceId: string, environmentId: string
 export const isCheckboxAllowed = (field: ContentTypeField): boolean => {
   if (!field || !field.type) return false;
 
-  const restrictedTypes = ['Location', 'Asset', 'Link', 'ResourceLink', 'RichText'];
+  // Link → Entry is allowed because the entryLinkEditor handles it via the SDK dialog picker.
+  // Link → Asset and other link types remain blocked as they have no bulk-edit editor support.
+  if (field.type === 'Link') {
+    return field.linkType === 'Entry';
+  }
+
+  const restrictedTypes = ['Location', 'Asset', 'ResourceLink', 'RichText'];
 
   if (field.type === 'Array') {
     return field.items?.type === 'Symbol';
@@ -357,6 +363,7 @@ export const mapContentTypePropsToFields = (
           name: f.name,
           locale: locale,
           type: f.type,
+          linkType: f.linkType,
           required: f.required,
           items: f?.items,
           validations: f.validations || [],
@@ -370,6 +377,7 @@ export const mapContentTypePropsToFields = (
         uniqueId: f.id,
         name: f.name,
         type: f.type,
+        linkType: f.linkType,
         required: f.required,
         items: f?.items,
         validations: f.validations || [],

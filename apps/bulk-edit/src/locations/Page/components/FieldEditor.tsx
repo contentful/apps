@@ -10,8 +10,8 @@ import { DropdownEditor } from '@contentful/field-editor-dropdown';
 import { RadioEditor } from '@contentful/field-editor-radio';
 import { ListEditor } from '@contentful/field-editor-list';
 import { CheckboxEditor } from '@contentful/field-editor-checkbox';
-import type { ContentTypeField } from '../types';
-import { Note } from '@contentful/f36-components';
+import type { ContentTypeField, FieldValue, LinkRef, DialogsSDK } from '../types';
+import { Button, Flex, Note, Text } from '@contentful/f36-components';
 import {
   createFieldAPI,
   getCustomBooleanLabels,
@@ -19,11 +19,22 @@ import {
 } from '../utils/fieldEditorUtils';
 import type { LocalesAPI } from '@contentful/field-editor-shared';
 
+function isEntryLink(v: unknown): v is LinkRef {
+  return (
+    !!v &&
+    typeof v === 'object' &&
+    (v as LinkRef).sys?.type === 'Link' &&
+    (v as LinkRef).sys?.linkType === 'Entry' &&
+    typeof (v as LinkRef).sys?.id === 'string'
+  );
+}
+
 interface FieldEditorProps {
   field: ContentTypeField;
-  value: string;
-  onChange: (value: string) => void;
+  value: FieldValue;
+  onChange: (value: FieldValue) => void;
   locales: LocalesAPI;
+  sdk?: { dialogs: DialogsSDK };
 }
 
 const ERROR_MESSAGE = 'Failed to initialize field editor. Please try again.';
@@ -39,6 +50,7 @@ const SUPPORTED_WIDGET_IDS = new Set([
   'tagEditor',
   'boolean',
   'objectEditor',
+  'entryLinkEditor',
 ]);
 const FIELD_TYPE_TO_DEFAULT_WIDGET: Record<string, string> = {
   Symbol: 'singleLine',
@@ -49,9 +61,10 @@ const FIELD_TYPE_TO_DEFAULT_WIDGET: Record<string, string> = {
   Array: 'tagEditor',
   Boolean: 'boolean',
   Object: 'objectEditor',
+  Link: 'entryLinkEditor',
 };
 
-export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange, locales }) => {
+export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange, locales, sdk }) => {
   const [error, setError] = useState('');
   const locale = field.locale ? field.locale : locales.default;
 
@@ -126,6 +139,47 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange
 
         case 'objectEditor':
           return <JsonEditor field={fieldApi} isInitiallyDisabled={false} />;
+
+        case 'entryLinkEditor': {
+          if (!sdk) return <Note variant="negative">SDK unavailable for reference field.</Note>;
+          const linkVal = isEntryLink(value) ? value : null;
+          const allowedContentTypes = (field.validations ?? [])
+            .flatMap((v: any) => v.linkContentType ?? []);
+          const handleSelect = async () => {
+            try {
+              const selected = await sdk.dialogs.selectSingleEntry(
+                allowedContentTypes.length > 0 ? { contentTypes: allowedContentTypes } : {}
+              );
+              if (selected) {
+                onChange({ sys: { type: 'Link', linkType: 'Entry', id: selected.sys.id } });
+              }
+            } catch (e) {
+              console.error('Failed to select entry:', e);
+              setError('Failed to open entry selector. Please try again.');
+            }
+          };
+          return (
+            <Flex gap="spacingS" alignItems="center" flexWrap="wrap">
+              {linkVal ? (
+                <Text>
+                  Selected:{' '}
+                  <Text fontWeight="fontWeightDemiBold">{linkVal.sys.id}</Text>
+                </Text>
+              ) : (
+                <Text>No entry selected</Text>
+              )}
+              <Button size="small" variant="secondary" onClick={handleSelect}>
+                {linkVal ? 'Change entry' : 'Select entry'}
+              </Button>
+              {linkVal && (
+                <Button size="small" variant="secondary" onClick={() => onChange(null)}>
+                  Clear
+                </Button>
+              )}
+            </Flex>
+          );
+        }
+
         default:
           return <Note variant="negative">{ERROR_MESSAGE}</Note>;
       }

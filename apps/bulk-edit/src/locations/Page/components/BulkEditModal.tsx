@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Flex, FormControl, Modal, Note, Text } from '@contentful/f36-components';
-import type { ContentTypeField, Entry } from '../types';
+import type { ContentTypeField, DialogsSDK, Entry, FieldValue } from '../types';
 import { getEntryFieldValue, getFieldDisplayValue } from '../utils/entryUtils';
 import { ClockIcon } from '@contentful/f36-icons';
 import { FieldEditor } from './FieldEditor';
@@ -10,13 +10,14 @@ import type { LocalesAPI } from '@contentful/field-editor-shared';
 interface BulkEditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (newValue: string | number) => void;
+  onSave: (newValue: FieldValue) => void;
   selectedEntries: Entry[];
   selectedField: ContentTypeField | null;
   locales: LocalesAPI;
   isSaving: boolean;
   totalUpdateCount: number;
   editionCount: number;
+  sdk?: { dialogs: DialogsSDK };
 }
 
 export const BulkEditModal: React.FC<BulkEditModalProps> = ({
@@ -29,8 +30,9 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
   isSaving,
   totalUpdateCount,
   editionCount,
+  sdk,
 }) => {
-  const [value, setValue] = useState<any>('');
+  const [value, setValue] = useState<FieldValue>('');
   const [hasValidationErrors, setHasValidationErrors] = useState(false);
   const entryCount = selectedEntries.length;
   const firstEntry = selectedEntries[0];
@@ -73,6 +75,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
                 value={value}
                 onChange={setValue}
                 locales={locales}
+                sdk={sdk}
                 datatest-id="field-editor"
               />
               <FieldValidation

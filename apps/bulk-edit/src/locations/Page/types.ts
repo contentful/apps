@@ -1,6 +1,19 @@
 import { ContentTypeFieldValidation, Control } from 'contentful-management';
+import type { DialogsAPI } from '@contentful/app-sdk';
 
 export type Item = { type: string; linkType?: string; validations?: ContentTypeFieldValidation[] };
+
+export type LinkRef = {
+  sys: {
+    type: 'Link';
+    linkType: string;
+    id: string;
+  };
+};
+
+export type FieldValue = string | number | boolean | LinkRef | object | null;
+
+export type DialogsSDK = Pick<DialogsAPI, 'selectSingleEntry'>;
 
 export type FilterOption = {
   label: string;
@@ -14,6 +27,7 @@ export type ContentTypeField = {
   name: string;
   locale?: string;
   type: string;
+  linkType?: string;
   required: boolean;
   items?: Item;
   fieldControl?: Control;
@@ -26,20 +40,8 @@ export interface Fields {
       | string
       | number
       | boolean
-      | {
-          sys: {
-            type: 'Link';
-            linkType: string;
-            id: string;
-          };
-        }
-      | Array<{
-          sys: {
-            type: 'Link';
-            linkType: string;
-            id: string;
-          };
-        }>
+      | LinkRef
+      | Array<LinkRef>
       | object
       | null
       | undefined;
