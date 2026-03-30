@@ -66,6 +66,7 @@ export const IconCell = memo(function IconCell({
         style={{
           width: '100%',
           height: '100%',
+          boxSizing: 'border-box',
         }}>
         {IconComponent && <IconComponent size={32} weight={weight} />}
       </button>
