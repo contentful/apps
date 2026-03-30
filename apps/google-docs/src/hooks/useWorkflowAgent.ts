@@ -11,8 +11,10 @@ import {
   AgentRunMessage,
   DocumentScopeResumePayload,
   DocumentScopeSuspendPayload,
+  ReviewedCreationPayload,
   WorkflowRunResult,
 } from '../utils/types';
+import { validateReviewedCreationShape } from '../utils/reviewedCreationPayload';
 
 interface UseWorkflowParams {
   sdk: PageAppSDK;
@@ -57,7 +59,8 @@ interface AgentRunData {
     status?: WorkflowRunStatus;
     workflowId?: string;
     workflowRunId?: string;
-    suspendPayload?: Record<string, unknown>;
+    suspendPayload?: DocumentScopeSuspendPayload;
+    payload?: ReviewedCreationPayload;
   };
   payload?: string;
   messages?: AgentRunMessage[];
@@ -90,6 +93,15 @@ const getAgentPayload = (runData: AgentRunData): string | null => {
   return textPart?.text || null;
 };
 
+const reviewedPayloadFromCompletedRun = (runData: AgentRunData): ReviewedCreationPayload => {
+  const raw = runData.metadata?.payload;
+  if (raw == null) {
+    throw new Error('Workflow completed but result payload was missing.');
+  }
+
+  return validateReviewedCreationShape(raw);
+};
+
 const getRunErrorMessage = (runData: AgentRunData): string => {
   const payload = getAgentPayload(runData);
   if (payload) {
@@ -105,7 +117,7 @@ const getRunErrorMessage = (runData: AgentRunData): string => {
 };
 
 const getSuspendPayload = (runData: AgentRunData): DocumentScopeSuspendPayload | undefined =>
-  runData.metadata?.suspendPayload as DocumentScopeSuspendPayload | undefined;
+  runData.metadata?.suspendPayload;
 
 const getWorkflowRunResult = (
   runData: AgentRunData,
@@ -131,12 +143,14 @@ const getWorkflowRunResult = (
       };
     }
 
-    case 'COMPLETED':
+    case 'COMPLETED': {
       return {
         status,
         runId: threadId,
         messages: runData.messages ?? [],
+        reviewedPayload: reviewedPayloadFromCompletedRun(runData),
       };
+    }
 
     default:
       return null;

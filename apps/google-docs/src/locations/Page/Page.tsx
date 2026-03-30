@@ -9,6 +9,8 @@ import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
 } from './components/mainpage/ModalOrchestrator';
+import { createEntriesFromReviewedPayload } from '../../services/entryService';
+import { creationPayloadMock } from '../../mocks/reviewedCreationPayloadSample';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -65,13 +67,25 @@ const Page = () => {
                   </Paragraph>
                 </Flex>
 
-                <Button
-                  variant="primary"
-                  isDisabled={!oauthToken}
-                  onClick={handleSelectFile}
-                  endIcon={<ArrowRightIcon />}>
-                  Select your file
-                </Button>
+                <Flex flexDirection="row" flexWrap="wrap" gap="spacingM">
+                  <Button
+                    variant="primary"
+                    isDisabled={!oauthToken}
+                    onClick={handleSelectFile}
+                    endIcon={<ArrowRightIcon />}>
+                    Select your file
+                  </Button>
+
+                  {/* TODO: Remove this once we have a real workflow */}
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      void createEntriesFromReviewedPayload(sdk, creationPayloadMock);
+                    }}
+                    endIcon={<ArrowRightIcon />}>
+                    Create entries from mock
+                  </Button>
+                </Flex>
               </Flex>
             </Card>
           </Flex>

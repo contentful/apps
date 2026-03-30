@@ -1,5 +1,10 @@
 // This file contains the types for the document scope review state, resume payload, and workflow run result.
 
+import type {
+  AssetToCreate,
+  EntryToCreate,
+} from '../../functions/agents/documentParserAgent/schema';
+
 export interface DocumentTabProps {
   tabId: string;
   tabTitle: string;
@@ -34,12 +39,32 @@ export interface DocumentScopeSuspendPayload {
   tabs?: DocTabOption[];
 }
 
-export interface WorkflowRunResult {
-  status: 'PENDING_REVIEW' | 'COMPLETED';
-  runId: string;
-  messages: AgentRunMessage[];
-  suspendPayload?: DocumentScopeSuspendPayload;
+export interface ReviewedReferenceGraph {
+  edges?: unknown[];
+  creationOrder?: string[];
+  deferredFields?: unknown[];
+  hasCircularDependency?: boolean;
 }
+
+export interface ReviewedCreationPayload {
+  entries: EntryToCreate[];
+  assets: AssetToCreate[];
+  referenceGraph?: ReviewedReferenceGraph;
+}
+
+export type WorkflowRunResult =
+  | {
+      status: 'PENDING_REVIEW';
+      runId: string;
+      messages: AgentRunMessage[];
+      suspendPayload: DocumentScopeSuspendPayload;
+    }
+  | {
+      status: 'COMPLETED';
+      runId: string;
+      messages: AgentRunMessage[];
+      reviewedPayload: ReviewedCreationPayload;
+    };
 
 export interface DocumentScopeResumePayload {
   includeImages?: boolean;

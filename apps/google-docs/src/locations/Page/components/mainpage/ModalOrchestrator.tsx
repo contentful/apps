@@ -14,6 +14,8 @@ import {
   DocumentScopeSuspendPayload,
   DocumentScopeReviewState,
   initialDocumentScopeReviewState,
+  ReviewedCreationPayload,
+  WorkflowRunResult,
 } from '../../../../utils/types';
 import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
 import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
@@ -33,10 +35,11 @@ enum FlowStep {
 interface ModalOrchestratorProps {
   sdk: PageAppSDK;
   oauthToken: string;
+  onWorkflowCompleted?: (payload: ReviewedCreationPayload) => void;
 }
 
 export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrchestratorProps>(
-  ({ sdk, oauthToken }, ref) => {
+  ({ sdk, oauthToken, onWorkflowCompleted }, ref) => {
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
     const [isErrorPreviewModalOpen, setIsErrorPreviewModalOpen] = useState(false);
@@ -135,11 +138,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setFlowStep(null);
     };
 
-    const handleWorkflowResult = (workflowRun: {
-      runId: string;
-      status: 'PENDING_REVIEW' | 'COMPLETED';
-      suspendPayload?: DocumentScopeSuspendPayload;
-    }) => {
+    const handleWorkflowResult = (workflowRun: WorkflowRunResult) => {
       setActiveRunId(workflowRun.runId);
 
       if (workflowRun.status === 'PENDING_REVIEW') {
@@ -147,7 +146,11 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
-      setFlowStep(null);
+      if (workflowRun.status === 'COMPLETED') {
+        onWorkflowCompleted?.(workflowRun.reviewedPayload);
+      }
+
+      resetProgress();
     };
 
     const continueWorkflow = async (
