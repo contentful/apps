@@ -71,7 +71,7 @@ function Dialog() {
    * Copies the hours configuration from a source day to specified target days.
    * Deep copies the slots array to avoid shared references between days.
    */
-  const copyHoursTodays = useCallback(
+  const copyHoursToDays = useCallback(
     (sourceDay: DayOfWeek, targetDays: DayOfWeek[]) => {
       const sourceHours = hours[sourceDay];
 

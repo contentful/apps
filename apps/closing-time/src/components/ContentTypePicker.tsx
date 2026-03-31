@@ -130,14 +130,15 @@ function ContentTypePicker({
             <Box
               style={{
                 position: 'relative',
-                margin: '-4px -12px 0',
-                padding: '10px 16px',
-                borderBottom: '1px solid #edf2f7',
+                margin: `-${tokens.spacing2Xs} -${tokens.spacingS} 0`,
+                padding: `${tokens.spacingS} ${tokens.spacingXs}`,
+                borderBottom: `1px solid ${tokens.gray100}`,
               }}>
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search content types"
+                aria-label="Search content types"
                 style={{
                   width: '100%',
                   border: 'none',
