@@ -1,13 +1,15 @@
-// This file contains the types for the document scope review state, resume payload, and workflow run result.
-
 import type {
   AssetToCreate,
   EntryToCreate,
 } from '../../functions/agents/documentParserAgent/schema';
+// This file contains the types for the document scope review state, resume payload, and workflow run result.
 
-export interface DocumentTabProps {
-  tabId: string;
-  tabTitle: string;
+export enum RunStatus {
+  IN_PROGRESS = 'IN_PROGRESS',
+  FAILED = 'FAILED',
+  COMPLETED = 'COMPLETED',
+  PENDING_REVIEW = 'PENDING_REVIEW',
+  DRAFT = 'DRAFT',
 }
 
 export interface AgentRunMessage {
@@ -21,9 +23,27 @@ export interface AgentRunMessage {
 }
 
 export interface DocTabOption {
-  id?: string;
-  title?: string;
+  id: string;
+  title: string;
   index?: number;
+}
+
+export interface DocumentTabProps {
+  tabId: string;
+  tabTitle: string;
+}
+
+export interface PreviewPayload {
+  entries: EntryToCreate[];
+  assets: AssetToCreate[];
+  referenceGraph?: ReviewedReferenceGraph;
+}
+
+export interface ReviewedReferenceGraph {
+  edges?: unknown[];
+  creationOrder?: string[];
+  deferredFields?: unknown[];
+  hasCircularDependency?: boolean;
 }
 
 export interface DocumentScopeSuspendPayload {
@@ -39,50 +59,15 @@ export interface DocumentScopeSuspendPayload {
   tabs?: DocTabOption[];
 }
 
-export interface ReviewedReferenceGraph {
-  edges?: unknown[];
-  creationOrder?: string[];
-  deferredFields?: unknown[];
-  hasCircularDependency?: boolean;
+export interface WorkflowRunResult {
+  status: RunStatus.PENDING_REVIEW | RunStatus.COMPLETED;
+  runId: string;
+  messages: AgentRunMessage[];
+  suspendPayload?: DocumentScopeSuspendPayload;
+  payload?: PreviewPayload;
 }
-
-export interface ReviewedCreationPayload {
-  entries: EntryToCreate[];
-  assets: AssetToCreate[];
-  referenceGraph?: ReviewedReferenceGraph;
-}
-
-export type WorkflowRunResult =
-  | {
-      status: 'PENDING_REVIEW';
-      runId: string;
-      messages: AgentRunMessage[];
-      suspendPayload: DocumentScopeSuspendPayload;
-    }
-  | {
-      status: 'COMPLETED';
-      runId: string;
-      messages: AgentRunMessage[];
-      reviewedPayload: ReviewedCreationPayload;
-    };
 
 export interface DocumentScopeResumePayload {
   includeImages?: boolean;
   selectedTabIds?: string[];
 }
-
-export interface DocumentScopeReviewState {
-  availableTabs: DocumentTabProps[];
-  selectedTabs: DocumentTabProps[];
-  useAllTabs: boolean | null;
-  includeImages: boolean | null;
-  requiresImageSelection: boolean;
-}
-
-export const initialDocumentScopeReviewState: DocumentScopeReviewState = {
-  availableTabs: [],
-  selectedTabs: [],
-  useAllTabs: null,
-  includeImages: null,
-  requiresImageSelection: false,
-};

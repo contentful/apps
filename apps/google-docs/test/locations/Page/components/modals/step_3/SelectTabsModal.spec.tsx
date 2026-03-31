@@ -26,7 +26,7 @@ const MOCK_TABS: DocumentTabProps[] = [
 
 const ModalWithState = (props: { isShown?: boolean } = {}) => {
   const { isShown = true } = props;
-  const [availableTabs, setAvailableTabs] = useState<DocumentTabProps[]>(MOCK_TABS);
+  const [availableTabs] = useState<DocumentTabProps[]>(MOCK_TABS);
   const [selectedTabs, setSelectedTabs] = useState<DocumentTabProps[]>([]);
   const [useAllTabs, setUseAllTabs] = useState<boolean | null>(null);
   return (
@@ -36,7 +36,6 @@ const ModalWithState = (props: { isShown?: boolean } = {}) => {
           onContinue={onContinue}
           onClose={onClose}
           availableTabs={availableTabs}
-          setAvailableTabs={setAvailableTabs}
           selectedTabs={selectedTabs}
           setSelectedTabs={setSelectedTabs}
           useAllTabs={useAllTabs}

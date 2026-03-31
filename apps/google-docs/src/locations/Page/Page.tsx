@@ -1,16 +1,14 @@
 import { useRef, useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { Button, Heading, Paragraph, Card, Layout, Flex, Note } from '@contentful/f36-components';
-import tokens from '@contentful/f36-tokens';
-import { ArrowRightIcon } from '@contentful/f36-icons';
-import { OAuthConnector } from './components/mainpage/OAuthConnector';
+import { Layout } from '@contentful/f36-components';
 import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
 } from './components/mainpage/ModalOrchestrator';
-import { createEntriesFromReviewedPayload } from '../../services/entryService';
-import { creationPayloadMock } from '../../mocks/reviewedCreationPayloadSample';
+import { MainPageView } from './components/mainpage/MainPageView';
+import { PreviewPageView } from './components/mainpage/PreviewPageView';
+import { PreviewPayload } from '../../utils/types';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -18,6 +16,7 @@ const Page = () => {
   const [oauthToken, setOauthToken] = useState<string>('');
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
   const [isOAuthLoading, setIsOAuthLoading] = useState(true);
+  const [previewPayload, setPreviewPayload] = useState<PreviewPayload | null>(null);
 
   const handleOauthTokenChange = (token: string) => {
     setOauthToken(token);
@@ -35,64 +34,45 @@ const Page = () => {
     modalOrchestratorRef.current?.startFlow();
   };
 
+  const handlePreviewReady = (payload: PreviewPayload) => {
+    setPreviewPayload(payload);
+  };
+
+  const handleReturnToMainPage = () => {
+    setPreviewPayload(null);
+  };
+
+  const handlePreviewCancel = () => {
+    // TODO: When we cancel we want to tell the Backend to reset the flow and return to the main page
+    // Clear preview state to return to the main page state.
+    setPreviewPayload(null);
+  };
+
   return (
     <>
-      <Layout variant="fullscreen" withBoxShadow={true} offsetTop={10}>
-        <Layout.Body>
-          <Flex
-            flexDirection="column"
-            gap="spacingXl"
-            style={{ maxWidth: '900px', margin: `${tokens.spacingL} auto` }}>
-            <Heading marginBottom="none">Google Drive</Heading>
-            <OAuthConnector
-              oauthToken={oauthToken}
-              onOAuthConnectedChange={handleOAuthConnectedChange}
-              isOAuthConnected={isOAuthConnected}
-              onOauthTokenChange={handleOauthTokenChange}
-              onLoadingStateChange={handleOAuthLoadingStateChange}
-            />
-            <Card padding="large">
-              {!isOAuthLoading && !isOAuthConnected && (
-                <Note variant="warning" style={{ marginBottom: tokens.spacingM }}>
-                  Please connect to Google Drive before selecting your file.
-                </Note>
-              )}
-              <Flex flexDirection="row" alignItems="center" justifyContent="space-between">
-                <Flex flexDirection="column" alignItems="flex-start">
-                  <Heading marginBottom="spacingS">Select your file</Heading>
-                  <Paragraph>
-                    Create entries using existing content types from a Google Drive file.
-                    <br />
-                    Get started by selecting the file you would like to use.
-                  </Paragraph>
-                </Flex>
-
-                <Flex flexDirection="row" flexWrap="wrap" gap="spacingM">
-                  <Button
-                    variant="primary"
-                    isDisabled={!oauthToken}
-                    onClick={handleSelectFile}
-                    endIcon={<ArrowRightIcon />}>
-                    Select your file
-                  </Button>
-
-                  {/* TODO: Remove this once we have a real workflow */}
-                  <Button
-                    variant="secondary"
-                    onClick={() => {
-                      void createEntriesFromReviewedPayload(sdk, creationPayloadMock);
-                    }}
-                    endIcon={<ArrowRightIcon />}>
-                    Create entries from mock
-                  </Button>
-                </Flex>
-              </Flex>
-            </Card>
-          </Flex>
-        </Layout.Body>
+      <Layout withBoxShadow={true} offsetTop={10}>
+        {previewPayload ? (
+          <PreviewPageView payload={previewPayload} onCancel={handlePreviewCancel} />
+        ) : (
+          <MainPageView
+            oauthToken={oauthToken}
+            isOAuthConnected={isOAuthConnected}
+            isOAuthLoading={isOAuthLoading}
+            onOAuthConnectedChange={handleOAuthConnectedChange}
+            onOauthTokenChange={handleOauthTokenChange}
+            onLoadingStateChange={handleOAuthLoadingStateChange}
+            onSelectFile={handleSelectFile}
+          />
+        )}
       </Layout>
 
-      <ModalOrchestrator ref={modalOrchestratorRef} sdk={sdk} oauthToken={oauthToken} />
+      <ModalOrchestrator
+        ref={modalOrchestratorRef}
+        sdk={sdk}
+        oauthToken={oauthToken}
+        onPreviewReady={handlePreviewReady}
+        onResetToMain={handleReturnToMainPage}
+      />
     </>
   );
 };

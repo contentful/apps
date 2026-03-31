@@ -7,14 +7,14 @@ import { ErrorModal } from '../modals/ErrorModal';
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
 import { LoadingModal } from '../modals/LoadingModal';
 import { ERROR_MESSAGES } from '../../../../utils/constants/messages';
+import { CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS } from '../../../../utils/constants/agent';
 import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 import {
   DocumentTabProps,
   DocumentScopeResumePayload,
   DocumentScopeSuspendPayload,
-  DocumentScopeReviewState,
-  initialDocumentScopeReviewState,
-  ReviewedCreationPayload,
+  PreviewPayload,
+  RunStatus,
   WorkflowRunResult,
 } from '../../../../utils/types';
 import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
@@ -35,20 +35,23 @@ enum FlowStep {
 interface ModalOrchestratorProps {
   sdk: PageAppSDK;
   oauthToken: string;
-  onWorkflowCompleted?: (payload: ReviewedCreationPayload) => void;
+  onPreviewReady: (payload: PreviewPayload) => void;
+  onResetToMain: () => void;
 }
 
 export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrchestratorProps>(
-  ({ sdk, oauthToken, onWorkflowCompleted }, ref) => {
+  ({ sdk, oauthToken, onPreviewReady, onResetToMain }, ref) => {
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
     const [isErrorPreviewModalOpen, setIsErrorPreviewModalOpen] = useState(false);
     const [flowStep, setFlowStep] = useState<FlowStep | null>(null);
     const [documentId, setDocumentId] = useState<string>('');
     const [selectedContentTypes, setSelectedContentTypes] = useState<ContentTypeProps[]>([]);
-    const [documentScopeReview, setDocumentScopeReview] = useState<DocumentScopeReviewState>(
-      initialDocumentScopeReviewState
-    );
+    const [availableTabs, setAvailableTabs] = useState<DocumentTabProps[]>([]);
+    const [selectedTabs, setSelectedTabs] = useState<DocumentTabProps[]>([]);
+    const [useAllTabs, setUseAllTabs] = useState<boolean | null>(null);
+    const [includeImages, setIncludeImages] = useState<boolean | null>(null);
+    const [requiresImageSelection, setRequiresImageSelection] = useState(false);
     const [activeRunId, setActiveRunId] = useState<string | null>(null);
     const { startWorkflow, resumeWorkflow } = useWorkflowAgent({
       sdk,
@@ -62,17 +65,18 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       startFlow: () => setIsUploadModalOpen(true),
     }));
 
-    const updateDocumentScopeReview = (updates: Partial<DocumentScopeReviewState>) => {
-      setDocumentScopeReview((currentState) => ({
-        ...currentState,
-        ...updates,
-      }));
+    const resetDocumentScopeReview = () => {
+      setAvailableTabs([]);
+      setSelectedTabs([]);
+      setUseAllTabs(null);
+      setIncludeImages(null);
+      setRequiresImageSelection(false);
     };
 
     const resetProgress = () => {
       setDocumentId('');
       setSelectedContentTypes([]);
-      setDocumentScopeReview(initialDocumentScopeReviewState);
+      resetDocumentScopeReview();
       setActiveRunId(null);
       setFlowStep(null);
       setIsUploadModalOpen(false);
@@ -86,11 +90,10 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const closeModalAndReset = (setOpen: (open: boolean) => void) => () => {
       setOpen(false);
       resetProgress();
+      onResetToMain();
     };
 
-    const showWorkflowError = (error: unknown, message: string) => {
-      // eslint-disable-next-line no-console -- developer workflow logging
-      console.error(message, error);
+    const showWorkflowError = () => {
       setFlowStep(null);
       setIsErrorPreviewModalOpen(true);
     };
@@ -107,31 +110,25 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       showDiscardConfirmation();
     };
 
-    const showSelectTabsStep = () => {
-      setFlowStep(FlowStep.SELECT_TABS);
-    };
-
-    const showIncludeImagesStep = () => {
-      setFlowStep(FlowStep.INCLUDE_IMAGES);
-    };
-
     const showDocumentScopeReview = (suspendPayload?: DocumentScopeSuspendPayload) => {
-      setDocumentScopeReview({
-        ...initialDocumentScopeReviewState,
-        availableTabs: (suspendPayload?.tabs ?? []).map((tab) => ({
+      setAvailableTabs(
+        (suspendPayload?.tabs ?? []).map((tab) => ({
           tabId: tab.id ?? '',
           tabTitle: tab.title ?? '',
-        })),
-        requiresImageSelection: Boolean(suspendPayload?.requiresImageSelection),
-      });
+        }))
+      );
+      setSelectedTabs([]);
+      setUseAllTabs(null);
+      setIncludeImages(null);
+      setRequiresImageSelection(Boolean(suspendPayload?.requiresImageSelection));
 
       if (suspendPayload?.requiresTabSelection) {
-        showSelectTabsStep();
+        setFlowStep(FlowStep.SELECT_TABS);
         return;
       }
 
       if (suspendPayload?.requiresImageSelection) {
-        showIncludeImagesStep();
+        setFlowStep(FlowStep.INCLUDE_IMAGES);
         return;
       }
 
@@ -141,16 +138,14 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const handleWorkflowResult = (workflowRun: WorkflowRunResult) => {
       setActiveRunId(workflowRun.runId);
 
-      if (workflowRun.status === 'PENDING_REVIEW') {
+      if (workflowRun.status === RunStatus.PENDING_REVIEW) {
         showDocumentScopeReview(workflowRun.suspendPayload);
         return;
       }
 
-      if (workflowRun.status === 'COMPLETED') {
-        onWorkflowCompleted?.(workflowRun.reviewedPayload);
-      }
-
-      resetProgress();
+      const payload = workflowRun.payload ?? { documentTitle: '', data: {} };
+      onPreviewReady(payload);
+      setFlowStep(null);
     };
 
     const continueWorkflow = async (
@@ -161,12 +156,10 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       }
 
       const resumePayload: DocumentScopeResumePayload = {
-        ...(documentScopeReview.selectedTabs.length > 0
-          ? { selectedTabIds: documentScopeReview.selectedTabs.map((tab) => tab.tabId) }
+        ...(selectedTabs.length > 0
+          ? { selectedTabIds: selectedTabs.map((tab) => tab.tabId) }
           : {}),
-        ...(documentScopeReview.includeImages !== null
-          ? { includeImages: documentScopeReview.includeImages }
-          : {}),
+        ...(includeImages !== null ? { includeImages } : {}),
         ...resumePayloadOverrides,
       };
 
@@ -176,38 +169,52 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       handleWorkflowResult(workflowRun);
     };
 
-    const handleContentTypeContinue = async (contentTypeIds: string[]) => {
-      setFlowStep(FlowStep.LOADING);
+    const startWorkflowWithDelayedLoading = async (contentTypeIds: string[]) => {
+      let isStartPending = true;
+      const loadingModalTimeout = window.setTimeout(() => {
+        if (isStartPending) {
+          setFlowStep(FlowStep.LOADING);
+        }
+      }, CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS);
 
       try {
-        handleWorkflowResult(await startWorkflow(contentTypeIds));
-      } catch (error) {
-        showWorkflowError(error, 'Failed to start Google Docs workflow:');
+        return await startWorkflow(contentTypeIds);
+      } finally {
+        isStartPending = false;
+        window.clearTimeout(loadingModalTimeout);
+      }
+    };
+
+    const handleContentTypeContinue = async (contentTypeIds: string[]) => {
+      try {
+        handleWorkflowResult(await startWorkflowWithDelayedLoading(contentTypeIds));
+      } catch {
+        showWorkflowError();
       }
     };
 
     const handleSelectTabsContinue = async (selectedTabs: DocumentTabProps[]) => {
-      updateDocumentScopeReview({ selectedTabs });
+      setSelectedTabs(selectedTabs);
 
-      if (documentScopeReview.requiresImageSelection) {
-        showIncludeImagesStep();
+      if (requiresImageSelection) {
+        setFlowStep(FlowStep.INCLUDE_IMAGES);
         return;
       }
 
       try {
         await continueWorkflow({ selectedTabIds: selectedTabs.map((tab) => tab.tabId) });
-      } catch (error) {
-        showWorkflowError(error, 'Failed to resume Google Docs workflow:');
+      } catch {
+        showWorkflowError();
       }
     };
 
     const handleIncludeImagesContinue = async (includeImages: boolean) => {
-      updateDocumentScopeReview({ includeImages });
+      setIncludeImages(includeImages);
 
       try {
         await continueWorkflow({ includeImages });
-      } catch (error) {
-        showWorkflowError(error, 'Failed to resume Google Docs workflow:');
+      } catch {
+        showWorkflowError();
       }
     };
 
@@ -228,19 +235,18 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
             <SelectTabsModal
               onContinue={handleSelectTabsContinue}
               onClose={showDiscardConfirmation}
-              availableTabs={documentScopeReview.availableTabs}
-              setAvailableTabs={(availableTabs) => updateDocumentScopeReview({ availableTabs })}
-              selectedTabs={documentScopeReview.selectedTabs}
-              setSelectedTabs={(selectedTabs) => updateDocumentScopeReview({ selectedTabs })}
-              useAllTabs={documentScopeReview.useAllTabs}
-              setUseAllTabs={(useAllTabs) => updateDocumentScopeReview({ useAllTabs })}
+              availableTabs={availableTabs}
+              selectedTabs={selectedTabs}
+              setSelectedTabs={setSelectedTabs}
+              useAllTabs={useAllTabs}
+              setUseAllTabs={setUseAllTabs}
             />
           );
         case FlowStep.INCLUDE_IMAGES:
           return (
             <IncludeImagesModal
-              includeImages={documentScopeReview.includeImages}
-              setIncludeImages={(includeImages) => updateDocumentScopeReview({ includeImages })}
+              includeImages={includeImages}
+              setIncludeImages={setIncludeImages}
               onContinue={handleIncludeImagesContinue}
               onClose={showDiscardConfirmation}
             />
