@@ -2,7 +2,7 @@ import { ArrowRightIcon } from '@contentful/f36-icons';
 import { Button, Card, Flex, Heading, Layout, Note, Paragraph } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { OAuthConnector } from './OAuthConnector';
-import { createEntriesFromReviewedPayload } from '../../../../services/entryService';
+import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
 import { creationPayloadMock } from '../../../../mocks/previewPayloadSample';
 import { PageAppSDK } from '@contentful/app-sdk';
 
@@ -68,7 +68,7 @@ export const MainPageView = ({
             <Button
               variant="secondary"
               isDisabled={!oauthToken}
-              onClick={() => createEntriesFromReviewedPayload(sdk, creationPayloadMock)}>
+              onClick={() => createEntriesFromPreviewPayload(sdk, creationPayloadMock)}>
               Create entries from saved preview payload
             </Button>
           </Flex>

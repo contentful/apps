@@ -158,7 +158,7 @@ async function createAssetsFromAgentOutput(
   return urlToAssetId;
 }
 
-export async function createEntriesFromReviewedPayload(
+export async function createEntriesFromPreviewPayload(
   sdk: PageAppSDK | ConfigAppSDK,
   payload: PreviewPayload
 ): Promise<EntryCreationResult> {
