@@ -47,6 +47,10 @@ export function getTimeOptions(clockFormat: ClockFormat = '12h') {
   return OPTIONS_BY_CLOCK_FORMAT[clockFormat];
 }
 
+export function compareTimeValues(left: string, right: string) {
+  return left.localeCompare(right);
+}
+
 export function formatDisplayTime(time: string, clockFormat: ClockFormat = '12h') {
   if (clockFormat === '24h') {
     return time;

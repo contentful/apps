@@ -1,8 +1,8 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Flex, Select, IconButton, Text } from '@contentful/f36-components';
 import { CloseIcon } from '@contentful/f36-icons';
 import { ClockFormat, TimeSlot } from '../types';
-import { getTimeOptions } from '../utils/time';
+import { compareTimeValues, getTimeOptions } from '../utils/time';
 
 interface TimeSlotInputProps {
   slot: TimeSlot;
@@ -24,25 +24,51 @@ function TimeSlotInput({
   clockFormat = '12h',
 }: TimeSlotInputProps) {
   const timeOptions = getTimeOptions(clockFormat);
+  const openTimeOptions = useMemo(
+    () => timeOptions.filter((option) => compareTimeValues(option.value, slot.close) < 0),
+    [slot.close, timeOptions]
+  );
+  const closeTimeOptions = useMemo(
+    () => timeOptions.filter((option) => compareTimeValues(option.value, slot.open) > 0),
+    [slot.open, timeOptions]
+  );
 
   const handleOpenChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const nextOpen = e.target.value;
+      const nextClose =
+        compareTimeValues(nextOpen, slot.close) < 0
+          ? slot.close
+          : timeOptions.find((option) => compareTimeValues(option.value, nextOpen) > 0)?.value ??
+            slot.close;
+
       onChange({
         ...slot,
-        open: e.target.value,
+        open: nextOpen,
+        close: nextClose,
       });
     },
-    [slot, onChange]
+    [slot, onChange, timeOptions]
   );
 
   const handleCloseChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const nextClose = e.target.value;
+      const nextOpen =
+        compareTimeValues(slot.open, nextClose) < 0
+          ? slot.open
+          : [...timeOptions]
+              .reverse()
+              .find((option) => compareTimeValues(option.value, nextClose) < 0)?.value ??
+            slot.open;
+
       onChange({
         ...slot,
-        close: e.target.value,
+        open: nextOpen,
+        close: nextClose,
       });
     },
-    [slot, onChange]
+    [slot, onChange, timeOptions]
   );
 
   return (
@@ -65,7 +91,7 @@ function TimeSlotInput({
         size="small"
         style={{ minWidth: 0, width: '100%' }}
         aria-label="Open time">
-        {timeOptions.map((option) => (
+        {openTimeOptions.map((option) => (
           <Select.Option key={option.value} value={option.value}>
             {option.label}
           </Select.Option>
@@ -79,7 +105,7 @@ function TimeSlotInput({
         size="small"
         style={{ minWidth: 0, width: '100%' }}
         aria-label="Close time">
-        {timeOptions.map((option) => (
+        {closeTimeOptions.map((option) => (
           <Select.Option key={option.value} value={option.value}>
             {option.label}
           </Select.Option>

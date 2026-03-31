@@ -19,7 +19,9 @@ const styles = {
   root: css({
     display: 'flex',
     flexDirection: 'column',
-    height: '100%',
+    height: '100vh',
+    maxHeight: '100vh',
+    overflow: 'hidden',
     backgroundColor: '#ffffff',
   }),
   header: css({
@@ -28,6 +30,7 @@ const styles = {
     justifyContent: 'space-between',
     padding: '20px 24px',
     borderBottom: '1px solid #e5ebf1',
+    flexShrink: 0,
   }),
   content: css({
     minHeight: 0,
@@ -42,7 +45,10 @@ const styles = {
     display: 'flex',
     justifyContent: 'flex-end',
     gap: '12px',
+    flexShrink: 0,
     padding: '20px 24px 24px',
+    borderTop: '1px solid #e5ebf1',
+    backgroundColor: '#ffffff',
   }),
 };
 

@@ -106,7 +106,24 @@ describe('TimeSlotInput', () => {
       />
     );
 
-    expect(screen.getAllByRole('option', { name: '09:00' }).length).toBe(2);
-    expect(screen.getAllByRole('option', { name: '17:00' }).length).toBe(2);
+    expect(screen.getAllByRole('option', { name: '09:00' }).length).toBe(1);
+    expect(screen.getAllByRole('option', { name: '17:00' }).length).toBe(1);
+  });
+
+  it('filters invalid open and close options', () => {
+    render(
+      <TimeSlotInput slot={defaultSlot} onChange={() => {}} onRemove={() => {}} canRemove={false} />
+    );
+
+    const [openTimeSelect, closeTimeSelect] = screen.getAllByRole('combobox');
+    const openTimeOptions = Array.from(openTimeSelect.querySelectorAll('option')).map(
+      (option) => option.textContent
+    );
+    const closeTimeOptions = Array.from(closeTimeSelect.querySelectorAll('option')).map(
+      (option) => option.textContent
+    );
+
+    expect(openTimeOptions).not.toContain('5:00 PM');
+    expect(closeTimeOptions).not.toContain('9:00 AM');
   });
 });
