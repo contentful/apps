@@ -1,8 +1,23 @@
-import { useMemo, useState } from 'react';
-import { Button, Card, Flex, Heading, Layout, Note, Paragraph } from '@contentful/f36-components';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import {
+  Button,
+  Card,
+  Flex,
+  FormControl,
+  Heading,
+  Layout,
+  Modal,
+  Paragraph,
+  Tabs,
+} from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import {
   FieldMapping,
+  EntryHierarchyItem,
+  GoogleDocsRawDocument,
+  GoogleDocsRawParagraph,
+  GoogleDocsRawParagraphElement,
+  GoogleDocsRawStructuralElement,
   GoogleDocsContentType,
   GoogleDocsContentTypeField,
   MappingEntry,
@@ -14,7 +29,6 @@ interface ReviewPageProps {
   reviewPayload: ReviewPayload;
 }
 
-type FilterMode = 'current' | 'all' | 'unassigned';
 type AssignmentMode = 'assign' | 'reassign' | null;
 type BlockStatus = 'current-entry' | 'other-entry' | 'unassigned' | 'multi-mapped' | 'excluded';
 
@@ -29,11 +43,25 @@ interface BlockDestination {
   blockId: string;
 }
 
-const FILTER_OPTIONS: Array<{ id: FilterMode; label: string }> = [
-  { id: 'current', label: 'Current entry' },
-  { id: 'all', label: 'All mappings' },
-  { id: 'unassigned', label: 'Unassigned' },
-];
+interface RenderableDocElement {
+  key: string;
+  blockId?: string;
+  text: string;
+  structuralElement: GoogleDocsRawStructuralElement;
+}
+
+interface RangeAnnotation {
+  id: string;
+  blockId: string;
+  text: string;
+  destinations: BlockDestination[];
+  excluded?: boolean;
+}
+
+interface SelectedRange {
+  blockId: string;
+  text: string;
+}
 
 const pageStyles = {
   container: {
@@ -46,61 +74,89 @@ const pageStyles = {
     fontSize: tokens.fontSizeM,
     lineHeight: tokens.lineHeightM,
   },
-  tabs: {
-    display: 'flex',
-    gap: tokens.spacing2Xs,
-    flexWrap: 'wrap' as const,
-  },
-  tabButton: {
-    borderRadius: tokens.borderRadiusMedium,
-  },
   shellGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(0, 1.8fr) minmax(320px, 1fr)',
-    gap: tokens.spacingL,
-    alignItems: 'start',
-  },
-  panelCard: {
-    height: '100%',
-  },
-  blockList: {
     display: 'flex',
     flexDirection: 'column' as const,
-    gap: tokens.spacingM,
-    maxHeight: '70vh',
-    overflowY: 'auto' as const,
-    paddingRight: tokens.spacingXs,
+    gap: tokens.spacingL,
+  },
+  docFlow: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: tokens.spacingXs,
+  },
+  documentSurface: {
+    border: `1px solid ${tokens.gray300}`,
+    borderRadius: tokens.borderRadiusMedium,
+    padding: `${tokens.spacingL} ${tokens.spacingXl}`,
+    background: tokens.colorWhite,
+  },
+  documentRow: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 1fr) 180px',
+    gap: tokens.spacingS,
+    alignItems: 'start',
   },
   blockButton: {
     width: '100%',
     textAlign: 'left' as const,
-    borderRadius: tokens.borderRadiusMedium,
-    borderWidth: '1px',
+    borderRadius: tokens.borderRadiusSmall,
+    borderWidth: '2px',
     borderStyle: 'solid',
-    padding: tokens.spacingM,
+    padding: `${tokens.spacing2Xs} ${tokens.spacingXs}`,
     cursor: 'pointer',
     background: tokens.colorWhite,
+    transition: 'box-shadow 120ms ease, border-color 120ms ease, background 120ms ease',
   },
-  blockMetaRow: {
-    display: 'flex',
-    gap: tokens.spacingXs,
-    flexWrap: 'wrap' as const,
-    marginBottom: tokens.spacingXs,
-  },
-  badge: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    borderRadius: tokens.borderRadiusMedium,
-    padding: `${tokens.spacing2Xs} ${tokens.spacingXs}`,
-    fontSize: tokens.fontSizeS,
-    fontWeight: tokens.fontWeightDemiBold,
+  blockContent: {
+    minWidth: 0,
   },
   destinationCard: {
     borderWidth: '1px',
     borderStyle: 'solid',
     borderRadius: tokens.borderRadiusMedium,
-    padding: tokens.spacingS,
+    padding: `${tokens.spacing2Xs} ${tokens.spacingXs}`,
+    marginTop: tokens.spacing2Xs,
+    background: tokens.gray100,
+  },
+  markerRail: {
+    paddingTop: tokens.spacing2Xs,
+  },
+  docParagraph: {
+    margin: 0,
+    fontSize: tokens.fontSizeM,
+    lineHeight: '1.65',
+    color: tokens.gray900,
+  },
+  docHeading: {
+    margin: 0,
+    color: tokens.gray900,
+    fontWeight: tokens.fontWeightDemiBold,
+    lineHeight: '1.3',
+  },
+  docListItem: {
+    display: 'grid',
+    gridTemplateColumns: '16px minmax(0, 1fr)',
+    gap: tokens.spacingXs,
+    alignItems: 'start',
+  },
+  docBullet: {
+    fontSize: tokens.fontSizeM,
+    lineHeight: '1.65',
+    color: tokens.gray700,
+  },
+  docTable: {
+    width: '100%',
+    borderCollapse: 'collapse' as const,
     marginTop: tokens.spacingS,
+    marginBottom: tokens.spacingS,
+  },
+  docTableCell: {
+    border: `1px solid ${tokens.gray300}`,
+    padding: `${tokens.spacingXs} ${tokens.spacingS}`,
+    verticalAlign: 'top' as const,
+    fontSize: tokens.fontSizeM,
+    lineHeight: '1.55',
+    color: tokens.gray900,
   },
   sectionLabel: {
     margin: 0,
@@ -112,53 +168,29 @@ const pageStyles = {
     color: tokens.gray700,
     fontSize: tokens.fontSizeS,
   },
-  fieldCard: {
-    borderWidth: '1px',
-    borderStyle: 'solid',
+  selectionToolbar: {
+    position: 'sticky' as const,
+    top: tokens.spacingM,
+    zIndex: 2,
+    border: `1px solid ${tokens.gray300}`,
     borderRadius: tokens.borderRadiusMedium,
-    padding: tokens.spacingM,
-  },
-  selectionCard: {
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderRadius: tokens.borderRadiusMedium,
-    padding: tokens.spacingM,
-    background: tokens.gray100,
-  },
-};
-
-const blockStatusStyles: Record<
-  BlockStatus,
-  {
-    borderColor: string;
-    background: string;
-    label: string;
-  }
-> = {
-  'current-entry': {
-    borderColor: tokens.green600,
-    background: tokens.green100,
-    label: 'Mapped to current entry',
-  },
-  'other-entry': {
-    borderColor: tokens.green600,
     background: tokens.colorWhite,
-    label: 'Mapped to another entry',
+    padding: `${tokens.spacingS} ${tokens.spacingM}`,
+    boxShadow: tokens.glowPrimary,
   },
-  unassigned: {
-    borderColor: tokens.gray400,
+  overviewCard: {
+    border: `1px solid ${tokens.gray300}`,
+    borderRadius: tokens.borderRadiusMedium,
+    padding: tokens.spacingM,
     background: tokens.gray100,
-    label: 'Unassigned',
   },
-  'multi-mapped': {
-    borderColor: tokens.green600,
-    background: tokens.green100,
-    label: 'Mapped to multiple destinations',
-  },
-  excluded: {
-    borderColor: tokens.red500,
-    background: tokens.red100,
-    label: 'Excluded',
+  overviewEntryCard: {
+    border: `1px solid ${tokens.gray300}`,
+    borderRadius: tokens.borderRadiusMedium,
+    padding: `${tokens.spacingS} ${tokens.spacingM}`,
+    background: tokens.colorWhite,
+    cursor: 'pointer',
+    transition: 'border-color 120ms ease, box-shadow 120ms ease',
   },
 };
 
@@ -170,8 +202,177 @@ const getBlockText = (block: NormalizedContentBlock): string => {
   return text.length > 0 ? text : `Untitled ${block.type}`;
 };
 
+const flattenRawDocumentContent = (
+  rawDocJson?: GoogleDocsRawDocument
+): GoogleDocsRawStructuralElement[] => {
+  if (!rawDocJson) return [];
+
+  const rootContent = rawDocJson.body?.content ?? [];
+  if (rootContent.length > 0) return rootContent;
+
+  const walkTab = (
+    tab: NonNullable<GoogleDocsRawDocument['tabs']>[number]
+  ): GoogleDocsRawStructuralElement[] => {
+    const tabContent = tab.body?.content ?? [];
+    const childContent = (tab.childTabs ?? []).flatMap(walkTab);
+    return [...tabContent, ...childContent];
+  };
+
+  const flattenedTabs = (rawDocJson.tabs ?? []).flatMap(walkTab);
+
+  return flattenedTabs;
+};
+
+const getRawParagraphText = (paragraph?: GoogleDocsRawParagraph): string =>
+  (paragraph?.elements ?? [])
+    .map((element) => element.textRun?.content ?? '')
+    .join('')
+    .replace(/\n+$/g, '');
+
+const getRawTableCellText = (cellContent: GoogleDocsRawStructuralElement[] = []): string =>
+  cellContent
+    .map((element) => {
+      if (element.paragraph) return getRawParagraphText(element.paragraph);
+      return '';
+    })
+    .filter(Boolean)
+    .join('\n');
+
+const renderRawParagraphRuns = (elements: GoogleDocsRawParagraphElement[] = []) =>
+  elements.map((element, index) => {
+    const text = (element.textRun?.content ?? '').replace(/\n+$/g, '');
+    if (text.length === 0) return null;
+
+    let content: ReactNode = text;
+    const textStyle = element.textRun?.textStyle;
+
+    if (textStyle?.bold) content = <strong>{content}</strong>;
+    if (textStyle?.italic) content = <em>{content}</em>;
+    if (textStyle?.underline) {
+      content = <span style={{ textDecoration: 'underline' }}>{content}</span>;
+    }
+
+    if (textStyle?.link?.url) {
+      content = (
+        <a href={textStyle.link.url} target="_blank" rel="noreferrer">
+          {content}
+        </a>
+      );
+    }
+
+    return <span key={`raw-run-${index}`}>{content}</span>;
+  });
+
+const getInlineObjectImage = (
+  rawDocJson: GoogleDocsRawDocument | undefined,
+  inlineObjectId?: string
+) => {
+  if (!rawDocJson || !inlineObjectId) return null;
+
+  const embeddedObject =
+    rawDocJson.inlineObjects?.[inlineObjectId]?.inlineObjectProperties?.embeddedObject;
+  const src =
+    embeddedObject?.imageProperties?.contentUri || embeddedObject?.imageProperties?.sourceUri;
+
+  if (!src) return null;
+
+  return {
+    src,
+    alt: embeddedObject?.title || embeddedObject?.description || 'Document image',
+  };
+};
+
+const renderParagraphContent = (
+  rawDocJson: GoogleDocsRawDocument | undefined,
+  elements: GoogleDocsRawParagraphElement[] = [],
+  blockId?: string,
+  annotatedText?: string,
+  renderAnnotated?: (blockId: string, text: string) => ReactNode
+) =>
+  elements.map((element, index) => {
+    if (element.inlineObjectElement?.inlineObjectId) {
+      const image = getInlineObjectImage(rawDocJson, element.inlineObjectElement.inlineObjectId);
+      if (!image) return null;
+
+      return (
+        <img
+          key={`inline-object-${index}`}
+          src={image.src}
+          alt={image.alt}
+          style={{
+            display: 'block',
+            maxWidth: '100%',
+            height: 'auto',
+            borderRadius: tokens.borderRadiusMedium,
+            marginTop: tokens.spacingS,
+            marginBottom: tokens.spacingS,
+          }}
+        />
+      );
+    }
+
+    if (blockId && annotatedText !== undefined && renderAnnotated) {
+      return index === 0 ? (
+        <span key={`annotated-text-${index}`}>{renderAnnotated(blockId, annotatedText)}</span>
+      ) : null;
+    }
+
+    return <span key={`text-run-${index}`}>{renderRawParagraphRuns([element])}</span>;
+  });
+
 const getContentTypeLabel = (contentType?: GoogleDocsContentType): string =>
   contentType?.name || contentType?.sys.id || 'Untitled entry';
+
+const getEntryKindLabel = (contentType?: GoogleDocsContentType) => {
+  const label = getContentTypeLabel(contentType).toLowerCase();
+  return label.includes('page') ? 'Page' : 'Component';
+};
+
+const buildOverviewItems = (
+  mappingEntries: MappingEntry[],
+  entryHierarchy?: EntryHierarchyItem[]
+) => {
+  if (!entryHierarchy || entryHierarchy.length === 0) {
+    return mappingEntries.map((entry, entryIndex) => ({
+      key: entry.tempId ?? `entry-${entryIndex}`,
+      entry,
+      entryIndex,
+      depth: 0,
+    }));
+  }
+
+  return entryHierarchy
+    .map((item) => {
+      const entry = mappingEntries[item.entryIndex];
+      if (!entry) return null;
+
+      return {
+        key: entry.tempId ?? `entry-${item.entryIndex}`,
+        entry,
+        entryIndex: item.entryIndex,
+        depth: item.depth,
+      };
+    })
+    .filter(
+      (item): item is { key: string; entry: MappingEntry; entryIndex: number; depth: number } =>
+        Boolean(item)
+    );
+};
+
+const getHeadingTag = (headingLevel?: number): 'h2' | 'h3' | 'h4' | 'h5' | 'h6' => {
+  switch (headingLevel) {
+    case 1:
+      return 'h2';
+    case 2:
+      return 'h3';
+    case 3:
+      return 'h4';
+    case 4:
+      return 'h5';
+    default:
+      return 'h6';
+  }
+};
 
 const cloneMappingEntries = (entries: MappingEntry[]): MappingEntry[] =>
   entries.map((entry) => ({
@@ -205,6 +406,26 @@ const getAssignmentSemantics = (
   return 'Coexist';
 };
 
+const getNodeElement = (node: Node | null): Element | null => {
+  if (!node) return null;
+  if (node instanceof Element) return node;
+  return node.parentElement;
+};
+
+const getRenderableTextByBlockId = (
+  renderableDocElements: RenderableDocElement[],
+  fallbackBlocks: NormalizedContentBlock[],
+  blockId: string | null
+) => {
+  if (!blockId) return '';
+
+  const renderableText = renderableDocElements.find((element) => element.blockId === blockId)?.text;
+  if (renderableText) return renderableText;
+
+  const block = fallbackBlocks.find((candidate) => candidate.id === blockId);
+  return block ? getBlockText(block) : '';
+};
+
 export const ReviewPage = ({ reviewPayload }: ReviewPageProps) => {
   const reviewDataReady = Boolean(
     reviewPayload.normalizedDocument &&
@@ -214,18 +435,32 @@ export const ReviewPage = ({ reviewPayload }: ReviewPageProps) => {
   );
 
   const [selectedEntryIndex, setSelectedEntryIndex] = useState(0);
-  const [filterMode, setFilterMode] = useState<FilterMode>('current');
   const [assignmentMode, setAssignmentMode] = useState<AssignmentMode>(null);
   const [hoveredBlockId, setHoveredBlockId] = useState<string | null>(null);
   const [hoveredDestinationKey, setHoveredDestinationKey] = useState<string | null>(null);
+  const [selectedRange, setSelectedRange] = useState<SelectedRange | null>(null);
+  const [modalSelectedEntryIndex, setModalSelectedEntryIndex] = useState(0);
+  const [modalSelectedFieldId, setModalSelectedFieldId] = useState('');
   const [excludedBlockIds, setExcludedBlockIds] = useState<Set<string>>(new Set());
+  const [rangeAnnotations, setRangeAnnotations] = useState<RangeAnnotation[]>([]);
   const [mappingEntries, setMappingEntries] = useState<MappingEntry[]>(
     reviewPayload.mappingPlan ? cloneMappingEntries(reviewPayload.mappingPlan.entries) : []
+  );
+  const [selectedEntryIndexes, setSelectedEntryIndexes] = useState<Set<number>>(
+    new Set((reviewPayload.mappingPlan?.entries ?? []).map((_, index) => index))
   );
 
   const contentTypes = reviewPayload.contentTypes ?? [];
   const normalizedDocument = reviewPayload.normalizedDocument;
   const blocks = normalizedDocument?.contentBlocks ?? [];
+  const rawDocContent = useMemo(
+    () => flattenRawDocumentContent(reviewPayload.rawDocJson),
+    [reviewPayload.rawDocJson]
+  );
+  const overviewItems = useMemo(
+    () => buildOverviewItems(mappingEntries, reviewPayload.entryHierarchy),
+    [mappingEntries, reviewPayload.entryHierarchy]
+  );
 
   const contentTypeById = useMemo(
     () => new Map(contentTypes.map((contentType) => [contentType.sys.id, contentType] as const)),
@@ -265,8 +500,72 @@ export const ReviewPage = ({ reviewPayload }: ReviewPageProps) => {
     return destinationMap;
   }, [contentTypeById, mappingEntries]);
 
+  const renderableDocElements = useMemo<RenderableDocElement[]>(() => {
+    if (rawDocContent.length === 0) {
+      return blocks.map((block) => ({
+        key: block.id,
+        blockId: block.id,
+        text: getBlockText(block),
+        structuralElement: {
+          paragraph: {
+            paragraphStyle:
+              block.type === 'heading'
+                ? { namedStyleType: `HEADING_${block.headingLevel ?? 2}` }
+                : undefined,
+            bullet:
+              block.type === 'listItem'
+                ? { nestingLevel: block.bullet?.nestingLevel ?? 0 }
+                : undefined,
+            elements: block.textRuns.map((run) => ({
+              textRun: {
+                content: run.text,
+                textStyle: {
+                  bold: run.styles.bold,
+                  italic: run.styles.italic,
+                  underline: run.styles.underline,
+                  link: run.styles.linkUrl ? { url: run.styles.linkUrl } : undefined,
+                },
+              },
+            })),
+          },
+        },
+      }));
+    }
+
+    let normalizedBlockIndex = 0;
+
+    return rawDocContent.map((element, index) => {
+      if (element.paragraph) {
+        const text = getRawParagraphText(element.paragraph);
+        const normalizedBlock = blocks[normalizedBlockIndex];
+        const blockId = normalizedBlock ? normalizedBlock.id : undefined;
+
+        if (text.length > 0 && normalizedBlock) {
+          normalizedBlockIndex += 1;
+        }
+
+        return {
+          key: `raw-element-${index}`,
+          blockId,
+          text,
+          structuralElement: element,
+        };
+      }
+
+      return {
+        key: `raw-element-${index}`,
+        text: '',
+        structuralElement: element,
+      };
+    });
+  }, [blocks, rawDocContent]);
+
   const initialSelectedBlockId =
-    blocks.find((block) => !excludedBlockIds.has(block.id))?.id ?? null;
+    renderableDocElements.find(
+      (element) => element.blockId && !excludedBlockIds.has(element.blockId)
+    )?.blockId ??
+    blocks.find((block) => !excludedBlockIds.has(block.id))?.id ??
+    null;
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(initialSelectedBlockId);
 
   if (!reviewDataReady || !normalizedDocument || !reviewPayload.mappingPlan) {
@@ -300,15 +599,20 @@ export const ReviewPage = ({ reviewPayload }: ReviewPageProps) => {
     );
   }
 
-  const selectedEntry = mappingEntries[selectedEntryIndex] ?? mappingEntries[0];
-  const selectedContentType = contentTypeById.get(selectedEntry.contentTypeId);
   const selectedBlock = blocks.find((block) => block.id === selectedBlockId) ?? null;
+  const selectedText = selectedRange?.text ?? '';
 
   const getFieldMapping = (entry: MappingEntry, fieldId: string) =>
     entry.fieldMappings.find((mapping) => mapping.fieldId === fieldId);
 
   const getDestinationsForBlock = (blockId: string | null) =>
     blockId ? blockDestinations.get(blockId) ?? [] : [];
+
+  const getRangeAnnotationsForBlock = (blockId: string | null) =>
+    blockId ? rangeAnnotations.filter((annotation) => annotation.blockId === blockId) : [];
+
+  const findMatchingAnnotation = (blockId: string | null, text: string) =>
+    getRangeAnnotationsForBlock(blockId).find((annotation) => annotation.text === text);
 
   const getBlockStatus = (blockId: string): BlockStatus => {
     if (excludedBlockIds.has(blockId)) return 'excluded';
@@ -319,23 +623,33 @@ export const ReviewPage = ({ reviewPayload }: ReviewPageProps) => {
     return destinations[0].entryIndex === selectedEntryIndex ? 'current-entry' : 'other-entry';
   };
 
-  const visibleBlocks = blocks.filter((block) => {
-    const destinations = getDestinationsForBlock(block.id);
-
-    if (filterMode === 'unassigned') {
-      return destinations.length === 0 && !excludedBlockIds.has(block.id);
-    }
-
-    if (filterMode === 'all') {
-      return destinations.length > 0 && !excludedBlockIds.has(block.id);
-    }
-
-    return true;
-  });
-
-  const selectedBlockDestinations = getDestinationsForBlock(selectedBlockId);
-  const selectedBlockStatus = selectedBlockId ? getBlockStatus(selectedBlockId) : 'unassigned';
-  const selectedBlockStatusLabel = blockStatusStyles[selectedBlockStatus].label;
+  const selectedBlockFullText = getRenderableTextByBlockId(
+    renderableDocElements,
+    blocks,
+    selectedBlockId
+  );
+  const selectedAnnotation = findMatchingAnnotation(
+    selectedRange?.blockId ?? selectedBlockId,
+    selectedText
+  );
+  const selectedBlockDestinations =
+    selectedAnnotation?.destinations ??
+    (selectedRange && selectedRange.text !== selectedBlockFullText
+      ? []
+      : getDestinationsForBlock(selectedBlockId));
+  const selectedBlockStatus = selectedAnnotation?.excluded
+    ? 'excluded'
+    : selectedAnnotation
+    ? selectedAnnotation.destinations.length > 1
+      ? 'multi-mapped'
+      : selectedAnnotation.destinations.length === 0
+      ? 'unassigned'
+      : selectedAnnotation.destinations[0].entryIndex === selectedEntryIndex
+      ? 'current-entry'
+      : 'other-entry'
+    : selectedBlockId
+    ? getBlockStatus(selectedBlockId)
+    : 'unassigned';
 
   const removeBlockFromAllMappings = (entries: MappingEntry[], blockId: string) => {
     entries.forEach((entry) => {
@@ -378,6 +692,46 @@ export const ReviewPage = ({ reviewPayload }: ReviewPageProps) => {
   ) => {
     if (!selectedBlockId) return;
 
+    if (
+      selectedRange &&
+      selectedRange.text.length > 0 &&
+      selectedRange.text !== selectedBlockFullText
+    ) {
+      const contentType = contentTypeById.get(mappingEntries[targetEntryIndex]?.contentTypeId);
+      const entryLabel = getContentTypeLabel(contentType);
+      const destination: BlockDestination = {
+        key: `range:${targetEntryIndex}:${targetField.id}:${selectedBlockId}:${selectedRange.text}`,
+        entryIndex: targetEntryIndex,
+        contentTypeId: mappingEntries[targetEntryIndex].contentTypeId,
+        entryLabel,
+        fieldId: targetField.id,
+        fieldLabel: targetField.name || targetField.id,
+        fieldType: targetField.type,
+        blockId: selectedBlockId,
+      };
+
+      setRangeAnnotations((current) => {
+        const existing = current.filter(
+          (annotation) =>
+            !(annotation.blockId === selectedBlockId && annotation.text === selectedRange.text)
+        );
+
+        return [
+          ...existing,
+          {
+            id: `range-${selectedBlockId}-${selectedRange.text}`,
+            blockId: selectedBlockId,
+            text: selectedRange.text,
+            destinations: [destination],
+          },
+        ];
+      });
+      setSelectedEntryIndex(targetEntryIndex);
+      setAssignmentMode(null);
+      window.getSelection?.()?.removeAllRanges?.();
+      return;
+    }
+
     setMappingEntries((currentEntries) => {
       const nextEntries = cloneMappingEntries(currentEntries);
 
@@ -402,10 +756,39 @@ export const ReviewPage = ({ reviewPayload }: ReviewPageProps) => {
     });
     setSelectedEntryIndex(targetEntryIndex);
     setAssignmentMode(null);
+    const selection = window.getSelection?.();
+    selection?.removeAllRanges?.();
   };
 
   const handleExclude = () => {
     if (!selectedBlockId) return;
+
+    if (
+      selectedRange &&
+      selectedRange.text.length > 0 &&
+      selectedRange.text !== selectedBlockFullText
+    ) {
+      setRangeAnnotations((current) => {
+        const existing = current.filter(
+          (annotation) =>
+            !(annotation.blockId === selectedBlockId && annotation.text === selectedRange.text)
+        );
+
+        return [
+          ...existing,
+          {
+            id: `range-${selectedBlockId}-${selectedRange.text}`,
+            blockId: selectedBlockId,
+            text: selectedRange.text,
+            destinations: [],
+            excluded: true,
+          },
+        ];
+      });
+      setAssignmentMode(null);
+      window.getSelection?.()?.removeAllRanges?.();
+      return;
+    }
 
     setMappingEntries((currentEntries) => {
       const nextEntries = cloneMappingEntries(currentEntries);
@@ -414,10 +797,26 @@ export const ReviewPage = ({ reviewPayload }: ReviewPageProps) => {
     });
     setExcludedBlockIds((current) => new Set(current).add(selectedBlockId));
     setAssignmentMode(null);
+    const selection = window.getSelection?.();
+    selection?.removeAllRanges?.();
   };
 
   const handleRestore = () => {
     if (!selectedBlockId) return;
+
+    if (
+      selectedRange &&
+      selectedRange.text.length > 0 &&
+      selectedRange.text !== selectedBlockFullText
+    ) {
+      setRangeAnnotations((current) =>
+        current.filter(
+          (annotation) =>
+            !(annotation.blockId === selectedBlockId && annotation.text === selectedRange.text)
+        )
+      );
+      return;
+    }
 
     setExcludedBlockIds((current) => {
       const next = new Set(current);
@@ -426,24 +825,40 @@ export const ReviewPage = ({ reviewPayload }: ReviewPageProps) => {
     });
   };
 
-  const renderDestinationCards = (
-    block: NormalizedContentBlock,
-    destinations: BlockDestination[]
-  ) => (
-    <div>
+  const handleBlockClick = (blockId: string) => {
+    const selection = window.getSelection?.();
+    const nextSelectedText = selection?.toString().trim() ?? '';
+    const destinations = getDestinationsForBlock(blockId);
+    const onlyMappedElsewhere =
+      destinations.length === 1 && destinations[0].entryIndex !== selectedEntryIndex;
+
+    setSelectedBlockId(blockId);
+    setAssignmentMode(null);
+
+    if (nextSelectedText.length === 0 && onlyMappedElsewhere) {
+      setSelectedEntryIndex(destinations[0].entryIndex);
+    }
+
+    if (nextSelectedText.length === 0) {
+      setSelectedRange(null);
+    }
+  };
+
+  const renderDestinationCards = (blockId: string, destinations: BlockDestination[]) => (
+    <div style={pageStyles.markerRail}>
       {destinations.map((destination) => {
-        const isHovered = hoveredDestinationKey === destination.key || hoveredBlockId === block.id;
+        const isHovered = hoveredDestinationKey === destination.key || hoveredBlockId === blockId;
 
         return (
           <div
             key={destination.key}
             style={{
               ...pageStyles.destinationCard,
-              borderColor: isHovered ? tokens.blue500 : tokens.gray300,
-              background: isHovered ? tokens.blue100 : tokens.gray100,
+              borderColor: isHovered ? tokens.green600 : tokens.gray300,
+              background: isHovered ? tokens.green100 : tokens.gray100,
             }}
             onMouseEnter={() => {
-              setHoveredBlockId(block.id);
+              setHoveredBlockId(blockId);
               setHoveredDestinationKey(destination.key);
             }}
             onMouseLeave={() => {
@@ -462,257 +877,464 @@ export const ReviewPage = ({ reviewPayload }: ReviewPageProps) => {
     </div>
   );
 
-  const renderAssignmentChooser = () => {
+  useEffect(() => {
+    if (!assignmentMode) {
+      setModalSelectedFieldId('');
+      return;
+    }
+
+    const fallbackEntryIndex = selectedBlockDestinations[0]?.entryIndex ?? selectedEntryIndex ?? 0;
+    const safeEntryIndex = Math.min(fallbackEntryIndex, Math.max(mappingEntries.length - 1, 0));
+    const entry = mappingEntries[safeEntryIndex];
+    const contentType = contentTypeById.get(entry?.contentTypeId ?? '');
+    const firstFieldId = contentType?.fields[0]?.id ?? '';
+
+    setModalSelectedEntryIndex(safeEntryIndex);
+    setModalSelectedFieldId(firstFieldId);
+  }, [
+    assignmentMode,
+    contentTypeById,
+    mappingEntries,
+    selectedBlockDestinations,
+    selectedEntryIndex,
+  ]);
+
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      const selection = window.getSelection?.();
+      const nextSelectedText = selection?.toString().trim() ?? '';
+      const anchorElement = getNodeElement(selection?.anchorNode ?? null);
+      const blockElement = anchorElement?.closest('[data-source-block-id]');
+      const blockId = blockElement?.getAttribute('data-source-block-id');
+
+      if (!blockId || nextSelectedText.length === 0) {
+        setSelectedRange(null);
+        return;
+      }
+
+      setSelectedBlockId(blockId);
+      setSelectedRange({ blockId, text: nextSelectedText });
+      setAssignmentMode(null);
+    };
+
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => document.removeEventListener('selectionchange', handleSelectionChange);
+  }, []);
+
+  const renderStructuralElement = (element: GoogleDocsRawStructuralElement, blockId?: string) => {
+    if (element.sectionBreak) return null;
+
+    if (element.table) {
+      const rows = element.table.tableRows ?? [];
+
+      return (
+        <table style={pageStyles.docTable}>
+          <tbody>
+            {rows.map((row, rowIndex) => (
+              <tr key={`table-row-${rowIndex}`}>
+                {(row.tableCells ?? []).map((cell, cellIndex) => (
+                  <td key={`table-cell-${rowIndex}-${cellIndex}`} style={pageStyles.docTableCell}>
+                    {getRawTableCellText(cell.content)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      );
+    }
+
+    const paragraph = element.paragraph;
+    if (!paragraph) return null;
+
+    const namedStyleType = paragraph.paragraphStyle?.namedStyleType ?? 'NORMAL_TEXT';
+    const headingMatch = namedStyleType.match(/^HEADING_(\d)$/);
+    const headingLevel = headingMatch ? Number(headingMatch[1]) : undefined;
+
+    if (headingLevel) {
+      const HeadingTag = getHeadingTag(headingLevel);
+      const text = getRawParagraphText(paragraph);
+      return (
+        <HeadingTag
+          style={{
+            ...pageStyles.docHeading,
+            fontSize:
+              headingLevel === 1
+                ? tokens.fontSizeXl
+                : headingLevel === 2
+                ? tokens.fontSizeL
+                : tokens.fontSizeM,
+          }}>
+          {renderParagraphContent(
+            reviewPayload.rawDocJson,
+            paragraph.elements,
+            blockId,
+            text,
+            renderAnnotatedText
+          )}
+        </HeadingTag>
+      );
+    }
+
+    if (paragraph.bullet) {
+      const text = getRawParagraphText(paragraph);
+      return (
+        <div style={pageStyles.docListItem}>
+          <span style={pageStyles.docBullet}>•</span>
+          <p style={pageStyles.docParagraph}>
+            {renderParagraphContent(
+              reviewPayload.rawDocJson,
+              paragraph.elements,
+              blockId,
+              text,
+              renderAnnotatedText
+            )}
+          </p>
+        </div>
+      );
+    }
+
+    const text = getRawParagraphText(paragraph);
+    return (
+      <p style={pageStyles.docParagraph}>
+        {renderParagraphContent(
+          reviewPayload.rawDocJson,
+          paragraph.elements,
+          blockId,
+          text,
+          renderAnnotatedText
+        )}
+      </p>
+    );
+  };
+
+  const renderAnnotatedText = (blockId: string, text: string) => {
+    const annotations = getRangeAnnotationsForBlock(blockId).filter(
+      (annotation) => annotation.text.length > 0
+    );
+
+    if (annotations.length === 0) {
+      return <span>{text}</span>;
+    }
+
+    const segments: Array<{ text: string; annotation?: RangeAnnotation }> = [];
+    let cursor = 0;
+
+    annotations
+      .map((annotation) => ({ annotation, start: text.indexOf(annotation.text) }))
+      .filter((match) => match.start >= 0)
+      .sort((a, b) => a.start - b.start)
+      .forEach(({ annotation, start }) => {
+        if (start > cursor) {
+          segments.push({ text: text.slice(cursor, start) });
+        }
+        segments.push({ text: annotation.text, annotation });
+        cursor = start + annotation.text.length;
+      });
+
+    if (cursor < text.length) {
+      segments.push({ text: text.slice(cursor) });
+    }
+
+    return segments.map((segment, index) => {
+      if (!segment.annotation) {
+        return <span key={`${blockId}-segment-${index}`}>{segment.text}</span>;
+      }
+
+      return (
+        <span
+          key={`${blockId}-segment-${index}`}
+          style={{
+            background: segment.annotation.excluded ? tokens.gray200 : tokens.green100,
+            border: `1px solid ${segment.annotation.excluded ? tokens.gray500 : tokens.green600}`,
+            borderRadius: tokens.borderRadiusSmall,
+            textDecoration: segment.annotation.excluded ? 'line-through' : undefined,
+            padding: '0 2px',
+          }}>
+          {segment.text}
+        </span>
+      );
+    });
+  };
+
+  const renderAssignmentModal = () => {
     if (!selectedBlock || !assignmentMode) return null;
 
+    const selectedEntry = mappingEntries[modalSelectedEntryIndex];
+    const selectedContentType = contentTypeById.get(selectedEntry?.contentTypeId ?? '');
+    const availableFields = selectedContentType?.fields ?? [];
+    const selectedField =
+      availableFields.find((field) => field.id === modalSelectedFieldId) ?? availableFields[0];
+    const selectedFieldMapping =
+      selectedEntry && selectedField ? getFieldMapping(selectedEntry, selectedField.id) : undefined;
+    const selectedOccupancy = selectedField
+      ? getFieldOccupancyLabel(selectedField, selectedFieldMapping)
+      : null;
+    const selectedSemantics =
+      selectedField && selectedOccupancy
+        ? getAssignmentSemantics(selectedField, selectedOccupancy)
+        : null;
+
     return (
-      <Card padding="default">
-        <Flex flexDirection="column" gap="spacingM">
-          <div>
-            <Heading as="h3" marginBottom="none">
-              Choose a destination
-            </Heading>
+      <Modal isShown={true} onClose={() => setAssignmentMode(null)} size="large">
+        <Modal.Header title="Move content" onClose={() => setAssignmentMode(null)} />
+        <Modal.Content>
+          <Flex flexDirection="column" gap="spacingM">
             <Paragraph marginBottom="none">
               {assignmentMode === 'assign'
-                ? 'Assign this source block to a field in the current creation flow.'
-                : 'Move this source block to a new destination.'}
+                ? 'Assign the selected text to a field in this creation flow.'
+                : 'Move the selected text to a new destination in this creation flow.'}
             </Paragraph>
-          </div>
-
-          {mappingEntries.map((entry, entryIndex) => {
-            const contentType = contentTypeById.get(entry.contentTypeId);
-            const entryLabel = getContentTypeLabel(contentType);
-
-            return (
-              <div key={`${entry.contentTypeId}-${entry.tempId ?? entryIndex}`}>
-                <p style={pageStyles.sectionLabel}>{entryLabel}</p>
-                <Flex flexDirection="column" gap="spacingXs" style={{ marginTop: tokens.spacingS }}>
-                  {(contentType?.fields ?? []).map((field) => {
-                    const fieldMapping = getFieldMapping(entry, field.id);
-                    const occupancy = getFieldOccupancyLabel(field, fieldMapping);
-                    const semantics = getAssignmentSemantics(field, occupancy);
-                    const actionLabel =
-                      assignmentMode === 'assign'
-                        ? `Assign to ${entryLabel} ${field.name || field.id}`
-                        : `Move to ${entryLabel} ${field.name || field.id}`;
-
-                    return (
-                      <Button
-                        key={`${entryLabel}-${field.id}`}
-                        variant="secondary"
-                        onClick={() => handleApplyAssignment(entryIndex, field)}
-                        style={{ justifyContent: 'space-between' }}>
-                        {actionLabel}
-                        <span style={{ marginLeft: tokens.spacingS }}>
-                          {occupancy} · {semantics}
-                        </span>
-                      </Button>
-                    );
-                  })}
-                </Flex>
+            <Card padding="default">
+              <div style={{ fontWeight: tokens.fontWeightDemiBold }}>
+                {selectedText || selectedBlockFullText || getBlockText(selectedBlock)}
               </div>
-            );
-          })}
-        </Flex>
-      </Card>
+              <div style={{ ...pageStyles.helperText, marginTop: tokens.spacing2Xs }}>
+                Current location:{' '}
+                {selectedBlockDestinations.length > 0
+                  ? `${selectedBlockDestinations.length} destination${
+                      selectedBlockDestinations.length === 1 ? '' : 's'
+                    }`
+                  : 'Not assigned to a field'}
+              </div>
+            </Card>
+            <FormControl>
+              <FormControl.Label htmlFor="move-content-entry">Entry</FormControl.Label>
+              <select
+                id="move-content-entry"
+                aria-label="Entry"
+                value={`${modalSelectedEntryIndex}`}
+                onChange={(event) => {
+                  const nextEntryIndex = Number(event.target.value);
+                  const nextEntry = mappingEntries[nextEntryIndex];
+                  const nextContentType = contentTypeById.get(nextEntry?.contentTypeId ?? '');
+                  setModalSelectedEntryIndex(nextEntryIndex);
+                  setModalSelectedFieldId(nextContentType?.fields[0]?.id ?? '');
+                }}
+                style={{
+                  width: '100%',
+                  minHeight: '40px',
+                  borderRadius: tokens.borderRadiusMedium,
+                  border: `1px solid ${tokens.gray400}`,
+                  padding: `0 ${tokens.spacingS}`,
+                }}>
+                {mappingEntries.map((entry, entryIndex) => {
+                  const contentType = contentTypeById.get(entry.contentTypeId);
+                  return (
+                    <option key={`${entry.contentTypeId}-${entryIndex}`} value={`${entryIndex}`}>
+                      {getContentTypeLabel(contentType)}
+                    </option>
+                  );
+                })}
+              </select>
+            </FormControl>
+
+            <FormControl>
+              <FormControl.Label htmlFor="move-content-field">Field</FormControl.Label>
+              <select
+                id="move-content-field"
+                aria-label="Field"
+                value={selectedField?.id ?? ''}
+                onChange={(event) => setModalSelectedFieldId(event.target.value)}
+                style={{
+                  width: '100%',
+                  minHeight: '40px',
+                  borderRadius: tokens.borderRadiusMedium,
+                  border: `1px solid ${tokens.gray400}`,
+                  padding: `0 ${tokens.spacingS}`,
+                }}>
+                {availableFields.map((field) => {
+                  const fieldMapping = selectedEntry
+                    ? getFieldMapping(selectedEntry, field.id)
+                    : undefined;
+                  const occupancy = getFieldOccupancyLabel(field, fieldMapping);
+
+                  return (
+                    <option key={field.id} value={field.id}>
+                      {(field.name || field.id) + ` (${field.type}) · ${occupancy}`}
+                    </option>
+                  );
+                })}
+              </select>
+            </FormControl>
+
+            {selectedField && selectedOccupancy && selectedSemantics && (
+              <Card padding="default">
+                <div style={{ fontWeight: tokens.fontWeightDemiBold }}>
+                  {selectedContentType ? getContentTypeLabel(selectedContentType) : 'Destination'}
+                </div>
+                <div style={{ ...pageStyles.helperText, marginTop: tokens.spacing2Xs }}>
+                  {(selectedField.name || selectedField.id) +
+                    ` · ${selectedField.type} · ${selectedOccupancy}`}
+                </div>
+                <div style={{ ...pageStyles.helperText, marginTop: tokens.spacing2Xs }}>
+                  This move will {selectedSemantics.toLowerCase()} the selected field.
+                </div>
+              </Card>
+            )}
+          </Flex>
+        </Modal.Content>
+        <Modal.Controls>
+          <Button variant="secondary" onClick={() => setAssignmentMode(null)}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              if (selectedField) {
+                handleApplyAssignment(modalSelectedEntryIndex, selectedField);
+              }
+            }}
+            isDisabled={!selectedField}>
+            Move content
+          </Button>
+        </Modal.Controls>
+      </Modal>
     );
+  };
+
+  const toggleSelectedEntry = (entryIndex: number) => {
+    setSelectedEntryIndexes((current) => {
+      const next = new Set(current);
+      if (next.has(entryIndex)) {
+        next.delete(entryIndex);
+      } else {
+        next.add(entryIndex);
+      }
+      return next;
+    });
   };
 
   return (
     <Layout variant="fullscreen" withBoxShadow={true} offsetTop={10}>
       <Layout.Body>
         <Flex flexDirection="column" gap="spacingL" style={pageStyles.container}>
-          <Flex flexDirection="column" gap="spacingS">
-            <Flex justifyContent="space-between" alignItems="flex-start" gap="spacingM">
-              <div>
-                <Heading marginBottom="none">Review your document mappings</Heading>
-                <Paragraph marginBottom="none">
-                  Verify how source content maps into each entry, then correct assignments inline.
-                </Paragraph>
-              </div>
-              <Card padding="default">
-                <div style={pageStyles.helperText}>Document</div>
-                <div style={{ fontWeight: tokens.fontWeightDemiBold }}>
-                  {reviewPayload.documentTitle || normalizedDocument.title || 'Untitled document'}
-                </div>
-                <div style={pageStyles.helperText}>
-                  {reviewPayload.reviewSummary || reviewPayload.summary || 'Ready for review'}
-                </div>
-              </Card>
-            </Flex>
-
-            <Note variant="primary">
-              Filled green means the content is mapped into the selected entry. Outline-only means
-              it maps somewhere else in the same creation flow.
-            </Note>
-          </Flex>
+          <Heading marginBottom="none">
+            {`Create from document "${
+              reviewPayload.documentTitle || normalizedDocument.title || 'Untitled document'
+            }"`}
+          </Heading>
 
           <Card padding="default">
             <Flex flexDirection="column" gap="spacingM">
-              <div style={pageStyles.tabs} role="tablist" aria-label="Entry tabs">
-                {mappingEntries.map((entry, entryIndex) => {
+              <Flex
+                alignItems="center"
+                justifyContent="space-between"
+                gap="spacingM"
+                flexWrap="wrap">
+                <div>
+                  <Heading as="h2" marginBottom="none">
+                    Overview
+                  </Heading>
+                  <Paragraph marginBottom="none">
+                    Review your content and associated entries below. Select which entries you’d
+                    like to create.
+                  </Paragraph>
+                </div>
+                <Button variant="primary">
+                  {`Create selected entries${
+                    selectedEntryIndexes.size > 0 ? ` (${selectedEntryIndexes.size})` : ''
+                  }`}
+                </Button>
+              </Flex>
+
+              <Flex flexDirection="column" gap="spacingS" style={pageStyles.overviewCard}>
+                {overviewItems.map(({ entry, entryIndex, depth, key }) => {
                   const contentType = contentTypeById.get(entry.contentTypeId);
-                  const label = getContentTypeLabel(contentType);
-                  const isSelected = entryIndex === selectedEntryIndex;
+                  const entryLabel = getContentTypeLabel(contentType);
+                  const entryKind = getEntryKindLabel(contentType);
+                  const isSelected = selectedEntryIndex === entryIndex;
+                  const isChecked = selectedEntryIndexes.has(entryIndex);
 
                   return (
-                    <Button
-                      key={`${entry.contentTypeId}-${entry.tempId ?? entryIndex}`}
-                      role="tab"
-                      aria-selected={isSelected}
-                      variant={isSelected ? 'primary' : 'secondary'}
-                      style={pageStyles.tabButton}
-                      onClick={() => setSelectedEntryIndex(entryIndex)}>
-                      {label}
-                    </Button>
+                    <div
+                      key={`overview-entry-${key}`}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`${entryKind}: ${entryLabel}`}
+                      onClick={() => setSelectedEntryIndex(entryIndex)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          setSelectedEntryIndex(entryIndex);
+                        }
+                      }}
+                      style={{
+                        ...pageStyles.overviewEntryCard,
+                        marginLeft: depth > 0 ? `${depth * 1.5}rem` : 0,
+                        borderColor: isSelected ? tokens.blue500 : tokens.gray300,
+                        boxShadow: isSelected ? `0 0 0 1px ${tokens.blue200}` : undefined,
+                      }}>
+                      <Flex alignItems="center" gap="spacingS">
+                        <input
+                          aria-label={`Select ${entryKind}: ${entryLabel}`}
+                          checked={isChecked}
+                          type="checkbox"
+                          onChange={() => toggleSelectedEntry(entryIndex)}
+                          onClick={(event) => event.stopPropagation()}
+                        />
+                        <div style={{ fontWeight: tokens.fontWeightDemiBold }}>
+                          {`${entryKind}: ${entryLabel}`}
+                        </div>
+                      </Flex>
+                    </div>
                   );
                 })}
-              </div>
-
-              <Flex gap="spacingXs" flexWrap="wrap">
-                {FILTER_OPTIONS.map((option) => (
-                  <Button
-                    key={option.id}
-                    variant={filterMode === option.id ? 'primary' : 'secondary'}
-                    aria-pressed={filterMode === option.id}
-                    onClick={() => setFilterMode(option.id)}>
-                    {option.label}
-                  </Button>
-                ))}
               </Flex>
             </Flex>
           </Card>
 
+          <Flex flexDirection="column" gap="spacingS">
+            <Heading as="h2" marginBottom="none">
+              Document outline
+            </Heading>
+            <Tabs
+              currentTab={`${selectedEntryIndex}`}
+              onTabChange={(tabId) => setSelectedEntryIndex(Number(tabId))}>
+              <Tabs.List
+                variant="horizontal-divider"
+                style={{
+                  overflowX: 'auto',
+                  overflowY: 'hidden',
+                  whiteSpace: 'nowrap',
+                  scrollbarWidth: 'thin',
+                }}>
+                {mappingEntries.map((entry, entryIndex) => {
+                  const contentType = contentTypeById.get(entry.contentTypeId);
+                  const label = getContentTypeLabel(contentType);
+
+                  return (
+                    <Tabs.Tab
+                      key={`${entry.contentTypeId}-${entry.tempId ?? entryIndex}`}
+                      panelId={`${entryIndex}`}>
+                      {label}
+                    </Tabs.Tab>
+                  );
+                })}
+              </Tabs.List>
+            </Tabs>
+          </Flex>
+
           <div style={pageStyles.shellGrid}>
-            <Card padding="large" style={pageStyles.panelCard}>
+            <Card padding="large">
               <Flex flexDirection="column" gap="spacingM">
-                <div>
-                  <Heading as="h2" marginBottom="none">
-                    Document provenance
-                  </Heading>
-                  <Paragraph marginBottom="none">
-                    Select a source block to inspect all linked destinations and edit its
-                    assignment.
-                  </Paragraph>
-                </div>
-
-                <div style={pageStyles.blockList}>
-                  {visibleBlocks.map((block) => {
-                    const status = getBlockStatus(block.id);
-                    const destinations = getDestinationsForBlock(block.id);
-                    const isSelected = selectedBlockId === block.id;
-                    const isHovered = hoveredBlockId === block.id;
-                    const statusStyle = blockStatusStyles[status];
-                    const blockText = getBlockText(block);
-
-                    return (
-                      <button
-                        key={block.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedBlockId(block.id);
-                          setAssignmentMode(null);
-                        }}
-                        onMouseEnter={() => setHoveredBlockId(block.id)}
-                        onMouseLeave={() => setHoveredBlockId(null)}
-                        style={{
-                          ...pageStyles.blockButton,
-                          borderColor:
-                            isSelected || isHovered ? tokens.blue500 : statusStyle.borderColor,
-                          background: statusStyle.background,
-                          boxShadow: isSelected ? `0 0 0 2px ${tokens.blue200}` : undefined,
-                        }}>
-                        <div style={pageStyles.blockMetaRow}>
-                          <span
-                            style={{
-                              ...pageStyles.badge,
-                              background: tokens.colorWhite,
-                              border: `1px solid ${statusStyle.borderColor}`,
-                            }}>
-                            {statusStyle.label}
-                          </span>
-                          {destinations.length > 1 && (
-                            <span
-                              style={{
-                                ...pageStyles.badge,
-                                background: tokens.yellow100,
-                                border: `1px solid ${tokens.yellow500}`,
-                              }}>
-                              Also used in {destinations.length - 1} other field
-                              {destinations.length > 2 ? 's' : ''}
-                            </span>
-                          )}
-                        </div>
-
-                        <div
-                          style={{
-                            fontWeight: tokens.fontWeightDemiBold,
-                            marginBottom: tokens.spacingXs,
-                          }}>
-                          {blockText}
-                        </div>
-                        <div style={pageStyles.helperText}>
-                          {block.type} · block {block.position + 1}
-                        </div>
-
-                        {destinations.length > 0 && renderDestinationCards(block, destinations)}
-                      </button>
-                    );
-                  })}
-                </div>
-              </Flex>
-            </Card>
-
-            <Flex flexDirection="column" gap="spacingL">
-              <Card padding="large">
-                <Flex flexDirection="column" gap="spacingM">
-                  <div>
-                    <Heading as="h2" marginBottom="none">
-                      Selected source
-                    </Heading>
-                    <Paragraph marginBottom="none">
-                      Review the assignment state for the selected content block.
-                    </Paragraph>
-                  </div>
-
-                  {selectedBlock ? (
-                    <div style={pageStyles.selectionCard}>
-                      <div
-                        style={{
-                          fontWeight: tokens.fontWeightDemiBold,
-                          marginBottom: tokens.spacingXs,
-                        }}>
-                        {getBlockText(selectedBlock)}
+                {selectedBlock && selectedRange && selectedText && (
+                  <div style={pageStyles.selectionToolbar}>
+                    <Flex
+                      alignItems="center"
+                      justifyContent="space-between"
+                      gap="spacingM"
+                      flexWrap="wrap">
+                      <div>
+                        <div style={{ fontWeight: tokens.fontWeightDemiBold }}>{selectedText}</div>
+                        {selectedBlockDestinations.length > 1 && (
+                          <div style={{ ...pageStyles.helperText, marginTop: tokens.spacing2Xs }}>
+                            Also used in {selectedBlockDestinations.length - 1} other field
+                            {selectedBlockDestinations.length > 2 ? 's' : ''}
+                          </div>
+                        )}
                       </div>
-                      <div style={pageStyles.helperText}>{selectedBlockStatusLabel}</div>
-
-                      <div style={{ marginTop: tokens.spacingM }}>
-                        <p style={pageStyles.sectionLabel}>
-                          Used in {selectedBlockDestinations.length} destination
-                          {selectedBlockDestinations.length === 1 ? '' : 's'}
-                        </p>
-                        <Flex
-                          flexDirection="column"
-                          gap="spacingXs"
-                          style={{ marginTop: tokens.spacingS }}>
-                          {selectedBlockDestinations.length > 0 ? (
-                            selectedBlockDestinations.map((destination) => (
-                              <Card key={destination.key} padding="default">
-                                <div style={{ fontWeight: tokens.fontWeightDemiBold }}>
-                                  {destination.fieldLabel}
-                                </div>
-                                <div style={pageStyles.helperText}>
-                                  {destination.entryLabel} · {destination.fieldType}
-                                </div>
-                              </Card>
-                            ))
-                          ) : (
-                            <div style={pageStyles.helperText}>This block is not assigned yet.</div>
-                          )}
-                        </Flex>
-                      </div>
-
-                      <Flex gap="spacingS" flexWrap="wrap" style={{ marginTop: tokens.spacingM }}>
+                      <Flex gap="spacingS" flexWrap="wrap">
                         {selectedBlockStatus === 'excluded' ? (
                           <Button variant="secondary" onClick={handleRestore}>
                             Restore
@@ -737,84 +1359,89 @@ export const ReviewPage = ({ reviewPayload }: ReviewPageProps) => {
                           </>
                         )}
                       </Flex>
-                    </div>
-                  ) : (
-                    <Paragraph marginBottom="none">
-                      Select a source block to begin reviewing.
-                    </Paragraph>
-                  )}
-                </Flex>
-              </Card>
-
-              {renderAssignmentChooser()}
-
-              <Card padding="large">
-                <Flex flexDirection="column" gap="spacingM">
-                  <div>
-                    <Heading as="h2" marginBottom="none">
-                      Entry mapping panel
-                    </Heading>
-                    <Paragraph marginBottom="none">
-                      Field occupancy for {getContentTypeLabel(selectedContentType)}.
-                    </Paragraph>
+                    </Flex>
                   </div>
+                )}
 
-                  <Flex flexDirection="column" gap="spacingS">
-                    {(selectedContentType?.fields ?? []).map((field) => {
-                      const mapping = getFieldMapping(selectedEntry, field.id);
-                      const occupancy = getFieldOccupancyLabel(field, mapping);
-                      const snippets = (mapping?.sourceBlockIds ?? [])
-                        .map((blockId) => blocks.find((block) => block.id === blockId))
-                        .filter(Boolean)
-                        .map((block) => getBlockText(block as NormalizedContentBlock));
+                <div style={pageStyles.documentSurface}>
+                  <div style={pageStyles.docFlow}>
+                    {renderableDocElements.map((element) => {
+                      const blockId = element.blockId;
+                      const destinations = blockId ? getDestinationsForBlock(blockId) : [];
+                      const status = blockId ? getBlockStatus(blockId) : null;
+                      const isSelected = blockId ? selectedBlockId === blockId : false;
+                      const isHovered = blockId ? hoveredBlockId === blockId : false;
+                      const isMappedToSelectedEntry =
+                        status === 'current-entry' || status === 'multi-mapped';
+                      const isMappedElsewhere = status === 'other-entry';
+                      const isExcluded = status === 'excluded';
+                      const hasDestinations = destinations.length > 0;
+
+                      if (!blockId) {
+                        return (
+                          <div key={element.key}>
+                            {renderStructuralElement(element.structuralElement)}
+                          </div>
+                        );
+                      }
 
                       return (
-                        <div
-                          key={field.id}
-                          style={{
-                            ...pageStyles.fieldCard,
-                            borderColor: selectedBlockDestinations.some(
-                              (destination) =>
-                                destination.entryIndex === selectedEntryIndex &&
-                                destination.fieldId === field.id
-                            )
-                              ? tokens.blue500
-                              : tokens.gray300,
-                          }}>
-                          <Flex
-                            justifyContent="space-between"
-                            alignItems="flex-start"
-                            gap="spacingM">
-                            <div>
-                              <div style={{ fontWeight: tokens.fontWeightDemiBold }}>
-                                {field.name || field.id}
-                              </div>
-                              <div style={pageStyles.helperText}>{field.type}</div>
+                        <div key={element.key} style={pageStyles.documentRow}>
+                          <div
+                            role="button"
+                            data-source-block-id={blockId}
+                            tabIndex={0}
+                            aria-label={element.text || blockId}
+                            aria-pressed={isSelected}
+                            onClick={() => handleBlockClick(blockId)}
+                            onKeyDown={(event) => {
+                              if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                setSelectedBlockId(blockId);
+                                setAssignmentMode(null);
+                                setSelectedRange(null);
+                              }
+                            }}
+                            onMouseEnter={() => setHoveredBlockId(blockId)}
+                            onMouseLeave={() => setHoveredBlockId(null)}
+                            style={{
+                              ...pageStyles.blockButton,
+                              borderColor: isExcluded
+                                ? tokens.red500
+                                : hasDestinations && (isSelected || isHovered)
+                                ? tokens.green600
+                                : hasDestinations && (isMappedToSelectedEntry || isMappedElsewhere)
+                                ? tokens.green600
+                                : tokens.colorWhite,
+                              background:
+                                hasDestinations && isMappedToSelectedEntry
+                                  ? tokens.green100
+                                  : hasDestinations && (isSelected || isHovered)
+                                  ? tokens.green100
+                                  : tokens.colorWhite,
+                              boxShadow:
+                                hasDestinations && isSelected
+                                  ? `0 0 0 2px ${tokens.green200}`
+                                  : undefined,
+                            }}>
+                            <div style={pageStyles.blockContent}>
+                              {renderStructuralElement(element.structuralElement, blockId)}
                             </div>
-                            <div style={{ ...pageStyles.badge, background: tokens.gray100 }}>
-                              {occupancy}
-                            </div>
-                          </Flex>
+                          </div>
 
-                          <div style={{ marginTop: tokens.spacingS }}>
-                            {snippets.length > 0 ? (
-                              snippets.map((snippet) => (
-                                <Card key={`${field.id}-${snippet}`} padding="default">
-                                  <div style={pageStyles.helperText}>{snippet}</div>
-                                </Card>
-                              ))
-                            ) : (
-                              <div style={pageStyles.helperText}>No source block assigned.</div>
-                            )}
+                          <div>
+                            {destinations.length > 0 &&
+                              renderDestinationCards(blockId, destinations)}
                           </div>
                         </div>
                       );
                     })}
-                  </Flex>
-                </Flex>
-              </Card>
-            </Flex>
+                  </div>
+                </div>
+              </Flex>
+            </Card>
           </div>
+          {renderAssignmentModal()}
         </Flex>
       </Layout.Body>
     </Layout>

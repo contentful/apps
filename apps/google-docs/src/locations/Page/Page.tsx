@@ -11,6 +11,7 @@ import {
   ModalOrchestratorHandle,
 } from './components/mainpage/ModalOrchestrator';
 import { ReviewPayload } from '../../utils/types';
+import { mockReviewPayload } from '../../mocks/mockReviewPayload';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -72,13 +73,23 @@ const Page = () => {
                   </Paragraph>
                 </Flex>
 
-                <Button
-                  variant="primary"
-                  isDisabled={!oauthToken}
-                  onClick={handleSelectFile}
-                  endIcon={<ArrowRightIcon />}>
-                  Select your file
-                </Button>
+                <Flex gap="spacingS">
+                  {import.meta.env.DEV && (
+                    <Button
+                      variant="secondary"
+                      onClick={() => setReviewPayload(mockReviewPayload)}
+                      isDisabled={!mockReviewPayload}>
+                      Open mock review
+                    </Button>
+                  )}
+                  <Button
+                    variant="primary"
+                    isDisabled={!oauthToken}
+                    onClick={handleSelectFile}
+                    endIcon={<ArrowRightIcon />}>
+                    Select your file
+                  </Button>
+                </Flex>
               </Flex>
             </Card>
           </Flex>

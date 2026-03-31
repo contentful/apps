@@ -50,6 +50,7 @@ export interface ReviewPayload {
   assets?: ReviewAsset[];
   unmappedBlockIds?: string[];
   normalizedDocument?: NormalizedDocument;
+  rawDocJson?: GoogleDocsRawDocument;
   contentTables?: NormalizedTable[];
   referenceGraph?: ReferenceGraph;
   headingCorrections?: number;
@@ -57,6 +58,7 @@ export interface ReviewPayload {
   agentCorrectionDetails?: ReviewCorrection[];
   contentTypes?: GoogleDocsContentType[];
   mappingPlan?: MappingPlan;
+  entryHierarchy?: EntryHierarchyItem[];
   [key: string]: unknown;
 }
 
@@ -161,9 +163,19 @@ export interface ReviewCorrection {
 }
 
 export interface ReferenceGraph {
-  nodes: Array<Record<string, unknown>>;
+  nodes?: Array<Record<string, unknown>>;
   edges: Array<Record<string, unknown>>;
   hasCircularDependency: boolean;
+  creationOrder?: string[];
+  [key: string]: unknown;
+}
+
+export interface EntryHierarchyItem {
+  tempId: string;
+  entryIndex: number;
+  parentTempId: string | null;
+  depth: number;
+  childTempIds: string[];
 }
 
 export interface GoogleDocsContentTypeField {
@@ -171,11 +183,16 @@ export interface GoogleDocsContentTypeField {
   name?: string;
   type: string;
   required?: boolean;
+  localized?: boolean;
   linkType?: string;
   items?: {
     type?: string;
     linkType?: string;
+    validations?: Array<Record<string, unknown>>;
+    [key: string]: unknown;
   };
+  validations?: Array<Record<string, unknown>>;
+  [key: string]: unknown;
 }
 
 export interface GoogleDocsContentType {
@@ -210,4 +227,86 @@ export interface MappingPlan {
   entries: MappingEntry[];
   unmappedBlockIds: string[];
   summary: string;
+}
+
+export interface GoogleDocsRawTextStyle {
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  link?: {
+    url?: string;
+  };
+}
+
+export interface GoogleDocsRawTextRun {
+  content?: string;
+  textStyle?: GoogleDocsRawTextStyle;
+}
+
+export interface GoogleDocsRawParagraphElement {
+  textRun?: GoogleDocsRawTextRun;
+  inlineObjectElement?: {
+    inlineObjectId?: string;
+  };
+}
+
+export interface GoogleDocsRawEmbeddedObject {
+  title?: string;
+  description?: string;
+  imageProperties?: {
+    contentUri?: string;
+    sourceUri?: string;
+  };
+}
+
+export interface GoogleDocsRawInlineObject {
+  inlineObjectProperties?: {
+    embeddedObject?: GoogleDocsRawEmbeddedObject;
+  };
+}
+
+export interface GoogleDocsRawParagraph {
+  elements?: GoogleDocsRawParagraphElement[];
+  bullet?: {
+    nestingLevel?: number;
+    listId?: string;
+  };
+  paragraphStyle?: {
+    namedStyleType?: string;
+  };
+}
+
+export interface GoogleDocsRawTableCell {
+  content?: GoogleDocsRawStructuralElement[];
+}
+
+export interface GoogleDocsRawTableRow {
+  tableCells?: GoogleDocsRawTableCell[];
+}
+
+export interface GoogleDocsRawTable {
+  tableRows?: GoogleDocsRawTableRow[];
+}
+
+export interface GoogleDocsRawStructuralElement {
+  paragraph?: GoogleDocsRawParagraph;
+  table?: GoogleDocsRawTable;
+  sectionBreak?: Record<string, unknown>;
+}
+
+export interface GoogleDocsRawDocumentTab {
+  body?: {
+    content?: GoogleDocsRawStructuralElement[];
+  };
+  childTabs?: GoogleDocsRawDocumentTab[];
+}
+
+export interface GoogleDocsRawDocument {
+  title?: string;
+  body?: {
+    content?: GoogleDocsRawStructuralElement[];
+  };
+  tabs?: GoogleDocsRawDocumentTab[];
+  inlineObjects?: Record<string, GoogleDocsRawInlineObject>;
+  [key: string]: unknown;
 }
