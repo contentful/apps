@@ -98,15 +98,15 @@ function Dialog() {
 
   /** Copies hours from one day to all days of the week */
   const handleCopyToAll = useCallback(
-    (sourceDay: DayOfWeek) => copyHoursTodays(sourceDay, [...DAYS_OF_WEEK]),
-    [copyHoursTodays]
+    (sourceDay: DayOfWeek) => copyHoursToDays(sourceDay, [...DAYS_OF_WEEK]),
+    [copyHoursToDays]
   );
 
   /** Copies hours from one day to weekdays only (Mon-Fri) */
   const handleCopyToWeekdays = useCallback(
     (sourceDay: DayOfWeek) =>
-      copyHoursTodays(sourceDay, ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']),
-    [copyHoursTodays]
+      copyHoursToDays(sourceDay, ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']),
+    [copyHoursToDays]
   );
 
   const handleSetAllClosed = useCallback(() => {

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Checkbox, Flex, Pill, Text } from '@contentful/f36-components';
 import { ChevronDownIcon, ChevronUpIcon, SearchIcon } from '@contentful/f36-icons';
+import tokens from '@contentful/f36-tokens';
 
 interface ContentTypeOption {
   id: string;
