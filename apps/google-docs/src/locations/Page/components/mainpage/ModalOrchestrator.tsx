@@ -13,7 +13,9 @@ import {
   DocumentTabProps,
   DocumentScopeResumePayload,
   DocumentScopeSuspendPayload,
+  PreviewPayload,
   RunStatus,
+  WorkflowRunResult,
 } from '../../../../utils/types';
 import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
 import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
@@ -33,10 +35,12 @@ enum FlowStep {
 interface ModalOrchestratorProps {
   sdk: PageAppSDK;
   oauthToken: string;
+  onPreviewReady: (payload: PreviewPayload) => void;
+  onResetToMain: () => void;
 }
 
 export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrchestratorProps>(
-  ({ sdk, oauthToken }, ref) => {
+  ({ sdk, oauthToken, onPreviewReady, onResetToMain }, ref) => {
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
     const [isErrorPreviewModalOpen, setIsErrorPreviewModalOpen] = useState(false);
@@ -86,6 +90,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const closeModalAndReset = (setOpen: (open: boolean) => void) => () => {
       setOpen(false);
       resetProgress();
+      onResetToMain();
     };
 
     const showWorkflowError = () => {
@@ -130,11 +135,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setFlowStep(null);
     };
 
-    const handleWorkflowResult = (workflowRun: {
-      runId: string;
-      status: RunStatus.PENDING_REVIEW | RunStatus.COMPLETED;
-      suspendPayload?: DocumentScopeSuspendPayload;
-    }) => {
+    const handleWorkflowResult = (workflowRun: WorkflowRunResult) => {
       setActiveRunId(workflowRun.runId);
 
       if (workflowRun.status === RunStatus.PENDING_REVIEW) {
@@ -142,6 +143,8 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
+      const payload = workflowRun.payload ?? { documentTitle: '', data: {} };
+      onPreviewReady(payload);
       setFlowStep(null);
     };
 
@@ -276,7 +279,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           size={'large'}
           shouldCloseOnOverlayClick={false}
           shouldCloseOnEscapePress={flowStep !== FlowStep.LOADING}>
-          {renderFlowStep()}
+          {renderFlowStep}
         </Modal>
 
         <ConfirmCancelModal
