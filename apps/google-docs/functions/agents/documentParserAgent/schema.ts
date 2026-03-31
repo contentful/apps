@@ -32,6 +32,10 @@ export const EntryToCreateSchema = z.object({
 // Schema for an asset to be created in Contentful
 export const AssetToCreateSchema = z.object({
   url: z.string().describe('The URL of the asset (image, video, etc.)'),
+  placeholderId: z
+    .string()
+    .optional()
+    .describe('Stable id used in entry fields / rich text (e.g. img-0) before upload'),
   title: z.string().optional().describe('Title for the asset'),
   altText: z.string().optional().describe('Alt text for the asset'),
   fileName: z.string().optional().describe('File name for the asset'),

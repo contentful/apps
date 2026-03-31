@@ -2,7 +2,11 @@ import { isReference, type EntryToCreate } from '../../functions/agents/document
 
 const CONTENTFUL_ENTRY_ID = /^[0-9A-Za-z]{22}$/;
 
-const RICH_TEXT_ENTRY_LINK_NODES = new Set(['embedded-entry-block', 'entry-hyperlink']);
+const RICH_TEXT_ENTRY_LINK_NODES = new Set([
+  'embedded-entry-block',
+  'embedded-entry-inline',
+  'entry-hyperlink',
+]);
 
 function isLikelyContentfulEntryId(id: string): boolean {
   return CONTENTFUL_ENTRY_ID.test(id);
