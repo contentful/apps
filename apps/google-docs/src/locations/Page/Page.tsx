@@ -44,7 +44,6 @@ const Page = () => {
 
   const handlePreviewCancel = () => {
     modalOrchestratorRef.current?.resetFlowFromPreviewCancel();
-    setPreviewPayload(null);
   };
 
   return (

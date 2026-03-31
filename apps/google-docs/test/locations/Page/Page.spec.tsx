@@ -33,7 +33,10 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
     ) => {
       const handle = {
         startFlow: vi.fn(),
-        resetFlowFromPreviewCancel: mockResetFlowFromPreviewCancel,
+        resetFlowFromPreviewCancel: () => {
+          mockResetFlowFromPreviewCancel();
+          props.onResetToMain();
+        },
       };
       if (typeof ref === 'function') {
         ref(handle);
