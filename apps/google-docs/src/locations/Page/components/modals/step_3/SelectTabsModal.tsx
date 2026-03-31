@@ -17,15 +17,15 @@ import {
   pillsContainer,
 } from './SelectTabsModal.styles';
 import { useMultiselectScrollReflow } from '../../../../../hooks/useMultiselectReflow';
-import { DocumentTabProps } from '../../../../../utils/types';
+import { TabOption } from '../../../../../utils/types';
 import { truncateLabel } from '../../../../../utils/utils';
 
 interface SelectTabsModalProps {
-  onContinue: (selectedTabs: DocumentTabProps[]) => void;
+  onContinue: (selectedTabs: TabOption[]) => void;
   onClose: () => void;
-  availableTabs: DocumentTabProps[];
-  selectedTabs: DocumentTabProps[];
-  setSelectedTabs: (tabs: DocumentTabProps[]) => void;
+  availableTabs: TabOption[];
+  selectedTabs: TabOption[];
+  setSelectedTabs: (tabs: TabOption[]) => void;
   useAllTabs: boolean | null;
   setUseAllTabs: (value: boolean | null) => void;
 }
@@ -62,10 +62,10 @@ export const SelectTabsModal = ({
 
     const { checked, value } = e.target;
     if (checked) {
-      const tab = availableTabs.find((t) => t.tabId === value);
+      const tab = availableTabs.find((t) => t.id === value);
       if (tab) setSelectedTabs([...selectedTabs, tab]);
     } else {
-      setSelectedTabs(selectedTabs.filter((t) => t.tabId !== value));
+      setSelectedTabs(selectedTabs.filter((t) => t.id !== value));
     }
   };
 
@@ -97,10 +97,10 @@ export const SelectTabsModal = ({
               <Flex flexDirection="column" gap="spacingS" marginLeft="spacingL" fullWidth>
                 <FormControl isRequired isInvalid={isInvalidSelectionError} marginBottom="none">
                   <FormControl.Label>Document tabs</FormControl.Label>
-                  <Checkbox.Group name="document-tabs" value={selectedTabs.map((t) => t.tabId)}>
+                  <Checkbox.Group name="document-tabs" value={selectedTabs.map((t) => t.id)}>
                     <Multiselect
                       className={multiselect}
-                      currentSelection={selectedTabs.map((tab) => tab.tabTitle)}
+                      currentSelection={selectedTabs.map((tab) => tab.title)}
                       placeholder={'Select one or more'}
                       popoverProps={{
                         listMaxHeight: 300,
@@ -109,12 +109,12 @@ export const SelectTabsModal = ({
                       {availableTabs.map((tab) => (
                         <Multiselect.Option
                           className={multiselectOption}
-                          key={tab.tabId}
-                          value={tab.tabId}
-                          itemId={tab.tabId}
-                          isChecked={selectedTabs.some((selected) => selected.tabId === tab.tabId)}
+                          key={tab.id}
+                          value={tab.id}
+                          itemId={tab.id}
+                          isChecked={selectedTabs.some((selected) => selected.id === tab.id)}
                           onSelectItem={handleSelectTab}>
-                          {tab.tabTitle}
+                          {tab.title}
                         </Multiselect.Option>
                       ))}
                     </Multiselect>
@@ -129,11 +129,9 @@ export const SelectTabsModal = ({
                   <Flex flexWrap="wrap" gap="spacingXs" className={pillsContainer}>
                     {selectedTabs.map((tab) => (
                       <Pill
-                        key={tab.tabId}
-                        label={truncateLabel(tab.tabTitle)}
-                        onClose={() =>
-                          setSelectedTabs(selectedTabs.filter((t) => t.tabId !== tab.tabId))
-                        }
+                        key={tab.id}
+                        label={truncateLabel(tab.title)}
+                        onClose={() => setSelectedTabs(selectedTabs.filter((t) => t.id !== tab.id))}
                       />
                     ))}
                   </Flex>

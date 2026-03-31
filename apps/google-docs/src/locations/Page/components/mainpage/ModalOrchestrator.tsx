@@ -10,9 +10,9 @@ import { ERROR_MESSAGES } from '../../../../utils/constants/messages';
 import { CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS } from '../../../../utils/constants/agent';
 import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 import {
-  DocumentTabProps,
-  DocumentScopeResumePayload,
-  DocumentScopeSuspendPayload,
+  TabOption,
+  ResumePayload,
+  SuspendPayload,
   PreviewPayload,
   RunStatus,
   WorkflowRunResult,
@@ -48,8 +48,8 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const [flowStep, setFlowStep] = useState<FlowStep | null>(null);
     const [documentId, setDocumentId] = useState<string>('');
     const [selectedContentTypes, setSelectedContentTypes] = useState<ContentTypeProps[]>([]);
-    const [availableTabs, setAvailableTabs] = useState<DocumentTabProps[]>([]);
-    const [selectedTabs, setSelectedTabs] = useState<DocumentTabProps[]>([]);
+    const [availableTabs, setAvailableTabs] = useState<TabOption[]>([]);
+    const [selectedTabs, setSelectedTabs] = useState<TabOption[]>([]);
     const [useAllTabs, setUseAllTabs] = useState<boolean | null>(null);
     const [includeImages, setIncludeImages] = useState<boolean | null>(null);
     const [requiresImageSelection, setRequiresImageSelection] = useState(false);
@@ -115,11 +115,11 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       showDiscardConfirmation();
     };
 
-    const showDocumentScopeReview = (suspendPayload?: DocumentScopeSuspendPayload) => {
+    const showDocumentScopeReview = (suspendPayload?: SuspendPayload) => {
       setAvailableTabs(
         (suspendPayload?.tabs ?? []).map((tab) => ({
-          tabId: tab.id ?? '',
-          tabTitle: tab.title ?? '',
+          id: tab.id ?? '',
+          title: tab.title ?? '',
         }))
       );
       setSelectedTabs([]);
@@ -148,22 +148,18 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
-      const payload = workflowRun.payload ?? { documentTitle: '', data: {} };
+      const payload = workflowRun.googleDocPayload ?? { documentTitle: '', data: {} };
       onPreviewReady(payload);
       setFlowStep(null);
     };
 
-    const continueWorkflow = async (
-      resumePayloadOverrides?: Partial<DocumentScopeResumePayload>
-    ) => {
+    const continueWorkflow = async (resumePayloadOverrides?: Partial<ResumePayload>) => {
       if (!activeRunId) {
         throw new Error('Workflow run id is missing for resume.');
       }
 
-      const resumePayload: DocumentScopeResumePayload = {
-        ...(selectedTabs.length > 0
-          ? { selectedTabIds: selectedTabs.map((tab) => tab.tabId) }
-          : {}),
+      const resumePayload: ResumePayload = {
+        ...(selectedTabs.length > 0 ? { selectedTabIds: selectedTabs.map((tab) => tab.id) } : {}),
         ...(includeImages !== null ? { includeImages } : {}),
         ...resumePayloadOverrides,
       };
@@ -198,7 +194,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       }
     };
 
-    const handleSelectTabsContinue = async (selectedTabs: DocumentTabProps[]) => {
+    const handleSelectTabsContinue = async (selectedTabs: TabOption[]) => {
       setSelectedTabs(selectedTabs);
 
       if (requiresImageSelection) {
@@ -207,7 +203,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       }
 
       try {
-        await continueWorkflow({ selectedTabIds: selectedTabs.map((tab) => tab.tabId) });
+        await continueWorkflow({ selectedTabIds: selectedTabs.map((tab) => tab.id) });
       } catch {
         showWorkflowError();
       }

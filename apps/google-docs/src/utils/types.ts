@@ -7,12 +7,6 @@ export enum RunStatus {
   PENDING_REVIEW = 'PENDING_REVIEW',
   DRAFT = 'DRAFT',
 }
-
-export interface DocumentTabProps {
-  tabId: string;
-  tabTitle: string;
-}
-
 export interface AgentRunMessage {
   role: string;
   content?: {
@@ -28,34 +22,31 @@ export interface PreviewPayload {
   data: Record<string, unknown>;
 }
 
-export interface DocTabOption {
+export interface TabOption {
   id: string;
   title: string;
   index?: number;
 }
 
-export interface DocumentScopeSuspendPayload {
+export interface SuspendPayload {
   reason?: string;
   documentId?: string;
   title?: string;
   requiresImageSelection?: boolean;
   requiresTabSelection?: boolean;
   imageCount?: number;
-  inlineObjectCount?: number;
-  positionedObjectCount?: number;
-  tabCount?: number;
-  tabs?: DocTabOption[];
+  tabs?: TabOption[];
 }
 
 export interface WorkflowRunResult {
   status: RunStatus.PENDING_REVIEW | RunStatus.COMPLETED;
   runId: string;
   messages: AgentRunMessage[];
-  suspendPayload?: DocumentScopeSuspendPayload;
-  payload?: PreviewPayload;
+  suspendPayload?: SuspendPayload;
+  googleDocPayload?: PreviewPayload;
 }
 
-export interface DocumentScopeResumePayload {
+export interface ResumePayload {
   includeImages?: boolean;
   selectedTabIds?: string[];
 }
