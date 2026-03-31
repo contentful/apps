@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   Box,
   Button,
@@ -25,14 +25,16 @@ import type { IconCatalogEntry, IconFieldValue, IconWeight } from '../types/icon
 import { formatPositionLabel, ICON_WEIGHT_LABELS } from '../types/icon';
 import type { DialogInvocationParameters, DialogSelectionMode } from '../types/parameters';
 
+const DEFAULT_DIALOG_HEIGHT = 480;
+const MIN_DIALOG_HEIGHT = 360;
+
 const styles = {
   container: css({
     display: 'grid',
-    gridTemplateRows: 'auto auto 1fr auto',
-    height: '680px',
-    maxHeight: 'calc(100vh - 40px)',
+    gridTemplateRows: 'auto auto auto auto',
     minHeight: 0,
     padding: '24px',
+    paddingBottom: '24px',
     boxSizing: 'border-box',
     gap: '20px',
     overflow: 'hidden',
@@ -41,7 +43,7 @@ const styles = {
     width: '100%',
     maxWidth: '760px',
     margin: '0 auto',
-    gridTemplateRows: 'auto auto minmax(0, 1fr) auto',
+    gridTemplateRows: 'auto auto auto auto',
     paddingBottom: '0',
     gap: '12px',
   }),
@@ -74,13 +76,10 @@ const styles = {
     gridTemplateColumns: 'minmax(0, 1fr) 180px',
     gap: '12px',
     alignItems: 'end',
-    '@media(max-width: 720px)': {
-      gridTemplateColumns: 'minmax(0, 1fr)',
-    },
   }),
   controlsSingle: css({
-    gridTemplateColumns: 'minmax(0, 1fr) 180px 180px',
-    '@media(max-width: 640px)': {
+    gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 180px) minmax(0, 180px)',
+    '@media(max-width: 520px)': {
       gridTemplateColumns: 'minmax(0, 1fr)',
     },
   }),
@@ -91,7 +90,7 @@ const styles = {
     minHeight: 0,
     overflow: 'hidden',
     display: 'grid',
-    gridTemplateRows: '72px minmax(0, 1fr)',
+    gridTemplateRows: '56px minmax(0, 1fr)',
     gap: '12px',
   }),
   bodySingle: css({
@@ -102,9 +101,9 @@ const styles = {
     border: '1px solid #cfd9e5',
     borderRadius: '8px',
     backgroundColor: '#f7f9fa',
-    padding: '10px 12px',
-    minHeight: '72px',
-    maxHeight: '72px',
+    padding: '8px 12px',
+    minHeight: '56px',
+    maxHeight: '56px',
     overflowY: 'auto',
     boxSizing: 'border-box',
   }),
@@ -145,7 +144,7 @@ const styles = {
     flex: 1,
   }),
   minControl: css({
-    minWidth: '180px',
+    minWidth: 0,
   }),
   sourceLink: css({
     display: 'inline-flex',
@@ -213,6 +212,12 @@ const Dialog = () => {
     invocationParams?.selectedIconNames ?? (currentValue ? [currentValue.name] : [])
   );
   const [previewIconName, setPreviewIconName] = useState<string | null>(currentValue?.name ?? null);
+  const [dialogHeight, setDialogHeight] = useState(DEFAULT_DIALOG_HEIGHT);
+  const [visibleRows, setVisibleRows] = useState(4);
+  const topSectionRef = useRef<HTMLDivElement>(null);
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const footerRef = useRef<HTMLDivElement>(null);
 
   const catalog = useIconCatalog();
   const scopedCatalog = useMemo(() => {
@@ -227,9 +232,52 @@ const Dialog = () => {
   const { query, setQuery, results } = useIconSearch({ catalog: scopedCatalog });
 
   useEffect(() => {
+    const syncDialogLayout = () => {
+      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+      const viewportOffset = mode === 'multi' ? 320 : 220;
+      const nextDialogHeight = Math.max(
+        MIN_DIALOG_HEIGHT,
+        Math.min(DEFAULT_DIALOG_HEIGHT, viewportHeight - viewportOffset)
+      );
+      const nextVisibleRows =
+        mode === 'multi' ? (nextDialogHeight >= 420 ? 2 : 1) : nextDialogHeight >= 520 ? 4 : 3;
+
+      setDialogHeight(nextDialogHeight);
+      setVisibleRows(nextVisibleRows);
+    };
+
     sdk.window.stopAutoResizer();
-    sdk.window.updateHeight(680);
-  }, [sdk.window]);
+    syncDialogLayout();
+    window.addEventListener('resize', syncDialogLayout);
+
+    return () => {
+      window.removeEventListener('resize', syncDialogLayout);
+    };
+  }, [mode, sdk.window]);
+
+  useLayoutEffect(() => {
+    const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+    const viewportOffset = mode === 'multi' ? 320 : 220;
+    const availableHeight = Math.max(MIN_DIALOG_HEIGHT, viewportHeight - viewportOffset);
+    const measuredHeight =
+      (topSectionRef.current?.offsetHeight ?? 0) +
+      (controlsRef.current?.offsetHeight ?? 0) +
+      (bodyRef.current?.offsetHeight ?? 0) +
+      (footerRef.current?.offsetHeight ?? 0) +
+      24 + // top padding
+      24 + // bottom padding
+      20 + // top to controls gap
+      20 + // controls to body gap
+      20; // body to footer gap
+
+    const nextHeight = Math.min(Math.max(MIN_DIALOG_HEIGHT, measuredHeight), availableHeight);
+
+    if (Math.abs(nextHeight - dialogHeight) > 1) {
+      setDialogHeight(nextHeight);
+    }
+
+    sdk.window.updateHeight(nextHeight);
+  }, [dialogHeight, sdk.window, visibleRows, results.length, mode, selectedIconNames.length]);
 
   const previewCatalogEntry = useMemo(() => {
     const previewName =
@@ -320,7 +368,9 @@ const Dialog = () => {
 
   return (
     <div className={`${styles.container} ${mode === 'single' ? styles.containerSingle : ''}`}>
-      <div className={`${styles.topSection} ${mode === 'single' ? styles.topSectionSingle : ''}`}>
+      <div
+        ref={topSectionRef}
+        className={`${styles.topSection} ${mode === 'single' ? styles.topSectionSingle : ''}`}>
         <Box>
           <Heading marginBottom="spacingS">
             {mode === 'multi' ? 'Choose allowed icons' : 'Select a Phosphor Icon'}
@@ -352,6 +402,7 @@ const Dialog = () => {
       </div>
 
       <div
+        ref={controlsRef}
         className={`${styles.controls} ${
           mode === 'single' ? styles.controlsSingle : styles.controlsMulti
         }`}>
@@ -392,7 +443,7 @@ const Dialog = () => {
         )}
       </div>
 
-      <div className={`${styles.body} ${mode === 'single' ? styles.bodySingle : ''}`}>
+      <div ref={bodyRef} className={`${styles.body} ${mode === 'single' ? styles.bodySingle : ''}`}>
         {mode === 'multi' ? (
           <div className={styles.chipTray}>
             {selectedIconNames.length > 0 ? (
@@ -423,12 +474,14 @@ const Dialog = () => {
               mode === 'multi' ? selectedIconNames : selectedIcon ? [selectedIcon.name] : []
             }
             onSelect={handleSelect}
-            maxVisibleRows={mode === 'single' ? 6 : 4}
+            maxVisibleRows={visibleRows}
           />
         </div>
       </div>
 
-      <div className={`${styles.footer} ${mode === 'single' ? styles.footerSingle : ''}`}>
+      <div
+        ref={footerRef}
+        className={`${styles.footer} ${mode === 'single' ? styles.footerSingle : ''}`}>
         <Text fontColor="gray600">
           {mode === 'multi' ? `${selectedIconNames.length} icon(s) selected` : ''}
         </Text>
