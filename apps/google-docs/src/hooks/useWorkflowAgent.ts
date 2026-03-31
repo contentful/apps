@@ -16,7 +16,7 @@ import {
   resumeWorkflowRun,
   startAgentRun,
 } from '../services/agents-api';
-import { validateReviewedCreationShape } from '../utils/reviewedCreationPayload';
+import { validatePayloadShape } from '../utils/previewPayload';
 
 interface UseWorkflowParams {
   sdk: PageAppSDK;
@@ -60,13 +60,13 @@ const getAgentPayload = (runData: AgentRunData): string | null => {
   return textPart?.text || null;
 };
 
-const reviewedPayloadFromCompletedRun = (runData: AgentRunData): PreviewPayload => {
+const previewPayloadFromCompletedRun = (runData: AgentRunData): PreviewPayload => {
   const raw = runData.metadata?.payload;
   if (raw == null) {
     throw new Error('Workflow completed but result payload was missing.');
   }
 
-  return validateReviewedCreationShape(raw);
+  return validatePayloadShape(raw);
 };
 
 const getRunErrorMessage = (runData: AgentRunData): string => {
@@ -117,7 +117,7 @@ const getWorkflowRunResult = (
         status,
         runId: threadId,
         messages,
-        payload: reviewedPayloadFromCompletedRun(runData),
+        payload: previewPayloadFromCompletedRun(runData),
       };
     }
 

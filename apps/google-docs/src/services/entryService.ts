@@ -7,8 +7,8 @@ import {
   separateReferenceFields,
   resolveReferences,
 } from './referenceResolution';
-import { ReviewedCreationPayload } from '../utils/types';
-import { orderEntriesByCreationOrder } from '../utils/reviewedCreationPayload';
+import { PreviewPayload } from '../utils/types';
+import { orderEntriesByCreationOrder } from '../utils/previewPayload';
 import { mapFieldValuesToSpaceDefaultLocale } from '../utils/remapEntryLocales';
 
 export interface EntryCreationResult {
@@ -160,7 +160,7 @@ async function createAssetsFromAgentOutput(
 
 export async function createEntriesFromReviewedPayload(
   sdk: PageAppSDK | ConfigAppSDK,
-  payload: ReviewedCreationPayload
+  payload: PreviewPayload
 ): Promise<EntryCreationResult> {
   const orderedEntries = orderEntriesByCreationOrder(
     payload.entries,

@@ -13,8 +13,17 @@ const mockStartWorkflow = vi.fn();
 const mockResumeWorkflow = vi.fn();
 
 const mockWorkflowPayload = {
-  documentTitle: 'Mock Preview Title',
-  data: { source: 'workflow' },
+  entries: [],
+  assets: [],
+  normalizedDocument: {
+    documentId: 'mock-doc-id',
+    title: 'Mock Preview Title',
+    designValues: [],
+    contentBlocks: [],
+    images: [],
+    tables: [],
+    assets: [],
+  },
 } satisfies PreviewPayload;
 
 vi.mock('../../../../../src/locations/Page/components/modals/step_1/SelectDocumentModal', () => ({

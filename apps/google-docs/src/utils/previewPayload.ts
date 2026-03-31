@@ -2,7 +2,7 @@ import type {
   AssetToCreate,
   EntryToCreate,
 } from '../../functions/agents/documentParserAgent/schema';
-import type { ReviewedCreationPayload, ReviewedReferenceGraph } from './types';
+import type { PreviewPayload, ReviewedReferenceGraph } from './types';
 
 /** Order entries by `referenceGraph.creationOrder`, then append any missing entries (original order). */
 export function orderEntriesByCreationOrder(
@@ -61,7 +61,7 @@ function isAssetToCreateShape(value: unknown): value is AssetToCreate {
   return isRecord(value) && typeof value.url === 'string' && value.url.trim() !== '';
 }
 
-export function validateReviewedCreationShape(payload: unknown): ReviewedCreationPayload {
+export function validatePayloadShape(payload: unknown): PreviewPayload {
   if (!isRecord(payload)) {
     throw new Error('Reviewed payload must be a JSON object.');
   }
@@ -112,9 +112,12 @@ export function validateReviewedCreationShape(payload: unknown): ReviewedCreatio
     };
   }
 
+  const normalizedDocument = isRecord(payload.normalizedDocument) ? payload.normalizedDocument : {};
+
   return {
     entries: payload.entries as EntryToCreate[],
     assets,
-    referenceGraph,
+    referenceGraph: referenceGraph ?? {},
+    normalizedDocument,
   };
 }

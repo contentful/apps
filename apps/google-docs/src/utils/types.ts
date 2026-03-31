@@ -36,7 +36,8 @@ export interface DocumentTabProps {
 export interface PreviewPayload {
   entries: EntryToCreate[];
   assets: AssetToCreate[];
-  referenceGraph?: ReviewedReferenceGraph;
+  referenceGraph: ReviewedReferenceGraph;
+  normalizedDocument: Record<string, unknown>;
 }
 
 export interface ReviewedReferenceGraph {
@@ -59,13 +60,19 @@ export interface DocumentScopeSuspendPayload {
   tabs?: DocTabOption[];
 }
 
-export interface WorkflowRunResult {
-  status: RunStatus.PENDING_REVIEW | RunStatus.COMPLETED;
-  runId: string;
-  messages: AgentRunMessage[];
-  suspendPayload?: DocumentScopeSuspendPayload;
-  payload?: PreviewPayload;
-}
+export type WorkflowRunResult =
+  | {
+      status: RunStatus.PENDING_REVIEW;
+      runId: string;
+      messages: AgentRunMessage[];
+      suspendPayload: DocumentScopeSuspendPayload;
+    }
+  | {
+      status: RunStatus.COMPLETED;
+      runId: string;
+      messages: AgentRunMessage[];
+      payload: PreviewPayload;
+    };
 
 export interface DocumentScopeResumePayload {
   includeImages?: boolean;

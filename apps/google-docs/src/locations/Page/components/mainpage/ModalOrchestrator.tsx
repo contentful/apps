@@ -143,8 +143,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
-      const payload = workflowRun.payload ?? { documentTitle: '', data: {} };
-      onPreviewReady(payload);
+      onPreviewReady(workflowRun.payload);
       setFlowStep(null);
     };
 

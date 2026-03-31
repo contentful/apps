@@ -62,6 +62,7 @@ const Page = () => {
             onOauthTokenChange={handleOauthTokenChange}
             onLoadingStateChange={handleOAuthLoadingStateChange}
             onSelectFile={handleSelectFile}
+            sdk={sdk}
           />
         )}
       </Layout>

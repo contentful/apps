@@ -2,6 +2,9 @@ import { ArrowRightIcon } from '@contentful/f36-icons';
 import { Button, Card, Flex, Heading, Layout, Note, Paragraph } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { OAuthConnector } from './OAuthConnector';
+import { createEntriesFromReviewedPayload } from '../../../../services/entryService';
+import { creationPayloadMock } from '../../../../mocks/previewPayloadSample';
+import { PageAppSDK } from '@contentful/app-sdk';
 
 interface MainPageViewProps {
   oauthToken: string;
@@ -11,6 +14,7 @@ interface MainPageViewProps {
   onOauthTokenChange: (token: string) => void;
   onLoadingStateChange: (isLoading: boolean) => void;
   onSelectFile: () => void;
+  sdk: PageAppSDK;
 }
 
 export const MainPageView = ({
@@ -21,6 +25,7 @@ export const MainPageView = ({
   onOauthTokenChange,
   onLoadingStateChange,
   onSelectFile,
+  sdk,
 }: MainPageViewProps) => {
   return (
     <Layout.Body>
@@ -58,6 +63,13 @@ export const MainPageView = ({
               onClick={onSelectFile}
               endIcon={<ArrowRightIcon />}>
               Select your file
+            </Button>
+
+            <Button
+              variant="secondary"
+              isDisabled={!oauthToken}
+              onClick={() => createEntriesFromReviewedPayload(sdk, creationPayloadMock)}>
+              Create entries from saved preview payload
             </Button>
           </Flex>
         </Card>
