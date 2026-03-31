@@ -11,13 +11,6 @@ import { ReviewedCreationPayload } from '../utils/types';
 import { orderEntriesByCreationOrder } from '../utils/reviewedCreationPayload';
 import { mapFieldValuesToSpaceDefaultLocale } from '../utils/remapEntryLocales';
 
-/**
- * Service for creating entries in Contentful using the Contentful Management API
- *
- * This service takes the output from the Document Parser Agent (which extracts entries from documents)
- * and creates them in Contentful using the CMA client from the SDK.
- */
-
 export interface EntryCreationResult {
   createdEntries: EntryProps[];
   errors: Array<{
@@ -27,11 +20,6 @@ export interface EntryCreationResult {
   }>;
 }
 
-/**
- * Creates an asset quickly without waiting for processing/publishing.
- * This is optimized for speed to avoid timeouts when processing many images.
- * The asset will be processed and published by Contentful in the background.
- */
 async function createAssetFromUrlFast(
   cma: PageAppSDK['cma'] | ConfigAppSDK['cma'],
   spaceId: string,
@@ -40,24 +28,10 @@ async function createAssetFromUrlFast(
   defaultLocale: string,
   metadata?: { title?: string; altText?: string; fileName?: string; contentType?: string }
 ) {
-  // Validate inputs
-  if (!cma) {
-    throw new Error('CMA client is required');
-  }
-  if (!spaceId || spaceId.trim().length === 0) {
-    throw new Error('spaceId is required and must be a non-empty string');
-  }
-  if (!environmentId || environmentId.trim().length === 0) {
-    throw new Error('environmentId is required and must be a non-empty string');
-  }
-
-  // Use metadata if provided, otherwise extract from URL
   const fileName = metadata?.fileName || 'image.jpg';
   const contentType = metadata?.contentType || 'image/jpeg';
   const title = metadata?.title || metadata?.altText || 'Image';
 
-  // Create asset without waiting for processing/publishing
-  // Contentful will process and publish it in the background
   const asset = await cma.asset.create(
     { spaceId, environmentId },
     {
@@ -74,14 +48,9 @@ async function createAssetFromUrlFast(
     }
   );
 
-  // Trigger processing in the background (don't wait for it)
   cma.asset.processForAllLocales({ spaceId, environmentId }, asset).catch(() => {
     // Silently fail - processing will be retried by Contentful
   });
-
-  // Note: Assets are created as drafts. They can be published later if needed.
-  // Entries can reference draft assets without issues. Publishing is only required
-  // if assets need to be accessible via the Delivery API (public access).
 
   return asset;
 }
@@ -110,7 +79,6 @@ async function transformFieldsForContentType(
           urlToAssetId && Object.keys(urlToAssetId).length > 0 ? urlToAssetId : undefined;
         perLocale[locale] = normalizeAgentRichTextJson(value, assetMap);
       } else {
-        // Apply field validation rules before setting the value
         perLocale[locale] = value;
       }
     }
@@ -121,13 +89,6 @@ async function transformFieldsForContentType(
   return transformed;
 }
 
-/**
- * Creates assets from the agent output and builds a lookup map for Rich Text asset links.
- *
- * Keys include:
- * - placeholderId (e.g. img-0) when the agent sets it on the asset
- * - normalizedUrl, composite URL+alt, and drawing variant for any legacy lookups
- */
 async function createAssetsFromAgentOutput(
   cma: PageAppSDK['cma'] | ConfigAppSDK['cma'],
   spaceId: string,
@@ -184,14 +145,11 @@ async function createAssetsFromAgentOutput(
       urlToAssetId[placeholderId] = assetId;
     }
 
-    // Map normalized URL (primary lookup)
     urlToAssetId[normalizedUrl] = assetId;
 
-    // Map composite key: `${normalizedUrl}::${altText || 'image'}`
     const compositeKey = `${normalizedUrl}::${altText || 'image'}`;
     urlToAssetId[compositeKey] = assetId;
 
-    // Map drawing-specific key if applicable
     if (altText.toLowerCase().includes('drawing')) {
       urlToAssetId[`${normalizedUrl}::drawing`] = assetId;
     }
@@ -218,28 +176,9 @@ export async function createEntriesFromReviewedPayload(
 }
 
 /**
- * Creates multiple entries in Contentful using a two-pass approach
- *
- * This function handles:
- * 1. ASSET CREATION: Create all assets from agent output first (assets are identified by the AI agent, not parsed from RichText)
- * 2. PASS 1: Create all entries WITHOUT reference fields (Contentful generates IDs)
- * 3. Build tempId -> realId mapping from created entries
- * 4. PASS 2: Update entries that have references with resolved reference fields
- * 5. Field transformation based on content type definitions
- *
- * The two-pass approach allows:
- * - Contentful to generate all entry IDs (no pre-generated UUIDs)
- * - Support for circular references (A -> B -> C -> A)
- * - tempIds remain ephemeral (only used during creation process)
- *
- * Assets are created from the agent's output array, not parsed algorithmically from RichText fields.
- * The AI agent identifies all images/drawings in the document and returns them in the assets array.
- *
- * @param sdk - Contentful SDK instance (PageAppSDK or ConfigAppSDK)
- * @param entries - Array of entries from Document Parser Agent output
- * @param contentTypeIds - Array of content type IDs to fetch and use
- * @param assets - Array of assets from Document Parser Agent output (optional, defaults to empty array)
- * @returns Promise resolving to creation results with entries and errors
+ * Creates entries in two passes: without reference fields, then patches references
+ * (including Rich Text entry links). Assets from `assets` are created first; Rich Text
+ * asset placeholders use the resulting id map in both passes.
  */
 export async function createEntriesFromPreview(
   sdk: PageAppSDK | ConfigAppSDK,
@@ -252,7 +191,6 @@ export async function createEntriesFromPreview(
   const cma = sdk.cma;
   const defaultLocale = sdk.locales.default;
 
-  // Fetch content types
   const contentTypesResponse = await cma.contentType.getMany({
     spaceId,
     environmentId,
@@ -275,8 +213,6 @@ export async function createEntriesFromPreview(
 
   // Map to track tempId -> actual Contentful entry ID (built during Pass 1)
   const tempIdToEntryId = new Map<string, string>();
-
-  // Track created entries and their original entry data (for Pass 2)
   const createdEntriesMap = new Map<string, { created: EntryProps; original: EntryToCreate }>();
 
   const createdEntries: EntryProps[] = [];
@@ -308,7 +244,6 @@ export async function createEntriesFromPreview(
         assetMapForTransform
       );
 
-      // Create the entry in Contentful (let Contentful generate the ID)
       const createdEntry = await cma.entry.create(
         { spaceId, environmentId, contentTypeId: entry.contentTypeId },
         { fields: transformedFields }
@@ -342,13 +277,10 @@ export async function createEntriesFromPreview(
     try {
       const contentType = contentTypes.find((ct) => ct.sys.id === original.contentTypeId);
 
-      // Extract only the reference fields
       const { refFields } = separateReferenceFields(original.fields);
 
       // Resolve references (now all IDs are known)
       const resolvedRefFields = resolveReferences(refFields, tempIdToEntryId);
-
-      // Transform fields for content type
       const transformedRefFields = await transformFieldsForContentType(
         resolvedRefFields,
         contentType,
@@ -369,7 +301,6 @@ export async function createEntriesFromPreview(
         { ...latestEntry, fields: updatedFields }
       );
 
-      // Update the entry in our results
       const index = createdEntries.findIndex((e) => e.sys.id === entryId);
       if (index !== -1) {
         createdEntries[index] = updatedEntry;

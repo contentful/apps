@@ -58,16 +58,18 @@ function isArrayOfStandaloneRefs(value: unknown): value is unknown[] {
   );
 }
 
-function isRichTextDocument(value: unknown): boolean {
-  return (
-    value !== null &&
-    typeof value === 'object' &&
-    !Array.isArray(value) &&
-    (value as Record<string, unknown>).nodeType === 'document'
-  );
+/** CMA document or agent payload with a `content` array (often no top-level `nodeType`). */
+function hasRichTextTreeShape(value: unknown): boolean {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+  const o = value as Record<string, unknown>;
+  if (o.nodeType === 'document') {
+    return true;
+  }
+  return Array.isArray(o.content);
 }
 
-/** Temp id for embedded / hyperlink entry targets, if any (only when id is not yet a CMA id). */
 function richTextEmbeddedEntryTempId(node: Record<string, unknown>): string | undefined {
   if (!RICH_TEXT_ENTRY_LINK_NODES.has(String(node.nodeType))) {
     return undefined;
@@ -109,29 +111,33 @@ function resolveEntryLinksInRichTextDocument(
   doc: unknown,
   tempIdToEntryId: Map<string, string>
 ): unknown {
-  const walk = (node: unknown): unknown => {
-    if (!node || typeof node !== 'object') {
-      return node;
+  const walk = (n: unknown): unknown => {
+    if (!n || typeof n !== 'object') {
+      return n;
     }
-    const n = node as Record<string, unknown>;
-    const tempId = richTextEmbeddedEntryTempId(n);
+    const node = n as Record<string, unknown>;
+    const tempId = richTextEmbeddedEntryTempId(node);
 
     const mapChildren = (): unknown =>
-      Array.isArray(n.content) ? { ...n, content: (n.content as unknown[]).map(walk) } : n;
+      Array.isArray(node.content)
+        ? { ...node, content: (node.content as unknown[]).map(walk) }
+        : node;
 
     if (tempId) {
       const entryId = lookupTempId(tempId, tempIdToEntryId);
       if (entryId) {
-        const data = { ...(n.data as Record<string, unknown>) };
+        const data = { ...(node.data as Record<string, unknown>) };
         const target = data.target as Record<string, unknown>;
         const t = { ...target };
         const sys = { ...(t.sys as Record<string, unknown>), id: entryId };
         t.sys = sys;
         data.target = t;
         return {
-          ...n,
+          ...node,
           data,
-          content: Array.isArray(n.content) ? (n.content as unknown[]).map(walk) : n.content,
+          content: Array.isArray(node.content)
+            ? (node.content as unknown[]).map(walk)
+            : node.content,
         };
       }
     }
@@ -142,10 +148,7 @@ function resolveEntryLinksInRichTextDocument(
   return walk(doc);
 }
 
-export function lookupTempId(
-  tempId: string,
-  tempIdToEntryId: Map<string, string>
-): string | undefined {
+function lookupTempId(tempId: string, tempIdToEntryId: Map<string, string>): string | undefined {
   const exact = tempIdToEntryId.get(tempId);
   if (exact) {
     return exact;
@@ -159,14 +162,14 @@ export function lookupTempId(
   return undefined;
 }
 
-export function valueHasReferences(value: unknown): boolean {
+function valueHasReferences(value: unknown): boolean {
   if (standaloneRefTempId(value) !== undefined) {
     return true;
   }
   if (isArrayOfStandaloneRefs(value)) {
     return true;
   }
-  if (isRichTextDocument(value)) {
+  if (hasRichTextTreeShape(value)) {
     return richTextHasUnresolvedEntryLink(value);
   }
   return false;
@@ -225,7 +228,7 @@ export function resolveReferences(
     for (const [locale, value] of Object.entries(localizedValue)) {
       const tempId = standaloneRefTempId(value);
 
-      if (tempId !== undefined && !isRichTextDocument(value)) {
+      if (tempId !== undefined && !hasRichTextTreeShape(value)) {
         const entryId = lookupTempId(tempId, tempIdToEntryId);
         if (entryId) {
           resolvedLocalized[locale] = createEntryLink(entryId);
@@ -242,7 +245,7 @@ export function resolveReferences(
         if (resolvedRefs.length > 0) {
           resolvedLocalized[locale] = resolvedRefs;
         }
-      } else if (isRichTextDocument(value)) {
+      } else if (hasRichTextTreeShape(value)) {
         resolvedLocalized[locale] = resolveEntryLinksInRichTextDocument(value, tempIdToEntryId);
       } else {
         resolvedLocalized[locale] = value;

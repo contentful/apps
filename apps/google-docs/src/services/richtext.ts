@@ -1,7 +1,4 @@
-/**
- * Rich Text helpers for Document Parser Agent output.
- * The agent returns Contentful-shaped JSON (document tree), not Markdown.
- */
+/** Rich Text: accept only CMA-shaped documents; resolve asset placeholder ids after upload. */
 
 export type ContentfulRichTextDocument = {
   nodeType: 'document';
@@ -33,50 +30,62 @@ function deepClone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
-function parseJsonValue(value: string): unknown {
+function parseJsonObject(value: string): Record<string, unknown> | null {
   try {
-    return JSON.parse(value.trim()) as unknown;
+    const parsed = JSON.parse(value.trim()) as unknown;
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return parsed as Record<string, unknown>;
+    }
+    return null;
   } catch {
     return null;
   }
 }
 
-/**
- * Coerce agent output to a plain object: JSON string or already-parsed object.
- */
-function coerceRichTextPayload(value: unknown): Record<string, unknown> | null {
+/** Requires `nodeType: "document"` and a `content` array; optional `data` must be a plain object if present. */
+function parseRichTextDocument(value: unknown): ContentfulRichTextDocument | null {
+  let richTextObject: Record<string, unknown> | null = null;
+
   if (typeof value === 'string') {
-    const parsed = parseJsonValue(value);
-    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-      return parsed as Record<string, unknown>;
-    }
+    richTextObject = parseJsonObject(value);
+  } else {
+    richTextObject = value as Record<string, unknown>;
+  }
+
+  if (
+    !richTextObject ||
+    richTextObject.nodeType !== 'document' ||
+    !Array.isArray(richTextObject.content)
+  ) {
     return null;
   }
-  if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-    return value as Record<string, unknown>;
-  }
-  return null;
+
+  return {
+    nodeType: richTextObject.nodeType,
+    data: richTextObject.data as Record<string, unknown>,
+    content: richTextObject.content as unknown[],
+  };
 }
 
 function resolveAssetPlaceholdersInNodes(
   nodes: unknown[],
   assetIdMap: Record<string, string>
 ): unknown[] {
-  return nodes.map((node) => {
-    if (!node || typeof node !== 'object' || Array.isArray(node)) {
-      return node;
+  return nodes.map((n) => {
+    if (!n || typeof n !== 'object' || Array.isArray(n)) {
+      return n;
     }
-    const n = node as Record<string, unknown>;
-    const nodeType = n.nodeType;
+    const node = n as Record<string, unknown>;
+    const nodeType = node.nodeType;
 
     if (
       typeof nodeType === 'string' &&
       ASSET_LINK_NODE_TYPES.has(nodeType) &&
-      n.data &&
-      typeof n.data === 'object' &&
-      !Array.isArray(n.data)
+      node.data &&
+      typeof node.data === 'object' &&
+      !Array.isArray(node.data)
     ) {
-      const data = n.data as Record<string, unknown>;
+      const data = node.data as Record<string, unknown>;
       const target = data.target;
       if (target && typeof target === 'object' && !Array.isArray(target)) {
         const sys = (target as Record<string, unknown>).sys as Record<string, unknown> | undefined;
@@ -84,7 +93,7 @@ function resolveAssetPlaceholdersInNodes(
           const realId = assetIdMap[sys.id];
           if (realId) {
             return {
-              ...n,
+              ...node,
               data: {
                 ...data,
                 target: {
@@ -92,73 +101,47 @@ function resolveAssetPlaceholdersInNodes(
                   sys: { ...sys, id: realId },
                 },
               },
-              content: Array.isArray(n.content)
-                ? resolveAssetPlaceholdersInNodes(n.content as unknown[], assetIdMap)
-                : n.content,
+              content: Array.isArray(node.content)
+                ? resolveAssetPlaceholdersInNodes(node.content as unknown[], assetIdMap)
+                : node.content,
             };
           }
         }
       }
     }
 
-    if (Array.isArray(n.content)) {
+    if (Array.isArray(node.content)) {
       return {
-        ...n,
-        content: resolveAssetPlaceholdersInNodes(n.content as unknown[], assetIdMap),
+        ...node,
+        content: resolveAssetPlaceholdersInNodes(node.content as unknown[], assetIdMap),
       };
     }
 
-    return n;
+    return node;
   });
 }
 
-/**
- * Normalizes agent Rich Text JSON into a Contentful document and resolves
- * embedded asset placeholder ids (e.g. img-0) using the map from asset creation.
- */
 export function normalizeAgentRichTextJson(
   value: unknown,
   assetIdMap?: Record<string, string>
 ): ContentfulRichTextDocument {
-  const payload = coerceRichTextPayload(value);
-  if (!payload) {
+  const doc = parseRichTextDocument(value);
+  if (!doc) {
     return emptyRichTextDocument();
   }
 
-  const rawContent = payload.content;
-  const contentArray = Array.isArray(rawContent) ? (rawContent as unknown[]) : [];
-
-  let doc: ContentfulRichTextDocument =
-    payload.nodeType === 'document'
-      ? {
-          nodeType: 'document',
-          data:
-            payload.data && typeof payload.data === 'object' && !Array.isArray(payload.data)
-              ? (payload.data as Record<string, unknown>)
-              : {},
-          content: contentArray,
-        }
-      : {
-          nodeType: 'document',
-          data:
-            payload.data && typeof payload.data === 'object' && !Array.isArray(payload.data)
-              ? (payload.data as Record<string, unknown>)
-              : {},
-          content: contentArray,
-        };
-
-  doc = deepClone(doc);
+  let out = deepClone(doc);
 
   if (assetIdMap && Object.keys(assetIdMap).length > 0) {
-    doc = {
-      ...doc,
-      content: resolveAssetPlaceholdersInNodes(doc.content, assetIdMap),
+    out = {
+      ...out,
+      content: resolveAssetPlaceholdersInNodes(out.content, assetIdMap),
     };
   }
 
-  if (!doc.content.length) {
+  if (!out.content.length) {
     return emptyRichTextDocument();
   }
 
-  return doc;
+  return out;
 }

@@ -44,6 +44,10 @@ export const createMockSDK = (
     notifier: mockNotifier as any,
     navigator: mockNavigator as any,
     ...overrides,
+    locales: {
+      default: 'en-US',
+      ...(overrides as Partial<PageAppSDK>)?.locales,
+    },
   } as unknown as PageAppSDK | ConfigAppSDK;
 };
 
