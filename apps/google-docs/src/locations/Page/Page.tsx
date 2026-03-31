@@ -43,8 +43,7 @@ const Page = () => {
   };
 
   const handlePreviewCancel = () => {
-    // TODO: When we cancel we want to tell the Backend to reset the flow and return to the main page
-    // Clear preview state to return to the main page state.
+    modalOrchestratorRef.current?.resetFlowFromPreviewCancel();
     setPreviewPayload(null);
   };
 
