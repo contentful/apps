@@ -273,7 +273,7 @@ describe('createEntriesFromPreviewPayload', () => {
       entries: [],
       assets: [],
       referenceGraph: {},
-      normalizedDocument: {},
+      normalizedDocument: { documentId: '', contentBlocks: [], tables: [] },
       ...overrides,
     };
   }

@@ -12,6 +12,8 @@ const previewPayloadMock: PreviewPayload = {
   normalizedDocument: {
     documentId: 'doc-test',
     title: 'Document from workflow',
+    contentBlocks: [],
+    tables: [],
   },
 };
 

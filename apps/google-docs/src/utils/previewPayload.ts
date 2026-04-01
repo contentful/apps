@@ -2,7 +2,69 @@ import type {
   AssetToCreate,
   EntryToCreate,
 } from '../../functions/agents/documentParserAgent/schema';
-import type { PreviewPayload, ReviewedReferenceGraph } from './types';
+import type {
+  NormalizedDocument,
+  PreviewPayload,
+  ReviewedReferenceGraph,
+  ReviewedReferenceGraphDeferredField,
+  ReviewedReferenceGraphEdge,
+} from './types';
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+const EMPTY_NORMALIZED_DOCUMENT: NormalizedDocument = {
+  documentId: '',
+  contentBlocks: [],
+  tables: [],
+};
+
+/** Shallow parse: coerce top-level fields, default arrays; does not validate nested block/table shape. */
+function parseNormalizedDocument(raw: unknown): NormalizedDocument {
+  if (!isRecord(raw)) {
+    return { ...EMPTY_NORMALIZED_DOCUMENT };
+  }
+  return {
+    documentId: typeof raw.documentId === 'string' ? raw.documentId : '',
+    title: typeof raw.title === 'string' ? raw.title : undefined,
+    designValues: Array.isArray(raw.designValues)
+      ? (raw.designValues as NormalizedDocument['designValues'])
+      : undefined,
+    contentBlocks: Array.isArray(raw.contentBlocks)
+      ? (raw.contentBlocks as NormalizedDocument['contentBlocks'])
+      : [],
+    images: Array.isArray(raw.images) ? (raw.images as NormalizedDocument['images']) : undefined,
+    tables: Array.isArray(raw.tables) ? (raw.tables as NormalizedDocument['tables']) : [],
+    assets: Array.isArray(raw.assets) ? (raw.assets as NormalizedDocument['assets']) : undefined,
+  };
+}
+
+function parseReferenceGraph(raw: unknown): ReviewedReferenceGraph | undefined {
+  if (raw === undefined) {
+    return undefined;
+  }
+  if (!isRecord(raw)) {
+    throw new Error('referenceGraph must be an object when present.');
+  }
+  const creationOrder = raw.creationOrder;
+  if (creationOrder !== undefined && !Array.isArray(creationOrder)) {
+    throw new Error('referenceGraph.creationOrder must be an array when present.');
+  }
+  return {
+    edges: Array.isArray(raw.edges)
+      ? (raw.edges as unknown as ReviewedReferenceGraphEdge[])
+      : undefined,
+    creationOrder: Array.isArray(creationOrder)
+      ? creationOrder.filter((id): id is string => typeof id === 'string')
+      : undefined,
+    deferredFields: Array.isArray(raw.deferredFields)
+      ? (raw.deferredFields as unknown as ReviewedReferenceGraphDeferredField[])
+      : undefined,
+    hasCircularDependency:
+      typeof raw.hasCircularDependency === 'boolean' ? raw.hasCircularDependency : undefined,
+  };
+}
 
 /** Order entries by `referenceGraph.creationOrder`, then append any missing entries (original order). */
 export function orderEntriesByCreationOrder(
@@ -46,10 +108,6 @@ export function orderEntriesByCreationOrder(
   }
 
   return ordered;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 /** Per EntryToCreateSchema: each field is `record(locale -> value)`; locale keys must be non-empty strings. */
@@ -107,28 +165,9 @@ export function validatePayloadShape(payload: unknown): PreviewPayload {
     }
   }
 
-  let referenceGraph: ReviewedReferenceGraph | undefined;
-  if (payload.referenceGraph !== undefined) {
-    if (!isRecord(payload.referenceGraph)) {
-      throw new Error('referenceGraph must be an object when present.');
-    }
-    const creationOrder = payload.referenceGraph.creationOrder;
-    if (creationOrder !== undefined && !Array.isArray(creationOrder)) {
-      throw new Error('referenceGraph.creationOrder must be an array when present.');
-    }
-    const rg = payload.referenceGraph;
-    referenceGraph = {
-      edges: Array.isArray(rg.edges) ? rg.edges : undefined,
-      creationOrder: Array.isArray(creationOrder)
-        ? creationOrder.filter((id): id is string => typeof id === 'string')
-        : undefined,
-      deferredFields: Array.isArray(rg.deferredFields) ? rg.deferredFields : undefined,
-      hasCircularDependency:
-        typeof rg.hasCircularDependency === 'boolean' ? rg.hasCircularDependency : undefined,
-    };
-  }
+  const referenceGraph = parseReferenceGraph(payload.referenceGraph);
 
-  const normalizedDocument = isRecord(payload.normalizedDocument) ? payload.normalizedDocument : {};
+  const normalizedDocument = parseNormalizedDocument(payload.normalizedDocument);
 
   return {
     entries: payload.entries as EntryToCreate[],
