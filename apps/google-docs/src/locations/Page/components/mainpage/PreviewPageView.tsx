@@ -10,9 +10,10 @@ interface PreviewPageViewProps {
 }
 
 export const PreviewPageView = ({ payload, onCancel }: PreviewPageViewProps) => {
-  const rawTitle = payload.normalizedDocument?.title;
-  const docTitle = typeof rawTitle === 'string' ? rawTitle : undefined;
-  const title = docTitle && docTitle.trim().length > 0 ? docTitle : 'Selected document';
+  const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
+
+  const rawTitle = payload.normalizedDocument?.title as string | undefined;
+  const title = rawTitle?.trim() ? rawTitle : 'Selected document';
 
   return (
     <>
