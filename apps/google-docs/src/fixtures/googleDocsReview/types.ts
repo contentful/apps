@@ -35,6 +35,19 @@ export interface FixtureTable {
   imageIds: string[];
 }
 
+export interface FixtureNormalizedImage {
+  id: string;
+  url: string;
+  altText?: string;
+  title?: string;
+  fileName?: string;
+  contentType?: string;
+  width?: number;
+  height?: number;
+  blockId?: string;
+  tableId?: string;
+}
+
 export interface FixtureNormalizedDocument {
   documentId: string;
   title?: string;
@@ -45,18 +58,7 @@ export interface FixtureNormalizedDocument {
     appliesTo: string[];
   }>;
   contentBlocks: FixtureContentBlock[];
-  images?: Array<{
-    id: string;
-    url: string;
-    altText?: string;
-    title?: string;
-    fileName?: string;
-    contentType?: string;
-    width?: number;
-    height?: number;
-    blockId?: string;
-    tableId?: string;
-  }>;
+  images?: FixtureNormalizedImage[];
   tables: FixtureTable[];
   assets?: Array<{
     url: string;
