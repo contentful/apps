@@ -9,6 +9,7 @@ import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
 } from './components/mainpage/ModalOrchestrator';
+import { SimpleReviewScreen } from './components/review-prototype/SimpleReviewScreen';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -16,6 +17,8 @@ const Page = () => {
   const [oauthToken, setOauthToken] = useState<string>('');
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
   const [isOAuthLoading, setIsOAuthLoading] = useState(true);
+  // Temporary state for development
+  const [isMappingPrototypeVisible, setIsMappingPrototypeVisible] = useState(false);
 
   const handleOauthTokenChange = (token: string) => {
     setOauthToken(token);
@@ -33,10 +36,19 @@ const Page = () => {
     modalOrchestratorRef.current?.startFlow();
   };
 
+  // Temporary component for development
+  if (isMappingPrototypeVisible) {
+    return <SimpleReviewScreen onBack={() => setIsMappingPrototypeVisible(false)} />;
+  }
+
   return (
     <>
       <Layout variant="fullscreen" withBoxShadow={true} offsetTop={10}>
         <Layout.Body>
+          {/* Temporary button for development */}
+          <Button onClick={() => setIsMappingPrototypeVisible((prev) => !prev)}>
+            Open mock document outline
+          </Button>
           <Flex
             flexDirection="column"
             gap="spacingXl"
