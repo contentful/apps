@@ -145,7 +145,9 @@ export default class Jira extends React.Component<Props, State> {
     const res = await this.props.client.getIssuesForEntry(this.props.sdk.ids);
     const pendingIssues = this.getPendingIssues();
     const pendingIssueKeys = new Set(res.issues.map((issue) => issue.key));
-    const unresolvedPendingIssues = pendingIssues.filter((issue) => !pendingIssueKeys.has(issue.key));
+    const unresolvedPendingIssues = pendingIssues.filter(
+      (issue) => !pendingIssueKeys.has(issue.key)
+    );
 
     let issues: FormattedIssue[] = [];
 
