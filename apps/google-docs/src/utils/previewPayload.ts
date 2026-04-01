@@ -24,7 +24,9 @@ export function orderEntriesByCreationOrder(
   const placed = new Set<string>();
 
   // Ids in creationOrder that do not match any entry are ignored (they might be stale or from an older graph).
+  // Duplicate ids in creationOrder only place the entry once.
   for (const id of creationOrder) {
+    if (placed.has(id)) continue;
     const e = byTempId.get(id);
     if (e) {
       ordered.push(e);
@@ -50,10 +52,24 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+/** Per EntryToCreateSchema: each field is `record(locale -> value)`; locale keys must be non-empty strings. */
+function isLocalizedFieldMapShape(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  for (const locale of Object.keys(value)) {
+    if (locale.trim() === '') return false;
+  }
+  return true;
+}
+
 function isEntryToCreateShape(value: unknown): value is EntryToCreate {
   if (!isRecord(value)) return false;
   if (typeof value.contentTypeId !== 'string' || value.contentTypeId.trim() === '') return false;
   if (!isRecord(value.fields)) return false;
+  for (const localized of Object.values(value.fields)) {
+    if (!isLocalizedFieldMapShape(localized)) {
+      return false;
+    }
+  }
   return true;
 }
 
@@ -73,7 +89,7 @@ export function validatePayloadShape(payload: unknown): PreviewPayload {
   for (const item of payload.entries) {
     if (!isEntryToCreateShape(item)) {
       throw new Error(
-        'Each entry must include contentTypeId (string) and fields (object with locale keys).'
+        'Each entry must include contentTypeId (non-empty string) and fields where every field maps locale codes (non-empty strings) to values.'
       );
     }
   }
