@@ -166,6 +166,29 @@ describe('ModalOrchestrator', () => {
     });
   });
 
+  it('calls onResetToMain and clears flow state when resetFlowFromPreviewCancel is invoked', async () => {
+    const ref = createRef<ModalOrchestratorHandle>();
+    render(<ModalOrchestrator ref={ref} {...defaultProps} />);
+
+    await act(async () => {
+      ref.current?.startFlow();
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Pick document' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Select content type(s)' })).toBeTruthy();
+    });
+
+    await act(async () => {
+      ref.current?.resetFlowFromPreviewCancel();
+    });
+
+    await waitFor(() => {
+      expect(defaultProps.onResetToMain).toHaveBeenCalledTimes(1);
+      expect(screen.queryByRole('heading', { name: 'Select content type(s)' })).toBeNull();
+    });
+  });
+
   it('resets flow when confirming discard in ConfirmCancelModal', async () => {
     const ref = createRef<ModalOrchestratorHandle>();
     render(<ModalOrchestrator ref={ref} {...defaultProps} />);

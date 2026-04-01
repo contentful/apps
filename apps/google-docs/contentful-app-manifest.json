@@ -10,46 +10,7 @@
       "component": "ConfigScreen"
     }
   ],
-  "parameters": {
-    "installation": [
-      {
-        "id": "openAiApiKey",
-        "type": "Secret",
-        "name": "OpenAI API Key",
-        "description": "API Key for the app to use the OpenAI API."
-      }
-    ]
-  },
   "functions": [
-    {
-      "id": "createPreview",
-      "name": "Create Preview",
-      "description": "Parses the document and creates preview entries",
-      "path": "functions/handlers/createPreview/createPreviewHandler.js",
-      "entryFile": "functions/handlers/createPreview/createPreviewHandler.ts",
-      "allowNetworks": [
-        "https://api.openai.com",
-        "*.googleapis.com",
-        "https://docs.google.com",
-        "https://jsonplaceholder.typicode.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
-    },
-    {
-      "id": "createContentTypesAnalysis",
-      "name": "Create Content Types Analysis",
-      "description": "Analyzes content type structure and relationships using AI.",
-      "path": "functions/handlers/createPreview/createContentTypesAnalysisHandler.js",
-      "entryFile": "functions/handlers/createPreview/createContentTypesAnalysisHandler.ts",
-      "allowNetworks": [
-        "https://api.openai.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
-    },
     {
       "id": "initiateGdocOauth",
       "name": "Initiate Gdoc OAuth Flow",
