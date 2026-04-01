@@ -15,6 +15,7 @@ const mockResumeWorkflow = vi.fn();
 const mockWorkflowPayload = {
   entries: [],
   assets: [],
+  referenceGraph: {},
   normalizedDocument: {
     documentId: 'mock-doc-id',
     title: 'Mock Preview Title',
@@ -96,7 +97,7 @@ describe('ModalOrchestrator', () => {
       status: RunStatus.COMPLETED,
       runId: 'run-123',
       messages: [],
-      payload: mockWorkflowPayload,
+      googleDocPayload: mockWorkflowPayload,
     } satisfies WorkflowRunResult);
     vi.mocked(mockSdk.cma.space.get).mockResolvedValue({ sys: { id: 'test-space-id' } });
     vi.mocked(mockSdk.cma.environment.get).mockResolvedValue({ sys: { id: 'test-env-id' } });

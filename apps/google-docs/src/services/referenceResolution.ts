@@ -1,16 +1,10 @@
 import { isReference, type EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
 
-const CONTENTFUL_ENTRY_ID = /^[0-9A-Za-z]{22}$/;
-
 const RICH_TEXT_ENTRY_LINK_NODES = new Set([
   'embedded-entry-block',
   'embedded-entry-inline',
   'entry-hyperlink',
 ]);
-
-function isLikelyContentfulEntryId(id: string): boolean {
-  return CONTENTFUL_ENTRY_ID.test(id);
-}
 
 function createEntryLink(entryId: string): {
   sys: { type: 'Link'; linkType: 'Entry'; id: string };
@@ -42,9 +36,6 @@ function standaloneRefTempId(value: unknown): string | undefined {
     typeof s.id !== 'string' ||
     s.id.length === 0
   ) {
-    return undefined;
-  }
-  if (isLikelyContentfulEntryId(s.id)) {
     return undefined;
   }
   return s.id;
@@ -82,12 +73,7 @@ function richTextEmbeddedEntryTempId(node: Record<string, unknown>): string | un
     return undefined;
   }
   const sys = (target as Record<string, unknown>).sys as Record<string, unknown> | undefined;
-  if (
-    sys?.type !== 'Link' ||
-    sys.linkType !== 'Entry' ||
-    typeof sys.id !== 'string' ||
-    isLikelyContentfulEntryId(sys.id)
-  ) {
+  if (sys?.type !== 'Link' || sys.linkType !== 'Entry' || typeof sys.id !== 'string') {
     return undefined;
   }
   return sys.id;

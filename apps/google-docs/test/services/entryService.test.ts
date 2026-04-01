@@ -1,10 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { PageAppSDK } from '@contentful/app-sdk';
 import type { EntryProps, ContentTypeProps } from 'contentful-management';
-import { createEntriesFromPreview, createEntriesFromPreviewPayload } from './entryService';
+import {
+  createEntriesFromPreview,
+  createEntriesFromPreviewPayload,
+} from '../../src/services/entryService';
 import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
-import type { PreviewPayload } from '../utils/types';
-import { createMockSDK } from '../../test/mocks';
+import type { PreviewPayload } from '../../src/utils/types';
+import { createMockSDK } from '../mocks';
 
 describe('createEntriesFromPreview', () => {
   let mockSDK: PageAppSDK;
