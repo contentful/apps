@@ -28,7 +28,8 @@ header img {
     margin-bottom: var(--spacing-xs);
     padding: var(--spacing-xs) var(--spacing-s);
     cursor: default;
-    max-width: fit-content;
+    width: 100%;
+    box-sizing: border-box;
 
     .primary {
       width: 100%;

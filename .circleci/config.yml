@@ -13,8 +13,7 @@ commands:
       - run:
           name: Setup GitHub packages
           command: |
-            echo "//npm.pkg.github.com/:_authToken=${GITHUB_PACKAGES_WRITE_TOKEN}" > ~/.npmrc
-            echo "@contentful:registry=https://npm.pkg.github.com" >> ~/.npmrc
+            echo "//npm.pkg.github.com/:_authToken=${GITHUB_PACKAGES_WRITE_TOKEN}" >> ~/.npmrc
       - run:
           name: Publish packages
           command: npm run publish-packages
@@ -31,6 +30,18 @@ commands:
             fi
             source $BASH_ENV
 
+  run_allow_scripts:
+    description: "Run LavaMoat allow-scripts for packages that use it"
+    steps:
+      - run:
+          name: Run allow-scripts (lifecycle scripts for whitelisted packages)
+          command: |
+            for pkg in apps/bedrock-content-generator; do
+              if [ -f "$pkg/package.json" ] && grep -q '"allow-scripts"' "$pkg/package.json" && [ -d "$pkg/node_modules/@lavamoat/allow-scripts" ]; then
+                (cd "$pkg" && npm run allow-scripts)
+              fi
+            done
+
 jobs:
   apps-test:
     docker:
@@ -46,6 +57,7 @@ jobs:
           command: |
             npm ci
             npm run bootstrap:ci
+      - run_allow_scripts
       - run:
           name: Check for prettier violations
           command: |
@@ -76,6 +88,7 @@ jobs:
           command: |
             npm ci
             npm run bootstrap:ci
+      - run_allow_scripts
       - run:
           name: Build
           command: |
@@ -96,6 +109,7 @@ jobs:
           command: |
             npm ci
             npm run bootstrap:ci
+      - run_allow_scripts
       - run:
           name: Install awscli
           command: |
@@ -137,6 +151,7 @@ jobs:
           command: |
             npm ci
             npm run bootstrap:ci
+      - run_allow_scripts
       - run:
           name: Install awscli
           command: |

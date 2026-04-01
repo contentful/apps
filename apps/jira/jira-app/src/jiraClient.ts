@@ -11,6 +11,7 @@ import {
   CloudProjectResponse,
   CloudProjectsResponse,
   CloudProjectsResource,
+  JiraMyselfApiResponse,
 } from './interfaces';
 enum HTTPMethod {
   GET = 'GET',
@@ -36,7 +37,7 @@ export default class JiraClient {
     this.token = token;
     this.projectId = projectId;
     this.jiraUrl = jiraUrl;
-    this.baseUrl = `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/2`;
+    this.baseUrl = `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/3`;
     this.unauthorizedHandler = unauthorizedHandler;
   }
 
@@ -87,7 +88,12 @@ export default class JiraClient {
   /**Make a JQL query and return an `IssuesResponse` */
   private async makeJqlQuery(jql: string): Promise<IssuesResponse> {
     try {
-      const result = await this.request(`/search?jql=${jql}`);
+      // v3 search/jql does not hydrate fields by default; request fields for formatIssue
+      const result = await this.request(
+        `/search/jql?jql=${jql}&fields=${encodeURIComponent(
+          'summary,priority,assignee,status,issuetype'
+        )}`
+      );
 
       if (result.ok) {
         const { issues }: { issues: JiraIssue[] } = await result.json();
@@ -236,6 +242,46 @@ export default class JiraClient {
     };
   }
 
+  /** Get the current user for the given cloud instance. Proves API connectivity.
+   * Uses GET /rest/api/3/myself (Jira Cloud REST API v3).
+   * @param cloudId The Jira cloud instance id
+   * @param token OAuth token
+   */
+  public static async getMyself(cloudId: string, token: string): Promise<JiraMyselfApiResponse> {
+    try {
+      const result = await window.fetch(
+        `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/3/myself`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+        }
+      );
+
+      if (!result.ok) {
+        throw new Error();
+      }
+
+      const user = await result.json();
+
+      return {
+        error: false,
+        user: {
+          displayName: user.displayName,
+          emailAddress: user.emailAddress,
+          accountId: user.accountId,
+        },
+      };
+    } catch (e) {
+      return {
+        error: true,
+        user: null,
+      };
+    }
+  }
+
   /**Get the current user's cloud resources. This is good for finding which
    * cloudIds the user can connect to.
    * @param token oauth token
@@ -280,7 +326,7 @@ export default class JiraClient {
   ): Promise<CloudProjectResponse> {
     try {
       const result = await window.fetch(
-        `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/2/project/${id}`,
+        `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/3/project/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -318,7 +364,7 @@ export default class JiraClient {
   ): Promise<CloudProjectsResponse> {
     try {
       const result = await window.fetch(
-        `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/2/project/search?query=${query}`,
+        `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/3/project/search?query=${query}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

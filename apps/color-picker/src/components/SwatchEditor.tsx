@@ -1,4 +1,6 @@
-import { Flex, FormControl, IconButton, TextInput } from '@contentful/f36-components';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { DragHandle, Flex, FormControl, IconButton, TextInput } from '@contentful/f36-components';
 import { DeleteIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
@@ -20,21 +22,48 @@ interface SwatchEditorProps {
 }
 
 export default function SwatchEditor({ swatch, onChange, onRemove }: SwatchEditorProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: swatch.id });
+
+  const rowStyle = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   return (
-    <div>
+    <div ref={setNodeRef} style={rowStyle}>
       <FormControl marginBottom="spacingM">
         <Flex gap={tokens.spacingXs} alignItems="center">
-          <FormControl.Label htmlFor="SwatchEditor" className={styles.displayNone}>
+          <DragHandle
+            as="button"
+            type="button"
+            ref={setActivatorNodeRef}
+            {...listeners}
+            {...attributes}
+            label="Reorder color in list"
+            variant="transparent"
+            isActive={isDragging}
+          />
+          <FormControl.Label
+            htmlFor={`SwatchEditorColor-${swatch.id}`}
+            className={styles.displayNone}>
             Color
           </FormControl.Label>
           <input
             value={swatch.value}
             onChange={(e) => onChange({ ...swatch, value: e.target.value })}
-            id="SwatchEditorColor"
+            id={`SwatchEditorColor-${swatch.id}`}
             type="color"
           />
           <TextInput
-            name="SwatchEditorName"
+            name={`SwatchEditorName-${swatch.id}`}
             placeholder="Color name"
             size="small"
             value={swatch.name}

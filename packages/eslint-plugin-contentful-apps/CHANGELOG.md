@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.9](https://github.com/contentful/apps/compare/@contentful/eslint-plugin-contentful-apps@0.1.8...@contentful/eslint-plugin-contentful-apps@0.1.9) (2026-03-24)
+
+### Bug Fixes
+
+- update LICENSE copyright years and add missing LICENSE file [EXT-00] ([#10733](https://github.com/contentful/apps/issues/10733)) ([9698d35](https://github.com/contentful/apps/commit/9698d351999aa34fc422ec9e71a346eb945f5083))
+
+## [0.1.8](https://github.com/contentful/apps/compare/@contentful/eslint-plugin-contentful-apps@0.1.7...@contentful/eslint-plugin-contentful-apps@0.1.8) (2026-03-20)
+
+### Bug Fixes
+
+- restore GitHub Packages publishing for [@contentful](https://github.com/contentful) packages [EXT-00] ([#10709](https://github.com/contentful/apps/issues/10709)) ([46e2959](https://github.com/contentful/apps/commit/46e2959833816488191e352d6c041127103b5b7c))
+
 ## [0.1.7](https://github.com/contentful/apps/compare/@contentful/eslint-plugin-contentful-apps@0.1.6...@contentful/eslint-plugin-contentful-apps@0.1.7) (2024-11-15)
 
 **Note:** Version bump only for package @contentful/eslint-plugin-contentful-apps

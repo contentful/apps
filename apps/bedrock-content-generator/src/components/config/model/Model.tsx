@@ -76,7 +76,9 @@ const Model = ({ credentials, credentialsValid, model, modelValid, region, dispa
     ai.getModels().then((allModels) => {
       const modelsWithRegionAvailability: ModelWithAvailability[] = featuredModels.map(
         (featuredModel) => {
-          const isInRegion = allModels.some((m) => m.modelId === featuredModel.id);
+          const isInFoundationList = allModels.some((m) => m.modelId === featuredModel.id);
+          // Models that use inference profiles may not appear in ListFoundationModels; still run availability check (invoke with profile ID).
+          const isInRegion = isInFoundationList || !!featuredModel.getInvokeId;
 
           return {
             ...featuredModel,
