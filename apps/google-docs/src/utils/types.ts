@@ -71,7 +71,7 @@ export type WorkflowRunResult =
       status: RunStatus.COMPLETED;
       runId: string;
       messages: AgentRunMessage[];
-      payload: PreviewPayload;
+      googleDocPayload: PreviewPayload;
     };
 
 export interface DocumentScopeResumePayload {
