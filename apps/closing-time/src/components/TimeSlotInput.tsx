@@ -59,8 +59,7 @@ function TimeSlotInput({
           ? slot.open
           : [...timeOptions]
               .reverse()
-              .find((option) => compareTimeValues(option.value, nextClose) < 0)?.value ??
-            slot.open;
+              .find((option) => compareTimeValues(option.value, nextClose) < 0)?.value ?? slot.open;
 
       onChange({
         ...slot,
