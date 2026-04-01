@@ -49,12 +49,17 @@ function isArrayOfStandaloneRefs(value: unknown): value is unknown[] {
   );
 }
 
+/** Non-null plain object (excludes arrays); matches typical Rich Text JSON nodes. */
+function isRichTextJsonObject(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
 /** CMA document or agent payload with a `content` array (often no top-level `nodeType`). */
 function hasRichTextTreeShape(value: unknown): boolean {
-  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+  if (!isRichTextJsonObject(value)) {
     return false;
   }
-  const o = value as Record<string, unknown>;
+  const o = value;
   if (o.nodeType === 'document') {
     return true;
   }
@@ -62,17 +67,14 @@ function hasRichTextTreeShape(value: unknown): boolean {
 }
 
 function richTextEmbeddedEntryTempId(node: Record<string, unknown>): string | undefined {
-  if (!RICH_TEXT_ENTRY_LINK_NODES.has(String(node.nodeType))) {
+  if (!RICH_TEXT_ENTRY_LINK_NODES.has(String(node.nodeType)) || !isRichTextJsonObject(node.data)) {
     return undefined;
   }
-  if (!node.data || typeof node.data !== 'object') {
+  const target = node.data.target;
+  if (!isRichTextJsonObject(target)) {
     return undefined;
   }
-  const target = (node.data as Record<string, unknown>).target;
-  if (!target || typeof target !== 'object') {
-    return undefined;
-  }
-  const sys = (target as Record<string, unknown>).sys as Record<string, unknown> | undefined;
+  const sys = target.sys as Record<string, unknown> | undefined;
   if (sys?.type !== 'Link' || sys.linkType !== 'Entry' || typeof sys.id !== 'string') {
     return undefined;
   }
@@ -80,10 +82,10 @@ function richTextEmbeddedEntryTempId(node: Record<string, unknown>): string | un
 }
 
 function richTextHasUnresolvedEntryLink(node: unknown): boolean {
-  if (!node || typeof node !== 'object') {
+  if (!isRichTextJsonObject(node)) {
     return false;
   }
-  const n = node as Record<string, unknown>;
+  const n = node;
   if (richTextEmbeddedEntryTempId(n)) {
     return true;
   }
@@ -98,10 +100,10 @@ function resolveEntryLinksInRichTextDocument(
   tempIdToEntryId: Map<string, string>
 ): unknown {
   const walk = (n: unknown): unknown => {
-    if (!n || typeof n !== 'object') {
+    if (!isRichTextJsonObject(n)) {
       return n;
     }
-    const node = n as Record<string, unknown>;
+    const node = n;
     const tempId = richTextEmbeddedEntryTempId(node);
 
     const mapChildren = (): unknown =>
