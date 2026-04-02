@@ -6,20 +6,20 @@ import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
 import { ErrorModal } from '../modals/ErrorModal';
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
 import { LoadingModal } from '../modals/LoadingModal';
-import { ERROR_MESSAGES } from '../../../../utils/constants/messages';
-import { CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS } from '../../../../utils/constants/agent';
+import { ERROR_MESSAGES } from '@constants/messages';
+import { CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS } from '@constants/agent';
 import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 import {
   DocumentTabProps,
-  DocumentScopeResumePayload,
-  DocumentScopeSuspendPayload,
+  ResumePayload,
+  SuspendPayload,
   PreviewPayload,
   RunStatus,
   WorkflowRunResult,
-} from '../../../../utils/types';
+} from '@types';
 import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
 import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
-import { useWorkflowAgent } from '../../../../hooks/useWorkflowAgent';
+import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
@@ -115,7 +115,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       showDiscardConfirmation();
     };
 
-    const showDocumentScopeReview = (suspendPayload?: DocumentScopeSuspendPayload) => {
+    const showDocumentScopeReview = (suspendPayload?: SuspendPayload) => {
       setAvailableTabs(
         (suspendPayload?.tabs ?? []).map((tab) => ({
           tabId: tab.id ?? '',
@@ -148,19 +148,16 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
-      const payload = workflowRun.payload ?? { documentTitle: '', data: {} };
-      onPreviewReady(payload);
+      onPreviewReady(workflowRun.googleDocPayload);
       setFlowStep(null);
     };
 
-    const continueWorkflow = async (
-      resumePayloadOverrides?: Partial<DocumentScopeResumePayload>
-    ) => {
+    const continueWorkflow = async (resumePayloadOverrides?: Partial<ResumePayload>) => {
       if (!activeRunId) {
         throw new Error('Workflow run id is missing for resume.');
       }
 
-      const resumePayload: DocumentScopeResumePayload = {
+      const resumePayload: ResumePayload = {
         ...(selectedTabs.length > 0
           ? { selectedTabIds: selectedTabs.map((tab) => tab.tabId) }
           : {}),

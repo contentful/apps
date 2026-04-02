@@ -2,13 +2,12 @@ import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { POLL_INTERVAL_MS, MAX_POLL_ATTEMPTS, WORKFLOW_AGENT_ID } from '../utils/constants/agent';
 import {
-  AgentRunMessage,
-  DocumentScopeResumePayload,
-  DocumentScopeSuspendPayload,
+  ResumePayload,
+  SuspendPayload,
   PreviewPayload,
   WorkflowRunResult,
   RunStatus,
-} from '../utils/types';
+} from '@types';
 import {
   AgentGeneratePayload,
   AgentRunData,
@@ -16,6 +15,7 @@ import {
   resumeWorkflowRun,
   startAgentRun,
 } from '../services/agents-api';
+import { validatePayloadShape } from '../utils/previewPayload';
 
 interface UseWorkflowParams {
   sdk: PageAppSDK;
@@ -27,10 +27,7 @@ interface WorkflowHook {
   isAnalyzing: boolean;
   error: string | null;
   startWorkflow: (contentTypeIds: string[]) => Promise<WorkflowRunResult>;
-  resumeWorkflow: (
-    runId: string,
-    resumePayload: DocumentScopeResumePayload
-  ) => Promise<WorkflowRunResult>;
+  resumeWorkflow: (runId: string, resumePayload: ResumePayload) => Promise<WorkflowRunResult>;
 }
 
 const wait = async (ms: number): Promise<void> => {
@@ -59,6 +56,15 @@ const getAgentPayload = (runData: AgentRunData): string | null => {
   return textPart?.text || null;
 };
 
+const previewPayloadFromCompletedRun = (runData: AgentRunData): PreviewPayload => {
+  const raw = runData.metadata?.googleDocPayload;
+  if (raw == null) {
+    throw new Error('Workflow completed but result payload was missing.');
+  }
+
+  return validatePayloadShape(raw);
+};
+
 const getRunErrorMessage = (runData: AgentRunData): string => {
   const payload = getAgentPayload(runData);
   if (payload) {
@@ -73,24 +79,8 @@ const getRunErrorMessage = (runData: AgentRunData): string => {
   return 'Workflow failed';
 };
 
-const getSuspendPayload = (runData: AgentRunData): DocumentScopeSuspendPayload | undefined =>
-  runData.metadata?.suspendPayload as DocumentScopeSuspendPayload | undefined;
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
-
-const parsePayloadJson = (payload: string | undefined): Record<string, unknown> | undefined => {
-  if (!payload) {
-    return undefined;
-  }
-
-  try {
-    const parsed = JSON.parse(payload) as unknown;
-    return isRecord(parsed) ? parsed : undefined;
-  } catch {
-    return undefined;
-  }
-};
+const getSuspendPayload = (runData: AgentRunData): SuspendPayload | undefined =>
+  runData.metadata?.suspendPayload as SuspendPayload | undefined;
 
 const getWorkflowRunResult = (
   runData: AgentRunData,
@@ -123,10 +113,7 @@ const getWorkflowRunResult = (
         status,
         runId: threadId,
         messages,
-        payload: {
-          documentTitle: 'Mock title',
-          data: {},
-        },
+        googleDocPayload: previewPayloadFromCompletedRun(runData),
       };
     }
 
@@ -216,7 +203,7 @@ export const useWorkflowAgent = ({
   );
 
   const resumeWorkflow = useCallback(
-    async (runId: string, resumePayload: DocumentScopeResumePayload) => {
+    async (runId: string, resumePayload: ResumePayload) => {
       setIsAnalyzing(true);
       setError(null);
 

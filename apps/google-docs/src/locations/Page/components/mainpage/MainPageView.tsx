@@ -2,6 +2,11 @@ import { ArrowRightIcon } from '@contentful/f36-icons';
 import { Button, Card, Flex, Heading, Layout, Note, Paragraph } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { OAuthConnector } from './OAuthConnector';
+import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
+import { creationPayloadMock } from '../../../../mocks/previewPayloadSample';
+import { PageAppSDK } from '@contentful/app-sdk';
+
+const enableMockEntryCreation = import.meta.env.VITE_ENABLE_MOCK_ENTRY_CREATION === 'true';
 
 interface MainPageViewProps {
   oauthToken: string;
@@ -11,6 +16,7 @@ interface MainPageViewProps {
   onOauthTokenChange: (token: string) => void;
   onLoadingStateChange: (isLoading: boolean) => void;
   onSelectFile: () => void;
+  sdk: PageAppSDK;
 }
 
 export const MainPageView = ({
@@ -21,6 +27,7 @@ export const MainPageView = ({
   onOauthTokenChange,
   onLoadingStateChange,
   onSelectFile,
+  sdk,
 }: MainPageViewProps) => {
   return (
     <Layout.Body>
@@ -42,7 +49,12 @@ export const MainPageView = ({
               Please connect to Drive Integration before selecting your file.
             </Note>
           )}
-          <Flex flexDirection="row" alignItems="center" justifyContent="space-between">
+          <Flex
+            flexDirection="row"
+            alignItems="center"
+            justifyContent="space-between"
+            flexWrap="wrap"
+            gap="spacingL">
             <Flex flexDirection="column" alignItems="flex-start">
               <Heading marginBottom="spacingS">Select your file</Heading>
               <Paragraph>
@@ -52,13 +64,26 @@ export const MainPageView = ({
               </Paragraph>
             </Flex>
 
-            <Button
-              variant="primary"
-              isDisabled={!oauthToken}
-              onClick={onSelectFile}
-              endIcon={<ArrowRightIcon />}>
-              Select your file
-            </Button>
+            <Flex flexDirection="row" alignItems="center" gap="spacingS">
+              <Button
+                variant="primary"
+                size="medium"
+                isDisabled={!oauthToken}
+                onClick={onSelectFile}
+                endIcon={<ArrowRightIcon />}>
+                Select your file
+              </Button>
+              {enableMockEntryCreation ? (
+                <Button
+                  variant="secondary"
+                  size="medium"
+                  isDisabled={!oauthToken}
+                  onClick={() => createEntriesFromPreviewPayload(sdk, creationPayloadMock)}
+                  endIcon={<ArrowRightIcon />}>
+                  Create entries from mock
+                </Button>
+              ) : null}
+            </Flex>
           </Flex>
         </Card>
       </Flex>

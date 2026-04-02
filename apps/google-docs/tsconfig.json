@@ -12,8 +12,14 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@types": ["./src/types"],
+      "@constants/*": ["./src/utils/constants/*"],
+      "@hooks/*": ["./src/hooks/*"]
+    }
   },
-  "include": ["src"],
+  "include": ["src/**/*", "test/**/*"],
   "exclude": ["actions", "functions"]
 }

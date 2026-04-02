@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button, Flex, Heading, Layout, Paragraph } from '@contentful/f36-components';
 import Splitter from './Splitter';
-import { PreviewPayload } from '../../../../utils/types';
+import { PreviewPayload } from '@types';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
 
 interface PreviewPageViewProps {
@@ -10,8 +10,10 @@ interface PreviewPageViewProps {
 }
 
 export const PreviewPageView = ({ payload, onCancel }: PreviewPageViewProps) => {
-  const title = payload.documentTitle.trim() ? payload.documentTitle : 'Selected document';
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
+
+  const rawTitle = payload.normalizedDocument?.title as string | undefined;
+  const title = rawTitle?.trim() ? rawTitle : 'Selected document';
 
   return (
     <>

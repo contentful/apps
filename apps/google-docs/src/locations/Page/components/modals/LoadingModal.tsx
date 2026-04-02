@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Modal, Paragraph, Skeleton, Flex } from '@contentful/f36-components';
-import { useSequentialMessages } from '../../../../hooks/useSequentialMessages';
+import { useSequentialMessages } from '@hooks/useSequentialMessages';
 import tokens, { ColorTokens } from '@contentful/f36-tokens';
 import { css, keyframes } from '@emotion/css';
 

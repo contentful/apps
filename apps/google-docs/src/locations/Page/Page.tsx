@@ -8,7 +8,7 @@ import {
 } from './components/mainpage/ModalOrchestrator';
 import { MainPageView } from './components/mainpage/MainPageView';
 import { PreviewPageView } from './components/mainpage/PreviewPageView';
-import { PreviewPayload } from '../../utils/types';
+import { PreviewPayload } from '@types';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -60,6 +60,7 @@ const Page = () => {
             onOauthTokenChange={handleOauthTokenChange}
             onLoadingStateChange={handleOAuthLoadingStateChange}
             onSelectFile={handleSelectFile}
+            sdk={sdk}
           />
         )}
       </Layout>

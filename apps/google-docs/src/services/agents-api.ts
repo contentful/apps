@@ -1,6 +1,6 @@
 import { PageAppSDK } from '@contentful/app-sdk';
 import { LOCAL_AGENTS_API_BASE_URL, WORKFLOW_AGENT_ID } from '../utils/constants/agent';
-import { AgentRunMessage, DocumentScopeResumePayload, RunStatus } from '../utils/types';
+import { AgentRunMessage, ResumePayload, RunStatus } from '@types';
 
 const AGENTS_API_HEADERS = {
   'x-contentful-enable-alpha-feature': 'agents-api',
@@ -33,7 +33,7 @@ export interface AgentRunData {
     workflowId?: string;
     workflowRunId?: string;
     suspendPayload?: Record<string, unknown>;
-    previewPayload?: Record<string, unknown>;
+    googleDocPayload?: Record<string, unknown>;
   };
   payload?: string;
   messages?: AgentRunMessage[];
@@ -136,7 +136,7 @@ export async function resumeWorkflowRun(
   spaceId: string,
   environmentId: string,
   runId: string,
-  resumePayload: DocumentScopeResumePayload
+  resumePayload: ResumePayload
 ): Promise<void> {
   if (LOCAL_AGENTS_API_BASE_URL) {
     const response = await fetch(
@@ -158,7 +158,7 @@ export async function resumeWorkflowRun(
   const agentRunApi = sdk.cma.agentRun as {
     resume?: (
       params: { spaceId: string; environmentId: string; runId: string },
-      body: { resumePayload: DocumentScopeResumePayload }
+      body: { resumePayload: ResumePayload }
     ) => Promise<unknown>;
   };
 
