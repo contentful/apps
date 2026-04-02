@@ -16,8 +16,7 @@
     "googleapis": "^166.0.0",
     "mammoth": "^1.11.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "zod": "^4.1.12"
+    "react-dom": "^18.3.1"
   },
   "scripts": {
     "start": "vite",

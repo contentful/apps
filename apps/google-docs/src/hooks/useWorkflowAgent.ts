@@ -2,13 +2,12 @@ import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { POLL_INTERVAL_MS, MAX_POLL_ATTEMPTS, WORKFLOW_AGENT_ID } from '../utils/constants/agent';
 import {
-  AgentRunMessage,
-  DocumentScopeResumePayload,
-  DocumentScopeSuspendPayload,
+  ResumePayload,
+  SuspendPayload,
   PreviewPayload,
   WorkflowRunResult,
   RunStatus,
-} from '../utils/types';
+} from '@types';
 import {
   AgentGeneratePayload,
   AgentRunData,
@@ -28,10 +27,7 @@ interface WorkflowHook {
   isAnalyzing: boolean;
   error: string | null;
   startWorkflow: (contentTypeIds: string[]) => Promise<WorkflowRunResult>;
-  resumeWorkflow: (
-    runId: string,
-    resumePayload: DocumentScopeResumePayload
-  ) => Promise<WorkflowRunResult>;
+  resumeWorkflow: (runId: string, resumePayload: ResumePayload) => Promise<WorkflowRunResult>;
 }
 
 const wait = async (ms: number): Promise<void> => {
@@ -83,8 +79,8 @@ const getRunErrorMessage = (runData: AgentRunData): string => {
   return 'Workflow failed';
 };
 
-const getSuspendPayload = (runData: AgentRunData): DocumentScopeSuspendPayload | undefined =>
-  runData.metadata?.suspendPayload as DocumentScopeSuspendPayload | undefined;
+const getSuspendPayload = (runData: AgentRunData): SuspendPayload | undefined =>
+  runData.metadata?.suspendPayload as SuspendPayload | undefined;
 
 const getWorkflowRunResult = (
   runData: AgentRunData,
@@ -207,7 +203,7 @@ export const useWorkflowAgent = ({
   );
 
   const resumeWorkflow = useCallback(
-    async (runId: string, resumePayload: DocumentScopeResumePayload) => {
+    async (runId: string, resumePayload: ResumePayload) => {
       setIsAnalyzing(true);
       setError(null);
 

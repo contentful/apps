@@ -5,8 +5,7 @@ import {
   createEntriesFromPreview,
   createEntriesFromPreviewPayload,
 } from '../../src/services/entryService';
-import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
-import type { PreviewPayload } from '../../src/utils/types';
+import { EntryToCreate, type PreviewPayload } from '@types';
 import { createMockSDK } from '../mocks';
 
 describe('createEntriesFromPreview', () => {

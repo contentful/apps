@@ -1,4 +1,4 @@
-import type { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
+import type { EntryToCreate } from '@types';
 
 type LocalizedField = EntryToCreate['fields'][string];
 

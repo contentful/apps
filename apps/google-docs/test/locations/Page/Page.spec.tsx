@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { mockCma, mockSdk } from '../../mocks';
 import { vi, describe, it, expect, afterEach } from 'vitest';
 import React from 'react';
-import type { PreviewPayload } from '../../../src/utils/types';
+import type { PreviewPayload } from '@types';
 
 const previewPayloadMock: PreviewPayload = {
   entries: [],

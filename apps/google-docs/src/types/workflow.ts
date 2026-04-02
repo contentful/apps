@@ -1,8 +1,4 @@
-import type {
-  AssetToCreate,
-  EntryToCreate,
-} from '../../functions/agents/documentParserAgent/schema';
-// This file contains the types for the document scope review state, resume payload, and workflow run result.
+import type { AssetToCreate, EntryToCreate } from './entry';
 
 export enum RunStatus {
   IN_PROGRESS = 'IN_PROGRESS',
@@ -134,7 +130,7 @@ export interface PreviewPayload {
   normalizedDocument: NormalizedDocument;
 }
 
-export interface DocumentScopeSuspendPayload {
+export interface SuspendPayload {
   reason?: string;
   documentId?: string;
   title?: string;
@@ -152,7 +148,7 @@ export type WorkflowRunResult =
       status: RunStatus.PENDING_REVIEW;
       runId: string;
       messages: AgentRunMessage[];
-      suspendPayload: DocumentScopeSuspendPayload;
+      suspendPayload: SuspendPayload;
     }
   | {
       status: RunStatus.COMPLETED;
@@ -161,7 +157,7 @@ export type WorkflowRunResult =
       googleDocPayload: PreviewPayload;
     };
 
-export interface DocumentScopeResumePayload {
+export interface ResumePayload {
   includeImages?: boolean;
   selectedTabIds?: string[];
 }

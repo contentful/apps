@@ -1,13 +1,12 @@
 import { PageAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
-import { EntryToCreate, AssetToCreate } from '../../functions/agents/documentParserAgent/schema';
 import { normalizeAgentRichTextJson } from './richtext';
+import { EntryToCreate, AssetToCreate, PreviewPayload } from '@types';
 import {
   entryHasReferences,
   separateReferenceFields,
   resolveReferences,
 } from './referenceResolution';
-import { PreviewPayload } from '../utils/types';
 import { orderEntriesByCreationOrder } from '../utils/previewPayload';
 import { mapFieldValuesToSpaceDefaultLocale } from '../utils/remapEntryLocales';
 
@@ -194,10 +193,9 @@ export async function createEntriesFromPreview(
   const contentTypesResponse = await cma.contentType.getMany({
     spaceId,
     environmentId,
+    query: { 'sys.id[in]': contentTypeIds.join(',') },
   });
-  const contentTypes = contentTypesResponse.items.filter((ct) =>
-    contentTypeIds.includes(ct.sys.id)
-  );
+  const contentTypes = contentTypesResponse.items;
 
   if (contentTypes.length === 0) {
     return {

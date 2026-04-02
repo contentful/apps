@@ -6,7 +6,7 @@ import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
 } from '../../../../../src/locations/Page/components/mainpage/ModalOrchestrator';
-import { PreviewPayload, WorkflowRunResult, RunStatus } from '../../../../../src/utils/types';
+import { PreviewPayload, WorkflowRunResult, RunStatus } from '@types';
 import { mockSdk } from '../../../../mocks';
 
 const mockStartWorkflow = vi.fn();
@@ -44,7 +44,7 @@ vi.mock('../../../../../src/locations/Page/components/modals/step_1/SelectDocume
   },
 }));
 
-vi.mock('../../../../../src/hooks/useWorkflowAgent', () => ({
+vi.mock('@hooks/useWorkflowAgent', () => ({
   useWorkflowAgent: () => ({
     isAnalyzing: false,
     error: null,

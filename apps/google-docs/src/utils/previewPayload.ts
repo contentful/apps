@@ -1,14 +1,12 @@
 import type {
   AssetToCreate,
   EntryToCreate,
-} from '../../functions/agents/documentParserAgent/schema';
-import type {
   NormalizedDocument,
   PreviewPayload,
   ReviewedReferenceGraph,
   ReviewedReferenceGraphDeferredField,
   ReviewedReferenceGraphEdge,
-} from './types';
+} from '@types';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button, Flex, Heading, Layout, Paragraph } from '@contentful/f36-components';
 import Splitter from './Splitter';
-import { PreviewPayload } from '../../../../utils/types';
+import { PreviewPayload } from '@types';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
 
 interface PreviewPageViewProps {

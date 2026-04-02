@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { validatePayloadShape, orderEntriesByCreationOrder } from '../../src/utils/previewPayload';
-import type { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
+import type { EntryToCreate } from '@types';
 
 const minimalEntry = {
   contentTypeId: 'blogPost',
