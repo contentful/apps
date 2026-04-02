@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { Button, Flex, Heading, Layout, Paragraph } from '@contentful/f36-components';
 import Splitter from './Splitter';
 import { PreviewPayload } from '../../../../utils/types';
+import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
 
 interface PreviewPageViewProps {
   payload: PreviewPayload;
@@ -8,16 +10,21 @@ interface PreviewPageViewProps {
 }
 
 export const PreviewPageView = ({ payload, onCancel }: PreviewPageViewProps) => {
-  const rawTitle = payload.normalizedDocument?.title;
-  const docTitle = typeof rawTitle === 'string' ? rawTitle : undefined;
-  const title = docTitle && docTitle.trim().length > 0 ? docTitle : 'Selected document';
+  const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
+
+  const rawTitle = payload.normalizedDocument?.title as string | undefined;
+  const title = rawTitle?.trim() ? rawTitle : 'Selected document';
 
   return (
     <>
       <Layout.Header title="Preview">
         <Flex justifyContent="space-between" alignItems="center" marginTop="spacingS">
           <Heading marginBottom="none">Create from document "{title}"</Heading>
-          <Button variant="transparent" size="small" onClick={onCancel} aria-label="Cancel preview">
+          <Button
+            variant="transparent"
+            size="small"
+            onClick={() => setIsConfirmCancelModalOpen(true)}
+            aria-label="Cancel preview">
             Cancel
           </Button>
         </Flex>
@@ -26,6 +33,11 @@ export const PreviewPageView = ({ payload, onCancel }: PreviewPageViewProps) => 
       <Layout.Body>
         <Paragraph>Preview</Paragraph>
       </Layout.Body>
+      <ConfirmCancelModal
+        isOpen={isConfirmCancelModalOpen}
+        onConfirm={onCancel}
+        onCancel={() => setIsConfirmCancelModalOpen(false)}
+      />
     </>
   );
 };

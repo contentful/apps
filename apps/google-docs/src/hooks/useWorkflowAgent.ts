@@ -117,7 +117,7 @@ const getWorkflowRunResult = (
         status,
         runId: threadId,
         messages,
-        payload: previewPayloadFromCompletedRun(runData),
+        googleDocPayload: previewPayloadFromCompletedRun(runData),
       };
     }
 

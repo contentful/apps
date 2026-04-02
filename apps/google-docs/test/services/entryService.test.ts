@@ -1,9 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { PageAppSDK } from '@contentful/app-sdk';
 import type { EntryProps, ContentTypeProps } from 'contentful-management';
-import { createEntriesFromPreview } from './entryService';
+import {
+  createEntriesFromPreview,
+  createEntriesFromPreviewPayload,
+} from '../../src/services/entryService';
 import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
-import { createMockSDK } from '../../test/mocks';
+import type { PreviewPayload } from '../../src/utils/types';
+import { createMockSDK } from '../mocks';
 
 describe('createEntriesFromPreview', () => {
   let mockSDK: PageAppSDK;
@@ -242,5 +246,119 @@ describe('createEntriesFromPreview', () => {
       expect(result.createdEntries).toHaveLength(1);
       expect(result.errors).toHaveLength(0);
     });
+  });
+});
+
+describe('createEntriesFromPreviewPayload', () => {
+  let mockSDK: PageAppSDK;
+  const mockContentTypes: ContentTypeProps[] = [
+    {
+      sys: { id: 'blogPost', type: 'ContentType' },
+      name: 'Blog Post',
+      fields: [{ id: 'title', name: 'Title', type: 'Symbol', required: true, localized: false }],
+    } as ContentTypeProps,
+  ];
+
+  beforeEach(() => {
+    mockSDK = createMockSDK() as PageAppSDK;
+    vi.clearAllMocks();
+    vi.mocked(mockSDK.cma.contentType.getMany).mockResolvedValue({
+      items: mockContentTypes,
+      total: mockContentTypes.length,
+    } as any);
+  });
+
+  function buildPayload(overrides: Partial<PreviewPayload> = {}): PreviewPayload {
+    return {
+      entries: [],
+      assets: [],
+      referenceGraph: {},
+      normalizedDocument: { documentId: '', contentBlocks: [], tables: [] },
+      ...overrides,
+    };
+  }
+
+  it('orders entry creation by referenceGraph.creationOrder when present', async () => {
+    const entries: EntryToCreate[] = [
+      {
+        tempId: 'author_1',
+        contentTypeId: 'blogPost',
+        fields: { title: { 'en-US': 'Author first in payload array' } },
+      },
+      {
+        tempId: 'post_1',
+        contentTypeId: 'blogPost',
+        fields: { title: { 'en-US': 'Post second in payload array' } },
+      },
+    ];
+
+    vi.mocked(mockSDK.cma.entry.create)
+      .mockResolvedValueOnce({
+        sys: {
+          id: 'entry-post',
+          type: 'Entry',
+          contentType: { sys: { id: 'blogPost', type: 'Link', linkType: 'ContentType' } },
+        },
+        fields: {},
+      } as EntryProps)
+      .mockResolvedValueOnce({
+        sys: {
+          id: 'entry-author',
+          type: 'Entry',
+          contentType: { sys: { id: 'blogPost', type: 'Link', linkType: 'ContentType' } },
+        },
+        fields: {},
+      } as EntryProps);
+
+    await createEntriesFromPreviewPayload(
+      mockSDK,
+      buildPayload({
+        entries,
+        referenceGraph: { creationOrder: ['post_1', 'author_1'] },
+      })
+    );
+
+    const calls = vi.mocked(mockSDK.cma.entry.create).mock.calls;
+    expect(calls).toHaveLength(2);
+    expect(calls[0][1].fields.title['en-US']).toBe('Post second in payload array');
+    expect(calls[1][1].fields.title['en-US']).toBe('Author first in payload array');
+  });
+
+  it('remaps en-US field locales to the space default locale before create', async () => {
+    mockSDK = createMockSDK() as PageAppSDK;
+    mockSDK.locales.default = 'de-DE';
+
+    vi.mocked(mockSDK.cma.contentType.getMany).mockResolvedValue({
+      items: mockContentTypes,
+      total: mockContentTypes.length,
+    } as any);
+
+    vi.mocked(mockSDK.cma.entry.create).mockResolvedValue({
+      sys: {
+        id: 'entry-1',
+        type: 'Entry',
+        contentType: { sys: { id: 'blogPost', type: 'Link', linkType: 'ContentType' } },
+      },
+      fields: {},
+    } as EntryProps);
+
+    await createEntriesFromPreviewPayload(
+      mockSDK,
+      buildPayload({
+        entries: [
+          {
+            contentTypeId: 'blogPost',
+            fields: { title: { 'en-US': 'German space title' } },
+          },
+        ],
+      })
+    );
+
+    expect(mockSDK.cma.entry.create).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        fields: { title: { 'de-DE': 'German space title' } },
+      })
+    );
   });
 });

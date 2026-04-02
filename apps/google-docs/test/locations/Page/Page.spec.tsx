@@ -12,6 +12,8 @@ const previewPayloadMock: PreviewPayload = {
   normalizedDocument: {
     documentId: 'doc-test',
     title: 'Document from workflow',
+    contentBlocks: [],
+    tables: [],
   },
 };
 
@@ -24,8 +26,9 @@ vi.mock('../../../src/locations/Page/components/mainpage/OAuthConnector', () => 
   OAuthConnector: () => <div>Mock OAuth Connector</div>,
 }));
 
-const { mockModalOrchestrator } = vi.hoisted(() => ({
+const { mockModalOrchestrator, mockResetFlowFromPreviewCancel } = vi.hoisted(() => ({
   mockModalOrchestrator: vi.fn(),
+  mockResetFlowFromPreviewCancel: vi.fn(),
 }));
 
 vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () => ({
@@ -36,9 +39,18 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
         onResetToMain: () => void;
         oauthToken: string;
       },
-      ref: React.ForwardedRef<{ startFlow: () => void }>
+      ref: React.ForwardedRef<{
+        startFlow: () => void;
+        resetFlowFromPreviewCancel: () => void;
+      }>
     ) => {
-      const handle = { startFlow: vi.fn() };
+      const handle = {
+        startFlow: vi.fn(),
+        resetFlowFromPreviewCancel: () => {
+          mockResetFlowFromPreviewCancel();
+          props.onResetToMain();
+        },
+      };
       if (typeof ref === 'function') {
         ref(handle);
       } else if (ref) {
@@ -85,7 +97,7 @@ describe('Page component', () => {
     });
   });
 
-  it('returns to main view when preview is canceled', async () => {
+  it('returns to main view when preview cancel is confirmed', async () => {
     render(<Page />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Trigger Preview Ready' }));
@@ -96,6 +108,15 @@ describe('Page component', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cancel preview' }));
 
     await waitFor(() => {
+      expect(
+        screen.getByRole('heading', { name: "You're about to lose your progress" })
+      ).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel without creating' }));
+
+    await waitFor(() => {
+      expect(mockResetFlowFromPreviewCancel).toHaveBeenCalledTimes(1);
       expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
       expect(screen.queryByText(/Create from document "Selected document":/)).toBeNull();
     });

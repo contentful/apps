@@ -15,6 +15,7 @@ const mockResumeWorkflow = vi.fn();
 const mockWorkflowPayload = {
   entries: [],
   assets: [],
+  referenceGraph: {},
   normalizedDocument: {
     documentId: 'mock-doc-id',
     title: 'Mock Preview Title',
@@ -96,7 +97,7 @@ describe('ModalOrchestrator', () => {
       status: RunStatus.COMPLETED,
       runId: 'run-123',
       messages: [],
-      payload: mockWorkflowPayload,
+      googleDocPayload: mockWorkflowPayload,
     } satisfies WorkflowRunResult);
     vi.mocked(mockSdk.cma.space.get).mockResolvedValue({ sys: { id: 'test-space-id' } });
     vi.mocked(mockSdk.cma.environment.get).mockResolvedValue({ sys: { id: 'test-env-id' } });
@@ -163,6 +164,29 @@ describe('ModalOrchestrator', () => {
       expect(
         screen.getByRole('heading', { name: "You're about to lose your progress" })
       ).toBeTruthy();
+    });
+  });
+
+  it('calls onResetToMain and clears flow state when resetFlowFromPreviewCancel is invoked', async () => {
+    const ref = createRef<ModalOrchestratorHandle>();
+    render(<ModalOrchestrator ref={ref} {...defaultProps} />);
+
+    await act(async () => {
+      ref.current?.startFlow();
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Pick document' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Select content type(s)' })).toBeTruthy();
+    });
+
+    await act(async () => {
+      ref.current?.resetFlowFromPreviewCancel();
+    });
+
+    await waitFor(() => {
+      expect(defaultProps.onResetToMain).toHaveBeenCalledTimes(1);
+      expect(screen.queryByRole('heading', { name: 'Select content type(s)' })).toBeNull();
     });
   });
 

@@ -42,7 +42,14 @@ function parseJsonObject(value: string): Record<string, unknown> | null {
   }
 }
 
-/** Requires `nodeType: "document"` and a `content` array; optional `data` must be a plain object if present. */
+function normalizeDocumentData(data: unknown): Record<string, unknown> {
+  if (data && typeof data === 'object' && !Array.isArray(data)) {
+    return data as Record<string, unknown>;
+  }
+  return {};
+}
+
+/** Requires `nodeType: "document"` and a `content` array; invalid or missing `data` is normalized to `{}`. */
 function parseRichTextDocument(value: unknown): ContentfulRichTextDocument | null {
   let richTextObject: Record<string, unknown> | null = null;
 
@@ -62,7 +69,7 @@ function parseRichTextDocument(value: unknown): ContentfulRichTextDocument | nul
 
   return {
     nodeType: richTextObject.nodeType,
-    data: richTextObject.data as Record<string, unknown>,
+    data: normalizeDocumentData(richTextObject.data),
     content: richTextObject.content as unknown[],
   };
 }
@@ -126,18 +133,21 @@ export function normalizeAgentRichTextJson(
   assetIdMap?: Record<string, string>
 ): ContentfulRichTextDocument {
   const doc = parseRichTextDocument(value);
-  if (!doc) {
+  if (!doc || !doc.content.length) {
     return emptyRichTextDocument();
   }
 
-  let out = deepClone(doc);
+  const needsPlaceholderResolution = assetIdMap !== undefined && Object.keys(assetIdMap).length > 0;
 
-  if (assetIdMap && Object.keys(assetIdMap).length > 0) {
-    out = {
-      ...out,
-      content: resolveAssetPlaceholdersInNodes(out.content, assetIdMap),
-    };
+  if (!needsPlaceholderResolution) {
+    return doc;
   }
+
+  const cloned = deepClone(doc);
+  const out = {
+    ...cloned,
+    content: resolveAssetPlaceholdersInNodes(cloned.content, assetIdMap),
+  };
 
   if (!out.content.length) {
     return emptyRichTextDocument();

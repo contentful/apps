@@ -4,8 +4,9 @@ import tokens from '@contentful/f36-tokens';
 import { OAuthConnector } from './OAuthConnector';
 import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
 import { creationPayloadMock } from '../../../../mocks/previewPayloadSample';
-import { ENABLE_MOCK_ENTRY_CREATION } from '../../../../config/featureFlags';
 import { PageAppSDK } from '@contentful/app-sdk';
+
+const enableMockEntryCreation = import.meta.env.VITE_ENABLE_MOCK_ENTRY_CREATION === 'true';
 
 interface MainPageViewProps {
   oauthToken: string;
@@ -72,7 +73,7 @@ export const MainPageView = ({
                 endIcon={<ArrowRightIcon />}>
                 Select your file
               </Button>
-              {ENABLE_MOCK_ENTRY_CREATION ? (
+              {enableMockEntryCreation ? (
                 <Button
                   variant="secondary"
                   size="medium"
