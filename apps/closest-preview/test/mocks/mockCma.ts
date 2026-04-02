@@ -10,6 +10,7 @@ const mockCma: any = {
       fields: [
         { id: 'title', type: 'Symbol' },
         { id: 'slug', type: 'Symbol' },
+        { id: 'url', type: 'Symbol' },
       ],
     }),
   },
@@ -33,7 +34,11 @@ const mockCma: any = {
             updatedAt: '2021-01-01',
             contentType: { sys: { id: 'blogPost' } },
           },
-          fields: { title: { 'en-US': 'Entry Title 1' }, slug: { 'en-US': 'entry-1' } },
+          fields: {
+            title: { 'en-US': 'Entry Title 1' },
+            slug: { 'en-US': 'entry-1' },
+            url: { 'en-US': 'entry-1' },
+          },
         },
         {
           sys: {
@@ -41,7 +46,11 @@ const mockCma: any = {
             updatedAt: '2021-01-01',
             contentType: { sys: { id: 'blogPost' } },
           },
-          fields: { title: { 'en-US': '' }, slug: { 'en-US': 'entry-2' } },
+          fields: {
+            title: { 'en-US': '' },
+            slug: { 'en-US': 'entry-2' },
+            url: { 'en-US': 'entry-2' },
+          },
         },
         {
           sys: {
@@ -49,7 +58,11 @@ const mockCma: any = {
             updatedAt: '2021-01-01',
             contentType: { sys: { id: 'blogPost' } },
           },
-          fields: { title: { 'en-US': undefined }, slug: { 'en-US': 'entry-3' } },
+          fields: {
+            title: { 'en-US': undefined },
+            slug: { 'en-US': 'entry-3' },
+            url: { 'en-US': 'entry-3' },
+          },
         },
         {
           sys: {
@@ -57,7 +70,11 @@ const mockCma: any = {
             updatedAt: '2021-01-01',
             contentType: { sys: { id: 'blogPost' } },
           },
-          fields: { title: { 'en-US': 'Entry Title 4' }, slug: { 'en-US': 'entry-4' } },
+          fields: {
+            title: { 'en-US': 'Entry Title 4' },
+            slug: { 'en-US': 'entry-4' },
+            url: { 'en-US': 'entry-4' },
+          },
         },
         {
           sys: {
@@ -65,7 +82,11 @@ const mockCma: any = {
             updatedAt: '2021-01-01',
             contentType: { sys: { id: 'blogPost' } },
           },
-          fields: { title: { 'en-US': 'Entry Title 5' }, slug: { 'en-US': 'entry-5' } },
+          fields: {
+            title: { 'en-US': 'Entry Title 5' },
+            slug: { 'en-US': 'entry-5' },
+            url: { 'en-US': 'entry-5' },
+          },
         },
         {
           sys: {
