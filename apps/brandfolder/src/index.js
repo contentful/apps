@@ -26,7 +26,26 @@ const FIELDS_TO_PERSIST = [
 ];
 
 function makeThumbnail(attachment) {
-  const thumbnail = attachment.thumbnail_url || attachment.url;
+  const { cdn_url, mimetype } = attachment;
+  let thumbnail;
+
+  if (
+    typeof cdn_url === 'string' &&
+    (mimetype?.startsWith('image/') || mimetype?.startsWith('video/') || mimetype === 'application/pdf')
+  ) {
+    const thumbnailUrl = new URL(cdn_url);
+    thumbnailUrl.searchParams.set('auto', 'webp');
+    thumbnailUrl.searchParams.set('width', '262');
+
+    if (!mimetype?.startsWith('image/')) {
+      thumbnailUrl.searchParams.set('format', 'jpg');
+    }
+
+    thumbnail = thumbnailUrl.toString();
+  } else {
+    thumbnail = attachment.thumbnail_url || attachment.url;
+  }
+
   const url = typeof thumbnail === 'string' ? thumbnail : undefined;
   const alt = attachment.filename;
 
