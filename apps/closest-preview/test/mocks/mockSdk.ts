@@ -16,6 +16,11 @@ const mockSdk: any = {
     entry: 'root-entry',
   },
   locales: { default: 'en-US' },
+  parameters: {
+    installation: {
+      slugFieldId: 'slug',
+    },
+  },
   cma: mockCma,
   hostnames: {
     webapp: 'app.contentful.com',
