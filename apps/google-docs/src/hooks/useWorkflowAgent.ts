@@ -61,7 +61,7 @@ const getAgentPayload = (runData: AgentRunData): string | null => {
 };
 
 const previewPayloadFromCompletedRun = (runData: AgentRunData): PreviewPayload => {
-  const raw = runData.metadata?.payload;
+  const raw = runData.metadata?.googleDocPayload;
   if (raw == null) {
     throw new Error('Workflow completed but result payload was missing.');
   }

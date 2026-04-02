@@ -33,7 +33,7 @@ export interface AgentRunData {
     workflowId?: string;
     workflowRunId?: string;
     suspendPayload?: Record<string, unknown>;
-    payload?: Record<string, unknown>;
+    googleDocPayload?: Record<string, unknown>;
   };
   payload?: string;
   messages?: AgentRunMessage[];
