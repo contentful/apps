@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   fetchEntriesWithBatching,
   getEntryFieldValue,
+  isCheckboxAllowed,
   mapContentTypePropsToFields,
   processEntriesInBatches,
   getFieldDisplayValue,
@@ -678,6 +679,76 @@ describe('entryUtils', () => {
         ...expected,
         uniqueId: 'relatedEntries',
       });
+    });
+  });
+
+  describe('isCheckboxAllowed', () => {
+    const makeField = (overrides: any) => ({
+      contentTypeId: 'ct',
+      id: 'f',
+      uniqueId: 'f',
+      name: 'F',
+      type: 'Symbol',
+      required: false,
+      validations: [],
+      ...overrides,
+    });
+
+    it('allows Symbol fields', () => {
+      expect(isCheckboxAllowed(makeField({ type: 'Symbol' }))).toBe(true);
+    });
+
+    it('allows Text fields', () => {
+      expect(isCheckboxAllowed(makeField({ type: 'Text' }))).toBe(true);
+    });
+
+    it('allows Integer fields', () => {
+      expect(isCheckboxAllowed(makeField({ type: 'Integer' }))).toBe(true);
+    });
+
+    it('allows Number fields', () => {
+      expect(isCheckboxAllowed(makeField({ type: 'Number' }))).toBe(true);
+    });
+
+    it('allows Boolean fields', () => {
+      expect(isCheckboxAllowed(makeField({ type: 'Boolean' }))).toBe(true);
+    });
+
+    it('allows Array fields with Symbol items', () => {
+      expect(isCheckboxAllowed(makeField({ type: 'Array', items: { type: 'Symbol' } }))).toBe(true);
+    });
+
+    it('blocks Array fields with Link items', () => {
+      expect(isCheckboxAllowed(makeField({ type: 'Array', items: { type: 'Link' } }))).toBe(false);
+    });
+
+    it('allows Link fields with Entry linkType', () => {
+      expect(isCheckboxAllowed(makeField({ type: 'Link', linkType: 'Entry' }))).toBe(true);
+    });
+
+    it('blocks Link fields with Asset linkType', () => {
+      expect(isCheckboxAllowed(makeField({ type: 'Link', linkType: 'Asset' }))).toBe(false);
+    });
+
+    it('blocks Link fields with no linkType', () => {
+      expect(isCheckboxAllowed(makeField({ type: 'Link' }))).toBe(false);
+    });
+
+    it('blocks Location fields', () => {
+      expect(isCheckboxAllowed(makeField({ type: 'Location' }))).toBe(false);
+    });
+
+    it('blocks RichText fields', () => {
+      expect(isCheckboxAllowed(makeField({ type: 'RichText' }))).toBe(false);
+    });
+
+    it('blocks ResourceLink fields', () => {
+      expect(isCheckboxAllowed(makeField({ type: 'ResourceLink' }))).toBe(false);
+    });
+
+    it('returns false for null/undefined field', () => {
+      expect(isCheckboxAllowed(null as any)).toBe(false);
+      expect(isCheckboxAllowed(undefined as any)).toBe(false);
     });
   });
 });

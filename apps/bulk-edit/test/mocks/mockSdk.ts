@@ -2,6 +2,9 @@ import { vi } from 'vitest';
 import { AppExtensionSDK } from '@contentful/app-sdk';
 
 interface MockSDK extends Partial<AppExtensionSDK> {
+  dialogs: {
+    selectSingleEntry: ReturnType<typeof vi.fn>;
+  };
   cma: {
     contentType: {
       getMany: ReturnType<typeof vi.fn>;
@@ -84,6 +87,9 @@ const mockSdk: MockSDK = {
     editorInterface: {
       get: vi.fn(),
     },
+  },
+  dialogs: {
+    selectSingleEntry: vi.fn(),
   },
 };
 
