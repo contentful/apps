@@ -186,10 +186,7 @@ export default function Page() {
     .map((p) => normalizeDomainPattern(p))
     .filter(Boolean);
   const baseUrl = (installation.baseUrl || '').trim().replace(/\/$/, '') || null;
-  const implicitBasePattern = baseUrl ? normalizeDomainPattern(baseUrl) : '';
-  const allowedPatterns = Array.from(
-    new Set([implicitBasePattern, ...explicitAllowedPatterns].filter(Boolean))
-  );
+  const allowedPatterns = explicitAllowedPatterns;
 
   const loadAuditResults = useCallback(async () => {
     setError(null);

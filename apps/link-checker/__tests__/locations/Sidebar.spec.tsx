@@ -76,6 +76,55 @@ describe('Sidebar component', () => {
     expect(createWithResponse).not.toHaveBeenCalled();
   });
 
+  it('does not implicitly allow the current domain when the allow list is configured', async () => {
+    const createWithResponse = jest.fn();
+
+    mockSdk.parameters.installation = {
+      baseUrl: 'https://contentful.com',
+      allowedUrlPatterns: 'ally.com',
+    };
+    mockSdk.entry.fields = {
+      body: {
+        id: 'body',
+        name: 'Body',
+        type: 'Text',
+        locales: ['en-US'],
+        getValue: () => 'Visit /help for more details.',
+      },
+    };
+    mockSdk.cma = {
+      appAction: {
+        getMany: jest.fn().mockResolvedValue({
+          items: [
+            {
+              sys: {
+                id: 'check-link-action',
+                appDefinition: { sys: { id: mockSdk.ids.app } },
+              },
+              function: { sys: { id: 'checkLink' } },
+            },
+          ],
+        }),
+      },
+      appActionCall: {
+        createWithResponse,
+      },
+    };
+
+    render(<Sidebar />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /check links/i }));
+    });
+
+    await screen.findByText(/not on allow list/i);
+    expect(screen.getByRole('link', { name: '/help' })).toHaveAttribute(
+      'href',
+      'https://contentful.com/help'
+    );
+    expect(createWithResponse).not.toHaveBeenCalled();
+  });
+
   it('shows only non-invalid results when remaining links are expanded', async () => {
     const createWithResponse = jest
       .fn()

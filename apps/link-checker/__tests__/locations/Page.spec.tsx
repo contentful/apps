@@ -76,4 +76,69 @@ describe('Page component', () => {
 
     await screen.findByText('https://example.invalid/not-found');
   });
+
+  it('does not implicitly allow the current domain when the allow list is configured', async () => {
+    mockSdk.parameters.installation = {
+      selectedContentTypeIds: ['article'],
+      baseUrl: 'https://contentful.com',
+      allowedUrlPatterns: 'ally.com',
+    };
+    mockSdk.cma = {
+      contentType: {
+        getMany: jest.fn().mockResolvedValue({
+          items: [
+            {
+              sys: { id: 'article' },
+              name: 'Article',
+              displayField: 'title',
+              fields: [
+                { id: 'title', name: 'Title', type: 'Symbol' },
+                { id: 'body', name: 'Body', type: 'Text' },
+              ],
+            },
+          ],
+        }),
+      },
+      entry: {
+        getMany: jest.fn().mockResolvedValue({
+          items: [
+            {
+              sys: {
+                id: 'entry-1',
+                contentType: { sys: { id: 'article' } },
+              },
+              fields: {
+                title: { 'en-US': 'Release Notes' },
+                body: { 'en-US': 'Visit /help' },
+              },
+            },
+          ],
+        }),
+      },
+      appAction: {
+        getMany: jest.fn().mockResolvedValue({
+          items: [
+            {
+              sys: {
+                id: 'check-link-action',
+                appDefinition: { sys: { id: mockSdk.ids.app } },
+              },
+              function: { sys: { id: 'checkLink' } },
+            },
+          ],
+        }),
+      },
+      appActionCall: {
+        createWithResponse: jest.fn(),
+      },
+    };
+
+    render(<Page />);
+    fireEvent.click(screen.getByRole('button', { name: 'Run scan' }));
+
+    await screen.findByText('/help');
+    await screen.findByText(/not on allow list/i);
+    expect(screen.getByText(/resolves to https:\/\/contentful.com\/help/i)).toBeInTheDocument();
+    expect(mockSdk.cma.appActionCall.createWithResponse).not.toHaveBeenCalled();
+  });
 });
