@@ -48,9 +48,10 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
     onSelectionChange(selectedContentTypes.filter((ct) => ct.id !== contentTypeId));
   };
 
-  const handleSelectItem = (contentType: ContentTypeOption) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    handleContentTypeToggle(contentType, event.target.checked);
-  };
+  const handleSelectItem =
+    (contentType: ContentTypeOption) => (event: React.ChangeEvent<HTMLInputElement>) => {
+      handleContentTypeToggle(contentType, event.target.checked);
+    };
 
   useEffect(() => {
     setFilteredContentTypes(availableContentTypes);
@@ -67,8 +68,7 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
         }}
         popoverProps={{ isFullWidth: true }}
         noMatchesMessage="No content types match your search."
-        triggerButtonProps={{ isDisabled }}
-      >
+        triggerButtonProps={{ isDisabled }}>
         {filteredContentTypes.map((contentType) => (
           <Multiselect.Option
             key={contentType.id}

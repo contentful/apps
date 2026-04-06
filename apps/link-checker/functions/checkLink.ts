@@ -14,7 +14,9 @@ interface CheckLinkEvent {
   body: CheckLinkParameters;
 }
 
-export const handler = async (event: CheckLinkEvent): Promise<{ status?: number; error?: string }> => {
+export const handler = async (
+  event: CheckLinkEvent
+): Promise<{ status?: number; error?: string }> => {
   const url = event?.body?.url;
   if (typeof url !== 'string' || !url.trim()) {
     return { error: 'Missing or invalid url parameter' };

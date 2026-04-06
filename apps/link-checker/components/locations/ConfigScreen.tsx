@@ -30,7 +30,9 @@ export function normalizeDomainPattern(value: string): string {
   if (!trimmed) return '';
 
   try {
-    return new URL(trimmed.startsWith('http') ? trimmed : `https://${trimmed}`).hostname.toLowerCase();
+    return new URL(
+      trimmed.startsWith('http') ? trimmed : `https://${trimmed}`
+    ).hostname.toLowerCase();
   } catch {
     return trimmed.replace(/^https?:\/\//i, '').toLowerCase();
   }
@@ -106,7 +108,9 @@ function ConfigScreen() {
         );
       } else if (currentState?.EditorInterface) {
         const selectedIds = Object.keys(currentState.EditorInterface);
-        setSelectedContentTypes(contentTypes.filter((contentType) => selectedIds.includes(contentType.id)));
+        setSelectedContentTypes(
+          contentTypes.filter((contentType) => selectedIds.includes(contentType.id))
+        );
       }
     } catch (error) {
       console.error('Error loading content types:', error);
@@ -201,8 +205,7 @@ function ConfigScreen() {
     const value = rawValue.trim();
     if (!value) return;
 
-    const currentPatterns =
-      key === 'allowedUrlPatterns' ? allowedPatterns : forbiddenPatterns;
+    const currentPatterns = key === 'allowedUrlPatterns' ? allowedPatterns : forbiddenPatterns;
 
     if (currentPatterns.includes(value)) {
       return;
@@ -221,8 +224,7 @@ function ConfigScreen() {
     key: 'allowedUrlPatterns' | 'forbiddenUrlPatterns',
     patternToRemove: string
   ) => {
-    const currentPatterns =
-      key === 'allowedUrlPatterns' ? allowedPatterns : forbiddenPatterns;
+    const currentPatterns = key === 'allowedUrlPatterns' ? allowedPatterns : forbiddenPatterns;
 
     updatePatternList(
       key,
@@ -256,9 +258,7 @@ function ConfigScreen() {
               <FormControl.Label>Current domain</FormControl.Label>
               <TextInput
                 value={parameters.baseUrl ?? ''}
-                onChange={(event) =>
-                  setParameters({ ...parameters, baseUrl: event.target.value })
-                }
+                onChange={(event) => setParameters({ ...parameters, baseUrl: event.target.value })}
                 placeholder="https://www.example.com"
               />
               <FormControl.HelpText>
@@ -274,8 +274,7 @@ function ConfigScreen() {
             Assign content types
           </Heading>
           <Paragraph marginBottom="spacingM">
-            Choose which content types should show the Link Checker sidebar app in the entry
-            editor.
+            Choose which content types should show the Link Checker sidebar app in the entry editor.
           </Paragraph>
           <FormControl id="contentTypes" style={{ width: '100%' }}>
             <FormControl.Label>Content types</FormControl.Label>
@@ -316,8 +315,7 @@ function ConfigScreen() {
               <Button
                 variant="secondary"
                 onClick={() => addPattern('allowedUrlPatterns', allowListInput)}
-                isDisabled={!allowListInput.trim()}
-              >
+                isDisabled={!allowListInput.trim()}>
                 Add
               </Button>
             </Flex>
@@ -333,8 +331,8 @@ function ConfigScreen() {
               </Flex>
             )}
             <FormControl.HelpText>
-              Optional. Add one domain pattern at a time. When set, Link Checker marks any
-              resolved URL that does not include one of these patterns as invalid.
+              Optional. Add one domain pattern at a time. When set, Link Checker marks any resolved
+              URL that does not include one of these patterns as invalid.
             </FormControl.HelpText>
           </FormControl>
           <FormControl marginTop="spacingM">
@@ -354,8 +352,7 @@ function ConfigScreen() {
               <Button
                 variant="secondary"
                 onClick={() => addPattern('forbiddenUrlPatterns', denyListInput)}
-                isDisabled={!denyListInput.trim()}
-              >
+                isDisabled={!denyListInput.trim()}>
                 Add
               </Button>
             </Flex>
@@ -371,9 +368,8 @@ function ConfigScreen() {
               </Flex>
             )}
             <FormControl.HelpText>
-              Optional. Add one domain pattern at a time. Anything listed here is always flagged
-              as invalid, which is useful for blocking staging, QA, or other non-production
-              domains.
+              Optional. Add one domain pattern at a time. Anything listed here is always flagged as
+              invalid, which is useful for blocking staging, QA, or other non-production domains.
             </FormControl.HelpText>
           </FormControl>
         </Form>

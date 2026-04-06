@@ -57,10 +57,7 @@ describe('checkLink handler', () => {
     mockFetch.mockResolvedValueOnce({ status: 200, ok: true });
     const result = await handler({ body: { url: '  https://example.com  ' } });
     expect(result).toEqual({ status: 200 });
-    expect(mockFetch).toHaveBeenCalledWith(
-      'https://example.com',
-      expect.any(Object)
-    );
+    expect(mockFetch).toHaveBeenCalledWith('https://example.com', expect.any(Object));
   });
 
   it('returns error when fetch throws', async () => {
