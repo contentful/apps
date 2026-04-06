@@ -1,8 +1,4 @@
-import {
-  extractUrlsFromEntry,
-  isRelativeUrl,
-  type ExtractedUrl,
-} from '@/utils/extractUrls';
+import { extractUrlsFromEntry, isRelativeUrl, type ExtractedUrl } from '@/utils/extractUrls';
 
 describe('isRelativeUrl', () => {
   it('returns false for http URLs', () => {
@@ -206,10 +202,7 @@ describe('extractUrlsFromEntry', () => {
             name: 'Links',
             type: 'Array',
             locales: ['en-US'],
-            getValue: () => [
-              'https://example.com',
-              'Check https://example.com too',
-            ],
+            getValue: () => ['https://example.com', 'Check https://example.com too'],
           },
         },
       };
@@ -226,7 +219,8 @@ describe('extractUrlsFromEntry', () => {
             name: 'Mixed',
             type: 'Array',
             locales: ['en-US'],
-            getValue: () => ['https://valid.com', null, 42, undefined, 'https://also-valid.com'] as unknown[],
+            getValue: () =>
+              ['https://valid.com', null, 42, undefined, 'https://also-valid.com'] as unknown[],
           },
         },
       };

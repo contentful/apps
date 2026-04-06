@@ -167,9 +167,9 @@ export default function Page() {
     entriesScanned: 0,
     linksFound: 0,
   });
-  const [configuredContentTypes, setConfiguredContentTypes] = useState<Array<{ id: string; name: string }>>(
-    []
-  );
+  const [configuredContentTypes, setConfiguredContentTypes] = useState<
+    Array<{ id: string; name: string }>
+  >([]);
   const [hasStartedScan, setHasStartedScan] = useState(false);
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | LinkStatus>('all');
@@ -197,13 +197,14 @@ export default function Page() {
     setScanStats({ entriesScanned: 0, linksFound: 0 });
 
     try {
-      const currentState = await (sdk as PageAppSDK & {
-        app?: { getCurrentState: () => Promise<{ EditorInterface?: Record<string, unknown> }> };
-      }).app?.getCurrentState?.();
-      const configuredContentTypeIds =
-        installation.selectedContentTypeIds?.length
-          ? installation.selectedContentTypeIds
-          : Object.keys(currentState?.EditorInterface ?? {});
+      const currentState = await (
+        sdk as PageAppSDK & {
+          app?: { getCurrentState: () => Promise<{ EditorInterface?: Record<string, unknown> }> };
+        }
+      ).app?.getCurrentState?.();
+      const configuredContentTypeIds = installation.selectedContentTypeIds?.length
+        ? installation.selectedContentTypeIds
+        : Object.keys(currentState?.EditorInterface ?? {});
 
       const fetchAllContentTypes = async (): Promise<ContentTypeSummary[]> => {
         const items: ContentTypeSummary[] = [];
@@ -236,7 +237,9 @@ export default function Page() {
       };
 
       const contentTypes = await fetchAllContentTypes();
-      setConfiguredContentTypes(contentTypes.map((contentType) => ({ id: contentType.id, name: contentType.name })));
+      setConfiguredContentTypes(
+        contentTypes.map((contentType) => ({ id: contentType.id, name: contentType.name }))
+      );
 
       if (configuredContentTypeIds.length === 0) {
         setLoading(false);
@@ -249,7 +252,9 @@ export default function Page() {
           .filter((contentType) =>
             contentType.fields.some((field) => {
               if (SUPPORTED_FIELD_TYPES.includes(field.type)) return true;
-              return field.type === 'Array' && SUPPORTED_FIELD_TYPES.includes(field.items?.type || '');
+              return (
+                field.type === 'Array' && SUPPORTED_FIELD_TYPES.includes(field.items?.type || '')
+              );
             })
           )
           .map((contentType) => [contentType.id, contentType])
@@ -275,7 +280,9 @@ export default function Page() {
             const functionId = action.function?.sys?.id;
             const actionAppDefinitionId =
               action.sys?.appDefinition?.sys?.id ?? action.sys?.appDefinition?.id;
-            return functionId === CHECK_LINK_FUNCTION_ID && actionAppDefinitionId === appDefinitionId;
+            return (
+              functionId === CHECK_LINK_FUNCTION_ID && actionAppDefinitionId === appDefinitionId
+            );
           });
 
           if (matchingAction?.sys?.id) {
@@ -352,16 +359,16 @@ export default function Page() {
           ? { 'sys.contentType.sys.id[in]': Array.from(contentTypeMap.keys()).join(',') }
           : {};
 
-        while (true) {
-          const response = await sdk.cma.entry.getMany({
-            spaceId: sdk.ids.space,
-            environmentId: sdk.ids.environment,
-            query: {
-              skip,
-              limit: ENTRY_FETCH_LIMIT,
-              ...entryQueryBase,
-            },
-          });
+      while (true) {
+        const response = await sdk.cma.entry.getMany({
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environment,
+          query: {
+            skip,
+            limit: ENTRY_FETCH_LIMIT,
+            ...entryQueryBase,
+          },
+        });
 
         const batchEntries = response.items as EntrySummary[];
 
@@ -564,8 +571,7 @@ export default function Page() {
               locale: item.extractedUrl.locale,
               url: item.extractedUrl.url,
               resolvedUrl: item.resolvedUrl,
-              status:
-                typeof status === 'number' && isSuccessStatus(status) ? 'valid' : 'invalid',
+              status: typeof status === 'number' && isSuccessStatus(status) ? 'valid' : 'invalid',
               statusCode: status,
               reason: response.error,
             };
@@ -644,27 +650,35 @@ export default function Page() {
 
   return (
     <Flex justifyContent="center" paddingLeft="spacingL" paddingRight="spacingL">
-      <Box style={{ width: '100%', maxWidth: '1280px' }} paddingTop="spacingL" paddingBottom="spacing2Xl">
-        <Flex alignItems="flex-start" justifyContent="space-between" gap="spacingL" marginBottom="spacingL">
+      <Box
+        style={{ width: '100%', maxWidth: '1280px' }}
+        paddingTop="spacingL"
+        paddingBottom="spacing2Xl">
+        <Flex
+          alignItems="flex-start"
+          justifyContent="space-between"
+          gap="spacingL"
+          marginBottom="spacingL">
           <Box>
             <Heading>Link Checker</Heading>
             <Paragraph marginTop="spacingXs" marginBottom="none">
-              Search and filter links across the space, then jump straight to the entry that needs an update.
+              Search and filter links across the space, then jump straight to the entry that needs
+              an update.
             </Paragraph>
           </Box>
           <Button
             variant="secondary"
             onClick={refreshResults}
             isLoading={refreshing || loading}
-            isDisabled={!loading && !hasAssignedContentTypes && hasStartedScan}
-          >
+            isDisabled={!loading && !hasAssignedContentTypes && hasStartedScan}>
             {hasStartedScan ? 'Refresh links' : 'Run scan'}
           </Button>
         </Flex>
 
         {!baseUrl && (
           <Note variant="warning" title="Current domain not configured">
-            Relative links will appear as unchecked until you set <strong>Current domain</strong> in the app configuration.
+            Relative links will appear as unchecked until you set <strong>Current domain</strong> in
+            the app configuration.
           </Note>
         )}
 
@@ -677,96 +691,95 @@ export default function Page() {
         )}
 
         <>
-            {!hasStartedScan && (
-              <Box marginTop="spacingL" marginBottom="spacingL">
-                {hasAssignedContentTypes ? (
-                  <Note variant="primary" title="Run a scan when you are ready">
-                    Scan only the content types assigned to Link Checker and populate the table batch by batch.
-                  </Note>
-                ) : (
-                  <Note variant="warning" title="Assign content types first">
-                    The page audit only scans content types selected in the app configuration. Assign at least one
-                    content type there, then come back here to run a scan.
-                  </Note>
-                )}
-              </Box>
-            )}
-
-            {loading && hasStartedScan && results.length === 0 && (
-              <Box marginTop="spacingL" marginBottom="spacingL">
-                <Note variant="primary" title="Loading first results">
-                  Loading entries and extracting links. The table will appear as soon as the first batch is ready.
+          {!hasStartedScan && (
+            <Box marginTop="spacingL" marginBottom="spacingL">
+              {hasAssignedContentTypes ? (
+                <Note variant="primary" title="Run a scan when you are ready">
+                  Scan only the content types assigned to Link Checker and populate the table batch
+                  by batch.
                 </Note>
-              </Box>
-            )}
-            <Flex gap="spacingS" flexWrap="wrap" marginTop="spacingL" marginBottom="spacingL">
-              <Badge variant="primary">{counts.checking} checking</Badge>
-              <Badge variant="negative">{counts.invalid} invalid</Badge>
-              <Badge variant="positive">{counts.valid} valid</Badge>
-              <Badge variant="secondary">{results.length} total</Badge>
-            </Flex>
-
-            {scanning && progress && (
-              <Box marginBottom="spacingL">
-                <Note variant="primary" title="Link scan in progress">
-                  Scanned {scanStats.entriesScanned} entries and found {scanStats.linksFound} links so far.
-                  Checked {progress.checked} of {progress.total} links. Results are updating as they come in.
+              ) : (
+                <Note variant="warning" title="Assign content types first">
+                  The page audit only scans content types selected in the app configuration. Assign
+                  at least one content type there, then come back here to run a scan.
                 </Note>
-              </Box>
-            )}
+              )}
+            </Box>
+          )}
 
-            <Flex gap="spacingS" flexWrap="wrap" marginBottom="spacingL" alignItems="flex-end">
-              <Box style={{ minWidth: '260px', flex: '1 1 320px' }}>
-                <TextInput
-                  name="link-search"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search by URL, entry, content type, field, or reason"
-                />
-              </Box>
-              <Box style={{ minWidth: '180px' }}>
-                <Select
-                  name="status-filter"
-                  value={statusFilter}
-                  onChange={(event) =>
-                    setStatusFilter(event.target.value as 'all' | LinkStatus)
-                  }
-                >
-                  <Option value="all">All statuses</Option>
-                  <Option value="checking">Checking</Option>
-                  <Option value="invalid">Invalid</Option>
-                  <Option value="valid">Valid</Option>
-                </Select>
-              </Box>
-              <Box style={{ minWidth: '220px' }}>
-                <Select
-                  name="content-type-filter"
-                  value={contentTypeFilter}
-                  onChange={(event) => setContentTypeFilter(event.target.value)}
-                  isDisabled={!hasAssignedContentTypes}
-                >
-                  <Option value="all">All content types</Option>
-                  {contentTypeOptions.map((option) => (
-                    <Option key={option.id} value={option.id}>
-                      {option.name}
-                    </Option>
-                  ))}
-                </Select>
-              </Box>
-            </Flex>
-
-            {filteredResults.length === 0 ? (
-              <Note variant="neutral">
-                {!hasStartedScan
-                  ? 'No scan has been run yet.'
-                  : !hasAssignedContentTypes
-                  ? 'No content types are assigned to Link Checker in the app configuration.'
-                  : loading
-                  ? `Preparing the first batch of links. ${scanStats.entriesScanned} entries scanned so far.`
-                  : 'No links match the current filters.'}
+          {loading && hasStartedScan && results.length === 0 && (
+            <Box marginTop="spacingL" marginBottom="spacingL">
+              <Note variant="primary" title="Loading first results">
+                Loading entries and extracting links. The table will appear as soon as the first
+                batch is ready.
               </Note>
-            ) : (
-              <Box style={{ overflowX: 'auto' }}>
+            </Box>
+          )}
+          <Flex gap="spacingS" flexWrap="wrap" marginTop="spacingL" marginBottom="spacingL">
+            <Badge variant="primary">{counts.checking} checking</Badge>
+            <Badge variant="negative">{counts.invalid} invalid</Badge>
+            <Badge variant="positive">{counts.valid} valid</Badge>
+            <Badge variant="secondary">{results.length} total</Badge>
+          </Flex>
+
+          {scanning && progress && (
+            <Box marginBottom="spacingL">
+              <Note variant="primary" title="Link scan in progress">
+                Scanned {scanStats.entriesScanned} entries and found {scanStats.linksFound} links so
+                far. Checked {progress.checked} of {progress.total} links. Results are updating as
+                they come in.
+              </Note>
+            </Box>
+          )}
+
+          <Flex gap="spacingS" flexWrap="wrap" marginBottom="spacingL" alignItems="flex-end">
+            <Box style={{ minWidth: '260px', flex: '1 1 320px' }}>
+              <TextInput
+                name="link-search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search by URL, entry, content type, field, or reason"
+              />
+            </Box>
+            <Box style={{ minWidth: '180px' }}>
+              <Select
+                name="status-filter"
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value as 'all' | LinkStatus)}>
+                <Option value="all">All statuses</Option>
+                <Option value="checking">Checking</Option>
+                <Option value="invalid">Invalid</Option>
+                <Option value="valid">Valid</Option>
+              </Select>
+            </Box>
+            <Box style={{ minWidth: '220px' }}>
+              <Select
+                name="content-type-filter"
+                value={contentTypeFilter}
+                onChange={(event) => setContentTypeFilter(event.target.value)}
+                isDisabled={!hasAssignedContentTypes}>
+                <Option value="all">All content types</Option>
+                {contentTypeOptions.map((option) => (
+                  <Option key={option.id} value={option.id}>
+                    {option.name}
+                  </Option>
+                ))}
+              </Select>
+            </Box>
+          </Flex>
+
+          {filteredResults.length === 0 ? (
+            <Note variant="neutral">
+              {!hasStartedScan
+                ? 'No scan has been run yet.'
+                : !hasAssignedContentTypes
+                ? 'No content types are assigned to Link Checker in the app configuration.'
+                : loading
+                ? `Preparing the first batch of links. ${scanStats.entriesScanned} entries scanned so far.`
+                : 'No links match the current filters.'}
+            </Note>
+          ) : (
+            <Box style={{ overflowX: 'auto' }}>
               <Table>
                 <Table.Head>
                   <Table.Row>
@@ -790,8 +803,7 @@ export default function Page() {
                             href={result.resolvedUrl ?? result.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
-                          >
+                            style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                             {result.url}
                           </TextLink>
                           {result.resolvedUrl && result.resolvedUrl !== result.url && (
@@ -801,15 +813,16 @@ export default function Page() {
                           )}
                         </Flex>
                       </Table.Cell>
-                      <Table.Cell style={{ minWidth: '180px' }}>{result.contentTypeName}</Table.Cell>
+                      <Table.Cell style={{ minWidth: '180px' }}>
+                        {result.contentTypeName}
+                      </Table.Cell>
                       <Table.Cell style={{ minWidth: '240px' }}>
                         <TextLink
                           href={result.entryUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           icon={<ExternalLinkIcon />}
-                          alignIcon="end"
-                        >
+                          alignIcon="end">
                           {result.entryTitle}
                         </TextLink>
                       </Table.Cell>
@@ -821,9 +834,9 @@ export default function Page() {
                   ))}
                 </Table.Body>
               </Table>
-              </Box>
-            )}
-          </>
+            </Box>
+          )}
+        </>
       </Box>
     </Flex>
   );

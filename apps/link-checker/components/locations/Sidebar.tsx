@@ -75,16 +75,14 @@ function ResultCard({ result }: { result: LinkCheckResult }) {
         border: '1px solid var(--color-gray-300)',
         borderRadius: '6px',
         backgroundColor: 'var(--color-white)',
-      }}
-    >
+      }}>
       <Flex flexDirection="column" alignItems="stretch" style={{ textAlign: 'left' }}>
         <Box>
           <TextLink
             href={result.resolvedUrl ?? result.url}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
-          >
+            style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
             {result.url}
           </TextLink>
         </Box>
@@ -361,20 +359,18 @@ export default function Sidebar() {
   const hasInvalid = invalidResults.length > 0;
 
   return (
-    <Flex
-      flexDirection="column"
-      gap="spacingS"
-      as="section"
-      aria-label="Link checker"
-    >
+    <Flex flexDirection="column" gap="spacingS" as="section" aria-label="Link checker">
       <Button
         variant="secondary"
         isFullWidth={true}
         onClick={runCheck}
         isLoading={loading}
         isDisabled={loading || functionUnavailable}
-        aria-label={functionUnavailable ? 'Link checking is unavailable; App Action is not configured' : undefined}
-      >
+        aria-label={
+          functionUnavailable
+            ? 'Link checking is unavailable; App Action is not configured'
+            : undefined
+        }>
         Check links
       </Button>
 
@@ -392,7 +388,8 @@ export default function Sidebar() {
 
       {!loading && relativeLinksSkipped > 0 && (
         <Note variant="neutral">
-          {relativeLinksSkipped} relative link{relativeLinksSkipped !== 1 ? 's' : ''} skipped. Set <strong>Current domain (base URL)</strong> in app config to check them.
+          {relativeLinksSkipped} relative link{relativeLinksSkipped !== 1 ? 's' : ''} skipped. Set{' '}
+          <strong>Current domain (base URL)</strong> in app config to check them.
         </Note>
       )}
       {loading && progress && (
@@ -443,8 +440,7 @@ export default function Sidebar() {
               </Flex>
               <Checkbox
                 isChecked={showAll}
-                onChange={(e) => setShowAll((e.target as HTMLInputElement).checked)}
-              >
+                onChange={(e) => setShowAll((e.target as HTMLInputElement).checked)}>
                 Show valid links
               </Checkbox>
             </Box>

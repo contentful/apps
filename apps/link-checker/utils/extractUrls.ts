@@ -91,7 +91,12 @@ export function extractUrlsFromEntry(entry: EntryLike): ExtractedUrl[] {
     for (const locale of locales) {
       const value = field.getValue(locale);
 
-      if (field.type === RICH_TEXT_FIELD_TYPE && value && typeof value === 'object' && !Array.isArray(value)) {
+      if (
+        field.type === RICH_TEXT_FIELD_TYPE &&
+        value &&
+        typeof value === 'object' &&
+        !Array.isArray(value)
+      ) {
         const doc = value as RichTextNode;
         extractUrlsFromRichTextValue(doc, fieldId, field.name || fieldId, locale, result, seen);
         continue;
@@ -100,8 +105,8 @@ export function extractUrlsFromEntry(entry: EntryLike): ExtractedUrl[] {
       const stringValues: string[] = Array.isArray(value)
         ? (value as unknown[]).filter((v): v is string => typeof v === 'string')
         : typeof value === 'string' && STRING_FIELD_TYPES.includes(field.type)
-          ? [value]
-          : [];
+        ? [value]
+        : [];
 
       for (const text of stringValues) {
         URL_REGEX.lastIndex = 0;
