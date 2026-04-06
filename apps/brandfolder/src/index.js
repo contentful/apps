@@ -1,5 +1,6 @@
 import pick from 'lodash/pick';
 import { setup } from '@contentful/dam-app-base';
+import { applyDialogSizing, createDialogOptions } from './dialogSizing';
 
 const CTF_APP_URL = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
 const BF_EMBED_URL = `https://integration-panel-ui.brandfolder-svc.com?channel=message&appName=Contentful&origin=${CTF_APP_URL}&attachment_fields=mux_hls_url`;
@@ -45,9 +46,7 @@ function renderDialog(sdk) {
   iframe.id = 'brandfolder-embed';
   iframe.className = 'iframe-container';
   iframe.src = bf_embed_url;
-  iframe.width = 400;
-  iframe.height = 650;
-  iframe.style.border = 'none';
+  applyDialogSizing(container, iframe);
   container.appendChild(iframe);
 
   document.body.appendChild(container);
@@ -73,15 +72,7 @@ function renderDialog(sdk) {
 }
 
 async function openDialog(sdk, _currentValue, config) {
-  const result = await sdk.dialogs.openCurrentApp({
-    position: 'center',
-    title: CTA,
-    shouldCloseOnOverlayClick: true,
-    shouldCloseOnEscapePress: true,
-    parameters: { ...config },
-    width: 400,
-    allowHeightOverflow: true,
-  });
+  const result = await sdk.dialogs.openCurrentApp(createDialogOptions(CTA, { ...config }));
 
   if (!Array.isArray(result)) {
     return [];
