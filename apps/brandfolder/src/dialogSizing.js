@@ -1,4 +1,5 @@
 export const DIALOG_MIN_HEIGHT = '80vh';
+export const DIALOG_WIDTH = 1200;
 
 export function createDialogOptions(title, parameters) {
   return {
@@ -7,7 +8,7 @@ export function createDialogOptions(title, parameters) {
     shouldCloseOnOverlayClick: true,
     shouldCloseOnEscapePress: true,
     parameters,
-    width: 'fullWidth',
+    width: DIALOG_WIDTH,
     minHeight: DIALOG_MIN_HEIGHT,
     allowHeightOverflow: true,
   };

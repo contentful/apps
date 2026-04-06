@@ -1,9 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { applyDialogSizing, createDialogOptions, DIALOG_MIN_HEIGHT } from './dialogSizing.js';
+import {
+  applyDialogSizing,
+  createDialogOptions,
+  DIALOG_MIN_HEIGHT,
+  DIALOG_WIDTH,
+} from './dialogSizing.js';
 
-test('createDialogOptions requests a full-width dialog for the asset picker', () => {
+test('createDialogOptions requests a fixed desktop-width dialog for the asset picker', () => {
   const config = { bf_api_key: 'test-key' };
 
   assert.deepEqual(createDialogOptions('Select an asset on Brandfolder', config), {
@@ -12,7 +17,7 @@ test('createDialogOptions requests a full-width dialog for the asset picker', ()
     shouldCloseOnOverlayClick: true,
     shouldCloseOnEscapePress: true,
     parameters: config,
-    width: 'fullWidth',
+    width: DIALOG_WIDTH,
     minHeight: DIALOG_MIN_HEIGHT,
     allowHeightOverflow: true,
   });
