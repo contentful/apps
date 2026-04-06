@@ -3,12 +3,12 @@ import {
   Box,
   Card,
   Flex,
-  Button,
   Table,
   TableHead,
   TableRow,
   TableCell,
   TableBody,
+  Button,
   Text,
 } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
@@ -21,7 +21,6 @@ import {
 
 interface GoogleDocsMappingReviewScreenProps {
   fixture: GoogleDocsReviewFixture;
-  onBack: () => void;
 }
 
 type DocSegment =
@@ -91,10 +90,7 @@ const getEntryDisplayTitle = (entry: GoogleDocsReviewFixture['entries'][number])
     : entry.contentTypeId;
 };
 
-export const GoogleDocsMappingReviewScreen = ({
-  fixture,
-  onBack,
-}: GoogleDocsMappingReviewScreenProps) => {
+export const GoogleDocsMappingReviewScreen = ({ fixture }: GoogleDocsMappingReviewScreenProps) => {
   const [selectedEntryIndex, setSelectedEntryIndex] = useState<number | null>(null);
   const sourceUsage = useMemo(() => buildUsageFromMappingPlan(fixture), [fixture]);
 
@@ -214,12 +210,6 @@ export const GoogleDocsMappingReviewScreen = ({
 
   return (
     <Flex flexDirection="column" gap="spacingM" style={{ padding: tokens.spacingL }}>
-      <Flex justifyContent="space-between" alignItems="center">
-        <Text fontWeight="fontWeightDemiBold">Google Docs Mapping Review</Text>
-        <Button variant="secondary" size="small" onClick={onBack}>
-          Back
-        </Button>
-      </Flex>
       <Card
         padding="none"
         style={{

@@ -6,7 +6,6 @@ import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
 } from './components/mainpage/ModalOrchestrator';
-import { SimpleReviewScreen } from './components/review-prototype/SimpleReviewScreen';
 import { MainPageView } from './components/mainpage/MainPageView';
 import { PreviewPageView } from './components/mainpage/PreviewPageView';
 import { PreviewPayload } from '../../utils/types';
@@ -17,8 +16,6 @@ const Page = () => {
   const [oauthToken, setOauthToken] = useState<string>('');
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
   const [isOAuthLoading, setIsOAuthLoading] = useState(true);
-  // Temporary state for development
-  const [isMappingPrototypeVisible, setIsMappingPrototypeVisible] = useState(false);
   const [previewPayload, setPreviewPayload] = useState<PreviewPayload | null>(null);
 
   const handleOauthTokenChange = (token: string) => {
@@ -37,13 +34,15 @@ const Page = () => {
     modalOrchestratorRef.current?.startFlow();
   };
 
-  // Temporary component for development
-  if (isMappingPrototypeVisible) {
-    return <SimpleReviewScreen onBack={() => setIsMappingPrototypeVisible(false)} />;
-  }
-
   const handlePreviewReady = (payload: PreviewPayload) => {
     setPreviewPayload(payload);
+  };
+
+  const handleUseFixturePreview = () => {
+    setPreviewPayload({
+      documentTitle: 'Fixture preview',
+      data: {},
+    });
   };
 
   const handleReturnToMainPage = () => {
@@ -68,6 +67,7 @@ const Page = () => {
             onOauthTokenChange={handleOauthTokenChange}
             onLoadingStateChange={handleOAuthLoadingStateChange}
             onSelectFile={handleSelectFile}
+            onUseFixturePreview={handleUseFixturePreview}
           />
         )}
       </Layout>
