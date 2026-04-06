@@ -9,7 +9,17 @@
       "accepts": [
         "appaction.call"
       ],
-      "allowNetworks": []
+      "allowNetworks": [
+        "contentful.com",
+        "www.contentful.com",
+        "colorful.com",
+        "www.colorful.com",
+        "twitter.com",
+        "www.twitter.com",
+        "youtube.com",
+        "www.youtube.com",
+        "httpstat.us"
+      ]
     }
   ],
   "actions": [
