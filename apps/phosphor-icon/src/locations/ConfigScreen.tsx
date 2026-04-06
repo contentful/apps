@@ -13,6 +13,7 @@ import {
   Note,
   Paragraph,
   Pill,
+  Select,
   Spinner,
   Stack,
   Switch,
@@ -43,6 +44,11 @@ interface ContentTypeWithJsonFields {
   name: string;
   jsonFieldIds: string[];
   fields: Array<{ id: string; name: string; type: string }>;
+}
+
+interface InvalidStyleUsageSummary {
+  entryCount: number;
+  invalidStyles: IconWeight[];
 }
 
 const DEFAULT_INSTALLATION_PARAMETERS: Required<AppInstallationParameters> = {
@@ -121,6 +127,80 @@ function isVersionMismatchError(error: unknown) {
   return message.toLowerCase().includes('version');
 }
 
+function extractInvalidStyleCount(
+  fieldValue: unknown,
+  allowedWeights: IconWeight[]
+): InvalidStyleUsageSummary | null {
+  const invalidStyles = new Set<IconWeight>();
+  let entryCount = 0;
+
+  const collect = (candidate: unknown) => {
+    if (
+      candidate &&
+      typeof candidate === 'object' &&
+      'weight' in candidate &&
+      typeof (candidate as { weight?: unknown }).weight === 'string'
+    ) {
+      const weight = (candidate as { weight: string }).weight;
+      if (ICON_WEIGHTS.includes(weight as IconWeight) && !allowedWeights.includes(weight as IconWeight)) {
+        invalidStyles.add(weight as IconWeight);
+        entryCount += 1;
+      }
+    }
+  };
+
+  if (fieldValue && typeof fieldValue === 'object' && 'weight' in (fieldValue as Record<string, unknown>)) {
+    collect(fieldValue);
+  } else if (fieldValue && typeof fieldValue === 'object') {
+    Object.values(fieldValue as Record<string, unknown>).forEach(collect);
+  }
+
+  if (entryCount === 0) {
+    return null;
+  }
+
+  return {
+    entryCount,
+    invalidStyles: Array.from(invalidStyles),
+  };
+}
+
+function replaceInvalidStyles(fieldValue: unknown, replacementWeight: IconWeight, allowedWeights: IconWeight[]) {
+  const replace = (candidate: unknown) => {
+    if (
+      candidate &&
+      typeof candidate === 'object' &&
+      'weight' in candidate &&
+      typeof (candidate as { weight?: unknown }).weight === 'string'
+    ) {
+      const weight = (candidate as { weight: string }).weight;
+      if (ICON_WEIGHTS.includes(weight as IconWeight) && !allowedWeights.includes(weight as IconWeight)) {
+        return {
+          ...(candidate as Record<string, unknown>),
+          weight: replacementWeight,
+        };
+      }
+    }
+
+    return candidate;
+  };
+
+  if (fieldValue && typeof fieldValue === 'object' && 'weight' in (fieldValue as Record<string, unknown>)) {
+    return replace(fieldValue);
+  }
+
+  if (fieldValue && typeof fieldValue === 'object') {
+    return Object.fromEntries(
+      Object.entries(fieldValue as Record<string, unknown>).map(([locale, value]) => [
+        locale,
+        replace(value),
+      ])
+    );
+  }
+
+  return fieldValue;
+}
+
 function IconStyleOption({
   weight,
   isChecked,
@@ -149,10 +229,17 @@ const ConfigScreen = () => {
   const [enabledWeights, setEnabledWeights] = useState<IconWeight[]>(['regular']);
   const [contentTypes, setContentTypes] = useState<ContentTypeWithJsonFields[]>([]);
   const [selectedContentTypeIds, setSelectedContentTypeIds] = useState<string[]>([]);
+  const [managedFieldName, setManagedFieldName] = useState(
+    DEFAULT_INSTALLATION_PARAMETERS.managedFieldName
+  );
   const [iconAvailabilityMode, setIconAvailabilityMode] = useState<IconAvailabilityMode>('all');
   const [selectedIconNames, setSelectedIconNames] = useState<string[]>([]);
   const [positionOptions, setPositionOptions] = useState<string[]>(DEFAULT_ICON_POSITIONS);
   const [newPositionOption, setNewPositionOption] = useState('');
+  const [invalidStyleUsage, setInvalidStyleUsage] = useState<InvalidStyleUsageSummary | null>(null);
+  const [applyStyleMigration, setApplyStyleMigration] = useState(false);
+  const [replacementStyle, setReplacementStyle] = useState<IconWeight>('regular');
+  const [isCheckingEntries, setIsCheckingEntries] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -165,6 +252,9 @@ const ConfigScreen = () => {
       const savedContentTypeIds = currentParameters.selectedContentTypeIds ?? [];
 
       setEnabledWeights(parseEnabledWeights(currentParameters.enabledWeights));
+      setManagedFieldName(
+        currentParameters.managedFieldName ?? DEFAULT_INSTALLATION_PARAMETERS.managedFieldName
+      );
       setSelectedIconNames(parseSelectedIconNames(currentParameters.selectedIconNames));
       setIconAvailabilityMode(currentParameters.iconAvailabilityMode ?? 'all');
       setPositionOptions(parsePositionOptions(currentParameters.positionOptions));
@@ -283,12 +373,209 @@ const ConfigScreen = () => {
     }
   }, [enabledWeights, normalizedPositionOptions, sdk.dialogs, selectedIconNames]);
 
+  const summarizeInvalidStyleUsage = useCallback(async () => {
+    if (selectedContentTypeIds.length === 0 || enabledWeights.length === 0) {
+      setInvalidStyleUsage(null);
+      return;
+    }
+
+    setIsCheckingEntries(true);
+
+    try {
+      const invalidStyles = new Set<IconWeight>();
+      let entryCount = 0;
+
+      for (const contentTypeId of selectedContentTypeIds) {
+        const contentTypeDetails = (await sdk.cma.contentType.get({
+          contentTypeId,
+        })) as {
+          fields: Array<{ id: string; name: string; type: string }>;
+        };
+
+        const editorInterface = (await sdk.cma.editorInterface.get({
+          contentTypeId,
+        })) as {
+          controls?: Array<{
+            fieldId: string;
+            widgetId?: string;
+            widgetNamespace?: string;
+          }>;
+        };
+
+        const fieldName = managedFieldName.trim();
+        const baseFieldId = slugifyFieldId(fieldName);
+        const existingAppControl = (editorInterface.controls ?? []).find(
+          (control) => control.widgetNamespace === 'app' && control.widgetId === sdk.ids.app
+        );
+
+        const managedField =
+          contentTypeDetails.fields.find((field) => field.id === existingAppControl?.fieldId) ??
+          contentTypeDetails.fields.find((field) => field.id === baseFieldId) ??
+          contentTypeDetails.fields.find((field) => field.name === fieldName);
+
+        if (!managedField) {
+          continue;
+        }
+
+        let skip = 0;
+        const limit = 100;
+
+        while (true) {
+          const entriesResponse = (await sdk.cma.entry.getMany({
+            query: {
+              content_type: contentTypeId,
+              limit,
+              skip,
+            },
+          })) as {
+            items: Array<{ fields?: Record<string, unknown> }>;
+            total?: number;
+          };
+
+          for (const entry of entriesResponse.items ?? []) {
+            const summary = extractInvalidStyleCount(entry.fields?.[managedField.id], enabledWeights);
+            if (!summary) {
+              continue;
+            }
+
+            entryCount += summary.entryCount;
+            summary.invalidStyles.forEach((style) => invalidStyles.add(style));
+          }
+
+          skip += entriesResponse.items?.length ?? 0;
+          if (!entriesResponse.items?.length || skip >= (entriesResponse.total ?? 0)) {
+            break;
+          }
+        }
+      }
+
+      setInvalidStyleUsage(
+        entryCount > 0
+          ? {
+              entryCount,
+              invalidStyles: Array.from(invalidStyles),
+            }
+          : null
+      );
+    } catch (scanError) {
+      console.error(scanError);
+      setInvalidStyleUsage(null);
+    } finally {
+      setIsCheckingEntries(false);
+    }
+  }, [enabledWeights, managedFieldName, sdk, selectedContentTypeIds]);
+
+  useEffect(() => {
+    summarizeInvalidStyleUsage();
+  }, [summarizeInvalidStyleUsage]);
+
+  useEffect(() => {
+    if (!enabledWeights.includes(replacementStyle)) {
+      setReplacementStyle(enabledWeights[0] ?? 'regular');
+    }
+  }, [enabledWeights, replacementStyle]);
+
+  const applyStyleMigrationToEntries = useCallback(
+    async (replacementWeight: IconWeight) => {
+      for (const contentTypeId of selectedContentTypeIds) {
+        const contentTypeDetails = (await sdk.cma.contentType.get({
+          contentTypeId,
+        })) as {
+          fields: Array<{ id: string; name: string; type: string }>;
+        };
+
+        const editorInterface = (await sdk.cma.editorInterface.get({
+          contentTypeId,
+        })) as {
+          controls?: Array<{
+            fieldId: string;
+            widgetId?: string;
+            widgetNamespace?: string;
+          }>;
+        };
+
+        const fieldName = managedFieldName.trim();
+        const baseFieldId = slugifyFieldId(fieldName);
+        const existingAppControl = (editorInterface.controls ?? []).find(
+          (control) => control.widgetNamespace === 'app' && control.widgetId === sdk.ids.app
+        );
+
+        const managedField =
+          contentTypeDetails.fields.find((field) => field.id === existingAppControl?.fieldId) ??
+          contentTypeDetails.fields.find((field) => field.id === baseFieldId) ??
+          contentTypeDetails.fields.find((field) => field.name === fieldName);
+
+        if (!managedField) {
+          continue;
+        }
+
+        let skip = 0;
+        const limit = 100;
+
+        while (true) {
+          const entriesResponse = (await sdk.cma.entry.getMany({
+            query: {
+              content_type: contentTypeId,
+              limit,
+              skip,
+            },
+          })) as {
+            items: Array<{
+              sys: { id: string; version?: number; publishedVersion?: number };
+              fields?: Record<string, unknown>;
+            }>;
+            total?: number;
+          };
+
+          for (const entry of entriesResponse.items ?? []) {
+            const currentFieldValue = entry.fields?.[managedField.id];
+            const summary = extractInvalidStyleCount(currentFieldValue, enabledWeights);
+
+            if (!summary) {
+              continue;
+            }
+
+            const updatedEntry = {
+              ...entry,
+              fields: {
+                ...(entry.fields ?? {}),
+                [managedField.id]: replaceInvalidStyles(
+                  currentFieldValue,
+                  replacementWeight,
+                  enabledWeights
+                ),
+              },
+            };
+
+            const updateResult = (await sdk.cma.entry.update(
+              { entryId: entry.sys.id },
+              updatedEntry as never
+            )) as { sys?: { version?: number; publishedVersion?: number } };
+
+            if (entry.sys.publishedVersion && updateResult.sys?.version) {
+              await sdk.cma.entry.publish(
+                { entryId: entry.sys.id },
+                { sys: { version: updateResult.sys.version } } as never
+              );
+            }
+          }
+
+          skip += entriesResponse.items?.length ?? 0;
+          if (!entriesResponse.items?.length || skip >= (entriesResponse.total ?? 0)) {
+            break;
+          }
+        }
+      }
+    },
+    [enabledWeights, managedFieldName, sdk, selectedContentTypeIds]
+  );
+
   const applyContentTypeAssignments = useCallback(
     async (configParameters: AppInstallationParameters) => {
       const assignedFields = await Promise.all(
         contentTypes.map(async (contentType) => {
           const assignApp = configParameters.selectedContentTypeIds?.includes(contentType.id);
-          const contentTypeDetails = (await sdk.cma.contentType.get({
+          let contentTypeDetails = (await sdk.cma.contentType.get({
             contentTypeId: contentType.id,
           })) as {
             name: string;
@@ -363,6 +650,41 @@ const ConfigScreen = () => {
               id: newFieldId,
               name: fieldName,
               type: 'Object',
+            };
+          }
+
+          if (assignApp && managedField && managedField.name !== fieldName) {
+            const renamedContentType = {
+              ...contentTypeDetails,
+              fields: contentTypeDetails.fields.map((field) =>
+                field.id === managedField!.id
+                  ? {
+                      ...field,
+                      name: fieldName,
+                    }
+                  : field
+              ),
+            };
+
+            const updatedResult = (await sdk.cma.contentType.update(
+              { contentTypeId: contentType.id },
+              renamedContentType as never
+            )) as {
+              fields: Array<{ id: string; name: string; type: string }>;
+              sys?: { version?: number };
+            };
+
+            if (updatedResult.sys?.version) {
+              await sdk.cma.contentType.publish(
+                { contentTypeId: contentType.id },
+                { sys: { version: updatedResult.sys.version } } as never
+              );
+            }
+
+            contentTypeDetails = updatedResult;
+            managedField = {
+              ...managedField,
+              name: fieldName,
             };
           }
 
@@ -490,18 +812,23 @@ const ConfigScreen = () => {
       return false;
     }
 
+    if (!managedFieldName.trim()) {
+      sdk.notifier.error('Enter a field name for the field to create.');
+      return false;
+    }
+
     if (iconAvailabilityMode === 'specific' && selectedIconNames.length === 0) {
       sdk.notifier.error('Select at least one icon when using the specific-icons mode.');
       return false;
     }
 
-    const managedFieldName = DEFAULT_INSTALLATION_PARAMETERS.managedFieldName;
-    const managedFieldId = slugifyFieldId(managedFieldName);
+    const normalizedManagedFieldName = managedFieldName.trim();
+    const managedFieldId = slugifyFieldId(normalizedManagedFieldName);
     const parameters: AppInstallationParameters = {
       enabledWeights: serializeEnabledWeights(enabledWeights),
       selectedContentTypeIds,
       managedFieldId,
-      managedFieldName,
+      managedFieldName: normalizedManagedFieldName,
       iconAvailabilityMode,
       selectedIconNames:
         iconAvailabilityMode === 'specific'
@@ -511,6 +838,10 @@ const ConfigScreen = () => {
     };
 
     try {
+      if (applyStyleMigration && invalidStyleUsage) {
+        await applyStyleMigrationToEntries(replacementStyle);
+      }
+
       const assignedFields = await applyContentTypeAssignments(parameters);
       const currentState = await sdk.app.getCurrentState();
       const targetState = {
@@ -539,10 +870,15 @@ const ConfigScreen = () => {
     }
   }, [
     applyContentTypeAssignments,
+    applyStyleMigrationToEntries,
     contentTypes,
     enabledWeights,
     iconAvailabilityMode,
+    applyStyleMigration,
+    invalidStyleUsage,
+    managedFieldName,
     normalizedPositionOptions,
+    replacementStyle,
     sdk,
     selectedContentTypeIds,
     selectedIconNames,
@@ -555,7 +891,7 @@ const ConfigScreen = () => {
   if (isLoading) {
     return (
       <Flex alignItems="center" justifyContent="center" padding="spacingXl">
-        <Spinner />
+        <FormControl.HelpText>Loading configuration…</FormControl.HelpText>
       </Flex>
     );
   }
@@ -601,6 +937,19 @@ const ConfigScreen = () => {
                   />
                 </FormControl>
               )}
+              <Box marginTop="spacingM">
+                <FormControl className={styles.fullWidth}>
+                  <FormControl.Label>Field name</FormControl.Label>
+                  <TextInput
+                    value={managedFieldName}
+                    onChange={(event) => setManagedFieldName(event.target.value)}
+                    placeholder="Phosphor icon"
+                  />
+                  <FormControl.HelpText>
+                    Phosphor Icon will use this name for the field on each selected content type.
+                  </FormControl.HelpText>
+                </FormControl>
+              </Box>
             </Box>
 
             <Box className={styles.section}>
@@ -618,6 +967,47 @@ const ConfigScreen = () => {
                     <FormControl.HelpText>
                       Choose which icon style options content editors can apply in the picker.
                     </FormControl.HelpText>
+                    {invalidStyleUsage ? (
+                      <Box marginTop="spacingS">
+                        <Note variant="warning" title="Existing entries use disabled styles">
+                          {invalidStyleUsage.entryCount} field value(s) currently use{' '}
+                          {invalidStyleUsage.invalidStyles
+                            .map((style) => ICON_WEIGHT_LABELS[style])
+                            .join(', ')}
+                          .
+                          <Box marginTop="spacingM">
+                            <Checkbox
+                              id="apply-style-migration"
+                              isChecked={applyStyleMigration}
+                              onChange={(event) => setApplyStyleMigration(event.target.checked)}>
+                              Apply an allowed style to existing entries that use disabled styles
+                            </Checkbox>
+                          </Box>
+                          {applyStyleMigration ? (
+                            <Box marginTop="spacingM">
+                              <FormControl>
+                                <FormControl.Label>Replacement style</FormControl.Label>
+                                <Select
+                                  value={replacementStyle}
+                                  onChange={(event) =>
+                                    setReplacementStyle(event.target.value as IconWeight)
+                                  }>
+                                  {enabledWeights.map((weight) => (
+                                    <Select.Option key={weight} value={weight}>
+                                      {ICON_WEIGHT_LABELS[weight]}
+                                    </Select.Option>
+                                  ))}
+                                </Select>
+                                <FormControl.HelpText>
+                                  Existing entries using disabled styles will be updated to this
+                                  style.
+                                </FormControl.HelpText>
+                              </FormControl>
+                            </Box>
+                          ) : null}
+                        </Note>
+                      </Box>
+                    ) : null}
                     <Box marginTop="spacingS">
                       {ICON_WEIGHTS.map((weight) => (
                         <Box key={weight} marginBottom="spacingS">
@@ -629,6 +1019,16 @@ const ConfigScreen = () => {
                         </Box>
                       ))}
                     </Box>
+                    {isCheckingEntries ? (
+                      <Box marginTop="spacing2Xs">
+                        <Flex alignItems="center" gap="spacing2Xs">
+                          <Spinner size="small" />
+                          <Paragraph marginBottom="none">
+                            Checking existing entries for disabled styles...
+                          </Paragraph>
+                        </Flex>
+                      </Box>
+                    ) : null}
                   </Box>
                 </FormControl>
 

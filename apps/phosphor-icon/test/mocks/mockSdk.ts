@@ -76,6 +76,10 @@ export function createMockConfigSdk(
       sys: { id: string };
       fields: Array<{ id: string; name: string; type: string }>;
     }>;
+    entries?: Array<{
+      sys: { id: string; contentTypeId: string; version?: number; publishedVersion?: number };
+      fields?: Record<string, unknown>;
+    }>;
     editorInterfaces?: Record<
       string,
       {
@@ -89,7 +93,7 @@ export function createMockConfigSdk(
     >;
   } = {}
 ): ConfigAppSDK<AppInstallationParameters> {
-  const { parameters = null, contentTypes = [], editorInterfaces = {} } = options;
+  const { parameters = null, contentTypes = [], entries = [], editorInterfaces = {} } = options;
   const contentTypesById = contentTypes.reduce<
     Record<
       string,
@@ -108,6 +112,25 @@ export function createMockConfigSdk(
   }, {});
 
   let configureHandler: (() => unknown | Promise<unknown>) | undefined;
+  const entriesById = entries.reduce<
+    Record<
+      string,
+      {
+        sys: { id: string; contentTypeId: string; version?: number; publishedVersion?: number };
+        fields?: Record<string, unknown>;
+      }
+    >
+  >((map, entry) => {
+    map[entry.sys.id] = {
+      ...entry,
+      sys: {
+        ...entry.sys,
+        version: entry.sys.version ?? 1,
+        publishedVersion: entry.sys.publishedVersion,
+      },
+    };
+    return map;
+  }, {});
 
   return {
     ids: {
@@ -203,6 +226,60 @@ export function createMockConfigSdk(
             return Promise.resolve(next);
           }
         ),
+      },
+      entry: {
+        getMany: vi.fn(({ query }: { query?: { content_type?: string; limit?: number; skip?: number } }) => {
+          const matchingEntries = Object.values(entriesById).filter(
+            (entry) => entry.sys.contentTypeId === query?.content_type
+          );
+          const skip = query?.skip ?? 0;
+          const limit = query?.limit ?? matchingEntries.length;
+          const items = matchingEntries.slice(skip, skip + limit);
+
+          return Promise.resolve({
+            items,
+            total: matchingEntries.length,
+          });
+        }),
+        update: vi.fn(
+          (
+            { entryId }: { entryId: string },
+            value: {
+              sys?: { contentTypeId?: string; version?: number; publishedVersion?: number };
+              fields?: Record<string, unknown>;
+            }
+          ) => {
+            const current = entriesById[entryId];
+            const updated = {
+              ...current,
+              ...value,
+              sys: {
+                ...current.sys,
+                ...value.sys,
+                id: entryId,
+                contentTypeId: value.sys?.contentTypeId ?? current.sys.contentTypeId,
+                version: (current.sys.version ?? 1) + 1,
+                publishedVersion: current.sys.publishedVersion,
+              },
+            };
+
+            entriesById[entryId] = updated;
+            return Promise.resolve(updated);
+          }
+        ),
+        publish: vi.fn(({ entryId }: { entryId: string }, value: { sys?: { version?: number } }) => {
+          const current = entriesById[entryId];
+          const published = {
+            ...current,
+            sys: {
+              ...current.sys,
+              publishedVersion: value.sys?.version ?? current.sys.version,
+            },
+          };
+
+          entriesById[entryId] = published;
+          return Promise.resolve(published);
+        }),
       },
     },
     dialogs: {

@@ -204,8 +204,11 @@ const Dialog = () => {
   const enabledWeights = invocationParams?.enabledWeights ?? ['regular'];
   const positionOptions = invocationParams?.positionOptions ?? ['start', 'end'];
   const currentValue = invocationParams?.currentValue ?? null;
+  const currentStyleAllowed = currentValue ? enabledWeights.includes(currentValue.weight) : true;
 
-  const [weight, setWeight] = useState<IconWeight>(currentValue?.weight ?? enabledWeights[0]);
+  const [weight, setWeight] = useState<IconWeight>(
+    currentValue?.weight && currentStyleAllowed ? currentValue.weight : enabledWeights[0]
+  );
   const [position, setPosition] = useState(currentValue?.position ?? positionOptions[0]);
   const [selectedIcon, setSelectedIcon] = useState<IconFieldValue | null>(currentValue);
   const [selectedIconNames, setSelectedIconNames] = useState<string[]>(
@@ -366,6 +369,12 @@ const Dialog = () => {
     sdk.close(null);
   }, [sdk]);
 
+  useEffect(() => {
+    if (!enabledWeights.includes(weight)) {
+      setWeight(enabledWeights[0]);
+    }
+  }, [enabledWeights, weight]);
+
   return (
     <div className={`${styles.container} ${mode === 'single' ? styles.containerSingle : ''}`}>
       <div
@@ -420,6 +429,7 @@ const Dialog = () => {
                 value={weight}
                 onChange={handleWeightChange}
                 enabledWeights={enabledWeights}
+                forceSelect={!currentStyleAllowed}
               />
             </FormControl>
           </Box>

@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Box, Button, Paragraph, Stack, Text } from '@contentful/f36-components';
+import { Box, Button, Note, Paragraph, Stack, Text } from '@contentful/f36-components';
 import { css } from 'emotion';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { IconPreview } from '../components/IconPreview/IconPreview';
-import type { IconFieldValue } from '../types/icon';
+import type { IconFieldValue, IconWeight } from '../types/icon';
+import { ICON_WEIGHT_LABELS } from '../types/icon';
 import type { AppInstallationParameters, DialogInvocationParameters } from '../types/parameters';
 import {
   parseEnabledWeights,
@@ -38,6 +39,9 @@ const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
   const [value, setValue] = useState<IconFieldValue | null>(sdk.field.getValue() ?? null);
   const [isOpeningDialog, setIsOpeningDialog] = useState(false);
+  const [enabledWeights, setEnabledWeights] = useState<IconWeight[]>(
+    parseEnabledWeights((sdk.parameters.installation as AppInstallationParameters)?.enabledWeights)
+  );
 
   useEffect(() => {
     sdk.window.startAutoResizer();
@@ -97,6 +101,26 @@ const Field = () => {
       return (sdk.parameters.installation as AppInstallationParameters) ?? {};
     }, [sdk]);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const syncInstallationParameters = async () => {
+      const installationParams = await fetchLatestInstallationParameters();
+
+      if (!isMounted) {
+        return;
+      }
+
+      setEnabledWeights(parseEnabledWeights(installationParams?.enabledWeights));
+    };
+
+    void syncInstallationParameters();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchLatestInstallationParameters]);
+
   const openDialog = useCallback(async () => {
     if (isOpeningDialog) {
       return;
@@ -140,13 +164,15 @@ const Field = () => {
     await sdk.field.removeValue();
   }, [sdk.field]);
 
+  const hasInvalidConfiguredStyle = Boolean(value && !enabledWeights.includes(value.weight));
+
   if (!value) {
     return (
       <div className={styles.container}>
         <Box className={styles.emptyState}>
           <Text fontColor="gray600">No icon selected</Text>
           <Paragraph marginTop="none" marginBottom="none" className={styles.helperCopy}>
-            Pick an icon, then adjust its style and position before saving it to this JSON field.
+            Pick an icon, then adjust its style and position before saving it to this field.
           </Paragraph>
           <Button
             variant="primary"
@@ -163,8 +189,14 @@ const Field = () => {
   return (
     <div className={styles.container}>
       <IconPreview value={value} />
+      {hasInvalidConfiguredStyle ? (
+        <Note variant="warning" title="Selected style is no longer allowed">
+          This entry currently uses {ICON_WEIGHT_LABELS[value.weight]}. An admin removed that style
+          from the allowed list in the app configuration.
+        </Note>
+      ) : null}
       <Paragraph marginTop="spacingS" marginBottom="none">
-        Change updates the icon, style, and position without clearing the current selection first.
+        Use &quot;Update&quot; to modify icon, style or position.
       </Paragraph>
       <Stack flexDirection="row" spacing="spacingS" marginTop="spacingM" className={styles.actions}>
         <Button
@@ -172,7 +204,7 @@ const Field = () => {
           onClick={openDialog}
           isLoading={isOpeningDialog}
           isDisabled={isOpeningDialog}>
-          Change
+          Update
         </Button>
         <Button variant="negative" onClick={handleRemove} isDisabled={isOpeningDialog}>
           Remove

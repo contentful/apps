@@ -6,10 +6,16 @@ interface WeightFilterProps {
   value: IconWeight;
   onChange: (weight: IconWeight) => void;
   enabledWeights: IconWeight[];
+  forceSelect?: boolean;
 }
 
-export function WeightFilter({ value, onChange, enabledWeights }: WeightFilterProps) {
-  if (enabledWeights.length === 1) {
+export function WeightFilter({
+  value,
+  onChange,
+  enabledWeights,
+  forceSelect = false,
+}: WeightFilterProps) {
+  if (enabledWeights.length === 1 && !forceSelect) {
     return <TextInput value={ICON_WEIGHT_LABELS[value]} isDisabled aria-label="Style" />;
   }
 

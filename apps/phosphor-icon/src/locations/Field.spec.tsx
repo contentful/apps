@@ -61,4 +61,46 @@ describe('Field', () => {
       );
     });
   });
+
+  it('shows a warning when the saved style is no longer allowed by config', async () => {
+    const fieldSdk = createMockFieldSdk({
+      fieldValue: {
+        name: 'alien',
+        componentName: 'Alien',
+        weight: 'duotone',
+        position: 'start',
+      },
+      installationParameters: {
+        enabledWeights: JSON.stringify(['regular']),
+        positionOptions: JSON.stringify(['start']),
+        iconAvailabilityMode: 'all',
+      },
+      liveInstallationParameters: {
+        enabledWeights: JSON.stringify(['regular']),
+        positionOptions: JSON.stringify(['start']),
+        iconAvailabilityMode: 'all',
+      },
+    });
+    fieldSdk.cma = {
+      appInstallation: {
+        get: vi.fn(() =>
+          Promise.resolve({
+            parameters: {
+              enabledWeights: JSON.stringify(['regular']),
+              positionOptions: JSON.stringify(['start']),
+              iconAvailabilityMode: 'all',
+            },
+          })
+        ),
+      },
+    } as never;
+    mockSdk = fieldSdk;
+
+    render(<Field />);
+
+    expect(await screen.findByText(/selected style is no longer allowed/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/this entry currently uses duotone\./i)
+    ).toBeInTheDocument();
+  });
 });

@@ -68,4 +68,25 @@ describe('Dialog', () => {
 
     expect(mockSdk.close).toHaveBeenCalledWith(['airplane', 'anchor']);
   });
+
+  it('shows a style dropdown when the saved style is no longer allowed', () => {
+    mockSdk = createMockDialogSdk({
+      invocationParameters: {
+        enabledWeights: ['regular'],
+        positionOptions: ['start', 'end'],
+        currentValue: {
+          name: 'airplane',
+          componentName: 'Airplane',
+          weight: 'duotone',
+          position: 'start',
+        },
+      },
+    });
+
+    render(<Dialog />);
+
+    const styleSelect = screen.getByLabelText(/select icon style/i) as HTMLSelectElement;
+    expect(styleSelect.value).toBe('regular');
+    expect(screen.getByRole('option', { name: 'Regular' })).toBeInTheDocument();
+  });
 });
