@@ -55,8 +55,8 @@ const styles = {
 function Dialog() {
   const sdk = useSDK<DialogAppSDK>();
   const installationParameters = sdk.parameters.installation as AppInstallationParameters;
-  const clockFormat = installationParameters.clockFormat ?? '12h';
   const invocationParams = sdk.parameters.invocation as unknown as DialogInvocationParameters;
+  const clockFormat = invocationParams?.clockFormat ?? installationParameters.clockFormat ?? '12h';
   const initialHours = invocationParams?.hours || ({} as HoursOfOperation);
 
   const [hours, setHours] = useState<HoursOfOperation>(initialHours);

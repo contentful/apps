@@ -20,7 +20,7 @@ describe('ConfigScreen', () => {
         useCustomDefaults: true,
         defaultHours: mockDefaultHours,
         managedFieldId: 'storeHours',
-        managedFieldName: 'Store hours',
+        managedFieldName: 'Operating hours',
       },
       contentTypes: [
         {
@@ -59,7 +59,7 @@ describe('ConfigScreen', () => {
     fireEvent.click(screen.getByRole('button', { name: /store/i }));
     expect(screen.getAllByText('Article').length).toBeGreaterThan(0);
     expect(screen.getByDisplayValue('24-hour clock')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('Store hours')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Operating hours')).toBeInTheDocument();
     expect(screen.getAllByRole('switch')[0]).toBeChecked();
   });
 
@@ -68,7 +68,7 @@ describe('ConfigScreen', () => {
       parameters: {
         clockFormat: '12h',
         selectedContentTypeIds: [],
-        managedFieldName: 'Store hours',
+        managedFieldName: 'Operating hours',
       },
       contentTypes: [
         {
@@ -100,7 +100,7 @@ describe('ConfigScreen', () => {
       parameters: {
         clockFormat: '12h',
         selectedContentTypeIds: ['article'],
-        managedFieldName: 'Store hours',
+        managedFieldName: 'Operating hours',
       },
       contentTypes: [
         {
@@ -136,7 +136,7 @@ describe('ConfigScreen', () => {
         targetState: {
           EditorInterface: {
             article: {
-              controls: [{ fieldId: 'storeHours' }],
+              controls: [{ fieldId: 'operatingHours' }],
             },
           },
         },
@@ -150,7 +150,7 @@ describe('ConfigScreen', () => {
         clockFormat: '12h',
         selectedContentTypeIds: ['storeDetails'],
         managedFieldId: 'storeHours',
-        managedFieldName: 'Store hours',
+        managedFieldName: 'Operating hours',
       },
       contentTypes: [
         {
@@ -159,7 +159,7 @@ describe('ConfigScreen', () => {
           fields: [
             { id: 'internalName', name: 'Internal name', type: 'Symbol' },
             { id: 'closingTime', name: 'Closing time', type: 'Object' },
-            { id: 'storeHours', name: 'Store hours', type: 'Object' },
+            { id: 'storeHours', name: 'Operating hours', type: 'Object' },
           ],
         },
       ],

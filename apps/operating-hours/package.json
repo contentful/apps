@@ -1,5 +1,5 @@
 {
-  "name": "closing-time",
+  "name": "operating-hours",
   "version": "1.0.0",
   "private": true,
   "description": "Contentful app for managing business hours of operation",

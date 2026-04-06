@@ -42,7 +42,7 @@ const DEFAULT_INSTALLATION_PARAMETERS: Required<AppInstallationParameters> = {
   useCustomDefaults: false,
   defaultHours: cloneHours(DEFAULT_HOURS),
   managedFieldId: 'storeHours',
-  managedFieldName: 'Store hours',
+  managedFieldName: 'Operating hours',
 };
 
 function getConfigureErrorMessage(error: unknown) {
@@ -62,7 +62,7 @@ function getConfigureErrorMessage(error: unknown) {
   try {
     return JSON.stringify(error);
   } catch {
-    return 'Failed to apply Closing Time to the selected content types.';
+    return 'Failed to apply Operating Hours to the selected content types.';
   }
 }
 
@@ -483,10 +483,9 @@ function ConfigScreen() {
             alignItems="stretch"
             style={{ width: '100%', textAlign: 'left' }}>
             <Box style={{ width: '100%', maxWidth: '760px' }}>
-              <Heading marginBottom="spacingS">Set up Closing Time</Heading>
+              <Heading marginBottom="spacingS">Set up Operating Hours</Heading>
               <Paragraph marginBottom="none" style={{ maxWidth: '720px' }}>
-                Configure where Closing Time appears and how authors should see store hours while
-                editing content.
+                Configure what fields use Operating Hours and how hours of operation are displayed.
               </Paragraph>
             </Box>
 
@@ -495,9 +494,9 @@ function ConfigScreen() {
                 Assign content types
               </Heading>
               <Paragraph marginBottom="spacingM">
-                Select the content type(s) you want to use with Closing Time. You can change this
-                anytime by navigating to the &quot;Fields&quot; tab in your content model and
-                unassigning the app from the JSON field.
+                Select the content type(s) you want to use with Operating Hours. You can
+                change this anytime by navigating to the &quot;Fields&quot; tab in your content
+                model and unassigning the app from the JSON field.
               </Paragraph>
               {pickerOptions.length === 0 ? (
                 <Note variant="warning">No content types were found in this space yet.</Note>
@@ -526,11 +525,11 @@ function ConfigScreen() {
                   <TextInput
                     value={managedFieldName}
                     onChange={(event) => setManagedFieldName(event.target.value)}
-                    placeholder="Store hours"
+                    placeholder="Operating hours"
                   />
                   <FormControl.HelpText>
-                    Closing Time will create this JSON field on each selected content type if it
-                    does not already exist.
+                    Operating Hours will create this JSON field on each selected content type
+                    if it does not already exist.
                   </FormControl.HelpText>
                 </FormControl>
 
@@ -542,9 +541,9 @@ function ConfigScreen() {
                     <Select.Option value="12h">12-hour clock</Select.Option>
                     <Select.Option value="24h">24-hour clock</Select.Option>
                   </Select>
-                  <FormControl.HelpText>
-                    Stored values stay in `HH:MM` JSON format. This only changes how authors see
-                    times in the field summary and editor.
+                <FormControl.HelpText>
+                    Stored values stay in `HH:MM` JSON format. This sets the default display
+                    format, and authors can change it for individual entries in the field app.
                   </FormControl.HelpText>
                 </FormControl>
               </Stack>
@@ -555,8 +554,9 @@ function ConfigScreen() {
                 Default hours
               </Heading>
               <Paragraph marginBottom="spacingM">
-                Choose whether Closing Time should prefill each day with custom opening hours the
-                first time authors open an empty field.
+                Choose whether Operating Hours should prefill each day with custom opening
+                hours the first time authors open an empty field. If disabled, all days start
+                closed.
               </Paragraph>
               <Flex alignItems="flex-start" gap="spacingM">
                 <Switch
@@ -569,8 +569,8 @@ function ConfigScreen() {
                     Set default hours before install
                   </Paragraph>
                   <Paragraph marginTop="none" marginBottom="none">
-                    Enable default opening and closing hours for each day. If disabled, Closing Time
-                    keeps the current built-in defaults.
+                    Enable default opening and closing hours for each day. If disabled, Operating
+                    Hours starts with every day closed until authors add hours manually.
                   </Paragraph>
                 </Box>
               </Flex>
@@ -578,8 +578,8 @@ function ConfigScreen() {
               {useCustomDefaults && (
                 <Box marginTop="spacingM">
                   <Paragraph marginBottom="spacingM">
-                    Configure the initial hours authors should see the first time they open Closing
-                    Time on an empty field.
+                    Configure the initial hours authors should see the first time they open
+                    Operating Hours on an empty field.
                   </Paragraph>
                   <Box
                     style={{

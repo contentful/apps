@@ -1,10 +1,12 @@
 import { useState, useCallback } from 'react';
 import { FieldAppSDK, SerializedJSONValue } from '@contentful/app-sdk';
 import { useSDK, useAutoResizer } from '@contentful/react-apps-toolkit';
-import { Button, Stack, Text, Badge, Box } from '@contentful/f36-components';
+import { Button, Stack, Text, Badge, Box, FormControl, Select } from '@contentful/f36-components';
 import { ClockIcon } from '@contentful/f36-icons';
 import {
   AppInstallationParameters,
+  CLOSED_HOURS,
+  ClockFormat,
   DEFAULT_HOURS,
   HoursOfOperation,
   DAYS_OF_WEEK,
@@ -41,15 +43,31 @@ function formatDayHours(
   return dayHours.slots.map((slot) => formatTimeSlot(slot, clockFormat));
 }
 
+function getEntryClockFormatKey(sdk: FieldAppSDK) {
+  return `operating-hours:clock-format:${sdk.ids.space}:${sdk.ids.environment}:${sdk.ids.entry}:${sdk.ids.field}`;
+}
+
+function readSavedClockFormat(sdk: FieldAppSDK): ClockFormat | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  const savedFormat = window.localStorage.getItem(getEntryClockFormatKey(sdk));
+  return savedFormat === '12h' || savedFormat === '24h' ? savedFormat : null;
+}
+
 function Field() {
   const sdk = useSDK<FieldAppSDK>();
   useAutoResizer();
   const installationParameters = sdk.parameters.installation as AppInstallationParameters;
-  const clockFormat = installationParameters.clockFormat ?? '12h';
+  const defaultClockFormat = installationParameters.clockFormat ?? '12h';
   const configuredDefaultHours =
     installationParameters.useCustomDefaults && installationParameters.defaultHours
       ? normalizeHours(installationParameters.defaultHours, DEFAULT_HOURS)
-      : DEFAULT_HOURS;
+      : CLOSED_HOURS;
+  const [clockFormat, setClockFormat] = useState<ClockFormat>(
+    () => readSavedClockFormat(sdk) ?? defaultClockFormat
+  );
 
   const [hours, setHours] = useState<HoursOfOperation>(() => {
     const value = sdk.field.getValue();
@@ -58,22 +76,34 @@ function Field() {
       : configuredDefaultHours;
   });
 
+  const handleClockFormatChange = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      const nextClockFormat = event.target.value as ClockFormat;
+      setClockFormat(nextClockFormat);
+
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(getEntryClockFormatKey(sdk), nextClockFormat);
+      }
+    },
+    [sdk]
+  );
+
   const handleEditHours = useCallback(async () => {
     const result = await sdk.dialogs.openCurrentApp({
-      parameters: { hours } as unknown as SerializedJSONValue,
+      parameters: { hours, clockFormat } as unknown as SerializedJSONValue,
     });
     if (result) {
       setHours(result as HoursOfOperation);
       sdk.field.setValue(result);
     }
-  }, [sdk, hours]);
+  }, [sdk, hours, clockFormat]);
 
   const openDaysCount = DAYS_OF_WEEK.filter((day) => hours[day].isOpen).length;
 
   return (
     <Box>
       <Stack flexDirection="column" spacing="spacingS" alignItems="flex-start">
-        <Stack flexDirection="row" spacing="spacingS" alignItems="center">
+        <Stack flexDirection="row" spacing="spacingS" alignItems="center" flexWrap="wrap">
           <Button variant="secondary" startIcon={<ClockIcon />} onClick={handleEditHours}>
             Edit hours of operation
           </Button>
@@ -81,6 +111,16 @@ function Field() {
             {openDaysCount} {openDaysCount === 1 ? 'day' : 'days'} open
           </Badge>
         </Stack>
+
+        <Box style={{ width: '100%', maxWidth: '220px' }}>
+          <FormControl>
+            <FormControl.Label>Time display format</FormControl.Label>
+            <Select value={clockFormat} onChange={handleClockFormatChange}>
+              <Select.Option value="12h">12-hour clock</Select.Option>
+              <Select.Option value="24h">24-hour clock</Select.Option>
+            </Select>
+          </FormControl>
+        </Box>
 
         <Box
           style={{

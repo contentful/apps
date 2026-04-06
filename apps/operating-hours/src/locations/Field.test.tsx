@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Field from './Field';
 import { createMockFieldSdk } from '../test/mocks/mockSdk';
 import { mockDefaultHours, mock24HourDay } from '../test/mocks/mockHours';
@@ -14,6 +14,7 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 
 describe('Field', () => {
   beforeEach(() => {
+    window.localStorage.clear();
     mockSdk = createMockFieldSdk({ fieldValue: mockDefaultHours });
   });
 
@@ -73,7 +74,7 @@ describe('Field', () => {
     fireEvent.click(screen.getByRole('button', { name: /edit hours of operation/i }));
 
     expect(mockSdk.dialogs.openCurrentApp).toHaveBeenCalledWith({
-      parameters: { hours: mockDefaultHours },
+      parameters: { hours: mockDefaultHours, clockFormat: '12h' },
     });
   });
 
@@ -110,6 +111,22 @@ describe('Field', () => {
     expect(screen.getAllByText('09:00 - 17:00').length).toBeGreaterThan(0);
   });
 
+  it('allows the time display format to be changed for a single entry', async () => {
+    render(<Field />);
+
+    fireEvent.change(screen.getByLabelText('Time display format'), {
+      target: { value: '24h' },
+    });
+
+    await waitFor(() => {
+      expect(screen.getAllByText('09:00 - 17:00').length).toBeGreaterThan(0);
+    });
+    fireEvent.click(screen.getByRole('button', { name: /edit hours of operation/i }));
+    expect(mockSdk.dialogs.openCurrentApp).toHaveBeenLastCalledWith({
+      parameters: { hours: mockDefaultHours, clockFormat: '24h' },
+    });
+  });
+
   it('uses configured default hours when the field is empty', () => {
     const customDefaults = {
       ...mockDefaultHours,
@@ -131,5 +148,19 @@ describe('Field', () => {
     render(<Field />);
 
     expect(screen.getByText('10:00 AM - 6:00 PM')).toBeInTheDocument();
+  });
+
+  it('defaults to all days closed when custom defaults are disabled and the field is empty', () => {
+    mockSdk = createMockFieldSdk({
+      fieldValue: null,
+      installationParameters: {
+        useCustomDefaults: false,
+      },
+    });
+
+    render(<Field />);
+
+    expect(screen.getByText('0 days open')).toBeInTheDocument();
+    expect(screen.getAllByText('Closed')).toHaveLength(7);
   });
 });

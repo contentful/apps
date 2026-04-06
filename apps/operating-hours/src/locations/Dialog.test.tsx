@@ -98,4 +98,15 @@ describe('Dialog', () => {
     expect(savedHours.saturday.is24Hours).toBe(false);
     expect(savedHours.saturday.slots).toEqual([]);
   });
+
+  it('uses the invocation clock format when provided', () => {
+    mockSdk = createMockDialogSdk({
+      invocationParameters: { hours: mockDefaultHours, clockFormat: '24h' },
+    });
+
+    render(<Dialog />);
+
+    expect(screen.getAllByText('09:00').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('17:00').length).toBeGreaterThan(0);
+  });
 });

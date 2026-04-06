@@ -53,18 +53,35 @@ export const DEFAULT_DAY_HOURS: DayHours = {
   slots: [{ ...DEFAULT_SLOT }],
 };
 
+export const CLOSED_DAY_HOURS: DayHours = {
+  isOpen: false,
+  is24Hours: false,
+  slots: [],
+};
+
 export const DEFAULT_HOURS: HoursOfOperation = {
   monday: { ...DEFAULT_DAY_HOURS, slots: [{ ...DEFAULT_SLOT }] },
   tuesday: { ...DEFAULT_DAY_HOURS, slots: [{ ...DEFAULT_SLOT }] },
   wednesday: { ...DEFAULT_DAY_HOURS, slots: [{ ...DEFAULT_SLOT }] },
   thursday: { ...DEFAULT_DAY_HOURS, slots: [{ ...DEFAULT_SLOT }] },
   friday: { ...DEFAULT_DAY_HOURS, slots: [{ ...DEFAULT_SLOT }] },
-  saturday: { isOpen: false, is24Hours: false, slots: [{ ...DEFAULT_SLOT }] },
-  sunday: { isOpen: false, is24Hours: false, slots: [{ ...DEFAULT_SLOT }] },
+  saturday: { ...CLOSED_DAY_HOURS },
+  sunday: { ...CLOSED_DAY_HOURS },
+};
+
+export const CLOSED_HOURS: HoursOfOperation = {
+  monday: { ...CLOSED_DAY_HOURS },
+  tuesday: { ...CLOSED_DAY_HOURS },
+  wednesday: { ...CLOSED_DAY_HOURS },
+  thursday: { ...CLOSED_DAY_HOURS },
+  friday: { ...CLOSED_DAY_HOURS },
+  saturday: { ...CLOSED_DAY_HOURS },
+  sunday: { ...CLOSED_DAY_HOURS },
 };
 
 export interface DialogInvocationParameters {
   hours: HoursOfOperation;
+  clockFormat?: ClockFormat;
   [key: string]: unknown;
 }
 

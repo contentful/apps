@@ -1,4 +1,4 @@
-# Closing Time
+# Operating Hours
 
 A Contentful App Framework app for managing business hours of operation. Provides a modal UI for content authors to easily set opening and closing times for each day of the week.
 
@@ -40,14 +40,14 @@ npm run build
 3. Enable the "Entry field", "Dialog", and "App configuration" locations
 4. Install the app in your space
 5. In the configuration screen:
-   - Select the content type(s) that should use Closing Time
+   - Select the content type(s) that should use Operating Hours
    - Choose whether editors should see a 12-hour or 24-hour clock
    - Optionally configure default hours for each day before install
 6. Save the installation and open an entry that uses one of the selected content types
 
 ## Configuration
 
-Closing Time stores all times in 24-hour JSON values such as `09:00` and
+Operating Hours stores all times in 24-hour JSON values such as `09:00` and
 `17:00`. The installation settings control how the app is assigned and how those
 values are shown to authors:
 
