@@ -9,6 +9,7 @@ import {
 } from './referenceResolution';
 import { orderEntriesByCreationOrder } from '../utils/previewPayload';
 import { mapFieldValuesToSpaceDefaultLocale } from '../utils/remapEntryLocales';
+import { filterPreviewPayloadBySelectedRowIds } from '../utils/checkboxEntryList';
 
 export interface EntryCreationResult {
   createdEntries: EntryProps[];
@@ -159,11 +160,17 @@ async function createAssetsFromAgentOutput(
 
 export async function createEntriesFromPreviewPayload(
   sdk: PageAppSDK | ConfigAppSDK,
-  payload: PreviewPayload
+  payload: PreviewPayload,
+  options?: { selectedRowIds?: Set<string> }
 ): Promise<EntryCreationResult> {
+  const effectivePayload =
+    options?.selectedRowIds !== undefined
+      ? filterPreviewPayloadBySelectedRowIds(payload, options.selectedRowIds)
+      : payload;
+
   const orderedEntries = orderEntriesByCreationOrder(
-    payload.entries,
-    payload.referenceGraph?.creationOrder
+    effectivePayload.entries,
+    effectivePayload.referenceGraph?.creationOrder
   );
   const entriesForSpaceLocale = mapFieldValuesToSpaceDefaultLocale(
     orderedEntries,
@@ -171,7 +178,12 @@ export async function createEntriesFromPreviewPayload(
   );
   const contentTypeIds = [...new Set(entriesForSpaceLocale.map((e) => e.contentTypeId))];
 
-  return createEntriesFromPreview(sdk, entriesForSpaceLocale, contentTypeIds, payload.assets);
+  return createEntriesFromPreview(
+    sdk,
+    entriesForSpaceLocale,
+    contentTypeIds,
+    effectivePayload.assets
+  );
 }
 
 /**

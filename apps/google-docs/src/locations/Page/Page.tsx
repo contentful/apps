@@ -39,18 +39,15 @@ const Page = () => {
   };
 
   const handleReturnToMainPage = () => {
+    modalOrchestratorRef.current?.resetFlowState();
     setPreviewPayload(null);
-  };
-
-  const handlePreviewCancel = () => {
-    modalOrchestratorRef.current?.resetFlowFromPreviewCancel();
   };
 
   return (
     <>
       <Layout withBoxShadow={true} offsetTop={10}>
         {previewPayload ? (
-          <PreviewPageView payload={previewPayload} onCancel={handlePreviewCancel} />
+          <PreviewPageView payload={previewPayload} onLeavePreview={handleReturnToMainPage} />
         ) : (
           <MainPageView
             oauthToken={oauthToken}

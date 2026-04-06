@@ -1,19 +1,23 @@
 import { useState } from 'react';
-import { Button, Flex, Heading, Layout, Paragraph } from '@contentful/f36-components';
+import { Button, Flex, Heading, Layout } from '@contentful/f36-components';
 import Splitter from './Splitter';
 import { PreviewPayload } from '@types';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
+import OverviewSection from './OverviewSection';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { PageAppSDK } from '@contentful/app-sdk';
 
 interface PreviewPageViewProps {
   payload: PreviewPayload;
-  onCancel: () => void;
+  onLeavePreview: () => void;
 }
 
-export const PreviewPageView = ({ payload, onCancel }: PreviewPageViewProps) => {
+export const PreviewPageView = ({ payload, onLeavePreview }: PreviewPageViewProps) => {
+  const sdk = useSDK<PageAppSDK>();
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
-
-  const rawTitle = payload.normalizedDocument?.title as string | undefined;
-  const title = rawTitle?.trim() ? rawTitle : 'Selected document';
+  const rawTitle = payload.normalizedDocument?.title;
+  const docTitle = typeof rawTitle === 'string' ? rawTitle : undefined;
+  const title = docTitle && docTitle.trim().length > 0 ? docTitle : 'Selected document';
 
   return (
     <>
@@ -31,11 +35,16 @@ export const PreviewPageView = ({ payload, onCancel }: PreviewPageViewProps) => 
       </Layout.Header>
       <Splitter marginTop="spacingS" />
       <Layout.Body>
-        <Paragraph>Preview</Paragraph>
+        <Flex flexDirection="column" gap="spacing2Xl">
+          <OverviewSection sdk={sdk} payload={payload} onReturnToMainPage={onLeavePreview} />
+          <Heading as="h2" marginBottom="none">
+            Document outline
+          </Heading>
+        </Flex>
       </Layout.Body>
       <ConfirmCancelModal
         isOpen={isConfirmCancelModalOpen}
-        onConfirm={onCancel}
+        onConfirm={onLeavePreview}
         onCancel={() => setIsConfirmCancelModalOpen(false)}
       />
     </>

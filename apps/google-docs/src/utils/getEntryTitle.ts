@@ -1,71 +1,54 @@
-import { ContentType, PageAppSDK } from '@contentful/app-sdk';
-import { EntryProps } from 'contentful-management';
+import { PageAppSDK } from '@contentful/app-sdk';
 import { EntryToCreate } from '@types';
 
-/**
- * Gets the title of an entry by fetching its content type's display field
- */
-
-export interface GetEntryTitleProps {
-  sdk: PageAppSDK;
-  entry: EntryToCreate;
+export interface ContentTypeDisplayInfo {
+  name: string;
+  displayField?: string;
 }
 
-export const getEntryTitle = async ({
-  sdk,
-  entry,
-}: GetEntryTitleProps): Promise<{ title: string; contentTypeName: string }> => {
-  try {
-    const contentType = await getContentType({ sdk, contentTypeId: entry.contentTypeId });
+const UNTITLED_ENTRY_LABEL = 'Untitled';
 
-    const contentTypeName = contentType.name;
-
-    if (!contentType.displayField) return { title: '', contentTypeName };
-
-    const defaultLocale = sdk.locales.default;
-    const value = entry.fields[contentType.displayField]?.[defaultLocale];
-    return {
-      title: String(value || ''),
-      contentTypeName,
-    };
-  } catch (error) {
-    console.error(`Failed to get entry title for ${entry.contentTypeId}:`, error);
-    return { title: '', contentTypeName: entry.contentTypeId };
+export function getEntryTitleFromPreviewData(
+  entry: EntryToCreate,
+  defaultLocale: string,
+  contentTypeInfo?: ContentTypeDisplayInfo
+): string {
+  if (!contentTypeInfo) {
+    return UNTITLED_ENTRY_LABEL;
   }
-};
-
-export interface GetContentTypeProps {
-  sdk: PageAppSDK;
-  contentTypeId: string;
+  if (!contentTypeInfo.displayField) {
+    return '';
+  }
+  const raw = entry.fields[contentTypeInfo.displayField]?.[defaultLocale];
+  if (raw != null && String(raw).trim().length > 0) {
+    return String(raw).trim();
+  }
+  return UNTITLED_ENTRY_LABEL;
 }
 
-export const getContentType = async ({
-  sdk,
-  contentTypeId,
-}: GetContentTypeProps): Promise<ContentType> => {
-  return await sdk.cma.contentType.get({
-    contentTypeId,
+export async function fetchContentTypesInfoByIds(
+  sdk: PageAppSDK,
+  contentTypeIds: string[]
+): Promise<Map<string, ContentTypeDisplayInfo>> {
+  const unique = [...new Set(contentTypeIds)].filter(Boolean);
+  if (unique.length === 0) {
+    return new Map();
+  }
+
+  const spaceId = sdk.ids.space;
+  const environmentId = sdk.ids.environment;
+  const response = await sdk.cma.contentType.getMany({
+    spaceId,
+    environmentId,
+    query: { 'sys.id[in]': unique.join(',') },
   });
-};
 
-export const getEntryDisplayName = (entry: EntryProps, defaultLocale: string): string => {
-  // Try to find a 'title' field first
-  if (entry.fields.title) {
-    const titleValue = entry.fields.title[defaultLocale] || Object.values(entry.fields.title)[0];
-    if (titleValue && typeof titleValue === 'string') {
-      return titleValue;
-    }
+  const displayInfoById = new Map<string, ContentTypeDisplayInfo>();
+  for (const ct of response.items) {
+    displayInfoById.set(ct.sys.id, {
+      name: ct.name,
+      displayField: ct.displayField,
+    });
   }
-
-  // Fall back to the first text/Symbol field
-  for (const localizedValue of Object.values(entry.fields)) {
-    if (localizedValue && typeof localizedValue === 'object') {
-      const value = localizedValue[defaultLocale] || Object.values(localizedValue)[0];
-      if (value && typeof value === 'string' && value.trim().length > 0) {
-        return value;
-      }
-    }
-  }
-
-  return 'Untitled';
-};
+  return displayInfoById;
+}

@@ -26,9 +26,9 @@ vi.mock('../../../src/locations/Page/components/mainpage/OAuthConnector', () => 
   OAuthConnector: () => <div>Mock OAuth Connector</div>,
 }));
 
-const { mockModalOrchestrator, mockResetFlowFromPreviewCancel } = vi.hoisted(() => ({
+const { mockModalOrchestrator, mockResetFlowState } = vi.hoisted(() => ({
   mockModalOrchestrator: vi.fn(),
-  mockResetFlowFromPreviewCancel: vi.fn(),
+  mockResetFlowState: vi.fn(),
 }));
 
 vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () => ({
@@ -41,14 +41,13 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
       },
       ref: React.ForwardedRef<{
         startFlow: () => void;
-        resetFlowFromPreviewCancel: () => void;
+        resetFlowState: () => void;
       }>
     ) => {
       const handle = {
         startFlow: vi.fn(),
-        resetFlowFromPreviewCancel: () => {
-          mockResetFlowFromPreviewCancel();
-          props.onResetToMain();
+        resetFlowState: () => {
+          mockResetFlowState();
         },
       };
       if (typeof ref === 'function') {
@@ -77,12 +76,16 @@ describe('Page component', () => {
     cleanup();
   });
 
+  beforeEach(() => {
+    mockResetFlowState.mockClear();
+  });
+
   it('renders MainPageView by default', async () => {
     render(<Page />);
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
-      expect(screen.queryByText(/Create from document "Selected document":/)).toBeNull();
+      expect(screen.queryByText(/Create from document "Selected document"/)).toBeNull();
     });
   });
 
@@ -116,9 +119,9 @@ describe('Page component', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cancel without creating' }));
 
     await waitFor(() => {
-      expect(mockResetFlowFromPreviewCancel).toHaveBeenCalledTimes(1);
+      expect(mockResetFlowState).toHaveBeenCalledTimes(1);
       expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
-      expect(screen.queryByText(/Create from document "Selected document":/)).toBeNull();
+      expect(screen.queryByText(/Create from document "Selected document"/)).toBeNull();
     });
   });
 
@@ -137,8 +140,9 @@ describe('Page component', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Trigger Reset To Main' }));
 
     await waitFor(() => {
+      expect(mockResetFlowState).toHaveBeenCalledTimes(1);
       expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
-      expect(screen.queryByText(/Create from document "Selected document":/)).toBeNull();
+      expect(screen.queryByText(/Create from document "Selected document"/)).toBeNull();
     });
   });
 });
