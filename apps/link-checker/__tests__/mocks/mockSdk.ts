@@ -14,8 +14,15 @@ const mockSdk: any = {
   parameters: {
     installation: {},
   },
+  locales: {
+    default: 'en-US',
+  },
   entry: {
     fields: {},
+  },
+  navigator: {
+    openEntry: jest.fn(),
+    openAppConfig: jest.fn(),
   },
   cma: {},
   location: { is: jest.fn().mockReturnValue(false) },

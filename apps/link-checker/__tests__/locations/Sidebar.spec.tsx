@@ -75,4 +75,57 @@ describe('Sidebar component', () => {
     await screen.findByText(/not on allow list/i);
     expect(createWithResponse).not.toHaveBeenCalled();
   });
+
+  it('shows only non-invalid results when remaining links are expanded', async () => {
+    const createWithResponse = jest
+      .fn()
+      .mockResolvedValueOnce({ response: { body: JSON.stringify({ status: 404 }) } })
+      .mockResolvedValueOnce({ response: { body: JSON.stringify({ status: 200 }) } });
+
+    mockSdk.entry.fields = {
+      body: {
+        id: 'body',
+        name: 'Body',
+        type: 'Text',
+        locales: ['en-US'],
+        getValue: () =>
+          'Broken https://broken.example.com and valid https://www.contentful.com/help',
+      },
+    };
+    mockSdk.cma = {
+      appAction: {
+        getMany: jest.fn().mockResolvedValue({
+          items: [
+            {
+              sys: {
+                id: 'check-link-action',
+                appDefinition: { sys: { id: mockSdk.ids.app } },
+              },
+              function: { sys: { id: 'checkLink' } },
+            },
+          ],
+        }),
+      },
+      appActionCall: {
+        createWithResponse,
+      },
+    };
+
+    render(<Sidebar />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /check links/i }));
+    });
+
+    await screen.findByText(/1 invalid link/i);
+    expect(screen.getByRole('checkbox', { name: /show valid links/i })).toBeInTheDocument();
+    expect(screen.getByText(/1 valid link/i)).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('checkbox', { name: /show valid links/i }));
+    });
+
+    expect(screen.getByText('https://www.contentful.com/help')).toBeInTheDocument();
+    expect(screen.queryAllByText('https://broken.example.com')).toHaveLength(1);
+  });
 });

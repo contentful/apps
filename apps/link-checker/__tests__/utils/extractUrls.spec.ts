@@ -105,6 +105,22 @@ describe('extractUrlsFromEntry', () => {
     expect(result).toHaveLength(1);
   });
 
+  it('does not treat plain email addresses as URLs', () => {
+    const entry = {
+      fields: {
+        replyToEmail: {
+          id: 'replyToEmail',
+          name: 'Reply-to email',
+          type: 'Symbol',
+          locales: ['en-US'],
+          getValue: () => 'hello@colorful.com',
+        },
+      },
+    };
+
+    expect(extractUrlsFromEntry(entry)).toEqual([]);
+  });
+
   it('includes Rich Text hyperlink URIs', () => {
     const entry = {
       fields: {
@@ -233,6 +249,22 @@ describe('extractUrlsFromEntry', () => {
           },
         },
       };
+      expect(extractUrlsFromEntry(entry)).toEqual([]);
+    });
+
+    it('does not treat a standalone slash separator as a relative link', () => {
+      const entry = {
+        fields: {
+          title: {
+            id: 'title',
+            name: 'Title',
+            type: 'Symbol',
+            locales: ['en-US'],
+            getValue: () => 'Partners / More customers',
+          },
+        },
+      };
+
       expect(extractUrlsFromEntry(entry)).toEqual([]);
     });
   });
