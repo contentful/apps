@@ -37,7 +37,7 @@ export function loadPickerApi(): Promise<void> {
       (window as any).gapi.load('picker', () => resolve());
     };
 
-    script.onerror = () => reject(new Error('Failed to load Google Picker'));
+    script.onerror = () => reject(new Error('Failed to load file picker'));
     document.body.appendChild(script);
   });
   return pickerLoaded;

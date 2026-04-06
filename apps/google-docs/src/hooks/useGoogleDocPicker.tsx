@@ -21,7 +21,7 @@ const GOOGLE_APP_ID = 1;
 
 // These are already exposed by google in the network even if they were hidden as environment variables
 // and google acknowledges that these are okay to be public and that restrictions come from defining the
-// origin web url that is allowed to use these keys which is defined in a private google docs oauth app.
+// origin web url that is allowed to use these keys which is defined in a private OAuth app.
 // Additionally the api key requires a valid OAuth token for operations on private user data.
 // That means even if someone sees your key, they cannot:
 // 1. access user files without an OAuth token,
@@ -38,7 +38,7 @@ export function useGoogleDocsPicker(
   const sdk = useSDK<PageAppSDK>();
   const openPicker = useCallback(async () => {
     if (!accessToken) {
-      console.warn('No Google access token available');
+      console.warn('No access token available');
       return;
     }
 
@@ -49,7 +49,7 @@ export function useGoogleDocsPicker(
 
       const google = (window as any).google;
 
-      // Create the document view - only show Google Docs
+      // Create the document view - only show documents
       const docsView = new google.picker.DocsView(google.picker.ViewId.DOCS);
       docsView.setMimeTypes('application/vnd.google-apps.document');
       const pickerBuilder = new google.picker.PickerBuilder()
@@ -60,7 +60,7 @@ export function useGoogleDocsPicker(
 
       const picker = pickerBuilder.setCallback((data: any) => {
         if (data.action === google.picker.Action.PICKED) {
-          // Filter to only include Google Docs (not folders)
+          // Filter to only include document files (not folders)
           // Folders are shown for navigation purposes only
           const pickedItems = data.docs.filter(
             (doc: any) => doc.mimeType === 'application/vnd.google-apps.document'
@@ -84,7 +84,7 @@ export function useGoogleDocsPicker(
 
       picker.build().setVisible(true);
     } catch (e) {
-      console.error('Error opening Google Docs picker', e);
+      console.error('Error opening file picker', e);
     } finally {
       setIsOpening(false);
     }

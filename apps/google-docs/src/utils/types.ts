@@ -23,6 +23,11 @@ export interface AgentRunMessage {
   };
 }
 
+export interface PreviewPayload {
+  documentTitle: string;
+  data: Record<string, unknown>;
+}
+
 export interface DocTabOption {
   id: string;
   title: string;
@@ -47,6 +52,7 @@ export interface WorkflowRunResult {
   runId: string;
   messages: AgentRunMessage[];
   suspendPayload?: DocumentScopeSuspendPayload;
+  payload?: PreviewPayload;
 }
 
 export interface DocumentScopeResumePayload {

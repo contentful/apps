@@ -161,7 +161,7 @@ export default class JiraClient {
    * @param records Array of URNS
    */
   private addRecord(entryUrn: string, records: string[]): string[] {
-    return [...records, entryUrn];
+    return Array.from(new Set([...records, entryUrn]));
   }
 
   /** Remove from records array
@@ -169,7 +169,7 @@ export default class JiraClient {
    * @param records Array of URNS
    */
   private removeRecord(entryUrn: string, records: string[]): string[] {
-    return records.filter((record) => record !== entryUrn);
+    return Array.from(new Set(records)).filter((record) => record !== entryUrn);
   }
 
   /**Internal method for adding and removing ContentfulLink entity properties.

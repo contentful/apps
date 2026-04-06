@@ -6,11 +6,16 @@ import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
 } from '../../../../../src/locations/Page/components/mainpage/ModalOrchestrator';
-import { WorkflowRunResult, RunStatus } from '../../../../../src/utils/types';
+import { PreviewPayload, WorkflowRunResult, RunStatus } from '../../../../../src/utils/types';
 import { mockSdk } from '../../../../mocks';
 
 const mockStartWorkflow = vi.fn();
 const mockResumeWorkflow = vi.fn();
+
+const mockWorkflowPayload = {
+  documentTitle: 'Mock Preview Title',
+  data: { source: 'workflow' },
+} satisfies PreviewPayload;
 
 vi.mock('../../../../../src/locations/Page/components/modals/step_1/SelectDocumentModal', () => ({
   __esModule: true,
@@ -50,11 +55,15 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 const defaultProps = {
   sdk: mockSdk,
   oauthToken: 'mock-oauth-token',
+  onPreviewReady: vi.fn(),
+  onResetToMain: vi.fn(),
 };
 
 describe('ModalOrchestrator', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    defaultProps.onPreviewReady.mockReset();
+    defaultProps.onResetToMain.mockReset();
     mockStartWorkflow.mockResolvedValue({
       status: RunStatus.PENDING_REVIEW,
       runId: 'run-123',
@@ -78,6 +87,7 @@ describe('ModalOrchestrator', () => {
       status: RunStatus.COMPLETED,
       runId: 'run-123',
       messages: [],
+      payload: mockWorkflowPayload,
     } satisfies WorkflowRunResult);
     vi.mocked(mockSdk.cma.space.get).mockResolvedValue({ sys: { id: 'test-space-id' } });
     vi.mocked(mockSdk.cma.environment.get).mockResolvedValue({ sys: { id: 'test-env-id' } });
@@ -144,6 +154,29 @@ describe('ModalOrchestrator', () => {
       expect(
         screen.getByRole('heading', { name: "You're about to lose your progress" })
       ).toBeTruthy();
+    });
+  });
+
+  it('calls onResetToMain and clears flow state when resetFlowFromPreviewCancel is invoked', async () => {
+    const ref = createRef<ModalOrchestratorHandle>();
+    render(<ModalOrchestrator ref={ref} {...defaultProps} />);
+
+    await act(async () => {
+      ref.current?.startFlow();
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Pick document' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Select content type(s)' })).toBeTruthy();
+    });
+
+    await act(async () => {
+      ref.current?.resetFlowFromPreviewCancel();
+    });
+
+    await waitFor(() => {
+      expect(defaultProps.onResetToMain).toHaveBeenCalledTimes(1);
+      expect(screen.queryByRole('heading', { name: 'Select content type(s)' })).toBeNull();
     });
   });
 
@@ -258,6 +291,7 @@ describe('ModalOrchestrator', () => {
         selectedTabIds: ['tab-1', 'tab-2'],
       });
       expect(screen.queryByRole('heading', { name: 'Preparing your preview' })).toBeNull();
+      expect(defaultProps.onPreviewReady).toHaveBeenCalledWith(mockWorkflowPayload);
     });
   });
 });

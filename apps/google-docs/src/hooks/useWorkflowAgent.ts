@@ -5,6 +5,7 @@ import {
   AgentRunMessage,
   DocumentScopeResumePayload,
   DocumentScopeSuspendPayload,
+  PreviewPayload,
   WorkflowRunResult,
   RunStatus,
 } from '../utils/types';
@@ -75,6 +76,22 @@ const getRunErrorMessage = (runData: AgentRunData): string => {
 const getSuspendPayload = (runData: AgentRunData): DocumentScopeSuspendPayload | undefined =>
   runData.metadata?.suspendPayload as DocumentScopeSuspendPayload | undefined;
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const parsePayloadJson = (payload: string | undefined): Record<string, unknown> | undefined => {
+  if (!payload) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(payload) as unknown;
+    return isRecord(parsed) ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
 const getWorkflowRunResult = (
   runData: AgentRunData,
   threadId: string
@@ -99,12 +116,19 @@ const getWorkflowRunResult = (
       };
     }
 
-    case RunStatus.COMPLETED:
+    case RunStatus.COMPLETED: {
+      const messages = runData.messages ?? [];
+
       return {
         status,
         runId: threadId,
-        messages: runData.messages ?? [],
+        messages,
+        payload: {
+          documentTitle: 'Mock title',
+          data: {},
+        },
       };
+    }
 
     default:
       return null;

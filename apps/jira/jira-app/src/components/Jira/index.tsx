@@ -18,6 +18,8 @@ interface State {
   issues: FormattedIssue[];
   error: IssuesResponse['error'];
 }
+
+const PENDING_ISSUES_STORAGE_KEY = 'jira.pendingIssues';
 /** The Jira sidebar component */
 export default class Jira extends React.Component<Props, State> {
   private issueInterval: NodeJS.Timer | undefined;
@@ -33,6 +35,15 @@ export default class Jira extends React.Component<Props, State> {
   }
 
   async componentDidMount() {
+    const pendingIssues = this.getPendingIssues();
+
+    if (pendingIssues.length) {
+      this.setState({
+        issues: this.sortIssues(pendingIssues),
+        loading: false,
+      });
+    }
+
     await this.getIssues();
 
     this.issueInterval = setInterval(this.getIssues, 30000);
@@ -81,15 +92,72 @@ export default class Jira extends React.Component<Props, State> {
     return [...sortedIssues.mine, ...sortedIssues.assigned, ...sortedIssues.other];
   };
 
+  getEntryKey = () => {
+    const { space, environment, entry } = this.props.sdk.ids;
+    return `ctf:${space}:${environment}:${entry}`;
+  };
+
+  getStoredPendingIssues = (): Record<string, FormattedIssue[]> => {
+    try {
+      const rawValue = window.sessionStorage.getItem(PENDING_ISSUES_STORAGE_KEY);
+      return rawValue ? JSON.parse(rawValue) : {};
+    } catch (e) {
+      return {};
+    }
+  };
+
+  setStoredPendingIssues = (pendingIssues: Record<string, FormattedIssue[]>) => {
+    try {
+      window.sessionStorage.setItem(PENDING_ISSUES_STORAGE_KEY, JSON.stringify(pendingIssues));
+    } catch (e) {
+      // Swallow storage errors; the sidebar still has in-memory optimistic state.
+    }
+  };
+
+  getPendingIssues = (): FormattedIssue[] => {
+    return this.getStoredPendingIssues()[this.getEntryKey()] || [];
+  };
+
+  setPendingIssues = (issues: FormattedIssue[]) => {
+    const pendingIssues = this.getStoredPendingIssues();
+    const entryKey = this.getEntryKey();
+
+    if (issues.length) {
+      pendingIssues[entryKey] = issues;
+    } else {
+      delete pendingIssues[entryKey];
+    }
+
+    this.setStoredPendingIssues(pendingIssues);
+  };
+
+  mergeIssues = (issues: FormattedIssue[]) => {
+    const mergedIssues = new Map<string, FormattedIssue>();
+
+    issues.forEach((issue) => {
+      mergedIssues.set(issue.key, issue);
+    });
+
+    return Array.from(mergedIssues.values());
+  };
+
   getIssues = async () => {
     const res = await this.props.client.getIssuesForEntry(this.props.sdk.ids);
+    const pendingIssues = this.getPendingIssues();
+    const pendingIssueKeys = new Set(res.issues.map((issue) => issue.key));
+    const unresolvedPendingIssues = pendingIssues.filter(
+      (issue) => !pendingIssueKeys.has(issue.key)
+    );
 
     let issues: FormattedIssue[] = [];
 
     if (res.issues.length) {
-      issues = this.sortIssues(res.issues);
+      issues = this.sortIssues(this.mergeIssues([...res.issues, ...unresolvedPendingIssues]));
+    } else if (unresolvedPendingIssues.length) {
+      issues = this.sortIssues(unresolvedPendingIssues);
     }
 
+    this.setPendingIssues(unresolvedPendingIssues);
     this.setState({ issues, loading: false, error: res.error });
   };
 
@@ -98,6 +166,7 @@ export default class Jira extends React.Component<Props, State> {
     this.setState((prevState: State) => ({
       issues: prevState.issues.filter((issue) => issue.key !== issueId),
     }));
+    this.setPendingIssues(this.getPendingIssues().filter((issue) => issue.key !== issueId));
 
     const success = await this.props.client.removeContentfulLink(this.props.sdk.ids, issueId);
 
@@ -111,8 +180,9 @@ export default class Jira extends React.Component<Props, State> {
   linkIssue = async (issue: FormattedIssue) => {
     // optimistically add the issue
     this.setState((prevState: State) => ({
-      issues: this.sortIssues([issue, ...prevState.issues]),
+      issues: this.sortIssues(this.mergeIssues([issue, ...prevState.issues])),
     }));
+    this.setPendingIssues(this.mergeIssues([issue, ...this.getPendingIssues()]));
 
     const success = await this.props.client.addContentfulLink(this.props.sdk.ids, issue.key);
 
@@ -125,6 +195,7 @@ export default class Jira extends React.Component<Props, State> {
       this.setState((prevState: State) => ({
         issues: prevState.issues.filter((i) => i.key !== issue.key),
       }));
+      this.setPendingIssues(this.getPendingIssues().filter((i) => i.key !== issue.key));
     }
   };
 

@@ -1,5 +1,3 @@
-export const AGENT_ID = 'google-docs-agent';
-
 export const WORKFLOW_AGENT_ID = 'google-docs-workflow-agent';
 
 export const POLL_INTERVAL_MS = 10000; // 10 seconds
