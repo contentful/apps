@@ -3,16 +3,13 @@ import {
   Box,
   Card,
   Flex,
-  Heading,
-  Paragraph,
-  Text,
   Button,
-  Badge,
   Table,
   TableHead,
   TableRow,
   TableCell,
   TableBody,
+  Text,
 } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import {
@@ -31,31 +28,19 @@ type DocSegment =
   | { kind: 'block'; id: string; position: number; block: FixtureContentBlock }
   | { kind: 'table'; id: string; position: number; table: FixtureTable };
 
+interface BaseOutlineSection {
+  id: string;
+  title: string;
+  segments: DocSegment[];
+}
+
+type OutlineSection = BaseOutlineSection;
+
 const getBlockText = (block: FixtureContentBlock): string => {
   return block.textRuns
     .map((run) => run.text)
     .join('')
     .trim();
-};
-
-const getSegmentLabel = (segment: DocSegment): string => {
-  if (segment.kind === 'table') {
-    return `Table (${segment.id})`;
-  }
-
-  if (segment.block.type === 'heading') {
-    return `Heading H${segment.block.headingLevel ?? 2} (${segment.id})`;
-  }
-
-  if (segment.block.type === 'listItem') {
-    return `List item (${segment.id})`;
-  }
-
-  return `Paragraph (${segment.id})`;
-};
-
-const formatUsage = (usage: FixtureUsageItem): string => {
-  return `${usage.contentTypeId}.${usage.fieldId}`;
 };
 
 const buildUsageFromMappingPlan = (fixture: GoogleDocsReviewFixture) => {
@@ -130,11 +115,81 @@ export const GoogleDocsMappingReviewScreen = ({
     return [...blockSegments, ...tableSegments].sort((a, b) => a.position - b.position);
   }, [fixture.normalizedDocument.contentBlocks, fixture.normalizedDocument.tables]);
 
+  const sections = useMemo<OutlineSection[]>(() => {
+    const result: BaseOutlineSection[] = [];
+    let currentSection: BaseOutlineSection | null = null;
+
+    segments.forEach((segment) => {
+      if (segment.kind === 'table') {
+        result.push({
+          id: `section-${segment.id}`,
+          title: 'Table',
+          segments: [segment],
+        });
+        currentSection = null;
+        return;
+      }
+
+      const isHeading = segment.block.type === 'heading' && getBlockText(segment.block).length > 0;
+
+      if (isHeading) {
+        const headingText = getBlockText(segment.block);
+        const section: BaseOutlineSection = {
+          id: `section-${segment.id}`,
+          title: headingText,
+          segments: [segment],
+        };
+        result.push(section);
+        currentSection = section;
+        return;
+      }
+
+      if (!currentSection) {
+        currentSection = {
+          id: `section-${segment.id}`,
+          title: getBlockText(segment.block) || 'Section',
+          segments: [],
+        };
+        result.push(currentSection);
+      }
+      currentSection.segments.push(segment);
+    });
+    return result;
+  }, [segments]);
+
+  const imageById = useMemo(() => {
+    const images = fixture.normalizedDocument.images ?? [];
+    return images.reduce<Record<string, (typeof images)[number]>>((acc, image) => {
+      acc[image.id] = image;
+      return acc;
+    }, {});
+  }, [fixture.normalizedDocument.images]);
+
   const getUsageForSegment = (segment: DocSegment): FixtureUsageItem[] => {
     if (segment.kind === 'table') {
       return sourceUsage.tableUsage[segment.id] ?? [];
     }
     return sourceUsage.blockUsage[segment.id] ?? [];
+  };
+
+  const getUsageForSection = (section: OutlineSection): FixtureUsageItem[] => {
+    const aggregated = section.segments.flatMap(getUsageForSegment);
+    const seen = new Set<string>();
+    return aggregated.filter((usage) => {
+      const key = `${usage.entryIndex}-${usage.contentTypeId}-${usage.fieldId}`;
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+  };
+
+  const getImagesForSegment = (
+    segment: DocSegment
+  ): Array<NonNullable<GoogleDocsReviewFixture['normalizedDocument']['images']>[number]> => {
+    const imageIds = segment.kind === 'table' ? segment.table.imageIds : segment.block.imageIds;
+    return imageIds.map((id) => imageById[id]).filter(Boolean);
   };
 
   const getVisibleUsage = (usage: FixtureUsageItem[]): FixtureUsageItem[] => {
@@ -144,172 +199,198 @@ export const GoogleDocsMappingReviewScreen = ({
     return usage.filter((item) => item.entryIndex === selectedEntryIndex);
   };
 
-  const highlightedSegmentCount = segments.filter((segment) => {
-    const usage = getVisibleUsage(getUsageForSegment(segment));
-    return usage.length > 0;
-  }).length;
+  const getMappingCardsForSection = (section: OutlineSection) => {
+    const visibleUsage = getVisibleUsage(getUsageForSection(section));
+    return visibleUsage.map((usage) => {
+      const fieldMappings = fixture.mappingPlan.entries[usage.entryIndex]?.fieldMappings ?? [];
+      const fieldMapping = fieldMappings.find((mapping) => mapping.fieldId === usage.fieldId);
+      return {
+        key: `${section.id}-${usage.entryIndex}-${usage.fieldId}`,
+        fieldId: usage.fieldId,
+        fieldType: fieldMapping?.fieldType,
+      };
+    });
+  };
 
   return (
     <Flex flexDirection="column" gap="spacingM" style={{ padding: tokens.spacingL }}>
-      <Flex alignItems="center" justifyContent="space-between">
-        <Box>
-          <Heading marginBottom="spacing2Xs">Google Doc mapping review (prototype)</Heading>
-          <Paragraph marginBottom="none" color="gray700">
-            Left panel shows normalized segments. Green blocks are mapped into entry fields.
-          </Paragraph>
+      <Flex justifyContent="space-between" alignItems="center">
+        <Text fontWeight="fontWeightDemiBold">Google Docs Mapping Review</Text>
+        <Button variant="secondary" size="small" onClick={onBack}>
+          Back
+        </Button>
+      </Flex>
+      <Card
+        padding="none"
+        style={{
+          minHeight: '70vh',
+          overflow: 'auto',
+          border: `1px solid ${tokens.gray300}`,
+        }}>
+        <Box padding="spacingM" style={{ borderBottom: `1px solid ${tokens.gray300}` }}>
+          <Text fontWeight="fontWeightDemiBold">Document outline</Text>
+          <Text as="p" fontColor="gray600" marginBottom="none">
+            {fixture.normalizedDocument.title ?? fixture.normalizedDocument.documentId}
+          </Text>
+          <Flex marginTop="spacingS" gap="spacing2Xs" flexWrap="wrap">
+            <Button
+              size="small"
+              variant={selectedEntryIndex === null ? 'primary' : 'secondary'}
+              onClick={() => setSelectedEntryIndex(null)}>
+              All mappings
+            </Button>
+            {fixture.entries.map((entry, entryIndex) => (
+              <Button
+                key={entry.tempId ?? `${entry.contentTypeId}-${entryIndex}`}
+                size="small"
+                variant={selectedEntryIndex === entryIndex ? 'primary' : 'secondary'}
+                onClick={() => setSelectedEntryIndex(entryIndex)}>
+                {getEntryDisplayTitle(entry)}
+              </Button>
+            ))}
+          </Flex>
         </Box>
-        <Flex alignItems="center" gap="spacingS">
-          <Badge>
-            {highlightedSegmentCount}/{segments.length} mapped segments visible
-          </Badge>
-          <Button variant="secondary" onClick={onBack}>
-            Back to current page
-          </Button>
-        </Flex>
-      </Flex>
+        <Flex flexDirection="column" gap="spacingS" style={{ padding: tokens.spacingM }}>
+          {sections.map((section) => {
+            const allUsage = getUsageForSection(section);
+            const visibleUsage = getVisibleUsage(allUsage);
+            const mappingCards = getMappingCardsForSection(section);
+            const isMapped = visibleUsage.length > 0;
 
-      <Flex gap="spacingM" alignItems="stretch" style={{ minHeight: '70vh' }}>
-        <Card
-          padding="none"
-          style={{
-            flex: 2,
-            overflow: 'auto',
-            border: `1px solid ${tokens.gray300}`,
-          }}>
-          <Box padding="spacingM" style={{ borderBottom: `1px solid ${tokens.gray300}` }}>
-            <Text fontWeight="fontWeightDemiBold">Document outline</Text>
-            <Text as="p" fontColor="gray600" marginBottom="none">
-              {fixture.normalizedDocument.title ?? fixture.normalizedDocument.documentId}
-            </Text>
-          </Box>
-          <Flex flexDirection="column" gap="spacingS" style={{ padding: tokens.spacingM }}>
-            {segments.map((segment) => {
-              const allUsage = getUsageForSegment(segment);
-              const visibleUsage = getVisibleUsage(allUsage);
-              const isMapped = visibleUsage.length > 0;
+            return (
+              <Box key={section.id}>
+                <Flex gap="spacingM" alignItems="stretch">
+                  <Box style={{ flex: 2 }}>
+                    <Box
+                      style={{
+                        border: `1px solid ${isMapped ? tokens.green500 : tokens.gray300}`,
+                        borderRadius: tokens.borderRadiusMedium,
+                        padding: tokens.spacingS,
+                        backgroundColor: isMapped ? tokens.green100 : tokens.gray100,
+                      }}>
+                      <Text fontWeight="fontWeightDemiBold">{section.title}</Text>
 
-              return (
-                <Box
-                  key={`${segment.kind}-${segment.id}`}
-                  style={{
-                    border: `1px solid ${isMapped ? tokens.green500 : tokens.gray300}`,
-                    borderRadius: tokens.borderRadiusMedium,
-                    padding: tokens.spacingS,
-                    backgroundColor: isMapped ? tokens.green100 : tokens.gray100,
-                  }}>
-                  <Flex justifyContent="space-between" alignItems="center">
-                    <Text fontWeight="fontWeightDemiBold">{getSegmentLabel(segment)}</Text>
-                    <Text fontColor={isMapped ? 'green700' : 'gray600'} fontSize="fontSizeS">
-                      {isMapped ? 'Mapped' : 'Unmapped'}
-                    </Text>
-                  </Flex>
+                      <Flex flexDirection="column" gap="spacingXs" marginTop="spacingXs">
+                        {section.segments.map((segment) => (
+                          <Box
+                            key={`${segment.kind}-${segment.id}`}
+                            style={{
+                              borderRadius: tokens.borderRadiusMedium,
+                              padding: tokens.spacingS,
+                              backgroundColor: 'transparent',
+                            }}>
+                            {segment.kind === 'table' ? (
+                              <Box>
+                                <Text fontWeight="fontWeightDemiBold">Table</Text>
+                                <Box marginTop="spacingXs">
+                                  <Table>
+                                    <TableHead>
+                                      <TableRow>
+                                        {segment.table.headers.map((header, headerIndex) => (
+                                          <TableCell
+                                            key={`${segment.table.id}-header-${headerIndex}`}>
+                                            {header}
+                                          </TableCell>
+                                        ))}
+                                      </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                      {segment.table.rows.map((row, rowIndex) => (
+                                        <TableRow key={`${segment.table.id}-row-${rowIndex}`}>
+                                          {row.cells.map((cell, cellIndex) => (
+                                            <TableCell
+                                              key={`${segment.table.id}-cell-${rowIndex}-${cellIndex}`}>
+                                              {cell}
+                                            </TableCell>
+                                          ))}
+                                        </TableRow>
+                                      ))}
+                                    </TableBody>
+                                  </Table>
+                                </Box>
+                              </Box>
+                            ) : (
+                              getBlockText(segment.block) && (
+                                <Text as="p" marginBottom="none">
+                                  {getBlockText(segment.block)}
+                                </Text>
+                              )
+                            )}
 
-                  {segment.kind === 'table' ? (
-                    <Box marginTop="spacingXs">
-                      <Table>
-                        <TableHead>
-                          <TableRow>
-                            {segment.table.headers.map((header) => (
-                              <TableCell key={header}>{header}</TableCell>
+                            {getImagesForSegment(segment).map((image) => (
+                              <Box key={image.id} marginTop="spacingS">
+                                <Box
+                                  as="img"
+                                  src={image.url}
+                                  alt={image.altText ?? image.title ?? 'Document image'}
+                                  style={{
+                                    width: '100%',
+                                    maxHeight: 280,
+                                    objectFit: 'contain',
+                                    borderRadius: tokens.borderRadiusMedium,
+                                    border: `1px solid ${tokens.gray300}`,
+                                    backgroundColor: tokens.gray100,
+                                  }}
+                                />
+                                {(image.title || image.altText) && (
+                                  <Text
+                                    as="p"
+                                    fontColor="gray700"
+                                    marginBottom="none"
+                                    marginTop="spacing2Xs">
+                                    {image.title ?? image.altText}
+                                  </Text>
+                                )}
+                              </Box>
                             ))}
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {segment.table.rows.map((row, rowIndex) => (
-                            <TableRow key={`${segment.table.id}-row-${rowIndex}`}>
-                              {row.cells.map((cell, cellIndex) => (
-                                <TableCell
-                                  key={`${segment.table.id}-cell-${rowIndex}-${cellIndex}`}>
-                                  {cell}
-                                </TableCell>
-                              ))}
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                          </Box>
+                        ))}
+                      </Flex>
                     </Box>
-                  ) : (
-                    <Text as="p" marginTop="spacingXs" marginBottom="none">
-                      {getBlockText(segment.block)}
-                    </Text>
-                  )}
+                  </Box>
 
-                  {visibleUsage.length > 0 && (
-                    <Flex marginTop="spacingXs" gap="spacing2Xs" flexWrap="wrap">
-                      {visibleUsage.map((usage, index) => (
-                        <Badge
-                          key={`${segment.id}-${usage.entryIndex}-${usage.fieldId}-${index}`}
-                          variant="primary">
-                          {formatUsage(usage)}
-                        </Badge>
-                      ))}
+                  <Box style={{ flex: 1 }}>
+                    <Flex flexDirection="column" gap="spacingS">
+                      {mappingCards.length > 0 ? (
+                        mappingCards.map((mappingCard) => (
+                          <Box
+                            key={mappingCard.key}
+                            style={{
+                              border: `1px solid ${tokens.green500}`,
+                              borderRadius: tokens.borderRadiusMedium,
+                              padding: tokens.spacingS,
+                              backgroundColor: tokens.green100,
+                            }}>
+                            <Text as="p" marginBottom="spacing2Xs" fontColor="gray700">
+                              Field
+                            </Text>
+                            <Text as="p" marginBottom="none" fontWeight="fontWeightDemiBold">
+                              {mappingCard.fieldId}
+                              {mappingCard.fieldType ? ` (${mappingCard.fieldType})` : ''}
+                            </Text>
+                          </Box>
+                        ))
+                      ) : (
+                        <Box
+                          style={{
+                            border: `1px solid ${tokens.gray300}`,
+                            borderRadius: tokens.borderRadiusMedium,
+                            padding: tokens.spacingS,
+                            backgroundColor: tokens.gray100,
+                          }}>
+                          <Text as="p" marginBottom="none" fontColor="gray700">
+                            No mappings for this section
+                          </Text>
+                        </Box>
+                      )}
                     </Flex>
-                  )}
-                </Box>
-              );
-            })}
-          </Flex>
-        </Card>
-
-        <Card
-          padding="none"
-          style={{
-            flex: 1,
-            overflow: 'auto',
-            border: `1px solid ${tokens.gray300}`,
-          }}>
-          <Box padding="spacingM" style={{ borderBottom: `1px solid ${tokens.gray300}` }}>
-            <Text fontWeight="fontWeightDemiBold">Entries to create</Text>
-            <Text as="p" fontColor="gray600" marginBottom="none">
-              Select an entry to filter highlighted source segments.
-            </Text>
-          </Box>
-
-          <Flex flexDirection="column" gap="spacingS" style={{ padding: tokens.spacingM }}>
-            <Card
-              onClick={() => setSelectedEntryIndex(null)}
-              style={{
-                cursor: 'pointer',
-                border:
-                  selectedEntryIndex === null
-                    ? `2px solid ${tokens.blue600}`
-                    : `1px solid ${tokens.gray300}`,
-              }}>
-              <Text fontWeight="fontWeightDemiBold">Show all mappings</Text>
-            </Card>
-
-            {fixture.entries.map((entry, entryIndex) => {
-              const isSelected = selectedEntryIndex === entryIndex;
-              const fieldMappings = fixture.mappingPlan.entries[entryIndex]?.fieldMappings ?? [];
-
-              return (
-                <Card
-                  key={entry.tempId ?? `${entry.contentTypeId}-${entryIndex}`}
-                  onClick={() => setSelectedEntryIndex(entryIndex)}
-                  style={{
-                    cursor: 'pointer',
-                    border: isSelected
-                      ? `2px solid ${tokens.blue600}`
-                      : `1px solid ${tokens.gray300}`,
-                    backgroundColor: isSelected ? tokens.blue100 : 'transparent',
-                  }}>
-                  <Text fontWeight="fontWeightDemiBold">{getEntryDisplayTitle(entry)}</Text>
-                  <Text as="p" fontColor="gray700" marginBottom="spacing2Xs">
-                    {entry.contentTypeId}
-                  </Text>
-                  <Flex gap="spacing2Xs" flexWrap="wrap">
-                    {fieldMappings.map((field) => (
-                      <Badge key={`${entryIndex}-${field.fieldId}`} variant="secondary">
-                        {field.fieldId}
-                      </Badge>
-                    ))}
-                  </Flex>
-                </Card>
-              );
-            })}
-          </Flex>
-        </Card>
-      </Flex>
+                  </Box>
+                </Flex>
+              </Box>
+            );
+          })}
+        </Flex>
+      </Card>
     </Flex>
   );
 };
