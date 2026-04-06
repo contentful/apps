@@ -33,8 +33,8 @@ describe('Config Screen component', () => {
     expect(getByText(/^Deny list$/)).toBeInTheDocument();
     expect(getByText('Disclaimer')).toBeInTheDocument();
     expect(getByPlaceholderText('https://www.example.com')).toBeInTheDocument();
-    expect(getByPlaceholderText(/help\.example\.com/)).toBeInTheDocument();
-    expect(getByPlaceholderText(/staging\.example\.com/)).toBeInTheDocument();
+    expect(getByPlaceholderText('Add allowed domain...')).toBeInTheDocument();
+    expect(getByPlaceholderText('Add blocked domain...')).toBeInTheDocument();
   });
 
   it('calls onConfigure and returns parameters and targetState', async () => {

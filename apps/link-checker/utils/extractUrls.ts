@@ -7,7 +7,7 @@ const URL_REGEX =
   /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9.\-]+)((?:\/[\+~%\/.\w\-_]*)?\??(?:[\-\+=&;%@.\w_]*)#?(?:[.\!\/\\\w\-]*))?)/gi;
 
 /** Matches relative paths: /path, ./path, ../path (not //). Preceded by start, whitespace, or punctuation so we don't match the path portion of an absolute URL. */
-const RELATIVE_PATH_REGEX = /(?:^|[\s(,"'])((?:\.\.?\/|\/(?!\/))[^\s"'<>)\]]*)/g;
+const RELATIVE_PATH_REGEX = /(?:^|[\s(,"'])((?:\.\.?\/|\/(?!\/))[^\s"'<>)\]]+)/g;
 
 export interface ExtractedUrl {
   url: string;
@@ -20,6 +20,10 @@ export interface ExtractedUrl {
 export function isRelativeUrl(url: string): boolean {
   const t = url.trim();
   return !/^https?:\/\//i.test(t);
+}
+
+function isPlainEmailAddress(url: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(url);
 }
 
 /** Field-like shape from sdk.entry.fields[id] */
@@ -105,6 +109,7 @@ export function extractUrlsFromEntry(entry: EntryLike): ExtractedUrl[] {
         while ((match = URL_REGEX.exec(text)) !== null) {
           const url = match[0].trim();
           if (!url) continue;
+          if (isPlainEmailAddress(url)) continue;
           const key = `${url}\0${fieldId}\0${locale}`;
           if (seen.has(key)) continue;
           seen.add(key);
