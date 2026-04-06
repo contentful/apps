@@ -118,10 +118,7 @@ export default function Sidebar() {
     .map((p) => normalizeDomainPattern(p))
     .filter(Boolean);
   const baseUrl = (installation.baseUrl || '').trim().replace(/\/$/, '') || null;
-  const implicitBasePattern = baseUrl ? normalizeDomainPattern(baseUrl) : '';
-  const allowedPatterns = Array.from(
-    new Set([implicitBasePattern, ...explicitAllowedPatterns].filter(Boolean))
-  );
+  const allowedPatterns = explicitAllowedPatterns;
 
   useAutoResizer();
 
