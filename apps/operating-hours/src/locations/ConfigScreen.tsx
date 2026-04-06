@@ -494,9 +494,9 @@ function ConfigScreen() {
                 Assign content types
               </Heading>
               <Paragraph marginBottom="spacingM">
-                Select the content type(s) you want to use with Operating Hours. You can
-                change this anytime by navigating to the &quot;Fields&quot; tab in your content
-                model and unassigning the app from the JSON field.
+                Select the content type(s) you want to use with Operating Hours. You can change this
+                anytime by navigating to the &quot;Fields&quot; tab in your content model and
+                unassigning the app from the JSON field.
               </Paragraph>
               {pickerOptions.length === 0 ? (
                 <Note variant="warning">No content types were found in this space yet.</Note>
@@ -528,8 +528,8 @@ function ConfigScreen() {
                     placeholder="Operating hours"
                   />
                   <FormControl.HelpText>
-                    Operating Hours will create this JSON field on each selected content type
-                    if it does not already exist.
+                    Operating Hours will create this JSON field on each selected content type if it
+                    does not already exist.
                   </FormControl.HelpText>
                 </FormControl>
 
@@ -541,9 +541,9 @@ function ConfigScreen() {
                     <Select.Option value="12h">12-hour clock</Select.Option>
                     <Select.Option value="24h">24-hour clock</Select.Option>
                   </Select>
-                <FormControl.HelpText>
-                    Stored values stay in `HH:MM` JSON format. This sets the default display
-                    format, and authors can change it for individual entries in the field app.
+                  <FormControl.HelpText>
+                    Stored values stay in `HH:MM` JSON format. This sets the default display format,
+                    and authors can change it for individual entries in the field app.
                   </FormControl.HelpText>
                 </FormControl>
               </Stack>
@@ -554,9 +554,8 @@ function ConfigScreen() {
                 Default hours
               </Heading>
               <Paragraph marginBottom="spacingM">
-                Choose whether Operating Hours should prefill each day with custom opening
-                hours the first time authors open an empty field. If disabled, all days start
-                closed.
+                Choose whether Operating Hours should prefill each day with custom opening hours the
+                first time authors open an empty field. If disabled, all days start closed.
               </Paragraph>
               <Flex alignItems="flex-start" gap="spacingM">
                 <Switch
