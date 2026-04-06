@@ -17,7 +17,7 @@ export interface AgentGeneratePayload {
   }>;
   metadata: {
     documentId: string;
-    contentTypeIds: string;
+    contentTypeIds: string[];
     oauthToken: string;
   };
   threadId: string;

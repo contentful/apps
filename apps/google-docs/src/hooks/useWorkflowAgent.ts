@@ -162,7 +162,6 @@ export const useWorkflowAgent = ({
       const spaceId = sdk.ids.space;
       const environmentId = sdk.ids.environment;
       const threadId = [crypto.randomUUID(), WORKFLOW_AGENT_ID].join('-');
-      const contentTypeIdsCsv = contentTypeIds.join(',');
 
       const payload: AgentGeneratePayload = {
         messages: [
@@ -180,9 +179,7 @@ export const useWorkflowAgent = ({
         ],
         metadata: {
           documentId,
-          // TEMP workaround: send as comma-separated string for now; API workflow normalizes back to string[].
-          contentTypeIds: contentTypeIdsCsv,
-          // contentTypeIds,
+          contentTypeIds,
           oauthToken,
         },
         threadId,
