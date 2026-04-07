@@ -13,6 +13,23 @@ vi.mock('../../../src/locations/Page/components/mainpage/OAuthConnector', () => 
   OAuthConnector: () => <div>Mock OAuth Connector</div>,
 }));
 
+vi.mock('../../../src/fixtures/googleDocsReview', () => ({
+  loadGoogleDocsReviewFixture: () => ({
+    entries: [],
+    assets: [],
+    originalNormalizedDocument: { contentBlocks: [], tables: [] },
+    editableNormalizedDocument: { contentBlocks: [], tables: [] },
+    entryBlockGraph: { entries: [], excludedSourceRefs: [] },
+  }),
+}));
+
+vi.mock(
+  '../../../src/locations/Page/components/review-prototype/GoogleDocsMappingReviewScreen',
+  () => ({
+    GoogleDocsMappingReviewScreen: () => <div>Mock fixture review</div>,
+  })
+);
+
 const { mockModalOrchestrator, mockResetFlowFromPreviewCancel } = vi.hoisted(() => ({
   mockModalOrchestrator: vi.fn(),
   mockResetFlowFromPreviewCancel: vi.fn(),
@@ -133,6 +150,33 @@ describe('Page component', () => {
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
       expect(screen.queryByText(/Create from document "Selected document":/)).toBeNull();
+    });
+  });
+
+  it('switches to the fixture review screen from the main page', async () => {
+    render(<Page />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Mock from fixture' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Create from fixture preview')).toBeTruthy();
+      expect(screen.getByText('Mock fixture review')).toBeTruthy();
+      expect(screen.queryByRole('heading', { name: 'Drive Integration' })).toBeNull();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel preview' }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', { name: "You're about to lose your progress" })
+      ).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel without creating' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
+      expect(screen.queryByText('Mock fixture review')).toBeNull();
     });
   });
 });

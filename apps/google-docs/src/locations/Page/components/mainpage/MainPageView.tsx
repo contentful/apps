@@ -11,6 +11,7 @@ interface MainPageViewProps {
   onOauthTokenChange: (token: string) => void;
   onLoadingStateChange: (isLoading: boolean) => void;
   onSelectFile: () => void;
+  onUseFixturePreview: () => void;
 }
 
 export const MainPageView = ({
@@ -21,6 +22,7 @@ export const MainPageView = ({
   onOauthTokenChange,
   onLoadingStateChange,
   onSelectFile,
+  onUseFixturePreview,
 }: MainPageViewProps) => {
   return (
     <Layout.Body>
@@ -52,13 +54,18 @@ export const MainPageView = ({
               </Paragraph>
             </Flex>
 
-            <Button
-              variant="primary"
-              isDisabled={!oauthToken}
-              onClick={onSelectFile}
-              endIcon={<ArrowRightIcon />}>
-              Select your file
-            </Button>
+            <Flex flexDirection="column" gap="spacingS" alignItems="stretch">
+              <Button
+                variant="primary"
+                isDisabled={!oauthToken}
+                onClick={onSelectFile}
+                endIcon={<ArrowRightIcon />}>
+                Select your file
+              </Button>
+              <Button variant="secondary" onClick={onUseFixturePreview}>
+                Mock from fixture
+              </Button>
+            </Flex>
           </Flex>
         </Card>
       </Flex>

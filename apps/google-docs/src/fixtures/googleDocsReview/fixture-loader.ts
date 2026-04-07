@@ -14,10 +14,12 @@ const hasRequiredShape = (value: unknown): value is GoogleDocsReviewFixture => {
   return (
     Array.isArray(candidate.entries) &&
     Array.isArray(candidate.assets) &&
-    !!candidate.normalizedDocument &&
-    typeof candidate.normalizedDocument === 'object' &&
-    !!candidate.mappingPlan &&
-    typeof candidate.mappingPlan === 'object'
+    !!candidate.originalNormalizedDocument &&
+    typeof candidate.originalNormalizedDocument === 'object' &&
+    !!candidate.editableNormalizedDocument &&
+    typeof candidate.editableNormalizedDocument === 'object' &&
+    !!candidate.entryBlockGraph &&
+    typeof candidate.entryBlockGraph === 'object'
   );
 };
 

@@ -4,6 +4,10 @@ export interface FixtureTextRun {
     bold?: boolean;
     italic?: boolean;
     underline?: boolean;
+    strikethrough?: boolean;
+    superscript?: boolean;
+    subscript?: boolean;
+    linkUrl?: string;
   };
 }
 
@@ -22,8 +26,28 @@ export interface FixtureContentBlock {
   captionForImageId?: string;
 }
 
+export interface FixtureTableTextPart {
+  id: string;
+  type: 'text';
+  textRuns: FixtureTextRun[];
+}
+
+export interface FixtureTableImagePart {
+  id: string;
+  type: 'image';
+  imageId: string;
+}
+
+export type FixtureTablePart = FixtureTableTextPart | FixtureTableImagePart;
+
+export interface FixtureTableCell {
+  id: string;
+  parts: FixtureTablePart[];
+}
+
 export interface FixtureTableRow {
-  cells: string[];
+  id: string;
+  cells: FixtureTableCell[];
 }
 
 export interface FixtureTable {
@@ -69,28 +93,54 @@ export interface FixtureNormalizedDocument {
   }>;
 }
 
+export type FixtureSourceRef =
+  | {
+      kind: 'blockText';
+      blockId: string;
+      start: number;
+      end: number;
+    }
+  | {
+      kind: 'blockImage';
+      blockId: string;
+      imageId: string;
+    }
+  | {
+      kind: 'tableText';
+      tableId: string;
+      rowId: string;
+      cellId: string;
+      partId: string;
+      start: number;
+      end: number;
+    }
+  | {
+      kind: 'tableImage';
+      tableId: string;
+      rowId: string;
+      cellId: string;
+      partId: string;
+      imageId: string;
+    };
+
 export interface FixtureFieldMapping {
   fieldId: string;
   fieldType: string;
-  sourceBlockIds: string[];
-  sourceTableIds: string[];
-  sourceAssetIds: string[];
+  sourceRefs: FixtureSourceRef[];
   sourceEntryIds?: string[];
-  sourceTableRowLabel?: string;
   confidence: number;
   transformNotes?: string;
 }
 
-export interface FixtureMappingEntry {
+export interface FixtureGraphEntry {
   contentTypeId: string;
   tempId?: string;
   fieldMappings: FixtureFieldMapping[];
 }
 
-export interface FixtureMappingPlan {
-  entries: FixtureMappingEntry[];
-  unmappedBlockIds: string[];
-  summary: string;
+export interface FixtureEntryBlockGraph {
+  entries: FixtureGraphEntry[];
+  excludedSourceRefs: FixtureSourceRef[];
 }
 
 export interface FixtureUsageItem {
@@ -106,7 +156,6 @@ export interface FixturePreviewEntry {
 }
 
 export interface FixtureAsset {
-  placeholderId: string;
   url: string;
   altText?: string;
   title?: string;
@@ -120,12 +169,6 @@ export interface GoogleDocsReviewFixture {
   [key: string]: unknown;
   entries: FixturePreviewEntry[];
   assets: FixtureAsset[];
-  unmappedBlockIds?: string[];
-  summary?: string;
-  normalizedDocument: FixtureNormalizedDocument;
-  contentTables?: FixtureTable[];
-  allTables?: FixtureTable[];
-  mappingPlan: FixtureMappingPlan;
   referenceGraph?: {
     edges: Array<{
       from: string;
@@ -135,9 +178,13 @@ export interface GoogleDocsReviewFixture {
     creationOrder: string[];
     hasCircularDependency: boolean;
     deferredFields: Array<{
-      entryId: string;
+      entryId?: string;
+      tempId?: string;
       fieldId: string;
-      reason: string;
+      reason?: string;
     }>;
   };
+  originalNormalizedDocument: FixtureNormalizedDocument;
+  editableNormalizedDocument: FixtureNormalizedDocument;
+  entryBlockGraph: FixtureEntryBlockGraph;
 }

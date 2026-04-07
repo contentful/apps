@@ -1,23 +1,37 @@
 import { useState } from 'react';
-import { Button, Flex, Heading, Layout, Paragraph } from '@contentful/f36-components';
+import { Button, Flex, Heading, Layout, Note, Paragraph } from '@contentful/f36-components';
 import Splitter from './Splitter';
 import { PreviewPayload } from '../../../../utils/types';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
+import { loadGoogleDocsReviewFixture } from '../../../../fixtures/googleDocsReview';
+import { GoogleDocsMappingReviewScreen } from '../review-prototype/GoogleDocsMappingReviewScreen';
 
-interface PreviewPageViewProps {
-  payload: PreviewPayload;
-  onCancel: () => void;
-}
+type PreviewPageViewProps =
+  | {
+      mode: 'workflow';
+      payload: PreviewPayload;
+      onCancel: () => void;
+    }
+  | {
+      mode: 'fixture';
+      onCancel: () => void;
+    };
 
-export const PreviewPageView = ({ payload, onCancel }: PreviewPageViewProps) => {
-  const title = payload.documentTitle.trim() ? payload.documentTitle : 'Selected document';
+export const PreviewPageView = (props: PreviewPageViewProps) => {
+  const isFixtureMode = props.mode === 'fixture';
+  const title = isFixtureMode
+    ? 'Create from fixture preview'
+    : `Create from document "${
+        props.payload.documentTitle.trim() ? props.payload.documentTitle : 'Selected document'
+      }"`;
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
+  const fixture = isFixtureMode ? loadGoogleDocsReviewFixture() : null;
 
   return (
     <>
       <Layout.Header title="Preview">
         <Flex justifyContent="space-between" alignItems="center" marginTop="spacingS">
-          <Heading marginBottom="none">Create from document "{title}"</Heading>
+          <Heading marginBottom="none">{title}</Heading>
           <Button
             variant="transparent"
             size="small"
@@ -29,11 +43,27 @@ export const PreviewPageView = ({ payload, onCancel }: PreviewPageViewProps) => 
       </Layout.Header>
       <Splitter marginTop="spacingS" />
       <Layout.Body>
-        <Paragraph>Preview</Paragraph>
+        {isFixtureMode ? (
+          fixture ? (
+            <GoogleDocsMappingReviewScreen fixture={fixture} showChrome={false} />
+          ) : (
+            <Note
+              variant="warning"
+              title="Fixture not found or invalid"
+              style={{ margin: '16px', maxWidth: 900 }}>
+              <Paragraph marginBottom="none">
+                Copy `debug-review-payload-latest.json` from `agents-api` into
+                `src/fixtures/googleDocsReview/fixture.json` and reload the app.
+              </Paragraph>
+            </Note>
+          )
+        ) : (
+          <Paragraph>Preview</Paragraph>
+        )}
       </Layout.Body>
       <ConfirmCancelModal
         isOpen={isConfirmCancelModalOpen}
-        onConfirm={onCancel}
+        onConfirm={props.onCancel}
         onCancel={() => setIsConfirmCancelModalOpen(false)}
       />
     </>
