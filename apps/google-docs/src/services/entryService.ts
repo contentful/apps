@@ -47,9 +47,11 @@ async function createAssetFromUrlFast(
     }
   );
 
-  cma.asset.processForAllLocales({ spaceId, environmentId }, asset).catch(() => {
-    // Silently fail - processing will be retried by Contentful
-  });
+  try {
+    await cma.asset.processForAllLocales({ spaceId, environmentId }, asset);
+  } catch (error) {
+    console.error(`Failed to process asset for URL: ${url}`, error);
+  }
 
   return asset;
 }
