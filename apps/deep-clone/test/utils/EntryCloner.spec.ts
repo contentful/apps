@@ -385,6 +385,282 @@ describe('EntryCloner', () => {
     });
   });
 
+  describe('Clone entry with rich text embedded references', () => {
+    beforeEach(() => {
+      contentType = getMockContentType([
+        { id: 'title', type: 'Text' },
+        { id: 'body', type: 'RichText' },
+      ]);
+
+      referencedEntry = getMockEntry('referenced-entry-id', {
+        title: { 'en-US': 'Referenced Entry Title' },
+      });
+
+      const inlineReferencedEntry = getMockEntry('inline-referenced-entry-id', {
+        title: { 'en-US': 'Inline Referenced Entry Title' },
+      });
+
+      mainEntry = getMockEntry('main-entry-id', {
+        title: { 'en-US': 'Main Entry Title' },
+        body: {
+          'en-US': {
+            nodeType: 'document',
+            data: {},
+            content: [
+              {
+                nodeType: 'paragraph',
+                data: {},
+                content: [
+                  {
+                    nodeType: 'text',
+                    value: 'Before inline reference',
+                    marks: [],
+                    data: {},
+                  },
+                  {
+                    nodeType: 'embedded-entry-inline',
+                    data: {
+                      target: {
+                        sys: { type: 'Link', linkType: 'Entry', id: 'inline-referenced-entry-id' },
+                      },
+                    },
+                    content: [],
+                  },
+                ],
+              },
+              {
+                nodeType: 'embedded-entry-block',
+                data: {
+                  target: {
+                    sys: { type: 'Link', linkType: 'Entry', id: 'referenced-entry-id' },
+                  },
+                },
+                content: [],
+              },
+              {
+                nodeType: 'embedded-asset-block',
+                data: {
+                  target: {
+                    sys: { type: 'Link', linkType: 'Asset', id: 'asset-id' },
+                  },
+                },
+                content: [],
+              },
+            ],
+          },
+        },
+      });
+
+      clonedReferencedEntry = getMockEntry('cloned-referenced-entry-id', {
+        title: { 'en-US': '[CLONE] Referenced Entry Title' },
+      });
+
+      const clonedInlineReferencedEntry = getMockEntry('cloned-inline-referenced-entry-id', {
+        title: { 'en-US': '[CLONE] Inline Referenced Entry Title' },
+      });
+
+      clonedMainEntry = getMockEntry('cloned-main-entry-id', {
+        title: { 'en-US': '[CLONE] Main Entry Title' },
+        body: {
+          'en-US': {
+            nodeType: 'document',
+            data: {},
+            content: [
+              {
+                nodeType: 'paragraph',
+                data: {},
+                content: [
+                  {
+                    nodeType: 'text',
+                    value: 'Before inline reference',
+                    marks: [],
+                    data: {},
+                  },
+                  {
+                    nodeType: 'embedded-entry-inline',
+                    data: {
+                      target: {
+                        sys: { type: 'Link', linkType: 'Entry', id: 'inline-referenced-entry-id' },
+                      },
+                    },
+                    content: [],
+                  },
+                ],
+              },
+              {
+                nodeType: 'embedded-entry-block',
+                data: {
+                  target: {
+                    sys: { type: 'Link', linkType: 'Entry', id: 'referenced-entry-id' },
+                  },
+                },
+                content: [],
+              },
+              {
+                nodeType: 'embedded-asset-block',
+                data: {
+                  target: {
+                    sys: { type: 'Link', linkType: 'Asset', id: 'asset-id' },
+                  },
+                },
+                content: [],
+              },
+            ],
+          },
+        },
+      });
+
+      updatedMainEntry = getMockEntry('cloned-main-entry-id', {
+        title: { 'en-US': '[CLONE] Main Entry Title' },
+        body: {
+          'en-US': {
+            nodeType: 'document',
+            data: {},
+            content: [
+              {
+                nodeType: 'paragraph',
+                data: {},
+                content: [
+                  {
+                    nodeType: 'text',
+                    value: 'Before inline reference',
+                    marks: [],
+                    data: {},
+                  },
+                  {
+                    nodeType: 'embedded-entry-inline',
+                    data: {
+                      target: {
+                        sys: {
+                          type: 'Link',
+                          linkType: 'Entry',
+                          id: 'cloned-inline-referenced-entry-id',
+                        },
+                      },
+                    },
+                    content: [],
+                  },
+                ],
+              },
+              {
+                nodeType: 'embedded-entry-block',
+                data: {
+                  target: {
+                    sys: { type: 'Link', linkType: 'Entry', id: 'cloned-referenced-entry-id' },
+                  },
+                },
+                content: [],
+              },
+              {
+                nodeType: 'embedded-asset-block',
+                data: {
+                  target: {
+                    sys: { type: 'Link', linkType: 'Asset', id: 'asset-id' },
+                  },
+                },
+                content: [],
+              },
+            ],
+          },
+        },
+      });
+
+      mockCma.entry.get
+        .mockResolvedValueOnce(mainEntry)
+        .mockResolvedValueOnce(inlineReferencedEntry)
+        .mockResolvedValueOnce(referencedEntry);
+      mockCma.entry.create
+        .mockResolvedValueOnce(clonedMainEntry)
+        .mockResolvedValueOnce(clonedInlineReferencedEntry)
+        .mockResolvedValueOnce(clonedReferencedEntry);
+      mockCma.entry.update.mockResolvedValueOnce(updatedMainEntry);
+    });
+
+    it('should clone embedded entries inside rich text and leave embedded assets unchanged', async () => {
+      mockCma.contentType.get.mockResolvedValue(contentType);
+
+      const result = await entryCloner.cloneEntry();
+
+      expect(result).toEqual(updatedMainEntry);
+      expect(setReferencesCount).toHaveBeenCalledWith(3);
+      expect(setClonesCount).toHaveBeenCalledWith(3);
+      expect(setUpdatesCount).toHaveBeenCalledWith(1);
+
+      expect(mockCma.entry.get).toHaveBeenCalledTimes(3);
+      expect(mockCma.entry.get).toHaveBeenNthCalledWith(1, { entryId: 'main-entry-id' });
+      expect(mockCma.entry.get).toHaveBeenNthCalledWith(2, {
+        entryId: 'inline-referenced-entry-id',
+      });
+      expect(mockCma.entry.get).toHaveBeenNthCalledWith(3, { entryId: 'referenced-entry-id' });
+      expect(mockCma.entry.create).toHaveBeenCalledTimes(3);
+      expect(mockCma.entry.update).toHaveBeenCalledTimes(1);
+
+      expect(mockCma.entry.update).toHaveBeenCalledWith(
+        { entryId: 'cloned-main-entry-id' },
+        expect.objectContaining({
+          fields: {
+            title: { 'en-US': '[CLONE] Main Entry Title' },
+            body: {
+              'en-US': {
+                nodeType: 'document',
+                data: {},
+                content: [
+                  {
+                    nodeType: 'paragraph',
+                    data: {},
+                    content: [
+                      {
+                        nodeType: 'text',
+                        value: 'Before inline reference',
+                        marks: [],
+                        data: {},
+                      },
+                      {
+                        nodeType: 'embedded-entry-inline',
+                        data: {
+                          target: {
+                            sys: {
+                              type: 'Link',
+                              linkType: 'Entry',
+                              id: 'cloned-inline-referenced-entry-id',
+                            },
+                          },
+                        },
+                        content: [],
+                      },
+                    ],
+                  },
+                  {
+                    nodeType: 'embedded-entry-block',
+                    data: {
+                      target: {
+                        sys: {
+                          type: 'Link',
+                          linkType: 'Entry',
+                          id: 'cloned-referenced-entry-id',
+                        },
+                      },
+                    },
+                    content: [],
+                  },
+                  {
+                    nodeType: 'embedded-asset-block',
+                    data: {
+                      target: {
+                        sys: { type: 'Link', linkType: 'Asset', id: 'asset-id' },
+                      },
+                    },
+                    content: [],
+                  },
+                ],
+              },
+            },
+          },
+        })
+      );
+    });
+  });
+
   describe('Handle deleted entries', () => {
     beforeEach(() => {
       contentType = getMockContentType([

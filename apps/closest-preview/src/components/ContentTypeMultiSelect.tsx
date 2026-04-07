@@ -8,17 +8,21 @@ import { getContentTypesWithoutLivePreview } from '../utils/livePreviewUtils';
 type ContentTypeMultiSelectProps = {
   selectedContentTypes: ContentType[];
   setSelectedContentTypes: (contentTypes: ContentType[]) => void;
+  slugFieldId: string;
   sdk: ConfigAppSDK;
   cma: CMAClient;
   excludedContentTypesIds?: string[];
 };
 
+const DEFAULT_EXCLUDED_CONTENT_TYPES_IDS: string[] = [];
+
 const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
   selectedContentTypes,
   setSelectedContentTypes,
+  slugFieldId,
   sdk,
   cma,
-  excludedContentTypesIds = [],
+  excludedContentTypesIds = DEFAULT_EXCLUDED_CONTENT_TYPES_IDS,
 }) => {
   const [availableContentTypes, setAvailableContentTypes] = useState<ContentType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -50,7 +54,8 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
 
         const contentTypesWithoutLivePreview = await getContentTypesWithoutLivePreview(
           cma,
-          excludedContentTypesIds
+          excludedContentTypesIds,
+          slugFieldId
         );
 
         const newAvailableContentTypes = contentTypesWithoutLivePreview
@@ -76,7 +81,7 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
         setIsLoading(false);
       }
     })();
-  }, []);
+  }, [cma, excludedContentTypesIds, sdk, setSelectedContentTypes, slugFieldId]);
 
   if (isLoading) {
     return (
