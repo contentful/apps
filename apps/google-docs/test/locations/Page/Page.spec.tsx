@@ -3,6 +3,19 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { mockCma, mockSdk } from '../../mocks';
 import { vi, describe, it, expect, afterEach } from 'vitest';
 import React from 'react';
+import type { PreviewPayload } from '@types';
+
+const previewPayloadMock: PreviewPayload = {
+  entries: [],
+  assets: [],
+  referenceGraph: {},
+  normalizedDocument: {
+    documentId: 'doc-test',
+    title: 'Document from workflow',
+    contentBlocks: [],
+    tables: [],
+  },
+};
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -22,7 +35,7 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
   ModalOrchestrator: require('react').forwardRef(
     (
       props: {
-        onPreviewReady: (payload: { documentTitle: string; data: Record<string, unknown> }) => void;
+        onPreviewReady: (payload: PreviewPayload) => void;
         onResetToMain: () => void;
         oauthToken: string;
       },
@@ -47,14 +60,7 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
       mockModalOrchestrator(props);
       return (
         <>
-          <button
-            onClick={() =>
-              props.onPreviewReady({
-                documentTitle: 'Document from workflow',
-                data: {},
-              })
-            }
-            type="button">
+          <button onClick={() => props.onPreviewReady(previewPayloadMock)} type="button">
             Trigger Preview Ready
           </button>
           <button onClick={props.onResetToMain} type="button">

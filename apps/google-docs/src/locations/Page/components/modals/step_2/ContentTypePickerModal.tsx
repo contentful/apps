@@ -11,7 +11,7 @@ import {
 import { PageAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
 import { css } from '@emotion/css';
-import { useMultiselectScrollReflow } from '../../../../../hooks/useMultiselectReflow';
+import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
 import { multiselect, pillsContainer } from './ContentTypePickerModal.styles';
 import { truncateLabel } from '../../../../../utils/utils';
 

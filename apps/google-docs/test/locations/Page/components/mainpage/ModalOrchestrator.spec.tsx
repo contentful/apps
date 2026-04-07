@@ -6,15 +6,25 @@ import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
 } from '../../../../../src/locations/Page/components/mainpage/ModalOrchestrator';
-import { PreviewPayload, WorkflowRunResult, RunStatus } from '../../../../../src/utils/types';
+import { PreviewPayload, WorkflowRunResult, RunStatus } from '@types';
 import { mockSdk } from '../../../../mocks';
 
 const mockStartWorkflow = vi.fn();
 const mockResumeWorkflow = vi.fn();
 
 const mockWorkflowPayload = {
-  documentTitle: 'Mock Preview Title',
-  data: { source: 'workflow' },
+  entries: [],
+  assets: [],
+  referenceGraph: {},
+  normalizedDocument: {
+    documentId: 'mock-doc-id',
+    title: 'Mock Preview Title',
+    designValues: [],
+    contentBlocks: [],
+    images: [],
+    tables: [],
+    assets: [],
+  },
 } satisfies PreviewPayload;
 
 vi.mock('../../../../../src/locations/Page/components/modals/step_1/SelectDocumentModal', () => ({
@@ -34,7 +44,7 @@ vi.mock('../../../../../src/locations/Page/components/modals/step_1/SelectDocume
   },
 }));
 
-vi.mock('../../../../../src/hooks/useWorkflowAgent', () => ({
+vi.mock('@hooks/useWorkflowAgent', () => ({
   useWorkflowAgent: () => ({
     isAnalyzing: false,
     error: null,
@@ -87,7 +97,7 @@ describe('ModalOrchestrator', () => {
       status: RunStatus.COMPLETED,
       runId: 'run-123',
       messages: [],
-      payload: mockWorkflowPayload,
+      googleDocPayload: mockWorkflowPayload,
     } satisfies WorkflowRunResult);
     vi.mocked(mockSdk.cma.space.get).mockResolvedValue({ sys: { id: 'test-space-id' } });
     vi.mocked(mockSdk.cma.environment.get).mockResolvedValue({ sys: { id: 'test-env-id' } });
