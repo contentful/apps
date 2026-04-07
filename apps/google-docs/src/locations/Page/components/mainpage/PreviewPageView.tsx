@@ -3,7 +3,7 @@ import { Button, Flex, Heading, Layout } from '@contentful/f36-components';
 import Splitter from './Splitter';
 import { PreviewPayload } from '@types';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
-import OverviewSection from './OverviewSection';
+import OverviewSection from '../overview/OverviewSection';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { PageAppSDK } from '@contentful/app-sdk';
 
