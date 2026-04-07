@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { cx } from '@emotion/css';
 import { Box, Button, Flex, Heading, Note, Paragraph } from '@contentful/f36-components';
-import tokens from '@contentful/f36-tokens';
 import type { PreviewPayload } from '@types';
 import {
   buildCheckboxEntryList,
@@ -9,6 +9,7 @@ import {
 } from '../../../../utils/checkboxEntryList';
 import { fetchContentTypesInfoByIds } from '../../../../services/contentTypeService';
 import { CheckboxEntryList } from './CheckboxEntryList';
+import { overviewSectionBox, overviewSectionBoxScrollable } from './OverviewSection.styles';
 import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
 import { PageAppSDK } from '@contentful/app-sdk';
 
@@ -89,11 +90,10 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
   return (
     <Box
       padding="spacingL"
-      style={{
-        backgroundColor: tokens.gray100,
-        border: `1px solid ${tokens.gray300}`,
-        borderRadius: tokens.borderRadiusMedium,
-      }}>
+      className={cx(
+        overviewSectionBox,
+        checkboxEntryRows.length > 3 && overviewSectionBoxScrollable
+      )}>
       <Flex flexDirection="column" gap="spacingL">
         <Flex justifyContent="space-between" alignItems="flex-start" gap="spacingL" flexWrap="wrap">
           <Flex flexDirection="column" gap="spacingXs" style={{ flex: '1 1 240px' }}>
