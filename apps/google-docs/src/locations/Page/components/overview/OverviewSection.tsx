@@ -48,7 +48,7 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
     };
 
     fetchContentTypesInfo();
-  }, [sdk]);
+  }, [sdk, payload.entries]);
 
   const checkboxEntryRows = useMemo(
     () => buildCheckboxEntryList(payload, contentTypeDisplayInfoMap, sdk.locales.default),
