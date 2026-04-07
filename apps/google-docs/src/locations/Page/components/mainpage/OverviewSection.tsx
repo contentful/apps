@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
+import { cx } from '@emotion/css';
 import { Box, Button, Flex, Heading, Note, Paragraph } from '@contentful/f36-components';
-import tokens from '@contentful/f36-tokens';
 import type { PreviewPayload } from '@types';
 import {
   buildCheckboxEntryList,
   collectCheckboxEntryListRowIds,
   type ContentTypeDisplayInfoMap,
 } from '../../../../utils/checkboxEntryList';
-import { fetchContentTypesInfoByIds } from '../../../../utils/getEntryTitle';
+import { fetchContentTypesInfoByIds } from '../../../../services/contentTypeService';
 import { CheckboxEntryList } from './CheckboxEntryList';
+import { overviewSectionBox, overviewSectionBoxScrollable } from './OverviewSection.styles';
 import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
 import { PageAppSDK } from '@contentful/app-sdk';
 import type { EntryProps } from 'contentful-management';
@@ -24,7 +25,7 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
   const [contentTypeDisplayInfoMap, setContentTypeDisplayInfoMap] = useState<
     ContentTypeDisplayInfoMap | undefined
   >();
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  const [selectedEntryTempIds, setSelectedEntryTempIds] = useState<Set<string>>(() => new Set());
   const [isCreating, setIsCreating] = useState(false);
   const [summaryEntries, setSummaryEntries] = useState<EntryProps[] | null>(null);
 
@@ -55,11 +56,11 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
   );
 
   useEffect(() => {
-    setSelectedIds(new Set(collectCheckboxEntryListRowIds(checkboxEntryRows)));
+    setSelectedEntryTempIds(new Set(collectCheckboxEntryListRowIds(checkboxEntryRows)));
   }, [checkboxEntryRows]);
 
   const handleToggle = (id: string, checked: boolean) => {
-    setSelectedIds((prev) => {
+    setSelectedEntryTempIds((prev) => {
       const next = new Set(prev);
       if (checked) {
         next.add(id);
@@ -71,14 +72,12 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
   };
 
   const handleCreateSelected = async () => {
-    if (selectedIds.size === 0) {
+    if (selectedEntryTempIds.size === 0) {
       return;
     }
     setIsCreating(true);
     try {
-      const result = await createEntriesFromPreviewPayload(sdk, payload, {
-        selectedRowIds: selectedIds,
-      });
+      const result = await createEntriesFromPreviewPayload(sdk, payload, selectedEntryTempIds);
       if (result.errors.length > 0) {
         sdk.notifier.error('Failed to create entries');
       } else {
@@ -99,11 +98,10 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
   return (
     <Box
       padding="spacingL"
-      style={{
-        backgroundColor: tokens.gray100,
-        border: `1px solid ${tokens.gray300}`,
-        borderRadius: tokens.borderRadiusMedium,
-      }}>
+      className={cx(
+        overviewSectionBox,
+        checkboxEntryRows.length > 3 && overviewSectionBoxScrollable
+      )}>
       <Flex flexDirection="column" gap="spacingL">
         <Flex justifyContent="space-between" alignItems="flex-start" gap="spacingL" flexWrap="wrap">
           <Flex flexDirection="column" gap="spacingXs" style={{ flex: '1 1 240px' }}>
@@ -119,7 +117,7 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
             variant="primary"
             onClick={handleCreateSelected}
             isLoading={isCreating}
-            isDisabled={selectedIds.size === 0}>
+            isDisabled={selectedEntryTempIds.size === 0}>
             Create selected entries
           </Button>
         </Flex>
@@ -132,7 +130,7 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
         ) : (
           <CheckboxEntryList
             rows={checkboxEntryRows}
-            selectedIds={selectedIds}
+            selectedIds={selectedEntryTempIds}
             onToggle={handleToggle}
           />
         )}

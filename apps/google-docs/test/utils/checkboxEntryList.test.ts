@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { EntryToCreate, PreviewPayload } from '@types';
-import type { ContentTypeDisplayInfo } from '../../src/utils/getEntryTitle';
+import type { ContentTypeDisplayInfo } from '../../src/services/contentTypeService';
 import {
   buildCheckboxEntryList,
   filterPreviewPayloadBySelectedRowIds,
@@ -65,6 +65,40 @@ describe('buildCheckboxEntryList', () => {
     });
   });
 
+  it('nests rows when a parent references a child tempId', () => {
+    const payload = createPayload(
+      [
+        createEntry({
+          tempId: 'page_1',
+          contentTypeId: 'page',
+          fields: {
+            title: { 'en-US': 'Event Detail' },
+            modules: { 'en-US': [{ __ref: 'hero_1' }] },
+          },
+        }),
+        createEntry({
+          tempId: 'hero_1',
+          contentTypeId: 'component',
+          fields: {
+            title: { 'en-US': 'Resource detail hero' },
+            description: { 'en-US': "Don't enter NRF uncaffeinated." },
+          },
+        }),
+      ],
+      ['page_1', 'hero_1']
+    );
+
+    const rows = buildCheckboxEntryList(payload);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].entryIndex).toBe(0);
+    expect(rows[0].contentTypeName).toBe('');
+    expect(rows[0].entryTitle).toBe('Untitled');
+    expect(rows[0].children).toHaveLength(1);
+    expect(rows[0].children[0].entryIndex).toBe(1);
+    expect(rows[0].children[0].contentTypeName).toBe('');
+    expect(rows[0].children[0].entryTitle).toBe('Untitled');
+  });
+
   it('builds nested rows and resolves content type names and entry titles from display fields', () => {
     const payload = createPayload(
       [
@@ -111,6 +145,43 @@ describe('buildCheckboxEntryList', () => {
     });
   });
 
+  it('uses empty type prefix when content type names map has no entry for that id', () => {
+    const payload = createPayload([
+      createEntry({
+        tempId: 'x',
+        contentTypeId: 'unknownType',
+        fields: { title: { 'en-US': 'Only title' } },
+      }),
+    ]);
+
+    const rows = buildCheckboxEntryList(
+      payload,
+      createContentTypeInfoMap([['other', { name: 'Other', displayField: 'title' }]]),
+      'en-US'
+    );
+    expect(rows[0].contentTypeName).toBe('');
+    expect(rows[0].entryTitle).toBe('Untitled');
+  });
+
+  it('uses CMA content type names when a map is provided', () => {
+    const payload = createPayload([
+      createEntry({
+        tempId: 'page_1',
+        contentTypeId: 'page',
+        fields: {
+          title: { 'en-US': 'Event Detail' },
+        },
+      }),
+    ]);
+
+    const contentTypeDisplayInfoById = createContentTypeInfoMap([
+      ['page', { name: 'Page (space name)', displayField: 'title' }],
+    ]);
+    const rows = buildCheckboxEntryList(payload, contentTypeDisplayInfoById, 'en-US');
+    expect(rows[0].contentTypeName).toBe('Page (space name)');
+    expect(rows[0].entryTitle).toBe('Event Detail');
+  });
+
   it('falls back consistently when content type metadata is missing or unusable', () => {
     const payload = createPayload([
       createEntry({
@@ -137,7 +208,7 @@ describe('buildCheckboxEntryList', () => {
     });
     expect(rows[1]).toMatchObject({
       contentTypeName: 'Known type',
-      entryTitle: 'Untitled',
+      entryTitle: '',
     });
   });
 });
