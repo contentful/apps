@@ -1,6 +1,6 @@
 import { ContentType, PageAppSDK } from '@contentful/app-sdk';
-import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
 import { EntryProps } from 'contentful-management';
+import { EntryToCreate } from '@types';
 
 /**
  * Gets the title of an entry by fetching its content type's display field

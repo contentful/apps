@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button, Flex, Heading, Layout, Note, Paragraph } from '@contentful/f36-components';
 import Splitter from './Splitter';
-import { PreviewPayload } from '../../../../utils/types';
+import { PreviewPayload } from '@types';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
 import { loadGoogleDocsReviewFixture } from '../../../../fixtures/googleDocsReview';
 import { GoogleDocsMappingReviewScreen } from '../review-prototype/GoogleDocsMappingReviewScreen';
@@ -19,13 +19,12 @@ type PreviewPageViewProps =
 
 export const PreviewPageView = (props: PreviewPageViewProps) => {
   const isFixtureMode = props.mode === 'fixture';
-  const title = isFixtureMode
-    ? 'Create from fixture preview'
-    : `Create from document "${
-        props.payload.documentTitle.trim() ? props.payload.documentTitle : 'Selected document'
-      }"`;
+
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
   const fixture = isFixtureMode ? loadGoogleDocsReviewFixture() : null;
+  const title = isFixtureMode
+    ? 'Create from fixture preview'
+    : `Create from document "${props.payload.normalizedDocument?.title ?? 'Selected document'}"`;
 
   return (
     <>

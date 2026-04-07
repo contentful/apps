@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor, act, cleanup } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Modal } from '@contentful/f36-components';
 import { SelectTabsModal } from '../../../../../../src/locations/Page/components/modals/step_3/SelectTabsModal';
-import type { DocumentTabProps } from '../../../../../../src/utils/types';
+import type { DocumentTabProps } from '@types';
 
 const onContinue = vi.fn();
 const onClose = vi.fn();
@@ -80,6 +80,10 @@ const selectTab = async (tabId: string) => {
 describe('SelectTabsModal', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    cleanup();
   });
 
   describe('Rendering', () => {

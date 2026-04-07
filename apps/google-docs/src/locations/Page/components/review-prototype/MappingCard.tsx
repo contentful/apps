@@ -3,9 +3,8 @@ import tokens from '@contentful/f36-tokens';
 
 export interface MappingCardData {
   key: string;
-  contentTypeName: string;
-  entryName: string;
   fieldName: string;
+  fieldType: string;
 }
 
 interface MappingCardProps {
@@ -14,10 +13,12 @@ interface MappingCardProps {
 
 const labelTextStyle = {
   fontSize: tokens.fontSizeS,
+  lineHeight: tokens.lineHeightS,
 };
 
 const valueTextStyle = {
   fontSize: tokens.fontSizeS,
+  lineHeight: tokens.lineHeightS,
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -32,37 +33,20 @@ export const MappingCard = ({ card }: MappingCardProps) => (
       padding: tokens.spacing2Xs,
       backgroundColor: tokens.green100,
     }}>
-    <Box
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '84px minmax(0, 1fr)',
-        alignItems: 'start',
-      }}>
-      <Text as="span" fontColor="gray600" style={labelTextStyle}>
-        Content type
-      </Text>
-      <Text
-        as="span"
-        fontWeight="fontWeightMedium"
-        title={card.contentTypeName}
-        style={valueTextStyle}>
-        {card.contentTypeName}
-      </Text>
+    <Text as="span" fontColor="gray600" style={labelTextStyle} marginRight="spacingXs">
+      Field:
+    </Text>
+    <Text
+      as="span"
+      fontWeight="fontWeightDemiBold"
+      title={`${card.fieldName} (${card.fieldType})`}
+      style={valueTextStyle}>
+      {card.fieldName}
 
-      <Text as="span" fontColor="gray600" style={labelTextStyle}>
-        Entry name
-      </Text>
-      <Text as="span" fontWeight="fontWeightMedium" title={card.entryName} style={valueTextStyle}>
-        {card.entryName}
-      </Text>
-
-      <Text as="span" fontColor="gray600" style={labelTextStyle}>
-        Field
-      </Text>
-      <Text as="span" fontWeight="fontWeightMedium" title={card.fieldName} style={valueTextStyle}>
-        {card.fieldName}
-      </Text>
-      <Text as="span" fontColor="gray600" style={labelTextStyle}></Text>
-    </Box>
+      <Box as="span" style={{ color: tokens.gray600 }}>
+        {' | '}
+        {card.fieldType}
+      </Box>
+    </Text>
   </Box>
 );

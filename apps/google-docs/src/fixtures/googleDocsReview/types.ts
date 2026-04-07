@@ -145,8 +145,9 @@ export interface FixtureEntryBlockGraph {
 
 export interface FixtureUsageItem {
   entryIndex: number;
-  contentTypeId: string;
   fieldId: string;
+  fieldType: string;
+  sourceRef: FixtureSourceRef;
 }
 
 export interface FixturePreviewEntry {

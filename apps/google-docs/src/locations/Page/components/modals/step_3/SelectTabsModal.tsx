@@ -16,8 +16,8 @@ import {
   multiselectOption,
   pillsContainer,
 } from './SelectTabsModal.styles';
-import { useMultiselectScrollReflow } from '../../../../../hooks/useMultiselectReflow';
-import { DocumentTabProps } from '../../../../../utils/types';
+import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
+import { DocumentTabProps } from '@types';
 import { truncateLabel } from '../../../../../utils/utils';
 
 interface SelectTabsModalProps {

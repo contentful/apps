@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react';
 import React from 'react';
 import tokens from '@contentful/f36-tokens';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { GoogleDocsMappingReviewScreen } from '../../../../../src/locations/Page/components/review-prototype/GoogleDocsMappingReviewScreen';
 import type { GoogleDocsReviewFixture } from '../../../../../src/fixtures/googleDocsReview';
@@ -31,6 +31,59 @@ function buildFixture(): GoogleDocsReviewFixture {
         ],
         designValueIds: [],
         imageIds: [],
+      },
+      {
+        id: 'block-2',
+        position: 3,
+        type: 'heading' as const,
+        headingLevel: 2,
+        textRuns: [{ text: 'Unmapped section', styles: {} }],
+        designValueIds: [],
+        imageIds: [],
+      },
+      {
+        id: 'block-3',
+        position: 4,
+        type: 'paragraph' as const,
+        textRuns: [{ text: 'This section has no mappings.', styles: {} }],
+        designValueIds: [],
+        imageIds: [],
+      },
+      {
+        id: 'block-4',
+        position: 5,
+        type: 'listItem' as const,
+        textRuns: [{ text: 'First step', styles: {} }],
+        designValueIds: [],
+        imageIds: [],
+        bullet: {
+          nestingLevel: 0,
+          ordered: true,
+        },
+      },
+      {
+        id: 'block-5',
+        position: 6,
+        type: 'listItem' as const,
+        textRuns: [{ text: 'Nested detail', styles: {} }],
+        designValueIds: [],
+        imageIds: [],
+        bullet: {
+          nestingLevel: 1,
+          ordered: false,
+        },
+      },
+      {
+        id: 'block-6',
+        position: 7,
+        type: 'listItem' as const,
+        textRuns: [{ text: 'Second step', styles: {} }],
+        designValueIds: [],
+        imageIds: [],
+        bullet: {
+          nestingLevel: 0,
+          ordered: true,
+        },
       },
     ],
     images: [
@@ -166,12 +219,14 @@ function buildFixture(): GoogleDocsReviewFixture {
 }
 
 describe('GoogleDocsMappingReviewScreen', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('renders highlighted block text spans from entryBlockGraph', () => {
     render(<GoogleDocsMappingReviewScreen fixture={buildFixture()} onBack={vi.fn()} />);
 
-    expect(screen.getByTestId('section-surface-section-block-0')).toHaveStyle({
-      backgroundColor: tokens.gray100,
-    });
+    expect(screen.getByTestId('section-surface-section-block-0').getAttribute('style')).toBeNull();
     expect(screen.getByTestId('block-segment-block-1-0')).toHaveAttribute(
       'data-highlighted',
       'true'
@@ -182,9 +237,8 @@ describe('GoogleDocsMappingReviewScreen', () => {
   it('renders mixed table cell text and image highlights independently', () => {
     render(<GoogleDocsMappingReviewScreen fixture={buildFixture()} onBack={vi.fn()} />);
 
-    expect(screen.getByTestId('section-surface-section-table-0')).toHaveStyle({
-      backgroundColor: tokens.gray100,
-    });
+    expect(screen.getByTestId('section-surface-section-table-0').getAttribute('style')).toBeNull();
+    expect(screen.queryByText(/^Table$/)).toBeNull();
     expect(screen.getByTestId('table-cell-table-0-row-0-cell-1').getAttribute('style')).toContain(
       'background-color: transparent'
     );
@@ -202,7 +256,19 @@ describe('GoogleDocsMappingReviewScreen', () => {
     );
   });
 
-  it('renders compact annotation cards with content type, entry name, and field name', () => {
+  it('renders ordered and nested unordered list item styling', () => {
+    render(<GoogleDocsMappingReviewScreen fixture={buildFixture()} onBack={vi.fn()} />);
+
+    expect(screen.getByTestId('list-marker-block-4')).toHaveTextContent('1.');
+    expect(screen.getByTestId('list-item-block-5')).toHaveStyle({
+      marginInlineStart: `calc(${tokens.spacingM} * 1)`,
+    });
+    expect(screen.getByTestId('list-marker-block-5')).toHaveTextContent('◦');
+    expect(screen.getByTestId('list-marker-block-6')).toHaveTextContent('2.');
+    expect(screen.getByText('Nested detail')).toBeTruthy();
+  });
+
+  it('renders field cards with the field type appended and no unmapped empty-state cards', () => {
     render(<GoogleDocsMappingReviewScreen fixture={buildFixture()} onBack={vi.fn()} />);
 
     expect(screen.getByTestId('mapping-rail-section-block-0')).toHaveStyle({ maxWidth: '280px' });
@@ -211,11 +277,93 @@ describe('GoogleDocsMappingReviewScreen', () => {
 
     expect(card).toHaveStyle({ backgroundColor: tokens.green100 });
     expect(card).toHaveStyle({ padding: tokens.spacing2Xs });
-    expect(within(card).getByText('Content type')).toBeTruthy();
-    expect(within(card).getByText('Page')).toBeTruthy();
-    expect(within(card).getByText('Entry name')).toBeTruthy();
-    expect(within(card).getByText('Example page')).toBeTruthy();
-    expect(within(card).getByText('Field')).toBeTruthy();
+    expect(within(card).getByText('Field:')).toBeTruthy();
     expect(within(card).getByText('Body')).toBeTruthy();
+    expect(within(card).getByText(/\|\s*Rich Text/)).toBeTruthy();
+    expect(screen.queryByText('No mappings for this section')).toBeNull();
+  });
+
+  it('positions mapping cards against measured document anchors', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function () {
+      const anchorId = this.getAttribute('data-anchor-id');
+      const testId = this.getAttribute('data-testid');
+
+      if (testId === 'section-layout-section-block-0') {
+        return {
+          x: 0,
+          y: 100,
+          top: 100,
+          left: 0,
+          bottom: 500,
+          right: 640,
+          width: 640,
+          height: 400,
+          toJSON: () => ({}),
+        };
+      }
+
+      if (testId === 'section-layout-section-table-0') {
+        return {
+          x: 0,
+          y: 160,
+          top: 160,
+          left: 0,
+          bottom: 760,
+          right: 640,
+          width: 640,
+          height: 600,
+          toJSON: () => ({}),
+        };
+      }
+
+      if (anchorId === 'block:block-1') {
+        return {
+          x: 0,
+          y: 180,
+          top: 180,
+          left: 0,
+          bottom: 220,
+          right: 320,
+          width: 320,
+          height: 40,
+          toJSON: () => ({}),
+        };
+      }
+
+      if (anchorId === 'row:table-0:table-0-row-0') {
+        return {
+          x: 0,
+          y: 320,
+          top: 320,
+          left: 0,
+          bottom: 380,
+          right: 320,
+          width: 320,
+          height: 60,
+          toJSON: () => ({}),
+        };
+      }
+
+      return {
+        x: 0,
+        y: 0,
+        top: 0,
+        left: 0,
+        bottom: 28,
+        right: 200,
+        width: 200,
+        height: 28,
+        toJSON: () => ({}),
+      };
+    });
+
+    render(<GoogleDocsMappingReviewScreen fixture={buildFixture()} onBack={vi.fn()} />);
+
+    expect(screen.getByTestId('mapping-card-position-section-block-0-0-body')).toHaveStyle({
+      top: '80px',
+    });
+    expect(screen.getByTestId('mapping-card-position-section-table-0-0-image')).toHaveStyle({
+      top: '160px',
+    });
   });
 });

@@ -1,4 +1,11 @@
-import { useMemo, useState, type CSSProperties } from 'react';
+import {
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type RefCallback,
+} from 'react';
 import {
   Box,
   Button,
@@ -22,6 +29,7 @@ import {
   GoogleDocsReviewFixture,
 } from '../../../../fixtures/googleDocsReview';
 import { MappingCard, type MappingCardData } from './MappingCard';
+import { getAnchorIdForSourceRef, resolveMarkerOffsets } from './mappingCardPositioning';
 
 interface GoogleDocsMappingReviewScreenProps {
   fixture: GoogleDocsReviewFixture;
@@ -40,13 +48,23 @@ interface OutlineSection {
 }
 
 type SourceUsage = FixtureUsageItem & {
+  fieldType: string;
   sourceRef: FixtureSourceRef;
+};
+
+type AnchoredMappingCard = MappingCardData & {
+  anchorId: string;
 };
 
 type TextSegment = {
   text: string;
   styles?: FixtureTextRun['styles'];
   highlighted: boolean;
+};
+
+type ListItemPresentation = {
+  marker: string;
+  nestingLevel: number;
 };
 
 const getBlockText = (block: FixtureContentBlock): string =>
@@ -87,19 +105,19 @@ const getEntryDisplayTitle = (entry: GoogleDocsReviewFixture['entries'][number])
 function buildUsageIndexes(fixture: GoogleDocsReviewFixture): {
   blockUsage: Record<string, SourceUsage[]>;
   tablePartUsage: Record<string, SourceUsage[]>;
-  tableUsage: Record<string, FixtureUsageItem[]>;
+  tableUsage: Record<string, SourceUsage[]>;
 } {
   const blockUsage: Record<string, SourceUsage[]> = {};
   const tablePartUsage: Record<string, SourceUsage[]> = {};
-  const tableUsage: Record<string, FixtureUsageItem[]> = {};
+  const tableUsage: Record<string, SourceUsage[]> = {};
 
   fixture.entryBlockGraph.entries.forEach((mappingEntry, entryIndex) => {
     mappingEntry.fieldMappings.forEach((fieldMapping) => {
       fieldMapping.sourceRefs.forEach((sourceRef) => {
         const usage: SourceUsage = {
           entryIndex,
-          contentTypeId: mappingEntry.contentTypeId,
           fieldId: fieldMapping.fieldId,
+          fieldType: fieldMapping.fieldType,
           sourceRef,
         };
 
@@ -115,14 +133,7 @@ function buildUsageIndexes(fixture: GoogleDocsReviewFixture): {
           sourceRef.partId,
         ].join(':');
         tablePartUsage[tablePartKey] = [...(tablePartUsage[tablePartKey] ?? []), usage];
-        tableUsage[sourceRef.tableId] = [
-          ...(tableUsage[sourceRef.tableId] ?? []),
-          {
-            entryIndex,
-            contentTypeId: mappingEntry.contentTypeId,
-            fieldId: fieldMapping.fieldId,
-          },
-        ];
+        tableUsage[sourceRef.tableId] = [...(tableUsage[sourceRef.tableId] ?? []), usage];
       });
     });
   });
@@ -130,10 +141,10 @@ function buildUsageIndexes(fixture: GoogleDocsReviewFixture): {
   return { blockUsage, tablePartUsage, tableUsage };
 }
 
-function uniqueUsage(usage: FixtureUsageItem[]): FixtureUsageItem[] {
+function uniqueUsage<T extends SourceUsage>(usage: T[]): T[] {
   const seen = new Set<string>();
   return usage.filter((item) => {
-    const key = `${item.entryIndex}-${item.contentTypeId}-${item.fieldId}`;
+    const key = `${item.entryIndex}-${item.fieldId}-${item.fieldType}`;
     if (seen.has(key)) {
       return false;
     }
@@ -247,12 +258,59 @@ function buildOutlineSections(segments: DocSegment[]): OutlineSection[] {
   return sections;
 }
 
+function buildListItemPresentations(
+  blocks: FixtureContentBlock[]
+): Record<string, ListItemPresentation> {
+  const presentations: Record<string, ListItemPresentation> = {};
+  const orderedCounts = new Map<number, number>();
+
+  [...blocks]
+    .sort((left, right) => left.position - right.position)
+    .forEach((block) => {
+      if (block.type !== 'listItem' || !block.bullet) {
+        orderedCounts.clear();
+        return;
+      }
+
+      const nestingLevel = Math.max(0, block.bullet.nestingLevel ?? 0);
+
+      Array.from(orderedCounts.keys()).forEach((level) => {
+        if (level > nestingLevel) {
+          orderedCounts.delete(level);
+        }
+      });
+
+      if (block.bullet.ordered) {
+        const nextCount = (orderedCounts.get(nestingLevel) ?? 0) + 1;
+        orderedCounts.set(nestingLevel, nextCount);
+        presentations[block.id] = {
+          marker: `${nextCount}.`,
+          nestingLevel,
+        };
+        return;
+      }
+
+      orderedCounts.delete(nestingLevel);
+      presentations[block.id] = {
+        marker: nestingLevel > 0 ? '◦' : '•',
+        nestingLevel,
+      };
+    });
+
+  return presentations;
+}
+
 export const GoogleDocsMappingReviewScreen = ({
   fixture,
   onBack,
   showChrome = true,
 }: GoogleDocsMappingReviewScreenProps) => {
   const [selectedEntryIndex, setSelectedEntryIndex] = useState<number | null>(null);
+  const [cardOffsetsBySection, setCardOffsetsBySection] = useState<
+    Record<string, Record<string, number>>
+  >({});
+  const sectionLayoutRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const cardWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const document = fixture.editableNormalizedDocument;
   const sourceUsage = useMemo(() => buildUsageIndexes(fixture), [fixture]);
@@ -284,6 +342,11 @@ export const GoogleDocsMappingReviewScreen = ({
     }, {});
   }, [document.images]);
 
+  const listItemPresentations = useMemo(
+    () => buildListItemPresentations(document.contentBlocks),
+    [document.contentBlocks]
+  );
+
   const getVisibleUsage = <T extends FixtureUsageItem>(usage: T[]): T[] => {
     if (selectedEntryIndex === null) {
       return usage;
@@ -291,7 +354,7 @@ export const GoogleDocsMappingReviewScreen = ({
     return usage.filter((item) => item.entryIndex === selectedEntryIndex);
   };
 
-  const getUsageForSegment = (segment: DocSegment): FixtureUsageItem[] => {
+  const getUsageForSegment = (segment: DocSegment): SourceUsage[] => {
     if (segment.kind === 'table') {
       return uniqueUsage(sourceUsage.tableUsage[segment.id] ?? []);
     }
@@ -302,17 +365,85 @@ export const GoogleDocsMappingReviewScreen = ({
   const getUsageForSection = (section: OutlineSection): FixtureUsageItem[] =>
     uniqueUsage(section.segments.flatMap(getUsageForSegment));
 
-  const getMappingCardsForSection = (section: OutlineSection): MappingCardData[] =>
+  const getMappingCardsForSection = (section: OutlineSection): AnchoredMappingCard[] =>
     getVisibleUsage(getUsageForSection(section)).map((usage) => {
-      const entry = fixture.entries[usage.entryIndex];
-
       return {
         key: `${section.id}-${usage.entryIndex}-${usage.fieldId}`,
-        contentTypeName: formatDisplayName(usage.contentTypeId),
-        entryName: entry ? getEntryDisplayTitle(entry) : formatDisplayName(usage.contentTypeId),
         fieldName: formatDisplayName(usage.fieldId),
+        fieldType: formatDisplayName(usage.fieldType),
+        anchorId: getAnchorIdForSourceRef(usage.sourceRef),
       };
     });
+
+  const mappingCardsBySection = useMemo(
+    () =>
+      sections.reduce<Record<string, AnchoredMappingCard[]>>((acc, section) => {
+        acc[section.id] = getMappingCardsForSection(section);
+        return acc;
+      }, {}),
+    [sections, selectedEntryIndex, fixture, sourceUsage]
+  );
+
+  const setSectionLayoutRef =
+    (sectionId: string): RefCallback<HTMLDivElement> =>
+    (node) => {
+      sectionLayoutRefs.current[sectionId] = node;
+    };
+
+  const setCardWrapperRef =
+    (cardKey: string): RefCallback<HTMLDivElement> =>
+    (node) => {
+      cardWrapperRefs.current[cardKey] = node;
+    };
+
+  useLayoutEffect(() => {
+    const measureOffsets = () => {
+      const nextOffsets: Record<string, Record<string, number>> = {};
+
+      sections.forEach((section) => {
+        const sectionNode = sectionLayoutRefs.current[section.id];
+        const sectionCards = mappingCardsBySection[section.id] ?? [];
+
+        if (!sectionNode || sectionCards.length === 0) {
+          return;
+        }
+
+        const sectionTop = sectionNode.getBoundingClientRect().top;
+        const anchorNodes = Array.from(
+          sectionNode.querySelectorAll<HTMLElement>('[data-anchor-id]')
+        );
+
+        const cards = sectionCards.map((card) => {
+          const anchorNode = anchorNodes.find(
+            (node) => node.getAttribute('data-anchor-id') === card.anchorId
+          );
+          const wrapperNode = cardWrapperRefs.current[card.key];
+          const rawTop = anchorNode
+            ? Math.max(0, anchorNode.getBoundingClientRect().top - sectionTop)
+            : 0;
+          const height =
+            wrapperNode?.getBoundingClientRect().height || wrapperNode?.offsetHeight || 28;
+
+          return {
+            key: card.key,
+            rawTop,
+            height,
+          };
+        });
+
+        nextOffsets[section.id] = resolveMarkerOffsets(cards);
+      });
+
+      setCardOffsetsBySection(nextOffsets);
+    };
+
+    measureOffsets();
+    window.addEventListener('resize', measureOffsets);
+
+    return () => {
+      window.removeEventListener('resize', measureOffsets);
+    };
+  }, [mappingCardsBySection, sections]);
 
   const renderBlock = (block: FixtureContentBlock) => {
     const visibleRefs = getVisibleUsage(sourceUsage.blockUsage[block.id] ?? []).map(
@@ -320,26 +451,57 @@ export const GoogleDocsMappingReviewScreen = ({
     );
     const textRefs = visibleRefs.filter((ref) => ref.kind === 'blockText');
     const segments = buildTextSegments(block.textRuns, textRefs);
+    const listItemPresentation = block.type === 'listItem' ? listItemPresentations[block.id] : null;
+
+    const renderedText = (
+      <Text as="p" marginBottom="none">
+        {segments.map((segment, index) => (
+          <Box
+            as="span"
+            key={`${block.id}-${index}`}
+            data-testid={`block-segment-${block.id}-${index}`}
+            data-highlighted={segment.highlighted ? 'true' : 'false'}
+            style={{
+              ...getTextSegmentStyle(segment.styles),
+              backgroundColor: segment.highlighted ? tokens.green200 : 'transparent',
+              borderRadius: segment.highlighted ? tokens.borderRadiusSmall : undefined,
+              whiteSpace: 'pre-wrap',
+            }}>
+            {segment.text}
+          </Box>
+        ))}
+      </Text>
+    );
 
     return (
       <Box>
-        <Text as="p" marginBottom="none">
-          {segments.map((segment, index) => (
-            <Box
+        {listItemPresentation ? (
+          <Flex
+            data-testid={`list-item-${block.id}`}
+            alignItems="flex-start"
+            gap="spacing2Xs"
+            style={{
+              marginInlineStart:
+                listItemPresentation.nestingLevel > 0
+                  ? `calc(${tokens.spacingM} * ${listItemPresentation.nestingLevel})`
+                  : undefined,
+            }}>
+            <Text
               as="span"
-              key={`${block.id}-${index}`}
-              data-testid={`block-segment-${block.id}-${index}`}
-              data-highlighted={segment.highlighted ? 'true' : 'false'}
+              data-testid={`list-marker-${block.id}`}
+              fontColor="gray600"
               style={{
-                ...getTextSegmentStyle(segment.styles),
-                backgroundColor: segment.highlighted ? tokens.green200 : 'transparent',
-                borderRadius: segment.highlighted ? tokens.borderRadiusSmall : undefined,
-                whiteSpace: 'pre-wrap',
+                minWidth: tokens.spacingM,
+                lineHeight: tokens.lineHeightM,
+                flex: '0 0 auto',
               }}>
-              {segment.text}
-            </Box>
-          ))}
-        </Text>
+              {listItemPresentation.marker}
+            </Text>
+            <Box style={{ minWidth: 0, flex: 1 }}>{renderedText}</Box>
+          </Flex>
+        ) : (
+          renderedText
+        )}
 
         {block.imageIds.map((imageId) => {
           const image = imageById[imageId];
@@ -435,45 +597,43 @@ export const GoogleDocsMappingReviewScreen = ({
   };
 
   const renderTable = (table: FixtureTable) => (
-    <Box>
-      <Text fontWeight="fontWeightDemiBold">Table</Text>
-      <Box marginTop="spacingXs">
-        <Table>
-          {table.headers.length > 0 && (
-            <TableHead>
-              <TableRow>
-                {table.headers.map((header, headerIndex) => (
-                  <TableCell key={`${table.id}-header-${headerIndex}`}>{header}</TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-          )}
-          <TableBody>
-            {table.rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.cells.map((cell) => {
-                  return (
-                    <TableCell
-                      key={cell.id}
-                      data-testid={`table-cell-${cell.id}`}
-                      style={{
-                        backgroundColor: 'transparent',
-                        verticalAlign: 'top',
-                      }}>
-                      <Flex flexDirection="column" gap="spacing2Xs">
-                        {cell.parts.map((part) => (
-                          <Box key={part.id}>{renderTablePart(table, row.id, cell.id, part)}</Box>
-                        ))}
-                      </Flex>
-                    </TableCell>
-                  );
-                })}
-              </TableRow>
+    <Table>
+      {table.headers.length > 0 && (
+        <TableHead>
+          <TableRow>
+            {table.headers.map((header, headerIndex) => (
+              <TableCell key={`${table.id}-header-${headerIndex}`}>{header}</TableCell>
             ))}
-          </TableBody>
-        </Table>
-      </Box>
-    </Box>
+          </TableRow>
+        </TableHead>
+      )}
+      <TableBody>
+        {table.rows.map((row) => (
+          <TableRow
+            key={row.id}
+            data-anchor-id={`row:${table.id}:${row.id}`}
+            data-testid={`table-row-${row.id}`}>
+            {row.cells.map((cell) => {
+              return (
+                <TableCell
+                  key={cell.id}
+                  data-testid={`table-cell-${cell.id}`}
+                  style={{
+                    backgroundColor: 'transparent',
+                    verticalAlign: 'top',
+                  }}>
+                  <Flex flexDirection="column" gap="spacing2Xs">
+                    {cell.parts.map((part) => (
+                      <Box key={part.id}>{renderTablePart(table, row.id, cell.id, part)}</Box>
+                    ))}
+                  </Flex>
+                </TableCell>
+              );
+            })}
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 
   return (
@@ -520,30 +680,40 @@ export const GoogleDocsMappingReviewScreen = ({
           </Flex>
         </Box>
 
-        <Flex flexDirection="column" gap="spacingS" style={{ padding: tokens.spacingM }}>
+        <Flex
+          flexDirection="column"
+          gap="spacingS"
+          style={{ padding: tokens.spacingM, marginTop: tokens.spacingM }}>
           {sections.map((section) => {
             const visibleUsage = getVisibleUsage(getUsageForSection(section));
             const mappingCards = getMappingCardsForSection(section);
             const isMapped = visibleUsage.length > 0;
+            const isTableSection = section.segments.every((segment) => segment.kind === 'table');
 
             return (
               <Box key={section.id}>
-                <Flex gap="spacingM" alignItems="stretch">
+                <Flex
+                  gap="spacingM"
+                  alignItems="stretch"
+                  data-testid={`section-layout-${section.id}`}
+                  ref={setSectionLayoutRef(section.id)}>
                   <Box style={{ flex: 2 }}>
-                    <Box
-                      data-testid={`section-surface-${section.id}`}
-                      style={{
-                        border: `1px solid ${isMapped ? tokens.green500 : tokens.gray300}`,
-                        borderRadius: tokens.borderRadiusMedium,
-                        padding: tokens.spacingS,
-                        backgroundColor: tokens.gray100,
-                      }}>
-                      <Text fontWeight="fontWeightDemiBold">{section.title}</Text>
-
-                      <Flex flexDirection="column" gap="spacingXs" marginTop="spacingXs">
+                    <Box data-testid={`section-surface-${section.id}`}>
+                      <Flex
+                        flexDirection="column"
+                        gap="spacingXs"
+                        marginTop={isTableSection ? 'none' : 'spacingXs'}>
                         {section.segments.map((segment) => (
                           <Box
                             key={`${segment.kind}-${segment.id}`}
+                            data-anchor-id={
+                              segment.kind === 'block' ? `block:${segment.block.id}` : undefined
+                            }
+                            data-testid={
+                              segment.kind === 'block'
+                                ? `block-anchor-${segment.block.id}`
+                                : undefined
+                            }
                             style={{
                               borderRadius: tokens.borderRadiusMedium,
                               padding: tokens.spacingS,
@@ -560,26 +730,25 @@ export const GoogleDocsMappingReviewScreen = ({
 
                   <Box
                     data-testid={`mapping-rail-${section.id}`}
-                    style={{ flex: '0 0 280px', maxWidth: 280 }}>
-                    <Flex flexDirection="column" gap="spacingXs">
-                      {mappingCards.length > 0 ? (
-                        mappingCards.map((mappingCard) => (
-                          <MappingCard key={mappingCard.key} card={mappingCard} />
-                        ))
-                      ) : (
-                        <Box
-                          style={{
-                            border: `1px solid ${tokens.gray300}`,
-                            borderRadius: tokens.borderRadiusMedium,
-                            padding: tokens.spacingS,
-                            backgroundColor: tokens.gray100,
-                          }}>
-                          <Text as="p" marginBottom="none" fontColor="gray700">
-                            No mappings for this section
-                          </Text>
-                        </Box>
-                      )}
-                    </Flex>
+                    style={{ flex: '0 0 280px', maxWidth: 280, position: 'relative' }}>
+                    <Box style={{ position: 'relative', minHeight: '100%' }}>
+                      {mappingCards.length > 0
+                        ? mappingCards.map((mappingCard) => (
+                            <Box
+                              key={mappingCard.key}
+                              data-testid={`mapping-card-position-${mappingCard.key}`}
+                              ref={setCardWrapperRef(mappingCard.key)}
+                              style={{
+                                position: 'absolute',
+                                insetInlineStart: 0,
+                                insetInlineEnd: 0,
+                                top: cardOffsetsBySection[section.id]?.[mappingCard.key] ?? 0,
+                              }}>
+                              <MappingCard card={mappingCard} />
+                            </Box>
+                          ))
+                        : null}
+                    </Box>
                   </Box>
                 </Flex>
               </Box>
