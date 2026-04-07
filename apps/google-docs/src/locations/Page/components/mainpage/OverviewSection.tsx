@@ -22,7 +22,7 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
   const [contentTypeDisplayInfoMap, setContentTypeDisplayInfoMap] = useState<
     ContentTypeDisplayInfoMap | undefined
   >();
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  const [selectedEntryTempIds, setSelectedEntryTempIds] = useState<Set<string>>(() => new Set());
   const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
@@ -52,11 +52,11 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
   );
 
   useEffect(() => {
-    setSelectedIds(new Set(collectCheckboxEntryListRowIds(checkboxEntryRows)));
+    setSelectedEntryTempIds(new Set(collectCheckboxEntryListRowIds(checkboxEntryRows)));
   }, [checkboxEntryRows]);
 
   const handleToggle = (id: string, checked: boolean) => {
-    setSelectedIds((prev) => {
+    setSelectedEntryTempIds((prev) => {
       const next = new Set(prev);
       if (checked) {
         next.add(id);
@@ -68,14 +68,12 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
   };
 
   const handleCreateSelected = async () => {
-    if (selectedIds.size === 0) {
+    if (selectedEntryTempIds.size === 0) {
       return;
     }
     setIsCreating(true);
     try {
-      const result = await createEntriesFromPreviewPayload(sdk, payload, {
-        selectedRowIds: selectedIds,
-      });
+      const result = await createEntriesFromPreviewPayload(sdk, payload, selectedEntryTempIds);
       if (result.errors.length > 0) {
         sdk.notifier.error('Failed to create entries');
       } else {
@@ -111,7 +109,7 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
             variant="primary"
             onClick={handleCreateSelected}
             isLoading={isCreating}
-            isDisabled={selectedIds.size === 0}>
+            isDisabled={selectedEntryTempIds.size === 0}>
             Create selected entries
           </Button>
         </Flex>
@@ -124,7 +122,7 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
         ) : (
           <CheckboxEntryList
             rows={checkboxEntryRows}
-            selectedIds={selectedIds}
+            selectedIds={selectedEntryTempIds}
             onToggle={handleToggle}
           />
         )}

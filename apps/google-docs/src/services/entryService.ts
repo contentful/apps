@@ -161,11 +161,11 @@ async function createAssetsFromAgentOutput(
 export async function createEntriesFromPreviewPayload(
   sdk: PageAppSDK | ConfigAppSDK,
   payload: PreviewPayload,
-  options?: { selectedRowIds?: Set<string> }
+  selectedEntryTempIds?: Set<string>
 ): Promise<EntryCreationResult> {
   const effectivePayload =
-    options?.selectedRowIds !== undefined
-      ? filterPreviewPayloadBySelectedRowIds(payload, options.selectedRowIds)
+    selectedEntryTempIds !== undefined
+      ? filterPreviewPayloadBySelectedRowIds(payload, selectedEntryTempIds)
       : payload;
 
   const orderedEntries = orderEntriesByCreationOrder(
