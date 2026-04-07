@@ -20,9 +20,7 @@ interface CheckboxEntryRowCardProps {
   row: CheckboxEntryListRow;
   selectedIds: Set<string>;
   onToggle: (id: string, checked: boolean) => void;
-  /** Tree connectors only for nested rows (not top-level roots) */
   showTreeLines: boolean;
-  /** When false, vertical stem runs through nested content; when true, L-shaped end at this row (nested only) */
   isLastRow?: boolean;
 }
 

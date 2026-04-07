@@ -57,7 +57,6 @@ function createRow(
   };
 }
 
-/** Maps parent tempId → child tempIds referenced from that entry’s fields (first parent wins). */
 function buildChildTempIdsByParentTempId(
   orderedEntriesContext: OrderedEntriesContext
 ): Map<string, string[]> {
@@ -127,7 +126,6 @@ function buildRowTreeForTempId(
   );
 }
 
-/** Top-level rows: entries with a tempId that nothing else references as a child. */
 function buildTreeRootRows(
   context: TreeBuildContext,
   childTempIds: Set<string>
@@ -145,7 +143,6 @@ function buildTreeRootRows(
   return roots;
 }
 
-/** Flat list of rows for entries that have a `tempId` (same order as `orderedEntries`, original indices preserved). */
 function buildFlatRows(
   orderedEntries: EntryToCreate[],
   contentTypeDisplayInfoMap?: ContentTypeDisplayInfoMap,
@@ -159,7 +156,6 @@ function buildFlatRows(
   return rows;
 }
 
-/** Preview rows for the overview checklist: only entries with a `tempId` (required for stable row ids and selection). */
 export function buildCheckboxEntryList(
   payload: PreviewPayload,
   contentTypeDisplayInfoMap?: ContentTypeDisplayInfoMap,
@@ -205,9 +201,6 @@ function collectSelectedEntryIndices(
   ]);
 }
 
-/**
- * Keeps only entries whose preview row is selected. Order matches creation order after filtering.
- */
 export function filterPreviewPayloadBySelectedRowIds(
   payload: PreviewPayload,
   selectedRowIds: Set<string>
