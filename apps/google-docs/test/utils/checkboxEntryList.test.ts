@@ -87,12 +87,12 @@ describe('buildCheckboxEntryList', () => {
       ['page_1', 'hero_1']
     );
 
-    const contentTypeInfoById = createContentTypeInfoMap([
+    const contentTypeInfoMap = createContentTypeInfoMap([
       ['page', { name: 'Page', displayField: 'title' }],
       ['component', { name: 'Component', displayField: 'internalName' }],
     ]);
 
-    const rows = buildCheckboxEntryList(payload, contentTypeInfoById, 'en-US');
+    const rows = buildCheckboxEntryList(payload, contentTypeInfoMap, 'en-US');
 
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({
