@@ -137,7 +137,7 @@ describe('buildCheckboxEntryList', () => {
     });
     expect(rows[1]).toMatchObject({
       contentTypeName: 'Known type',
-      entryTitle: '',
+      entryTitle: 'Untitled',
     });
   });
 });

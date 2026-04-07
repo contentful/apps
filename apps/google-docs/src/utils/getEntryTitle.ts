@@ -1,5 +1,6 @@
 import { PageAppSDK } from '@contentful/app-sdk';
-import { EntryToCreate } from '@types';
+import type { EntryProps } from 'contentful-management';
+import type { EntryToCreate } from '@types';
 
 export interface ContentTypeDisplayInfo {
   name: string;
@@ -8,21 +9,21 @@ export interface ContentTypeDisplayInfo {
 
 const UNTITLED_ENTRY_LABEL = 'Untitled';
 
-export function getEntryTitleFromPreviewData(
-  entry: EntryToCreate,
+export function getEntryDisplayTitle(
+  entry: EntryToCreate | EntryProps,
   defaultLocale: string,
   contentTypeInfo?: ContentTypeDisplayInfo
 ): string {
-  if (!contentTypeInfo) {
+  const fields = entry.fields as Record<string, Record<string, unknown>>;
+  if (!contentTypeInfo?.displayField) {
     return UNTITLED_ENTRY_LABEL;
   }
-  if (!contentTypeInfo.displayField) {
-    return '';
-  }
-  const raw = entry.fields[contentTypeInfo.displayField]?.[defaultLocale];
+
+  const raw = fields[contentTypeInfo.displayField]?.[defaultLocale];
   if (raw != null && String(raw).trim().length > 0) {
     return String(raw).trim();
   }
+
   return UNTITLED_ENTRY_LABEL;
 }
 
