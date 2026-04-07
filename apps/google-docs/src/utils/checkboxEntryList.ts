@@ -1,7 +1,8 @@
 import type { EntryToCreate, PreviewPayload } from '@types';
 import { collectReferencedTempIdsFromEntry } from '../services/referenceResolution';
+import { type ContentTypeDisplayInfo } from '../services/contentTypeService';
 import { orderEntriesByCreationOrder } from './previewPayload';
-import { type ContentTypeDisplayInfo, getEntryTitleFromPreviewData } from './getEntryTitle';
+import { getEntryTitleFromPreviewData } from './getPreviewEntryTitle';
 
 export interface CheckboxEntryListRow {
   id: string;

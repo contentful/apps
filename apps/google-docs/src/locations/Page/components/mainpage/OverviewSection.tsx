@@ -7,7 +7,7 @@ import {
   collectCheckboxEntryListRowIds,
   type ContentTypeDisplayInfoMap,
 } from '../../../../utils/checkboxEntryList';
-import { fetchContentTypesInfoByIds } from '../../../../utils/getEntryTitle';
+import { fetchContentTypesInfoByIds } from '../../../../services/contentTypeService';
 import { CheckboxEntryList } from './CheckboxEntryList';
 import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
 import { PageAppSDK } from '@contentful/app-sdk';
