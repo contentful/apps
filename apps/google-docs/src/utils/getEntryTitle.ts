@@ -43,12 +43,12 @@ export async function fetchContentTypesInfoByIds(
     query: { 'sys.id[in]': unique.join(',') },
   });
 
-  const displayInfoById = new Map<string, ContentTypeDisplayInfo>();
+  const displayInfoMap = new Map<string, ContentTypeDisplayInfo>();
   for (const ct of response.items) {
-    displayInfoById.set(ct.sys.id, {
+    displayInfoMap.set(ct.sys.id, {
       name: ct.name,
       displayField: ct.displayField,
     });
   }
-  return displayInfoById;
+  return displayInfoMap;
 }

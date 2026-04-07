@@ -11,8 +11,7 @@ export interface CheckboxEntryListRow {
   children: CheckboxEntryListRow[];
 }
 
-/** Content type id → CMA display metadata (name + display field), not a full content type model. From {@link fetchContentTypesByIds}. */
-export type ContentTypeDisplayInfoById = ReadonlyMap<string, ContentTypeDisplayInfo>;
+export type ContentTypeDisplayInfoMap = ReadonlyMap<string, ContentTypeDisplayInfo>;
 
 interface OrderedEntriesContext {
   entries: EntryToCreate[];
@@ -23,15 +22,15 @@ interface OrderedEntriesContext {
 interface TreeBuildContext {
   orderedEntriesContext: OrderedEntriesContext;
   childTempIdsByParentTempId: Map<string, string[]>;
-  contentTypeDisplayInfoById?: ContentTypeDisplayInfoById;
+  contentTypeDisplayInfoMap?: ContentTypeDisplayInfoMap;
   defaultLocale?: string;
 }
 
 function resolveContentTypeLabel(
   contentTypeId: string,
-  contentTypeDisplayInfoById?: ContentTypeDisplayInfoById
+  contentTypeDisplayInfoMap?: ContentTypeDisplayInfoMap
 ): string {
-  const name = contentTypeDisplayInfoById?.get(contentTypeId)?.name?.trim();
+  const name = contentTypeDisplayInfoMap?.get(contentTypeId)?.name?.trim();
   return name && name.length > 0 ? name : '';
 }
 
@@ -40,14 +39,14 @@ function createRow(
   entryIndex: number,
   children: CheckboxEntryListRow[] = [],
   id: string,
-  contentTypeDisplayInfoById?: ContentTypeDisplayInfoById,
+  contentTypeDisplayInfoMap?: ContentTypeDisplayInfoMap,
   defaultLocale?: string
 ): CheckboxEntryListRow {
-  const contentTypeName = resolveContentTypeLabel(entry.contentTypeId, contentTypeDisplayInfoById);
+  const contentTypeName = resolveContentTypeLabel(entry.contentTypeId, contentTypeDisplayInfoMap);
   const title = getEntryTitleFromPreviewData(
     entry,
     defaultLocale ?? 'en-US',
-    contentTypeDisplayInfoById?.get(entry.contentTypeId)
+    contentTypeDisplayInfoMap?.get(entry.contentTypeId)
   );
   return {
     id,
@@ -123,7 +122,7 @@ function buildRowTreeForTempId(
     entryIndex,
     childRows,
     tempId,
-    context.contentTypeDisplayInfoById,
+    context.contentTypeDisplayInfoMap,
     context.defaultLocale
   );
 }
@@ -149,13 +148,13 @@ function buildTreeRootRows(
 /** Flat list of rows for entries that have a `tempId` (same order as `orderedEntries`, original indices preserved). */
 function buildFlatRows(
   orderedEntries: EntryToCreate[],
-  contentTypeDisplayInfoById?: ContentTypeDisplayInfoById,
+  contentTypeDisplayInfoMap?: ContentTypeDisplayInfoMap,
   defaultLocale?: string
 ): CheckboxEntryListRow[] {
   const rows: CheckboxEntryListRow[] = [];
   orderedEntries.forEach((entry, index) => {
     if (!entry.tempId) return;
-    rows.push(createRow(entry, index, [], entry.tempId, contentTypeDisplayInfoById, defaultLocale));
+    rows.push(createRow(entry, index, [], entry.tempId, contentTypeDisplayInfoMap, defaultLocale));
   });
   return rows;
 }
@@ -163,7 +162,7 @@ function buildFlatRows(
 /** Preview rows for the overview checklist: only entries with a `tempId` (required for stable row ids and selection). */
 export function buildCheckboxEntryList(
   payload: PreviewPayload,
-  contentTypeDisplayInfoById?: ContentTypeDisplayInfoById,
+  contentTypeDisplayInfoMap?: ContentTypeDisplayInfoMap,
   defaultLocale?: string
 ): CheckboxEntryListRow[] {
   const { entries, referenceGraph } = payload;
@@ -179,14 +178,14 @@ export function buildCheckboxEntryList(
     {
       orderedEntriesContext,
       childTempIdsByParentTempId,
-      contentTypeDisplayInfoById,
+      contentTypeDisplayInfoMap,
       defaultLocale,
     },
     collectChildTempIds(childTempIdsByParentTempId)
   );
 
   if (roots.length === 0) {
-    return buildFlatRows(orderedEntriesContext.entries, contentTypeDisplayInfoById, defaultLocale);
+    return buildFlatRows(orderedEntriesContext.entries, contentTypeDisplayInfoMap, defaultLocale);
   }
 
   return roots;

@@ -5,7 +5,7 @@ import type { PreviewPayload } from '@types';
 import {
   buildCheckboxEntryList,
   collectCheckboxEntryListRowIds,
-  type ContentTypeDisplayInfoById,
+  type ContentTypeDisplayInfoMap,
 } from '../../../../utils/checkboxEntryList';
 import { fetchContentTypesInfoByIds } from '../../../../utils/getEntryTitle';
 import { CheckboxEntryList } from './CheckboxEntryList';
@@ -19,29 +19,27 @@ interface OverviewSectionProps {
 }
 
 const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionProps) => {
-  const contentTypeIds = useMemo(
-    () =>
-      [...new Set(payload.entries.map((e) => e.contentTypeId))].filter(Boolean).sort().join('\0'),
-    [payload.entries]
-  );
-
-  const [contentTypeDisplayInfoById, setContentTypeDisplayInfoById] = useState<
-    ContentTypeDisplayInfoById | undefined
+  const [contentTypeDisplayInfoMap, setContentTypeDisplayInfoMap] = useState<
+    ContentTypeDisplayInfoMap | undefined
   >();
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     const fetchContentTypesInfo = async () => {
-      const ids = contentTypeIds === '' ? [] : contentTypeIds.split('\0');
-      if (ids.length === 0) {
-        setContentTypeDisplayInfoById(undefined);
+      const contentTypeIds = [...new Set(payload.entries.map((entry) => entry.contentTypeId))]
+        .filter((id): id is string => Boolean(id))
+        .sort();
+      if (contentTypeIds.length === 0) {
+        setContentTypeDisplayInfoMap(undefined);
         return;
       }
       try {
-        const map = await fetchContentTypesInfoByIds(sdk, ids);
-        setContentTypeDisplayInfoById(map);
+        const map = await fetchContentTypesInfoByIds(sdk, contentTypeIds);
+        setContentTypeDisplayInfoMap(map);
       } catch (error) {
         console.error('Failed to fetch content type names for overview labels:', error);
-        setContentTypeDisplayInfoById(undefined);
+        setContentTypeDisplayInfoMap(undefined);
       }
     };
 
@@ -49,12 +47,9 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
   }, [sdk]);
 
   const checkboxEntryRows = useMemo(
-    () => buildCheckboxEntryList(payload, contentTypeDisplayInfoById, sdk.locales.default),
-    [payload, contentTypeDisplayInfoById, sdk.locales.default]
+    () => buildCheckboxEntryList(payload, contentTypeDisplayInfoMap, sdk.locales.default),
+    [payload, contentTypeDisplayInfoMap, sdk.locales.default]
   );
-
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
-  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     setSelectedIds(new Set(collectCheckboxEntryListRowIds(checkboxEntryRows)));
