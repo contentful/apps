@@ -4,7 +4,7 @@ import type { ContentTypeDisplayInfo } from '../services/contentTypeService';
 
 const UNTITLED_ENTRY_LABEL = 'Untitled';
 
-export function getEntryTitleFromPreviewData(
+export function getEntryDisplayTitle(
   entry: EntryToCreate | EntryProps,
   defaultLocale: string,
   contentTypeInfo?: ContentTypeDisplayInfo

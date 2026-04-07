@@ -1,7 +1,7 @@
 import { Button, EntryCard, Flex, Modal, Paragraph } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import type { EntryProps } from 'contentful-management';
-import { getEntryTitleFromPreviewData } from '../../../../utils/getPreviewEntryTitle';
+import { getEntryDisplayTitle } from '../../../../utils/getEntryDisplayTitle';
 import type { ContentTypeDisplayInfoMap } from '../../../../utils/checkboxEntryList';
 
 export interface SummaryModalProps {
@@ -48,7 +48,7 @@ export function SummaryModal({
               {entries.map((entry) => {
                 const contentTypeId = entry.sys.contentType.sys.id;
                 const info = contentTypeDisplayInfoMap?.get(contentTypeId);
-                const title = getEntryTitleFromPreviewData(entry, defaultLocale, info);
+                const title = getEntryDisplayTitle(entry, defaultLocale, info);
                 const contentTypeLabel = resolveContentTypeLabel(
                   contentTypeId,
                   contentTypeDisplayInfoMap

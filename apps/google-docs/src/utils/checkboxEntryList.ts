@@ -2,7 +2,7 @@ import type { EntryToCreate, PreviewPayload } from '@types';
 import { collectReferencedTempIdsFromEntry } from '../services/referenceResolution';
 import { type ContentTypeDisplayInfo } from '../services/contentTypeService';
 import { orderEntriesByCreationOrder } from './previewPayload';
-import { getEntryTitleFromPreviewData } from './getPreviewEntryTitle';
+import { getEntryDisplayTitle } from './getEntryDisplayTitle';
 
 export interface CheckboxEntryListRow {
   id: string;
@@ -44,7 +44,7 @@ function createRow(
   defaultLocale?: string
 ): CheckboxEntryListRow {
   const contentTypeName = resolveContentTypeLabel(entry.contentTypeId, contentTypeDisplayInfoMap);
-  const title = getEntryTitleFromPreviewData(
+  const title = getEntryDisplayTitle(
     entry,
     defaultLocale ?? 'en-US',
     contentTypeDisplayInfoMap?.get(entry.contentTypeId)
