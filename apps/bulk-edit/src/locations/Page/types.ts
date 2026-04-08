@@ -7,6 +7,27 @@ export type FilterOption = {
   value: string;
 };
 
+export type FieldFilterValue = {
+  fieldUniqueId: string;
+  operator:
+    | 'in'
+    | 'ne'
+    | 'match'
+    | 'exists'
+    | 'not exists'
+    | 'all'
+    | 'nin'
+    | 'is'
+    | 'lt'
+    | 'lte'
+    | 'gt'
+    | 'gte';
+  value: string | null;
+  entryIds?: string[];
+  assetIds?: string[];
+  contentTypeField: ContentTypeField;
+};
+
 export type ContentTypeField = {
   contentTypeId: string;
   id: string;
