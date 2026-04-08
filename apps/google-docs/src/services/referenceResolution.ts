@@ -163,6 +163,49 @@ function valueHasReferences(value: unknown): boolean {
   return false;
 }
 
+function collectRichTextEntryTempIds(richTextNode: unknown, referencedTempIds: Set<string>): void {
+  if (!isRichTextJsonObject(richTextNode)) {
+    return;
+  }
+  const id = richTextEmbeddedEntryTempId(richTextNode);
+  if (id) {
+    referencedTempIds.add(id);
+  }
+  if (Array.isArray(richTextNode.content)) {
+    for (const childNode of richTextNode.content as unknown[]) {
+      collectRichTextEntryTempIds(childNode, referencedTempIds);
+    }
+  }
+}
+
+function collectReferencedTempIdsFromValue(value: unknown, referencedTempIds: Set<string>): void {
+  const tempIdFromStandaloneRef = standaloneRefTempId(value);
+  if (tempIdFromStandaloneRef !== undefined) {
+    referencedTempIds.add(tempIdFromStandaloneRef);
+    return;
+  }
+  if (isArrayOfStandaloneRefs(value)) {
+    for (const item of value) {
+      referencedTempIds.add(standaloneRefTempId(item)!);
+    }
+    return;
+  }
+  if (hasRichTextTreeShape(value)) {
+    collectRichTextEntryTempIds(value, referencedTempIds);
+  }
+}
+
+/** Temp entry ids referenced by field values (standalone refs, ref arrays, rich text embeds). */
+export function collectReferencedTempIdsFromEntry(entry: EntryToCreate): string[] {
+  const referencedTempIds = new Set<string>();
+  for (const localizedValue of Object.values(entry.fields)) {
+    for (const value of Object.values(localizedValue)) {
+      collectReferencedTempIdsFromValue(value, referencedTempIds);
+    }
+  }
+  return [...referencedTempIds];
+}
+
 export function entryHasReferences(entry: EntryToCreate): boolean {
   for (const localizedValue of Object.values(entry.fields)) {
     for (const value of Object.values(localizedValue)) {

@@ -3,10 +3,18 @@ import { CMAClient } from '@contentful/app-sdk';
 import { AppParameters } from '@/vite-env';
 
 type ReferenceMap = Record<string, EntryProps>;
+type ReferenceChildrenMap = Record<string, string[]>;
+
+export type CloneReferenceNode = {
+  entryId: string;
+  label: string;
+  children: CloneReferenceNode[];
+};
 
 class EntryCloner {
   private references: ReferenceMap = {};
   private clones: ReferenceMap = {};
+  private referenceChildren: ReferenceChildrenMap = {};
   private contentTypes: { [id: string]: ContentTypeProps } = {};
   private updates: number = 0;
   private parameters: AppParameters;
@@ -32,9 +40,13 @@ class EntryCloner {
     this.setUpdatesCount = setUpdatesCount;
   }
 
-  async cloneEntry(): Promise<EntryProps> {
+  async cloneEntry(selectedEntryIds?: string[]): Promise<EntryProps> {
     if (Object.keys(this.references).length === 0) {
       await this.findReferences(this.entryId);
+    }
+    if (selectedEntryIds) {
+      this.filterReferences(selectedEntryIds);
+      this.setReferencesCount(Object.keys(this.references).length);
     }
     await this.createClones();
     await this.updateReferenceTree();
@@ -46,7 +58,14 @@ class EntryCloner {
     return Object.keys(this.references).length;
   }
 
-  private async findReferences(entryId: string): Promise<void> {
+  async getReferenceTree(): Promise<CloneReferenceNode> {
+    await this.findReferences(this.entryId);
+    return this.buildReferenceNode(this.entryId, new Set());
+  }
+
+  private async findReferences(entryId: string, parentEntryId?: string): Promise<void> {
+    this.addChildReference(parentEntryId, entryId);
+
     if (this.references[entryId]) {
       return;
     }
@@ -61,13 +80,14 @@ class EntryCloner {
     if (entry !== undefined) {
       this.references[entryId] = entry;
       this.setReferencesCount(Object.keys(this.references).length);
+      this.referenceChildren[entryId] ||= [];
 
       for (const fieldName in entry.fields) {
         const field = entry.fields[fieldName];
 
         for (const locale in field) {
           const fieldValue = field[locale];
-          await this.inspectField(fieldValue);
+          await this.inspectField(fieldValue, entryId);
         }
       }
     }
@@ -138,34 +158,30 @@ class EntryCloner {
     await Promise.all(updatePromises);
   }
 
-  private async inspectField(fieldValue: any): Promise<void> {
+  private async inspectField(fieldValue: any, parentEntryId?: string): Promise<void> {
     if (!fieldValue) return;
 
-    if (this.isReferenceArray(fieldValue)) {
-      await Promise.all(
-        fieldValue.map((f: any) => {
-          return this.inspectField(f);
-        })
-      );
+    if (this.isReference(fieldValue)) {
+      await this.findReferences(fieldValue.sys.id, parentEntryId);
       return;
     }
 
-    if (this.isReference(fieldValue)) {
-      await this.findReferences(fieldValue.sys.id);
+    if (Array.isArray(fieldValue)) {
+      for (const value of fieldValue) {
+        await this.inspectField(value, parentEntryId);
+      }
+      return;
+    }
+
+    if (this.isObject(fieldValue)) {
+      for (const value of Object.values(fieldValue)) {
+        await this.inspectField(value, parentEntryId);
+      }
     }
   }
 
   private async updateReferencesOnField(fieldValue: any): Promise<boolean> {
     if (!fieldValue) return false;
-
-    if (this.isReferenceArray(fieldValue)) {
-      const didUpdateArray = await Promise.all(
-        fieldValue.map((f: any) => {
-          return this.updateReferencesOnField(f);
-        })
-      );
-      return didUpdateArray.some((didUpdate) => didUpdate);
-    }
 
     if (this.isReference(fieldValue)) {
       const clone = this.clones[fieldValue.sys.id];
@@ -173,6 +189,27 @@ class EntryCloner {
         fieldValue.sys.id = clone.sys.id;
         return true;
       }
+      return false;
+    }
+
+    if (Array.isArray(fieldValue)) {
+      let didUpdateArray = false;
+      for (const value of fieldValue) {
+        if (await this.updateReferencesOnField(value)) {
+          didUpdateArray = true;
+        }
+      }
+      return didUpdateArray;
+    }
+
+    if (this.isObject(fieldValue)) {
+      let didUpdateObject = false;
+      for (const value of Object.values(fieldValue)) {
+        if (await this.updateReferencesOnField(value)) {
+          didUpdateObject = true;
+        }
+      }
+      return didUpdateObject;
     }
 
     return false;
@@ -204,12 +241,82 @@ class EntryCloner {
     return entryFields;
   }
 
-  private isReferenceArray(fieldValue: any): boolean {
-    return Array.isArray(fieldValue) && fieldValue.some((f: any) => this.isReference(f));
+  private async getContentType(contentTypeId: string): Promise<ContentTypeProps> {
+    const contentType =
+      this.contentTypes[contentTypeId] ||
+      (await this.cma.contentType.get({ contentTypeId: contentTypeId }));
+    this.contentTypes[contentTypeId] = contentType;
+    return contentType;
+  }
+
+  private async getEntryLabel(entry: EntryProps): Promise<string> {
+    const contentTypeId = entry.sys.contentType.sys.id;
+    const contentType = await this.getContentType(contentTypeId);
+    const displayFieldId = contentType.displayField;
+
+    if (displayFieldId && entry.fields[displayFieldId]) {
+      const displayFieldValues = entry.fields[displayFieldId];
+      const displayValue = Object.values(displayFieldValues).find(
+        (value) => typeof value === 'string'
+      );
+      if (typeof displayValue === 'string' && displayValue.trim()) {
+        return displayValue;
+      }
+    }
+
+    return entry.sys.id;
+  }
+
+  private async buildReferenceNode(
+    entryId: string,
+    visitedEntryIds: Set<string>
+  ): Promise<CloneReferenceNode> {
+    const entry = this.references[entryId];
+    const nextVisitedEntryIds = new Set(visitedEntryIds).add(entryId);
+    const childEntryIds = this.referenceChildren[entryId] || [];
+    const children: CloneReferenceNode[] = [];
+
+    for (const childEntryId of childEntryIds) {
+      if (nextVisitedEntryIds.has(childEntryId)) {
+        continue;
+      }
+      children.push(await this.buildReferenceNode(childEntryId, nextVisitedEntryIds));
+    }
+
+    return {
+      entryId,
+      label: entry ? await this.getEntryLabel(entry) : entryId,
+      children,
+    };
+  }
+
+  private addChildReference(parentEntryId: string | undefined, childEntryId: string): void {
+    if (!parentEntryId || parentEntryId === childEntryId) {
+      return;
+    }
+
+    const childEntryIds = this.referenceChildren[parentEntryId] || [];
+    if (!childEntryIds.includes(childEntryId)) {
+      childEntryIds.push(childEntryId);
+    }
+    this.referenceChildren[parentEntryId] = childEntryIds;
+  }
+
+  private filterReferences(selectedEntryIds: string[]): void {
+    const selectedEntryIdSet = new Set(selectedEntryIds);
+    selectedEntryIdSet.add(this.entryId);
+
+    this.references = Object.fromEntries(
+      Object.entries(this.references).filter(([entryId]) => selectedEntryIdSet.has(entryId))
+    );
   }
 
   private isReference(fieldValue: any): boolean {
     return fieldValue.sys && fieldValue.sys.type === 'Link' && fieldValue.sys.linkType === 'Entry';
+  }
+
+  private isObject(fieldValue: any): boolean {
+    return typeof fieldValue === 'object' && fieldValue !== null;
   }
 }
 

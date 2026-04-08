@@ -167,7 +167,7 @@ describe('ModalOrchestrator', () => {
     });
   });
 
-  it('calls onResetToMain and clears flow state when resetFlowFromPreviewCancel is invoked', async () => {
+  it('clears flow state when resetFlowState is invoked without calling onResetToMain', async () => {
     const ref = createRef<ModalOrchestratorHandle>();
     render(<ModalOrchestrator ref={ref} {...defaultProps} />);
 
@@ -181,11 +181,11 @@ describe('ModalOrchestrator', () => {
     });
 
     await act(async () => {
-      ref.current?.resetFlowFromPreviewCancel();
+      ref.current?.resetFlowState();
     });
 
     await waitFor(() => {
-      expect(defaultProps.onResetToMain).toHaveBeenCalledTimes(1);
+      expect(defaultProps.onResetToMain).not.toHaveBeenCalled();
       expect(screen.queryByRole('heading', { name: 'Select content type(s)' })).toBeNull();
     });
   });

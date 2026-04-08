@@ -5,18 +5,26 @@ import { PreviewPayload } from '@types';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
 import { loadGoogleDocsReviewFixture } from '../../../../fixtures/googleDocsReview';
 import { GoogleDocsMappingReviewScreen } from '../review-prototype/GoogleDocsMappingReviewScreen';
+import Splitter from './Splitter';
+import OverviewSection from '../overview/OverviewSection';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { PageAppSDK } from '@contentful/app-sdk';
 
 interface PreviewPageViewProps {
   payload: PreviewPayload;
-  onCancel: () => void;
+  onLeavePreview: () => void;
 }
 
-export const PreviewPageView = ({ payload, onCancel }: PreviewPageViewProps) => {
+export const PreviewPageView = ({ payload, onLeavePreview }: PreviewPageViewProps) => {
+  const sdk = useSDK<PageAppSDK>();
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
   const fixture = loadGoogleDocsReviewFixture();
 
   const rawTitle = payload.normalizedDocument?.title as string | undefined;
   const title = rawTitle?.trim() ? rawTitle : 'Selected document';
+  const rawTitle = payload.normalizedDocument?.title;
+  const docTitle = typeof rawTitle === 'string' ? rawTitle : undefined;
+  const title = docTitle && docTitle.trim().length > 0 ? docTitle : 'Selected document';
 
   return (
     <>
@@ -34,20 +42,21 @@ export const PreviewPageView = ({ payload, onCancel }: PreviewPageViewProps) => 
       </Layout.Header>
       <Splitter marginTop="spacingS" />
       <Layout.Body>
-        {fixture ? (
-          <GoogleDocsMappingReviewScreen fixture={fixture} />
-        ) : (
-          <Note variant="warning" title="Fixture not found or invalid">
-            <Paragraph marginBottom="none">
-              Copy a backend debug payload into `src/fixtures/googleDocsReview/fixture.json` and
-              reload the app.
-            </Paragraph>
-          </Note>
-        )}
+        {fixture ? <GoogleDocsMappingReviewScreen fixture={fixture} /> : null}
+        <Flex flexDirection="column" gap="spacing2Xl">
+          <OverviewSection
+            sdk={sdk}
+            payload={payload || fixture}
+            onReturnToMainPage={onLeavePreview}
+          />
+          <Heading as="h2" marginBottom="none">
+            Document outline
+          </Heading>
+        </Flex>
       </Layout.Body>
       <ConfirmCancelModal
         isOpen={isConfirmCancelModalOpen}
-        onConfirm={onCancel}
+        onConfirm={onLeavePreview}
         onCancel={() => setIsConfirmCancelModalOpen(false)}
       />
     </>
