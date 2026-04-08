@@ -1,10 +1,12 @@
 import { EntryProps, KeyValueMap } from 'contentful-management';
 import { CMAClient, SidebarAppSDK } from '@contentful/app-sdk';
 import { getEntry } from './entryUtils';
+import { DEFAULT_SLUG_FIELD_ID } from '../types';
 
 export const getContentTypesWithoutLivePreview = async (
   cma: CMAClient,
-  excludedContentTypesIds: string[] = []
+  excludedContentTypesIds: string[] = [],
+  slugFieldId: string = DEFAULT_SLUG_FIELD_ID
 ): Promise<any[]> => {
   try {
     let allContentTypes: any[] = [];
@@ -27,7 +29,7 @@ export const getContentTypesWithoutLivePreview = async (
 
     const contentTypesWithoutLivePreview = allContentTypes.filter((contentType) => {
       const isExcluded = excludedContentTypesIds.includes(contentType.sys.id);
-      const hasSlugField = contentType.fields?.some((field: any) => field.id === 'slug');
+      const hasSlugField = contentType.fields?.some((field: any) => field.id === slugFieldId);
 
       return !isExcluded && !hasSlugField;
     });
@@ -54,8 +56,12 @@ export const getRelatedEntries = async (sdk: SidebarAppSDK, id: string): Promise
   }
 };
 
-export const hasLivePreview = (entry: EntryProps<KeyValueMap>, defaultLocale: string): boolean => {
-  return !!entry.fields.slug?.[defaultLocale];
+export const hasLivePreview = (
+  entry: EntryProps<KeyValueMap>,
+  defaultLocale: string,
+  slugFieldId: string = DEFAULT_SLUG_FIELD_ID
+): boolean => {
+  return !!entry.fields[slugFieldId]?.[defaultLocale];
 };
 
 export const isNotChecked = (
@@ -76,6 +82,7 @@ export const getRootEntries = async (sdk: SidebarAppSDK): Promise<EntryProps[]> 
   const rootEntryData: EntryProps[] = [];
   let childEntries: EntryProps[] = [];
   const checkedEntries: Set<string> = new Set([sdk.ids.entry]);
+  const slugFieldId = sdk.parameters.installation.slugFieldId || DEFAULT_SLUG_FIELD_ID;
 
   const initialEntry = await getEntry(sdk);
 
@@ -99,7 +106,7 @@ export const getRootEntries = async (sdk: SidebarAppSDK): Promise<EntryProps[]> 
       if (isNotChecked(entry, checkedEntries)) {
         checkedEntries.add(entry.sys.id);
 
-        if (hasLivePreview(entry, sdk.locales.default)) {
+        if (hasLivePreview(entry, sdk.locales.default, slugFieldId)) {
           entriesWithLivePreview.push(entry);
         } else {
           entriesWithoutLivePreview.push(entry);
