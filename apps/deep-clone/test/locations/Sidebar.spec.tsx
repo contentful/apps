@@ -25,13 +25,17 @@ vi.mock('../../src/utils/EntryCloner', () => {
       .fn()
       .mockImplementation(
         (cma, parameters, entryId, setReferencesCount, setClonesCount, setUpdatesCount) => ({
+          getReferenceTree: vi.fn().mockImplementation(async () => ({
+            entryId: 'test-entry',
+            label: 'Main Entry',
+            children: [{ entryId: 'referenced-entry-id', label: 'Referenced Entry', children: [] }],
+          })),
           cloneEntry: vi.fn().mockImplementation(async () => {
             setReferencesCount(2);
             setClonesCount(2);
             setUpdatesCount(1);
             return { sys: { id: 'cloned-id' } };
           }),
-          getReferencesQty: vi.fn().mockImplementation(async () => 2),
         })
       ),
   };
@@ -102,5 +106,34 @@ describe('Sidebar component', () => {
       expect.anything(),
       expect.anything()
     );
+  });
+
+  it('opens selection dialog before cloning and passes selected entry ids', async () => {
+    const { getByText } = render(<Sidebar />);
+
+    await act(async () => {
+      fireEvent.click(getByText('Clone entry'));
+    });
+
+    expect(mockSdk.dialogs.openCurrentApp).toHaveBeenCalledWith({
+      title: 'Select entries to clone',
+      width: 'large',
+      shouldCloseOnEscapePress: true,
+      shouldCloseOnOverlayClick: false,
+      parameters: {
+        referenceTree: {
+          entryId: 'test-entry',
+          label: 'Main Entry',
+          children: [{ entryId: 'referenced-entry-id', label: 'Referenced Entry', children: [] }],
+        },
+      },
+    });
+
+    const EntryCloner = (await import('../../src/utils/EntryCloner')).default;
+    expect(EntryCloner).toHaveBeenCalledTimes(1);
+    expect((EntryCloner as any).mock.results[0].value.cloneEntry).toHaveBeenCalledWith([
+      'test-entry',
+      'referenced-entry-id',
+    ]);
   });
 });

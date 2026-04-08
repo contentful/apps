@@ -16,7 +16,6 @@ const Page = () => {
   const [oauthToken, setOauthToken] = useState<string>('');
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
   const [isOAuthLoading, setIsOAuthLoading] = useState(true);
-  const [isMappingPrototypeVisible, setIsMappingPrototypeVisible] = useState(false);
   const [previewPayload, setPreviewPayload] = useState<PreviewPayload | null>(null);
 
   const handleOauthTokenChange = (token: string) => {
@@ -36,37 +35,19 @@ const Page = () => {
   };
 
   const handlePreviewReady = (payload: PreviewPayload) => {
-    setIsMappingPrototypeVisible(false);
     setPreviewPayload(payload);
   };
 
   const handleReturnToMainPage = () => {
-    setIsMappingPrototypeVisible(false);
+    modalOrchestratorRef.current?.resetFlowState();
     setPreviewPayload(null);
-  };
-
-  const handlePreviewCancel = () => {
-    if (isMappingPrototypeVisible) {
-      handleReturnToMainPage();
-      return;
-    }
-
-    modalOrchestratorRef.current?.resetFlowFromPreviewCancel();
   };
 
   return (
     <>
       <Layout withBoxShadow={true} offsetTop={10}>
-        {previewPayload || isMappingPrototypeVisible ? (
-          isMappingPrototypeVisible ? (
-            <PreviewPageView mode="fixture" onCancel={handlePreviewCancel} />
-          ) : (
-            <PreviewPageView
-              mode="workflow"
-              payload={previewPayload!}
-              onCancel={handlePreviewCancel}
-            />
-          )
+        {previewPayload ? (
+          <PreviewPageView payload={previewPayload} onLeavePreview={handleReturnToMainPage} />
         ) : (
           <MainPageView
             oauthToken={oauthToken}
@@ -76,7 +57,6 @@ const Page = () => {
             onOauthTokenChange={handleOauthTokenChange}
             onLoadingStateChange={handleOAuthLoadingStateChange}
             onSelectFile={handleSelectFile}
-            onUseFixturePreview={() => setIsMappingPrototypeVisible(true)}
             sdk={sdk}
           />
         )}

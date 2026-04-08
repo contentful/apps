@@ -1,36 +1,29 @@
 import { useState } from 'react';
-import { Button, Flex, Heading, Layout, Note, Paragraph } from '@contentful/f36-components';
+import { Button, Flex, Heading, Layout } from '@contentful/f36-components';
 import Splitter from './Splitter';
 import { PreviewPayload } from '@types';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
-import { loadGoogleDocsReviewFixture } from '../../../../fixtures/googleDocsReview';
-import { GoogleDocsMappingReviewScreen } from '../review-prototype/GoogleDocsMappingReviewScreen';
+import OverviewSection from '../overview/OverviewSection';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { PageAppSDK } from '@contentful/app-sdk';
 
-type PreviewPageViewProps =
-  | {
-      mode: 'workflow';
-      payload: PreviewPayload;
-      onCancel: () => void;
-    }
-  | {
-      mode: 'fixture';
-      onCancel: () => void;
-    };
+interface PreviewPageViewProps {
+  payload: PreviewPayload;
+  onLeavePreview: () => void;
+}
 
-export const PreviewPageView = (props: PreviewPageViewProps) => {
-  const isFixtureMode = props.mode === 'fixture';
-
+export const PreviewPageView = ({ payload, onLeavePreview }: PreviewPageViewProps) => {
+  const sdk = useSDK<PageAppSDK>();
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
-  const fixture = isFixtureMode ? loadGoogleDocsReviewFixture() : null;
-  const title = isFixtureMode
-    ? 'Create from fixture preview'
-    : `Create from document "${props.payload.normalizedDocument?.title ?? 'Selected document'}"`;
+  const rawTitle = payload.normalizedDocument?.title;
+  const docTitle = typeof rawTitle === 'string' ? rawTitle : undefined;
+  const title = docTitle && docTitle.trim().length > 0 ? docTitle : 'Selected document';
 
   return (
     <>
       <Layout.Header title="Preview">
         <Flex justifyContent="space-between" alignItems="center" marginTop="spacingS">
-          <Heading marginBottom="none">{title}</Heading>
+          <Heading marginBottom="none">Create from document "{title}"</Heading>
           <Button
             variant="transparent"
             size="small"
@@ -42,27 +35,16 @@ export const PreviewPageView = (props: PreviewPageViewProps) => {
       </Layout.Header>
       <Splitter marginTop="spacingS" />
       <Layout.Body>
-        {isFixtureMode ? (
-          fixture ? (
-            <GoogleDocsMappingReviewScreen fixture={fixture} showChrome={false} />
-          ) : (
-            <Note
-              variant="warning"
-              title="Fixture not found or invalid"
-              style={{ margin: '16px', maxWidth: 900 }}>
-              <Paragraph marginBottom="none">
-                Copy `debug-review-payload-latest.json` from `agents-api` into
-                `src/fixtures/googleDocsReview/fixture.json` and reload the app.
-              </Paragraph>
-            </Note>
-          )
-        ) : (
-          <Paragraph>Preview</Paragraph>
-        )}
+        <Flex flexDirection="column" gap="spacing2Xl">
+          <OverviewSection sdk={sdk} payload={payload} onReturnToMainPage={onLeavePreview} />
+          <Heading as="h2" marginBottom="none">
+            Document outline
+          </Heading>
+        </Flex>
       </Layout.Body>
       <ConfirmCancelModal
         isOpen={isConfirmCancelModalOpen}
-        onConfirm={props.onCancel}
+        onConfirm={onLeavePreview}
         onCancel={() => setIsConfirmCancelModalOpen(false)}
       />
     </>

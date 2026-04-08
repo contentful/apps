@@ -23,7 +23,8 @@ import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
-  resetFlowFromPreviewCancel: () => void;
+  /** Clears in-progress flow state without calling `onResetToMain` (parent clears preview separately). */
+  resetFlowState: () => void;
 }
 
 enum FlowStep {
@@ -64,9 +65,10 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
     useImperativeHandle(ref, () => ({
       startFlow: () => setIsUploadModalOpen(true),
-      resetFlowFromPreviewCancel: () => {
+      resetFlowState: () => {
         resetProgress();
-        onResetToMain();
+        setIsConfirmCancelModalOpen(false);
+        setIsErrorPreviewModalOpen(false);
       },
     }));
 
