@@ -1,10 +1,11 @@
-import { EntryToCreate } from '@types';
-import { ContentTypeDisplayInfo } from '../services/contentTypeService';
+import type { EntryProps } from 'contentful-management';
+import type { EntryToCreate } from '@types';
+import type { ContentTypeDisplayInfo } from '../services/contentTypeService';
 
 const UNTITLED_ENTRY_LABEL = 'Untitled';
 
-export function getEntryTitleFromPreviewData(
-  entry: EntryToCreate,
+export function getEntryDisplayTitle(
+  entry: EntryToCreate | EntryProps,
   defaultLocale: string,
   contentTypeInfo?: ContentTypeDisplayInfo
 ): string {

@@ -12,6 +12,8 @@ import { CheckboxEntryList } from './CheckboxEntryList';
 import { overviewSectionBox, overviewSectionBoxScrollable } from './OverviewSection.styles';
 import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
 import { PageAppSDK } from '@contentful/app-sdk';
+import type { EntryProps } from 'contentful-management';
+import { SummaryModal } from '../modals/SummaryModal';
 
 interface OverviewSectionProps {
   sdk: PageAppSDK;
@@ -25,6 +27,7 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
   >();
   const [selectedEntryTempIds, setSelectedEntryTempIds] = useState<Set<string>>(() => new Set());
   const [isCreating, setIsCreating] = useState(false);
+  const [summaryEntries, setSummaryEntries] = useState<EntryProps[] | null>(null);
 
   useEffect(() => {
     const fetchContentTypesInfo = async () => {
@@ -78,13 +81,18 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
       if (result.errors.length > 0) {
         sdk.notifier.error('Failed to create entries');
       } else {
-        onReturnToMainPage();
+        setSummaryEntries(result.createdEntries);
       }
     } catch {
       sdk.notifier.error('Failed to create entries');
     } finally {
       setIsCreating(false);
     }
+  };
+
+  const handleSummaryDone = () => {
+    setSummaryEntries(null);
+    onReturnToMainPage();
   };
 
   return (
@@ -127,6 +135,15 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
           />
         )}
       </Flex>
+
+      <SummaryModal
+        isOpen={summaryEntries !== null}
+        sdk={sdk}
+        entries={summaryEntries ?? []}
+        contentTypeDisplayInfoMap={contentTypeDisplayInfoMap}
+        defaultLocale={sdk.locales.default}
+        onDone={handleSummaryDone}
+      />
     </Box>
   );
 };
