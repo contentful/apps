@@ -56,6 +56,24 @@ export const getContentTypesWithoutLivePreview = async (
   }
 };
 
+export const getContentTypeIdsWithPreviewFields = async (
+  cma: CMAClient,
+  previewFieldIds: string[] = DEFAULT_PREVIEW_FIELD_IDS
+): Promise<string[]> => {
+  try {
+    const allContentTypes = await getContentTypes(cma);
+
+    return allContentTypes
+      .filter((contentType) =>
+        contentType.fields?.some((field: any) => previewFieldIds.includes(field.id))
+      )
+      .map((contentType) => contentType.sys.id);
+  } catch (error) {
+    console.error('Error fetching content types with preview fields:', error);
+    return [];
+  }
+};
+
 export const getContentTypes = async (cma: CMAClient): Promise<any[]> => {
   let allContentTypes: any[] = [];
   let skip = 0;

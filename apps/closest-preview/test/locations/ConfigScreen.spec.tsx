@@ -110,6 +110,26 @@ describe('ConfigScreen', () => {
   });
 
   it('successfully configures app with selected content types', async () => {
+    mockCma.contentType.getMany.mockResolvedValue({
+      items: [
+        {
+          sys: { id: 'pageType' },
+          name: 'Page Type',
+          fields: [{ id: 'slug', type: 'Symbol' }],
+        },
+        {
+          sys: { id: 'blogPost' },
+          name: 'Blog Post',
+          fields: [{ id: 'title', type: 'Symbol' }],
+        },
+        {
+          sys: { id: 'article' },
+          name: 'Article',
+          fields: [{ id: 'title', type: 'Symbol' }],
+        },
+      ],
+    });
+
     render(<ConfigScreen />);
     await userEvent.click(await screen.findByRole('button', { name: 'Add Blog Post' }));
     await userEvent.click(await screen.findByRole('button', { name: 'Add Article' }));
@@ -127,6 +147,48 @@ describe('ConfigScreen', () => {
           blogPost: {
             sidebar: { position: 0 },
           },
+          article: {
+            sidebar: { position: 0 },
+          },
+        },
+      },
+    });
+  });
+
+  it('does not save page-level content types in the sidebar assignment state', async () => {
+    mockCma.contentType.getMany.mockResolvedValue({
+      items: [
+        {
+          sys: { id: 'blogPost' },
+          name: 'Blog Post',
+          fields: [{ id: 'slug', type: 'Symbol' }],
+        },
+        {
+          sys: { id: 'article' },
+          name: 'Article',
+          fields: [{ id: 'title', type: 'Symbol' }],
+        },
+      ],
+    });
+
+    render(<ConfigScreen />);
+    await waitFor(() => {
+      expect(mockCma.contentType.getMany).toHaveBeenCalled();
+    });
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Add Blog Post' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Add Article' }));
+
+    const result = await act(async () => {
+      return await saveAppInstallation();
+    });
+
+    expect(result).toEqual({
+      parameters: {
+        previewFieldIds: ['slug'],
+      },
+      targetState: {
+        EditorInterface: {
           article: {
             sidebar: { position: 0 },
           },

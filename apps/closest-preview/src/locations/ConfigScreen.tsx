@@ -6,36 +6,49 @@ import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
 import PreviewFieldMultiSelect from '../components/PreviewFieldMultiSelect';
 import { AppInstallationParameters, ContentType } from '../types';
 import { styles } from './ConfigScreen.styles';
-import { DEFAULT_PREVIEW_FIELD_IDS, normalizePreviewFieldIds } from '../utils/livePreviewUtils';
+import {
+  DEFAULT_PREVIEW_FIELD_IDS,
+  getContentTypeIdsWithPreviewFields,
+  normalizePreviewFieldIds,
+} from '../utils/livePreviewUtils';
 
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
   const [selectedContentTypes, setSelectedContentTypes] = useState<ContentType[]>([]);
   const [selectedPreviewFieldIds, setSelectedPreviewFieldIds] =
     useState<string[]>(DEFAULT_PREVIEW_FIELD_IDS);
+  const [excludedContentTypeIds, setExcludedContentTypeIds] = useState<string[]>([]);
+  const normalizedPreviewFieldIds = useMemo(
+    () => normalizePreviewFieldIds(selectedPreviewFieldIds),
+    [selectedPreviewFieldIds]
+  );
 
   const onConfigure = useCallback(async () => {
-    const editorInterface = selectedContentTypes.reduce((acc, contentType) => {
-      return {
+    const assignableContentTypes = selectedContentTypes.filter(
+      (contentType) => !excludedContentTypeIds.includes(contentType.id)
+    );
+    const editorInterface = assignableContentTypes.reduce(
+      (acc, contentType) => ({
         ...acc,
         [contentType.id]: {
           sidebar: { position: 0 },
         },
-      };
-    }, {});
+      }),
+      {}
+    );
 
     const currentState = await sdk.app.getCurrentState();
 
     return {
       parameters: {
-        previewFieldIds: normalizePreviewFieldIds(selectedPreviewFieldIds),
+        previewFieldIds: normalizedPreviewFieldIds,
       } satisfies AppInstallationParameters,
       targetState: {
         ...currentState,
         EditorInterface: editorInterface,
       },
     };
-  }, [sdk, selectedContentTypes, selectedPreviewFieldIds]);
+  }, [excludedContentTypeIds, normalizedPreviewFieldIds, sdk, selectedContentTypes]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -50,10 +63,16 @@ const ConfigScreen = () => {
       sdk.app.setReady();
     })();
   }, [sdk]);
-  const normalizedPreviewFieldIds = useMemo(
-    () => normalizePreviewFieldIds(selectedPreviewFieldIds),
-    [selectedPreviewFieldIds]
-  );
+
+  useEffect(() => {
+    (async () => {
+      const nextExcludedContentTypeIds = await getContentTypeIdsWithPreviewFields(
+        sdk.cma,
+        normalizedPreviewFieldIds
+      );
+      setExcludedContentTypeIds(nextExcludedContentTypeIds);
+    })();
+  }, [normalizedPreviewFieldIds, sdk.cma]);
 
   return (
     <Flex justifyContent="center" alignItems="center">
@@ -82,6 +101,7 @@ const ConfigScreen = () => {
                 setSelectedContentTypes={setSelectedContentTypes}
                 sdk={sdk}
                 cma={sdk.cma}
+                excludedContentTypesIds={excludedContentTypeIds}
               />
             </FormControl>
           </Box>

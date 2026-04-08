@@ -66,7 +66,11 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
 
         if (currentContentTypesIds.length > 0) {
           const currentContentTypes = contentTypes
-            .filter((ct) => currentContentTypesIds.includes(ct.sys.id))
+            .filter(
+              (ct) =>
+                currentContentTypesIds.includes(ct.sys.id) &&
+                !resolvedExcludedContentTypeIds.includes(ct.sys.id)
+            )
             .map((ct) => ({ id: ct.sys.id, name: ct.name }));
           setSelectedContentTypes(currentContentTypes);
         }
