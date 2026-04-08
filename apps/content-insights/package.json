@@ -25,7 +25,7 @@
     "start": "vite",
     "build": "tsc && vite build",
     "test": "vitest",
-    "test:ci": "vitest",
+    "test:ci": "vitest run",
     "lint": "eslint src test ",
     "lint:fix": "eslint src --fix",
     "prettier": "prettier --write .",
@@ -35,6 +35,7 @@
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 5W2Kr6xIwM99vK6BMbKacv --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id V6H8OgumVia017YclvlLo --token ${TEST_CMA_TOKEN}",
     "generate-entries": "tsx src/scripts/generateEntries.ts",
     "delete-entries": "tsx src/scripts/deleteEntries.ts"
   },
