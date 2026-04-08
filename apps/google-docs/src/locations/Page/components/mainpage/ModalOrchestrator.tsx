@@ -11,8 +11,9 @@ import { CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS } from '@constants/agent';
 import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 import {
   DocumentTabProps,
+  DocumentScopeSuspendPayload,
+  MappingReviewSuspendPayload,
   ResumePayload,
-  SuspendPayload,
   PreviewPayload,
   RunStatus,
   WorkflowRunResult,
@@ -23,8 +24,8 @@ import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
-  /** Clears in-progress flow state without calling `onResetToMain` (parent clears preview separately). */
-  resetFlowState: () => void;
+  resetFlowFromPreviewCancel: () => void;
+  resumeMappingReview: (resumePayload: ResumePayload) => Promise<void>;
 }
 
 enum FlowStep {
@@ -38,11 +39,12 @@ interface ModalOrchestratorProps {
   sdk: PageAppSDK;
   oauthToken: string;
   onPreviewReady: (payload: PreviewPayload) => void;
+  onMappingReviewReady: (payload: MappingReviewSuspendPayload) => void;
   onResetToMain: () => void;
 }
 
 export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrchestratorProps>(
-  ({ sdk, oauthToken, onPreviewReady, onResetToMain }, ref) => {
+  ({ sdk, oauthToken, onPreviewReady, onMappingReviewReady, onResetToMain }, ref) => {
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
     const [isErrorPreviewModalOpen, setIsErrorPreviewModalOpen] = useState(false);
@@ -65,10 +67,21 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
     useImperativeHandle(ref, () => ({
       startFlow: () => setIsUploadModalOpen(true),
-      resetFlowState: () => {
+      resetFlowFromPreviewCancel: () => {
         resetProgress();
-        setIsConfirmCancelModalOpen(false);
-        setIsErrorPreviewModalOpen(false);
+        onResetToMain();
+      },
+      resumeMappingReview: async (resumePayload: ResumePayload) => {
+        if (!activeRunId) {
+          throw new Error('Workflow run id is missing for resume.');
+        }
+
+        try {
+          setFlowStep(FlowStep.LOADING);
+          handleWorkflowResult(await resumeWorkflow(activeRunId, resumePayload));
+        } catch {
+          showWorkflowError();
+        }
       },
     }));
 
@@ -117,7 +130,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       showDiscardConfirmation();
     };
 
-    const showDocumentScopeReview = (suspendPayload?: SuspendPayload) => {
+    const showDocumentScopeReview = (suspendPayload?: DocumentScopeSuspendPayload) => {
       setAvailableTabs(
         (suspendPayload?.tabs ?? []).map((tab) => ({
           tabId: tab.id ?? '',
@@ -146,6 +159,12 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setActiveRunId(workflowRun.runId);
 
       if (workflowRun.status === RunStatus.PENDING_REVIEW) {
+        if (workflowRun.suspendPayload.suspendStepId === 'mapping-review') {
+          setFlowStep(null);
+          onMappingReviewReady(workflowRun.suspendPayload);
+          return;
+        }
+
         showDocumentScopeReview(workflowRun.suspendPayload);
         return;
       }

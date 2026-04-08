@@ -9,6 +9,9 @@ export interface MappingCardData {
 
 interface MappingCardProps {
   card: MappingCardData;
+  isHovered?: boolean;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
 const labelTextStyle = {
@@ -24,14 +27,23 @@ const valueTextStyle = {
   textOverflow: 'ellipsis',
 } as const;
 
-export const MappingCard = ({ card }: MappingCardProps) => (
+export const MappingCard = ({
+  card,
+  isHovered = false,
+  onMouseEnter,
+  onMouseLeave,
+}: MappingCardProps) => (
   <Box
     data-testid={`mapping-card-${card.key}`}
+    data-hovered={isHovered ? 'true' : 'false'}
+    onMouseEnter={onMouseEnter}
+    onMouseLeave={onMouseLeave}
     style={{
-      border: `1px solid ${tokens.green500}`,
+      border: `${isHovered ? 2 : 1}px solid ${isHovered ? tokens.green600 : tokens.green500}`,
       borderRadius: tokens.borderRadiusMedium,
       padding: tokens.spacing2Xs,
       backgroundColor: tokens.green100,
+      transition: 'border-color 120ms ease, border-width 120ms ease',
     }}>
     <Text as="span" fontColor="gray600" style={labelTextStyle} marginRight="spacingXs">
       Field:

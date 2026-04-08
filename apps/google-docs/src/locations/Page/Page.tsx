@@ -8,7 +8,7 @@ import {
 } from './components/mainpage/ModalOrchestrator';
 import { MainPageView } from './components/mainpage/MainPageView';
 import { PreviewPageView } from './components/mainpage/PreviewPageView';
-import { PreviewPayload } from '@types';
+import { MappingReviewSuspendPayload, PreviewPayload, ResumePayload } from '@types';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -16,6 +16,9 @@ const Page = () => {
   const [oauthToken, setOauthToken] = useState<string>('');
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
   const [isOAuthLoading, setIsOAuthLoading] = useState(true);
+  const [isMappingPrototypeVisible, setIsMappingPrototypeVisible] = useState(false);
+  const [mappingReviewPayload, setMappingReviewPayload] =
+    useState<MappingReviewSuspendPayload | null>(null);
   const [previewPayload, setPreviewPayload] = useState<PreviewPayload | null>(null);
 
   const handleOauthTokenChange = (token: string) => {
@@ -35,19 +38,56 @@ const Page = () => {
   };
 
   const handlePreviewReady = (payload: PreviewPayload) => {
+    setIsMappingPrototypeVisible(false);
+    setMappingReviewPayload(null);
     setPreviewPayload(payload);
   };
 
-  const handleReturnToMainPage = () => {
-    modalOrchestratorRef.current?.resetFlowState();
+  const handleMappingReviewReady = (payload: MappingReviewSuspendPayload) => {
+    setIsMappingPrototypeVisible(false);
     setPreviewPayload(null);
+    setMappingReviewPayload(payload);
+  };
+
+  const handleReturnToMainPage = () => {
+    setIsMappingPrototypeVisible(false);
+    setMappingReviewPayload(null);
+    setPreviewPayload(null);
+  };
+
+  const handlePreviewCancel = () => {
+    if (isMappingPrototypeVisible) {
+      handleReturnToMainPage();
+      return;
+    }
+
+    modalOrchestratorRef.current?.resetFlowFromPreviewCancel();
+  };
+
+  const handleMappingReviewContinue = async (resumePayload: ResumePayload) => {
+    await modalOrchestratorRef.current?.resumeMappingReview(resumePayload);
   };
 
   return (
     <>
       <Layout withBoxShadow={true} offsetTop={10}>
-        {previewPayload ? (
-          <PreviewPageView payload={previewPayload} onLeavePreview={handleReturnToMainPage} />
+        {previewPayload || mappingReviewPayload || isMappingPrototypeVisible ? (
+          isMappingPrototypeVisible ? (
+            <PreviewPageView mode="fixture" onCancel={handlePreviewCancel} />
+          ) : mappingReviewPayload ? (
+            <PreviewPageView
+              mode="mappingReview"
+              payload={mappingReviewPayload}
+              onCancel={handlePreviewCancel}
+              onContinue={handleMappingReviewContinue}
+            />
+          ) : (
+            <PreviewPageView
+              mode="workflow"
+              payload={previewPayload!}
+              onCancel={handlePreviewCancel}
+            />
+          )
         ) : (
           <MainPageView
             oauthToken={oauthToken}
@@ -57,6 +97,7 @@ const Page = () => {
             onOauthTokenChange={handleOauthTokenChange}
             onLoadingStateChange={handleOAuthLoadingStateChange}
             onSelectFile={handleSelectFile}
+            onUseFixturePreview={() => setIsMappingPrototypeVisible(true)}
             sdk={sdk}
           />
         )}
@@ -67,6 +108,7 @@ const Page = () => {
         sdk={sdk}
         oauthToken={oauthToken}
         onPreviewReady={handlePreviewReady}
+        onMappingReviewReady={handleMappingReviewReady}
         onResetToMain={handleReturnToMainPage}
       />
     </>

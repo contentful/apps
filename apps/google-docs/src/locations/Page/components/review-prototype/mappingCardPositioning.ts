@@ -1,8 +1,8 @@
-import type { FixtureSourceRef } from '../../../../fixtures/googleDocsReview';
+import type { ReviewSourceRef } from '../../../../fixtures/googleDocsReview';
 
 const DEFAULT_CARD_GAP = 8;
 
-export const getAnchorIdForSourceRef = (sourceRef: FixtureSourceRef): string =>
+export const getAnchorIdForSourceRef = (sourceRef: ReviewSourceRef): string =>
   sourceRef.kind === 'blockText' || sourceRef.kind === 'blockImage'
     ? `block:${sourceRef.blockId}`
     : `row:${sourceRef.tableId}:${sourceRef.rowId}`;

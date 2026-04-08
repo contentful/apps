@@ -17,29 +17,30 @@ import {
   TableHead,
   TableRow,
   Text,
+  TextLink,
 } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import {
-  FixtureContentBlock,
-  FixtureSourceRef,
-  FixtureTable,
-  FixtureTablePart,
-  FixtureTextRun,
-  FixtureUsageItem,
-  GoogleDocsReviewFixture,
+  ReviewContentBlock,
+  ReviewSourceRef,
+  ReviewTable,
+  ReviewTablePart,
+  ReviewTextRun,
+  ReviewUsageItem,
+  GoogleDocsReviewData,
 } from '../../../../fixtures/googleDocsReview';
 import { MappingCard, type MappingCardData } from './MappingCard';
 import { getAnchorIdForSourceRef, resolveMarkerOffsets } from './mappingCardPositioning';
 
 interface GoogleDocsMappingReviewScreenProps {
-  fixture: GoogleDocsReviewFixture;
+  fixture: GoogleDocsReviewData;
   onBack?: () => void;
   showChrome?: boolean;
 }
 
 type DocSegment =
-  | { kind: 'block'; id: string; position: number; block: FixtureContentBlock }
-  | { kind: 'table'; id: string; position: number; table: FixtureTable };
+  | { kind: 'block'; id: string; position: number; block: ReviewContentBlock }
+  | { kind: 'table'; id: string; position: number; table: ReviewTable };
 
 interface OutlineSection {
   id: string;
@@ -47,9 +48,9 @@ interface OutlineSection {
   segments: DocSegment[];
 }
 
-type SourceUsage = FixtureUsageItem & {
+type SourceUsage = ReviewUsageItem & {
   fieldType: string;
-  sourceRef: FixtureSourceRef;
+  sourceRef: ReviewSourceRef;
 };
 
 type AnchoredMappingCard = MappingCardData & {
@@ -58,8 +59,9 @@ type AnchoredMappingCard = MappingCardData & {
 
 type TextSegment = {
   text: string;
-  styles?: FixtureTextRun['styles'];
+  styles?: ReviewTextRun['styles'];
   highlighted: boolean;
+  mappingKeys: string[];
 };
 
 type ListItemPresentation = {
@@ -67,7 +69,7 @@ type ListItemPresentation = {
   nestingLevel: number;
 };
 
-const getBlockText = (block: FixtureContentBlock): string =>
+const getBlockText = (block: ReviewContentBlock): string =>
   block.textRuns
     .map((run) => run.text)
     .join('')
@@ -87,7 +89,7 @@ const formatDisplayName = (value: string): string => {
   return normalized.replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
-const getEntryDisplayTitle = (entry: GoogleDocsReviewFixture['entries'][number]): string => {
+const getEntryDisplayTitle = (entry: GoogleDocsReviewData['entries'][number]): string => {
   const titleField = entry.fields?.title;
   if (typeof titleField !== 'object' || titleField === null) {
     return formatDisplayName(entry.contentTypeId);
@@ -102,7 +104,7 @@ const getEntryDisplayTitle = (entry: GoogleDocsReviewFixture['entries'][number])
     : formatDisplayName(entry.contentTypeId);
 };
 
-function buildUsageIndexes(fixture: GoogleDocsReviewFixture): {
+function buildUsageIndexes(fixture: GoogleDocsReviewData): {
   blockUsage: Record<string, SourceUsage[]>;
   tablePartUsage: Record<string, SourceUsage[]>;
   tableUsage: Record<string, SourceUsage[]>;
@@ -141,6 +143,9 @@ function buildUsageIndexes(fixture: GoogleDocsReviewFixture): {
   return { blockUsage, tablePartUsage, tableUsage };
 }
 
+const getMappingCardKey = (sectionId: string, usage: ReviewUsageItem): string =>
+  `${sectionId}-${usage.entryIndex}-${usage.fieldId}`;
+
 function uniqueUsage<T extends SourceUsage>(usage: T[]): T[] {
   const seen = new Set<string>();
   return usage.filter((item) => {
@@ -153,14 +158,21 @@ function uniqueUsage<T extends SourceUsage>(usage: T[]): T[] {
   });
 }
 
-function buildTextSegments(textRuns: FixtureTextRun[], refs: FixtureSourceRef[]): TextSegment[] {
-  const textRefs = refs.filter(
-    (sourceRef): sourceRef is Extract<FixtureSourceRef, { kind: 'blockText' | 'tableText' }> =>
-      sourceRef.kind === 'blockText' || sourceRef.kind === 'tableText'
+function buildTextSegments(
+  textRuns: ReviewTextRun[],
+  usage: Array<{ sourceRef: ReviewSourceRef; mappingKey: string }>
+): TextSegment[] {
+  const textUsage = usage.filter(
+    (
+      usageItem
+    ): usageItem is {
+      sourceRef: Extract<ReviewSourceRef, { kind: 'blockText' | 'tableText' }>;
+      mappingKey: string;
+    } => usageItem.sourceRef.kind === 'blockText' || usageItem.sourceRef.kind === 'tableText'
   );
 
   let fullText = '';
-  const runRanges: Array<{ start: number; end: number; styles?: FixtureTextRun['styles'] }> = [];
+  const runRanges: Array<{ start: number; end: number; styles?: ReviewTextRun['styles'] }> = [];
 
   textRuns.forEach((run) => {
     const start = fullText.length;
@@ -173,9 +185,9 @@ function buildTextSegments(textRuns: FixtureTextRun[], refs: FixtureSourceRef[])
     boundaries.add(range.start);
     boundaries.add(range.end);
   });
-  textRefs.forEach((ref) => {
-    boundaries.add(ref.start);
-    boundaries.add(ref.end);
+  textUsage.forEach(({ sourceRef }) => {
+    boundaries.add(sourceRef.start);
+    boundaries.add(sourceRef.end);
   });
 
   const sortedBoundaries = [...boundaries].sort((a, b) => a - b);
@@ -192,19 +204,22 @@ function buildTextSegments(textRuns: FixtureTextRun[], refs: FixtureSourceRef[])
     }
 
     const run = runRanges.find((range) => start >= range.start && end <= range.end);
-    const highlighted = textRefs.some((ref) => start >= ref.start && end <= ref.end);
+    const mappingKeys = textUsage
+      .filter(({ sourceRef }) => start >= sourceRef.start && end <= sourceRef.end)
+      .map(({ mappingKey }) => mappingKey);
 
     return [
       {
         text,
         styles: run?.styles,
-        highlighted,
+        highlighted: mappingKeys.length > 0,
+        mappingKeys,
       },
     ];
   });
 }
 
-function getTextSegmentStyle(styles?: FixtureTextRun['styles']): CSSProperties {
+function getTextSegmentStyle(styles?: ReviewTextRun['styles']): CSSProperties {
   return {
     fontWeight: styles?.bold ? 600 : undefined,
     fontStyle: styles?.italic ? 'italic' : undefined,
@@ -215,6 +230,49 @@ function getTextSegmentStyle(styles?: FixtureTextRun['styles']): CSSProperties {
       : undefined,
     verticalAlign: styles?.superscript ? 'super' : styles?.subscript ? 'sub' : undefined,
   };
+}
+
+function renderTextSegment(
+  key: string,
+  testId: string,
+  segment: TextSegment,
+  hovered: boolean,
+  setHoveredMappings: (mappingKeys: string[]) => void
+) {
+  const content = (
+    <Box
+      as="span"
+      key={key}
+      data-testid={testId}
+      data-highlighted={segment.highlighted ? 'true' : 'false'}
+      data-hovered={hovered ? 'true' : 'false'}
+      onMouseEnter={segment.highlighted ? () => setHoveredMappings(segment.mappingKeys) : undefined}
+      onMouseLeave={segment.highlighted ? () => setHoveredMappings([]) : undefined}
+      style={{
+        ...getTextSegmentStyle(segment.styles),
+        backgroundColor: segment.highlighted
+          ? hovered
+            ? tokens.green300
+            : tokens.green200
+          : 'transparent',
+        borderRadius: segment.highlighted ? tokens.borderRadiusSmall : undefined,
+        whiteSpace: 'pre-wrap',
+        transition: 'background-color 120ms ease',
+      }}>
+      {segment.text}
+    </Box>
+  );
+
+  const linkUrl = segment.styles?.linkUrl?.trim();
+  if (!linkUrl) {
+    return content;
+  }
+
+  return (
+    <TextLink key={`link-${key}`} href={linkUrl} target="_blank" rel="noreferrer">
+      {content}
+    </TextLink>
+  );
 }
 
 function buildOutlineSections(segments: DocSegment[]): OutlineSection[] {
@@ -259,7 +317,7 @@ function buildOutlineSections(segments: DocSegment[]): OutlineSection[] {
 }
 
 function buildListItemPresentations(
-  blocks: FixtureContentBlock[]
+  blocks: ReviewContentBlock[]
 ): Record<string, ListItemPresentation> {
   const presentations: Record<string, ListItemPresentation> = {};
   const orderedCounts = new Map<number, number>();
@@ -306,6 +364,7 @@ export const GoogleDocsMappingReviewScreen = ({
   showChrome = true,
 }: GoogleDocsMappingReviewScreenProps) => {
   const [selectedEntryIndex, setSelectedEntryIndex] = useState<number | null>(null);
+  const [hoveredMappingKeys, setHoveredMappingKeys] = useState<string[]>([]);
   const [cardOffsetsBySection, setCardOffsetsBySection] = useState<
     Record<string, Record<string, number>>
   >({});
@@ -347,7 +406,7 @@ export const GoogleDocsMappingReviewScreen = ({
     [document.contentBlocks]
   );
 
-  const getVisibleUsage = <T extends FixtureUsageItem>(usage: T[]): T[] => {
+  const getVisibleUsage = <T extends ReviewUsageItem>(usage: T[]): T[] => {
     if (selectedEntryIndex === null) {
       return usage;
     }
@@ -362,13 +421,16 @@ export const GoogleDocsMappingReviewScreen = ({
     return uniqueUsage(sourceUsage.blockUsage[segment.id] ?? []);
   };
 
-  const getUsageForSection = (section: OutlineSection): FixtureUsageItem[] =>
+  const getUsageForSection = (section: OutlineSection): ReviewUsageItem[] =>
     uniqueUsage(section.segments.flatMap(getUsageForSegment));
+
+  const isMappingHovered = (mappingKeys: string[]) =>
+    mappingKeys.some((mappingKey) => hoveredMappingKeys.includes(mappingKey));
 
   const getMappingCardsForSection = (section: OutlineSection): AnchoredMappingCard[] =>
     getVisibleUsage(getUsageForSection(section)).map((usage) => {
       return {
-        key: `${section.id}-${usage.entryIndex}-${usage.fieldId}`,
+        key: getMappingCardKey(section.id, usage),
         fieldName: formatDisplayName(usage.fieldId),
         fieldType: formatDisplayName(usage.fieldType),
         anchorId: getAnchorIdForSourceRef(usage.sourceRef),
@@ -445,31 +507,31 @@ export const GoogleDocsMappingReviewScreen = ({
     };
   }, [mappingCardsBySection, sections]);
 
-  const renderBlock = (block: FixtureContentBlock) => {
-    const visibleRefs = getVisibleUsage(sourceUsage.blockUsage[block.id] ?? []).map(
-      (usage) => usage.sourceRef
-    );
-    const textRefs = visibleRefs.filter((ref) => ref.kind === 'blockText');
-    const segments = buildTextSegments(block.textRuns, textRefs);
+  const renderBlock = (sectionId: string, block: ReviewContentBlock) => {
+    const visibleUsage = getVisibleUsage(sourceUsage.blockUsage[block.id] ?? []);
+    const visibleRefs = visibleUsage.map((usage) => usage.sourceRef);
+    const textUsage = visibleUsage.map((usage) => ({
+      sourceRef: usage.sourceRef,
+      mappingKey: getMappingCardKey(sectionId, usage),
+    }));
+    const segments = buildTextSegments(block.textRuns, textUsage);
     const listItemPresentation = block.type === 'listItem' ? listItemPresentations[block.id] : null;
+    const setHoveredMappings = (mappingKeys: string[]) => {
+      setHoveredMappingKeys(mappingKeys);
+    };
 
     const renderedText = (
       <Text as="p" marginBottom="none">
-        {segments.map((segment, index) => (
-          <Box
-            as="span"
-            key={`${block.id}-${index}`}
-            data-testid={`block-segment-${block.id}-${index}`}
-            data-highlighted={segment.highlighted ? 'true' : 'false'}
-            style={{
-              ...getTextSegmentStyle(segment.styles),
-              backgroundColor: segment.highlighted ? tokens.green200 : 'transparent',
-              borderRadius: segment.highlighted ? tokens.borderRadiusSmall : undefined,
-              whiteSpace: 'pre-wrap',
-            }}>
-            {segment.text}
-          </Box>
-        ))}
+        {segments.map((segment, index) => {
+          const hovered = isMappingHovered(segment.mappingKeys);
+          return renderTextSegment(
+            `${block.id}-${index}`,
+            `block-segment-${block.id}-${index}`,
+            segment,
+            hovered,
+            setHoveredMappings
+          );
+        })}
       </Text>
     );
 
@@ -509,6 +571,13 @@ export const GoogleDocsMappingReviewScreen = ({
           const highlighted = visibleRefs.some(
             (ref) => ref.kind === 'blockImage' && ref.imageId === imageId
           );
+          const mappingKeys = visibleUsage
+            .filter(
+              (usage) =>
+                usage.sourceRef.kind === 'blockImage' && usage.sourceRef.imageId === imageId
+            )
+            .map((usage) => getMappingCardKey(sectionId, usage));
+          const hovered = isMappingHovered(mappingKeys);
 
           return (
             <Box key={image.id} marginTop="spacingS">
@@ -517,13 +586,19 @@ export const GoogleDocsMappingReviewScreen = ({
                 src={image.url}
                 alt={image.altText ?? image.title ?? 'Document image'}
                 data-highlighted={highlighted ? 'true' : 'false'}
+                data-hovered={hovered ? 'true' : 'false'}
+                onMouseEnter={highlighted ? () => setHoveredMappings(mappingKeys) : undefined}
+                onMouseLeave={highlighted ? () => setHoveredMappings([]) : undefined}
                 style={{
                   width: '100%',
                   maxHeight: 280,
                   objectFit: 'contain',
                   borderRadius: tokens.borderRadiusMedium,
-                  border: `2px solid ${highlighted ? tokens.green500 : tokens.gray300}`,
+                  border: `2px solid ${
+                    highlighted ? (hovered ? tokens.green600 : tokens.green500) : tokens.gray300
+                  }`,
                   backgroundColor: tokens.gray100,
+                  transition: 'border-color 120ms ease',
                 }}
               />
             </Box>
@@ -534,19 +609,26 @@ export const GoogleDocsMappingReviewScreen = ({
   };
 
   const renderTablePart = (
-    table: FixtureTable,
+    sectionId: string,
+    table: ReviewTable,
     rowId: string,
     cellId: string,
-    part: FixtureTablePart
+    part: ReviewTablePart
   ) => {
     const usageKey = [table.id, rowId, cellId, part.id].join(':');
-    const visibleRefs = getVisibleUsage(sourceUsage.tablePartUsage[usageKey] ?? []).map(
-      (usage) => usage.sourceRef
-    );
+    const visibleUsage = getVisibleUsage(sourceUsage.tablePartUsage[usageKey] ?? []);
+    const visibleRefs = visibleUsage.map((usage) => usage.sourceRef);
+    const setHoveredMappings = (mappingKeys: string[]) => {
+      setHoveredMappingKeys(mappingKeys);
+    };
 
     if (part.type === 'image') {
       const image = imageById[part.imageId];
       const highlighted = visibleRefs.some((ref) => ref.kind === 'tableImage');
+      const mappingKeys = visibleUsage
+        .filter((usage) => usage.sourceRef.kind === 'tableImage')
+        .map((usage) => getMappingCardKey(sectionId, usage));
+      const hovered = isMappingHovered(mappingKeys);
 
       if (!image) {
         return null;
@@ -560,43 +642,48 @@ export const GoogleDocsMappingReviewScreen = ({
             alt={image.altText ?? image.title ?? 'Table image'}
             data-testid={`table-image-part-${part.id}`}
             data-highlighted={highlighted ? 'true' : 'false'}
+            data-hovered={hovered ? 'true' : 'false'}
+            onMouseEnter={highlighted ? () => setHoveredMappings(mappingKeys) : undefined}
+            onMouseLeave={highlighted ? () => setHoveredMappings([]) : undefined}
             style={{
               width: '100%',
               maxWidth: 180,
               objectFit: 'contain',
               borderRadius: tokens.borderRadiusMedium,
-              border: `2px solid ${highlighted ? tokens.green500 : tokens.gray300}`,
+              border: `2px solid ${
+                highlighted ? (hovered ? tokens.green600 : tokens.green500) : tokens.gray300
+              }`,
               backgroundColor: tokens.gray100,
+              transition: 'border-color 120ms ease',
             }}
           />
         </Box>
       );
     }
 
-    const segments = buildTextSegments(part.textRuns, visibleRefs);
+    const textUsage = visibleUsage.map((usage) => ({
+      sourceRef: usage.sourceRef,
+      mappingKey: getMappingCardKey(sectionId, usage),
+    }));
+    const segments = buildTextSegments(part.textRuns, textUsage);
 
     return (
       <Box as="span" style={{ whiteSpace: 'pre-wrap' }}>
-        {segments.map((segment, index) => (
-          <Box
-            as="span"
-            key={`${part.id}-${index}`}
-            data-testid={`table-text-segment-${part.id}-${index}`}
-            data-highlighted={segment.highlighted ? 'true' : 'false'}
-            style={{
-              ...getTextSegmentStyle(segment.styles),
-              backgroundColor: segment.highlighted ? tokens.green200 : 'transparent',
-              borderRadius: segment.highlighted ? tokens.borderRadiusSmall : undefined,
-              whiteSpace: 'pre-wrap',
-            }}>
-            {segment.text}
-          </Box>
-        ))}
+        {segments.map((segment, index) => {
+          const hovered = isMappingHovered(segment.mappingKeys);
+          return renderTextSegment(
+            `${part.id}-${index}`,
+            `table-text-segment-${part.id}-${index}`,
+            segment,
+            hovered,
+            setHoveredMappings
+          );
+        })}
       </Box>
     );
   };
 
-  const renderTable = (table: FixtureTable) => (
+  const renderTable = (sectionId: string, table: ReviewTable) => (
     <Table>
       {table.headers.length > 0 && (
         <TableHead>
@@ -624,7 +711,9 @@ export const GoogleDocsMappingReviewScreen = ({
                   }}>
                   <Flex flexDirection="column" gap="spacing2Xs">
                     {cell.parts.map((part) => (
-                      <Box key={part.id}>{renderTablePart(table, row.id, cell.id, part)}</Box>
+                      <Box key={part.id}>
+                        {renderTablePart(sectionId, table, row.id, cell.id, part)}
+                      </Box>
                     ))}
                   </Flex>
                 </TableCell>
@@ -720,8 +809,8 @@ export const GoogleDocsMappingReviewScreen = ({
                               backgroundColor: 'transparent',
                             }}>
                             {segment.kind === 'table'
-                              ? renderTable(segment.table)
-                              : renderBlock(segment.block)}
+                              ? renderTable(section.id, segment.table)
+                              : renderBlock(section.id, segment.block)}
                           </Box>
                         ))}
                       </Flex>
@@ -744,7 +833,12 @@ export const GoogleDocsMappingReviewScreen = ({
                                 insetInlineEnd: 0,
                                 top: cardOffsetsBySection[section.id]?.[mappingCard.key] ?? 0,
                               }}>
-                              <MappingCard card={mappingCard} />
+                              <MappingCard
+                                card={mappingCard}
+                                isHovered={hoveredMappingKeys.includes(mappingCard.key)}
+                                onMouseEnter={() => setHoveredMappingKeys([mappingCard.key])}
+                                onMouseLeave={() => setHoveredMappingKeys([])}
+                              />
                             </Box>
                           ))
                         : null}

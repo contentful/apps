@@ -21,7 +21,6 @@ const mockSdk = {
       cloneTextBefore: true,
       automaticRedirect: true,
     },
-    invocation: undefined,
   },
   entry: {
     save: vi.fn(),
@@ -33,10 +32,8 @@ const mockSdk = {
   navigator: {
     openEntry: vi.fn(),
   },
-  close: vi.fn(),
   dialogs: {
     openConfirm: vi.fn().mockResolvedValue(true),
-    openCurrentApp: vi.fn().mockResolvedValue(['test-entry', 'referenced-entry-id']),
   },
 };
 

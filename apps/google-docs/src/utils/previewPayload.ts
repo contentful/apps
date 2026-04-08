@@ -1,5 +1,6 @@
 import type {
   AssetToCreate,
+  EntryBlockGraph,
   EntryToCreate,
   NormalizedDocument,
   PreviewPayload,
@@ -61,6 +62,23 @@ function parseReferenceGraph(raw: unknown): ReviewedReferenceGraph | undefined {
       : undefined,
     hasCircularDependency:
       typeof raw.hasCircularDependency === 'boolean' ? raw.hasCircularDependency : undefined,
+  };
+}
+
+function parseEntryBlockGraph(raw: unknown): EntryBlockGraph | undefined {
+  if (raw === undefined) {
+    return undefined;
+  }
+
+  if (!isRecord(raw)) {
+    throw new Error('entryBlockGraph must be an object when present.');
+  }
+
+  return {
+    entries: Array.isArray(raw.entries) ? (raw.entries as EntryBlockGraph['entries']) : [],
+    excludedSourceRefs: Array.isArray(raw.excludedSourceRefs)
+      ? (raw.excludedSourceRefs as EntryBlockGraph['excludedSourceRefs'])
+      : [],
   };
 }
 
@@ -166,11 +184,13 @@ export function validatePayloadShape(payload: unknown): PreviewPayload {
   const referenceGraph = parseReferenceGraph(payload.referenceGraph);
 
   const normalizedDocument = parseNormalizedDocument(payload.normalizedDocument);
+  const entryBlockGraph = parseEntryBlockGraph(payload.entryBlockGraph);
 
   return {
     entries: payload.entries as EntryToCreate[],
     assets,
     referenceGraph: referenceGraph ?? {},
     normalizedDocument,
+    entryBlockGraph,
   };
 }

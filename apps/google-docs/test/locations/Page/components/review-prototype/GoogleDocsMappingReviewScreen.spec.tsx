@@ -1,12 +1,12 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
 import tokens from '@contentful/f36-tokens';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { GoogleDocsMappingReviewScreen } from '../../../../../src/locations/Page/components/review-prototype/GoogleDocsMappingReviewScreen';
-import type { GoogleDocsReviewFixture } from '../../../../../src/fixtures/googleDocsReview';
+import type { GoogleDocsReviewData } from '../../../../../src/fixtures/googleDocsReview';
 
-function buildFixture(): GoogleDocsReviewFixture {
+function buildFixture(): GoogleDocsReviewData {
   const originalNormalizedDocument = {
     documentId: 'doc-1',
     title: 'Demo document',
@@ -223,6 +223,64 @@ describe('GoogleDocsMappingReviewScreen', () => {
     vi.restoreAllMocks();
   });
 
+  it('renders linked text runs as anchors in blocks and table cells', () => {
+    const fixture = buildFixture();
+
+    const linkedBlockRuns = [
+      { text: 'Visit ', styles: {} },
+      {
+        text: 'Contentful',
+        styles: { linkUrl: 'https://www.contentful.com' },
+      },
+    ];
+
+    fixture.originalNormalizedDocument.contentBlocks[1].textRuns = linkedBlockRuns;
+    fixture.editableNormalizedDocument.contentBlocks[1].textRuns = linkedBlockRuns;
+    fixture.entryBlockGraph.entries[0].fieldMappings[0].sourceRefs = [
+      { kind: 'blockText', blockId: 'block-1', start: 0, end: 17 },
+    ];
+
+    const linkedTableRuns = [
+      {
+        text: 'View map',
+        styles: { linkUrl: 'https://maps.app.goo.gl/example' },
+      },
+    ];
+
+    fixture.originalNormalizedDocument.tables[0].rows[0].cells[1].parts[2] = {
+      id: 'table-0-row-0-cell-1-part-2',
+      type: 'text',
+      textRuns: linkedTableRuns,
+    };
+    fixture.editableNormalizedDocument.tables[0].rows[0].cells[1].parts[2] = {
+      id: 'table-0-row-0-cell-1-part-2',
+      type: 'text',
+      textRuns: linkedTableRuns,
+    };
+    fixture.entryBlockGraph.entries[0].fieldMappings[2].sourceRefs = [
+      {
+        kind: 'tableText',
+        tableId: 'table-0',
+        rowId: 'table-0-row-0',
+        cellId: 'table-0-row-0-cell-1',
+        partId: 'table-0-row-0-cell-1-part-2',
+        start: 0,
+        end: 8,
+      },
+    ];
+
+    render(<GoogleDocsMappingReviewScreen fixture={fixture} onBack={vi.fn()} />);
+
+    expect(screen.getByRole('link', { name: 'Contentful' })).toHaveAttribute(
+      'href',
+      'https://www.contentful.com'
+    );
+    expect(screen.getByRole('link', { name: 'View map' })).toHaveAttribute(
+      'href',
+      'https://maps.app.goo.gl/example'
+    );
+  });
+
   it('renders highlighted block text spans from entryBlockGraph', () => {
     render(<GoogleDocsMappingReviewScreen fixture={buildFixture()} onBack={vi.fn()} />);
 
@@ -256,6 +314,31 @@ describe('GoogleDocsMappingReviewScreen', () => {
     );
   });
 
+  it('syncs hover styling between mapping cards and their highlights', () => {
+    render(<GoogleDocsMappingReviewScreen fixture={buildFixture()} onBack={vi.fn()} />);
+
+    const card = screen.getByTestId('mapping-card-section-table-0-0-imageCaption');
+    const textHighlight = screen.getByTestId('table-text-segment-table-0-row-0-cell-1-part-2-0');
+
+    expect(card).toHaveStyle({ border: `1px solid ${tokens.green500}` });
+    expect(textHighlight).toHaveStyle({ backgroundColor: tokens.green200 });
+
+    fireEvent.mouseEnter(card);
+
+    expect(card).toHaveAttribute('data-hovered', 'true');
+    expect(card).toHaveStyle({ border: `2px solid ${tokens.green600}` });
+    expect(textHighlight).toHaveAttribute('data-hovered', 'true');
+    expect(textHighlight).toHaveStyle({ backgroundColor: tokens.green300 });
+
+    fireEvent.mouseLeave(card);
+    fireEvent.mouseEnter(textHighlight);
+
+    expect(card).toHaveAttribute('data-hovered', 'true');
+    expect(card).toHaveStyle({ border: `2px solid ${tokens.green600}` });
+    expect(textHighlight).toHaveAttribute('data-hovered', 'true');
+    expect(textHighlight).toHaveStyle({ backgroundColor: tokens.green300 });
+  });
+
   it('renders ordered and nested unordered list item styling', () => {
     render(<GoogleDocsMappingReviewScreen fixture={buildFixture()} onBack={vi.fn()} />);
 
@@ -284,7 +367,9 @@ describe('GoogleDocsMappingReviewScreen', () => {
   });
 
   it('positions mapping cards against measured document anchors', () => {
-    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function () {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: HTMLElement
+    ) {
       const anchorId = this.getAttribute('data-anchor-id');
       const testId = this.getAttribute('data-testid');
 

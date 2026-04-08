@@ -1,4 +1,4 @@
-export interface FixtureTextRun {
+export interface ReviewTextRun {
   text: string;
   styles?: {
     bold?: boolean;
@@ -11,12 +11,12 @@ export interface FixtureTextRun {
   };
 }
 
-export interface FixtureContentBlock {
+export interface ReviewContentBlock {
   id: string;
   position: number;
-  type: 'paragraph' | 'heading' | 'listItem';
+  type: 'paragraph' | 'heading' | 'listItem' | 'image';
   headingLevel?: number;
-  textRuns: FixtureTextRun[];
+  textRuns: ReviewTextRun[];
   designValueIds: string[];
   imageIds: string[];
   bullet?: {
@@ -26,40 +26,40 @@ export interface FixtureContentBlock {
   captionForImageId?: string;
 }
 
-export interface FixtureTableTextPart {
+export interface ReviewTableTextPart {
   id: string;
   type: 'text';
-  textRuns: FixtureTextRun[];
+  textRuns: ReviewTextRun[];
 }
 
-export interface FixtureTableImagePart {
+export interface ReviewTableImagePart {
   id: string;
   type: 'image';
   imageId: string;
 }
 
-export type FixtureTablePart = FixtureTableTextPart | FixtureTableImagePart;
+export type ReviewTablePart = ReviewTableTextPart | ReviewTableImagePart;
 
-export interface FixtureTableCell {
+export interface ReviewTableCell {
   id: string;
-  parts: FixtureTablePart[];
+  parts: ReviewTablePart[];
 }
 
-export interface FixtureTableRow {
+export interface ReviewTableRow {
   id: string;
-  cells: FixtureTableCell[];
+  cells: ReviewTableCell[];
 }
 
-export interface FixtureTable {
+export interface ReviewTable {
   id: string;
   position: number;
   headers: string[];
-  rows: FixtureTableRow[];
+  rows: ReviewTableRow[];
   designValueIds: string[];
   imageIds: string[];
 }
 
-export interface FixtureNormalizedImage {
+export interface ReviewNormalizedImage {
   id: string;
   url: string;
   altText?: string;
@@ -72,7 +72,7 @@ export interface FixtureNormalizedImage {
   tableId?: string;
 }
 
-export interface FixtureNormalizedDocument {
+export interface ReviewNormalizedDocument {
   documentId: string;
   title?: string;
   designValues?: Array<{
@@ -81,9 +81,9 @@ export interface FixtureNormalizedDocument {
     value: Record<string, unknown>;
     appliesTo: string[];
   }>;
-  contentBlocks: FixtureContentBlock[];
-  images?: FixtureNormalizedImage[];
-  tables: FixtureTable[];
+  contentBlocks: ReviewContentBlock[];
+  images?: ReviewNormalizedImage[];
+  tables: ReviewTable[];
   assets?: Array<{
     url: string;
     altText?: string;
@@ -93,7 +93,7 @@ export interface FixtureNormalizedDocument {
   }>;
 }
 
-export type FixtureSourceRef =
+export type ReviewSourceRef =
   | {
       kind: 'blockText';
       blockId: string;
@@ -123,40 +123,40 @@ export type FixtureSourceRef =
       imageId: string;
     };
 
-export interface FixtureFieldMapping {
+export interface ReviewFieldMapping {
   fieldId: string;
   fieldType: string;
-  sourceRefs: FixtureSourceRef[];
+  sourceRefs: ReviewSourceRef[];
   sourceEntryIds?: string[];
   confidence: number;
   transformNotes?: string;
 }
 
-export interface FixtureGraphEntry {
+export interface ReviewGraphEntry {
   contentTypeId: string;
   tempId?: string;
-  fieldMappings: FixtureFieldMapping[];
+  fieldMappings: ReviewFieldMapping[];
 }
 
-export interface FixtureEntryBlockGraph {
-  entries: FixtureGraphEntry[];
-  excludedSourceRefs: FixtureSourceRef[];
+export interface ReviewEntryBlockGraph {
+  entries: ReviewGraphEntry[];
+  excludedSourceRefs: ReviewSourceRef[];
 }
 
-export interface FixtureUsageItem {
+export interface ReviewUsageItem {
   entryIndex: number;
   fieldId: string;
   fieldType: string;
-  sourceRef: FixtureSourceRef;
+  sourceRef: ReviewSourceRef;
 }
 
-export interface FixturePreviewEntry {
+export interface ReviewPreviewEntry {
   tempId?: string;
   contentTypeId: string;
   fields: Record<string, unknown>;
 }
 
-export interface FixtureAsset {
+export interface ReviewAsset {
   url: string;
   altText?: string;
   title?: string;
@@ -166,26 +166,26 @@ export interface FixtureAsset {
   fileName?: string;
 }
 
-export interface GoogleDocsReviewFixture {
+export interface GoogleDocsReviewData {
   [key: string]: unknown;
-  entries: FixturePreviewEntry[];
-  assets: FixtureAsset[];
+  entries: ReviewPreviewEntry[];
+  assets: ReviewAsset[];
   referenceGraph?: {
-    edges: Array<{
+    edges?: Array<{
       from: string;
       to: string;
       fieldId: string;
     }>;
-    creationOrder: string[];
-    hasCircularDependency: boolean;
-    deferredFields: Array<{
+    creationOrder?: string[];
+    hasCircularDependency?: boolean;
+    deferredFields?: Array<{
       entryId?: string;
       tempId?: string;
       fieldId: string;
       reason?: string;
     }>;
   };
-  originalNormalizedDocument: FixtureNormalizedDocument;
-  editableNormalizedDocument: FixtureNormalizedDocument;
-  entryBlockGraph: FixtureEntryBlockGraph;
+  originalNormalizedDocument: ReviewNormalizedDocument;
+  editableNormalizedDocument: ReviewNormalizedDocument;
+  entryBlockGraph: ReviewEntryBlockGraph;
 }

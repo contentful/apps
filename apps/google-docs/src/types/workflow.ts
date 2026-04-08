@@ -35,26 +35,59 @@ export interface NormalizedDocumentTextRun {
     bold?: boolean;
     italic?: boolean;
     underline?: boolean;
+    strikethrough?: boolean;
+    superscript?: boolean;
+    subscript?: boolean;
+    linkUrl?: string;
   };
+}
+
+export interface NormalizedDocumentFlattenedRun extends NormalizedDocumentTextRun {
+  start: number;
+  end: number;
 }
 
 export interface NormalizedDocumentContentBlock {
   id: string;
   position: number;
-  type: 'paragraph' | 'heading' | 'listItem';
+  type: 'paragraph' | 'heading' | 'listItem' | 'image';
   headingLevel?: number;
-  textRuns: NormalizedDocumentTextRun[];
-  designValueIds: string[];
-  imageIds: string[];
   bullet?: {
     nestingLevel: number;
     ordered: boolean;
   };
+  textRuns: NormalizedDocumentTextRun[];
+  flattenedTextRuns?: NormalizedDocumentFlattenedRun[];
+  designValueIds: string[];
+  imageIds: string[];
   captionForImageId?: string;
 }
 
+export interface NormalizedDocumentTableTextPart {
+  id: string;
+  type: 'text';
+  textRuns: NormalizedDocumentTextRun[];
+  flattenedTextRuns?: NormalizedDocumentFlattenedRun[];
+}
+
+export interface NormalizedDocumentTableImagePart {
+  id: string;
+  type: 'image';
+  imageId: string;
+}
+
+export type NormalizedDocumentTablePart =
+  | NormalizedDocumentTableTextPart
+  | NormalizedDocumentTableImagePart;
+
+export interface NormalizedDocumentTableCell {
+  id: string;
+  parts: NormalizedDocumentTablePart[];
+}
+
 export interface NormalizedDocumentTableRow {
-  cells: string[];
+  id: string;
+  cells: NormalizedDocumentTableCell[];
 }
 
 export interface NormalizedDocumentTable {
@@ -104,6 +137,62 @@ export interface NormalizedDocument {
   assets?: NormalizedDocumentAsset[];
 }
 
+export type EntryBlockGraphTextSourceRef =
+  | {
+      kind: 'blockText';
+      blockId: string;
+      start: number;
+      end: number;
+      flattenedRuns?: NormalizedDocumentFlattenedRun[];
+    }
+  | {
+      kind: 'tableText';
+      tableId: string;
+      rowId: string;
+      cellId: string;
+      partId: string;
+      start: number;
+      end: number;
+      flattenedRuns?: NormalizedDocumentFlattenedRun[];
+    };
+
+export type EntryBlockGraphImageSourceRef =
+  | {
+      kind: 'blockImage';
+      blockId: string;
+      imageId: string;
+    }
+  | {
+      kind: 'tableImage';
+      tableId: string;
+      rowId: string;
+      cellId: string;
+      partId: string;
+      imageId: string;
+    };
+
+export type EntryBlockGraphSourceRef = EntryBlockGraphTextSourceRef | EntryBlockGraphImageSourceRef;
+
+export interface EntryBlockGraphFieldMapping {
+  fieldId: string;
+  fieldType: string;
+  sourceRefs: EntryBlockGraphSourceRef[];
+  sourceEntryIds?: string[];
+  confidence: number;
+  transformNotes?: string;
+}
+
+export interface EntryBlockGraphEntry {
+  contentTypeId: string;
+  tempId?: string;
+  fieldMappings: EntryBlockGraphFieldMapping[];
+}
+
+export interface EntryBlockGraph {
+  entries: EntryBlockGraphEntry[];
+  excludedSourceRefs: EntryBlockGraphSourceRef[];
+}
+
 export interface ReviewedReferenceGraphEdge {
   from: string;
   to: string;
@@ -111,9 +200,10 @@ export interface ReviewedReferenceGraphEdge {
 }
 
 export interface ReviewedReferenceGraphDeferredField {
-  entryId: string;
+  entryId?: string;
+  tempId?: string;
   fieldId: string;
-  reason: string;
+  reason?: string;
 }
 
 export interface ReviewedReferenceGraph {
@@ -123,14 +213,34 @@ export interface ReviewedReferenceGraph {
   hasCircularDependency?: boolean;
 }
 
+export interface WorkflowContentTypeField {
+  id?: string;
+  name?: string;
+  type?: string;
+  required?: boolean;
+  validations?: unknown[];
+}
+
+export interface WorkflowContentType {
+  sys: {
+    id: string;
+  };
+  displayField?: string;
+  name?: string;
+  description?: string | null;
+  fields: WorkflowContentTypeField[];
+}
+
 export interface PreviewPayload {
   entries: EntryToCreate[];
   assets: AssetToCreate[];
   referenceGraph: ReviewedReferenceGraph;
   normalizedDocument: NormalizedDocument;
+  entryBlockGraph?: EntryBlockGraph;
 }
 
-export interface SuspendPayload {
+export interface DocumentScopeSuspendPayload {
+  suspendStepId: 'document-scope-selection';
   reason?: string;
   documentId?: string;
   title?: string;
@@ -142,6 +252,19 @@ export interface SuspendPayload {
   tabCount?: number;
   tabs?: DocTabOption[];
 }
+
+export interface MappingReviewSuspendPayload {
+  suspendStepId: 'mapping-review';
+  reason: string;
+  documentId: string;
+  documentTitle?: string;
+  normalizedDocument: NormalizedDocument;
+  entryBlockGraph: EntryBlockGraph;
+  referenceGraph: ReviewedReferenceGraph;
+  contentTypes: WorkflowContentType[];
+}
+
+export type SuspendPayload = DocumentScopeSuspendPayload | MappingReviewSuspendPayload;
 
 export type WorkflowRunResult =
   | {
@@ -160,4 +283,6 @@ export type WorkflowRunResult =
 export interface ResumePayload {
   includeImages?: boolean;
   selectedTabIds?: string[];
+  editedNormalizedDocument?: NormalizedDocument;
+  entryBlockGraph?: EntryBlockGraph;
 }

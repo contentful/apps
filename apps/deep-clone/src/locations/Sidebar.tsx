@@ -59,26 +59,19 @@ function Sidebar() {
       setClonesCount,
       setUpdatesCount
     );
-    const referenceTree = await cloner.getReferenceTree();
-    const selectedEntryIds = await sdk.dialogs.openCurrentApp({
-      title: 'Select entries to clone',
-      width: 'large',
-      shouldCloseOnEscapePress: true,
-      shouldCloseOnOverlayClick: false,
-      parameters: {
-        referenceTree,
-      },
+    const referencesQty = await cloner.getReferencesQty();
+    const confirmation = await sdk.dialogs.openConfirm({
+      title: 'Clone entry',
+      message: `Are you sure you want to clone this entry? This will create ${referencesQty} new entries.`,
     });
-
-    if (!selectedEntryIds || !Array.isArray(selectedEntryIds)) {
+    if (!confirmation) {
       resetState();
       return;
     }
-
     setIsConfirming(false);
     setIsCloning(true);
 
-    const clonedEntry = await cloner.cloneEntry(selectedEntryIds);
+    const clonedEntry = await cloner.cloneEntry();
 
     setIsCloning(false);
     setIsFinished(true);
