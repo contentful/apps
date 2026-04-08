@@ -52,9 +52,7 @@ const PreviewFieldMultiSelect: React.FC<PreviewFieldMultiSelectProps> = ({
 
   const handleSearchValueChange = (event: { target: { value: string } }) => {
     const value = event.target.value.toLowerCase();
-    setFilteredItems(
-      availableFields.filter((field) => field.name.toLowerCase().includes(value))
-    );
+    setFilteredItems(availableFields.filter((field) => field.name.toLowerCase().includes(value)));
   };
 
   useEffect(() => {

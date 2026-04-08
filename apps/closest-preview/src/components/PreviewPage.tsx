@@ -15,8 +15,7 @@ const PreviewPage = () => {
       padding="spacing2Xl"
       style={{
         minHeight: '100vh',
-        background:
-          'linear-gradient(180deg, rgba(246,247,249,1) 0%, rgba(255,255,255,1) 100%)',
+        background: 'linear-gradient(180deg, rgba(246,247,249,1) 0%, rgba(255,255,255,1) 100%)',
       }}>
       <Box
         style={{
