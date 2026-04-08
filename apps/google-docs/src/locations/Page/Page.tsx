@@ -47,7 +47,11 @@ const Page = () => {
     <>
       <Layout withBoxShadow={true} offsetTop={10}>
         {previewPayload ? (
-          <PreviewPageView payload={previewPayload} onLeavePreview={handleReturnToMainPage} />
+          <PreviewPageView
+            payload={previewPayload}
+            oauthToken={oauthToken}
+            onLeavePreview={handleReturnToMainPage}
+          />
         ) : (
           <MainPageView
             oauthToken={oauthToken}

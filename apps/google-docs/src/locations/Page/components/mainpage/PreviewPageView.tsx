@@ -9,10 +9,11 @@ import { PageAppSDK } from '@contentful/app-sdk';
 
 interface PreviewPageViewProps {
   payload: PreviewPayload;
+  oauthToken: string;
   onLeavePreview: () => void;
 }
 
-export const PreviewPageView = ({ payload, onLeavePreview }: PreviewPageViewProps) => {
+export const PreviewPageView = ({ payload, oauthToken, onLeavePreview }: PreviewPageViewProps) => {
   const sdk = useSDK<PageAppSDK>();
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
   const rawTitle = payload.normalizedDocument?.title;
@@ -36,7 +37,12 @@ export const PreviewPageView = ({ payload, onLeavePreview }: PreviewPageViewProp
       <Splitter marginTop="spacingS" />
       <Layout.Body>
         <Flex flexDirection="column" gap="spacing2Xl">
-          <OverviewSection sdk={sdk} payload={payload} onReturnToMainPage={onLeavePreview} />
+          <OverviewSection
+            sdk={sdk}
+            payload={payload}
+            oauthToken={oauthToken}
+            onReturnToMainPage={onLeavePreview}
+          />
           <Heading as="h2" marginBottom="none">
             Document outline
           </Heading>
