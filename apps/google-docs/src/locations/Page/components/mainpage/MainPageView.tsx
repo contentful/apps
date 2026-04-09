@@ -58,7 +58,7 @@ export const MainPageView = ({
             <Flex flexDirection="column" alignItems="flex-start">
               <Heading marginBottom="spacingS">Select your file</Heading>
               <Paragraph>
-                Create entries using existing content types from a Drive Integration file.
+                Create entries using existing content types from a Google Drive file.
                 <br />
                 Get started by selecting the file you would like to use.
               </Paragraph>
