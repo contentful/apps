@@ -23,6 +23,7 @@ export const PreviewPageView = ({
 }: PreviewPageViewProps) => {
   const sdk = useSDK<PageAppSDK>();
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
+  const mappingReviewPayload = isMappingReviewSuspendPayload(payload) ? payload : null;
   const rawTitle = payload.normalizedDocument?.title;
   const docTitle = typeof rawTitle === 'string' ? rawTitle : undefined;
   const title = docTitle && docTitle.trim().length > 0 ? docTitle : 'Selected document';
@@ -49,7 +50,7 @@ export const PreviewPageView = ({
             payload={payload}
             oauthToken={oauthToken}
             onReturnToMainPage={onLeavePreview}
-            onCreateSelected={onResumeMappingReview}
+            onCreateSelected={mappingReviewPayload ? onResumeMappingReview : undefined}
           />
           <Heading as="h2" marginBottom="none">
             Document outline
