@@ -48,10 +48,10 @@ const OverviewSection = ({
         {
           fields: {
             url: {
-              'en-US': '/blog/show-up-first-with-pinterest-top-of-search-ads',
+              'en-US': '/blog/an-url',
             },
             internalLabel: {
-              'en-US': '/blog/show-up-first-with-pinterest-top-of-search-ads',
+              'en-US': '/blog/another-url',
             },
           },
           tempId: 'url_1',
