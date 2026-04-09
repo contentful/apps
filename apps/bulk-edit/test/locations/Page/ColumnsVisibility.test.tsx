@@ -94,14 +94,14 @@ describe('FieldVisibiltyMenu (Column Selection)', () => {
       render(<FieldVisibiltyMenu {...defaultProps} />);
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /filed visibility/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /field visibility/i })).toBeInTheDocument();
       });
     });
 
     it('opens menu when trigger is clicked', async () => {
       render(<FieldVisibiltyMenu {...defaultProps} />);
 
-      const triggerButton = screen.getByRole('button', { name: /filed visibility/i });
+      const triggerButton = screen.getByRole('button', { name: /field visibility/i });
       fireEvent.click(triggerButton);
 
       await waitFor(() => {
@@ -113,7 +113,7 @@ describe('FieldVisibiltyMenu (Column Selection)', () => {
     it('displays all field options in the menu', async () => {
       render(<FieldVisibiltyMenu {...defaultProps} />);
 
-      const triggerButton = screen.getByRole('button', { name: /filed visibility/i });
+      const triggerButton = screen.getByRole('button', { name: /field visibility/i });
       fireEvent.click(triggerButton);
 
       await waitFor(() => {
@@ -127,7 +127,7 @@ describe('FieldVisibiltyMenu (Column Selection)', () => {
     it('calls setSelectedColumns with all options when Select all is clicked', async () => {
       render(<FieldVisibiltyMenu {...defaultProps} />);
 
-      const triggerButton = screen.getByRole('button', { name: /filed visibility/i });
+      const triggerButton = screen.getByRole('button', { name: /field visibility/i });
       fireEvent.click(triggerButton);
 
       await waitFor(() => {
@@ -143,7 +143,7 @@ describe('FieldVisibiltyMenu (Column Selection)', () => {
       const selectedColumns = getFieldsMapped(mockFields);
       render(<FieldVisibiltyMenu {...defaultProps} selectedColumns={selectedColumns} />);
 
-      const triggerButton = screen.getByRole('button', { name: /filed visibility/i });
+      const triggerButton = screen.getByRole('button', { name: /field visibility/i });
       fireEvent.click(triggerButton);
 
       await waitFor(() => {
@@ -158,7 +158,7 @@ describe('FieldVisibiltyMenu (Column Selection)', () => {
     it('adds field to selection when unselected field is clicked', async () => {
       render(<FieldVisibiltyMenu {...defaultProps} selectedColumns={[]} />);
 
-      const triggerButton = screen.getByRole('button', { name: /filed visibility/i });
+      const triggerButton = screen.getByRole('button', { name: /field visibility/i });
       fireEvent.click(triggerButton);
 
       await waitFor(() => {
@@ -176,7 +176,7 @@ describe('FieldVisibiltyMenu (Column Selection)', () => {
       const selectedColumns = [{ label: 'Display name', value: 'displayName' }];
       render(<FieldVisibiltyMenu {...defaultProps} selectedColumns={selectedColumns} />);
 
-      const triggerButton = screen.getByRole('button', { name: /filed visibility/i });
+      const triggerButton = screen.getByRole('button', { name: /field visibility/i });
       fireEvent.click(triggerButton);
 
       await waitFor(() => {
@@ -197,7 +197,7 @@ describe('FieldVisibiltyMenu (Column Selection)', () => {
       };
       render(<FieldVisibiltyMenu {...localizedProps} />);
 
-      const triggerButton = screen.getByRole('button', { name: /filed visibility/i });
+      const triggerButton = screen.getByRole('button', { name: /field visibility/i });
       fireEvent.click(triggerButton);
 
       await waitFor(() => {
@@ -216,7 +216,7 @@ describe('FieldVisibiltyMenu (Column Selection)', () => {
       };
       render(<FieldVisibiltyMenu {...localizedProps} />);
 
-      const triggerButton = screen.getByRole('button', { name: /filed visibility/i });
+      const triggerButton = screen.getByRole('button', { name: /field visibility/i });
       fireEvent.click(triggerButton);
 
       await waitFor(() => {
@@ -239,7 +239,7 @@ describe('FieldVisibiltyMenu (Column Selection)', () => {
       };
       render(<FieldVisibiltyMenu {...emptyProps} />);
 
-      const triggerButton = screen.getByRole('button', { name: /filed visibility/i });
+      const triggerButton = screen.getByRole('button', { name: /field visibility/i });
       fireEvent.click(triggerButton);
 
       await waitFor(() => {
@@ -255,7 +255,7 @@ describe('FieldVisibiltyMenu (Column Selection)', () => {
       };
       render(<FieldVisibiltyMenu {...singleFieldProps} />);
 
-      const triggerButton = screen.getByRole('button', { name: /filed visibility/i });
+      const triggerButton = screen.getByRole('button', { name: /field visibility/i });
       fireEvent.click(triggerButton);
 
       await waitFor(() => {
