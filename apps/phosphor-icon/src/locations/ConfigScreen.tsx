@@ -142,14 +142,21 @@ function extractInvalidStyleCount(
       typeof (candidate as { weight?: unknown }).weight === 'string'
     ) {
       const weight = (candidate as { weight: string }).weight;
-      if (ICON_WEIGHTS.includes(weight as IconWeight) && !allowedWeights.includes(weight as IconWeight)) {
+      if (
+        ICON_WEIGHTS.includes(weight as IconWeight) &&
+        !allowedWeights.includes(weight as IconWeight)
+      ) {
         invalidStyles.add(weight as IconWeight);
         entryCount += 1;
       }
     }
   };
 
-  if (fieldValue && typeof fieldValue === 'object' && 'weight' in (fieldValue as Record<string, unknown>)) {
+  if (
+    fieldValue &&
+    typeof fieldValue === 'object' &&
+    'weight' in (fieldValue as Record<string, unknown>)
+  ) {
     collect(fieldValue);
   } else if (fieldValue && typeof fieldValue === 'object') {
     Object.values(fieldValue as Record<string, unknown>).forEach(collect);
@@ -165,7 +172,11 @@ function extractInvalidStyleCount(
   };
 }
 
-function replaceInvalidStyles(fieldValue: unknown, replacementWeight: IconWeight, allowedWeights: IconWeight[]) {
+function replaceInvalidStyles(
+  fieldValue: unknown,
+  replacementWeight: IconWeight,
+  allowedWeights: IconWeight[]
+) {
   const replace = (candidate: unknown) => {
     if (
       candidate &&
@@ -174,7 +185,10 @@ function replaceInvalidStyles(fieldValue: unknown, replacementWeight: IconWeight
       typeof (candidate as { weight?: unknown }).weight === 'string'
     ) {
       const weight = (candidate as { weight: string }).weight;
-      if (ICON_WEIGHTS.includes(weight as IconWeight) && !allowedWeights.includes(weight as IconWeight)) {
+      if (
+        ICON_WEIGHTS.includes(weight as IconWeight) &&
+        !allowedWeights.includes(weight as IconWeight)
+      ) {
         return {
           ...(candidate as Record<string, unknown>),
           weight: replacementWeight,
@@ -185,7 +199,11 @@ function replaceInvalidStyles(fieldValue: unknown, replacementWeight: IconWeight
     return candidate;
   };
 
-  if (fieldValue && typeof fieldValue === 'object' && 'weight' in (fieldValue as Record<string, unknown>)) {
+  if (
+    fieldValue &&
+    typeof fieldValue === 'object' &&
+    'weight' in (fieldValue as Record<string, unknown>)
+  ) {
     return replace(fieldValue);
   }
 
@@ -433,7 +451,10 @@ const ConfigScreen = () => {
           };
 
           for (const entry of entriesResponse.items ?? []) {
-            const summary = extractInvalidStyleCount(entry.fields?.[managedField.id], enabledWeights);
+            const summary = extractInvalidStyleCount(
+              entry.fields?.[managedField.id],
+              enabledWeights
+            );
             if (!summary) {
               continue;
             }
@@ -553,10 +574,9 @@ const ConfigScreen = () => {
             )) as { sys?: { version?: number; publishedVersion?: number } };
 
             if (entry.sys.publishedVersion && updateResult.sys?.version) {
-              await sdk.cma.entry.publish(
-                { entryId: entry.sys.id },
-                { sys: { version: updateResult.sys.version } } as never
-              );
+              await sdk.cma.entry.publish({ entryId: entry.sys.id }, {
+                sys: { version: updateResult.sys.version },
+              } as never);
             }
           }
 
@@ -675,10 +695,9 @@ const ConfigScreen = () => {
             };
 
             if (updatedResult.sys?.version) {
-              await sdk.cma.contentType.publish(
-                { contentTypeId: contentType.id },
-                { sys: { version: updatedResult.sys.version } } as never
-              );
+              await sdk.cma.contentType.publish({ contentTypeId: contentType.id }, {
+                sys: { version: updatedResult.sys.version },
+              } as never);
             }
 
             contentTypeDetails = updatedResult;

@@ -228,19 +228,21 @@ export function createMockConfigSdk(
         ),
       },
       entry: {
-        getMany: vi.fn(({ query }: { query?: { content_type?: string; limit?: number; skip?: number } }) => {
-          const matchingEntries = Object.values(entriesById).filter(
-            (entry) => entry.sys.contentTypeId === query?.content_type
-          );
-          const skip = query?.skip ?? 0;
-          const limit = query?.limit ?? matchingEntries.length;
-          const items = matchingEntries.slice(skip, skip + limit);
+        getMany: vi.fn(
+          ({ query }: { query?: { content_type?: string; limit?: number; skip?: number } }) => {
+            const matchingEntries = Object.values(entriesById).filter(
+              (entry) => entry.sys.contentTypeId === query?.content_type
+            );
+            const skip = query?.skip ?? 0;
+            const limit = query?.limit ?? matchingEntries.length;
+            const items = matchingEntries.slice(skip, skip + limit);
 
-          return Promise.resolve({
-            items,
-            total: matchingEntries.length,
-          });
-        }),
+            return Promise.resolve({
+              items,
+              total: matchingEntries.length,
+            });
+          }
+        ),
         update: vi.fn(
           (
             { entryId }: { entryId: string },
@@ -267,19 +269,21 @@ export function createMockConfigSdk(
             return Promise.resolve(updated);
           }
         ),
-        publish: vi.fn(({ entryId }: { entryId: string }, value: { sys?: { version?: number } }) => {
-          const current = entriesById[entryId];
-          const published = {
-            ...current,
-            sys: {
-              ...current.sys,
-              publishedVersion: value.sys?.version ?? current.sys.version,
-            },
-          };
+        publish: vi.fn(
+          ({ entryId }: { entryId: string }, value: { sys?: { version?: number } }) => {
+            const current = entriesById[entryId];
+            const published = {
+              ...current,
+              sys: {
+                ...current.sys,
+                publishedVersion: value.sys?.version ?? current.sys.version,
+              },
+            };
 
-          entriesById[entryId] = published;
-          return Promise.resolve(published);
-        }),
+            entriesById[entryId] = published;
+            return Promise.resolve(published);
+          }
+        ),
       },
     },
     dialogs: {

@@ -99,8 +99,6 @@ describe('Field', () => {
     render(<Field />);
 
     expect(await screen.findByText(/selected style is no longer allowed/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/this entry currently uses duotone\./i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/this entry currently uses duotone\./i)).toBeInTheDocument();
   });
 });
