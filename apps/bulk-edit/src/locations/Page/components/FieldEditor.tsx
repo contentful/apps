@@ -10,7 +10,7 @@ import { DropdownEditor } from '@contentful/field-editor-dropdown';
 import { RadioEditor } from '@contentful/field-editor-radio';
 import { ListEditor } from '@contentful/field-editor-list';
 import { CheckboxEditor } from '@contentful/field-editor-checkbox';
-import type { ContentTypeField } from '../types';
+import type { ContentTypeField, EntryLinkValue } from '../types';
 import { Note } from '@contentful/f36-components';
 import {
   createFieldAPI,
@@ -18,8 +18,18 @@ import {
   getBooleanEditorParameters,
 } from '../utils/fieldEditorUtils';
 import type { LocalesAPI } from '@contentful/field-editor-shared';
+import { ReferenceFieldEditor } from './ReferenceFieldEditor';
 
-export type FieldValue = string | number | boolean | string[] | object | null | undefined;
+export type FieldValue =
+  | string
+  | number
+  | boolean
+  | string[]
+  | EntryLinkValue
+  | EntryLinkValue[]
+  | object
+  | null
+  | undefined;
 
 interface FieldEditorProps {
   field: ContentTypeField;
@@ -53,6 +63,16 @@ const FIELD_TYPE_TO_DEFAULT_WIDGET: Record<string, string> = {
   Object: 'objectEditor',
 };
 
+const isSingleEntryReferenceField = (field: ContentTypeField) =>
+  field.type === 'Link' &&
+  (field.fieldControl?.widgetId === 'entryLinkEditor' ||
+    field.validations.some((validation) => Array.isArray(validation.linkContentType)));
+
+const isMultipleEntryReferenceField = (field: ContentTypeField) =>
+  field.type === 'Array' &&
+  field.items?.type === 'Link' &&
+  field.items?.linkType === 'Entry';
+
 export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange, locales }) => {
   const [error, setError] = useState('');
   const locale = field.locale ? field.locale : locales.default;
@@ -70,6 +90,16 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange
 
   const renderEditor = () => {
     try {
+      if (isSingleEntryReferenceField(field) || isMultipleEntryReferenceField(field)) {
+        return (
+          <ReferenceFieldEditor
+            field={field}
+            value={value as EntryLinkValue | EntryLinkValue[] | null | undefined}
+            onChange={onChange}
+          />
+        );
+      }
+
       switch (getWidgetId(field)) {
         case 'singleLine':
           return (
@@ -143,7 +173,9 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange
 
   return (
     <>
-      {!SUPPORTED_WIDGET_IDS.has(getWidgetId(field)) && (
+      {!SUPPORTED_WIDGET_IDS.has(getWidgetId(field)) &&
+        !isSingleEntryReferenceField(field) &&
+        !isMultipleEntryReferenceField(field) && (
         <Note>
           This field uses an unsupported custom appereance, the default editor for the field will be
           used instead.

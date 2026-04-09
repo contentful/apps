@@ -32,6 +32,12 @@ interface MockSDK extends Partial<AppExtensionSDK> {
     optional: Record<string, boolean>;
     direction: Record<string, 'ltr' | 'rtl'>;
   };
+  dialogs: {
+    selectSingleEntry: ReturnType<typeof vi.fn>;
+    selectMultipleEntries: ReturnType<typeof vi.fn>;
+    selectSingleAsset: ReturnType<typeof vi.fn>;
+    selectMultipleAssets: ReturnType<typeof vi.fn>;
+  };
 }
 
 const mockSdk: MockSDK = {
@@ -70,6 +76,12 @@ const mockSdk: MockSDK = {
       'en-US': 'ltr',
       'es-AR': 'ltr',
     },
+  },
+  dialogs: {
+    selectSingleEntry: vi.fn(),
+    selectMultipleEntries: vi.fn(),
+    selectSingleAsset: vi.fn(),
+    selectMultipleAssets: vi.fn(),
   },
   cma: {
     contentType: {

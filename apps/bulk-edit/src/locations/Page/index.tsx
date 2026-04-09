@@ -23,6 +23,8 @@ import { SearchBar } from './components/SearchBar';
 import {
   fetchEntriesWithBatching,
   getEntryFieldValue,
+  getEntryTitle,
+  isEntryLinkValue,
   mapContentTypePropsToFields,
   processEntriesInBatches,
   STATUSES,
@@ -73,11 +75,12 @@ const Page = () => {
   const [totalUpdateCount, setTotalUpdateCount] = useState<number>(0);
   const [editionCount, setEditionCount] = useState<number>(0);
   const [selectedColumns, setSelectedColumns] = useState<FilterOption[]>([]);
-  const [selectedStatuses, setSelectedStatuses] = useState<FilterOption[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<FilterOption[]>([]); //statusOptions);
   const [currentContentType, setCurrentContentType] = useState<ContentTypeProps | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchFieldFilterValues, setSearchFieldFilterValues] = useState<FieldFilterValue[]>([]);
   const [searchFieldFilterArgs, setSearchFieldFilterArgs] = useState<string>('');
+  const [referenceDisplayValues, setReferenceDisplayValues] = useState<Record<string, string>>({});
   // Used to force a re-render of the table when the selection changes
   const [tableKey, setTableKey] = useState(0);
 
@@ -109,6 +112,8 @@ const Page = () => {
 
     do {
       const response = await sdk.cma.contentType.getMany({
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environment,
         query: { skip, limit },
       });
       const items = response.items as ContentTypeProps[];
@@ -136,6 +141,66 @@ const Page = () => {
   useEffect(() => {
     setSearchFieldFilterArgs(fieldFilterValuesToQuery(searchFieldFilterValues).queryString);
   }, [searchFieldFilterValues]);
+
+  useEffect(() => {
+    const fetchReferenceDisplayValues = async () => {
+      const referenceIds = new Set<string>();
+
+      for (const entry of entries) {
+        for (const field of fields) {
+          const fieldValue = entry.fields[field.id]?.[field.locale || defaultLocale];
+
+          if (Array.isArray(fieldValue)) {
+            fieldValue.filter(isEntryLinkValue).forEach((reference) => referenceIds.add(reference.sys.id));
+          } else if (isEntryLinkValue(fieldValue)) {
+            referenceIds.add(fieldValue.sys.id);
+          }
+        }
+      }
+
+      if (referenceIds.size === 0) {
+        setReferenceDisplayValues({});
+        return;
+      }
+
+      try {
+        const linkedEntries: EntryProps[] = [];
+        const ids = Array.from(referenceIds);
+
+        for (let i = 0; i < ids.length; i += API_LIMITS.CORS_QUERY_PARAM_LIMIT) {
+          const chunk = ids.slice(i, i + API_LIMITS.CORS_QUERY_PARAM_LIMIT);
+          const response = await sdk.cma.entry.getMany({
+            spaceId: sdk.ids.space,
+            environmentId: sdk.ids.environment,
+            query: {
+              'sys.id[in]': chunk.join(','),
+              limit: chunk.length,
+            },
+          });
+
+          linkedEntries.push(...((response.items as EntryProps[]) || []));
+        }
+
+        const contentTypeMap = new Map(contentTypes.map((contentType) => [contentType.sys.id, contentType]));
+        const displayValueMap = Object.fromEntries(
+          linkedEntries.map((linkedEntry) => {
+            const linkedContentType = contentTypeMap.get(linkedEntry.sys.contentType.sys.id);
+            const displayValue = linkedContentType
+              ? getEntryTitle(linkedEntry as any, linkedContentType, defaultLocale)
+              : linkedEntry.sys.id;
+
+            return [linkedEntry.sys.id, displayValue];
+          })
+        );
+
+        setReferenceDisplayValues(displayValueMap);
+      } catch {
+        setReferenceDisplayValues({});
+      }
+    };
+
+    void fetchReferenceDisplayValues();
+  }, [sdk, entries, fields, contentTypes, defaultLocale]);
 
   // ------------------------------------------------------------
   // ALL Content Types Fetch
@@ -298,6 +363,8 @@ const Page = () => {
           const updated = await sdk.cma.entry.update(
             {
               entryId: latestEntry.sys.id,
+              spaceId: sdk.ids.space,
+              environmentId: sdk.ids.environment,
             },
             { ...latestEntry, fields: updatedFields }
           );
@@ -383,6 +450,8 @@ const Page = () => {
         try {
           const restoredEntry = await sdk.cma.entry.update(
             {
+              spaceId: sdk.ids.space,
+              environmentId: sdk.ids.environment,
               entryId: currentEntry.sys.id,
             },
             {
@@ -541,7 +610,7 @@ const Page = () => {
                         )}
                         contentType={selectedContentType}
                         spaceId={sdk.ids.space}
-                        environmentId={sdk.ids.environmentAlias ?? sdk.ids.environment}
+                        environmentId={sdk.ids.environment}
                         defaultLocale={defaultLocale}
                         activePage={activePage}
                         totalEntries={totalEntries}
@@ -552,15 +621,16 @@ const Page = () => {
                           setActivePage(0);
                         }}
                         pageSizeOptions={PAGE_SIZE_OPTIONS}
-                        onSelectionChange={({ selectedEntryIds, selectedFieldId }) => {
-                          setSelectedEntryIds(selectedEntryIds);
-                          setSelectedField(
-                            fields.find((f) => f.uniqueId === selectedFieldId) || null
-                          );
-                        }}
-                      />
-                    </>
-                  )}
+                      onSelectionChange={({ selectedEntryIds, selectedFieldId }) => {
+                        setSelectedEntryIds(selectedEntryIds);
+                        setSelectedField(
+                          fields.find((f) => f.uniqueId === selectedFieldId) || null
+                        );
+                      }}
+                      referenceDisplayValues={referenceDisplayValues}
+                    />
+                  </>
+                )}
                 </>
               )}
             </Flex>

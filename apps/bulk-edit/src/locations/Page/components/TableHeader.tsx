@@ -50,6 +50,36 @@ const FocusedTooltip: React.FC<FocusedTooltipProps> = ({ content, isFocused, chi
   );
 };
 
+const getFieldTypeLabel = (field: ContentTypeField) => {
+  if (field.type === 'Link') {
+    return 'Reference';
+  }
+
+  if (field.type === 'Array' && field.items?.type === 'Link' && field.items?.linkType === 'Entry') {
+    return 'Multi-reference';
+  }
+
+  if (field.type === 'Array' && field.items?.type === 'Symbol') {
+    return 'List';
+  }
+
+  const typeLabels: Record<string, string> = {
+    Symbol: 'Short text',
+    Text: 'Long text',
+    Integer: 'Integer',
+    Number: 'Number',
+    Date: 'Date',
+    Boolean: 'Boolean',
+    Object: 'JSON',
+    RichText: 'Rich text',
+    Location: 'Location',
+    Asset: 'Asset',
+    ResourceLink: 'Resource',
+  };
+
+  return typeLabels[field.type] || field.type;
+};
+
 export const TableHeader: React.FC<TableHeaderProps> = ({
   fields,
   headerCheckboxes,
@@ -127,7 +157,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
               tabIndex={-1}
               data-row={HEADERS_ROW}
               data-column={columnIndex}>
-              <Flex gap="spacingXs">
+              <Flex style={headerStyles.fieldHeaderContent}>
                 {isAllowed ? (
                   <>
                     <Checkbox
@@ -145,6 +175,9 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
                       fontColor="gray900">
                       {fieldName}
                     </Text>
+                    <Text fontSize="fontSizeXs" lineHeight="lineHeightS" fontColor="gray600">
+                      {getFieldTypeLabel(field)}
+                    </Text>
                   </>
                 ) : (
                   <>
@@ -154,6 +187,9 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
                       lineHeight="lineHeightS"
                       fontColor="gray500">
                       {fieldName}
+                    </Text>
+                    <Text fontSize="fontSizeXs" lineHeight="lineHeightS" fontColor="gray500">
+                      {getFieldTypeLabel(field)}
                     </Text>
                     <FocusedTooltip
                       content={`Bulk editing is not supported for the ${field.name} field type`}

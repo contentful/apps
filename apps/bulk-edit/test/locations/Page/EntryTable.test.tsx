@@ -164,6 +164,8 @@ describe('EntryTable', () => {
     expect(screen.getByText('Status')).toBeInTheDocument();
     expect(screen.getByText('Display Name')).toBeInTheDocument();
     expect(screen.getByText('Description')).toBeInTheDocument();
+    expect(screen.getByText('Short text')).toBeInTheDocument();
+    expect(screen.getByText('Long text')).toBeInTheDocument();
   });
 
   it('renders all fields with localized fields in the table header', () => {
@@ -190,6 +192,8 @@ describe('EntryTable', () => {
     expect(screen.getByText('(en-US) Description')).toBeInTheDocument();
     expect(screen.getByText('(es-AR) Display Name')).toBeInTheDocument();
     expect(screen.getByText('(es-AR) Description')).toBeInTheDocument();
+    expect(screen.getAllByText('Short text').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Long text').length).toBeGreaterThan(0);
   });
 
   it('renders entry data in the table cells', () => {
@@ -252,6 +256,57 @@ describe('EntryTable', () => {
     expect(screen.getByText('Edificio dos')).toBeInTheDocument();
     expect(screen.getByText('Descripción uno')).toBeInTheDocument();
     expect(screen.getByText('Descripción dos')).toBeInTheDocument();
+  });
+
+  it('renders resolved reference titles in table cells when provided', () => {
+    const referenceFields: ContentTypeField[] = [
+      {
+        contentTypeId: 'testContentType',
+        id: 'author',
+        uniqueId: 'author',
+        name: 'Author',
+        type: 'Link',
+        required: false,
+        validations: [{ linkContentType: ['bulkEditAuthor'] }],
+        fieldControl: { fieldId: 'author', widgetId: 'entryLinkEditor' },
+      },
+    ];
+
+    const referenceEntries: Entry[] = [
+      {
+        sys: {
+          id: 'entry-1',
+          contentType: { sys: { id: 'building' } },
+          publishedVersion: 1,
+          version: 2,
+        },
+        fields: {
+          displayName: { 'en-US': 'Building one' },
+          author: { 'en-US': { sys: { type: 'Link', linkType: 'Entry', id: 'author-1' } } },
+        },
+      },
+    ];
+
+    render(
+      <EntryTable
+        entries={referenceEntries}
+        fields={referenceFields}
+        contentType={mockContentType}
+        spaceId="space-1"
+        environmentId="env-1"
+        defaultLocale="en-US"
+        activePage={0}
+        totalEntries={1}
+        itemsPerPage={15}
+        onPageChange={() => {}}
+        onItemsPerPageChange={() => {}}
+        pageSizeOptions={[15, 50, 100]}
+        referenceDisplayValues={{ 'author-1': 'Jessie Xu' }}
+      />
+    );
+
+    expect(screen.getByText('Jessie Xu')).toBeInTheDocument();
+    expect(screen.getByText('Reference')).toBeInTheDocument();
   });
 
   it('calls onPageChange when pagination is used', () => {

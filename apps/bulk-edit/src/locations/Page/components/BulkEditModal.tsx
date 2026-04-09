@@ -1,16 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Flex, FormControl, Modal, Note, Text } from '@contentful/f36-components';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import type { PageAppSDK } from '@contentful/app-sdk';
 import type { ContentTypeField, Entry } from '../types';
-import { getEntryFieldValue, getFieldDisplayValue } from '../utils/entryUtils';
+import {
+  getEntryFieldValue,
+  getEntryLinkIds,
+  getFieldDisplayValue,
+  getReferenceDisplayValue,
+} from '../utils/entryUtils';
 import { ClockIcon } from '@contentful/f36-icons';
 import { FieldEditor } from './FieldEditor';
 import { FieldValidation } from './FieldValidation';
 import type { LocalesAPI } from '@contentful/field-editor-shared';
+import type { FieldValue } from './FieldEditor';
 
 interface BulkEditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (newValue: string | number) => void;
+  onSave: (newValue: FieldValue) => void;
   selectedEntries: Entry[];
   selectedField: ContentTypeField | null;
   locales: LocalesAPI;
@@ -30,8 +38,10 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
   totalUpdateCount,
   editionCount,
 }) => {
-  const [value, setValue] = useState<any>('');
+  const sdk = useSDK<PageAppSDK>();
+  const [value, setValue] = useState<FieldValue>('');
   const [hasValidationErrors, setHasValidationErrors] = useState(false);
+  const [referenceDisplayValues, setReferenceDisplayValues] = useState<Record<string, string>>({});
   const entryCount = selectedEntries.length;
   const firstEntry = selectedEntries[0];
   const firstValueToUpdate =
@@ -44,6 +54,70 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
     setValue('');
     setHasValidationErrors(false);
   }, [isOpen]);
+
+  useEffect(() => {
+    const referenceIds = getEntryLinkIds(firstValueToUpdate);
+
+    if (!selectedField || referenceIds.length === 0 || !isOpen) {
+      setReferenceDisplayValues({});
+      return;
+    }
+
+    let isMounted = true;
+
+    const loadReferenceTitles = async () => {
+      const entries = await Promise.all(
+        referenceIds.map(async (entryId) => {
+          try {
+            const entry = await sdk.cma.entry.get({
+              spaceId: sdk.ids.space,
+              environmentId: sdk.ids.environment,
+              entryId,
+            });
+
+            return entry || null;
+          } catch {
+            return null;
+          }
+        })
+      );
+
+      if (!isMounted) {
+        return;
+      }
+
+      const labels = entries.reduce<Record<string, string>>((acc, entry, index) => {
+        if (entry) {
+          const firstField = Object.values((entry as Entry).fields || {}).find(
+            (localizedFieldValue) =>
+              localizedFieldValue &&
+              typeof localizedFieldValue === 'object' &&
+              Object.keys(localizedFieldValue).length > 0
+          ) as Record<string, unknown> | undefined;
+
+          const firstLocalizedValue = firstField ? Object.values(firstField)[0] : undefined;
+          acc[referenceIds[index]] =
+            typeof firstLocalizedValue === 'string' && firstLocalizedValue.trim() !== ''
+              ? firstLocalizedValue
+              : referenceIds[index];
+        }
+
+        return acc;
+      }, {});
+
+      setReferenceDisplayValues(labels);
+    };
+
+    void loadReferenceTitles();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [firstValueToUpdate, isOpen, sdk, selectedField]);
+
+  const firstValueDisplay = getReferenceDisplayValue(firstValueToUpdate, referenceDisplayValues)
+    ? getFieldDisplayValue(selectedField, firstValueToUpdate, 30, referenceDisplayValues)
+    : getFieldDisplayValue(selectedField, firstValueToUpdate, 30);
 
   return (
     <Modal
@@ -60,9 +134,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
           </Text>
           <Flex>
             <Text>
-              <Text fontWeight="fontWeightDemiBold">
-                {getFieldDisplayValue(selectedField, firstValueToUpdate, 30)}
-              </Text>{' '}
+              <Text fontWeight="fontWeightDemiBold">{firstValueDisplay}</Text>{' '}
               {entryCount === 1 ? 'selected' : `selected and ${entryCount - 1} more`}
             </Text>
           </Flex>

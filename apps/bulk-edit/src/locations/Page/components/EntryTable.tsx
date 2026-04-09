@@ -3,6 +3,7 @@ import { Box, Flex, Pagination, Table } from '@contentful/f36-components';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { ContentTypeField, Entry } from '../types';
 import { ContentTypeProps } from 'contentful-management';
+import { styles } from '../styles';
 import { TableHeader } from './TableHeader';
 import { TableRow } from './TableRow';
 import { getEntryUrl, isCheckboxAllowed as isBulkEditable } from '../utils/entryUtils';
@@ -33,6 +34,7 @@ interface EntryTableProps {
     selectedEntryIds: string[];
     selectedFieldId: string | null;
   }) => void;
+  referenceDisplayValues?: Record<string, string>;
 }
 
 function getColumnIds(fields: ContentTypeField[]): string[] {
@@ -80,6 +82,7 @@ export const EntryTable: React.FC<EntryTableProps> = ({
   onItemsPerPageChange,
   pageSizeOptions,
   onSelectionChange,
+  referenceDisplayValues = {},
 }) => {
   const columnIds = getColumnIds(fields);
   const allowedColumns = getBulkEditableColumns(fields);
@@ -328,6 +331,7 @@ export const EntryTable: React.FC<EntryTableProps> = ({
                     focusedCell={focusedCell}
                     focusRange={focusRange}
                     onCellFocus={(position) => focusCell(position)}
+                    referenceDisplayValues={referenceDisplayValues}
                   />
                 );
               })}

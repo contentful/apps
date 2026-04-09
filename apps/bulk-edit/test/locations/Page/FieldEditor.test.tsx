@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { i18n } from '@lingui/core';
 import { FieldEditor } from '../../../src/locations/Page/components/FieldEditor';
@@ -30,6 +30,9 @@ describe('FieldEditor', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockSdk.dialogs.selectSingleEntry.mockReset();
+    mockSdk.dialogs.selectMultipleEntries.mockReset();
+    mockSdk.cma.entry.get.mockReset();
   });
 
   beforeAll(() => {
@@ -646,6 +649,101 @@ describe('FieldEditor', () => {
       );
 
       expect(screen.getByDisplayValue(value)).toBeInTheDocument();
+    });
+
+    it('opens the single-entry picker for entry reference fields', async () => {
+      const field = {
+        ...createField('Link', 'author', 'Author'),
+        fieldControl: createFieldControl('entryLinkEditor', 'author'),
+        validations: [{ linkContentType: ['author'] }],
+      };
+
+      mockSdk.dialogs.selectSingleEntry.mockResolvedValue({
+        sys: { id: 'author-entry-1' },
+        fields: { title: { 'en-US': 'Jessie Xu' } },
+      });
+
+      render(<FieldEditor field={field} value={null} onChange={mockOnChange} locales={mockSdk.locales} />);
+
+      fireEvent.click(screen.getByTestId('reference-picker-trigger'));
+
+      await waitFor(() => {
+        expect(mockSdk.dialogs.selectSingleEntry).toHaveBeenCalledWith({
+          locale: mockSdk.locales.default,
+          contentTypes: ['author'],
+        });
+        expect(mockOnChange).toHaveBeenCalledWith({
+          sys: { type: 'Link', linkType: 'Entry', id: 'author-entry-1' },
+        });
+      });
+    });
+
+  it('opens the multi-entry picker for multi-reference entry fields', async () => {
+      const field = {
+        ...createField('Array', 'authors', 'Authors'),
+        fieldControl: createFieldControl('entryLinksEditor', 'authors'),
+        items: {
+          type: 'Link',
+          linkType: 'Entry',
+          validations: [{ linkContentType: ['author'] }],
+        },
+      };
+
+      mockSdk.dialogs.selectMultipleEntries.mockResolvedValue([
+        { sys: { id: 'author-entry-1' }, fields: { title: { 'en-US': 'Jessie Xu' } } },
+        { sys: { id: 'author-entry-2' }, fields: { title: { 'en-US': 'Neha Khawas' } } },
+      ]);
+
+      render(<FieldEditor field={field} value={[]} onChange={mockOnChange} locales={mockSdk.locales} />);
+
+      fireEvent.click(screen.getByTestId('reference-picker-trigger'));
+
+      await waitFor(() => {
+        expect(mockSdk.dialogs.selectMultipleEntries).toHaveBeenCalledWith({
+          locale: mockSdk.locales.default,
+          contentTypes: ['author'],
+        });
+        expect(mockOnChange).toHaveBeenCalledWith([
+          { sys: { type: 'Link', linkType: 'Entry', id: 'author-entry-1' } },
+          { sys: { type: 'Link', linkType: 'Entry', id: 'author-entry-2' } },
+        ]);
+      });
+    });
+
+    it('renders linked entry titles for existing multi-reference values', async () => {
+      const field = {
+        ...createField('Array', 'authors', 'Authors'),
+        fieldControl: createFieldControl('entryLinksEditor', 'authors'),
+        items: {
+          type: 'Link',
+          linkType: 'Entry',
+          validations: [{ linkContentType: ['author'] }],
+        },
+      };
+
+      mockSdk.cma.entry.get
+        .mockResolvedValueOnce({
+          sys: { id: 'author-entry-1' },
+          fields: { title: { 'en-US': 'Jessie Xu' } },
+        })
+        .mockResolvedValueOnce({
+          sys: { id: 'author-entry-2' },
+          fields: { title: { 'en-US': 'Sarah Tyler' } },
+        });
+
+      render(
+        <FieldEditor
+          field={field}
+          value={[
+            { sys: { type: 'Link', linkType: 'Entry', id: 'author-entry-1' } },
+            { sys: { type: 'Link', linkType: 'Entry', id: 'author-entry-2' } },
+          ]}
+          onChange={mockOnChange}
+          locales={mockSdk.locales}
+        />
+      );
+
+      expect(await screen.findByText('Jessie Xu, Sarah Tyler')).toBeInTheDocument();
     });
   });
 });

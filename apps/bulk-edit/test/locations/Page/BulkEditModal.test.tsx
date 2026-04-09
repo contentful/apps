@@ -1,6 +1,6 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { BulkEditModal } from '../../../src/locations/Page/components/BulkEditModal';
 import { ContentTypeField, Entry } from '../../../src/locations/Page/types';
 import { mockSdk } from '../../mocks';
@@ -28,6 +28,12 @@ describe('BulkEditModal', () => {
     sys: { id: '2', contentType: { sys: { id: 'condoA' } }, version: 2 },
     fields: { displayName: { 'en-US': 'Building two' }, size: { 'en-US': 2000 } },
   };
+
+  beforeEach(() => {
+    mockSdk.dialogs.selectSingleEntry.mockReset();
+    mockSdk.dialogs.selectMultipleEntries.mockReset();
+    mockSdk.cma.entry.get.mockReset();
+  });
 
   it('renders subtitle for single entry', () => {
     render(
@@ -224,5 +230,145 @@ describe('BulkEditModal', () => {
     // Save button should be disabled
     const saveButton = screen.getByTestId('bulk-edit-save');
     expect(saveButton).toBeDisabled();
+  });
+
+  it('saves a selected single reference value', async () => {
+    const onSave = vi.fn();
+    const referenceField: ContentTypeField = {
+      contentTypeId: 'test-content-type',
+      id: 'author',
+      uniqueId: 'author',
+      name: 'Author',
+      type: 'Link',
+      required: false,
+      fieldControl: { fieldId: 'author', widgetId: 'entryLinkEditor' },
+      validations: [{ linkContentType: ['author'] }],
+    };
+
+    mockSdk.dialogs.selectSingleEntry.mockResolvedValue({
+      sys: { id: 'author-entry-1' },
+      fields: { title: { 'en-US': 'Jessie Xu' } },
+    });
+
+    render(
+      <BulkEditModal
+        isOpen={true}
+        onClose={vi.fn()}
+        onSave={onSave}
+        selectedEntries={[entry1]}
+        selectedField={referenceField}
+        locales={mockSdk.locales}
+        isSaving={false}
+        totalUpdateCount={0}
+        editionCount={0}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('reference-picker-trigger'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Jessie Xu')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('bulk-edit-save'));
+
+    expect(onSave).toHaveBeenCalledWith({
+      sys: { type: 'Link', linkType: 'Entry', id: 'author-entry-1' },
+    });
+  });
+
+  it('displays the linked entry title for an existing reference value', async () => {
+    const referenceField: ContentTypeField = {
+      contentTypeId: 'test-content-type',
+      id: 'author',
+      uniqueId: 'author',
+      name: 'Author',
+      type: 'Link',
+      required: false,
+      fieldControl: { fieldId: 'author', widgetId: 'entryLinkEditor' },
+      validations: [{ linkContentType: ['author'] }],
+    };
+    const entryWithAuthor: Entry = {
+      sys: { id: '3', contentType: { sys: { id: 'condoA' } }, version: 1 },
+      fields: {
+        displayName: { 'en-US': 'Building three' },
+        author: {
+          'en-US': { sys: { type: 'Link', linkType: 'Entry', id: 'author-entry-1' } },
+        },
+      },
+    };
+
+    mockSdk.cma.entry.get.mockResolvedValue({
+      sys: { id: 'author-entry-1' },
+      fields: { title: { 'en-US': 'Jessie Xu' } },
+    });
+
+    render(
+      <BulkEditModal
+        isOpen={true}
+        onClose={vi.fn()}
+        onSave={vi.fn()}
+        selectedEntries={[entryWithAuthor]}
+        selectedField={referenceField}
+        locales={mockSdk.locales}
+        isSaving={false}
+        totalUpdateCount={0}
+        editionCount={0}
+      />
+    );
+
+    expect(await screen.findByText('Jessie Xu')).toBeInTheDocument();
+    expect(screen.getByText('selected')).toBeInTheDocument();
+  });
+
+  it('saves selected multi-reference values', async () => {
+    const onSave = vi.fn();
+    const multiReferenceField: ContentTypeField = {
+      contentTypeId: 'test-content-type',
+      id: 'authors',
+      uniqueId: 'authors',
+      name: 'Authors',
+      type: 'Array',
+      required: false,
+      fieldControl: { fieldId: 'authors', widgetId: 'entryLinksEditor' },
+      validations: [],
+      items: {
+        type: 'Link',
+        linkType: 'Entry',
+        validations: [{ linkContentType: ['author'] }],
+      },
+    };
+
+    mockSdk.dialogs.selectMultipleEntries.mockResolvedValue([
+      { sys: { id: 'author-entry-1' }, fields: { title: { 'en-US': 'Jessie Xu' } } },
+      { sys: { id: 'author-entry-2' }, fields: { title: { 'en-US': 'Neha Khawas' } } },
+    ]);
+
+    render(
+      <BulkEditModal
+        isOpen={true}
+        onClose={vi.fn()}
+        onSave={onSave}
+        selectedEntries={[entry1]}
+        selectedField={multiReferenceField}
+        locales={mockSdk.locales}
+        isSaving={false}
+        totalUpdateCount={0}
+        editionCount={0}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('reference-picker-trigger'));
+
+    await waitFor(() => {
+      expect(screen.getByText('2 entries selected')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('bulk-edit-save'));
+
+    expect(onSave).toHaveBeenCalledWith([
+      { sys: { type: 'Link', linkType: 'Entry', id: 'author-entry-1' } },
+      { sys: { type: 'Link', linkType: 'Entry', id: 'author-entry-2' } },
+    ]);
   });
 });

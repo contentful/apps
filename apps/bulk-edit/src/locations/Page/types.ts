@@ -41,6 +41,14 @@ export type ContentTypeField = {
   validations: ContentTypeFieldValidation[];
 };
 
+export type EntryLinkValue = {
+  sys: {
+    type: 'Link';
+    linkType: 'Entry';
+    id: string;
+  };
+};
+
 export interface Fields {
   [key: string]: {
     [locale: string]:
