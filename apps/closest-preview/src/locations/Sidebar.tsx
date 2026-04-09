@@ -10,8 +10,12 @@ import { ArrowSquareOutIcon } from '@contentful/f36-icons';
 import { SidebarAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { EntryProps } from 'contentful-management';
-import { useEffect, useState } from 'react';
-import { getRootEntries } from '../utils/livePreviewUtils';
+import { useEffect, useMemo, useState } from 'react';
+import { AppInstallationParameters } from '../types';
+import {
+  getPreviewFieldIdsFromInstallationParameters,
+  getRootEntries,
+} from '../utils/livePreviewUtils';
 import { getContentTypesForEntries, getDisplayField } from '../utils/entryUtils';
 
 const Sidebar = () => {
@@ -20,10 +24,17 @@ const Sidebar = () => {
   const [entries, setEntries] = useState<EntryProps[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [contentTypes, setContentTypes] = useState<Record<string, any>>({});
+  const previewFieldIds = useMemo(
+    () =>
+      getPreviewFieldIdsFromInstallationParameters(
+        sdk.parameters.installation as AppInstallationParameters | undefined
+      ),
+    [sdk.parameters.installation]
+  );
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      const entries = await getRootEntries(sdk);
+      const entries = await getRootEntries(sdk, previewFieldIds);
 
       setEntries(entries);
 
@@ -33,7 +44,7 @@ const Sidebar = () => {
       setIsLoading(false);
     };
     fetchData();
-  }, []);
+  }, [previewFieldIds, sdk]);
 
   if (isLoading) {
     return (

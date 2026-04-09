@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Box, Paragraph, Pill, Skeleton, Stack } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { ContentType } from '../types';
 import { CMAClient, ConfigAppSDK } from '@contentful/app-sdk';
-import { getContentTypesWithoutLivePreview } from '../utils/livePreviewUtils';
+import { getContentTypes } from '../utils/livePreviewUtils';
 
 type ContentTypeMultiSelectProps = {
   selectedContentTypes: ContentType[];
@@ -18,11 +18,15 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
   setSelectedContentTypes,
   sdk,
   cma,
-  excludedContentTypesIds = [],
+  excludedContentTypesIds,
 }) => {
   const [availableContentTypes, setAvailableContentTypes] = useState<ContentType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const resolvedExcludedContentTypeIds = useMemo(
+    () => excludedContentTypesIds ?? [],
+    [excludedContentTypesIds]
+  );
 
   const getPlaceholderText = () => {
     if (selectedContentTypes.length === 0) return 'Select one or more';
@@ -48,12 +52,9 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
         const currentState = await sdk.app.getCurrentState();
         const currentContentTypesIds = Object.keys(currentState?.EditorInterface || {});
 
-        const contentTypesWithoutLivePreview = await getContentTypesWithoutLivePreview(
-          cma,
-          excludedContentTypesIds
-        );
-
-        const newAvailableContentTypes = contentTypesWithoutLivePreview
+        const contentTypes = await getContentTypes(cma);
+        const newAvailableContentTypes = contentTypes
+          .filter((ct) => !resolvedExcludedContentTypeIds.includes(ct.sys.id))
           .map((ct) => ({
             id: ct.sys.id,
             name: ct.name,
@@ -64,8 +65,12 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
         setFilteredItems(newAvailableContentTypes);
 
         if (currentContentTypesIds.length > 0) {
-          const currentContentTypes = contentTypesWithoutLivePreview
-            .filter((ct) => currentContentTypesIds.includes(ct.sys.id))
+          const currentContentTypes = contentTypes
+            .filter(
+              (ct) =>
+                currentContentTypesIds.includes(ct.sys.id) &&
+                !resolvedExcludedContentTypeIds.includes(ct.sys.id)
+            )
             .map((ct) => ({ id: ct.sys.id, name: ct.name }));
           setSelectedContentTypes(currentContentTypes);
         }
@@ -76,7 +81,7 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
         setIsLoading(false);
       }
     })();
-  }, []);
+  }, [cma, resolvedExcludedContentTypeIds, sdk, setSelectedContentTypes]);
 
   if (isLoading) {
     return (
