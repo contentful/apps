@@ -114,21 +114,17 @@ function isVersionMismatchError(error: unknown) {
     return true;
   }
 
-  if (error instanceof Error && error.message.toLowerCase().includes('version')) {
-    return true;
-  }
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === 'object' &&
+        error !== null &&
+        'message' in error &&
+        typeof (error as { message?: unknown }).message === 'string'
+      ? (error as { message: string }).message
+      : '';
 
-  if (
-    typeof error === 'object' &&
-    error !== null &&
-    'message' in error &&
-    typeof (error as { message?: unknown }).message === 'string' &&
-    (error as { message: string }).message.toLowerCase().includes('version')
-  ) {
-    return true;
-  }
-
-  return false;
+  return message.toLowerCase().includes('version');
 }
 
 function extractInvalidStyleCount(
@@ -388,37 +384,26 @@ const ConfigScreen = () => {
     try {
       const invalidStyles = new Set<IconWeight>();
       let entryCount = 0;
-      const fieldName = managedFieldName.trim();
-      const baseFieldId = slugifyFieldId(fieldName);
 
-      const contentTypeContext = await Promise.all(
-        selectedContentTypeIds.map(async (contentTypeId) => {
-          const [contentTypeDetails, editorInterface] = await Promise.all([
-            sdk.cma.contentType.get({
-              contentTypeId,
-            }) as Promise<{
-              fields: Array<{ id: string; name: string; type: string }>;
-            }>,
-            sdk.cma.editorInterface.get({
-              contentTypeId,
-            }) as Promise<{
-              controls?: Array<{
-                fieldId: string;
-                widgetId?: string;
-                widgetNamespace?: string;
-              }>;
-            }>,
-          ]);
+      for (const contentTypeId of selectedContentTypeIds) {
+        const contentTypeDetails = (await sdk.cma.contentType.get({
+          contentTypeId,
+        })) as {
+          fields: Array<{ id: string; name: string; type: string }>;
+        };
 
-          return {
-            contentTypeId,
-            contentTypeDetails,
-            editorInterface,
-          };
-        })
-      );
+        const editorInterface = (await sdk.cma.editorInterface.get({
+          contentTypeId,
+        })) as {
+          controls?: Array<{
+            fieldId: string;
+            widgetId?: string;
+            widgetNamespace?: string;
+          }>;
+        };
 
-      for (const { contentTypeId, contentTypeDetails, editorInterface } of contentTypeContext) {
+        const fieldName = managedFieldName.trim();
+        const baseFieldId = slugifyFieldId(fieldName);
         const existingAppControl = (editorInterface.controls ?? []).find(
           (control) => control.widgetNamespace === 'app' && control.widgetId === sdk.ids.app
         );
