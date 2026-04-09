@@ -151,7 +151,9 @@ const Page = () => {
           const fieldValue = entry.fields[field.id]?.[field.locale || defaultLocale];
 
           if (Array.isArray(fieldValue)) {
-            fieldValue.filter(isEntryLinkValue).forEach((reference) => referenceIds.add(reference.sys.id));
+            fieldValue
+              .filter(isEntryLinkValue)
+              .forEach((reference) => referenceIds.add(reference.sys.id));
           } else if (isEntryLinkValue(fieldValue)) {
             referenceIds.add(fieldValue.sys.id);
           }
@@ -181,7 +183,9 @@ const Page = () => {
           linkedEntries.push(...((response.items as EntryProps[]) || []));
         }
 
-        const contentTypeMap = new Map(contentTypes.map((contentType) => [contentType.sys.id, contentType]));
+        const contentTypeMap = new Map(
+          contentTypes.map((contentType) => [contentType.sys.id, contentType])
+        );
         const displayValueMap = Object.fromEntries(
           linkedEntries.map((linkedEntry) => {
             const linkedContentType = contentTypeMap.get(linkedEntry.sys.contentType.sys.id);
@@ -621,16 +625,16 @@ const Page = () => {
                           setActivePage(0);
                         }}
                         pageSizeOptions={PAGE_SIZE_OPTIONS}
-                      onSelectionChange={({ selectedEntryIds, selectedFieldId }) => {
-                        setSelectedEntryIds(selectedEntryIds);
-                        setSelectedField(
-                          fields.find((f) => f.uniqueId === selectedFieldId) || null
-                        );
-                      }}
-                      referenceDisplayValues={referenceDisplayValues}
-                    />
-                  </>
-                )}
+                        onSelectionChange={({ selectedEntryIds, selectedFieldId }) => {
+                          setSelectedEntryIds(selectedEntryIds);
+                          setSelectedField(
+                            fields.find((f) => f.uniqueId === selectedFieldId) || null
+                          );
+                        }}
+                        referenceDisplayValues={referenceDisplayValues}
+                      />
+                    </>
+                  )}
                 </>
               )}
             </Flex>

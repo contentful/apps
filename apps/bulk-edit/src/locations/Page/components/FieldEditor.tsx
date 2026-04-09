@@ -69,9 +69,7 @@ const isSingleEntryReferenceField = (field: ContentTypeField) =>
     field.validations.some((validation) => Array.isArray(validation.linkContentType)));
 
 const isMultipleEntryReferenceField = (field: ContentTypeField) =>
-  field.type === 'Array' &&
-  field.items?.type === 'Link' &&
-  field.items?.linkType === 'Entry';
+  field.type === 'Array' && field.items?.type === 'Link' && field.items?.linkType === 'Entry';
 
 export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange, locales }) => {
   const [error, setError] = useState('');
@@ -176,11 +174,11 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange
       {!SUPPORTED_WIDGET_IDS.has(getWidgetId(field)) &&
         !isSingleEntryReferenceField(field) &&
         !isMultipleEntryReferenceField(field) && (
-        <Note>
-          This field uses an unsupported custom appereance, the default editor for the field will be
-          used instead.
-        </Note>
-      )}
+          <Note>
+            This field uses an unsupported custom appereance, the default editor for the field will
+            be used instead.
+          </Note>
+        )}
       {renderEditor()}
     </>
   );

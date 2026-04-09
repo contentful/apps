@@ -75,7 +75,9 @@ export const isLinkValue = (value: unknown): value is { sys: { linkType: string 
   );
 };
 
-export const isEntryLinkValue = (value: unknown): value is { sys: { linkType: 'Entry'; id: string } } =>
+export const isEntryLinkValue = (
+  value: unknown
+): value is { sys: { linkType: 'Entry'; id: string } } =>
   isLinkValue(value) && value.sys.linkType === 'Entry' && 'id' in (value as any).sys;
 
 export const getEntryLinkIds = (value: unknown): string[] => {
@@ -147,8 +149,8 @@ export const getFieldDisplayValue = (
         referenceLabels.length > 0
           ? referenceLabels.join(', ')
           : count === 1
-            ? '1 reference field'
-            : `${count} reference fields`;
+          ? '1 reference field'
+          : `${count} reference fields`;
     } else if (value[0]?.sys?.linkType === 'Asset') {
       displayValue = count === 1 ? '1 asset' : `${count} assets`;
     } else {

@@ -38,7 +38,9 @@ const isEntryReferenceField = (field: ContentTypeField) =>
 const getEntryDisplayLabel = (entry: Entry): string => {
   const firstField = Object.values(entry.fields || {}).find(
     (localizedFieldValue) =>
-      localizedFieldValue && typeof localizedFieldValue === 'object' && Object.keys(localizedFieldValue).length > 0
+      localizedFieldValue &&
+      typeof localizedFieldValue === 'object' &&
+      Object.keys(localizedFieldValue).length > 0
   ) as Record<string, unknown> | undefined;
 
   const firstLocalizedValue = firstField ? Object.values(firstField)[0] : undefined;
@@ -57,9 +59,7 @@ export const ReferenceFieldEditor: React.FC<ReferenceFieldEditorProps> = ({
   const [referenceDisplayValues, setReferenceDisplayValues] = useState<Record<string, string>>({});
   const allowedContentTypes = useMemo(() => getLinkContentTypes(field), [field]);
   const isMultiReferenceField =
-    field.type === 'Array' &&
-    field.items?.type === 'Link' &&
-    field.items?.linkType === 'Entry';
+    field.type === 'Array' && field.items?.type === 'Link' && field.items?.linkType === 'Entry';
 
   useEffect(() => {
     const referenceIds = getEntryLinkIds(value);
@@ -172,7 +172,9 @@ export const ReferenceFieldEditor: React.FC<ReferenceFieldEditorProps> = ({
       <Flex gap="spacingS" alignItems="center">
         <Button
           variant="secondary"
-          onClick={() => void (isMultiReferenceField ? selectMultipleEntries() : selectSingleEntry())}
+          onClick={() =>
+            void (isMultiReferenceField ? selectMultipleEntries() : selectSingleEntry())
+          }
           testId="reference-picker-trigger">
           Add existing content
         </Button>

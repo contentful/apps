@@ -663,7 +663,9 @@ describe('FieldEditor', () => {
         fields: { title: { 'en-US': 'Jessie Xu' } },
       });
 
-      render(<FieldEditor field={field} value={null} onChange={mockOnChange} locales={mockSdk.locales} />);
+      render(
+        <FieldEditor field={field} value={null} onChange={mockOnChange} locales={mockSdk.locales} />
+      );
 
       fireEvent.click(screen.getByTestId('reference-picker-trigger'));
 
@@ -678,7 +680,7 @@ describe('FieldEditor', () => {
       });
     });
 
-  it('opens the multi-entry picker for multi-reference entry fields', async () => {
+    it('opens the multi-entry picker for multi-reference entry fields', async () => {
       const field = {
         ...createField('Array', 'authors', 'Authors'),
         fieldControl: createFieldControl('entryLinksEditor', 'authors'),
@@ -694,7 +696,9 @@ describe('FieldEditor', () => {
         { sys: { id: 'author-entry-2' }, fields: { title: { 'en-US': 'Neha Khawas' } } },
       ]);
 
-      render(<FieldEditor field={field} value={[]} onChange={mockOnChange} locales={mockSdk.locales} />);
+      render(
+        <FieldEditor field={field} value={[]} onChange={mockOnChange} locales={mockSdk.locales} />
+      );
 
       fireEvent.click(screen.getByTestId('reference-picker-trigger'));
 
