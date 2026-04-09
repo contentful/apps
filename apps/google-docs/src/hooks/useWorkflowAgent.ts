@@ -2,8 +2,9 @@ import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { POLL_INTERVAL_MS, MAX_POLL_ATTEMPTS, WORKFLOW_AGENT_ID } from '../utils/constants/agent';
 import {
+  MappingReviewSuspendPayload,
   ResumePayload,
-  SuspendPayload,
+  TabsImagesSuspendPayload,
   PreviewPayload,
   WorkflowRunResult,
   RunStatus,
@@ -79,8 +80,11 @@ const getRunErrorMessage = (runData: AgentRunData): string => {
   return 'Workflow failed';
 };
 
-const getSuspendPayload = (runData: AgentRunData): SuspendPayload | undefined =>
-  runData.metadata?.suspendPayload as SuspendPayload | undefined;
+const getSuspendPayload = (
+  runData: AgentRunData
+): TabsImagesSuspendPayload | MappingReviewSuspendPayload | undefined => {
+  return runData.metadata?.suspendPayload;
+};
 
 const getWorkflowRunResult = (
   runData: AgentRunData,

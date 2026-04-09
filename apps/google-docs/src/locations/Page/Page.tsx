@@ -8,7 +8,8 @@ import {
 } from './components/mainpage/ModalOrchestrator';
 import { MainPageView } from './components/mainpage/MainPageView';
 import { PreviewPageView } from './components/mainpage/PreviewPageView';
-import { PreviewPayload } from '@types';
+import { MappingReviewSuspendPayload, PreviewPayload } from '@types';
+import { isMappingReviewSuspendPayload } from '../../utils/utils';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -16,7 +17,9 @@ const Page = () => {
   const [oauthToken, setOauthToken] = useState<string>('');
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
   const [isOAuthLoading, setIsOAuthLoading] = useState(true);
-  const [previewPayload, setPreviewPayload] = useState<PreviewPayload | null>(null);
+  const [previewPayload, setPreviewPayload] = useState<
+    PreviewPayload | MappingReviewSuspendPayload | null
+  >(null);
 
   const handleOauthTokenChange = (token: string) => {
     setOauthToken(token);
@@ -38,10 +41,29 @@ const Page = () => {
     setPreviewPayload(payload);
   };
 
+  const handleMappingReviewReady = (payload: MappingReviewSuspendPayload) => {
+    setPreviewPayload(payload);
+  };
+
   const handleReturnToMainPage = () => {
     modalOrchestratorRef.current?.resetFlowState();
     setPreviewPayload(null);
   };
+
+  const handleResumeMappingReview = async () => {
+    if (!previewPayload || !isMappingReviewSuspendPayload(previewPayload)) {
+      return;
+    }
+
+    try {
+      await modalOrchestratorRef.current?.resumeMappingReview(previewPayload);
+    } catch (error) {
+      console.error('Failed to resume mapping review:', error);
+      sdk.notifier.error('Unable to resume preview. Please try again.');
+    }
+  };
+
+  console.log('previewPayload', previewPayload);
 
   return (
     <>
@@ -51,6 +73,7 @@ const Page = () => {
             payload={previewPayload}
             oauthToken={oauthToken}
             onLeavePreview={handleReturnToMainPage}
+            onResumeMappingReview={handleResumeMappingReview}
           />
         ) : (
           <MainPageView
@@ -71,6 +94,7 @@ const Page = () => {
         sdk={sdk}
         oauthToken={oauthToken}
         onPreviewReady={handlePreviewReady}
+        onMappingReviewReady={handleMappingReviewReady}
         onResetToMain={handleReturnToMainPage}
       />
     </>

@@ -66,6 +66,7 @@ const defaultProps = {
   sdk: mockSdk,
   oauthToken: 'mock-oauth-token',
   onPreviewReady: vi.fn(),
+  onMappingReviewReady: vi.fn(),
   onResetToMain: vi.fn(),
 };
 
@@ -73,12 +74,14 @@ describe('ModalOrchestrator', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     defaultProps.onPreviewReady.mockReset();
+    defaultProps.onMappingReviewReady.mockReset();
     defaultProps.onResetToMain.mockReset();
     mockStartWorkflow.mockResolvedValue({
       status: RunStatus.PENDING_REVIEW,
       runId: 'run-123',
       messages: [],
       suspendPayload: {
+        suspendStepId: 'select-tabs-images-step',
         reason: 'Needs document scope review',
         documentId: 'mock-doc-id-123',
         requiresImageSelection: true,
@@ -266,6 +269,7 @@ describe('ModalOrchestrator', () => {
       runId: 'run-123',
       messages: [],
       suspendPayload: {
+        suspendStepId: 'select-tabs-images-step',
         reason: 'Needs document scope review',
         documentId: 'mock-doc-id-123',
         requiresImageSelection: true,

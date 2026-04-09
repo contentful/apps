@@ -130,8 +130,17 @@ export interface PreviewPayload {
   normalizedDocument: NormalizedDocument;
 }
 
-export interface SuspendPayload {
+export interface MappingReviewEntryBlock {
+  [key: string]: unknown;
+}
+
+export interface MappingReviewContentType {
+  [key: string]: unknown;
+}
+
+export interface TabsImagesSuspendPayload {
   reason?: string;
+  suspendStepId: 'select-tabs-images-step';
   documentId?: string;
   title?: string;
   requiresImageSelection?: boolean;
@@ -143,12 +152,23 @@ export interface SuspendPayload {
   tabs?: DocTabOption[];
 }
 
+export interface MappingReviewSuspendPayload {
+  reason?: string;
+  suspendStepId: 'mapping-review';
+  documentId: string;
+  documentTitle?: string;
+  normalizedDocument: NormalizedDocument;
+  entryBlockGraph: MappingReviewEntryBlock[];
+  referenceGraph: ReviewedReferenceGraph;
+  contentTypes: MappingReviewContentType[];
+}
+
 export type WorkflowRunResult =
   | {
       status: RunStatus.PENDING_REVIEW;
       runId: string;
       messages: AgentRunMessage[];
-      suspendPayload: SuspendPayload;
+      suspendPayload: TabsImagesSuspendPayload | MappingReviewSuspendPayload;
     }
   | {
       status: RunStatus.COMPLETED;
@@ -160,4 +180,6 @@ export type WorkflowRunResult =
 export interface ResumePayload {
   includeImages?: boolean;
   selectedTabIds?: string[];
+  editedNormalizedDocument?: NormalizedDocument;
+  entryBlockGraph?: MappingReviewEntryBlock[];
 }

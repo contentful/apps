@@ -11,8 +11,9 @@ import { CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS } from '@constants/agent';
 import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 import {
   DocumentTabProps,
+  MappingReviewSuspendPayload,
   ResumePayload,
-  SuspendPayload,
+  TabsImagesSuspendPayload,
   PreviewPayload,
   RunStatus,
   WorkflowRunResult,
@@ -25,6 +26,7 @@ export interface ModalOrchestratorHandle {
   startFlow: () => void;
   /** Clears in-progress flow state without calling `onResetToMain` (parent clears preview separately). */
   resetFlowState: () => void;
+  resumeMappingReview: (payload: MappingReviewSuspendPayload) => Promise<void>;
 }
 
 enum FlowStep {
@@ -39,10 +41,11 @@ interface ModalOrchestratorProps {
   oauthToken: string;
   onPreviewReady: (payload: PreviewPayload) => void;
   onResetToMain: () => void;
+  onMappingReviewReady: (payload: MappingReviewSuspendPayload) => void;
 }
 
 export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrchestratorProps>(
-  ({ sdk, oauthToken, onPreviewReady, onResetToMain }, ref) => {
+  ({ sdk, oauthToken, onPreviewReady, onMappingReviewReady, onResetToMain }, ref) => {
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
     const [isErrorPreviewModalOpen, setIsErrorPreviewModalOpen] = useState(false);
@@ -69,6 +72,19 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         resetProgress();
         setIsConfirmCancelModalOpen(false);
         setIsErrorPreviewModalOpen(false);
+      },
+      resumeMappingReview: async (payload: MappingReviewSuspendPayload) => {
+        if (!activeRunId) {
+          throw new Error('Workflow run id is missing for resume.');
+        }
+
+        // TODO : modify the normalized document and entry block graph with the edited values
+        const workflowRun = await resumeWorkflow(activeRunId, {
+          editedNormalizedDocument: payload.normalizedDocument,
+          entryBlockGraph: payload.entryBlockGraph,
+        });
+
+        handleWorkflowResult(workflowRun);
       },
     }));
 
@@ -117,7 +133,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       showDiscardConfirmation();
     };
 
-    const showDocumentScopeReview = (suspendPayload?: SuspendPayload) => {
+    const showDocumentScopeReview = (suspendPayload?: TabsImagesSuspendPayload) => {
       setAvailableTabs(
         (suspendPayload?.tabs ?? []).map((tab) => ({
           tabId: tab.id ?? '',
@@ -146,6 +162,12 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setActiveRunId(workflowRun.runId);
 
       if (workflowRun.status === RunStatus.PENDING_REVIEW) {
+        if (workflowRun.suspendPayload.suspendStepId === 'mapping-review') {
+          setFlowStep(null);
+          onMappingReviewReady(workflowRun.suspendPayload);
+          return;
+        }
+
         showDocumentScopeReview(workflowRun.suspendPayload);
         return;
       }

@@ -1,19 +1,26 @@
 import { useState } from 'react';
 import { Button, Flex, Heading, Layout } from '@contentful/f36-components';
 import Splitter from './Splitter';
-import { PreviewPayload } from '@types';
+import { MappingReviewSuspendPayload, PreviewPayload } from '@types';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
 import OverviewSection from '../overview/OverviewSection';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { PageAppSDK } from '@contentful/app-sdk';
+import { isMappingReviewSuspendPayload } from '../../../../utils/utils';
 
 interface PreviewPageViewProps {
-  payload: PreviewPayload;
+  payload: PreviewPayload | MappingReviewSuspendPayload;
   oauthToken: string;
   onLeavePreview: () => void;
+  onResumeMappingReview?: () => Promise<void>;
 }
 
-export const PreviewPageView = ({ payload, oauthToken, onLeavePreview }: PreviewPageViewProps) => {
+export const PreviewPageView = ({
+  payload,
+  oauthToken,
+  onLeavePreview,
+  onResumeMappingReview,
+}: PreviewPageViewProps) => {
   const sdk = useSDK<PageAppSDK>();
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
   const rawTitle = payload.normalizedDocument?.title;
@@ -42,6 +49,7 @@ export const PreviewPageView = ({ payload, oauthToken, onLeavePreview }: Preview
             payload={payload}
             oauthToken={oauthToken}
             onReturnToMainPage={onLeavePreview}
+            onCreateSelected={onResumeMappingReview}
           />
           <Heading as="h2" marginBottom="none">
             Document outline
