@@ -1,5 +1,4 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import React from 'react';
 import tokens from '@contentful/f36-tokens';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -210,7 +209,7 @@ function buildFixture(): MappingReviewSuspendPayload {
   };
 }
 
-describe('GoogleDocsMappingReviewScreen', () => {
+describe('DocumentOutline', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
