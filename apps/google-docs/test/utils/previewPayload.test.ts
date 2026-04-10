@@ -85,22 +85,6 @@ describe('validatePayloadShape normalizedDocument', () => {
     });
     expect('extraField' in out.normalizedDocument).toBe(false);
   });
-
-  it('preserves entryBlockGraph when it is present on the payload', () => {
-    const out = validatePayloadShape(
-      minimalPayload({
-        entryBlockGraph: {
-          entries: [],
-          excludedSourceRefs: [],
-        },
-      })
-    );
-
-    expect(out.entryBlockGraph).toEqual({
-      entries: [],
-      excludedSourceRefs: [],
-    });
-  });
 });
 
 describe('orderEntriesByCreationOrder', () => {

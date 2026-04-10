@@ -15,13 +15,13 @@ import type { EntryProps } from 'contentful-management';
 import { SummaryModal } from '../modals/SummaryModal';
 import { isPreviewPayload } from '../../../../utils/utils';
 
-type OverviewSectionProps = {
+interface OverviewSectionProps {
   sdk: PageAppSDK;
   payload: PreviewPayload | MappingReviewSuspendPayload;
   oauthToken: string;
   onReturnToMainPage: () => void;
   onCreateSelected?: () => Promise<void>;
-};
+}
 
 const OverviewSection = ({
   sdk,
@@ -168,16 +168,14 @@ const OverviewSection = ({
         )}
       </Flex>
 
-      {sdk ? (
-        <SummaryModal
-          isOpen={summaryEntries !== null}
-          sdk={sdk}
-          entries={summaryEntries ?? []}
-          contentTypeDisplayInfoMap={contentTypeDisplayInfoMap}
-          defaultLocale={sdk.locales.default}
-          onDone={handleSummaryDone}
-        />
-      ) : null}
+      <SummaryModal
+        isOpen={summaryEntries !== null}
+        sdk={sdk}
+        entries={summaryEntries ?? []}
+        contentTypeDisplayInfoMap={contentTypeDisplayInfoMap}
+        defaultLocale={sdk.locales.default}
+        onDone={handleSummaryDone}
+      />
     </Box>
   );
 };
