@@ -11,68 +11,14 @@ import {
 import { GoogleDocsMappingReviewScreen } from '../review-prototype/GoogleDocsMappingReviewScreen';
 import OverviewSection from '../overview/OverviewSection';
 
-type PreviewPageViewProps =
-  | {
-      mode: 'workflow';
-      payload: PreviewPayload;
-      onCancel: () => void;
-      sdk?: PageAppSDK;
-    }
-  | {
-      mode: 'mappingReview';
-      payload: MappingReviewSuspendPayload;
-      onCancel: () => void;
-      onContinue: (resumePayload: ResumePayload) => Promise<void> | void;
-      sdk?: PageAppSDK;
-    }
-  | {
-      mode: 'fixture';
-      onCancel: () => void;
-      sdk?: PageAppSDK;
-    };
+interface PreviewPageViewProps {
+  payload: PreviewPayload;
+  oauthToken: string;
+  onLeavePreview: () => void;
+}
 
-const buildFixtureFromCompletedPayload = (payload: PreviewPayload): GoogleDocsReviewData => ({
-  entries: payload.entries,
-  assets: payload.assets,
-  referenceGraph: payload.referenceGraph,
-  originalNormalizedDocument: payload.normalizedDocument,
-  editableNormalizedDocument: structuredClone(payload.normalizedDocument),
-  entryBlockGraph: payload.entryBlockGraph ?? {
-    entries: [],
-    excludedSourceRefs: [],
-  },
-});
-
-const buildFixtureFromMappingReviewPayload = (
-  payload: MappingReviewSuspendPayload
-): GoogleDocsReviewData => ({
-  entries: payload.entryBlockGraph.entries.map((entry) => {
-    const contentType = payload.contentTypes.find(
-      (candidate) => candidate.sys.id === entry.contentTypeId
-    );
-    const title = contentType?.name ?? entry.tempId ?? entry.contentTypeId;
-
-    return {
-      tempId: entry.tempId,
-      contentTypeId: entry.contentTypeId,
-      fields: {
-        title: {
-          'en-US': title,
-        },
-      },
-    };
-  }),
-  assets: [],
-  referenceGraph: payload.referenceGraph,
-  originalNormalizedDocument: payload.normalizedDocument,
-  editableNormalizedDocument: structuredClone(payload.normalizedDocument),
-  entryBlockGraph: payload.entryBlockGraph,
-});
-
-export const PreviewPageView = (props: PreviewPageViewProps) => {
-  const isFixtureMode = props.mode === 'fixture';
-  const isMappingReviewMode = props.mode === 'mappingReview';
-
+export const PreviewPageView = ({ payload, oauthToken, onLeavePreview }: PreviewPageViewProps) => {
+  const sdk = useSDK<PageAppSDK>();
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
   const [isContinuing, setIsContinuing] = useState(false);
   const fixture = isFixtureMode ? loadGoogleDocsReviewData() : null;
@@ -158,44 +104,19 @@ export const PreviewPageView = (props: PreviewPageViewProps) => {
       </Layout.Header>
       <Splitter marginTop="spacingS" />
       <Layout.Body>
-        {isFixtureMode ? (
-          reviewFixture ? (
-            <GoogleDocsMappingReviewScreen fixture={reviewFixture} showChrome={false} />
-          ) : (
-            <Note
-              variant="warning"
-              title="Fixture not found or invalid"
-              style={{ margin: '16px', maxWidth: 900 }}>
-              <Paragraph marginBottom="none">
-                Copy `debug-review-payload-latest.json` from `agents-api` into
-                `src/fixtures/googleDocsReview/fixture.json` and reload the app.
-              </Paragraph>
-            </Note>
-          )
-        ) : (
-          <Flex flexDirection="column" gap="spacing2Xl">
-            {props.mode === 'mappingReview' ? <OverviewSection payload={props.payload} /> : null}
-            {props.mode === 'workflow' && props.sdk ? (
-              <OverviewSection
-                sdk={props.sdk}
-                payload={props.payload}
-                onReturnToMainPage={props.onCancel}
-              />
-            ) : null}
-            {reviewFixture ? (
-              <GoogleDocsMappingReviewScreen fixture={reviewFixture} showChrome={false} />
-            ) : (
-              <Paragraph>Preview</Paragraph>
-            )}
-            {isMappingReviewMode ? (
-              <Flex justifyContent="flex-end" marginTop="spacingM">
-                <Button onClick={handleContinue} isDisabled={isContinuing}>
-                  Continue
-                </Button>
-              </Flex>
-            ) : null}
-          </Flex>
-        )}
+        {fixture ? <GoogleDocsMappingReviewScreen fixture={fixture} /> : null}
+        <Flex flexDirection="column" gap="spacing2Xl">
+          <OverviewSection
+            sdk={sdk}
+            payload={payload || fixture}
+            payload={payload}
+            oauthToken={oauthToken}
+            onReturnToMainPage={onLeavePreview}
+          />
+          <Heading as="h2" marginBottom="none">
+            Document outline
+          </Heading>
+        </Flex>
       </Layout.Body>
       <ConfirmCancelModal
         isOpen={isConfirmCancelModalOpen}

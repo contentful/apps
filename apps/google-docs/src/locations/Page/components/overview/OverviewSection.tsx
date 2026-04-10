@@ -19,6 +19,7 @@ import { SummaryModal } from '../modals/SummaryModal';
 type CreateOverviewSectionProps = {
   sdk: PageAppSDK;
   payload: PreviewPayload;
+  oauthToken: string;
   onReturnToMainPage: () => void;
 };
 
@@ -36,9 +37,12 @@ function isMappingReviewPayload(
   return 'suspendStepId' in payload && payload.suspendStepId === 'mapping-review';
 }
 
-const OverviewSection = (props: OverviewSectionProps) => {
-  const isMappingReviewMode = isMappingReviewPayload(props.payload);
-  const sdk = 'sdk' in props ? props.sdk : undefined;
+const OverviewSection = ({
+  sdk,
+  payload,
+  oauthToken,
+  onReturnToMainPage,
+}: OverviewSectionProps) => {
   const [contentTypeDisplayInfoMap, setContentTypeDisplayInfoMap] = useState<
     ContentTypeDisplayInfoMap | undefined
   >();
@@ -108,8 +112,9 @@ const OverviewSection = (props: OverviewSectionProps) => {
     try {
       const result = await createEntriesFromPreviewPayload(
         sdk,
-        props.payload,
-        selectedEntryTempIds
+        payload,
+        selectedEntryTempIds,
+        oauthToken
       );
       if (result.errors.length > 0) {
         sdk.notifier.error('Failed to create entries');
