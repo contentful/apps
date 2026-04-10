@@ -9,7 +9,6 @@ import {
 } from './referenceResolution';
 import { orderEntriesByCreationOrder } from '../utils/previewPayload';
 import { mapFieldValuesToSpaceDefaultLocale } from '../utils/remapEntryLocales';
-import { filterPreviewPayloadBySelectedRowIds } from '../utils/checkboxEntryList';
 
 export interface EntryCreationResult {
   createdEntries: EntryProps[];
@@ -48,11 +47,9 @@ async function createAssetFromUrlFast(
     }
   );
 
-  try {
-    await cma.asset.processForAllLocales({ spaceId, environmentId }, asset);
-  } catch (error) {
-    console.error(`Failed to process asset for URL: ${url}`, error);
-  }
+  cma.asset.processForAllLocales({ spaceId, environmentId }, asset).catch(() => {
+    // Silently fail - processing will be retried by Contentful
+  });
 
   return asset;
 }
@@ -162,17 +159,11 @@ async function createAssetsFromAgentOutput(
 
 export async function createEntriesFromPreviewPayload(
   sdk: PageAppSDK | ConfigAppSDK,
-  payload: PreviewPayload,
-  selectedEntryTempIds?: Set<string>
+  payload: PreviewPayload
 ): Promise<EntryCreationResult> {
-  const effectivePayload =
-    selectedEntryTempIds !== undefined
-      ? filterPreviewPayloadBySelectedRowIds(payload, selectedEntryTempIds)
-      : payload;
-
   const orderedEntries = orderEntriesByCreationOrder(
-    effectivePayload.entries,
-    effectivePayload.referenceGraph?.creationOrder
+    payload.entries,
+    payload.referenceGraph?.creationOrder
   );
   const entriesForSpaceLocale = mapFieldValuesToSpaceDefaultLocale(
     orderedEntries,
@@ -180,12 +171,7 @@ export async function createEntriesFromPreviewPayload(
   );
   const contentTypeIds = [...new Set(entriesForSpaceLocale.map((e) => e.contentTypeId))];
 
-  return createEntriesFromPreview(
-    sdk,
-    entriesForSpaceLocale,
-    contentTypeIds,
-    effectivePayload.assets
-  );
+  return createEntriesFromPreview(sdk, entriesForSpaceLocale, contentTypeIds, payload.assets);
 }
 
 /**

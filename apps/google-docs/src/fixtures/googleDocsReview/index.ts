@@ -1,7 +1,12 @@
-export { loadGoogleDocsReviewFixture } from './fixture-loader';
+export { loadGoogleDocsReviewData } from './fixture-loader';
 export type {
-  GoogleDocsReviewFixture,
-  FixtureContentBlock,
-  FixtureTable,
-  FixtureUsageItem,
+  GoogleDocsReviewData,
+  ReviewContentBlock,
+  ReviewTextRun,
+  ReviewTable,
+  ReviewUsageItem,
+  ReviewFieldMapping,
+  ReviewSourceRef,
+  ReviewTablePart,
+  ReviewEntryBlockGraph,
 } from './types';

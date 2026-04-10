@@ -66,16 +66,17 @@ export const MainPageView = ({
               </Paragraph>
             </Flex>
 
-            <Flex flexDirection="column" gap="spacingS" alignItems="stretch">
+            <Flex flexDirection="row" alignItems="center" gap="spacingS">
               <Button
                 variant="primary"
+                size="medium"
                 isDisabled={!oauthToken}
                 onClick={onSelectFile}
                 endIcon={<ArrowRightIcon />}>
                 Select your file
               </Button>
               <Button variant="secondary" onClick={onUseFixturePreview}>
-                Use fixture preview
+                Mock from fixture
               </Button>
               {enableMockEntryCreation ? (
                 <Button

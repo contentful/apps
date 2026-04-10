@@ -1,84 +1,98 @@
-import { useMemo, useState } from 'react';
+import {
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type RefCallback,
+} from 'react';
 import {
   Box,
+  Button,
   Card,
   Flex,
   Table,
+  TableBody,
+  TableCell,
   TableHead,
   TableRow,
-  TableCell,
-  TableBody,
-  Button,
   Text,
+  TextLink,
 } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import {
-  GoogleDocsReviewFixture,
-  FixtureContentBlock,
-  FixtureTable,
-  FixtureUsageItem,
+  ReviewContentBlock,
+  ReviewSourceRef,
+  ReviewTable,
+  ReviewTablePart,
+  ReviewTextRun,
+  ReviewUsageItem,
+  GoogleDocsReviewData,
 } from '../../../../fixtures/googleDocsReview';
+import { MappingCard, type MappingCardData } from './MappingCard';
+import { getAnchorIdForSourceRef, resolveMarkerOffsets } from './mappingCardPositioning';
 
 interface GoogleDocsMappingReviewScreenProps {
-  fixture: GoogleDocsReviewFixture;
+  fixture: GoogleDocsReviewData;
+  onBack?: () => void;
+  showChrome?: boolean;
 }
 
 type DocSegment =
-  | { kind: 'block'; id: string; position: number; block: FixtureContentBlock }
-  | { kind: 'table'; id: string; position: number; table: FixtureTable };
+  | { kind: 'block'; id: string; position: number; block: ReviewContentBlock }
+  | { kind: 'table'; id: string; position: number; table: ReviewTable };
 
-interface BaseOutlineSection {
+interface OutlineSection {
   id: string;
   title: string;
   segments: DocSegment[];
 }
 
-type OutlineSection = BaseOutlineSection;
+type SourceUsage = ReviewUsageItem & {
+  fieldType: string;
+  sourceRef: ReviewSourceRef;
+};
 
-const getBlockText = (block: FixtureContentBlock): string => {
-  return block.textRuns
+type AnchoredMappingCard = MappingCardData & {
+  anchorId: string;
+};
+
+type TextSegment = {
+  text: string;
+  styles?: ReviewTextRun['styles'];
+  highlighted: boolean;
+  mappingKeys: string[];
+};
+
+type ListItemPresentation = {
+  marker: string;
+  nestingLevel: number;
+};
+
+const getBlockText = (block: ReviewContentBlock): string =>
+  block.textRuns
     .map((run) => run.text)
     .join('')
     .trim();
+
+const formatDisplayName = (value: string): string => {
+  const normalized = value
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/[-_]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (!normalized) {
+    return value;
+  }
+
+  return normalized.replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
-const buildUsageFromMappingPlan = (fixture: GoogleDocsReviewFixture) => {
-  const blockUsage: Record<string, FixtureUsageItem[]> = {};
-  const tableUsage: Record<string, FixtureUsageItem[]> = {};
-
-  fixture.mappingPlan.entries.forEach((mappingEntry, entryIndex) => {
-    mappingEntry.fieldMappings.forEach((fieldMapping) => {
-      fieldMapping.sourceBlockIds.forEach((blockId) => {
-        if (!blockUsage[blockId]) {
-          blockUsage[blockId] = [];
-        }
-        blockUsage[blockId].push({
-          entryIndex,
-          contentTypeId: mappingEntry.contentTypeId,
-          fieldId: fieldMapping.fieldId,
-        });
-      });
-
-      fieldMapping.sourceTableIds.forEach((tableId) => {
-        if (!tableUsage[tableId]) {
-          tableUsage[tableId] = [];
-        }
-        tableUsage[tableId].push({
-          entryIndex,
-          contentTypeId: mappingEntry.contentTypeId,
-          fieldId: fieldMapping.fieldId,
-        });
-      });
-    });
-  });
-
-  return { blockUsage, tableUsage };
-};
-
-const getEntryDisplayTitle = (entry: GoogleDocsReviewFixture['entries'][number]): string => {
+const getEntryDisplayTitle = (entry: GoogleDocsReviewData['entries'][number]): string => {
   const titleField = entry.fields?.title;
   if (typeof titleField !== 'object' || titleField === null) {
-    return entry.contentTypeId;
+    return formatDisplayName(entry.contentTypeId);
   }
 
   const localeValue = Object.values(titleField as Record<string, unknown>).find(
@@ -87,21 +101,287 @@ const getEntryDisplayTitle = (entry: GoogleDocsReviewFixture['entries'][number])
 
   return typeof localeValue === 'string' && localeValue.trim().length > 0
     ? localeValue
-    : entry.contentTypeId;
+    : formatDisplayName(entry.contentTypeId);
 };
 
-export const GoogleDocsMappingReviewScreen = ({ fixture }: GoogleDocsMappingReviewScreenProps) => {
+function buildUsageIndexes(fixture: GoogleDocsReviewData): {
+  blockUsage: Record<string, SourceUsage[]>;
+  tablePartUsage: Record<string, SourceUsage[]>;
+  tableUsage: Record<string, SourceUsage[]>;
+} {
+  const blockUsage: Record<string, SourceUsage[]> = {};
+  const tablePartUsage: Record<string, SourceUsage[]> = {};
+  const tableUsage: Record<string, SourceUsage[]> = {};
+
+  fixture.entryBlockGraph.entries.forEach((mappingEntry, entryIndex) => {
+    mappingEntry.fieldMappings.forEach((fieldMapping) => {
+      fieldMapping.sourceRefs.forEach((sourceRef) => {
+        const usage: SourceUsage = {
+          entryIndex,
+          fieldId: fieldMapping.fieldId,
+          fieldType: fieldMapping.fieldType,
+          sourceRef,
+        };
+
+        if (sourceRef.kind === 'blockText' || sourceRef.kind === 'blockImage') {
+          blockUsage[sourceRef.blockId] = [...(blockUsage[sourceRef.blockId] ?? []), usage];
+          return;
+        }
+
+        const tablePartKey = [
+          sourceRef.tableId,
+          sourceRef.rowId,
+          sourceRef.cellId,
+          sourceRef.partId,
+        ].join(':');
+        tablePartUsage[tablePartKey] = [...(tablePartUsage[tablePartKey] ?? []), usage];
+        tableUsage[sourceRef.tableId] = [...(tableUsage[sourceRef.tableId] ?? []), usage];
+      });
+    });
+  });
+
+  return { blockUsage, tablePartUsage, tableUsage };
+}
+
+const getMappingCardKey = (sectionId: string, usage: ReviewUsageItem): string =>
+  `${sectionId}-${usage.entryIndex}-${usage.fieldId}`;
+
+function uniqueUsage<T extends SourceUsage>(usage: T[]): T[] {
+  const seen = new Set<string>();
+  return usage.filter((item) => {
+    const key = `${item.entryIndex}-${item.fieldId}-${item.fieldType}`;
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+}
+
+function buildTextSegments(
+  textRuns: ReviewTextRun[],
+  usage: Array<{ sourceRef: ReviewSourceRef; mappingKey: string }>
+): TextSegment[] {
+  const textUsage = usage.filter(
+    (
+      usageItem
+    ): usageItem is {
+      sourceRef: Extract<ReviewSourceRef, { kind: 'blockText' | 'tableText' }>;
+      mappingKey: string;
+    } => usageItem.sourceRef.kind === 'blockText' || usageItem.sourceRef.kind === 'tableText'
+  );
+
+  let fullText = '';
+  const runRanges: Array<{ start: number; end: number; styles?: ReviewTextRun['styles'] }> = [];
+
+  textRuns.forEach((run) => {
+    const start = fullText.length;
+    fullText += run.text;
+    runRanges.push({ start, end: fullText.length, styles: run.styles });
+  });
+
+  const boundaries = new Set<number>([0, fullText.length]);
+  runRanges.forEach((range) => {
+    boundaries.add(range.start);
+    boundaries.add(range.end);
+  });
+  textUsage.forEach(({ sourceRef }) => {
+    boundaries.add(sourceRef.start);
+    boundaries.add(sourceRef.end);
+  });
+
+  const sortedBoundaries = [...boundaries].sort((a, b) => a - b);
+
+  return sortedBoundaries.flatMap((start, index) => {
+    const end = sortedBoundaries[index + 1];
+    if (end === undefined || start === end) {
+      return [];
+    }
+
+    const text = fullText.slice(start, end);
+    if (!text) {
+      return [];
+    }
+
+    const run = runRanges.find((range) => start >= range.start && end <= range.end);
+    const mappingKeys = textUsage
+      .filter(({ sourceRef }) => start >= sourceRef.start && end <= sourceRef.end)
+      .map(({ mappingKey }) => mappingKey);
+
+    return [
+      {
+        text,
+        styles: run?.styles,
+        highlighted: mappingKeys.length > 0,
+        mappingKeys,
+      },
+    ];
+  });
+}
+
+function getTextSegmentStyle(styles?: ReviewTextRun['styles']): CSSProperties {
+  return {
+    fontWeight: styles?.bold ? 600 : undefined,
+    fontStyle: styles?.italic ? 'italic' : undefined,
+    textDecoration: styles?.underline
+      ? 'underline'
+      : styles?.strikethrough
+      ? 'line-through'
+      : undefined,
+    verticalAlign: styles?.superscript ? 'super' : styles?.subscript ? 'sub' : undefined,
+  };
+}
+
+function renderTextSegment(
+  key: string,
+  testId: string,
+  segment: TextSegment,
+  hovered: boolean,
+  setHoveredMappings: (mappingKeys: string[]) => void
+) {
+  const content = (
+    <Box
+      as="span"
+      key={key}
+      data-testid={testId}
+      data-highlighted={segment.highlighted ? 'true' : 'false'}
+      data-hovered={hovered ? 'true' : 'false'}
+      onMouseEnter={segment.highlighted ? () => setHoveredMappings(segment.mappingKeys) : undefined}
+      onMouseLeave={segment.highlighted ? () => setHoveredMappings([]) : undefined}
+      style={{
+        ...getTextSegmentStyle(segment.styles),
+        backgroundColor: segment.highlighted
+          ? hovered
+            ? tokens.green300
+            : tokens.green200
+          : 'transparent',
+        borderRadius: segment.highlighted ? tokens.borderRadiusSmall : undefined,
+        whiteSpace: 'pre-wrap',
+        transition: 'background-color 120ms ease',
+      }}>
+      {segment.text}
+    </Box>
+  );
+
+  const linkUrl = segment.styles?.linkUrl?.trim();
+  if (!linkUrl) {
+    return content;
+  }
+
+  return (
+    <TextLink key={`link-${key}`} href={linkUrl} target="_blank" rel="noreferrer">
+      {content}
+    </TextLink>
+  );
+}
+
+function buildOutlineSections(segments: DocSegment[]): OutlineSection[] {
+  const sections: OutlineSection[] = [];
+  let currentSection: OutlineSection | null = null;
+
+  segments.forEach((segment) => {
+    if (segment.kind === 'table') {
+      sections.push({
+        id: `section-${segment.id}`,
+        title: 'Table',
+        segments: [segment],
+      });
+      currentSection = null;
+      return;
+    }
+
+    const isHeading = segment.block.type === 'heading' && getBlockText(segment.block).length > 0;
+    if (isHeading) {
+      currentSection = {
+        id: `section-${segment.id}`,
+        title: getBlockText(segment.block),
+        segments: [segment],
+      };
+      sections.push(currentSection);
+      return;
+    }
+
+    if (!currentSection) {
+      currentSection = {
+        id: `section-${segment.id}`,
+        title: getBlockText(segment.block) || 'Section',
+        segments: [],
+      };
+      sections.push(currentSection);
+    }
+
+    currentSection.segments.push(segment);
+  });
+
+  return sections;
+}
+
+function buildListItemPresentations(
+  blocks: ReviewContentBlock[]
+): Record<string, ListItemPresentation> {
+  const presentations: Record<string, ListItemPresentation> = {};
+  const orderedCounts = new Map<number, number>();
+
+  [...blocks]
+    .sort((left, right) => left.position - right.position)
+    .forEach((block) => {
+      if (block.type !== 'listItem' || !block.bullet) {
+        orderedCounts.clear();
+        return;
+      }
+
+      const nestingLevel = Math.max(0, block.bullet.nestingLevel ?? 0);
+
+      Array.from(orderedCounts.keys()).forEach((level) => {
+        if (level > nestingLevel) {
+          orderedCounts.delete(level);
+        }
+      });
+
+      if (block.bullet.ordered) {
+        const nextCount = (orderedCounts.get(nestingLevel) ?? 0) + 1;
+        orderedCounts.set(nestingLevel, nextCount);
+        presentations[block.id] = {
+          marker: `${nextCount}.`,
+          nestingLevel,
+        };
+        return;
+      }
+
+      orderedCounts.delete(nestingLevel);
+      presentations[block.id] = {
+        marker: nestingLevel > 0 ? '◦' : '•',
+        nestingLevel,
+      };
+    });
+
+  return presentations;
+}
+
+export const GoogleDocsMappingReviewScreen = ({
+  fixture,
+  onBack,
+  showChrome = true,
+}: GoogleDocsMappingReviewScreenProps) => {
   const [selectedEntryIndex, setSelectedEntryIndex] = useState<number | null>(null);
-  const sourceUsage = useMemo(() => buildUsageFromMappingPlan(fixture), [fixture]);
+  const [hoveredMappingKeys, setHoveredMappingKeys] = useState<string[]>([]);
+  const [cardOffsetsBySection, setCardOffsetsBySection] = useState<
+    Record<string, Record<string, number>>
+  >({});
+  const sectionLayoutRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const cardWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  const document = fixture.editableNormalizedDocument;
+  const sourceUsage = useMemo(() => buildUsageIndexes(fixture), [fixture]);
 
   const segments = useMemo<DocSegment[]>(() => {
-    const blockSegments: DocSegment[] = fixture.normalizedDocument.contentBlocks.map((block) => ({
+    const blockSegments: DocSegment[] = document.contentBlocks.map((block) => ({
       kind: 'block',
       id: block.id,
       position: block.position,
       block,
     }));
-    const tableSegments: DocSegment[] = fixture.normalizedDocument.tables.map((table) => ({
+    const tableSegments: DocSegment[] = document.tables.map((table) => ({
       kind: 'table',
       id: table.id,
       position: table.position,
@@ -109,270 +389,549 @@ export const GoogleDocsMappingReviewScreen = ({ fixture }: GoogleDocsMappingRevi
     }));
 
     return [...blockSegments, ...tableSegments].sort((a, b) => a.position - b.position);
-  }, [fixture.normalizedDocument.contentBlocks, fixture.normalizedDocument.tables]);
+  }, [document.contentBlocks, document.tables]);
 
-  const sections = useMemo<OutlineSection[]>(() => {
-    const result: BaseOutlineSection[] = [];
-    let currentSection: BaseOutlineSection | null = null;
-
-    segments.forEach((segment) => {
-      if (segment.kind === 'table') {
-        result.push({
-          id: `section-${segment.id}`,
-          title: 'Table',
-          segments: [segment],
-        });
-        currentSection = null;
-        return;
-      }
-
-      const isHeading = segment.block.type === 'heading' && getBlockText(segment.block).length > 0;
-
-      if (isHeading) {
-        const headingText = getBlockText(segment.block);
-        const section: BaseOutlineSection = {
-          id: `section-${segment.id}`,
-          title: headingText,
-          segments: [segment],
-        };
-        result.push(section);
-        currentSection = section;
-        return;
-      }
-
-      if (!currentSection) {
-        currentSection = {
-          id: `section-${segment.id}`,
-          title: getBlockText(segment.block) || 'Section',
-          segments: [],
-        };
-        result.push(currentSection);
-      }
-      currentSection.segments.push(segment);
-    });
-    return result;
-  }, [segments]);
+  const sections = useMemo(() => buildOutlineSections(segments), [segments]);
 
   const imageById = useMemo(() => {
-    const images = fixture.normalizedDocument.images ?? [];
+    const images = document.images ?? [];
     return images.reduce<Record<string, (typeof images)[number]>>((acc, image) => {
       acc[image.id] = image;
       return acc;
     }, {});
-  }, [fixture.normalizedDocument.images]);
+  }, [document.images]);
 
-  const getUsageForSegment = (segment: DocSegment): FixtureUsageItem[] => {
-    if (segment.kind === 'table') {
-      return sourceUsage.tableUsage[segment.id] ?? [];
-    }
-    return sourceUsage.blockUsage[segment.id] ?? [];
-  };
+  const listItemPresentations = useMemo(
+    () => buildListItemPresentations(document.contentBlocks),
+    [document.contentBlocks]
+  );
+  const overviewEntries = useMemo(
+    () =>
+      fixture.entryBlockGraph.entries.map((graphEntry, entryIndex) => {
+        const entry = fixture.entries[entryIndex];
+        const key =
+          entry?.tempId ?? graphEntry.tempId ?? `${graphEntry.contentTypeId}-${entryIndex}`;
 
-  const getUsageForSection = (section: OutlineSection): FixtureUsageItem[] => {
-    const aggregated = section.segments.flatMap(getUsageForSegment);
-    const seen = new Set<string>();
-    return aggregated.filter((usage) => {
-      const key = `${usage.entryIndex}-${usage.contentTypeId}-${usage.fieldId}`;
-      if (seen.has(key)) {
-        return false;
-      }
-      seen.add(key);
-      return true;
-    });
-  };
+        return {
+          key,
+          entryIndex,
+          title: entry ? getEntryDisplayTitle(entry) : formatDisplayName(graphEntry.contentTypeId),
+          contentType: formatDisplayName(graphEntry.contentTypeId),
+          mappingCount: graphEntry.fieldMappings.length,
+        };
+      }),
+    [fixture.entries, fixture.entryBlockGraph.entries]
+  );
 
-  const getImagesForSegment = (
-    segment: DocSegment
-  ): Array<NonNullable<GoogleDocsReviewFixture['normalizedDocument']['images']>[number]> => {
-    const imageIds = segment.kind === 'table' ? segment.table.imageIds : segment.block.imageIds;
-    return imageIds.map((id) => imageById[id]).filter(Boolean);
-  };
-
-  const getVisibleUsage = (usage: FixtureUsageItem[]): FixtureUsageItem[] => {
+  const getVisibleUsage = <T extends ReviewUsageItem>(usage: T[]): T[] => {
     if (selectedEntryIndex === null) {
       return usage;
     }
     return usage.filter((item) => item.entryIndex === selectedEntryIndex);
   };
 
-  const getMappingCardsForSection = (section: OutlineSection) => {
-    const visibleUsage = getVisibleUsage(getUsageForSection(section));
-    return visibleUsage.map((usage) => {
-      const fieldMappings = fixture.mappingPlan.entries[usage.entryIndex]?.fieldMappings ?? [];
-      const fieldMapping = fieldMappings.find((mapping) => mapping.fieldId === usage.fieldId);
-      return {
-        key: `${section.id}-${usage.entryIndex}-${usage.fieldId}`,
-        fieldId: usage.fieldId,
-        fieldType: fieldMapping?.fieldType,
-      };
-    });
+  const getUsageForSegment = (segment: DocSegment): SourceUsage[] => {
+    if (segment.kind === 'table') {
+      return uniqueUsage(sourceUsage.tableUsage[segment.id] ?? []);
+    }
+
+    return uniqueUsage(sourceUsage.blockUsage[segment.id] ?? []);
   };
 
-  return (
-    <Flex flexDirection="column" gap="spacingM">
-      <Box padding="spacingM">
-        <Flex marginTop="spacingS" gap="spacing2Xs" flexWrap="wrap">
-          <Button
-            size="small"
-            variant={selectedEntryIndex === null ? 'primary' : 'secondary'}
-            onClick={() => setSelectedEntryIndex(null)}>
-            All mappings
-          </Button>
-          {fixture.entries.map((entry, entryIndex) => (
-            <Button
-              key={entry.tempId ?? `${entry.contentTypeId}-${entryIndex}`}
-              size="small"
-              variant={selectedEntryIndex === entryIndex ? 'primary' : 'secondary'}
-              onClick={() => setSelectedEntryIndex(entryIndex)}>
-              {getEntryDisplayTitle(entry)}
-            </Button>
-          ))}
-        </Flex>
-      </Box>
+  const getUsageForSection = (section: OutlineSection): ReviewUsageItem[] =>
+    uniqueUsage(section.segments.flatMap(getUsageForSegment));
 
-      <Flex flexDirection="column" gap="spacingS" style={{ padding: tokens.spacingM }}>
-        <Text fontSize="fontSizeL" fontWeight="fontWeightDemiBold">
-          Document outline
-        </Text>
-        {sections.map((section) => {
-          const allUsage = getUsageForSection(section);
-          const visibleUsage = getVisibleUsage(allUsage);
-          const mappingCards = getMappingCardsForSection(section);
-          const isMapped = visibleUsage.length > 0;
+  const isMappingHovered = (mappingKeys: string[]) =>
+    mappingKeys.some((mappingKey) => hoveredMappingKeys.includes(mappingKey));
+
+  const getMappingCardsForSection = (section: OutlineSection): AnchoredMappingCard[] =>
+    getVisibleUsage(getUsageForSection(section)).map((usage) => {
+      return {
+        key: getMappingCardKey(section.id, usage),
+        fieldName: formatDisplayName(usage.fieldId),
+        fieldType: formatDisplayName(usage.fieldType),
+        anchorId: getAnchorIdForSourceRef(usage.sourceRef),
+      };
+    });
+
+  const mappingCardsBySection = useMemo(
+    () =>
+      sections.reduce<Record<string, AnchoredMappingCard[]>>((acc, section) => {
+        acc[section.id] = getMappingCardsForSection(section);
+        return acc;
+      }, {}),
+    [sections, selectedEntryIndex, fixture, sourceUsage]
+  );
+
+  const setSectionLayoutRef =
+    (sectionId: string): RefCallback<HTMLDivElement> =>
+    (node) => {
+      sectionLayoutRefs.current[sectionId] = node;
+    };
+
+  const setCardWrapperRef =
+    (cardKey: string): RefCallback<HTMLDivElement> =>
+    (node) => {
+      cardWrapperRefs.current[cardKey] = node;
+    };
+
+  useLayoutEffect(() => {
+    const measureOffsets = () => {
+      const nextOffsets: Record<string, Record<string, number>> = {};
+
+      sections.forEach((section) => {
+        const sectionNode = sectionLayoutRefs.current[section.id];
+        const sectionCards = mappingCardsBySection[section.id] ?? [];
+
+        if (!sectionNode || sectionCards.length === 0) {
+          return;
+        }
+
+        const sectionTop = sectionNode.getBoundingClientRect().top;
+        const anchorNodes = Array.from(
+          sectionNode.querySelectorAll<HTMLElement>('[data-anchor-id]')
+        );
+
+        const cards = sectionCards.map((card) => {
+          const anchorNode = anchorNodes.find(
+            (node) => node.getAttribute('data-anchor-id') === card.anchorId
+          );
+          const wrapperNode = cardWrapperRefs.current[card.key];
+          const rawTop = anchorNode
+            ? Math.max(0, anchorNode.getBoundingClientRect().top - sectionTop)
+            : 0;
+          const height =
+            wrapperNode?.getBoundingClientRect().height || wrapperNode?.offsetHeight || 28;
+
+          return {
+            key: card.key,
+            rawTop,
+            height,
+          };
+        });
+
+        nextOffsets[section.id] = resolveMarkerOffsets(cards);
+      });
+
+      setCardOffsetsBySection(nextOffsets);
+    };
+
+    measureOffsets();
+    window.addEventListener('resize', measureOffsets);
+
+    return () => {
+      window.removeEventListener('resize', measureOffsets);
+    };
+  }, [mappingCardsBySection, sections]);
+
+  const renderBlock = (sectionId: string, block: ReviewContentBlock) => {
+    const visibleUsage = getVisibleUsage(sourceUsage.blockUsage[block.id] ?? []);
+    const visibleRefs = visibleUsage.map((usage) => usage.sourceRef);
+    const textUsage = visibleUsage.map((usage) => ({
+      sourceRef: usage.sourceRef,
+      mappingKey: getMappingCardKey(sectionId, usage),
+    }));
+    const segments = buildTextSegments(block.textRuns, textUsage);
+    const listItemPresentation = block.type === 'listItem' ? listItemPresentations[block.id] : null;
+    const setHoveredMappings = (mappingKeys: string[]) => {
+      setHoveredMappingKeys(mappingKeys);
+    };
+
+    const renderedText = (
+      <Text as="p" marginBottom="none">
+        {segments.map((segment, index) => {
+          const hovered = isMappingHovered(segment.mappingKeys);
+          return renderTextSegment(
+            `${block.id}-${index}`,
+            `block-segment-${block.id}-${index}`,
+            segment,
+            hovered,
+            setHoveredMappings
+          );
+        })}
+      </Text>
+    );
+
+    return (
+      <Box>
+        {listItemPresentation ? (
+          <Flex
+            data-testid={`list-item-${block.id}`}
+            alignItems="flex-start"
+            gap="spacing2Xs"
+            style={{
+              marginInlineStart:
+                listItemPresentation.nestingLevel > 0
+                  ? `calc(${tokens.spacingM} * ${listItemPresentation.nestingLevel})`
+                  : undefined,
+            }}>
+            <Text
+              as="span"
+              data-testid={`list-marker-${block.id}`}
+              fontColor="gray600"
+              style={{
+                minWidth: tokens.spacingM,
+                lineHeight: tokens.lineHeightM,
+                flex: '0 0 auto',
+              }}>
+              {listItemPresentation.marker}
+            </Text>
+            <Box style={{ minWidth: 0, flex: 1 }}>{renderedText}</Box>
+          </Flex>
+        ) : (
+          renderedText
+        )}
+
+        {block.imageIds.map((imageId) => {
+          const image = imageById[imageId];
+          if (!image) return null;
+          const highlighted = visibleRefs.some(
+            (ref) => ref.kind === 'blockImage' && ref.imageId === imageId
+          );
+          const mappingKeys = visibleUsage
+            .filter(
+              (usage) =>
+                usage.sourceRef.kind === 'blockImage' && usage.sourceRef.imageId === imageId
+            )
+            .map((usage) => getMappingCardKey(sectionId, usage));
+          const hovered = isMappingHovered(mappingKeys);
 
           return (
-            <Box key={section.id}>
-              <Flex gap="spacingM" alignItems="stretch">
-                <Box style={{ flex: 2 }}>
-                  <Box
-                    style={{
-                      border: `1px solid ${isMapped ? tokens.green500 : tokens.gray300}`,
-                      borderRadius: tokens.borderRadiusMedium,
-                      padding: tokens.spacingS,
-                      backgroundColor: isMapped ? tokens.green100 : tokens.gray100,
-                    }}>
-                    <Text fontWeight="fontWeightDemiBold">{section.title}</Text>
-
-                    <Flex flexDirection="column" gap="spacingXs" marginTop="spacingXs">
-                      {section.segments.map((segment) => (
-                        <Box
-                          key={`${segment.kind}-${segment.id}`}
-                          style={{
-                            borderRadius: tokens.borderRadiusMedium,
-                            padding: tokens.spacingS,
-                            backgroundColor: 'transparent',
-                          }}>
-                          {segment.kind === 'table' ? (
-                            <Box>
-                              <Text fontWeight="fontWeightDemiBold">Table</Text>
-                              <Box marginTop="spacingXs">
-                                <Table>
-                                  <TableHead>
-                                    <TableRow>
-                                      {segment.table.headers.map((header, headerIndex) => (
-                                        <TableCell
-                                          key={`${segment.table.id}-header-${headerIndex}`}>
-                                          {header}
-                                        </TableCell>
-                                      ))}
-                                    </TableRow>
-                                  </TableHead>
-                                  <TableBody>
-                                    {segment.table.rows.map((row, rowIndex) => (
-                                      <TableRow key={`${segment.table.id}-row-${rowIndex}`}>
-                                        {row.cells.map((cell, cellIndex) => (
-                                          <TableCell
-                                            key={`${segment.table.id}-cell-${rowIndex}-${cellIndex}`}>
-                                            {cell}
-                                          </TableCell>
-                                        ))}
-                                      </TableRow>
-                                    ))}
-                                  </TableBody>
-                                </Table>
-                              </Box>
-                            </Box>
-                          ) : (
-                            getBlockText(segment.block) && (
-                              <Text as="p" marginBottom="none">
-                                {getBlockText(segment.block)}
-                              </Text>
-                            )
-                          )}
-
-                          {getImagesForSegment(segment).map((image) => (
-                            <Box key={image.id} marginTop="spacingS">
-                              <Box
-                                as="img"
-                                src={image.url}
-                                alt={image.altText ?? image.title ?? 'Document image'}
-                                style={{
-                                  width: '100%',
-                                  maxHeight: 280,
-                                  objectFit: 'contain',
-                                  borderRadius: tokens.borderRadiusMedium,
-                                  border: `1px solid ${tokens.gray300}`,
-                                  backgroundColor: tokens.gray100,
-                                }}
-                              />
-                              {(image.title || image.altText) && (
-                                <Text
-                                  as="p"
-                                  fontColor="gray700"
-                                  marginBottom="none"
-                                  marginTop="spacing2Xs">
-                                  {image.title ?? image.altText}
-                                </Text>
-                              )}
-                            </Box>
-                          ))}
-                        </Box>
-                      ))}
-                    </Flex>
-                  </Box>
-                </Box>
-
-                <Box style={{ flex: 1 }}>
-                  <Flex flexDirection="column" gap="spacingS">
-                    {mappingCards.length > 0 ? (
-                      mappingCards.map((mappingCard) => (
-                        <Box
-                          key={mappingCard.key}
-                          style={{
-                            border: `1px solid ${tokens.green500}`,
-                            borderRadius: tokens.borderRadiusMedium,
-                            padding: tokens.spacingS,
-                            backgroundColor: tokens.green100,
-                          }}>
-                          <Text as="p" marginBottom="spacing2Xs" fontColor="gray700">
-                            Field
-                          </Text>
-                          <Text as="p" marginBottom="none" fontWeight="fontWeightDemiBold">
-                            {mappingCard.fieldId}
-                            {mappingCard.fieldType ? ` (${mappingCard.fieldType})` : ''}
-                          </Text>
-                        </Box>
-                      ))
-                    ) : (
-                      <Box
-                        style={{
-                          border: `1px solid ${tokens.gray300}`,
-                          borderRadius: tokens.borderRadiusMedium,
-                          padding: tokens.spacingS,
-                          backgroundColor: tokens.gray100,
-                        }}>
-                        <Text as="p" marginBottom="none" fontColor="gray700">
-                          No mappings for this section
-                        </Text>
-                      </Box>
-                    )}
-                  </Flex>
-                </Box>
-              </Flex>
+            <Box key={image.id} marginTop="spacingS">
+              <Box
+                as="img"
+                src={image.url}
+                alt={image.altText ?? image.title ?? 'Document image'}
+                data-highlighted={highlighted ? 'true' : 'false'}
+                data-hovered={hovered ? 'true' : 'false'}
+                onMouseEnter={highlighted ? () => setHoveredMappings(mappingKeys) : undefined}
+                onMouseLeave={highlighted ? () => setHoveredMappings([]) : undefined}
+                style={{
+                  width: '100%',
+                  maxHeight: 280,
+                  objectFit: 'contain',
+                  borderRadius: tokens.borderRadiusMedium,
+                  border: `2px solid ${
+                    highlighted ? (hovered ? tokens.green600 : tokens.green500) : tokens.gray300
+                  }`,
+                  backgroundColor: tokens.gray100,
+                  transition: 'border-color 120ms ease',
+                }}
+              />
             </Box>
           );
         })}
-      </Flex>
+      </Box>
+    );
+  };
+
+  const renderTablePart = (
+    sectionId: string,
+    table: ReviewTable,
+    rowId: string,
+    cellId: string,
+    part: ReviewTablePart
+  ) => {
+    const usageKey = [table.id, rowId, cellId, part.id].join(':');
+    const visibleUsage = getVisibleUsage(sourceUsage.tablePartUsage[usageKey] ?? []);
+    const visibleRefs = visibleUsage.map((usage) => usage.sourceRef);
+    const setHoveredMappings = (mappingKeys: string[]) => {
+      setHoveredMappingKeys(mappingKeys);
+    };
+
+    if (part.type === 'image') {
+      const image = imageById[part.imageId];
+      const highlighted = visibleRefs.some((ref) => ref.kind === 'tableImage');
+      const mappingKeys = visibleUsage
+        .filter((usage) => usage.sourceRef.kind === 'tableImage')
+        .map((usage) => getMappingCardKey(sectionId, usage));
+      const hovered = isMappingHovered(mappingKeys);
+
+      if (!image) {
+        return null;
+      }
+
+      return (
+        <Box marginTop="spacing2Xs">
+          <Box
+            as="img"
+            src={image.url}
+            alt={image.altText ?? image.title ?? 'Table image'}
+            data-testid={`table-image-part-${part.id}`}
+            data-highlighted={highlighted ? 'true' : 'false'}
+            data-hovered={hovered ? 'true' : 'false'}
+            onMouseEnter={highlighted ? () => setHoveredMappings(mappingKeys) : undefined}
+            onMouseLeave={highlighted ? () => setHoveredMappings([]) : undefined}
+            style={{
+              width: '100%',
+              maxWidth: 180,
+              objectFit: 'contain',
+              borderRadius: tokens.borderRadiusMedium,
+              border: `2px solid ${
+                highlighted ? (hovered ? tokens.green600 : tokens.green500) : tokens.gray300
+              }`,
+              backgroundColor: tokens.gray100,
+              transition: 'border-color 120ms ease',
+            }}
+          />
+        </Box>
+      );
+    }
+
+    const textUsage = visibleUsage.map((usage) => ({
+      sourceRef: usage.sourceRef,
+      mappingKey: getMappingCardKey(sectionId, usage),
+    }));
+    const segments = buildTextSegments(part.textRuns, textUsage);
+
+    return (
+      <Box as="span" style={{ whiteSpace: 'pre-wrap' }}>
+        {segments.map((segment, index) => {
+          const hovered = isMappingHovered(segment.mappingKeys);
+          return renderTextSegment(
+            `${part.id}-${index}`,
+            `table-text-segment-${part.id}-${index}`,
+            segment,
+            hovered,
+            setHoveredMappings
+          );
+        })}
+      </Box>
+    );
+  };
+
+  const renderTable = (sectionId: string, table: ReviewTable) => (
+    <Table>
+      {table.headers.length > 0 && (
+        <TableHead>
+          <TableRow>
+            {table.headers.map((header, headerIndex) => (
+              <TableCell key={`${table.id}-header-${headerIndex}`}>{header}</TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+      )}
+      <TableBody>
+        {table.rows.map((row) => (
+          <TableRow
+            key={row.id}
+            data-anchor-id={`row:${table.id}:${row.id}`}
+            data-testid={`table-row-${row.id}`}>
+            {row.cells.map((cell) => {
+              return (
+                <TableCell
+                  key={cell.id}
+                  data-testid={`table-cell-${cell.id}`}
+                  style={{
+                    backgroundColor: 'transparent',
+                    verticalAlign: 'top',
+                  }}>
+                  <Flex flexDirection="column" gap="spacing2Xs">
+                    {cell.parts.map((part) => (
+                      <Box key={part.id}>
+                        {renderTablePart(sectionId, table, row.id, cell.id, part)}
+                      </Box>
+                    ))}
+                  </Flex>
+                </TableCell>
+              );
+            })}
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+
+  return (
+    <Flex flexDirection="column" gap="spacingM" style={{ padding: tokens.spacingL }}>
+      {showChrome ? (
+        <Flex justifyContent="space-between" alignItems="center">
+          <Text fontWeight="fontWeightDemiBold">Google Docs Mapping Review</Text>
+          {onBack ? (
+            <Button variant="secondary" size="small" onClick={onBack}>
+              Back
+            </Button>
+          ) : null}
+        </Flex>
+      ) : null}
+
+      <Card
+        padding="spacingM"
+        style={{
+          border: `1px solid ${tokens.gray300}`,
+        }}>
+        <Flex flexDirection="column" gap="spacingS">
+          <Box>
+            <Text fontWeight="fontWeightDemiBold">Overview</Text>
+            <Text as="p" fontColor="gray600" marginBottom="none">
+              Select an entry card to focus the document outline on that entry&apos;s mappings.
+            </Text>
+          </Box>
+
+          <Flex gap="spacingS" flexWrap="wrap">
+            <Box
+              as="button"
+              type="button"
+              data-testid="entry-overview-card-all"
+              aria-pressed={selectedEntryIndex === null}
+              onClick={() => setSelectedEntryIndex(null)}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: tokens.spacing2Xs,
+                minWidth: 220,
+                padding: tokens.spacingM,
+                borderRadius: tokens.borderRadiusMedium,
+                border: `1px solid ${
+                  selectedEntryIndex === null ? tokens.green500 : tokens.gray300
+                }`,
+                backgroundColor: selectedEntryIndex === null ? tokens.green100 : tokens.colorWhite,
+                textAlign: 'left',
+                cursor: 'pointer',
+              }}>
+              <Text fontWeight="fontWeightDemiBold">All mappings</Text>
+              <Text as="span" fontColor="gray600">
+                Show every mapped entry in the document outline.
+              </Text>
+            </Box>
+
+            {overviewEntries.map((entry) => {
+              const isSelected = selectedEntryIndex === entry.entryIndex;
+
+              return (
+                <Box
+                  as="button"
+                  key={entry.key}
+                  type="button"
+                  data-testid={`entry-overview-card-${entry.key}`}
+                  aria-pressed={isSelected}
+                  onClick={() => setSelectedEntryIndex(entry.entryIndex)}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: tokens.spacing2Xs,
+                    minWidth: 220,
+                    padding: tokens.spacingM,
+                    borderRadius: tokens.borderRadiusMedium,
+                    border: `1px solid ${isSelected ? tokens.green500 : tokens.gray300}`,
+                    backgroundColor: isSelected ? tokens.green100 : tokens.colorWhite,
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}>
+                  <Text fontWeight="fontWeightDemiBold">{entry.title}</Text>
+                  <Text as="span" fontColor="gray600">
+                    {entry.contentType} | {entry.mappingCount} mapping
+                    {entry.mappingCount === 1 ? '' : 's'}
+                  </Text>
+                </Box>
+              );
+            })}
+          </Flex>
+        </Flex>
+      </Card>
+
+      <Card
+        padding="none"
+        style={{
+          minHeight: '70vh',
+          overflow: 'auto',
+          border: `1px solid ${tokens.gray300}`,
+        }}>
+        <Box padding="spacingM" style={{ borderBottom: `1px solid ${tokens.gray300}` }}>
+          <Text fontWeight="fontWeightDemiBold">Document outline</Text>
+          <Text as="p" fontColor="gray600" marginBottom="none">
+            {document.title ?? document.documentId}
+          </Text>
+          <Text as="p" fontColor="gray600" marginBottom="none">
+            {selectedEntryIndex === null
+              ? 'Showing mappings for all entries.'
+              : `Showing mappings for ${
+                  overviewEntries[selectedEntryIndex]?.title ?? 'selected entry'
+                }.`}
+          </Text>
+        </Box>
+
+        <Flex
+          flexDirection="column"
+          gap="spacingS"
+          style={{ padding: tokens.spacingM, marginTop: tokens.spacingM }}>
+          {sections.map((section) => {
+            const visibleUsage = getVisibleUsage(getUsageForSection(section));
+            const mappingCards = getMappingCardsForSection(section);
+            const isMapped = visibleUsage.length > 0;
+            const isTableSection = section.segments.every((segment) => segment.kind === 'table');
+
+            return (
+              <Box key={section.id}>
+                <Flex
+                  gap="spacingM"
+                  alignItems="stretch"
+                  data-testid={`section-layout-${section.id}`}
+                  ref={setSectionLayoutRef(section.id)}>
+                  <Box style={{ flex: 2 }}>
+                    <Box data-testid={`section-surface-${section.id}`}>
+                      <Flex
+                        flexDirection="column"
+                        gap="spacingXs"
+                        marginTop={isTableSection ? 'none' : 'spacingXs'}>
+                        {section.segments.map((segment) => (
+                          <Box
+                            key={`${segment.kind}-${segment.id}`}
+                            data-anchor-id={
+                              segment.kind === 'block' ? `block:${segment.block.id}` : undefined
+                            }
+                            data-testid={
+                              segment.kind === 'block'
+                                ? `block-anchor-${segment.block.id}`
+                                : undefined
+                            }
+                            style={{
+                              borderRadius: tokens.borderRadiusMedium,
+                              padding: tokens.spacingS,
+                              backgroundColor: 'transparent',
+                            }}>
+                            {segment.kind === 'table'
+                              ? renderTable(section.id, segment.table)
+                              : renderBlock(section.id, segment.block)}
+                          </Box>
+                        ))}
+                      </Flex>
+                    </Box>
+                  </Box>
+
+                  <Box
+                    data-testid={`mapping-rail-${section.id}`}
+                    style={{ flex: '0 0 280px', maxWidth: 280, position: 'relative' }}>
+                    <Box style={{ position: 'relative', minHeight: '100%' }}>
+                      {mappingCards.length > 0
+                        ? mappingCards.map((mappingCard) => (
+                            <Box
+                              key={mappingCard.key}
+                              data-testid={`mapping-card-position-${mappingCard.key}`}
+                              ref={setCardWrapperRef(mappingCard.key)}
+                              style={{
+                                position: 'absolute',
+                                insetInlineStart: 0,
+                                insetInlineEnd: 0,
+                                top: cardOffsetsBySection[section.id]?.[mappingCard.key] ?? 0,
+                              }}>
+                              <MappingCard
+                                card={mappingCard}
+                                isHovered={hoveredMappingKeys.includes(mappingCard.key)}
+                                onMouseEnter={() => setHoveredMappingKeys([mappingCard.key])}
+                                onMouseLeave={() => setHoveredMappingKeys([])}
+                              />
+                            </Box>
+                          ))
+                        : null}
+                    </Box>
+                  </Box>
+                </Flex>
+              </Box>
+            );
+          })}
+        </Flex>
+      </Card>
     </Flex>
   );
 };

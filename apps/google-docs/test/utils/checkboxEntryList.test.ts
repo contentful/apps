@@ -3,6 +3,7 @@ import type { PreviewPayload } from '../../src/types';
 import type { ContentTypeDisplayInfo } from '../../src/services/contentTypeService';
 import {
   buildCheckboxEntryList,
+  buildCheckboxEntryListFromMappingReviewPayload,
   filterPreviewPayloadBySelectedRowIds,
 } from '../../src/utils/checkboxEntryList';
 
@@ -171,5 +172,72 @@ describe('buildCheckboxEntryList', () => {
     const filtered = filterPreviewPayloadBySelectedRowIds(payload, new Set(['b']));
     expect(filtered.entries).toHaveLength(1);
     expect(filtered.entries[0].tempId).toBe('b');
+  });
+
+  it('builds overview rows from the mapping review suspend payload', () => {
+    const payload = {
+      suspendStepId: 'mapping-review',
+      reason: 'Mapping review required before CMA payload generation continues',
+      documentId: 'doc-test',
+      documentTitle: 'Mapping review doc',
+      normalizedDocument: {
+        documentId: 'doc-test',
+        title: 'Mapping review doc',
+        contentBlocks: [],
+        tables: [],
+      },
+      contentTypes: [
+        {
+          sys: { id: 'page' },
+          name: 'Page',
+          displayField: 'title',
+          fields: [],
+        },
+        {
+          sys: { id: 'hero' },
+          name: 'Hero',
+          displayField: 'internalName',
+          fields: [],
+        },
+      ],
+      referenceGraph: {
+        edges: [
+          {
+            from: 'page_1',
+            to: 'hero_1',
+            fieldId: 'hero',
+          },
+        ],
+        creationOrder: ['hero_1', 'page_1'],
+        deferredFields: [],
+        hasCircularDependency: false,
+      },
+      entryBlockGraph: {
+        entries: [
+          {
+            tempId: 'page_1',
+            contentTypeId: 'page',
+            fieldMappings: [],
+          },
+          {
+            tempId: 'hero_1',
+            contentTypeId: 'hero',
+            fieldMappings: [],
+          },
+        ],
+        excludedSourceRefs: [],
+      },
+    };
+
+    const rows = buildCheckboxEntryListFromMappingReviewPayload(payload as any);
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0].id).toBe('page_1');
+    expect(rows[0].contentTypeName).toBe('Page');
+    expect(rows[0].entryTitle).toBe('page_1');
+    expect(rows[0].children).toHaveLength(1);
+    expect(rows[0].children[0].id).toBe('hero_1');
+    expect(rows[0].children[0].contentTypeName).toBe('Hero');
+    expect(rows[0].children[0].entryTitle).toBe('hero_1');
   });
 });

@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { cx } from '@emotion/css';
 import { Box, Button, Flex, Heading, Note, Paragraph } from '@contentful/f36-components';
-import type { PreviewPayload } from '@types';
+import type { MappingReviewSuspendPayload, PreviewPayload } from '@types';
 import {
   buildCheckboxEntryList,
+  buildCheckboxEntryListFromMappingReviewPayload,
   collectCheckboxEntryListRowIds,
   type ContentTypeDisplayInfoMap,
 } from '../../../../utils/checkboxEntryList';
@@ -15,13 +16,29 @@ import { PageAppSDK } from '@contentful/app-sdk';
 import type { EntryProps } from 'contentful-management';
 import { SummaryModal } from '../modals/SummaryModal';
 
-interface OverviewSectionProps {
+type CreateOverviewSectionProps = {
   sdk: PageAppSDK;
   payload: PreviewPayload;
   onReturnToMainPage: () => void;
+};
+
+type MappingReviewOverviewSectionProps = {
+  sdk?: PageAppSDK;
+  payload: MappingReviewSuspendPayload;
+  onReturnToMainPage?: () => void;
+};
+
+type OverviewSectionProps = CreateOverviewSectionProps | MappingReviewOverviewSectionProps;
+
+function isMappingReviewPayload(
+  payload: PreviewPayload | MappingReviewSuspendPayload
+): payload is MappingReviewSuspendPayload {
+  return 'suspendStepId' in payload && payload.suspendStepId === 'mapping-review';
 }
 
-const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionProps) => {
+const OverviewSection = (props: OverviewSectionProps) => {
+  const isMappingReviewMode = isMappingReviewPayload(props.payload);
+  const sdk = 'sdk' in props ? props.sdk : undefined;
   const [contentTypeDisplayInfoMap, setContentTypeDisplayInfoMap] = useState<
     ContentTypeDisplayInfoMap | undefined
   >();
@@ -30,8 +47,13 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
   const [summaryEntries, setSummaryEntries] = useState<EntryProps[] | null>(null);
 
   useEffect(() => {
+    if (isMappingReviewMode || !sdk) {
+      setContentTypeDisplayInfoMap(undefined);
+      return;
+    }
+
     const fetchContentTypesInfo = async () => {
-      const contentTypeIds = [...new Set(payload.entries.map((entry) => entry.contentTypeId))]
+      const contentTypeIds = [...new Set(props.payload.entries.map((entry) => entry.contentTypeId))]
         .filter((id): id is string => Boolean(id))
         .sort();
       if (contentTypeIds.length === 0) {
@@ -48,12 +70,15 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
     };
 
     fetchContentTypesInfo();
-  }, [sdk, payload.entries]);
+  }, [isMappingReviewMode, props.payload, sdk]);
 
-  const checkboxEntryRows = useMemo(
-    () => buildCheckboxEntryList(payload, contentTypeDisplayInfoMap, sdk.locales.default),
-    [payload, contentTypeDisplayInfoMap, sdk.locales.default]
-  );
+  const checkboxEntryRows = useMemo(() => {
+    if (isMappingReviewMode) {
+      return buildCheckboxEntryListFromMappingReviewPayload(props.payload);
+    }
+
+    return buildCheckboxEntryList(props.payload, contentTypeDisplayInfoMap, sdk?.locales.default);
+  }, [contentTypeDisplayInfoMap, isMappingReviewMode, props.payload, sdk?.locales.default]);
 
   useEffect(() => {
     setSelectedEntryTempIds(new Set(collectCheckboxEntryListRowIds(checkboxEntryRows)));
@@ -72,12 +97,20 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
   };
 
   const handleCreateSelected = async () => {
+    if (isMappingReviewMode || !sdk) {
+      return;
+    }
+
     if (selectedEntryTempIds.size === 0) {
       return;
     }
     setIsCreating(true);
     try {
-      const result = await createEntriesFromPreviewPayload(sdk, payload, selectedEntryTempIds);
+      const result = await createEntriesFromPreviewPayload(
+        sdk,
+        props.payload,
+        selectedEntryTempIds
+      );
       if (result.errors.length > 0) {
         sdk.notifier.error('Failed to create entries');
       } else {
@@ -92,7 +125,9 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
 
   const handleSummaryDone = () => {
     setSummaryEntries(null);
-    onReturnToMainPage();
+    if ('onReturnToMainPage' in props) {
+      props.onReturnToMainPage();
+    }
   };
 
   return (
@@ -109,23 +144,27 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
               Overview
             </Heading>
             <Paragraph marginBottom="none">
-              Review your content and associated entries below. Select which entries you&apos;d like
-              to create.
+              {isMappingReviewMode
+                ? 'Review the entry structure produced for the mapping step. Entry creation continues after mapping review is complete.'
+                : 'Review your content and associated entries below. Select which entries you&apos;d like to create.'}
             </Paragraph>
           </Flex>
-          <Button
-            variant="primary"
-            onClick={handleCreateSelected}
-            isLoading={isCreating}
-            isDisabled={selectedEntryTempIds.size === 0}>
-            Create selected entries
-          </Button>
+          {!isMappingReviewMode ? (
+            <Button
+              variant="primary"
+              onClick={handleCreateSelected}
+              isLoading={isCreating}
+              isDisabled={selectedEntryTempIds.size === 0}>
+              Create selected entries
+            </Button>
+          ) : null}
         </Flex>
 
         {checkboxEntryRows.length === 0 ? (
           <Note variant="neutral">
-            No entries were found in this preview. When the document is parsed successfully, entries
-            to create will appear here.
+            {isMappingReviewMode
+              ? 'No entry mappings are available yet. Once the mapping review payload is generated, the planned entries will appear here.'
+              : 'No entries were found in this preview. When the document is parsed successfully, entries to create will appear here.'}
           </Note>
         ) : (
           <CheckboxEntryList
@@ -136,14 +175,16 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
         )}
       </Flex>
 
-      <SummaryModal
-        isOpen={summaryEntries !== null}
-        sdk={sdk}
-        entries={summaryEntries ?? []}
-        contentTypeDisplayInfoMap={contentTypeDisplayInfoMap}
-        defaultLocale={sdk.locales.default}
-        onDone={handleSummaryDone}
-      />
+      {!isMappingReviewMode && sdk ? (
+        <SummaryModal
+          isOpen={summaryEntries !== null}
+          sdk={sdk}
+          entries={summaryEntries ?? []}
+          contentTypeDisplayInfoMap={contentTypeDisplayInfoMap}
+          defaultLocale={sdk.locales.default}
+          onDone={handleSummaryDone}
+        />
+      ) : null}
     </Box>
   );
 };
