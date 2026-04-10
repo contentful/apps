@@ -16,4 +16,20 @@ describe('Chart Footer for the analytics app', () => {
 
     expect(screen.getByText('Open in Google Analytics')).toBeVisible();
   });
+
+  it('renders included paths summary for aggregated results', () => {
+    render(
+      <ChartFooter
+        slugName="3 rules configured"
+        viewUrl=""
+        includedPaths={['/category/my-post/', '/interviews/my-post/', '/news/my-post/']}
+      />
+    );
+
+    expect(screen.getByText('Included paths (3)')).toBeVisible();
+    expect(screen.getByText('/category/my-post/')).toBeVisible();
+    expect(screen.getByText('/interviews/my-post/')).toBeVisible();
+    expect(screen.getByText('/news/my-post/')).toBeVisible();
+    expect(screen.queryByText('Open in Google Analytics')).not.toBeInTheDocument();
+  });
 });

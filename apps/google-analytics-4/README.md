@@ -14,6 +14,8 @@ See the [Google Analytics 4 App Marketplace listing](https://contentful.com/mark
 - [Google Analytics 4 App Guide](https://www.contentful.com/help/google-analytics-4-app/)
 - [Installing a service account to use with Google Analytics 4](https://www.contentful.com/help/google-analytics-service-account-setup/)
 
+For reviewer-specific setup and validation steps for this branch, see [VALIDATION.md](./VALIDATION.md).
+
 ## Technical Overview
 
 ### General

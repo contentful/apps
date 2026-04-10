@@ -18,6 +18,7 @@ import { config } from 'config';
 import { convertServiceAccountKeyToServiceAccountKeyId } from 'utils/serviceAccountKey';
 import HyperLink from 'components/common/HyperLink/HyperLink';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { getUniqueContentTypeIds, normalizeContentTypeRules } from 'helpers/contentTypeRules/contentTypeRules';
 
 export default function GoogleAnalyticsConfigPage() {
   const [accountsSummaries, setAccountsSummaries] = useState<AccountSummariesType[]>([]);
@@ -137,18 +138,18 @@ export default function GoogleAnalyticsConfigPage() {
 
     let parametersToSave = parameters;
 
-    // Filter out empty content types that came from empty rows on the form
-    if (parameters.contentTypes) {
-      const nonEmptyContentTypes = Object.fromEntries(
-        Object.entries(parameters.contentTypes).filter(([key]) => key !== '')
-      );
+    if (parameters.contentTypeRules || parameters.contentTypes) {
+      const nonEmptyContentTypeRules = normalizeContentTypeRules(
+        parameters.contentTypeRules,
+        parameters.contentTypes
+      ).filter((rule) => rule.contentTypeId !== '');
 
-      parametersToSave = { ...parameters, contentTypes: nonEmptyContentTypes };
+      parametersToSave = { ...parameters, contentTypeRules: nonEmptyContentTypeRules };
       setParameters(parametersToSave);
     }
 
     // Assign the app to the sidebar for saved content types
-    const contentTypeIds = Object.keys(parametersToSave.contentTypes ?? {});
+    const contentTypeIds = getUniqueContentTypeIds(parametersToSave.contentTypeRules ?? []);
     const newEditorInterfaceAssignments = generateEditorInterfaceAssignments(
       currentEditorInterface,
       contentTypeIds,
@@ -285,6 +286,10 @@ export default function GoogleAnalyticsConfigPage() {
               parameters={parameters}
               currentEditorInterface={currentEditorInterface}
               originalContentTypes={originalParameters.contentTypes ?? {}}
+              originalContentTypeRules={normalizeContentTypeRules(
+                originalParameters.contentTypeRules,
+                originalParameters.contentTypes
+              )}
             />
           </>
         )}

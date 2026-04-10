@@ -66,7 +66,7 @@ const ApiController = {
     try {
       const serviceAccountKey = requireServiceAccountKey(req.serviceAccountKey);
 
-      const { propertyId, slug, startDate, endDate, dimensions, metrics } =
+      const { propertyId, slug, matchDimension, matchType, startDate, endDate, dimensions, metrics } =
         req.query as unknown as RunReportParamsType;
       const googleApi = GoogleApiService.fromServiceAccountKeyFile(serviceAccountKey);
       const result =
@@ -74,12 +74,21 @@ const ApiController = {
           ? await googleApi.runReport(
               propertyId,
               slug,
+              matchDimension,
+              matchType,
               startDate,
               endDate,
               formatArrays(dimensions),
               formatArrays(metrics)
             )
-          : await googleApi.runReport(propertyId, slug, startDate, endDate);
+          : await googleApi.runReport(
+              propertyId,
+              slug,
+              matchDimension,
+              matchType,
+              startDate,
+              endDate
+            );
       res.status(200).json(result);
     } catch (err) {
       next(err);
