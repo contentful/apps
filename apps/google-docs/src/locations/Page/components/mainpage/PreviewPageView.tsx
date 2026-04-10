@@ -2,88 +2,34 @@ import { useEffect, useMemo, useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { Button, Flex, Heading, Layout, Note, Paragraph } from '@contentful/f36-components';
 import Splitter from './Splitter';
-import { MappingReviewSuspendPayload, PreviewPayload, ResumePayload } from '@types';
+import { MappingReviewSuspendPayload, PreviewPayload } from '@types';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
 import { loadGoogleDocsReviewData } from '../../../../fixtures/googleDocsReview';
 import { GoogleDocsMappingReviewScreen } from '../review-prototype/GoogleDocsMappingReviewScreen';
 import OverviewSection from '../overview/OverviewSection';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { PageAppSDK } from '@contentful/app-sdk';
+import { isMappingReviewSuspendPayload } from '../../../../utils/utils';
 
 interface PreviewPageViewProps {
-  payload: PreviewPayload;
+  payload: PreviewPayload | MappingReviewSuspendPayload;
   oauthToken: string;
   onLeavePreview: () => void;
+  onResumeMappingReview?: () => Promise<void>;
 }
 
-export const PreviewPageView = ({ payload, oauthToken, onLeavePreview }: PreviewPageViewProps) => {
+export const PreviewPageView = ({
+  payload,
+  oauthToken,
+  onLeavePreview,
+  onResumeMappingReview,
+}: PreviewPageViewProps) => {
   const sdk = useSDK<PageAppSDK>();
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
-  const [isContinuing, setIsContinuing] = useState(false);
-  const fixture = isFixtureMode ? loadGoogleDocsReviewData() : null;
-  const reviewFixture = useMemo(() => {
-    if (isFixtureMode) {
-      return fixture;
-    }
-
-    if (props.mode === 'workflow') {
-      return buildFixtureFromCompletedPayload(props.payload);
-    }
-
-    return buildFixtureFromMappingReviewPayload(props.payload);
-  }, [fixture, isFixtureMode, props]);
-
-  useEffect(() => {
-    if (!reviewFixture) {
-      console.warn(
-        '[google-docs][preview]',
-        'Fixture review screen could not be rendered because no valid fixture was loaded.'
-      );
-      return;
-    }
-
-    console.log('[google-docs][preview]', 'Resolved preview fixture state...', {
-      mode: props.mode,
-      entryCount: reviewFixture.entries.length,
-      assetCount: reviewFixture.assets.length,
-      contentBlockCount: reviewFixture.originalNormalizedDocument.contentBlocks.length,
-      tableCount: reviewFixture.originalNormalizedDocument.tables.length,
-      graphEntryCount: reviewFixture.entryBlockGraph.entries.length,
-    });
-  }, [props.mode, reviewFixture]);
-
-  const title = isFixtureMode
-    ? 'Create from fixture preview'
-    : isMappingReviewMode
-    ? `Review document "${
-        props.payload.documentTitle ??
-        props.payload.normalizedDocument.title ??
-        props.payload.documentId
-      }"`
-    : `Create from document "${props.payload.normalizedDocument?.title ?? 'Selected document'}"`;
-
-  const handleContinue = async () => {
-    if (props.mode !== 'mappingReview' || isContinuing) {
-      return;
-    }
-
-    const resumePayload = {
-      editedNormalizedDocument:
-        reviewFixture?.editableNormalizedDocument ?? props.payload.normalizedDocument,
-      entryBlockGraph: reviewFixture?.entryBlockGraph ?? props.payload.entryBlockGraph,
-    };
-
-    console.log('[google-docs][preview]', 'Continuing mapping review with current graph state.', {
-      contentBlockCount: resumePayload.editedNormalizedDocument.contentBlocks.length,
-      tableCount: resumePayload.editedNormalizedDocument.tables.length,
-      graphEntryCount: resumePayload.entryBlockGraph.entries.length,
-    });
-
-    setIsContinuing(true);
-    try {
-      await props.onContinue(resumePayload);
-    } finally {
-      setIsContinuing(false);
-    }
-  };
+  const mappingReviewPayload = isMappingReviewSuspendPayload(payload) ? payload : null;
+  const rawTitle = payload.normalizedDocument?.title;
+  const docTitle = typeof rawTitle === 'string' ? rawTitle : undefined;
+  const title = docTitle && docTitle.trim().length > 0 ? docTitle : 'Selected document';
 
   return (
     <>
@@ -109,6 +55,7 @@ export const PreviewPageView = ({ payload, oauthToken, onLeavePreview }: Preview
             payload={payload}
             oauthToken={oauthToken}
             onReturnToMainPage={onLeavePreview}
+            onCreateSelected={mappingReviewPayload ? onResumeMappingReview : undefined}
           />
           <Heading as="h2" marginBottom="none">
             Document outline

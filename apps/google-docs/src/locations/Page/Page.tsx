@@ -8,7 +8,8 @@ import {
 } from './components/mainpage/ModalOrchestrator';
 import { MainPageView } from './components/mainpage/MainPageView';
 import { PreviewPageView } from './components/mainpage/PreviewPageView';
-import { MappingReviewSuspendPayload, PreviewPayload, ResumePayload } from '@types';
+import { MappingReviewSuspendPayload, PreviewPayload } from '@types';
+import { isMappingReviewSuspendPayload } from '../../utils/utils';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -16,10 +17,9 @@ const Page = () => {
   const [oauthToken, setOauthToken] = useState<string>('');
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
   const [isOAuthLoading, setIsOAuthLoading] = useState(true);
-  const [isMappingPrototypeVisible, setIsMappingPrototypeVisible] = useState(false);
-  const [mappingReviewPayload, setMappingReviewPayload] =
-    useState<MappingReviewSuspendPayload | null>(null);
-  const [previewPayload, setPreviewPayload] = useState<PreviewPayload | null>(null);
+  const [previewPayload, setPreviewPayload] = useState<
+    PreviewPayload | MappingReviewSuspendPayload | null
+  >(null);
 
   const handleOauthTokenChange = (token: string) => {
     setOauthToken(token);
@@ -44,9 +44,7 @@ const Page = () => {
   };
 
   const handleMappingReviewReady = (payload: MappingReviewSuspendPayload) => {
-    setIsMappingPrototypeVisible(false);
-    setPreviewPayload(null);
-    setMappingReviewPayload(payload);
+    setPreviewPayload(payload);
   };
 
   const handleReturnToMainPage = () => {
@@ -55,18 +53,20 @@ const Page = () => {
     setPreviewPayload(null);
   };
 
-  const handlePreviewCancel = () => {
-    if (isMappingPrototypeVisible) {
-      handleReturnToMainPage();
+  const handleResumeMappingReview = async () => {
+    if (!previewPayload || !isMappingReviewSuspendPayload(previewPayload)) {
       return;
     }
 
-    modalOrchestratorRef.current?.resetFlowFromPreviewCancel();
+    try {
+      await modalOrchestratorRef.current?.resumeMappingReview(previewPayload);
+    } catch (error) {
+      console.error('Failed to resume mapping review:', error);
+      sdk.notifier.error('Unable to resume preview. Please try again.');
+    }
   };
 
-  const handleMappingReviewContinue = async (resumePayload: ResumePayload) => {
-    await modalOrchestratorRef.current?.resumeMappingReview(resumePayload);
-  };
+  console.log('previewPayload', previewPayload);
 
   return (
     <>
@@ -76,6 +76,7 @@ const Page = () => {
             payload={previewPayload}
             oauthToken={oauthToken}
             onLeavePreview={handleReturnToMainPage}
+            onResumeMappingReview={handleResumeMappingReview}
           />
         ) : (
           <MainPageView

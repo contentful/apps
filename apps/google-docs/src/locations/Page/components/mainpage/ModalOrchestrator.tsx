@@ -11,9 +11,9 @@ import { CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS } from '@constants/agent';
 import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 import {
   DocumentTabProps,
-  DocumentScopeSuspendPayload,
   MappingReviewSuspendPayload,
   ResumePayload,
+  TabsImagesSuspendPayload,
   PreviewPayload,
   RunStatus,
   WorkflowRunResult,
@@ -24,8 +24,9 @@ import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
-  resetFlowFromPreviewCancel: () => void;
-  resumeMappingReview: (resumePayload: ResumePayload) => Promise<void>;
+  /** Clears in-progress flow state without calling `onResetToMain` (parent clears preview separately). */
+  resetFlowState: () => void;
+  resumeMappingReview: (payload: MappingReviewSuspendPayload) => Promise<void>;
 }
 
 enum FlowStep {
@@ -41,6 +42,7 @@ interface ModalOrchestratorProps {
   onPreviewReady: (payload: PreviewPayload) => void;
   onMappingReviewReady: (payload: MappingReviewSuspendPayload) => void;
   onResetToMain: () => void;
+  onMappingReviewReady: (payload: MappingReviewSuspendPayload) => void;
 }
 
 export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrchestratorProps>(
@@ -82,6 +84,19 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         } catch {
           showWorkflowError();
         }
+      },
+      resumeMappingReview: async (payload: MappingReviewSuspendPayload) => {
+        if (!activeRunId) {
+          throw new Error('Workflow run id is missing for resume.');
+        }
+
+        // TODO : modify the normalized document and entry block graph with the edited values
+        const workflowRun = await resumeWorkflow(activeRunId, {
+          editedNormalizedDocument: payload.normalizedDocument,
+          entryBlockGraph: payload.entryBlockGraph,
+        });
+
+        handleWorkflowResult(workflowRun);
       },
     }));
 
@@ -130,7 +145,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       showDiscardConfirmation();
     };
 
-    const showDocumentScopeReview = (suspendPayload?: DocumentScopeSuspendPayload) => {
+    const showDocumentScopeReview = (suspendPayload?: TabsImagesSuspendPayload) => {
       setAvailableTabs(
         (suspendPayload?.tabs ?? []).map((tab) => ({
           tabId: tab.id ?? '',

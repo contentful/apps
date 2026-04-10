@@ -11,30 +11,17 @@ import {
 import { fetchContentTypesInfoByIds } from '../../../../services/contentTypeService';
 import { CheckboxEntryList } from './CheckboxEntryList';
 import { overviewSectionBox, overviewSectionBoxScrollable } from './OverviewSection.styles';
-import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
 import { PageAppSDK } from '@contentful/app-sdk';
 import type { EntryProps } from 'contentful-management';
 import { SummaryModal } from '../modals/SummaryModal';
+import { isPreviewPayload } from '../../../../utils/utils';
 
 type CreateOverviewSectionProps = {
   sdk: PageAppSDK;
-  payload: PreviewPayload;
+  payload: PreviewPayload | MappingReviewSuspendPayload;
   oauthToken: string;
   onReturnToMainPage: () => void;
-};
-
-type MappingReviewOverviewSectionProps = {
-  sdk?: PageAppSDK;
-  payload: MappingReviewSuspendPayload;
-  onReturnToMainPage?: () => void;
-};
-
-type OverviewSectionProps = CreateOverviewSectionProps | MappingReviewOverviewSectionProps;
-
-function isMappingReviewPayload(
-  payload: PreviewPayload | MappingReviewSuspendPayload
-): payload is MappingReviewSuspendPayload {
-  return 'suspendStepId' in payload && payload.suspendStepId === 'mapping-review';
+  onCreateSelected?: () => Promise<void>;
 }
 
 const OverviewSection = ({
@@ -42,6 +29,7 @@ const OverviewSection = ({
   payload,
   oauthToken,
   onReturnToMainPage,
+  onCreateSelected,
 }: OverviewSectionProps) => {
   const [contentTypeDisplayInfoMap, setContentTypeDisplayInfoMap] = useState<
     ContentTypeDisplayInfoMap | undefined
@@ -50,6 +38,33 @@ const OverviewSection = ({
   const [isCreating, setIsCreating] = useState(false);
   const [summaryEntries, setSummaryEntries] = useState<EntryProps[] | null>(null);
 
+  const overviewPayload = useMemo<PreviewPayload>(() => {
+    if (isPreviewPayload(payload)) {
+      return payload;
+    }
+
+    return {
+      // TODO: remove this temporary mock once the backend provides preview entries
+      entries: [
+        {
+          fields: {
+            url: {
+              'en-US': '/blog/an-url',
+            },
+            internalLabel: {
+              'en-US': '/blog/another-url',
+            },
+          },
+          tempId: 'url_1',
+          contentTypeId: 'url',
+        },
+      ],
+      assets: [],
+      referenceGraph: payload.referenceGraph,
+      normalizedDocument: payload.normalizedDocument,
+    };
+  }, [payload]);
+
   useEffect(() => {
     if (isMappingReviewMode || !sdk) {
       setContentTypeDisplayInfoMap(undefined);
@@ -57,7 +72,9 @@ const OverviewSection = ({
     }
 
     const fetchContentTypesInfo = async () => {
-      const contentTypeIds = [...new Set(props.payload.entries.map((entry) => entry.contentTypeId))]
+      const contentTypeIds = [
+        ...new Set(overviewPayload.entries.map((entry) => entry.contentTypeId)),
+      ]
         .filter((id): id is string => Boolean(id))
         .sort();
       if (contentTypeIds.length === 0) {
@@ -74,15 +91,12 @@ const OverviewSection = ({
     };
 
     fetchContentTypesInfo();
-  }, [isMappingReviewMode, props.payload, sdk]);
+  }, [sdk, overviewPayload.entries]);
 
-  const checkboxEntryRows = useMemo(() => {
-    if (isMappingReviewMode) {
-      return buildCheckboxEntryListFromMappingReviewPayload(props.payload);
-    }
-
-    return buildCheckboxEntryList(props.payload, contentTypeDisplayInfoMap, sdk?.locales.default);
-  }, [contentTypeDisplayInfoMap, isMappingReviewMode, props.payload, sdk?.locales.default]);
+  const checkboxEntryRows = useMemo(
+    () => buildCheckboxEntryList(overviewPayload, contentTypeDisplayInfoMap, sdk.locales.default),
+    [overviewPayload, contentTypeDisplayInfoMap, sdk.locales.default]
+  );
 
   useEffect(() => {
     setSelectedEntryTempIds(new Set(collectCheckboxEntryListRowIds(checkboxEntryRows)));
@@ -101,28 +115,14 @@ const OverviewSection = ({
   };
 
   const handleCreateSelected = async () => {
-    if (isMappingReviewMode || !sdk) {
+    if (selectedEntryTempIds.size === 0 || !onCreateSelected) {
       return;
     }
 
-    if (selectedEntryTempIds.size === 0) {
-      return;
-    }
     setIsCreating(true);
+
     try {
-      const result = await createEntriesFromPreviewPayload(
-        sdk,
-        payload,
-        selectedEntryTempIds,
-        oauthToken
-      );
-      if (result.errors.length > 0) {
-        sdk.notifier.error('Failed to create entries');
-      } else {
-        setSummaryEntries(result.createdEntries);
-      }
-    } catch {
-      sdk.notifier.error('Failed to create entries');
+      await onCreateSelected();
     } finally {
       setIsCreating(false);
     }
@@ -154,15 +154,13 @@ const OverviewSection = ({
                 : 'Review your content and associated entries below. Select which entries you&apos;d like to create.'}
             </Paragraph>
           </Flex>
-          {!isMappingReviewMode ? (
-            <Button
-              variant="primary"
-              onClick={handleCreateSelected}
-              isLoading={isCreating}
-              isDisabled={selectedEntryTempIds.size === 0}>
-              Create selected entries
-            </Button>
-          ) : null}
+          <Button
+            variant="primary"
+            onClick={handleCreateSelected}
+            isLoading={isCreating}
+            isDisabled={selectedEntryTempIds.size === 0 || !onCreateSelected}>
+            Create selected entries
+          </Button>
         </Flex>
 
         {checkboxEntryRows.length === 0 ? (
