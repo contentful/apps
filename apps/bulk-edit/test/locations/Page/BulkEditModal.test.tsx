@@ -9,6 +9,106 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
+vi.mock('../../../src/locations/Page/components/FieldEditor', () => ({
+  FieldEditor: ({
+    field,
+    value,
+    onChange,
+  }: {
+    field: ContentTypeField;
+    value: string | number | null | { sys: { id: string } } | Array<{ sys: { id: string } }>;
+    onChange: (
+      value:
+        | string
+        | { sys: { type: 'Link'; linkType: 'Entry'; id: string } }
+        | Array<{ sys: { type: 'Link'; linkType: 'Entry'; id: string } }>
+    ) => void;
+  }) => {
+    const [selectionLabel, setSelectionLabel] = React.useState(() => {
+      if (Array.isArray(value)) {
+        return value.length > 0 ? `${value.length} entries selected` : 'No content selected';
+      }
+
+      if (value && typeof value === 'object' && 'sys' in value) {
+        return value.sys.id;
+      }
+
+      return 'No content selected';
+    });
+
+    const isSingleReference =
+      field.type === 'Link' && field.fieldControl?.widgetId === 'entryLinkEditor';
+    const isMultiReference =
+      field.type === 'Array' && field.fieldControl?.widgetId === 'entryLinksEditor';
+
+    if (isSingleReference) {
+      return (
+        <>
+          <button
+            data-test-id="reference-picker-trigger"
+            onClick={async () => {
+              const entry = await mockSdk.dialogs.selectSingleEntry();
+
+              if (!entry) {
+                return;
+              }
+
+              const title = entry.fields?.title?.['en-US'];
+              setSelectionLabel(typeof title === 'string' ? title : entry.sys.id);
+              onChange({
+                sys: { type: 'Link', linkType: 'Entry', id: entry.sys.id },
+              });
+            }}
+            type="button">
+            Add existing content
+          </button>
+          <span>{selectionLabel}</span>
+        </>
+      );
+    }
+
+    if (isMultiReference) {
+      return (
+        <>
+          <button
+            data-test-id="reference-picker-trigger"
+            onClick={async () => {
+              const entries = await mockSdk.dialogs.selectMultipleEntries();
+
+              if (!entries || entries.length === 0) {
+                return;
+              }
+
+              setSelectionLabel(
+                entries.length === 1
+                  ? entries[0].fields?.title?.['en-US'] ?? entries[0].sys.id
+                  : `${entries.length} entries selected`
+              );
+              onChange(
+                entries.map((entry) => ({
+                  sys: { type: 'Link', linkType: 'Entry', id: entry.sys.id },
+                }))
+              );
+            }}
+            type="button">
+            Add existing content
+          </button>
+          <span>{selectionLabel}</span>
+        </>
+      );
+    }
+
+    return (
+      <input
+        data-test-id="number-editor-input"
+        value={value ?? ''}
+        onChange={(e) => onChange(e.target.value)}
+        readOnly={false}
+      />
+    );
+  },
+}));
+
 describe('BulkEditModal', () => {
   const field: ContentTypeField = {
     contentTypeId: 'test-content-type',

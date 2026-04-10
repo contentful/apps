@@ -9,6 +9,19 @@ import { condoAEntry1, condoAEntry2 } from '../../mocks/mockEntries';
 import { Notification } from '@contentful/f36-components';
 import type { ContentTypeProps } from 'contentful-management';
 
+const originalConsoleError = console.error;
+const suppressReact18RenderWarning = () =>
+  vi.spyOn(console, 'error').mockImplementation((...args) => {
+    const message = args.find((arg) => typeof arg === 'string');
+    if (
+      typeof message === 'string' &&
+      message.includes('ReactDOM.render is no longer supported in React 18')
+    ) {
+      return;
+    }
+    originalConsoleError(...args);
+  });
+
 // Mock the field editors
 vi.mock('../../../src/locations/Page/components/FieldEditor', () => ({
   FieldEditor: ({ value, onChange }: { value: string; onChange: (value: string) => void }) => (
@@ -37,7 +50,10 @@ vi.mock('@tanstack/react-virtual', () => ({
 }));
 
 describe('Page', () => {
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+
   beforeEach(() => {
+    consoleErrorSpy = suppressReact18RenderWarning();
     // Mock content type fetch
     mockSdk.cma.contentType.getMany = vi
       .fn()
@@ -53,6 +69,7 @@ describe('Page', () => {
   });
 
   afterEach(() => {
+    consoleErrorSpy.mockRestore();
     cleanup();
   });
 
@@ -81,7 +98,10 @@ describe('Page', () => {
 });
 
 describe('Bulk edit functionality', () => {
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+
   beforeEach(() => {
+    consoleErrorSpy = suppressReact18RenderWarning();
     // Mock content type fetch
     mockSdk.cma.contentType.getMany = vi
       .fn()
@@ -99,6 +119,7 @@ describe('Bulk edit functionality', () => {
     mockSdk.cma.entry.update = vi.fn().mockImplementation(async (params, entry) => entry);
   });
   afterEach(() => {
+    consoleErrorSpy.mockRestore();
     cleanup();
   });
 
@@ -204,7 +225,10 @@ describe('Bulk edit notification', () => {
 });
 
 describe('Table display', () => {
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+
   beforeEach(() => {
+    consoleErrorSpy = suppressReact18RenderWarning();
     // Mock content type fetch
     mockSdk.cma.contentType.getMany = vi
       .fn()
@@ -220,6 +244,7 @@ describe('Table display', () => {
   });
 
   afterEach(() => {
+    consoleErrorSpy.mockRestore();
     cleanup();
   });
 
@@ -247,7 +272,10 @@ describe('Table display', () => {
 });
 
 describe('Reset filters functionality', () => {
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+
   beforeEach(() => {
+    consoleErrorSpy = suppressReact18RenderWarning();
     // Mock content type fetch
     mockSdk.cma.contentType.getMany = vi
       .fn()
@@ -263,6 +291,7 @@ describe('Reset filters functionality', () => {
   });
 
   afterEach(() => {
+    consoleErrorSpy.mockRestore();
     cleanup();
   });
 
@@ -342,7 +371,14 @@ describe('Reset filters functionality', () => {
 });
 
 describe('Client-side filtering regressions', () => {
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    consoleErrorSpy = suppressReact18RenderWarning();
+  });
+
   afterEach(() => {
+    consoleErrorSpy.mockRestore();
     cleanup();
   });
 
