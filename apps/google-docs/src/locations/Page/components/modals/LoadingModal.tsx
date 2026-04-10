@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Modal, Paragraph, Skeleton, Flex } from '@contentful/f36-components';
+import { Modal, Paragraph, Skeleton, Flex, Spinner, Box } from '@contentful/f36-components';
 import { useSequentialMessages } from '@hooks/useSequentialMessages';
 import tokens, { ColorTokens } from '@contentful/f36-tokens';
 import { css, keyframes } from '@emotion/css';
@@ -71,15 +71,15 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
   const messages = useMemo(() => {
     if (step === 'reviewingContentTypes') {
       const baseMessages = [
-        'Fetching document...',
-        'Analyzing document structure...',
-        'Processing document with AI...',
+        'Fetching document',
+        'Analyzing document structure',
+        'Processing document with AI',
         contentTypeCount
           ? `Analyzing content for ${contentTypeCount} content type${
               contentTypeCount === 1 ? '' : 's'
-            }...`
-          : 'Analyzing content for content types...',
-        'Generating preview entries...',
+            }`
+          : 'Analyzing content for content types',
+        'Generating preview entries',
       ];
       return baseMessages;
     }
@@ -106,13 +106,19 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
               <div className={styles.verticalBar} />
               <Flex flex={1} flexDirection="column" gap="spacingS" alignItems="flex-start">
                 {visibleMessages.map((message, index) => (
-                  <Paragraph
-                    key={message}
-                    fontColor={getMessageColor(index, visibleMessages.length)}
-                    marginBottom="none"
-                    className={styles.message}>
-                    {message}
-                  </Paragraph>
+                  <Flex key={message} alignItems="center" className={styles.message}>
+                    <Paragraph
+                      fontColor={getMessageColor(index, visibleMessages.length)}
+                      marginBottom="none">
+                      {message}
+                    </Paragraph>
+
+                    {index === visibleMessages.length - 1 ? (
+                      <Box as="span" marginLeft="spacing2Xs">
+                        <Spinner customSize={18} variant="default" />
+                      </Box>
+                    ) : null}
+                  </Flex>
                 ))}
               </Flex>
             </Flex>
