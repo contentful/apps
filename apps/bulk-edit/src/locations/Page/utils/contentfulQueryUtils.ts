@@ -101,14 +101,19 @@ export const fieldFilterValuesToQuery = (
           : fieldFilterValue.value ?? undefined;
       }
     } else if (fieldFilterValue.contentTypeField.type === 'Array') {
+      const isArrayOfLinks = fieldFilterValue.contentTypeField.items?.type === 'Link';
+      const fieldPath = isArrayOfLinks
+        ? `fields.${fieldFilterValue.fieldUniqueId}.sys.id`
+        : `fields.${fieldFilterValue.fieldUniqueId}`;
+
       if (operator === 'exists') {
-        key = `fields.${fieldFilterValue.fieldUniqueId}.sys.id[exists]`;
+        key = `${fieldPath}[exists]`;
         value = 'true';
       } else if (operator === 'not exists') {
-        key = `fields.${fieldFilterValue.fieldUniqueId}.sys.id[exists]`;
+        key = `${fieldPath}[exists]`;
         value = 'false';
       } else {
-        key = `fields.${fieldFilterValue.fieldUniqueId}.sys.id[${operator}]`;
+        key = `${fieldPath}[${operator}]`;
         value = Array.isArray(fieldFilterValue.value)
           ? fieldFilterValue.value.join(',')
           : fieldFilterValue.value ?? undefined;

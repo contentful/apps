@@ -59,7 +59,7 @@ describe('Page', () => {
   it('shows loading spinner during initial content type fetch', async () => {
     render(<Page />);
     await waitFor(() => {
-      expect(screen.queryByTitle('Loading…')).not.toBeInTheDocument();
+      expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
     });
   });
 
@@ -339,4 +339,128 @@ describe('Reset filters functionality', () => {
       expect(resetButton).toBeDisabled();
     });
   });
+});
+
+describe('Client-side filtering regressions', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('filters numeric searches client-side for number fields', async () => {
+    const numericContentType = {
+      ...condoAContentType,
+      fields: [
+        ...condoAContentType.fields,
+        {
+          id: 'unitCount',
+          name: 'Unit Count',
+          required: false,
+          localized: false,
+          type: 'Integer',
+        },
+      ],
+    } as ContentTypeProps;
+
+    const numericEntries = [
+      {
+        ...condoAEntry1,
+        fields: {
+          ...condoAEntry1.fields,
+          unitCount: { 'en-US': 12 },
+        },
+      },
+      {
+        ...condoAEntry2,
+        fields: {
+          ...condoAEntry2.fields,
+          unitCount: { 'en-US': 34 },
+        },
+      },
+    ];
+
+    mockSdk.cma.contentType.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyContentTypes([numericContentType]));
+    mockSdk.cma.contentType.get = vi.fn().mockResolvedValue(numericContentType);
+    mockSdk.cma.entry.getMany = vi.fn().mockResolvedValue(getManyEntries(numericEntries));
+
+    render(<Page />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
+      expect(screen.getAllByText('Building one').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Building two').length).toBeGreaterThan(0);
+    });
+
+    fireEvent.change(screen.getByPlaceholderText('Search'), { target: { value: '34' } });
+
+    await waitFor(
+      () => {
+        expect(screen.queryAllByText('Building one')).toHaveLength(0);
+        expect(screen.getAllByText('Building two').length).toBeGreaterThan(0);
+      },
+      { timeout: 10000 }
+    );
+  }, 15000);
+
+  it('separates changed and published entries client-side after status selection', async () => {
+    const statusEntries = [
+      {
+        ...condoAEntry1,
+        fields: { displayName: { 'en-US': 'Published entry' } },
+        sys: {
+          ...condoAEntry1.sys,
+          version: 2,
+          publishedVersion: 1,
+        },
+      },
+      {
+        ...condoAEntry2,
+        fields: { displayName: { 'en-US': 'Changed entry' } },
+        sys: {
+          ...condoAEntry2.sys,
+          version: 3,
+          publishedVersion: 1,
+        },
+      },
+    ];
+
+    mockSdk.cma.contentType.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyContentTypes([condoAContentType]));
+    mockSdk.cma.contentType.get = vi.fn().mockResolvedValue(condoAContentType);
+    mockSdk.cma.entry.getMany = vi.fn().mockResolvedValue(getManyEntries(statusEntries));
+
+    render(<Page />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Published entry').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Changed entry').length).toBeGreaterThan(0);
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Filter by' }));
+    await waitFor(() => {
+      expect(screen.getByRole('menuitem', { name: 'Changed' })).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Changed' }));
+
+    await waitFor(() => {
+      expect(screen.queryAllByText('Published entry')).toHaveLength(0);
+      expect(screen.getAllByText('Changed entry').length).toBeGreaterThan(0);
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Filter by' }));
+    await waitFor(() => {
+      expect(screen.getByRole('menuitem', { name: 'Published' })).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Published' }));
+
+    await waitFor(
+      () => {
+        expect(screen.getAllByText('Published entry').length).toBeGreaterThan(0);
+        expect(screen.queryAllByText('Changed entry')).toHaveLength(0);
+      },
+      { timeout: 10000 }
+    );
+  }, 15000);
 });

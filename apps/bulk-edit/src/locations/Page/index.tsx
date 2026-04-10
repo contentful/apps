@@ -22,16 +22,26 @@ import { UndoBulkEditModal } from './components/UndoBulkEditModal';
 import { SearchBar } from './components/SearchBar';
 import {
   fetchEntriesWithBatching,
+  filterEntriesByNumericSearch,
   getEntryFieldValue,
+  getStatusFromEntry,
   getEntryTitle,
   isEntryLinkValue,
+  isNumericSearch,
   mapContentTypePropsToFields,
   processEntriesInBatches,
   STATUSES,
   updateEntryFieldLocalized,
 } from './utils/entryUtils';
 import { successNotification } from './utils/successNotification';
-import { API_LIMITS, BATCH_FETCHING, BATCH_PROCESSING, PAGE_SIZE_OPTIONS } from './utils/constants';
+import {
+  API_LIMITS,
+  BATCH_FETCHING,
+  BATCH_PROCESSING,
+  CHANGED_STATUS,
+  PAGE_SIZE_OPTIONS,
+  PUBLISHED_STATUS,
+} from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
 import { EmptyEntryBanner } from './components/EmptyEntryBanner';
 import { buildQuery, fieldFilterValuesToQuery } from './utils/contentfulQueryUtils';
@@ -136,6 +146,23 @@ const Page = () => {
     setSelectedField(null);
     setSelectedEntryIds([]);
     setTableKey((tableKey) => tableKey + 1);
+  };
+
+  const needsClientFiltering = () => {
+    const statusLabels = selectedStatuses.map((status) => status.label);
+    const requiresStatusFiltering = statusLabels.some((status) =>
+      [CHANGED_STATUS, PUBLISHED_STATUS].includes(status)
+    );
+
+    return requiresStatusFiltering || isNumericSearch(searchQuery);
+  };
+
+  const filterEntriesByStatus = (entries: EntryProps[], statusLabels: string[]): EntryProps[] => {
+    if (statusLabels.length === 0) {
+      return entries;
+    }
+
+    return entries.filter((entry) => statusLabels.includes(getStatusFromEntry(entry)));
   };
 
   useEffect(() => {
@@ -282,6 +309,7 @@ const Page = () => {
       try {
         const displayField = currentContentType.displayField || null;
         const statusLabels = selectedStatuses.map((status) => status.label);
+        const shouldClientFilter = needsClientFiltering();
 
         const baseQuery = buildQuery(
           sortOption,
@@ -294,13 +322,33 @@ const Page = () => {
           searchQuery
         );
 
+        if (shouldClientFilter) {
+          baseQuery.skip = 0;
+          delete baseQuery.limit;
+        }
+
         const { entries, total } = await fetchEntriesWithBatching(
           sdk,
           baseQuery,
-          baseQuery.limit || BATCH_FETCHING.DEFAULT_BATCH_SIZE
+          BATCH_FETCHING.DEFAULT_BATCH_SIZE
         );
-        setEntries(entries);
-        setTotalEntries(total);
+
+        const statusFilteredEntries = shouldClientFilter
+          ? filterEntriesByStatus(entries, statusLabels)
+          : entries;
+        const fullyFilteredEntries = isNumericSearch(searchQuery)
+          ? filterEntriesByNumericSearch(statusFilteredEntries, searchQuery, fields, defaultLocale)
+          : statusFilteredEntries;
+
+        if (shouldClientFilter) {
+          const startIndex = activePage * itemsPerPage;
+          const endIndex = startIndex + itemsPerPage;
+          setEntries(fullyFilteredEntries.slice(startIndex, endIndex));
+          setTotalEntries(fullyFilteredEntries.length);
+        } else {
+          setEntries(fullyFilteredEntries);
+          setTotalEntries(total);
+        }
       } catch (e) {
         setEntries([]);
         setTotalEntries(0);
