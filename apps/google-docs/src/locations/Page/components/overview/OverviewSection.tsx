@@ -18,10 +18,16 @@ import { SummaryModal } from '../modals/SummaryModal';
 interface OverviewSectionProps {
   sdk: PageAppSDK;
   payload: PreviewPayload;
+  oauthToken: string;
   onReturnToMainPage: () => void;
 }
 
-const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionProps) => {
+const OverviewSection = ({
+  sdk,
+  payload,
+  oauthToken,
+  onReturnToMainPage,
+}: OverviewSectionProps) => {
   const [contentTypeDisplayInfoMap, setContentTypeDisplayInfoMap] = useState<
     ContentTypeDisplayInfoMap | undefined
   >();
@@ -77,7 +83,12 @@ const OverviewSection = ({ sdk, payload, onReturnToMainPage }: OverviewSectionPr
     }
     setIsCreating(true);
     try {
-      const result = await createEntriesFromPreviewPayload(sdk, payload, selectedEntryTempIds);
+      const result = await createEntriesFromPreviewPayload(
+        sdk,
+        payload,
+        selectedEntryTempIds,
+        oauthToken
+      );
       if (result.errors.length > 0) {
         sdk.notifier.error('Failed to create entries');
       } else {

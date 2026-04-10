@@ -12,10 +12,11 @@ import { PageAppSDK } from '@contentful/app-sdk';
 
 interface PreviewPageViewProps {
   payload: PreviewPayload;
+  oauthToken: string;
   onLeavePreview: () => void;
 }
 
-export const PreviewPageView = ({ payload, onLeavePreview }: PreviewPageViewProps) => {
+export const PreviewPageView = ({ payload, oauthToken, onLeavePreview }: PreviewPageViewProps) => {
   const sdk = useSDK<PageAppSDK>();
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
   const fixture = loadGoogleDocsReviewFixture();
@@ -47,6 +48,8 @@ export const PreviewPageView = ({ payload, onLeavePreview }: PreviewPageViewProp
           <OverviewSection
             sdk={sdk}
             payload={payload || fixture}
+            payload={payload}
+            oauthToken={oauthToken}
             onReturnToMainPage={onLeavePreview}
           />
           <Heading as="h2" marginBottom="none">

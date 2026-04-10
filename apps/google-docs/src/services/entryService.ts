@@ -20,44 +20,81 @@ export interface EntryCreationResult {
   }>;
 }
 
-async function createAssetFromUrlFast(
+interface AssetFileInput {
+  fileName: string;
+  contentType: string;
+  upload?: string;
+  uploadFrom?: Record<string, unknown>;
+}
+
+async function createAssetFromUrl(
   cma: PageAppSDK['cma'] | ConfigAppSDK['cma'],
   spaceId: string,
   environmentId: string,
   url: string,
   defaultLocale: string,
-  metadata?: { title?: string; altText?: string; fileName?: string; contentType?: string }
+  metadata?: { title?: string; altText?: string; fileName?: string; contentType?: string },
+  oauthToken?: string
 ) {
   const fileName = metadata?.fileName || 'image.jpg';
   const contentType = metadata?.contentType || 'image/jpeg';
   const title = metadata?.title || metadata?.altText || 'Image';
+
+  let fileField: AssetFileInput;
+
+  if (oauthToken) {
+    // Google content URLs are signed (the ?key= param is the credential) so no
+    // Authorization header is needed or permitted cross-origin. Fetch the binary
+    // directly here in the browser so Contentful's servers don't have to reach an
+    // expiring signed URL, then upload the bytes via the CMA upload endpoint.
+    const imageResponse = await fetch(url);
+    if (!imageResponse.ok) {
+      throw new Error(`Failed to fetch image (HTTP ${imageResponse.status})`);
+    }
+    const arrayBuffer = await imageResponse.arrayBuffer();
+    const upload = await cma.upload.create({ spaceId, environmentId }, { file: arrayBuffer });
+    fileField = {
+      contentType,
+      fileName,
+      uploadFrom: { sys: { type: 'Link', linkType: 'Upload', id: upload.sys.id } },
+    };
+  } else {
+    fileField = { contentType, fileName, upload: url };
+  }
 
   const asset = await cma.asset.create(
     { spaceId, environmentId },
     {
       fields: {
         title: { [defaultLocale]: title },
-        file: {
-          [defaultLocale]: {
-            contentType,
-            fileName,
-            upload: url,
-          },
-        },
+        file: { [defaultLocale]: fileField },
       },
     }
   );
 
-  try {
-    await cma.asset.processForAllLocales({ spaceId, environmentId }, asset);
-  } catch (error) {
-    console.error(`Failed to process asset for URL: ${url}`, error);
-  }
+  await cma.asset.processForAllLocales({ spaceId, environmentId }, asset);
 
   return asset;
 }
 
-async function transformFieldsForContentType(
+function resolveAssetPlaceholder(value: unknown, urlToAssetId: Record<string, string>): unknown {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return value;
+  const v = value as Record<string, unknown>;
+  const sys = v.sys;
+  if (sys === null || typeof sys !== 'object' || Array.isArray(sys)) return value;
+  const s = sys as Record<string, unknown>;
+  if (s.type !== 'Link' || s.linkType !== 'Asset' || typeof s.id !== 'string') return value;
+  const resolvedId = urlToAssetId[s.id];
+  if (!resolvedId) {
+    // Placeholder not found — asset creation likely failed. Return undefined so
+    // the caller can omit this field rather than writing a dangling reference.
+    console.warn('[asset] unresolved asset placeholder:', s.id);
+    return undefined;
+  }
+  return { sys: { type: 'Link', linkType: 'Asset', id: resolvedId } };
+}
+
+function transformFieldsForContentType(
   fields: Record<string, Record<string, unknown>>,
   contentType: ContentTypeProps | undefined,
   urlToAssetId?: Record<string, string>
@@ -65,6 +102,7 @@ async function transformFieldsForContentType(
   if (!contentType) return fields;
 
   const fieldDefs = new Map(contentType.fields.map((f) => [f.id, f]));
+  const assetMap = urlToAssetId && Object.keys(urlToAssetId).length > 0 ? urlToAssetId : undefined;
   const transformed: Record<string, Record<string, unknown>> = {};
 
   for (const [fieldId, localizedValue] of Object.entries(fields)) {
@@ -77,9 +115,24 @@ async function transformFieldsForContentType(
     const perLocale: Record<string, unknown> = {};
     for (const [locale, value] of Object.entries(localizedValue)) {
       if (def.type === 'RichText') {
-        const assetMap =
-          urlToAssetId && Object.keys(urlToAssetId).length > 0 ? urlToAssetId : undefined;
         perLocale[locale] = normalizeAgentRichTextJson(value, assetMap);
+      } else if (assetMap && def.type === 'Link' && def.linkType === 'Asset') {
+        const resolved = resolveAssetPlaceholder(value, assetMap);
+        if (resolved !== undefined) {
+          perLocale[locale] = resolved;
+        }
+      } else if (
+        assetMap &&
+        def.type === 'Array' &&
+        def.items?.linkType === 'Asset' &&
+        Array.isArray(value)
+      ) {
+        const resolved = value
+          .map((item) => resolveAssetPlaceholder(item, assetMap))
+          .filter((item): item is NonNullable<typeof item> => item !== undefined);
+        if (resolved.length > 0) {
+          perLocale[locale] = resolved;
+        }
       } else {
         perLocale[locale] = value;
       }
@@ -96,7 +149,8 @@ async function createAssetsFromAgentOutput(
   spaceId: string,
   environmentId: string,
   defaultLocale: string,
-  assets: AssetToCreate[]
+  assets: AssetToCreate[],
+  oauthToken?: string
 ): Promise<Record<string, string>> {
   const urlToAssetId: Record<string, string> = {};
 
@@ -106,7 +160,7 @@ async function createAssetsFromAgentOutput(
 
   const assetCreationPromises = assets.map(async (asset) => {
     try {
-      const createdAsset = await createAssetFromUrlFast(
+      const createdAsset = await createAssetFromUrl(
         cma,
         spaceId,
         environmentId,
@@ -117,7 +171,8 @@ async function createAssetsFromAgentOutput(
           altText: asset.altText,
           fileName: asset.fileName,
           contentType: asset.contentType,
-        }
+        },
+        oauthToken
       );
 
       const normalizedUrl = asset.url.replace(/\s+/g, '');
@@ -141,12 +196,19 @@ async function createAssetsFromAgentOutput(
     if (!result) continue;
 
     const { normalizedUrl, altText, assetId } = result;
+    const rawUrl = assets[i]?.url;
     const placeholderId = assets[i]?.placeholderId;
 
     if (placeholderId) {
       urlToAssetId[placeholderId] = assetId;
     }
 
+    // Store both the raw URL and the whitespace-normalised form so the lookup
+    // in resolveAssetPlaceholder succeeds regardless of how the agent encoded
+    // the URL in the entry field.
+    if (rawUrl && rawUrl !== normalizedUrl) {
+      urlToAssetId[rawUrl] = assetId;
+    }
     urlToAssetId[normalizedUrl] = assetId;
 
     const compositeKey = `${normalizedUrl}::${altText || 'image'}`;
@@ -163,7 +225,8 @@ async function createAssetsFromAgentOutput(
 export async function createEntriesFromPreviewPayload(
   sdk: PageAppSDK | ConfigAppSDK,
   payload: PreviewPayload,
-  selectedEntryTempIds?: Set<string>
+  selectedEntryTempIds?: Set<string>,
+  oauthToken?: string
 ): Promise<EntryCreationResult> {
   const effectivePayload =
     selectedEntryTempIds !== undefined
@@ -184,20 +247,23 @@ export async function createEntriesFromPreviewPayload(
     sdk,
     entriesForSpaceLocale,
     contentTypeIds,
-    effectivePayload.assets
+    effectivePayload.assets,
+    oauthToken
   );
 }
 
 /**
  * Creates entries in two passes: without reference fields, then patches references
- * (including Rich Text entry links). Assets from `assets` are created first; Rich Text
- * asset placeholders use the resulting id map in both passes.
+ * (including Rich Text entry links). Assets are created first; the resulting
+ * placeholder→id map is used to resolve asset references in RichText fields,
+ * standalone Media fields, and arrays of Media fields across both passes.
  */
 export async function createEntriesFromPreview(
   sdk: PageAppSDK | ConfigAppSDK,
   entries: EntryToCreate[],
   contentTypeIds: string[],
-  assets: AssetToCreate[] = []
+  assets: AssetToCreate[] = [],
+  oauthToken?: string
 ): Promise<EntryCreationResult> {
   const spaceId = sdk.ids.space;
   const environmentId = sdk.ids.environment;
@@ -236,7 +302,8 @@ export async function createEntriesFromPreview(
     spaceId,
     environmentId,
     defaultLocale,
-    assets
+    assets,
+    oauthToken
   );
 
   // PASS 1: Create all entries WITHOUT reference fields

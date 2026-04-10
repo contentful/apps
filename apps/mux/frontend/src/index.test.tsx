@@ -19,6 +19,11 @@ vi.mock('contentful-management', () => ({
   })),
 }));
 
+// Mock MuxPlayer to avoid Web Component errors in jsdom
+vi.mock('@mux/mux-player-react', () => ({
+  default: vi.fn(() => null),
+}));
+
 // Mock the API client
 vi.mock('./util/apiClient', () => ({
   default: vi.fn().mockImplementation(() => ({
