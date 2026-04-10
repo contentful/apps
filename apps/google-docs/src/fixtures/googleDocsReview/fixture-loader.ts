@@ -1,9 +1,10 @@
-import {
-  type ReviewAsset,
-  type ReviewEntryBlockGraph,
-  type ReviewNormalizedDocument,
-  type GoogleDocsReviewData,
-} from './types';
+import type {
+  AssetToCreate,
+  EntryBlockGraph,
+  GoogleDocsPreviewData,
+  NormalizedDocument,
+  WorkflowContentType,
+} from '@types';
 
 const FIXTURE_LOG_PREFIX = '[google-docs][fixture]';
 
@@ -16,15 +17,15 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function isNormalizedDocumentLike(value: unknown): value is ReviewNormalizedDocument {
+function isNormalizedDocumentLike(value: unknown): value is NormalizedDocument {
   return isRecord(value) && Array.isArray(value.contentBlocks) && Array.isArray(value.tables);
 }
 
-function isEntryBlockGraphLike(value: unknown): value is ReviewEntryBlockGraph {
+function isEntryBlockGraphLike(value: unknown): value is EntryBlockGraph {
   return isRecord(value) && Array.isArray(value.entries) && Array.isArray(value.excludedSourceRefs);
 }
 
-function hasReviewFixtureShape(value: unknown): value is GoogleDocsReviewData {
+function hasReviewFixtureShape(value: unknown): value is GoogleDocsPreviewData {
   return (
     isRecord(value) &&
     Array.isArray(value.entries) &&
@@ -36,12 +37,12 @@ function hasReviewFixtureShape(value: unknown): value is GoogleDocsReviewData {
 }
 
 function hasNormalizedDocumentPayloadShape(value: unknown): value is {
-  normalizedDocument: ReviewNormalizedDocument;
-  entryBlockGraph: ReviewEntryBlockGraph;
-  contentTypes?: Array<Record<string, unknown>>;
-  assets?: ReviewAsset[];
-  cmaAssets?: ReviewAsset[];
-  referenceGraph?: GoogleDocsReviewData['referenceGraph'];
+  normalizedDocument: NormalizedDocument;
+  entryBlockGraph: EntryBlockGraph;
+  contentTypes?: WorkflowContentType[];
+  assets?: AssetToCreate[];
+  cmaAssets?: AssetToCreate[];
+  referenceGraph?: GoogleDocsPreviewData['referenceGraph'];
 } {
   return (
     isRecord(value) &&
@@ -51,9 +52,9 @@ function hasNormalizedDocumentPayloadShape(value: unknown): value is {
 }
 
 function buildEntriesFromEntryBlockGraph(
-  entryBlockGraph: ReviewEntryBlockGraph,
-  contentTypes: Array<Record<string, unknown>> = []
-): GoogleDocsReviewData['entries'] {
+  entryBlockGraph: EntryBlockGraph,
+  contentTypes: WorkflowContentType[] = []
+): GoogleDocsPreviewData['entries'] {
   const contentTypeNameById = new Map<string, string>();
 
   contentTypes.forEach((contentType) => {
@@ -80,7 +81,7 @@ function buildEntriesFromEntryBlockGraph(
   }));
 }
 
-export function coerceGoogleDocsReviewData(value: unknown): GoogleDocsReviewData | null {
+export function coerceGoogleDocsReviewData(value: unknown): GoogleDocsPreviewData | null {
   if (hasReviewFixtureShape(value)) {
     return value;
   }
@@ -105,7 +106,7 @@ export function coerceGoogleDocsReviewData(value: unknown): GoogleDocsReviewData
   return null;
 }
 
-export const loadGoogleDocsReviewData = (): GoogleDocsReviewData | null => {
+export const loadGoogleDocsReviewData = (): GoogleDocsPreviewData | null => {
   const availableFixtureFiles = Object.keys(fixtureModules)
     .map((path) => path.replace('./', ''))
     .sort();

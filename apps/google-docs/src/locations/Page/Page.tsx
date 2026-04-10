@@ -71,25 +71,12 @@ const Page = () => {
   return (
     <>
       <Layout withBoxShadow={true} offsetTop={10}>
-        {previewPayload || mappingReviewPayload || isMappingPrototypeVisible ? (
-          isMappingPrototypeVisible ? (
-            <PreviewPageView mode="fixture" onCancel={handlePreviewCancel} sdk={sdk} />
-          ) : mappingReviewPayload ? (
-            <PreviewPageView
-              mode="mappingReview"
-              payload={mappingReviewPayload}
-              onCancel={handlePreviewCancel}
-              onContinue={handleMappingReviewContinue}
-              sdk={sdk}
-            />
-          ) : (
-            <PreviewPageView
-              mode="workflow"
-              payload={previewPayload!}
-              onCancel={handlePreviewCancel}
-              sdk={sdk}
-            />
-          )
+        {previewPayload ? (
+          <PreviewPageView
+            payload={previewPayload}
+            oauthToken={oauthToken}
+            onLeavePreview={handleReturnToMainPage}
+          />
         ) : (
           <MainPageView
             oauthToken={oauthToken}

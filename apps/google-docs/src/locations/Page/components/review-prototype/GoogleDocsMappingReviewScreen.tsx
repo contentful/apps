@@ -20,27 +20,26 @@ import {
   TextLink,
 } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import {
-  ReviewContentBlock,
-  ReviewSourceRef,
-  ReviewTable,
-  ReviewTablePart,
-  ReviewTextRun,
-  ReviewUsageItem,
-  GoogleDocsReviewData,
-} from '../../../../fixtures/googleDocsReview';
+import type {
+  EntryBlockGraphSourceRef,
+  GoogleDocsPreviewData,
+  NormalizedDocumentContentBlock,
+  NormalizedDocumentTable,
+  NormalizedDocumentTablePart,
+  NormalizedDocumentTextRun,
+} from '@types';
 import { MappingCard, type MappingCardData } from './MappingCard';
 import { getAnchorIdForSourceRef, resolveMarkerOffsets } from './mappingCardPositioning';
 
 interface GoogleDocsMappingReviewScreenProps {
-  fixture: GoogleDocsReviewData;
+  fixture: GoogleDocsPreviewData;
   onBack?: () => void;
   showChrome?: boolean;
 }
 
 type DocSegment =
-  | { kind: 'block'; id: string; position: number; block: ReviewContentBlock }
-  | { kind: 'table'; id: string; position: number; table: ReviewTable };
+  | { kind: 'block'; id: string; position: number; block: NormalizedDocumentContentBlock }
+  | { kind: 'table'; id: string; position: number; table: NormalizedDocumentTable };
 
 interface OutlineSection {
   id: string;
@@ -48,10 +47,12 @@ interface OutlineSection {
   segments: DocSegment[];
 }
 
-type SourceUsage = ReviewUsageItem & {
+interface SourceUsage {
+  entryIndex: number;
   fieldType: string;
-  sourceRef: ReviewSourceRef;
-};
+  fieldId: string;
+  sourceRef: EntryBlockGraphSourceRef;
+}
 
 type AnchoredMappingCard = MappingCardData & {
   anchorId: string;
@@ -59,7 +60,7 @@ type AnchoredMappingCard = MappingCardData & {
 
 type TextSegment = {
   text: string;
-  styles?: ReviewTextRun['styles'];
+  styles?: NormalizedDocumentTextRun['styles'];
   highlighted: boolean;
   mappingKeys: string[];
 };
@@ -69,7 +70,7 @@ type ListItemPresentation = {
   nestingLevel: number;
 };
 
-const getBlockText = (block: ReviewContentBlock): string =>
+const getBlockText = (block: NormalizedDocumentContentBlock): string =>
   block.textRuns
     .map((run) => run.text)
     .join('')
@@ -89,7 +90,7 @@ const formatDisplayName = (value: string): string => {
   return normalized.replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
-const getEntryDisplayTitle = (entry: GoogleDocsReviewData['entries'][number]): string => {
+const getEntryDisplayTitle = (entry: GoogleDocsPreviewData['entries'][number]): string => {
   const titleField = entry.fields?.title;
   if (typeof titleField !== 'object' || titleField === null) {
     return formatDisplayName(entry.contentTypeId);
@@ -104,7 +105,7 @@ const getEntryDisplayTitle = (entry: GoogleDocsReviewData['entries'][number]): s
     : formatDisplayName(entry.contentTypeId);
 };
 
-function buildUsageIndexes(fixture: GoogleDocsReviewData): {
+function buildUsageIndexes(fixture: GoogleDocsPreviewData): {
   blockUsage: Record<string, SourceUsage[]>;
   tablePartUsage: Record<string, SourceUsage[]>;
   tableUsage: Record<string, SourceUsage[]>;
@@ -143,7 +144,7 @@ function buildUsageIndexes(fixture: GoogleDocsReviewData): {
   return { blockUsage, tablePartUsage, tableUsage };
 }
 
-const getMappingCardKey = (sectionId: string, usage: ReviewUsageItem): string =>
+const getMappingCardKey = (sectionId: string, usage: SourceUsage): string =>
   `${sectionId}-${usage.entryIndex}-${usage.fieldId}`;
 
 function uniqueUsage<T extends SourceUsage>(usage: T[]): T[] {
@@ -159,20 +160,24 @@ function uniqueUsage<T extends SourceUsage>(usage: T[]): T[] {
 }
 
 function buildTextSegments(
-  textRuns: ReviewTextRun[],
-  usage: Array<{ sourceRef: ReviewSourceRef; mappingKey: string }>
+  textRuns: NormalizedDocumentTextRun[],
+  usage: Array<{ sourceRef: EntryBlockGraphSourceRef; mappingKey: string }>
 ): TextSegment[] {
   const textUsage = usage.filter(
     (
       usageItem
     ): usageItem is {
-      sourceRef: Extract<ReviewSourceRef, { kind: 'blockText' | 'tableText' }>;
+      sourceRef: Extract<EntryBlockGraphSourceRef, { kind: 'blockText' | 'tableText' }>;
       mappingKey: string;
     } => usageItem.sourceRef.kind === 'blockText' || usageItem.sourceRef.kind === 'tableText'
   );
 
   let fullText = '';
-  const runRanges: Array<{ start: number; end: number; styles?: ReviewTextRun['styles'] }> = [];
+  const runRanges: Array<{
+    start: number;
+    end: number;
+    styles?: NormalizedDocumentTextRun['styles'];
+  }> = [];
 
   textRuns.forEach((run) => {
     const start = fullText.length;
@@ -219,7 +224,7 @@ function buildTextSegments(
   });
 }
 
-function getTextSegmentStyle(styles?: ReviewTextRun['styles']): CSSProperties {
+function getTextSegmentStyle(styles?: NormalizedDocumentTextRun['styles']): CSSProperties {
   return {
     fontWeight: styles?.bold ? 600 : undefined,
     fontStyle: styles?.italic ? 'italic' : undefined,
@@ -317,7 +322,7 @@ function buildOutlineSections(segments: DocSegment[]): OutlineSection[] {
 }
 
 function buildListItemPresentations(
-  blocks: ReviewContentBlock[]
+  blocks: NormalizedDocumentContentBlock[]
 ): Record<string, ListItemPresentation> {
   const presentations: Record<string, ListItemPresentation> = {};
   const orderedCounts = new Map<number, number>();
@@ -423,7 +428,7 @@ export const GoogleDocsMappingReviewScreen = ({
     [fixture.entries, fixture.entryBlockGraph.entries]
   );
 
-  const getVisibleUsage = <T extends ReviewUsageItem>(usage: T[]): T[] => {
+  const getVisibleUsage = <T extends SourceUsage>(usage: T[]): T[] => {
     if (selectedEntryIndex === null) {
       return usage;
     }
@@ -438,7 +443,7 @@ export const GoogleDocsMappingReviewScreen = ({
     return uniqueUsage(sourceUsage.blockUsage[segment.id] ?? []);
   };
 
-  const getUsageForSection = (section: OutlineSection): ReviewUsageItem[] =>
+  const getUsageForSection = (section: OutlineSection): SourceUsage[] =>
     uniqueUsage(section.segments.flatMap(getUsageForSegment));
 
   const isMappingHovered = (mappingKeys: string[]) =>
@@ -524,7 +529,7 @@ export const GoogleDocsMappingReviewScreen = ({
     };
   }, [mappingCardsBySection, sections]);
 
-  const renderBlock = (sectionId: string, block: ReviewContentBlock) => {
+  const renderBlock = (sectionId: string, block: NormalizedDocumentContentBlock) => {
     const visibleUsage = getVisibleUsage(sourceUsage.blockUsage[block.id] ?? []);
     const visibleRefs = visibleUsage.map((usage) => usage.sourceRef);
     const textUsage = visibleUsage.map((usage) => ({
@@ -627,10 +632,10 @@ export const GoogleDocsMappingReviewScreen = ({
 
   const renderTablePart = (
     sectionId: string,
-    table: ReviewTable,
+    table: NormalizedDocumentTable,
     rowId: string,
     cellId: string,
-    part: ReviewTablePart
+    part: NormalizedDocumentTablePart
   ) => {
     const usageKey = [table.id, rowId, cellId, part.id].join(':');
     const visibleUsage = getVisibleUsage(sourceUsage.tablePartUsage[usageKey] ?? []);
@@ -700,7 +705,7 @@ export const GoogleDocsMappingReviewScreen = ({
     );
   };
 
-  const renderTable = (sectionId: string, table: ReviewTable) => (
+  const renderTable = (sectionId: string, table: NormalizedDocumentTable) => (
     <Table>
       {table.headers.length > 0 && (
         <TableHead>
@@ -756,7 +761,7 @@ export const GoogleDocsMappingReviewScreen = ({
       ) : null}
 
       <Card
-        padding="spacingM"
+        padding="default"
         style={{
           border: `1px solid ${tokens.gray300}`,
         }}>

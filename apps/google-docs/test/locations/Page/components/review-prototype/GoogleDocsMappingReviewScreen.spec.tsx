@@ -4,9 +4,9 @@ import tokens from '@contentful/f36-tokens';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { GoogleDocsMappingReviewScreen } from '../../../../../src/locations/Page/components/review-prototype/GoogleDocsMappingReviewScreen';
-import type { GoogleDocsReviewData } from '../../../../../src/fixtures/googleDocsReview';
+import type { GoogleDocsPreviewData } from '@types';
 
-function buildFixture(): GoogleDocsReviewData {
+function buildFixture(): GoogleDocsPreviewData {
   const originalNormalizedDocument = {
     documentId: 'doc-1',
     title: 'Demo document',
