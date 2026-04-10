@@ -1,14 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
-import { PageAppSDK } from '@contentful/app-sdk';
-import { Button, Flex, Heading, Layout, Note, Paragraph } from '@contentful/f36-components';
+import { useState } from 'react';
+import { Button, Flex, Heading, Layout, Paragraph } from '@contentful/f36-components';
+import type { MappingReviewSuspendPayload, PreviewPayload } from '@types';
 import Splitter from './Splitter';
-import { MappingReviewSuspendPayload, PreviewPayload } from '@types';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
-import { loadGoogleDocsReviewData } from '../../../../fixtures/googleDocsReview';
-import { GoogleDocsMappingReviewScreen } from '../review-prototype/GoogleDocsMappingReviewScreen';
-import OverviewSection from '../overview/OverviewSection';
-import { useSDK } from '@contentful/react-apps-toolkit';
-import { PageAppSDK } from '@contentful/app-sdk';
+import { DocumentOutline } from '../review/DocumentOutline';
 import { isMappingReviewSuspendPayload } from '../../../../utils/utils';
 
 interface PreviewPageViewProps {
@@ -18,18 +13,19 @@ interface PreviewPageViewProps {
   onResumeMappingReview?: () => Promise<void>;
 }
 
-export const PreviewPageView = ({
-  payload,
-  oauthToken,
-  onLeavePreview,
-  onResumeMappingReview,
-}: PreviewPageViewProps) => {
-  const sdk = useSDK<PageAppSDK>();
+function hasEntryBlockGraph(
+  payload: PreviewPayload | MappingReviewSuspendPayload
+): payload is
+  | MappingReviewSuspendPayload
+  | (PreviewPayload & { entryBlockGraph: NonNullable<PreviewPayload['entryBlockGraph']> }) {
+  return Boolean(payload.entryBlockGraph);
+}
+
+export const PreviewPageView = ({ payload, onLeavePreview }: PreviewPageViewProps) => {
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
-  const mappingReviewPayload = isMappingReviewSuspendPayload(payload) ? payload : null;
-  const rawTitle = payload.normalizedDocument?.title;
-  const docTitle = typeof rawTitle === 'string' ? rawTitle : undefined;
-  const title = docTitle && docTitle.trim().length > 0 ? docTitle : 'Selected document';
+  const isMappingReviewMode = isMappingReviewSuspendPayload(payload);
+
+  const title = `Create from document "${payload.normalizedDocument.title ?? 'Selected document'}"`;
 
   return (
     <>
@@ -47,24 +43,19 @@ export const PreviewPageView = ({
       </Layout.Header>
       <Splitter marginTop="spacingS" />
       <Layout.Body>
-        {fixture ? <GoogleDocsMappingReviewScreen fixture={fixture} /> : null}
-        <Flex flexDirection="column" gap="spacing2Xl">
-          <OverviewSection
-            sdk={sdk}
-            payload={payload || fixture}
-            payload={payload}
-            oauthToken={oauthToken}
-            onReturnToMainPage={onLeavePreview}
-            onCreateSelected={mappingReviewPayload ? onResumeMappingReview : undefined}
-          />
-          <Heading as="h2" marginBottom="none">
-            Document outline
-          </Heading>
-        </Flex>
+        {/* TODO: Restore OverviewSection once it is compatible with EntryBlockGraph-based preview payloads. */}
+        {hasEntryBlockGraph(payload) ? (
+          <DocumentOutline payload={payload} showChrome={false} />
+        ) : (
+          <Paragraph marginBottom="none">
+            Preview overview is temporarily unavailable until the preview payload is compatible with
+            EntryBlockGraph.
+          </Paragraph>
+        )}
       </Layout.Body>
       <ConfirmCancelModal
         isOpen={isConfirmCancelModalOpen}
-        onConfirm={props.onCancel}
+        onConfirm={onLeavePreview}
         onCancel={() => setIsConfirmCancelModalOpen(false)}
       />
     </>

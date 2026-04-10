@@ -77,14 +77,6 @@ export interface PreviewPayload {
   entryBlockGraph?: EntryBlockGraph;
 }
 
-export interface MappingReviewEntryBlock {
-  [key: string]: unknown;
-}
-
-export interface MappingReviewContentType {
-  [key: string]: unknown;
-}
-
 export interface TabsImagesSuspendPayload {
   reason?: string;
   suspendStepId: 'select-tabs-images-step';
@@ -105,9 +97,9 @@ export interface MappingReviewSuspendPayload {
   documentId: string;
   documentTitle?: string;
   normalizedDocument: NormalizedDocument;
-  entryBlockGraph: MappingReviewEntryBlock[];
+  entryBlockGraph: EntryBlockGraph;
   referenceGraph: ReviewedReferenceGraph;
-  contentTypes: MappingReviewContentType[];
+  contentTypes: WorkflowContentType[];
 }
 
 export type WorkflowRunResult =
@@ -128,5 +120,5 @@ export interface ResumePayload {
   includeImages?: boolean;
   selectedTabIds?: string[];
   editedNormalizedDocument?: NormalizedDocument;
-  entryBlockGraph?: MappingReviewEntryBlock[];
+  entryBlockGraph?: EntryBlockGraph;
 }

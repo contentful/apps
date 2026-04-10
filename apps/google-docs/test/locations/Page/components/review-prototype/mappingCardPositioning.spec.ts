@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   getAnchorIdForSourceRef,
   resolveMarkerOffsets,
-} from '../../../../../src/locations/Page/components/review-prototype/mappingCardPositioning';
+} from '../../../../../src/locations/Page/components/review/mappingCardPositioning';
 
 describe('mappingCardPositioning', () => {
   it('derives block and table anchors from source refs', () => {

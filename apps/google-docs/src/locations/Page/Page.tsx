@@ -10,6 +10,7 @@ import { MainPageView } from './components/mainpage/MainPageView';
 import { PreviewPageView } from './components/mainpage/PreviewPageView';
 import { MappingReviewSuspendPayload, PreviewPayload } from '@types';
 import { isMappingReviewSuspendPayload } from '../../utils/utils';
+import fixtureReviewPayload from '../../fixtures/googleDocsReview/fixture.json';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -38,8 +39,6 @@ const Page = () => {
   };
 
   const handlePreviewReady = (payload: PreviewPayload) => {
-    setIsMappingPrototypeVisible(false);
-    setMappingReviewPayload(null);
     setPreviewPayload(payload);
   };
 
@@ -48,8 +47,6 @@ const Page = () => {
   };
 
   const handleReturnToMainPage = () => {
-    setIsMappingPrototypeVisible(false);
-    setMappingReviewPayload(null);
     setPreviewPayload(null);
   };
 
@@ -65,8 +62,6 @@ const Page = () => {
       sdk.notifier.error('Unable to resume preview. Please try again.');
     }
   };
-
-  console.log('previewPayload', previewPayload);
 
   return (
     <>
@@ -87,7 +82,9 @@ const Page = () => {
             onOauthTokenChange={handleOauthTokenChange}
             onLoadingStateChange={handleOAuthLoadingStateChange}
             onSelectFile={handleSelectFile}
-            onUseFixturePreview={() => setIsMappingPrototypeVisible(true)}
+            onUseFixturePreview={() =>
+              setPreviewPayload(fixtureReviewPayload as MappingReviewSuspendPayload)
+            }
             sdk={sdk}
           />
         )}

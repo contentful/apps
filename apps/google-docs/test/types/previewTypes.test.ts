@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { GoogleDocsPreviewData } from '@types';
+import type { MappingReviewSuspendPayload } from '@types';
 import type { EntryBlockGraph } from '../../src/types/entryBlockGraph';
 import type { NormalizedDocument } from '../../src/types/normalizedDocument';
 
@@ -50,39 +50,29 @@ function buildEntryBlockGraph(): EntryBlockGraph {
   };
 }
 
-function buildPreviewData(): GoogleDocsPreviewData {
+function buildPreviewData(): MappingReviewSuspendPayload {
   const normalizedDocument = buildNormalizedDocument();
   return {
-    entries: [
-      {
-        tempId: 'page_1',
-        contentTypeId: 'page',
-        fields: {
-          title: {
-            'en-US': 'Example page',
-          },
-        },
-      },
-    ],
-    assets: [],
+    suspendStepId: 'mapping-review',
+    documentId: 'doc-1',
     referenceGraph: {
       edges: [],
       creationOrder: ['page_1'],
       deferredFields: [],
       hasCircularDependency: false,
     },
-    originalNormalizedDocument: normalizedDocument,
-    editableNormalizedDocument: structuredClone(normalizedDocument),
+    normalizedDocument,
     entryBlockGraph: buildEntryBlockGraph(),
+    contentTypes: [],
   };
 }
 
-describe('GoogleDocsPreviewData', () => {
+describe('MappingReviewSuspendPayload', () => {
   it('supports the latest agents api normalized document and source ref fields', () => {
     const previewData = buildPreviewData();
     const sourceRef = previewData.entryBlockGraph.entries[0].fieldMappings[0].sourceRefs[0];
 
-    expect(previewData.originalNormalizedDocument.contentBlocks[0].flattenedTextRuns).toEqual([
+    expect(previewData.normalizedDocument.contentBlocks[0].flattenedTextRuns).toEqual([
       { text: 'Overview', start: 0, end: 8, styles: {} },
     ]);
 

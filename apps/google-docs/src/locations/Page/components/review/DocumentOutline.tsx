@@ -21,18 +21,25 @@ import {
 } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import type {
+  EntryToCreate,
+  EntryBlockGraph,
   EntryBlockGraphSourceRef,
-  GoogleDocsPreviewData,
+  MappingReviewSuspendPayload,
   NormalizedDocumentContentBlock,
   NormalizedDocumentTable,
   NormalizedDocumentTablePart,
   NormalizedDocumentTextRun,
+  PreviewPayload,
 } from '@types';
 import { MappingCard, type MappingCardData } from './MappingCard';
 import { getAnchorIdForSourceRef, resolveMarkerOffsets } from './mappingCardPositioning';
 
-interface GoogleDocsMappingReviewScreenProps {
-  fixture: GoogleDocsPreviewData;
+type PreviewDocumentOutlinePayload = PreviewPayload & {
+  entryBlockGraph: NonNullable<PreviewPayload['entryBlockGraph']>;
+};
+
+interface DocumentOutlineProps {
+  payload: MappingReviewSuspendPayload | PreviewDocumentOutlinePayload;
   onBack?: () => void;
   showChrome?: boolean;
 }
@@ -90,7 +97,7 @@ const formatDisplayName = (value: string): string => {
   return normalized.replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
-const getEntryDisplayTitle = (entry: GoogleDocsPreviewData['entries'][number]): string => {
+const getEntryDisplayTitle = (entry: EntryToCreate): string => {
   const titleField = entry.fields?.title;
   if (typeof titleField !== 'object' || titleField === null) {
     return formatDisplayName(entry.contentTypeId);
@@ -105,7 +112,7 @@ const getEntryDisplayTitle = (entry: GoogleDocsPreviewData['entries'][number]): 
     : formatDisplayName(entry.contentTypeId);
 };
 
-function buildUsageIndexes(fixture: GoogleDocsPreviewData): {
+function buildUsageIndexes(entryBlockGraph: EntryBlockGraph): {
   blockUsage: Record<string, SourceUsage[]>;
   tablePartUsage: Record<string, SourceUsage[]>;
   tableUsage: Record<string, SourceUsage[]>;
@@ -114,7 +121,7 @@ function buildUsageIndexes(fixture: GoogleDocsPreviewData): {
   const tablePartUsage: Record<string, SourceUsage[]> = {};
   const tableUsage: Record<string, SourceUsage[]> = {};
 
-  fixture.entryBlockGraph.entries.forEach((mappingEntry, entryIndex) => {
+  entryBlockGraph.entries.forEach((mappingEntry, entryIndex) => {
     mappingEntry.fieldMappings.forEach((fieldMapping) => {
       fieldMapping.sourceRefs.forEach((sourceRef) => {
         const usage: SourceUsage = {
@@ -142,6 +149,12 @@ function buildUsageIndexes(fixture: GoogleDocsPreviewData): {
   });
 
   return { blockUsage, tablePartUsage, tableUsage };
+}
+
+function hasPreviewEntries(
+  payload: MappingReviewSuspendPayload | PreviewDocumentOutlinePayload
+): payload is PreviewDocumentOutlinePayload {
+  return 'entries' in payload;
 }
 
 const getMappingCardKey = (sectionId: string, usage: SourceUsage): string =>
@@ -363,11 +376,7 @@ function buildListItemPresentations(
   return presentations;
 }
 
-export const GoogleDocsMappingReviewScreen = ({
-  fixture,
-  onBack,
-  showChrome = true,
-}: GoogleDocsMappingReviewScreenProps) => {
+export const DocumentOutline = ({ payload, onBack, showChrome = true }: DocumentOutlineProps) => {
   const [selectedEntryIndex, setSelectedEntryIndex] = useState<number | null>(null);
   const [hoveredMappingKeys, setHoveredMappingKeys] = useState<string[]>([]);
   const [cardOffsetsBySection, setCardOffsetsBySection] = useState<
@@ -376,8 +385,12 @@ export const GoogleDocsMappingReviewScreen = ({
   const sectionLayoutRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const cardWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  const document = fixture.editableNormalizedDocument;
-  const sourceUsage = useMemo(() => buildUsageIndexes(fixture), [fixture]);
+  const document = payload.normalizedDocument;
+  const previewEntries = hasPreviewEntries(payload) ? payload.entries : undefined;
+  const sourceUsage = useMemo(
+    () => buildUsageIndexes(payload.entryBlockGraph),
+    [payload.entryBlockGraph]
+  );
 
   const segments = useMemo<DocSegment[]>(() => {
     const blockSegments: DocSegment[] = document.contentBlocks.map((block) => ({
@@ -412,8 +425,8 @@ export const GoogleDocsMappingReviewScreen = ({
   );
   const overviewEntries = useMemo(
     () =>
-      fixture.entryBlockGraph.entries.map((graphEntry, entryIndex) => {
-        const entry = fixture.entries[entryIndex];
+      payload.entryBlockGraph.entries.map((graphEntry, entryIndex) => {
+        const entry = previewEntries?.[entryIndex];
         const key =
           entry?.tempId ?? graphEntry.tempId ?? `${graphEntry.contentTypeId}-${entryIndex}`;
 
@@ -425,7 +438,7 @@ export const GoogleDocsMappingReviewScreen = ({
           mappingCount: graphEntry.fieldMappings.length,
         };
       }),
-    [fixture.entries, fixture.entryBlockGraph.entries]
+    [payload.entryBlockGraph.entries, previewEntries]
   );
 
   const getVisibleUsage = <T extends SourceUsage>(usage: T[]): T[] => {
@@ -465,7 +478,7 @@ export const GoogleDocsMappingReviewScreen = ({
         acc[section.id] = getMappingCardsForSection(section);
         return acc;
       }, {}),
-    [sections, selectedEntryIndex, fixture, sourceUsage]
+    [sections, selectedEntryIndex, sourceUsage]
   );
 
   const setSectionLayoutRef =

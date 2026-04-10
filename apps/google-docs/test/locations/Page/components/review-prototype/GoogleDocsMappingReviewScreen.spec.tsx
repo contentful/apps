@@ -3,11 +3,11 @@ import React from 'react';
 import tokens from '@contentful/f36-tokens';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { GoogleDocsMappingReviewScreen } from '../../../../../src/locations/Page/components/review-prototype/GoogleDocsMappingReviewScreen';
-import type { GoogleDocsPreviewData } from '@types';
+import { DocumentOutline } from '../../../../../src/locations/Page/components/review/DocumentOutline';
+import type { MappingReviewSuspendPayload } from '@types';
 
-function buildFixture(): GoogleDocsPreviewData {
-  const originalNormalizedDocument = {
+function buildFixture(): MappingReviewSuspendPayload {
+  const normalizedDocument = {
     documentId: 'doc-1',
     title: 'Demo document',
     designValues: [],
@@ -144,26 +144,18 @@ function buildFixture(): GoogleDocsPreviewData {
   };
 
   return {
-    entries: [
-      {
-        tempId: 'page_1',
-        contentTypeId: 'page',
-        fields: {
-          title: {
-            'en-US': 'Example page',
-          },
-        },
-      },
-    ],
-    assets: [],
+    suspendStepId: 'mapping-review',
+    reason: 'Mapping review required',
+    documentId: 'doc-1',
+    documentTitle: 'Demo document',
+    normalizedDocument,
+    contentTypes: [],
     referenceGraph: {
       edges: [],
       creationOrder: [],
       hasCircularDependency: false,
       deferredFields: [],
     },
-    originalNormalizedDocument,
-    editableNormalizedDocument: JSON.parse(JSON.stringify(originalNormalizedDocument)),
     entryBlockGraph: {
       entries: [
         {
@@ -234,8 +226,7 @@ describe('GoogleDocsMappingReviewScreen', () => {
       },
     ];
 
-    fixture.originalNormalizedDocument.contentBlocks[1].textRuns = linkedBlockRuns;
-    fixture.editableNormalizedDocument.contentBlocks[1].textRuns = linkedBlockRuns;
+    fixture.normalizedDocument.contentBlocks[1].textRuns = linkedBlockRuns;
     fixture.entryBlockGraph.entries[0].fieldMappings[0].sourceRefs = [
       { kind: 'blockText', blockId: 'block-1', start: 0, end: 17 },
     ];
@@ -247,12 +238,7 @@ describe('GoogleDocsMappingReviewScreen', () => {
       },
     ];
 
-    fixture.originalNormalizedDocument.tables[0].rows[0].cells[1].parts[2] = {
-      id: 'table-0-row-0-cell-1-part-2',
-      type: 'text',
-      textRuns: linkedTableRuns,
-    };
-    fixture.editableNormalizedDocument.tables[0].rows[0].cells[1].parts[2] = {
+    fixture.normalizedDocument.tables[0].rows[0].cells[1].parts[2] = {
       id: 'table-0-row-0-cell-1-part-2',
       type: 'text',
       textRuns: linkedTableRuns,
@@ -269,7 +255,7 @@ describe('GoogleDocsMappingReviewScreen', () => {
       },
     ];
 
-    render(<GoogleDocsMappingReviewScreen fixture={fixture} onBack={vi.fn()} />);
+    render(<DocumentOutline payload={fixture} onBack={vi.fn()} />);
 
     expect(screen.getByRole('link', { name: 'Contentful' })).toHaveAttribute(
       'href',
@@ -282,7 +268,7 @@ describe('GoogleDocsMappingReviewScreen', () => {
   });
 
   it('renders highlighted block text spans from entryBlockGraph', () => {
-    render(<GoogleDocsMappingReviewScreen fixture={buildFixture()} onBack={vi.fn()} />);
+    render(<DocumentOutline payload={buildFixture()} onBack={vi.fn()} />);
 
     expect(screen.getByTestId('section-surface-section-block-0').getAttribute('style')).toBeNull();
     expect(screen.getByTestId('block-segment-block-1-0')).toHaveAttribute(
@@ -293,7 +279,7 @@ describe('GoogleDocsMappingReviewScreen', () => {
   });
 
   it('renders mixed table cell text and image highlights independently', () => {
-    render(<GoogleDocsMappingReviewScreen fixture={buildFixture()} onBack={vi.fn()} />);
+    render(<DocumentOutline payload={buildFixture()} onBack={vi.fn()} />);
 
     expect(screen.getByTestId('section-surface-section-table-0').getAttribute('style')).toBeNull();
     expect(screen.queryByText(/^Table$/)).toBeNull();
@@ -315,7 +301,7 @@ describe('GoogleDocsMappingReviewScreen', () => {
   });
 
   it('syncs hover styling between mapping cards and their highlights', () => {
-    render(<GoogleDocsMappingReviewScreen fixture={buildFixture()} onBack={vi.fn()} />);
+    render(<DocumentOutline payload={buildFixture()} onBack={vi.fn()} />);
 
     const card = screen.getByTestId('mapping-card-section-table-0-0-imageCaption');
     const textHighlight = screen.getByTestId('table-text-segment-table-0-row-0-cell-1-part-2-0');
@@ -340,7 +326,7 @@ describe('GoogleDocsMappingReviewScreen', () => {
   });
 
   it('renders ordered and nested unordered list item styling', () => {
-    render(<GoogleDocsMappingReviewScreen fixture={buildFixture()} onBack={vi.fn()} />);
+    render(<DocumentOutline payload={buildFixture()} onBack={vi.fn()} />);
 
     expect(screen.getByTestId('list-marker-block-4')).toHaveTextContent('1.');
     expect(screen.getByTestId('list-item-block-5')).toHaveStyle({
@@ -352,7 +338,7 @@ describe('GoogleDocsMappingReviewScreen', () => {
   });
 
   it('renders field cards with the field type appended and no unmapped empty-state cards', () => {
-    render(<GoogleDocsMappingReviewScreen fixture={buildFixture()} onBack={vi.fn()} />);
+    render(<DocumentOutline payload={buildFixture()} onBack={vi.fn()} />);
 
     expect(screen.getByTestId('mapping-rail-section-block-0')).toHaveStyle({ maxWidth: '280px' });
 
@@ -369,16 +355,6 @@ describe('GoogleDocsMappingReviewScreen', () => {
   it('filters mappings when an overview entry card is selected', () => {
     const fixture = buildFixture();
 
-    fixture.entries.push({
-      tempId: 'page_2',
-      contentTypeId: 'page',
-      fields: {
-        title: {
-          'en-US': 'FAQ page',
-        },
-      },
-    });
-
     fixture.entryBlockGraph.entries.push({
       contentTypeId: 'page',
       tempId: 'page_2',
@@ -393,7 +369,7 @@ describe('GoogleDocsMappingReviewScreen', () => {
       ],
     });
 
-    render(<GoogleDocsMappingReviewScreen fixture={fixture} onBack={vi.fn()} />);
+    render(<DocumentOutline payload={fixture} onBack={vi.fn()} />);
 
     expect(screen.getByTestId('mapping-card-section-block-0-0-body')).toBeTruthy();
     expect(screen.getByTestId('mapping-card-section-block-2-1-faqBody')).toBeTruthy();
@@ -480,7 +456,7 @@ describe('GoogleDocsMappingReviewScreen', () => {
       };
     });
 
-    render(<GoogleDocsMappingReviewScreen fixture={buildFixture()} onBack={vi.fn()} />);
+    render(<DocumentOutline payload={buildFixture()} onBack={vi.fn()} />);
 
     expect(screen.getByTestId('mapping-card-position-section-block-0-0-body')).toHaveStyle({
       top: '80px',

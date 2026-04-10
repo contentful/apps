@@ -4,7 +4,6 @@ import { Box, Button, Flex, Heading, Note, Paragraph } from '@contentful/f36-com
 import type { MappingReviewSuspendPayload, PreviewPayload } from '@types';
 import {
   buildCheckboxEntryList,
-  buildCheckboxEntryListFromMappingReviewPayload,
   collectCheckboxEntryListRowIds,
   type ContentTypeDisplayInfoMap,
 } from '../../../../utils/checkboxEntryList';
@@ -16,13 +15,13 @@ import type { EntryProps } from 'contentful-management';
 import { SummaryModal } from '../modals/SummaryModal';
 import { isPreviewPayload } from '../../../../utils/utils';
 
-type CreateOverviewSectionProps = {
+type OverviewSectionProps = {
   sdk: PageAppSDK;
   payload: PreviewPayload | MappingReviewSuspendPayload;
   oauthToken: string;
   onReturnToMainPage: () => void;
   onCreateSelected?: () => Promise<void>;
-}
+};
 
 const OverviewSection = ({
   sdk,
@@ -66,11 +65,6 @@ const OverviewSection = ({
   }, [payload]);
 
   useEffect(() => {
-    if (isMappingReviewMode || !sdk) {
-      setContentTypeDisplayInfoMap(undefined);
-      return;
-    }
-
     const fetchContentTypesInfo = async () => {
       const contentTypeIds = [
         ...new Set(overviewPayload.entries.map((entry) => entry.contentTypeId)),
@@ -130,9 +124,7 @@ const OverviewSection = ({
 
   const handleSummaryDone = () => {
     setSummaryEntries(null);
-    if ('onReturnToMainPage' in props) {
-      props.onReturnToMainPage();
-    }
+    onReturnToMainPage();
   };
 
   return (
@@ -149,9 +141,8 @@ const OverviewSection = ({
               Overview
             </Heading>
             <Paragraph marginBottom="none">
-              {isMappingReviewMode
-                ? 'Review the entry structure produced for the mapping step. Entry creation continues after mapping review is complete.'
-                : 'Review your content and associated entries below. Select which entries you&apos;d like to create.'}
+              Review your content and associated entries below. Select which entries you&apos;d like
+              to create.
             </Paragraph>
           </Flex>
           <Button
@@ -165,9 +156,8 @@ const OverviewSection = ({
 
         {checkboxEntryRows.length === 0 ? (
           <Note variant="neutral">
-            {isMappingReviewMode
-              ? 'No entry mappings are available yet. Once the mapping review payload is generated, the planned entries will appear here.'
-              : 'No entries were found in this preview. When the document is parsed successfully, entries to create will appear here.'}
+            No entries were found in this preview. When the document is parsed successfully, entries
+            to create will appear here.
           </Note>
         ) : (
           <CheckboxEntryList
@@ -178,7 +168,7 @@ const OverviewSection = ({
         )}
       </Flex>
 
-      {!isMappingReviewMode && sdk ? (
+      {sdk ? (
         <SummaryModal
           isOpen={summaryEntries !== null}
           sdk={sdk}

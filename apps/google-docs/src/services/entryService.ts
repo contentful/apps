@@ -9,6 +9,7 @@ import {
 } from './referenceResolution';
 import { orderEntriesByCreationOrder } from '../utils/previewPayload';
 import { mapFieldValuesToSpaceDefaultLocale } from '../utils/remapEntryLocales';
+import { filterPreviewPayloadBySelectedRowIds } from 'src/utils/checkboxEntryList';
 
 export interface EntryCreationResult {
   createdEntries: EntryProps[];
@@ -227,9 +228,14 @@ export async function createEntriesFromPreviewPayload(
   selectedEntryTempIds?: Set<string>,
   oauthToken?: string
 ): Promise<EntryCreationResult> {
+  const effectivePayload =
+    selectedEntryTempIds !== undefined
+      ? filterPreviewPayloadBySelectedRowIds(payload, selectedEntryTempIds)
+      : payload;
+
   const orderedEntries = orderEntriesByCreationOrder(
-    payload.entries,
-    payload.referenceGraph?.creationOrder
+    effectivePayload.entries,
+    effectivePayload.referenceGraph?.creationOrder
   );
   const entriesForSpaceLocale = mapFieldValuesToSpaceDefaultLocale(
     orderedEntries,

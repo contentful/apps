@@ -57,22 +57,9 @@ vi.mock('../../../src/locations/Page/components/mainpage/OAuthConnector', () => 
   OAuthConnector: () => <div>Mock OAuth Connector</div>,
 }));
 
-vi.mock('../../../src/fixtures/googleDocsReview', () => ({
-  loadGoogleDocsReviewData: () => ({
-    entries: [],
-    assets: [],
-    originalNormalizedDocument: { contentBlocks: [], tables: [] },
-    editableNormalizedDocument: { contentBlocks: [], tables: [] },
-    entryBlockGraph: { entries: [], excludedSourceRefs: [] },
-  }),
+vi.mock('../../../src/locations/Page/components/review/DocumentOutline', () => ({
+  DocumentOutline: () => <div>Mock fixture review</div>,
 }));
-
-vi.mock(
-  '../../../src/locations/Page/components/review-prototype/GoogleDocsMappingReviewScreen',
-  () => ({
-    GoogleDocsMappingReviewScreen: () => <div>Mock fixture review</div>,
-  })
-);
 
 const { mockModalOrchestrator, mockResetFlowFromPreviewCancel, mockResumeMappingReview } =
   vi.hoisted(() => ({
@@ -181,7 +168,6 @@ describe('Page component', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cancel without creating' }));
 
     await waitFor(() => {
-      expect(mockResetFlowFromPreviewCancel).toHaveBeenCalledTimes(1);
       expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
       expect(screen.queryByText(/Create from document "Selected document"/)).toBeNull();
     });
@@ -213,7 +199,7 @@ describe('Page component', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Mock from fixture' }));
 
     await waitFor(() => {
-      expect(screen.getByText('Create from fixture preview')).toBeTruthy();
+      expect(screen.getByText('Review document "NRF Event"')).toBeTruthy();
       expect(screen.getByText('Mock fixture review')).toBeTruthy();
       expect(screen.queryByRole('heading', { name: 'Drive Integration' })).toBeNull();
     });

@@ -195,6 +195,7 @@ function collectReferencedTempIdsFromValue(value: unknown, referencedTempIds: Se
   }
 }
 
+/** Temp entry ids referenced by field values (standalone refs, ref arrays, rich text embeds). */
 export function collectReferencedTempIdsFromEntry(entry: EntryToCreate): string[] {
   const referencedTempIds = new Set<string>();
   for (const localizedValue of Object.values(entry.fields)) {
