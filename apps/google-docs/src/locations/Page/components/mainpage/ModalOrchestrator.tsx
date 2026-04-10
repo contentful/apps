@@ -42,7 +42,6 @@ interface ModalOrchestratorProps {
   onPreviewReady: (payload: PreviewPayload) => void;
   onMappingReviewReady: (payload: MappingReviewSuspendPayload) => void;
   onResetToMain: () => void;
-  onMappingReviewReady: (payload: MappingReviewSuspendPayload) => void;
 }
 
 export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrchestratorProps>(
@@ -69,22 +68,11 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
     useImperativeHandle(ref, () => ({
       startFlow: () => setIsUploadModalOpen(true),
-      resetFlowFromPreviewCancel: () => {
+      resetFlowState: () => {
         resetProgress();
         onResetToMain();
       },
-      resumeMappingReview: async (resumePayload: ResumePayload) => {
-        if (!activeRunId) {
-          throw new Error('Workflow run id is missing for resume.');
-        }
 
-        try {
-          setFlowStep(FlowStep.LOADING);
-          handleWorkflowResult(await resumeWorkflow(activeRunId, resumePayload));
-        } catch {
-          showWorkflowError();
-        }
-      },
       resumeMappingReview: async (payload: MappingReviewSuspendPayload) => {
         if (!activeRunId) {
           throw new Error('Workflow run id is missing for resume.');

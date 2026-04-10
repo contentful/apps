@@ -9,7 +9,7 @@ import {
 } from './referenceResolution';
 import { orderEntriesByCreationOrder } from '../utils/previewPayload';
 import { mapFieldValuesToSpaceDefaultLocale } from '../utils/remapEntryLocales';
-import { filterPreviewPayloadBySelectedRowIds } from 'src/utils/checkboxEntryList';
+import { filterPreviewPayloadBySelectedRowIds } from '../utils/checkboxEntryList';
 
 export interface EntryCreationResult {
   createdEntries: EntryProps[];
