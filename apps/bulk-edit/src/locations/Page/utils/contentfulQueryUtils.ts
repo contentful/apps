@@ -22,11 +22,13 @@ const getStatusFilter = (statusLabels: string[]) => {
   if (status === ARCHIVED_STATUS) {
     return { 'sys.archivedAt[exists]': true };
   } else if (status === DRAFT_STATUS) {
-    return { 'sys.publishedAt[exists]': false };
+    // Exclude both published and archived entries to match only true drafts
+    return { 'sys.publishedAt[exists]': false, 'sys.archivedAt[exists]': false };
   } else if (status === PUBLISHED_STATUS) {
     return { 'sys.publishedAt[exists]': true, 'sys.archivedAt[exists]': false };
   } else if (status === CHANGED_STATUS) {
-    return { 'sys.publishedAt[exists]': true, 'sys.archivedAt[exists]': false, changed: true };
+    // The CMA does not support `changed: true`; filter by publishedVersion < version instead
+    return { 'sys.publishedAt[exists]': true, 'sys.archivedAt[exists]': false };
   }
 
   return {};
@@ -62,18 +64,23 @@ export const fieldFilterValuesToQuery = (
   fieldFilterValues: FieldFilterValue[]
 ): { query: Record<string, string>; queryString: string } => {
   // would like to compare over time, so sorting...
-  const sortedFieldFilterValues = fieldFilterValues.sort((a, b) =>
-    a.fieldUniqueId.localeCompare(b.fieldUniqueId)
-  );
+  const sortedFieldFilterValues = fieldFilterValues
+    .slice()
+    .sort((a, b) => a.fieldUniqueId.localeCompare(b.fieldUniqueId));
 
   const query: Record<string, string> = {};
   const queryString: string[] = [];
-  sortedFieldFilterValues.map((fieldFilterValue) => {
-    if (!fieldFilterValue.value) {
-      return null;
-    }
-    let key, value;
+  sortedFieldFilterValues.forEach((fieldFilterValue) => {
     const operator = fieldFilterValue.operator;
+    const isExistenceOperator = operator === 'exists' || operator === 'not exists';
+
+    // Existence operators have no value; all others require one
+    if (!fieldFilterValue.value && !isExistenceOperator) {
+      return;
+    }
+
+    let key: string | undefined;
+    let value: string | undefined;
 
     if (
       fieldFilterValue.contentTypeField.type === 'Symbol' ||
@@ -88,10 +95,10 @@ export const fieldFilterValuesToQuery = (
         key = `fields.${fieldFilterValue.fieldUniqueId}[exists]`;
         value = 'false';
       } else {
-        key = `fields.${fieldFilterValue.fieldUniqueId}[${fieldFilterValue.operator}]`;
+        key = `fields.${fieldFilterValue.fieldUniqueId}[${operator}]`;
         value = Array.isArray(fieldFilterValue.value)
           ? fieldFilterValue.value.join(',')
-          : fieldFilterValue.value;
+          : fieldFilterValue.value ?? undefined;
       }
     } else if (fieldFilterValue.contentTypeField.type === 'Array') {
       if (operator === 'exists') {
@@ -101,10 +108,10 @@ export const fieldFilterValuesToQuery = (
         key = `fields.${fieldFilterValue.fieldUniqueId}.sys.id[exists]`;
         value = 'false';
       } else {
-        key = `fields.${fieldFilterValue.fieldUniqueId}.sys.id[${fieldFilterValue.operator}]`;
+        key = `fields.${fieldFilterValue.fieldUniqueId}.sys.id[${operator}]`;
         value = Array.isArray(fieldFilterValue.value)
           ? fieldFilterValue.value.join(',')
-          : fieldFilterValue.value;
+          : fieldFilterValue.value ?? undefined;
       }
     } else if (fieldFilterValue.contentTypeField.type === 'Link') {
       if (operator === 'exists') {
@@ -114,10 +121,10 @@ export const fieldFilterValuesToQuery = (
         key = `fields.${fieldFilterValue.fieldUniqueId}.sys.id[exists]`;
         value = 'false';
       } else {
-        key = `fields.${fieldFilterValue.fieldUniqueId}.sys.id[${fieldFilterValue.operator}]`;
+        key = `fields.${fieldFilterValue.fieldUniqueId}.sys.id[${operator}]`;
         value = Array.isArray(fieldFilterValue.value)
           ? fieldFilterValue.value.join(',')
-          : fieldFilterValue.value;
+          : fieldFilterValue.value ?? undefined;
       }
     }
 

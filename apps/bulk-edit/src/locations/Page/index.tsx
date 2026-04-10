@@ -75,7 +75,7 @@ const Page = () => {
   const [totalUpdateCount, setTotalUpdateCount] = useState<number>(0);
   const [editionCount, setEditionCount] = useState<number>(0);
   const [selectedColumns, setSelectedColumns] = useState<FilterOption[]>([]);
-  const [selectedStatuses, setSelectedStatuses] = useState<FilterOption[]>([]); //statusOptions);
+  const [selectedStatuses, setSelectedStatuses] = useState<FilterOption[]>([]);
   const [currentContentType, setCurrentContentType] = useState<ContentTypeProps | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchFieldFilterValues, setSearchFieldFilterValues] = useState<FieldFilterValue[]>([]);
@@ -595,7 +595,10 @@ const Page = () => {
               ) : (
                 <>
                   {entries.length === 0 || !selectedContentType ? (
-                    <EmptyEntryBanner hasEntries={entries.length > 0} />
+                    <EmptyEntryBanner
+                      hasEntries={entries.length > 0}
+                      hasActiveFilters={hasActiveFilters()}
+                    />
                   ) : (
                     <>
                       {failedUpdates.length > 0 && (
@@ -652,6 +655,7 @@ const Page = () => {
         isSaving={isSaving}
         totalUpdateCount={totalUpdateCount}
         editionCount={editionCount}
+        contentTypes={contentTypes}
       />
       <UndoBulkEditModal
         isOpen={isUndoModalOpen}

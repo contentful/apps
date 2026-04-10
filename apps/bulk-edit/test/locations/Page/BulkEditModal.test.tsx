@@ -33,6 +33,7 @@ describe('BulkEditModal', () => {
     mockSdk.dialogs.selectSingleEntry.mockReset();
     mockSdk.dialogs.selectMultipleEntries.mockReset();
     mockSdk.cma.entry.get.mockReset();
+    mockSdk.cma.entry.getMany.mockReset();
   });
 
   it('renders subtitle for single entry', () => {
@@ -47,6 +48,7 @@ describe('BulkEditModal', () => {
         isSaving={false}
         totalUpdateCount={0}
         editionCount={0}
+        contentTypes={[]}
       />
     );
     expect(screen.getByText('Edit')).toBeInTheDocument();
@@ -66,6 +68,7 @@ describe('BulkEditModal', () => {
         isSaving={false}
         totalUpdateCount={0}
         editionCount={0}
+        contentTypes={[]}
       />
     );
     expect(screen.getByText('Bulk edit')).toBeInTheDocument();
@@ -86,6 +89,7 @@ describe('BulkEditModal', () => {
         isSaving={false}
         totalUpdateCount={0}
         editionCount={0}
+        contentTypes={[]}
       />
     );
     fireEvent.click(screen.getByTestId('bulk-edit-cancel'));
@@ -105,6 +109,7 @@ describe('BulkEditModal', () => {
         isSaving={false}
         totalUpdateCount={0}
         editionCount={0}
+        contentTypes={[]}
       />
     );
     const input = await screen.findByTestId('number-editor-input');
@@ -162,6 +167,7 @@ describe('BulkEditModal', () => {
         isSaving={true}
         totalUpdateCount={2}
         editionCount={1}
+        contentTypes={[]}
       />
     );
 
@@ -184,6 +190,7 @@ describe('BulkEditModal', () => {
         isSaving={false}
         totalUpdateCount={0}
         editionCount={0}
+        contentTypes={[]}
       />
     );
 
@@ -213,6 +220,7 @@ describe('BulkEditModal', () => {
         isSaving={false}
         totalUpdateCount={0}
         editionCount={0}
+        contentTypes={[]}
       />
     );
 
@@ -261,6 +269,7 @@ describe('BulkEditModal', () => {
         isSaving={false}
         totalUpdateCount={0}
         editionCount={0}
+        contentTypes={[]}
       />
     );
 
@@ -298,10 +307,30 @@ describe('BulkEditModal', () => {
       },
     };
 
-    mockSdk.cma.entry.get.mockResolvedValue({
-      sys: { id: 'author-entry-1' },
-      fields: { title: { 'en-US': 'Jessie Xu' } },
+    mockSdk.cma.entry.getMany.mockResolvedValue({
+      items: [
+        {
+          sys: { id: 'author-entry-1', contentType: { sys: { id: 'author' } } },
+          fields: { title: { 'en-US': 'Jessie Xu' } },
+        },
+      ],
     });
+
+    const authorContentType = {
+      sys: { id: 'author' },
+      displayField: 'title',
+      name: 'Author',
+      fields: [
+        {
+          id: 'title',
+          name: 'Title',
+          type: 'Symbol',
+          required: true,
+          localized: false,
+          validations: [],
+        },
+      ],
+    } as any;
 
     render(
       <BulkEditModal
@@ -314,6 +343,7 @@ describe('BulkEditModal', () => {
         isSaving={false}
         totalUpdateCount={0}
         editionCount={0}
+        contentTypes={[authorContentType]}
       />
     );
 
@@ -355,6 +385,7 @@ describe('BulkEditModal', () => {
         isSaving={false}
         totalUpdateCount={0}
         editionCount={0}
+        contentTypes={[]}
       />
     );
 

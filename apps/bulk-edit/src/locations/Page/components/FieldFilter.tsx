@@ -99,7 +99,7 @@ export const FieldFilter = ({ field, setFieldFilterValues }: FieldFilterProps) =
   const isAssetsSelector =
     field.type === 'Array' && field.fieldControl?.widgetId === 'assetLinksEditor';
 
-  const isInput = !isEntrySelector && !isEntriesSelector && !isAssetSelector;
+  const isInput = !isEntrySelector && !isEntriesSelector && !isAssetSelector && !isAssetsSelector;
 
   const showValueInput = selectedOperator !== 'exists' && selectedOperator !== 'not exists';
 
@@ -127,7 +127,16 @@ export const FieldFilter = ({ field, setFieldFilterValues }: FieldFilterProps) =
         return [...prev, newFilterValue];
       }
     });
-  }, [selectedOperator, debouncedInputValue, field.uniqueId, setFieldFilterValues]);
+  }, [
+    selectedOperator,
+    debouncedInputValue,
+    field.uniqueId,
+    setFieldFilterValues,
+    selectedEntry,
+    selectedEntries,
+    selectedAsset,
+    selectedAssets,
+  ]);
 
   const handleSelectEntry = async () => {
     try {

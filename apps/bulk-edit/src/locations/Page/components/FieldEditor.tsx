@@ -10,6 +10,7 @@ import { DropdownEditor } from '@contentful/field-editor-dropdown';
 import { RadioEditor } from '@contentful/field-editor-radio';
 import { ListEditor } from '@contentful/field-editor-list';
 import { CheckboxEditor } from '@contentful/field-editor-checkbox';
+import type { ContentTypeProps } from 'contentful-management';
 import type { ContentTypeField, EntryLinkValue } from '../types';
 import { Note } from '@contentful/f36-components';
 import {
@@ -36,6 +37,7 @@ interface FieldEditorProps {
   value: FieldValue;
   onChange: (value: FieldValue) => void;
   locales: LocalesAPI;
+  contentTypes?: ContentTypeProps[];
 }
 
 const ERROR_MESSAGE = 'Failed to initialize field editor. Please try again.';
@@ -71,7 +73,13 @@ const isSingleEntryReferenceField = (field: ContentTypeField) =>
 const isMultipleEntryReferenceField = (field: ContentTypeField) =>
   field.type === 'Array' && field.items?.type === 'Link' && field.items?.linkType === 'Entry';
 
-export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange, locales }) => {
+export const FieldEditor: React.FC<FieldEditorProps> = ({
+  field,
+  value,
+  onChange,
+  locales,
+  contentTypes,
+}) => {
   const [error, setError] = useState('');
   const locale = field.locale ? field.locale : locales.default;
 
@@ -94,6 +102,8 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange
             field={field}
             value={value as EntryLinkValue | EntryLinkValue[] | null | undefined}
             onChange={onChange}
+            contentTypes={contentTypes}
+            defaultLocale={locales.default}
           />
         );
       }

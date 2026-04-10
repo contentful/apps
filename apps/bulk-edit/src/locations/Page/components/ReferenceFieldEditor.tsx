@@ -2,14 +2,17 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Button, Flex, Text } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import type { PageAppSDK } from '@contentful/app-sdk';
-import type { Entry } from 'contentful-management';
+import type { ContentTypeProps, Entry } from 'contentful-management';
 import type { ContentTypeField, EntryLinkValue } from '../types';
-import { getEntryLinkIds, getReferenceDisplayValue } from '../utils/entryUtils';
+import { getEntryLinkIds, getEntryTitle, getReferenceDisplayValue } from '../utils/entryUtils';
+import { API_LIMITS } from '../utils/constants';
 
 interface ReferenceFieldEditorProps {
   field: ContentTypeField;
   value: EntryLinkValue | EntryLinkValue[] | null | undefined;
   onChange: (value: EntryLinkValue | EntryLinkValue[] | null) => void;
+  contentTypes?: ContentTypeProps[];
+  defaultLocale?: string;
 }
 
 const createEntryLinkValue = (entryId: string): EntryLinkValue => ({
@@ -35,26 +38,15 @@ const isEntryReferenceField = (field: ContentTypeField) =>
       field.validations.some((validation) => Array.isArray(validation.linkContentType)))) ||
   (field.type === 'Array' && field.items?.type === 'Link' && field.items?.linkType === 'Entry');
 
-const getEntryDisplayLabel = (entry: Entry): string => {
-  const firstField = Object.values(entry.fields || {}).find(
-    (localizedFieldValue) =>
-      localizedFieldValue &&
-      typeof localizedFieldValue === 'object' &&
-      Object.keys(localizedFieldValue).length > 0
-  ) as Record<string, unknown> | undefined;
-
-  const firstLocalizedValue = firstField ? Object.values(firstField)[0] : undefined;
-  return typeof firstLocalizedValue === 'string' && firstLocalizedValue.trim() !== ''
-    ? firstLocalizedValue
-    : entry.sys.id;
-};
-
 export const ReferenceFieldEditor: React.FC<ReferenceFieldEditorProps> = ({
   field,
   value,
   onChange,
+  contentTypes = [],
+  defaultLocale,
 }) => {
   const sdk = useSDK<PageAppSDK>();
+  const locale = defaultLocale || sdk.locales.default;
   const [selectionLabel, setSelectionLabel] = useState<string>('');
   const [referenceDisplayValues, setReferenceDisplayValues] = useState<Record<string, string>>({});
   const allowedContentTypes = useMemo(() => getLinkContentTypes(field), [field]);
@@ -70,37 +62,40 @@ export const ReferenceFieldEditor: React.FC<ReferenceFieldEditorProps> = ({
     }
 
     let isMounted = true;
+    const contentTypeMap = new Map(contentTypes.map((ct) => [ct.sys.id, ct]));
 
     const loadReferenceTitles = async () => {
-      const entries = await Promise.all(
-        referenceIds.map(async (entryId) => {
-          try {
-            const entry = await sdk.cma.entry.get({
-              spaceId: sdk.ids.space,
-              environmentId: sdk.ids.environment,
-              entryId,
-            });
+      try {
+        const linkedEntries: Entry[] = [];
 
-            return entry || null;
-          } catch {
-            return null;
-          }
-        })
-      );
-
-      if (!isMounted) {
-        return;
-      }
-
-      const labels = entries.reduce<Record<string, string>>((acc, entry, index) => {
-        if (entry) {
-          acc[referenceIds[index]] = getEntryDisplayLabel(entry as Entry);
+        for (let i = 0; i < referenceIds.length; i += API_LIMITS.CORS_QUERY_PARAM_LIMIT) {
+          const chunk = referenceIds.slice(i, i + API_LIMITS.CORS_QUERY_PARAM_LIMIT);
+          const response = await sdk.cma.entry.getMany({
+            spaceId: sdk.ids.space,
+            environmentId: sdk.ids.environment,
+            query: { 'sys.id[in]': chunk.join(','), limit: chunk.length },
+          });
+          linkedEntries.push(...((response.items as Entry[]) || []));
         }
 
-        return acc;
-      }, {});
+        if (!isMounted) {
+          return;
+        }
 
-      setReferenceDisplayValues(labels);
+        const labels = Object.fromEntries(
+          linkedEntries.map((entry) => {
+            const ct = contentTypeMap.get(entry.sys.contentType.sys.id);
+            const label = ct ? getEntryTitle(entry as any, ct, locale) : entry.sys.id;
+            return [entry.sys.id, label];
+          })
+        );
+
+        setReferenceDisplayValues(labels);
+      } catch {
+        if (isMounted) {
+          setReferenceDisplayValues({});
+        }
+      }
     };
 
     void loadReferenceTitles();
@@ -108,7 +103,7 @@ export const ReferenceFieldEditor: React.FC<ReferenceFieldEditorProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [sdk, value]);
+  }, [sdk, value, contentTypes, locale]);
 
   if (!isEntryReferenceField(field)) {
     return null;
@@ -127,9 +122,25 @@ export const ReferenceFieldEditor: React.FC<ReferenceFieldEditorProps> = ({
     return 'No content selected';
   };
 
+  const getLabel = (entry: Entry): string => {
+    const ctId = entry.sys.contentType?.sys?.id;
+    const ct = ctId ? contentTypeMap.get(ctId) : undefined;
+    if (ct) {
+      return getEntryTitle(entry as any, ct, locale);
+    }
+    // Fallback: use the first non-empty string field value
+    const firstField = Object.values(entry.fields || {}).find(
+      (v) => v && typeof v === 'object' && Object.keys(v).length > 0
+    ) as Record<string, unknown> | undefined;
+    const firstValue = firstField ? Object.values(firstField)[0] : undefined;
+    return typeof firstValue === 'string' && firstValue.trim() !== '' ? firstValue : entry.sys.id;
+  };
+
+  const contentTypeMap = new Map(contentTypes.map((ct) => [ct.sys.id, ct]));
+
   const selectSingleEntry = async () => {
     const entry = (await sdk.dialogs.selectSingleEntry({
-      locale: sdk.locales.default,
+      locale,
       ...(allowedContentTypes && allowedContentTypes.length > 0
         ? { contentTypes: allowedContentTypes }
         : {}),
@@ -139,13 +150,13 @@ export const ReferenceFieldEditor: React.FC<ReferenceFieldEditorProps> = ({
       return;
     }
 
-    setSelectionLabel(getEntryDisplayLabel(entry));
+    setSelectionLabel(getLabel(entry));
     onChange(createEntryLinkValue(entry.sys.id));
   };
 
   const selectMultipleEntries = async () => {
     const entries = (await sdk.dialogs.selectMultipleEntries({
-      locale: sdk.locales.default,
+      locale,
       ...(allowedContentTypes && allowedContentTypes.length > 0
         ? { contentTypes: allowedContentTypes }
         : {}),
@@ -155,7 +166,7 @@ export const ReferenceFieldEditor: React.FC<ReferenceFieldEditorProps> = ({
       return;
     }
 
-    const entryLabels = entries.map(getEntryDisplayLabel);
+    const entryLabels = entries.map(getLabel);
     setSelectionLabel(
       entryLabels.length === 1 ? entryLabels[0] : `${entryLabels.length} entries selected`
     );

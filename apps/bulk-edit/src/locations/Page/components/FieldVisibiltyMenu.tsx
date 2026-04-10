@@ -42,11 +42,12 @@ export const FieldVisibiltyMenu = ({
               )
             }
             onClick={() => {
-              if (selectedColumns.some((c) => c.value === field.value)) {
-                setSelectedColumns(selectedColumns.filter((c) => c.value !== field.value));
-              } else {
-                setSelectedColumns([...selectedColumns, field]);
-              }
+              const allFields = getFieldsMapped(fields);
+              const next = selectedColumns.some((c) => c.value === field.value)
+                ? selectedColumns.filter((c) => c.value !== field.value)
+                : [...selectedColumns, field];
+              // Re-sort to preserve content-type field order
+              setSelectedColumns(allFields.filter((f) => next.some((c) => c.value === f.value)));
             }}>
             {field.label}
           </Menu.Item>
