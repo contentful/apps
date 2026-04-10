@@ -13,6 +13,7 @@ describe('mappingCardPositioning', () => {
         blockId: 'block-1',
         start: 0,
         end: 5,
+        flattenedRuns: [],
       })
     ).toBe('block:block-1');
 

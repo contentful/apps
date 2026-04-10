@@ -1,16 +1,15 @@
 import { useRef, useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { Layout } from '@contentful/f36-components';
+import { Button, Layout } from '@contentful/f36-components';
 import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
 } from './components/mainpage/ModalOrchestrator';
 import { MainPageView } from './components/mainpage/MainPageView';
-import { PreviewPageView } from './components/mainpage/PreviewPageView';
-import { MappingReviewSuspendPayload, PreviewPayload } from '@types';
-import { isMappingReviewSuspendPayload } from '../../utils/utils';
+import { MappingReviewPage } from './components/mainpage/MappingReviewPage';
 import fixtureReviewPayload from '../../fixtures/googleDocsReview/fixture.json';
+import type { MappingReviewSuspendPayload, PreviewPayload } from '@types';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -18,9 +17,9 @@ const Page = () => {
   const [oauthToken, setOauthToken] = useState<string>('');
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
   const [isOAuthLoading, setIsOAuthLoading] = useState(true);
-  const [previewPayload, setPreviewPayload] = useState<
-    PreviewPayload | MappingReviewSuspendPayload | null
-  >(null);
+  const [previewPayload, setPreviewPayload] = useState<PreviewPayload | null>(null);
+  const [mappingReviewPayload, setMappingReviewPayload] =
+    useState<MappingReviewSuspendPayload | null>(null);
 
   const handleOauthTokenChange = (token: string) => {
     setOauthToken(token);
@@ -43,50 +42,53 @@ const Page = () => {
   };
 
   const handleMappingReviewReady = (payload: MappingReviewSuspendPayload) => {
-    setPreviewPayload(payload);
+    setMappingReviewPayload(payload);
   };
 
   const handleReturnToMainPage = () => {
     setPreviewPayload(null);
+    setMappingReviewPayload(null);
   };
 
   const handleResumeMappingReview = async () => {
-    if (!previewPayload || !isMappingReviewSuspendPayload(previewPayload)) {
+    if (!mappingReviewPayload) {
       return;
     }
 
-    try {
-      await modalOrchestratorRef.current?.resumeMappingReview(previewPayload);
-    } catch (error) {
-      console.error('Failed to resume mapping review:', error);
-      sdk.notifier.error('Unable to resume preview. Please try again.');
-    }
+    await modalOrchestratorRef.current?.resumeMappingReview(mappingReviewPayload);
   };
+
+  const activePreviewPayload = mappingReviewPayload ?? previewPayload;
 
   return (
     <>
       <Layout withBoxShadow={true} offsetTop={10}>
-        {previewPayload ? (
-          <PreviewPageView
-            payload={previewPayload}
+        {activePreviewPayload ? (
+          <MappingReviewPage
+            payload={activePreviewPayload}
             oauthToken={oauthToken}
-            onLeavePreview={handleReturnToMainPage}
+            onLeaveReview={handleReturnToMainPage}
             onResumeMappingReview={handleResumeMappingReview}
           />
         ) : (
-          <MainPageView
-            oauthToken={oauthToken}
-            isOAuthConnected={isOAuthConnected}
-            isOAuthLoading={isOAuthLoading}
-            onOAuthConnectedChange={handleOAuthConnectedChange}
-            onOauthTokenChange={handleOauthTokenChange}
-            onLoadingStateChange={handleOAuthLoadingStateChange}
-            onSelectFile={handleSelectFile}
-            onUseFixturePreview={() =>
-              setPreviewPayload(fixtureReviewPayload as MappingReviewSuspendPayload)
-            }
-            sdk={sdk}
-          />
+          <>
+            <Button
+              onClick={() =>
+                setMappingReviewPayload(fixtureReviewPayload as MappingReviewSuspendPayload)
+              }>
+              Mock from fixture
+            </Button>
+            <MainPageView
+              oauthToken={oauthToken}
+              isOAuthConnected={isOAuthConnected}
+              isOAuthLoading={isOAuthLoading}
+              onOAuthConnectedChange={handleOAuthConnectedChange}
+              onOauthTokenChange={handleOauthTokenChange}
+              onLoadingStateChange={handleOAuthLoadingStateChange}
+              onSelectFile={handleSelectFile}
+              sdk={sdk}
+            />
+          </>
         )}
       </Layout>
 

@@ -12,9 +12,9 @@ import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 import {
   DocumentTabProps,
   MappingReviewSuspendPayload,
+  PreviewPayload,
   ResumePayload,
   TabsImagesSuspendPayload,
-  PreviewPayload,
   RunStatus,
   WorkflowRunResult,
 } from '@types';
@@ -24,8 +24,8 @@ import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
-  /** Clears in-progress flow state without calling `onResetToMain` (parent clears preview separately). */
-  resetFlowState: () => void;
+  /** Clears in-progress flow state and returns the page to the main state. */
+  resetFlowFromPreviewCancel: () => void;
   resumeMappingReview: (payload: MappingReviewSuspendPayload) => Promise<void>;
 }
 
@@ -68,7 +68,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
     useImperativeHandle(ref, () => ({
       startFlow: () => setIsUploadModalOpen(true),
-      resetFlowState: () => {
+      resetFlowFromPreviewCancel: () => {
         resetProgress();
         onResetToMain();
       },
@@ -173,7 +173,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       }
 
       onPreviewReady(workflowRun.googleDocPayload);
-      setFlowStep(null);
     };
 
     const continueWorkflow = async (resumePayloadOverrides?: Partial<ResumePayload>) => {

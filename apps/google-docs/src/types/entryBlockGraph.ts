@@ -6,7 +6,7 @@ export type EntryBlockGraphTextSourceRef =
       blockId: string;
       start: number;
       end: number;
-      flattenedRuns?: NormalizedDocumentFlattenedRun[];
+      flattenedRuns: NormalizedDocumentFlattenedRun[];
     }
   | {
       kind: 'tableText';
@@ -16,7 +16,7 @@ export type EntryBlockGraphTextSourceRef =
       partId: string;
       start: number;
       end: number;
-      flattenedRuns?: NormalizedDocumentFlattenedRun[];
+      flattenedRuns: NormalizedDocumentFlattenedRun[];
     };
 
 export type EntryBlockGraphImageSourceRef =

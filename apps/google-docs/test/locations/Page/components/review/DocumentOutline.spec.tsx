@@ -3,7 +3,7 @@ import tokens from '@contentful/f36-tokens';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { DocumentOutline } from '../../../../../src/locations/Page/components/review/DocumentOutline';
-import type { MappingReviewSuspendPayload } from '@types';
+import type { MappingReviewSuspendPayload, NormalizedDocumentContentBlock } from '@types';
 
 function buildFixture(): MappingReviewSuspendPayload {
   const normalizedDocument = {
@@ -17,6 +17,7 @@ function buildFixture(): MappingReviewSuspendPayload {
         type: 'heading' as const,
         headingLevel: 1,
         textRuns: [{ text: 'Overview', styles: {} }],
+        flattenedTextRuns: [{ text: 'Overview', start: 0, end: 8, styles: {} }],
         designValueIds: [],
         imageIds: [],
       },
@@ -26,7 +27,11 @@ function buildFixture(): MappingReviewSuspendPayload {
         type: 'paragraph' as const,
         textRuns: [
           { text: 'Body ', styles: {} },
-          { text: 'paragraph', styles: { bold: true } },
+          { text: 'paragraph', styles: { bold: true as const } },
+        ],
+        flattenedTextRuns: [
+          { text: 'Body ', start: 0, end: 5, styles: {} },
+          { text: 'paragraph', start: 5, end: 14, styles: { bold: true as const } },
         ],
         designValueIds: [],
         imageIds: [],
@@ -37,6 +42,7 @@ function buildFixture(): MappingReviewSuspendPayload {
         type: 'heading' as const,
         headingLevel: 2,
         textRuns: [{ text: 'Unmapped section', styles: {} }],
+        flattenedTextRuns: [{ text: 'Unmapped section', start: 0, end: 16, styles: {} }],
         designValueIds: [],
         imageIds: [],
       },
@@ -45,6 +51,9 @@ function buildFixture(): MappingReviewSuspendPayload {
         position: 4,
         type: 'paragraph' as const,
         textRuns: [{ text: 'This section has no mappings.', styles: {} }],
+        flattenedTextRuns: [
+          { text: 'This section has no mappings.', start: 0, end: 29, styles: {} },
+        ],
         designValueIds: [],
         imageIds: [],
       },
@@ -53,6 +62,7 @@ function buildFixture(): MappingReviewSuspendPayload {
         position: 5,
         type: 'listItem' as const,
         textRuns: [{ text: 'First step', styles: {} }],
+        flattenedTextRuns: [{ text: 'First step', start: 0, end: 10, styles: {} }],
         designValueIds: [],
         imageIds: [],
         bullet: {
@@ -65,6 +75,7 @@ function buildFixture(): MappingReviewSuspendPayload {
         position: 6,
         type: 'listItem' as const,
         textRuns: [{ text: 'Nested detail', styles: {} }],
+        flattenedTextRuns: [{ text: 'Nested detail', start: 0, end: 13, styles: {} }],
         designValueIds: [],
         imageIds: [],
         bullet: {
@@ -77,6 +88,7 @@ function buildFixture(): MappingReviewSuspendPayload {
         position: 7,
         type: 'listItem' as const,
         textRuns: [{ text: 'Second step', styles: {} }],
+        flattenedTextRuns: [{ text: 'Second step', start: 0, end: 11, styles: {} }],
         designValueIds: [],
         imageIds: [],
         bullet: {
@@ -109,6 +121,7 @@ function buildFixture(): MappingReviewSuspendPayload {
                     id: 'table-0-row-0-cell-0-part-0',
                     type: 'text' as const,
                     textRuns: [{ text: 'Header image', styles: {} }],
+                    flattenedTextRuns: [{ text: 'Header image', start: 0, end: 12, styles: {} }],
                   },
                 ],
               },
@@ -119,6 +132,7 @@ function buildFixture(): MappingReviewSuspendPayload {
                     id: 'table-0-row-0-cell-1-part-0',
                     type: 'text' as const,
                     textRuns: [{ text: 'Left: Drupal ', styles: {} }],
+                    flattenedTextRuns: [{ text: 'Left: Drupal ', start: 0, end: 13, styles: {} }],
                   },
                   {
                     id: 'table-0-row-0-cell-1-part-1',
@@ -128,7 +142,15 @@ function buildFixture(): MappingReviewSuspendPayload {
                   {
                     id: 'table-0-row-0-cell-1-part-2',
                     type: 'text' as const,
-                    textRuns: [{ text: 'Right: Contentful', styles: { bold: true } }],
+                    textRuns: [{ text: 'Right: Contentful', styles: { bold: true as const } }],
+                    flattenedTextRuns: [
+                      {
+                        text: 'Right: Contentful',
+                        start: 0,
+                        end: 17,
+                        styles: { bold: true as const },
+                      },
+                    ],
                   },
                 ],
               },
@@ -164,7 +186,9 @@ function buildFixture(): MappingReviewSuspendPayload {
             {
               fieldId: 'body',
               fieldType: 'RichText',
-              sourceRefs: [{ kind: 'blockText', blockId: 'block-1', start: 0, end: 5 }],
+              sourceRefs: [
+                { kind: 'blockText', blockId: 'block-1', start: 0, end: 5, flattenedRuns: [] },
+              ],
               sourceEntryIds: [],
               confidence: 0.98,
             },
@@ -196,6 +220,7 @@ function buildFixture(): MappingReviewSuspendPayload {
                   partId: 'table-0-row-0-cell-1-part-2',
                   start: 0,
                   end: 18,
+                  flattenedRuns: [],
                 },
               ],
               sourceEntryIds: [],
@@ -225,9 +250,16 @@ describe('DocumentOutline', () => {
       },
     ];
 
-    fixture.normalizedDocument.contentBlocks[1].textRuns = linkedBlockRuns;
+    (fixture.normalizedDocument.contentBlocks[1] as NormalizedDocumentContentBlock).textRuns =
+      linkedBlockRuns;
+    (
+      fixture.normalizedDocument.contentBlocks[1] as NormalizedDocumentContentBlock
+    ).flattenedTextRuns = [
+      { text: 'Visit ', start: 0, end: 6, styles: {} },
+      { text: 'Contentful', start: 6, end: 16, styles: { linkUrl: 'https://www.contentful.com' } },
+    ];
     fixture.entryBlockGraph.entries[0].fieldMappings[0].sourceRefs = [
-      { kind: 'blockText', blockId: 'block-1', start: 0, end: 17 },
+      { kind: 'blockText', blockId: 'block-1', start: 0, end: 17, flattenedRuns: [] },
     ];
 
     const linkedTableRuns = [
@@ -241,6 +273,14 @@ describe('DocumentOutline', () => {
       id: 'table-0-row-0-cell-1-part-2',
       type: 'text',
       textRuns: linkedTableRuns,
+      flattenedTextRuns: [
+        {
+          text: 'View map',
+          start: 0,
+          end: 8,
+          styles: { linkUrl: 'https://maps.app.goo.gl/example' },
+        },
+      ],
     };
     fixture.entryBlockGraph.entries[0].fieldMappings[2].sourceRefs = [
       {
@@ -251,6 +291,7 @@ describe('DocumentOutline', () => {
         partId: 'table-0-row-0-cell-1-part-2',
         start: 0,
         end: 8,
+        flattenedRuns: [],
       },
     ];
 
@@ -269,7 +310,7 @@ describe('DocumentOutline', () => {
   it('renders highlighted block text spans from entryBlockGraph', () => {
     render(<DocumentOutline payload={buildFixture()} onBack={vi.fn()} />);
 
-    expect(screen.getByTestId('section-surface-section-block-0').getAttribute('style')).toBeNull();
+    expect(screen.getByTestId('segment-surface-block-0').getAttribute('style')).toBeNull();
     expect(screen.getByTestId('block-segment-block-1-0')).toHaveAttribute(
       'data-highlighted',
       'true'
@@ -280,7 +321,7 @@ describe('DocumentOutline', () => {
   it('renders mixed table cell text and image highlights independently', () => {
     render(<DocumentOutline payload={buildFixture()} onBack={vi.fn()} />);
 
-    expect(screen.getByTestId('section-surface-section-table-0').getAttribute('style')).toBeNull();
+    expect(screen.getByTestId('segment-surface-table-0').getAttribute('style')).toBeNull();
     expect(screen.queryByText(/^Table$/)).toBeNull();
     expect(screen.getByTestId('table-cell-table-0-row-0-cell-1').getAttribute('style')).toContain(
       'background-color: transparent'
@@ -302,7 +343,7 @@ describe('DocumentOutline', () => {
   it('syncs hover styling between mapping cards and their highlights', () => {
     render(<DocumentOutline payload={buildFixture()} onBack={vi.fn()} />);
 
-    const card = screen.getByTestId('mapping-card-section-table-0-0-imageCaption');
+    const card = screen.getByTestId('mapping-card-table-0-0-imageCaption');
     const textHighlight = screen.getByTestId('table-text-segment-table-0-row-0-cell-1-part-2-0');
 
     expect(card).toHaveStyle({ border: `1px solid ${tokens.green500}` });
@@ -339,9 +380,9 @@ describe('DocumentOutline', () => {
   it('renders field cards with the field type appended and no unmapped empty-state cards', () => {
     render(<DocumentOutline payload={buildFixture()} onBack={vi.fn()} />);
 
-    expect(screen.getByTestId('mapping-rail-section-block-0')).toHaveStyle({ maxWidth: '280px' });
+    expect(screen.getByTestId('mapping-rail-block-1')).toHaveStyle({ maxWidth: '280px' });
 
-    const card = screen.getByTestId('mapping-card-section-block-0-0-body');
+    const card = screen.getByTestId('mapping-card-block-1-0-body');
 
     expect(card).toHaveStyle({ backgroundColor: tokens.green100 });
     expect(card).toHaveStyle({ padding: tokens.spacing2Xs });
@@ -361,7 +402,9 @@ describe('DocumentOutline', () => {
         {
           fieldId: 'faqBody',
           fieldType: 'RichText',
-          sourceRefs: [{ kind: 'blockText', blockId: 'block-3', start: 0, end: 28 }],
+          sourceRefs: [
+            { kind: 'blockText', blockId: 'block-3', start: 0, end: 28, flattenedRuns: [] },
+          ],
           sourceEntryIds: [],
           confidence: 0.91,
         },
@@ -370,13 +413,13 @@ describe('DocumentOutline', () => {
 
     render(<DocumentOutline payload={fixture} onBack={vi.fn()} />);
 
-    expect(screen.getByTestId('mapping-card-section-block-0-0-body')).toBeTruthy();
-    expect(screen.getByTestId('mapping-card-section-block-2-1-faqBody')).toBeTruthy();
+    expect(screen.getByTestId('mapping-card-block-1-0-body')).toBeTruthy();
+    expect(screen.getByTestId('mapping-card-block-3-1-faqBody')).toBeTruthy();
 
     fireEvent.click(screen.getByTestId('entry-overview-card-page_2'));
 
-    expect(screen.queryByTestId('mapping-card-section-block-0-0-body')).toBeNull();
-    expect(screen.getByTestId('mapping-card-section-block-2-1-faqBody')).toBeTruthy();
+    expect(screen.queryByTestId('mapping-card-block-1-0-body')).toBeNull();
+    expect(screen.getByTestId('mapping-card-block-3-1-faqBody')).toBeTruthy();
   });
 
   it('positions mapping cards against measured document anchors', () => {
@@ -386,7 +429,7 @@ describe('DocumentOutline', () => {
       const anchorId = this.getAttribute('data-anchor-id');
       const testId = this.getAttribute('data-testid');
 
-      if (testId === 'section-layout-section-block-0') {
+      if (testId === 'segment-layout-block-1') {
         return {
           x: 0,
           y: 100,
@@ -400,7 +443,7 @@ describe('DocumentOutline', () => {
         };
       }
 
-      if (testId === 'section-layout-section-table-0') {
+      if (testId === 'segment-layout-table-0') {
         return {
           x: 0,
           y: 160,
@@ -457,10 +500,10 @@ describe('DocumentOutline', () => {
 
     render(<DocumentOutline payload={buildFixture()} onBack={vi.fn()} />);
 
-    expect(screen.getByTestId('mapping-card-position-section-block-0-0-body')).toHaveStyle({
+    expect(screen.getByTestId('mapping-card-position-block-1-0-body')).toHaveStyle({
       top: '80px',
     });
-    expect(screen.getByTestId('mapping-card-position-section-table-0-0-image')).toHaveStyle({
+    expect(screen.getByTestId('mapping-card-position-table-0-0-image')).toHaveStyle({
       top: '160px',
     });
   });

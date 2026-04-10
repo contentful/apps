@@ -8,7 +8,6 @@ import {
 } from 'react';
 import {
   Box,
-  Button,
   Card,
   Flex,
   Table,
@@ -21,37 +20,23 @@ import {
 } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import type {
-  EntryToCreate,
   EntryBlockGraph,
   EntryBlockGraphSourceRef,
   MappingReviewSuspendPayload,
   NormalizedDocumentContentBlock,
+  NormalizedDocumentFlattenedRun,
   NormalizedDocumentTable,
   NormalizedDocumentTablePart,
-  NormalizedDocumentTextRun,
-  PreviewPayload,
 } from '@types';
+import { FileTextIcon } from '@contentful/f36-icons';
 import { MappingCard, type MappingCardData } from './MappingCard';
 import { getAnchorIdForSourceRef, resolveMarkerOffsets } from './mappingCardPositioning';
-
-type PreviewDocumentOutlinePayload = PreviewPayload & {
-  entryBlockGraph: NonNullable<PreviewPayload['entryBlockGraph']>;
-};
+import { type DocSegment, type Tab, orderDocument } from './buildDocument';
 
 interface DocumentOutlineProps {
-  payload: MappingReviewSuspendPayload | PreviewDocumentOutlinePayload;
-  onBack?: () => void;
+  payload: MappingReviewSuspendPayload;
   showChrome?: boolean;
-}
-
-type DocSegment =
-  | { kind: 'block'; id: string; position: number; block: NormalizedDocumentContentBlock }
-  | { kind: 'table'; id: string; position: number; table: NormalizedDocumentTable };
-
-interface OutlineSection {
-  id: string;
-  title: string;
-  segments: DocSegment[];
+  onBack?: () => void;
 }
 
 interface SourceUsage {
@@ -67,7 +52,7 @@ type AnchoredMappingCard = MappingCardData & {
 
 type TextSegment = {
   text: string;
-  styles?: NormalizedDocumentTextRun['styles'];
+  styles?: NormalizedDocumentFlattenedRun['styles'];
   highlighted: boolean;
   mappingKeys: string[];
 };
@@ -76,12 +61,6 @@ type ListItemPresentation = {
   marker: string;
   nestingLevel: number;
 };
-
-const getBlockText = (block: NormalizedDocumentContentBlock): string =>
-  block.textRuns
-    .map((run) => run.text)
-    .join('')
-    .trim();
 
 const formatDisplayName = (value: string): string => {
   const normalized = value
@@ -95,21 +74,6 @@ const formatDisplayName = (value: string): string => {
   }
 
   return normalized.replace(/\b\w/g, (char) => char.toUpperCase());
-};
-
-const getEntryDisplayTitle = (entry: EntryToCreate): string => {
-  const titleField = entry.fields?.title;
-  if (typeof titleField !== 'object' || titleField === null) {
-    return formatDisplayName(entry.contentTypeId);
-  }
-
-  const localeValue = Object.values(titleField as Record<string, unknown>).find(
-    (value) => typeof value === 'string'
-  );
-
-  return typeof localeValue === 'string' && localeValue.trim().length > 0
-    ? localeValue
-    : formatDisplayName(entry.contentTypeId);
 };
 
 function buildUsageIndexes(entryBlockGraph: EntryBlockGraph): {
@@ -151,14 +115,8 @@ function buildUsageIndexes(entryBlockGraph: EntryBlockGraph): {
   return { blockUsage, tablePartUsage, tableUsage };
 }
 
-function hasPreviewEntries(
-  payload: MappingReviewSuspendPayload | PreviewDocumentOutlinePayload
-): payload is PreviewDocumentOutlinePayload {
-  return 'entries' in payload;
-}
-
-const getMappingCardKey = (sectionId: string, usage: SourceUsage): string =>
-  `${sectionId}-${usage.entryIndex}-${usage.fieldId}`;
+const getMappingCardKey = (segmentId: string, usage: SourceUsage): string =>
+  `${segmentId}-${usage.entryIndex}-${usage.fieldId}`;
 
 function uniqueUsage<T extends SourceUsage>(usage: T[]): T[] {
   const seen = new Set<string>();
@@ -173,9 +131,12 @@ function uniqueUsage<T extends SourceUsage>(usage: T[]): T[] {
 }
 
 function buildTextSegments(
-  textRuns: NormalizedDocumentTextRun[],
+  flattenedRuns: NormalizedDocumentFlattenedRun[],
   usage: Array<{ sourceRef: EntryBlockGraphSourceRef; mappingKey: string }>
 ): TextSegment[] {
+  console.log('flattenedRuns', flattenedRuns);
+  if (!flattenedRuns.length) return [];
+
   const textUsage = usage.filter(
     (
       usageItem
@@ -185,23 +146,11 @@ function buildTextSegments(
     } => usageItem.sourceRef.kind === 'blockText' || usageItem.sourceRef.kind === 'tableText'
   );
 
-  let fullText = '';
-  const runRanges: Array<{
-    start: number;
-    end: number;
-    styles?: NormalizedDocumentTextRun['styles'];
-  }> = [];
-
-  textRuns.forEach((run) => {
-    const start = fullText.length;
-    fullText += run.text;
-    runRanges.push({ start, end: fullText.length, styles: run.styles });
-  });
-
+  const fullText = flattenedRuns.map((run) => run.text).join('');
   const boundaries = new Set<number>([0, fullText.length]);
-  runRanges.forEach((range) => {
-    boundaries.add(range.start);
-    boundaries.add(range.end);
+  flattenedRuns.forEach((run) => {
+    boundaries.add(run.start);
+    boundaries.add(run.end);
   });
   textUsage.forEach(({ sourceRef }) => {
     boundaries.add(sourceRef.start);
@@ -221,7 +170,7 @@ function buildTextSegments(
       return [];
     }
 
-    const run = runRanges.find((range) => start >= range.start && end <= range.end);
+    const run = flattenedRuns.find((r) => start >= r.start && end <= r.end);
     const mappingKeys = textUsage
       .filter(({ sourceRef }) => start >= sourceRef.start && end <= sourceRef.end)
       .map(({ mappingKey }) => mappingKey);
@@ -237,7 +186,7 @@ function buildTextSegments(
   });
 }
 
-function getTextSegmentStyle(styles?: NormalizedDocumentTextRun['styles']): CSSProperties {
+function getTextSegmentStyle(styles?: NormalizedDocumentFlattenedRun['styles']): CSSProperties {
   return {
     fontWeight: styles?.bold ? 600 : undefined,
     fontStyle: styles?.italic ? 'italic' : undefined,
@@ -293,47 +242,6 @@ function renderTextSegment(
   );
 }
 
-function buildOutlineSections(segments: DocSegment[]): OutlineSection[] {
-  const sections: OutlineSection[] = [];
-  let currentSection: OutlineSection | null = null;
-
-  segments.forEach((segment) => {
-    if (segment.kind === 'table') {
-      sections.push({
-        id: `section-${segment.id}`,
-        title: 'Table',
-        segments: [segment],
-      });
-      currentSection = null;
-      return;
-    }
-
-    const isHeading = segment.block.type === 'heading' && getBlockText(segment.block).length > 0;
-    if (isHeading) {
-      currentSection = {
-        id: `section-${segment.id}`,
-        title: getBlockText(segment.block),
-        segments: [segment],
-      };
-      sections.push(currentSection);
-      return;
-    }
-
-    if (!currentSection) {
-      currentSection = {
-        id: `section-${segment.id}`,
-        title: getBlockText(segment.block) || 'Section',
-        segments: [],
-      };
-      sections.push(currentSection);
-    }
-
-    currentSection.segments.push(segment);
-  });
-
-  return sections;
-}
-
 function buildListItemPresentations(
   blocks: NormalizedDocumentContentBlock[]
 ): Record<string, ListItemPresentation> {
@@ -376,40 +284,25 @@ function buildListItemPresentations(
   return presentations;
 }
 
-export const DocumentOutline = ({ payload, onBack, showChrome = true }: DocumentOutlineProps) => {
+export const DocumentOutline = ({ payload, showChrome = true, onBack }: DocumentOutlineProps) => {
   const [selectedEntryIndex, setSelectedEntryIndex] = useState<number | null>(null);
   const [hoveredMappingKeys, setHoveredMappingKeys] = useState<string[]>([]);
-  const [cardOffsetsBySection, setCardOffsetsBySection] = useState<
+  const [cardOffsetsBySegment, setCardOffsetsBySegment] = useState<
     Record<string, Record<string, number>>
   >({});
-  const sectionLayoutRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const segmentLayoutRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const cardWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const document = payload.normalizedDocument;
-  const previewEntries = hasPreviewEntries(payload) ? payload.entries : undefined;
+
   const sourceUsage = useMemo(
     () => buildUsageIndexes(payload.entryBlockGraph),
     [payload.entryBlockGraph]
   );
 
-  const segments = useMemo<DocSegment[]>(() => {
-    const blockSegments: DocSegment[] = document.contentBlocks.map((block) => ({
-      kind: 'block',
-      id: block.id,
-      position: block.position,
-      block,
-    }));
-    const tableSegments: DocSegment[] = document.tables.map((table) => ({
-      kind: 'table',
-      id: table.id,
-      position: table.position,
-      table,
-    }));
+  const tabs = useMemo(() => orderDocument(document).tabs, [document]);
 
-    return [...blockSegments, ...tableSegments].sort((a, b) => a.position - b.position);
-  }, [document.contentBlocks, document.tables]);
-
-  const sections = useMemo(() => buildOutlineSections(segments), [segments]);
+  const allSegments = useMemo(() => tabs.flatMap((tab) => tab.segments), [tabs]);
 
   const imageById = useMemo(() => {
     const images = document.images ?? [];
@@ -420,25 +313,33 @@ export const DocumentOutline = ({ payload, onBack, showChrome = true }: Document
   }, [document.images]);
 
   const listItemPresentations = useMemo(
-    () => buildListItemPresentations(document.contentBlocks),
-    [document.contentBlocks]
+    () =>
+      buildListItemPresentations(
+        allSegments
+          .filter((seg): seg is Extract<DocSegment, { kind: 'block' }> => seg.kind === 'block')
+          .map((seg) => seg.block)
+      ),
+    [allSegments]
   );
+
   const overviewEntries = useMemo(
     () =>
       payload.entryBlockGraph.entries.map((graphEntry, entryIndex) => {
-        const entry = previewEntries?.[entryIndex];
-        const key =
-          entry?.tempId ?? graphEntry.tempId ?? `${graphEntry.contentTypeId}-${entryIndex}`;
+        const contentTypeName = payload.contentTypes.find(
+          (contentType) => contentType.sys.id === graphEntry.contentTypeId
+        )?.name;
+        const displayName = formatDisplayName(contentTypeName ?? graphEntry.contentTypeId);
+        const key = graphEntry.tempId ?? `${graphEntry.contentTypeId}-${entryIndex}`;
 
         return {
           key,
           entryIndex,
-          title: entry ? getEntryDisplayTitle(entry) : formatDisplayName(graphEntry.contentTypeId),
-          contentType: formatDisplayName(graphEntry.contentTypeId),
+          title: displayName,
+          contentType: displayName,
           mappingCount: graphEntry.fieldMappings.length,
         };
       }),
-    [payload.entryBlockGraph.entries, previewEntries]
+    [payload.contentTypes, payload.entryBlockGraph.entries]
   );
 
   const getVisibleUsage = <T extends SourceUsage>(usage: T[]): T[] => {
@@ -452,39 +353,34 @@ export const DocumentOutline = ({ payload, onBack, showChrome = true }: Document
     if (segment.kind === 'table') {
       return uniqueUsage(sourceUsage.tableUsage[segment.id] ?? []);
     }
-
     return uniqueUsage(sourceUsage.blockUsage[segment.id] ?? []);
   };
-
-  const getUsageForSection = (section: OutlineSection): SourceUsage[] =>
-    uniqueUsage(section.segments.flatMap(getUsageForSegment));
 
   const isMappingHovered = (mappingKeys: string[]) =>
     mappingKeys.some((mappingKey) => hoveredMappingKeys.includes(mappingKey));
 
-  const getMappingCardsForSection = (section: OutlineSection): AnchoredMappingCard[] =>
-    getVisibleUsage(getUsageForSection(section)).map((usage) => {
-      return {
-        key: getMappingCardKey(section.id, usage),
-        fieldName: formatDisplayName(usage.fieldId),
-        fieldType: formatDisplayName(usage.fieldType),
-        anchorId: getAnchorIdForSourceRef(usage.sourceRef),
-      };
-    });
+  const getMappingCardsForSegment = (segment: DocSegment): AnchoredMappingCard[] =>
+    getVisibleUsage(getUsageForSegment(segment)).map((usage) => ({
+      key: getMappingCardKey(segment.id, usage),
+      fieldName: formatDisplayName(usage.fieldId),
+      fieldType: formatDisplayName(usage.fieldType),
+      anchorId: getAnchorIdForSourceRef(usage.sourceRef),
+    }));
 
-  const mappingCardsBySection = useMemo(
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const mappingCardsBySegment = useMemo(
     () =>
-      sections.reduce<Record<string, AnchoredMappingCard[]>>((acc, section) => {
-        acc[section.id] = getMappingCardsForSection(section);
+      allSegments.reduce<Record<string, AnchoredMappingCard[]>>((acc, segment) => {
+        acc[segment.id] = getMappingCardsForSegment(segment);
         return acc;
       }, {}),
-    [sections, selectedEntryIndex, sourceUsage]
+    [allSegments, selectedEntryIndex, sourceUsage]
   );
 
-  const setSectionLayoutRef =
-    (sectionId: string): RefCallback<HTMLDivElement> =>
+  const setSegmentLayoutRef =
+    (segmentId: string): RefCallback<HTMLDivElement> =>
     (node) => {
-      sectionLayoutRefs.current[sectionId] = node;
+      segmentLayoutRefs.current[segmentId] = node;
     };
 
   const setCardWrapperRef =
@@ -497,41 +393,37 @@ export const DocumentOutline = ({ payload, onBack, showChrome = true }: Document
     const measureOffsets = () => {
       const nextOffsets: Record<string, Record<string, number>> = {};
 
-      sections.forEach((section) => {
-        const sectionNode = sectionLayoutRefs.current[section.id];
-        const sectionCards = mappingCardsBySection[section.id] ?? [];
+      allSegments.forEach((segment) => {
+        const segmentNode = segmentLayoutRefs.current[segment.id];
+        const segmentCards = mappingCardsBySegment[segment.id] ?? [];
 
-        if (!sectionNode || sectionCards.length === 0) {
+        if (!segmentNode || segmentCards.length === 0) {
           return;
         }
 
-        const sectionTop = sectionNode.getBoundingClientRect().top;
+        const segmentTop = segmentNode.getBoundingClientRect().top;
         const anchorNodes = Array.from(
-          sectionNode.querySelectorAll<HTMLElement>('[data-anchor-id]')
+          segmentNode.querySelectorAll<HTMLElement>('[data-anchor-id]')
         );
 
-        const cards = sectionCards.map((card) => {
+        const cards = segmentCards.map((card) => {
           const anchorNode = anchorNodes.find(
             (node) => node.getAttribute('data-anchor-id') === card.anchorId
           );
           const wrapperNode = cardWrapperRefs.current[card.key];
           const rawTop = anchorNode
-            ? Math.max(0, anchorNode.getBoundingClientRect().top - sectionTop)
+            ? Math.max(0, anchorNode.getBoundingClientRect().top - segmentTop)
             : 0;
           const height =
             wrapperNode?.getBoundingClientRect().height || wrapperNode?.offsetHeight || 28;
 
-          return {
-            key: card.key,
-            rawTop,
-            height,
-          };
+          return { key: card.key, rawTop, height };
         });
 
-        nextOffsets[section.id] = resolveMarkerOffsets(cards);
+        nextOffsets[segment.id] = resolveMarkerOffsets(cards);
       });
 
-      setCardOffsetsBySection(nextOffsets);
+      setCardOffsetsBySegment(nextOffsets);
     };
 
     measureOffsets();
@@ -540,29 +432,28 @@ export const DocumentOutline = ({ payload, onBack, showChrome = true }: Document
     return () => {
       window.removeEventListener('resize', measureOffsets);
     };
-  }, [mappingCardsBySection, sections]);
+  }, [mappingCardsBySegment, allSegments]);
 
-  const renderBlock = (sectionId: string, block: NormalizedDocumentContentBlock) => {
+  const renderBlock = (segmentId: string, block: NormalizedDocumentContentBlock) => {
     const visibleUsage = getVisibleUsage(sourceUsage.blockUsage[block.id] ?? []);
     const visibleRefs = visibleUsage.map((usage) => usage.sourceRef);
     const textUsage = visibleUsage.map((usage) => ({
       sourceRef: usage.sourceRef,
-      mappingKey: getMappingCardKey(sectionId, usage),
+      mappingKey: getMappingCardKey(segmentId, usage),
     }));
-    const segments = buildTextSegments(block.textRuns, textUsage);
+    console.log(block);
+    const textSegments = buildTextSegments(block.flattenedTextRuns, textUsage);
     const listItemPresentation = block.type === 'listItem' ? listItemPresentations[block.id] : null;
-    const setHoveredMappings = (mappingKeys: string[]) => {
-      setHoveredMappingKeys(mappingKeys);
-    };
+    const setHoveredMappings = (mappingKeys: string[]) => setHoveredMappingKeys(mappingKeys);
 
     const renderedText = (
       <Text as="p" marginBottom="none">
-        {segments.map((segment, index) => {
-          const hovered = isMappingHovered(segment.mappingKeys);
+        {textSegments.map((seg, index) => {
+          const hovered = isMappingHovered(seg.mappingKeys);
           return renderTextSegment(
             `${block.id}-${index}`,
             `block-segment-${block.id}-${index}`,
-            segment,
+            seg,
             hovered,
             setHoveredMappings
           );
@@ -600,7 +491,7 @@ export const DocumentOutline = ({ payload, onBack, showChrome = true }: Document
           renderedText
         )}
 
-        {block.imageIds.map((imageId) => {
+        {block.imageIds.map((imageId: string) => {
           const image = imageById[imageId];
           if (!image) return null;
           const highlighted = visibleRefs.some(
@@ -611,7 +502,7 @@ export const DocumentOutline = ({ payload, onBack, showChrome = true }: Document
               (usage) =>
                 usage.sourceRef.kind === 'blockImage' && usage.sourceRef.imageId === imageId
             )
-            .map((usage) => getMappingCardKey(sectionId, usage));
+            .map((usage) => getMappingCardKey(segmentId, usage));
           const hovered = isMappingHovered(mappingKeys);
 
           return (
@@ -644,7 +535,7 @@ export const DocumentOutline = ({ payload, onBack, showChrome = true }: Document
   };
 
   const renderTablePart = (
-    sectionId: string,
+    segmentId: string,
     table: NormalizedDocumentTable,
     rowId: string,
     cellId: string,
@@ -653,16 +544,14 @@ export const DocumentOutline = ({ payload, onBack, showChrome = true }: Document
     const usageKey = [table.id, rowId, cellId, part.id].join(':');
     const visibleUsage = getVisibleUsage(sourceUsage.tablePartUsage[usageKey] ?? []);
     const visibleRefs = visibleUsage.map((usage) => usage.sourceRef);
-    const setHoveredMappings = (mappingKeys: string[]) => {
-      setHoveredMappingKeys(mappingKeys);
-    };
+    const setHoveredMappings = (mappingKeys: string[]) => setHoveredMappingKeys(mappingKeys);
 
     if (part.type === 'image') {
       const image = imageById[part.imageId];
       const highlighted = visibleRefs.some((ref) => ref.kind === 'tableImage');
       const mappingKeys = visibleUsage
         .filter((usage) => usage.sourceRef.kind === 'tableImage')
-        .map((usage) => getMappingCardKey(sectionId, usage));
+        .map((usage) => getMappingCardKey(segmentId, usage));
       const hovered = isMappingHovered(mappingKeys);
 
       if (!image) {
@@ -698,18 +587,18 @@ export const DocumentOutline = ({ payload, onBack, showChrome = true }: Document
 
     const textUsage = visibleUsage.map((usage) => ({
       sourceRef: usage.sourceRef,
-      mappingKey: getMappingCardKey(sectionId, usage),
+      mappingKey: getMappingCardKey(segmentId, usage),
     }));
-    const segments = buildTextSegments(part.textRuns, textUsage);
+    const textSegments = buildTextSegments(part.flattenedTextRuns, textUsage);
 
     return (
       <Box as="span" style={{ whiteSpace: 'pre-wrap' }}>
-        {segments.map((segment, index) => {
-          const hovered = isMappingHovered(segment.mappingKeys);
+        {textSegments.map((seg, index) => {
+          const hovered = isMappingHovered(seg.mappingKeys);
           return renderTextSegment(
             `${part.id}-${index}`,
             `table-text-segment-${part.id}-${index}`,
-            segment,
+            seg,
             hovered,
             setHoveredMappings
           );
@@ -718,12 +607,12 @@ export const DocumentOutline = ({ payload, onBack, showChrome = true }: Document
     );
   };
 
-  const renderTable = (sectionId: string, table: NormalizedDocumentTable) => (
+  const renderTable = (segmentId: string, table: NormalizedDocumentTable) => (
     <Table>
       {table.headers.length > 0 && (
         <TableHead>
           <TableRow>
-            {table.headers.map((header, headerIndex) => (
+            {table.headers.map((header: string, headerIndex: number) => (
               <TableCell key={`${table.id}-header-${headerIndex}`}>{header}</TableCell>
             ))}
           </TableRow>
@@ -735,25 +624,20 @@ export const DocumentOutline = ({ payload, onBack, showChrome = true }: Document
             key={row.id}
             data-anchor-id={`row:${table.id}:${row.id}`}
             data-testid={`table-row-${row.id}`}>
-            {row.cells.map((cell) => {
-              return (
-                <TableCell
-                  key={cell.id}
-                  data-testid={`table-cell-${cell.id}`}
-                  style={{
-                    backgroundColor: 'transparent',
-                    verticalAlign: 'top',
-                  }}>
-                  <Flex flexDirection="column" gap="spacing2Xs">
-                    {cell.parts.map((part) => (
-                      <Box key={part.id}>
-                        {renderTablePart(sectionId, table, row.id, cell.id, part)}
-                      </Box>
-                    ))}
-                  </Flex>
-                </TableCell>
-              );
-            })}
+            {row.cells.map((cell) => (
+              <TableCell
+                key={cell.id}
+                data-testid={`table-cell-${cell.id}`}
+                style={{ backgroundColor: 'transparent', verticalAlign: 'top' }}>
+                <Flex flexDirection="column" gap="spacing2Xs">
+                  {cell.parts.map((part) => (
+                    <Box key={part.id}>
+                      {renderTablePart(segmentId, table, row.id, cell.id, part)}
+                    </Box>
+                  ))}
+                </Flex>
+              </TableCell>
+            ))}
           </TableRow>
         ))}
       </TableBody>
@@ -762,139 +646,106 @@ export const DocumentOutline = ({ payload, onBack, showChrome = true }: Document
 
   return (
     <Flex flexDirection="column" gap="spacingM" style={{ padding: tokens.spacingL }}>
-      {showChrome ? (
-        <Flex justifyContent="space-between" alignItems="center">
-          <Text fontWeight="fontWeightDemiBold">Google Docs Mapping Review</Text>
-          {onBack ? (
-            <Button variant="secondary" size="small" onClick={onBack}>
-              Back
-            </Button>
-          ) : null}
-        </Flex>
-      ) : null}
-
-      <Card
-        padding="default"
-        style={{
-          border: `1px solid ${tokens.gray300}`,
-        }}>
-        <Flex flexDirection="column" gap="spacingS">
-          <Box>
-            <Text fontWeight="fontWeightDemiBold">Overview</Text>
-            <Text as="p" fontColor="gray600" marginBottom="none">
-              Select an entry card to focus the document outline on that entry&apos;s mappings.
-            </Text>
-          </Box>
-
-          <Flex gap="spacingS" flexWrap="wrap">
-            <Box
-              as="button"
-              type="button"
-              data-testid="entry-overview-card-all"
-              aria-pressed={selectedEntryIndex === null}
-              onClick={() => setSelectedEntryIndex(null)}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: tokens.spacing2Xs,
-                minWidth: 220,
-                padding: tokens.spacingM,
-                borderRadius: tokens.borderRadiusMedium,
-                border: `1px solid ${
-                  selectedEntryIndex === null ? tokens.green500 : tokens.gray300
-                }`,
-                backgroundColor: selectedEntryIndex === null ? tokens.green100 : tokens.colorWhite,
-                textAlign: 'left',
-                cursor: 'pointer',
-              }}>
-              <Text fontWeight="fontWeightDemiBold">All mappings</Text>
-              <Text as="span" fontColor="gray600">
-                Show every mapped entry in the document outline.
+      {showChrome && (
+        <Card padding="default" style={{ border: `1px solid ${tokens.gray300}` }}>
+          <Flex flexDirection="column" gap="spacingS">
+            <Box>
+              <Text fontWeight="fontWeightDemiBold">Overview</Text>
+              <Text as="p" fontColor="gray600" marginBottom="none">
+                Select an entry card to focus the document outline on that entry&apos;s mappings.
               </Text>
             </Box>
 
-            {overviewEntries.map((entry) => {
-              const isSelected = selectedEntryIndex === entry.entryIndex;
+            <Flex gap="spacingS" flexWrap="wrap">
+              <Box
+                as="button"
+                type="button"
+                data-testid="entry-overview-card-all"
+                aria-pressed={selectedEntryIndex === null}
+                onClick={() => setSelectedEntryIndex(null)}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: tokens.spacing2Xs,
+                  minWidth: 220,
+                  padding: tokens.spacingM,
+                  borderRadius: tokens.borderRadiusMedium,
+                  border: `1px solid ${
+                    selectedEntryIndex === null ? tokens.green500 : tokens.gray300
+                  }`,
+                  backgroundColor:
+                    selectedEntryIndex === null ? tokens.green100 : tokens.colorWhite,
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                }}>
+                <Text fontWeight="fontWeightDemiBold">All mappings</Text>
+                <Text as="span" fontColor="gray600">
+                  Show every mapped entry in the document outline.
+                </Text>
+              </Box>
 
-              return (
-                <Box
-                  as="button"
-                  key={entry.key}
-                  type="button"
-                  data-testid={`entry-overview-card-${entry.key}`}
-                  aria-pressed={isSelected}
-                  onClick={() => setSelectedEntryIndex(entry.entryIndex)}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: tokens.spacing2Xs,
-                    minWidth: 220,
-                    padding: tokens.spacingM,
-                    borderRadius: tokens.borderRadiusMedium,
-                    border: `1px solid ${isSelected ? tokens.green500 : tokens.gray300}`,
-                    backgroundColor: isSelected ? tokens.green100 : tokens.colorWhite,
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                  }}>
-                  <Text fontWeight="fontWeightDemiBold">{entry.title}</Text>
-                  <Text as="span" fontColor="gray600">
-                    {entry.contentType} | {entry.mappingCount} mapping
-                    {entry.mappingCount === 1 ? '' : 's'}
-                  </Text>
-                </Box>
-              );
-            })}
+              {overviewEntries.map((entry) => {
+                const isSelected = selectedEntryIndex === entry.entryIndex;
+                return (
+                  <Box
+                    as="button"
+                    key={entry.key}
+                    type="button"
+                    data-testid={`entry-overview-card-${entry.key}`}
+                    aria-pressed={isSelected}
+                    onClick={() => setSelectedEntryIndex(entry.entryIndex)}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: tokens.spacing2Xs,
+                      minWidth: 220,
+                      padding: tokens.spacingM,
+                      borderRadius: tokens.borderRadiusMedium,
+                      border: `1px solid ${isSelected ? tokens.green500 : tokens.gray300}`,
+                      backgroundColor: isSelected ? tokens.green100 : tokens.colorWhite,
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                    }}>
+                    <Text fontWeight="fontWeightDemiBold">{entry.title}</Text>
+                    <Text as="span" fontColor="gray600">
+                      {entry.contentType} | {entry.mappingCount} mapping
+                      {entry.mappingCount === 1 ? '' : 's'}
+                    </Text>
+                  </Box>
+                );
+              })}
+            </Flex>
           </Flex>
-        </Flex>
-      </Card>
+        </Card>
+      )}
 
-      <Card
-        padding="none"
-        style={{
-          minHeight: '70vh',
-          overflow: 'auto',
-          border: `1px solid ${tokens.gray300}`,
-        }}>
-        <Box padding="spacingM" style={{ borderBottom: `1px solid ${tokens.gray300}` }}>
-          <Text fontWeight="fontWeightDemiBold">Document outline</Text>
-          <Text as="p" fontColor="gray600" marginBottom="none">
-            {document.title ?? document.documentId}
-          </Text>
-          <Text as="p" fontColor="gray600" marginBottom="none">
-            {selectedEntryIndex === null
-              ? 'Showing mappings for all entries.'
-              : `Showing mappings for ${
-                  overviewEntries[selectedEntryIndex]?.title ?? 'selected entry'
-                }.`}
-          </Text>
-        </Box>
+      <Flex
+        flexDirection="column"
+        gap="spacingS"
+        style={{ padding: tokens.spacingM, marginTop: tokens.spacingM }}>
+        {tabs.map((tab) => (
+          <Box key={tab.id}>
+            {tab.name && (
+              <Flex alignItems="center" gap="spacingXs">
+                <FileTextIcon />
+                <Text fontWeight="fontWeightDemiBold">{tab.name}</Text>
+              </Flex>
+            )}
 
-        <Flex
-          flexDirection="column"
-          gap="spacingS"
-          style={{ padding: tokens.spacingM, marginTop: tokens.spacingM }}>
-          {sections.map((section) => {
-            const visibleUsage = getVisibleUsage(getUsageForSection(section));
-            const mappingCards = getMappingCardsForSection(section);
-            const isMapped = visibleUsage.length > 0;
-            const isTableSection = section.segments.every((segment) => segment.kind === 'table');
+            <Flex flexDirection="column" gap="spacingS">
+              {tab.segments.map((segment) => {
+                const mappingCards = mappingCardsBySegment[segment.id] ?? [];
 
-            return (
-              <Box key={section.id}>
-                <Flex
-                  gap="spacingM"
-                  alignItems="stretch"
-                  data-testid={`section-layout-${section.id}`}
-                  ref={setSectionLayoutRef(section.id)}>
-                  <Box style={{ flex: 2 }}>
-                    <Box data-testid={`section-surface-${section.id}`}>
-                      <Flex
-                        flexDirection="column"
-                        gap="spacingXs"
-                        marginTop={isTableSection ? 'none' : 'spacingXs'}>
-                        {section.segments.map((segment) => (
+                return (
+                  <Box key={segment.id}>
+                    <Flex
+                      gap="spacingM"
+                      alignItems="stretch"
+                      data-testid={`segment-layout-${segment.id}`}
+                      ref={setSegmentLayoutRef(segment.id)}>
+                      <Box style={{ flex: 2 }}>
+                        <Box data-testid={`segment-surface-${segment.id}`}>
                           <Box
-                            key={`${segment.kind}-${segment.id}`}
                             data-anchor-id={
                               segment.kind === 'block' ? `block:${segment.block.id}` : undefined
                             }
@@ -909,47 +760,47 @@ export const DocumentOutline = ({ payload, onBack, showChrome = true }: Document
                               backgroundColor: 'transparent',
                             }}>
                             {segment.kind === 'table'
-                              ? renderTable(section.id, segment.table)
-                              : renderBlock(section.id, segment.block)}
+                              ? renderTable(segment.id, segment.table)
+                              : renderBlock(segment.id, segment.block)}
                           </Box>
-                        ))}
-                      </Flex>
-                    </Box>
-                  </Box>
+                        </Box>
+                      </Box>
 
-                  <Box
-                    data-testid={`mapping-rail-${section.id}`}
-                    style={{ flex: '0 0 280px', maxWidth: 280, position: 'relative' }}>
-                    <Box style={{ position: 'relative', minHeight: '100%' }}>
-                      {mappingCards.length > 0
-                        ? mappingCards.map((mappingCard) => (
-                            <Box
-                              key={mappingCard.key}
-                              data-testid={`mapping-card-position-${mappingCard.key}`}
-                              ref={setCardWrapperRef(mappingCard.key)}
-                              style={{
-                                position: 'absolute',
-                                insetInlineStart: 0,
-                                insetInlineEnd: 0,
-                                top: cardOffsetsBySection[section.id]?.[mappingCard.key] ?? 0,
-                              }}>
-                              <MappingCard
-                                card={mappingCard}
-                                isHovered={hoveredMappingKeys.includes(mappingCard.key)}
-                                onMouseEnter={() => setHoveredMappingKeys([mappingCard.key])}
-                                onMouseLeave={() => setHoveredMappingKeys([])}
-                              />
-                            </Box>
-                          ))
-                        : null}
-                    </Box>
+                      <Box
+                        data-testid={`mapping-rail-${segment.id}`}
+                        style={{ flex: '0 0 280px', maxWidth: 280, position: 'relative' }}>
+                        <Box style={{ position: 'relative', minHeight: '100%' }}>
+                          {mappingCards.length > 0
+                            ? mappingCards.map((mappingCard) => (
+                                <Box
+                                  key={mappingCard.key}
+                                  data-testid={`mapping-card-position-${mappingCard.key}`}
+                                  ref={setCardWrapperRef(mappingCard.key)}
+                                  style={{
+                                    position: 'absolute',
+                                    insetInlineStart: 0,
+                                    insetInlineEnd: 0,
+                                    top: cardOffsetsBySegment[segment.id]?.[mappingCard.key] ?? 0,
+                                  }}>
+                                  <MappingCard
+                                    card={mappingCard}
+                                    isHovered={hoveredMappingKeys.includes(mappingCard.key)}
+                                    onMouseEnter={() => setHoveredMappingKeys([mappingCard.key])}
+                                    onMouseLeave={() => setHoveredMappingKeys([])}
+                                  />
+                                </Box>
+                              ))
+                            : null}
+                        </Box>
+                      </Box>
+                    </Flex>
                   </Box>
-                </Flex>
-              </Box>
-            );
-          })}
-        </Flex>
-      </Card>
+                );
+              })}
+            </Flex>
+          </Box>
+        ))}
+      </Flex>
     </Flex>
   );
 };

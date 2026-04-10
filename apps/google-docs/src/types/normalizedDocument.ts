@@ -16,6 +16,13 @@ export interface NormalizedDocumentFlattenedRun extends NormalizedDocumentTextRu
   end: number;
 }
 
+export interface NormalizedDocumentTabBlock {
+  id: string;
+  position: number;
+  type: 'tab';
+  name: string;
+}
+
 export interface NormalizedDocumentContentBlock {
   id: string;
   position: number;
@@ -26,17 +33,19 @@ export interface NormalizedDocumentContentBlock {
     ordered: boolean;
   };
   textRuns: NormalizedDocumentTextRun[];
-  flattenedTextRuns?: NormalizedDocumentFlattenedRun[];
+  flattenedTextRuns: NormalizedDocumentFlattenedRun[];
   designValueIds: string[];
   imageIds: string[];
   captionForImageId?: string;
 }
 
+export type NormalizedDocumentBlock = NormalizedDocumentContentBlock | NormalizedDocumentTabBlock;
+
 export interface NormalizedDocumentTableTextPart {
   id: string;
   type: 'text';
   textRuns: NormalizedDocumentTextRun[];
-  flattenedTextRuns?: NormalizedDocumentFlattenedRun[];
+  flattenedTextRuns: NormalizedDocumentFlattenedRun[];
 }
 
 export interface NormalizedDocumentTableImagePart {
@@ -100,7 +109,7 @@ export interface NormalizedDocument {
   documentId: string;
   title?: string;
   designValues?: NormalizedDocumentDesignValue[];
-  contentBlocks: NormalizedDocumentContentBlock[];
+  contentBlocks: NormalizedDocumentBlock[];
   images?: NormalizedDocumentImage[];
   tables: NormalizedDocumentTable[];
   assets?: NormalizedDocumentAsset[];

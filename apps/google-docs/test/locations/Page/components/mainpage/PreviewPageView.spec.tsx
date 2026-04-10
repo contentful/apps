@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Layout } from '@contentful/f36-components';
 import { describe, expect, it, vi } from 'vitest';
 import type { MappingReviewSuspendPayload } from '@types';
-import { PreviewPageView } from '../../../../../src/locations/Page/components/mainpage/PreviewPageView';
+import { MappingReviewPage } from '../../../../../src/locations/Page/components/mainpage/MappingReviewPage';
 
 vi.mock('../../../../../src/locations/Page/components/review/DocumentOutline', () => ({
   DocumentOutline: ({ payload }: { payload: MappingReviewSuspendPayload }) => (
@@ -34,10 +34,10 @@ describe('PreviewPageView', () => {
   it('renders the mapping review screen without the overview action section', async () => {
     render(
       <Layout>
-        <PreviewPageView
+        <MappingReviewPage
           payload={mappingReviewPayload}
           oauthToken="oauth-token"
-          onLeavePreview={vi.fn()}
+          onLeaveReview={vi.fn()}
           onResumeMappingReview={vi.fn()}
         />
       </Layout>
@@ -53,10 +53,10 @@ describe('PreviewPageView', () => {
 
     render(
       <Layout>
-        <PreviewPageView
+        <MappingReviewPage
           payload={mappingReviewPayload}
           oauthToken="oauth-token"
-          onLeavePreview={onLeavePreview}
+          onLeaveReview={onLeavePreview}
         />
       </Layout>
     );

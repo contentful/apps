@@ -199,7 +199,7 @@ describe('Page component', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Mock from fixture' }));
 
     await waitFor(() => {
-      expect(screen.getByText('Review document "NRF Event"')).toBeTruthy();
+      expect(screen.getByText('Review document "NRF Event Playbook"')).toBeTruthy();
       expect(screen.getByText('Mock fixture review')).toBeTruthy();
       expect(screen.queryByRole('heading', { name: 'Drive Integration' })).toBeNull();
     });
