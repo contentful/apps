@@ -182,4 +182,6 @@ export interface ResumePayload {
   selectedTabIds?: string[];
   editedNormalizedDocument?: NormalizedDocument;
   entryBlockGraph?: MappingReviewEntryBlock[];
+  /** When true, tells the workflow to release/clean the agent thread (user cancelled tabs/images). */
+  cancelled?: boolean;
 }

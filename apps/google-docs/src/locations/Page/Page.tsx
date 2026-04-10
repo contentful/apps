@@ -50,6 +50,10 @@ const Page = () => {
     setPreviewPayload(null);
   };
 
+  const handleDiscardMappingReviewRun = async () => {
+    await modalOrchestratorRef.current?.notifyRunCancelledForCleanup();
+  };
+
   const handleResumeMappingReview = async () => {
     if (!previewPayload || !isMappingReviewSuspendPayload(previewPayload)) {
       return;
@@ -63,8 +67,6 @@ const Page = () => {
     }
   };
 
-  console.log('previewPayload', previewPayload);
-
   return (
     <>
       <Layout withBoxShadow={true} offsetTop={10}>
@@ -73,6 +75,7 @@ const Page = () => {
             payload={previewPayload}
             oauthToken={oauthToken}
             onLeavePreview={handleReturnToMainPage}
+            onDiscardMappingReview={handleDiscardMappingReviewRun}
             onResumeMappingReview={handleResumeMappingReview}
           />
         ) : (

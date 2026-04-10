@@ -27,6 +27,8 @@ export interface ModalOrchestratorHandle {
   /** Clears in-progress flow state without calling `onResetToMain` (parent clears preview separately). */
   resetFlowState: () => void;
   resumeMappingReview: (payload: MappingReviewSuspendPayload) => Promise<void>;
+  /** Resume with `cancelled: true` so the agent thread can be cleaned up (mapping-review or similar suspend). */
+  notifyRunCancelledForCleanup: () => Promise<void>;
 }
 
 enum FlowStep {
@@ -86,6 +88,18 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
         handleWorkflowResult(workflowRun);
       },
+      notifyRunCancelledForCleanup: async () => {
+        const runId = activeRunId;
+        if (!runId) {
+          return;
+        }
+
+        try {
+          await resumeWorkflow(runId, { cancelled: true });
+        } catch {
+          // Best-effort; caller still resets UI.
+        }
+      },
     }));
 
     const resetDocumentScopeReview = () => {
@@ -112,6 +126,24 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
     const closeModalAndReset = (setOpen: (open: boolean) => void) => () => {
       setOpen(false);
+      resetProgress();
+      onResetToMain();
+    };
+
+    const shouldSendCancelledResumeForTabsOrImagesStep =
+      activeRunId !== null &&
+      (flowStep === FlowStep.SELECT_TABS || flowStep === FlowStep.INCLUDE_IMAGES);
+
+    const handleConfirmDiscard = async () => {
+      if (shouldSendCancelledResumeForTabsOrImagesStep && activeRunId) {
+        try {
+          await resumeWorkflow(activeRunId, { cancelled: true });
+        } catch {
+          // Still reset UI; backend cleanup is best-effort.
+        }
+      }
+
+      setIsConfirmCancelModalOpen(false);
       resetProgress();
       onResetToMain();
     };
@@ -310,7 +342,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
         <ConfirmCancelModal
           isOpen={isConfirmCancelModalOpen}
-          onConfirm={closeModalAndReset(setIsConfirmCancelModalOpen)}
+          onConfirm={handleConfirmDiscard}
           onCancel={() => setIsConfirmCancelModalOpen(false)}
         />
 

@@ -221,6 +221,159 @@ describe('ModalOrchestrator', () => {
         screen.queryByRole('heading', { name: "You're about to lose your progress" })
       ).toBeNull();
     });
+
+    expect(mockResumeWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('sends cancelled resume when confirming discard on the tabs step', async () => {
+    let resolveStartWorkflow: ((value: WorkflowRunResult) => void) | undefined;
+    mockStartWorkflow.mockImplementation(
+      () =>
+        new Promise<WorkflowRunResult>((resolve) => {
+          resolveStartWorkflow = resolve;
+        })
+    );
+
+    const ref = createRef<ModalOrchestratorHandle>();
+    render(<ModalOrchestrator ref={ref} {...defaultProps} />);
+
+    await act(async () => {
+      ref.current?.startFlow();
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Pick document' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Select content type(s)' })).toBeTruthy();
+    });
+
+    const multiselectToggle = screen.getByRole('button', { name: /toggle multiselect/i });
+    fireEvent.click(multiselectToggle);
+
+    await waitFor(() => {
+      expect(document.querySelector('[data-test-id="cf-multiselect-list-item-ct-1"]')).toBeTruthy();
+    });
+
+    const optionInput = document
+      .querySelector('[data-test-id="cf-multiselect-list-item-ct-1"]')
+      ?.closest('label')
+      ?.querySelector('input') as HTMLInputElement;
+    if (optionInput) fireEvent.click(optionInput);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+
+    await waitFor(() => {
+      expect(mockStartWorkflow).toHaveBeenCalled();
+    });
+
+    resolveStartWorkflow?.({
+      status: RunStatus.PENDING_REVIEW,
+      runId: 'run-123',
+      messages: [],
+      suspendPayload: {
+        suspendStepId: 'select-tabs-images-step',
+        reason: 'Needs document scope review',
+        documentId: 'mock-doc-id-123',
+        requiresImageSelection: false,
+        requiresTabSelection: true,
+        tabCount: 2,
+        tabs: [
+          { id: 'tab-1', title: 'Introduction', index: 0 },
+          { id: 'tab-2', title: 'Appendix', index: 1 },
+        ],
+      },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Document tabs' })).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', { name: "You're about to lose your progress" })
+      ).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel without creating' }));
+
+    await waitFor(() => {
+      expect(mockResumeWorkflow).toHaveBeenCalledWith('run-123', { cancelled: true });
+    });
+  });
+
+  it('sends cancelled resume when confirming discard on the images step', async () => {
+    let resolveStartWorkflow: ((value: WorkflowRunResult) => void) | undefined;
+    mockStartWorkflow.mockImplementation(
+      () =>
+        new Promise<WorkflowRunResult>((resolve) => {
+          resolveStartWorkflow = resolve;
+        })
+    );
+
+    const ref = createRef<ModalOrchestratorHandle>();
+    render(<ModalOrchestrator ref={ref} {...defaultProps} />);
+
+    await act(async () => {
+      ref.current?.startFlow();
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Pick document' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Select content type(s)' })).toBeTruthy();
+    });
+
+    const multiselectToggle = screen.getByRole('button', { name: /toggle multiselect/i });
+    fireEvent.click(multiselectToggle);
+
+    await waitFor(() => {
+      expect(document.querySelector('[data-test-id="cf-multiselect-list-item-ct-1"]')).toBeTruthy();
+    });
+
+    const optionInput = document
+      .querySelector('[data-test-id="cf-multiselect-list-item-ct-1"]')
+      ?.closest('label')
+      ?.querySelector('input') as HTMLInputElement;
+    if (optionInput) fireEvent.click(optionInput);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+
+    await waitFor(() => {
+      expect(mockStartWorkflow).toHaveBeenCalled();
+    });
+
+    resolveStartWorkflow?.({
+      status: RunStatus.PENDING_REVIEW,
+      runId: 'run-123',
+      messages: [],
+      suspendPayload: {
+        suspendStepId: 'select-tabs-images-step',
+        reason: 'Needs document scope review',
+        documentId: 'mock-doc-id-123',
+        requiresImageSelection: true,
+        requiresTabSelection: false,
+        imageCount: 2,
+        tabs: [],
+      },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Images' })).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', { name: "You're about to lose your progress" })
+      ).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel without creating' }));
+
+    await waitFor(() => {
+      expect(mockResumeWorkflow).toHaveBeenCalledWith('run-123', { cancelled: true });
+    });
   });
 
   it('starts the workflow after selecting content types and shows the document scope review steps', async () => {

@@ -68,4 +68,38 @@ describe('PreviewPageView', () => {
       expect(onResumeMappingReview).toHaveBeenCalledTimes(1);
     });
   });
+
+  it('calls onDiscardMappingReview before leaving when cancel is confirmed during mapping review', async () => {
+    const onLeavePreview = vi.fn();
+    const onDiscardMappingReview = vi.fn().mockResolvedValue(undefined);
+
+    render(
+      <Layout>
+        <PreviewPageView
+          payload={mappingReviewPayload}
+          oauthToken="oauth-token"
+          onLeavePreview={onLeavePreview}
+          onDiscardMappingReview={onDiscardMappingReview}
+        />
+      </Layout>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Cancel preview' })).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel preview' }));
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', { name: "You're about to lose your progress" })
+      ).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel without creating' }));
+
+    await waitFor(() => {
+      expect(onDiscardMappingReview).toHaveBeenCalledTimes(1);
+      expect(onLeavePreview).toHaveBeenCalledTimes(1);
+    });
+  });
 });

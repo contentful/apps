@@ -12,6 +12,8 @@ interface PreviewPageViewProps {
   payload: PreviewPayload | MappingReviewSuspendPayload;
   oauthToken: string;
   onLeavePreview: () => void;
+  /** When user confirms cancel during mapping-review suspend; run before `onLeavePreview`. */
+  onDiscardMappingReview?: () => Promise<void>;
   onResumeMappingReview?: () => Promise<void>;
 }
 
@@ -19,6 +21,7 @@ export const PreviewPageView = ({
   payload,
   oauthToken,
   onLeavePreview,
+  onDiscardMappingReview,
   onResumeMappingReview,
 }: PreviewPageViewProps) => {
   const sdk = useSDK<PageAppSDK>();
@@ -59,7 +62,12 @@ export const PreviewPageView = ({
       </Layout.Body>
       <ConfirmCancelModal
         isOpen={isConfirmCancelModalOpen}
-        onConfirm={onLeavePreview}
+        onConfirm={async () => {
+          if (mappingReviewPayload && onDiscardMappingReview) {
+            await onDiscardMappingReview();
+          }
+          onLeavePreview();
+        }}
         onCancel={() => setIsConfirmCancelModalOpen(false)}
       />
     </>
