@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button, Flex, Heading, Layout, Note, Paragraph } from '@contentful/f36-components';
 import Splitter from './Splitter';
-import { PreviewPayload } from '@types';
+import { MappingReviewSuspendPayload, PreviewPayload } from '@types';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
 import { loadGoogleDocsReviewFixture } from '../../../../fixtures/googleDocsReview';
 import { GoogleDocsMappingReviewScreen } from '../review-prototype/GoogleDocsMappingReviewScreen';
@@ -9,20 +9,24 @@ import Splitter from './Splitter';
 import OverviewSection from '../overview/OverviewSection';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { PageAppSDK } from '@contentful/app-sdk';
+import { isMappingReviewSuspendPayload } from '../../../../utils/utils';
 
 interface PreviewPageViewProps {
-  payload: PreviewPayload;
+  payload: PreviewPayload | MappingReviewSuspendPayload;
   oauthToken: string;
   onLeavePreview: () => void;
+  onResumeMappingReview?: () => Promise<void>;
 }
 
-export const PreviewPageView = ({ payload, oauthToken, onLeavePreview }: PreviewPageViewProps) => {
+export const PreviewPageView = ({
+  payload,
+  oauthToken,
+  onLeavePreview,
+  onResumeMappingReview,
+}: PreviewPageViewProps) => {
   const sdk = useSDK<PageAppSDK>();
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
-  const fixture = loadGoogleDocsReviewFixture();
-
-  const rawTitle = payload.normalizedDocument?.title as string | undefined;
-  const title = rawTitle?.trim() ? rawTitle : 'Selected document';
+  const mappingReviewPayload = isMappingReviewSuspendPayload(payload) ? payload : null;
   const rawTitle = payload.normalizedDocument?.title;
   const docTitle = typeof rawTitle === 'string' ? rawTitle : undefined;
   const title = docTitle && docTitle.trim().length > 0 ? docTitle : 'Selected document';
@@ -51,6 +55,7 @@ export const PreviewPageView = ({ payload, oauthToken, onLeavePreview }: Preview
             payload={payload}
             oauthToken={oauthToken}
             onReturnToMainPage={onLeavePreview}
+            onCreateSelected={mappingReviewPayload ? onResumeMappingReview : undefined}
           />
           <Heading as="h2" marginBottom="none">
             Document outline

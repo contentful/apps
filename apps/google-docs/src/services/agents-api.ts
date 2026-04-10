@@ -1,6 +1,12 @@
 import { PageAppSDK } from '@contentful/app-sdk';
 import { LOCAL_AGENTS_API_BASE_URL, WORKFLOW_AGENT_ID } from '../utils/constants/agent';
-import { AgentRunMessage, ResumePayload, RunStatus } from '@types';
+import {
+  AgentRunMessage,
+  MappingReviewSuspendPayload,
+  ResumePayload,
+  RunStatus,
+  TabsImagesSuspendPayload,
+} from '@types';
 
 const AGENTS_API_HEADERS = {
   'x-contentful-enable-alpha-feature': 'agents-api',
@@ -32,7 +38,7 @@ export interface AgentRunData {
     status?: RunStatus;
     workflowId?: string;
     workflowRunId?: string;
-    suspendPayload?: Record<string, unknown>;
+    suspendPayload?: TabsImagesSuspendPayload | MappingReviewSuspendPayload;
     googleDocPayload?: Record<string, unknown>;
   };
   payload?: string;

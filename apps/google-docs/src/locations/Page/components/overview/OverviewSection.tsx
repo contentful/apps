@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { cx } from '@emotion/css';
 import { Box, Button, Flex, Heading, Note, Paragraph } from '@contentful/f36-components';
-import type { PreviewPayload } from '@types';
+import type { MappingReviewSuspendPayload, PreviewPayload } from '@types';
 import {
   buildCheckboxEntryList,
   collectCheckboxEntryListRowIds,
@@ -10,16 +10,17 @@ import {
 import { fetchContentTypesInfoByIds } from '../../../../services/contentTypeService';
 import { CheckboxEntryList } from './CheckboxEntryList';
 import { overviewSectionBox, overviewSectionBoxScrollable } from './OverviewSection.styles';
-import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
 import { PageAppSDK } from '@contentful/app-sdk';
 import type { EntryProps } from 'contentful-management';
 import { SummaryModal } from '../modals/SummaryModal';
+import { isPreviewPayload } from '../../../../utils/utils';
 
 interface OverviewSectionProps {
   sdk: PageAppSDK;
-  payload: PreviewPayload;
+  payload: PreviewPayload | MappingReviewSuspendPayload;
   oauthToken: string;
   onReturnToMainPage: () => void;
+  onCreateSelected?: () => Promise<void>;
 }
 
 const OverviewSection = ({
@@ -27,6 +28,7 @@ const OverviewSection = ({
   payload,
   oauthToken,
   onReturnToMainPage,
+  onCreateSelected,
 }: OverviewSectionProps) => {
   const [contentTypeDisplayInfoMap, setContentTypeDisplayInfoMap] = useState<
     ContentTypeDisplayInfoMap | undefined
@@ -35,9 +37,38 @@ const OverviewSection = ({
   const [isCreating, setIsCreating] = useState(false);
   const [summaryEntries, setSummaryEntries] = useState<EntryProps[] | null>(null);
 
+  const overviewPayload = useMemo<PreviewPayload>(() => {
+    if (isPreviewPayload(payload)) {
+      return payload;
+    }
+
+    return {
+      // TODO: remove this temporary mock once the backend provides preview entries
+      entries: [
+        {
+          fields: {
+            url: {
+              'en-US': '/blog/an-url',
+            },
+            internalLabel: {
+              'en-US': '/blog/another-url',
+            },
+          },
+          tempId: 'url_1',
+          contentTypeId: 'url',
+        },
+      ],
+      assets: [],
+      referenceGraph: payload.referenceGraph,
+      normalizedDocument: payload.normalizedDocument,
+    };
+  }, [payload]);
+
   useEffect(() => {
     const fetchContentTypesInfo = async () => {
-      const contentTypeIds = [...new Set(payload.entries.map((entry) => entry.contentTypeId))]
+      const contentTypeIds = [
+        ...new Set(overviewPayload.entries.map((entry) => entry.contentTypeId)),
+      ]
         .filter((id): id is string => Boolean(id))
         .sort();
       if (contentTypeIds.length === 0) {
@@ -54,11 +85,11 @@ const OverviewSection = ({
     };
 
     fetchContentTypesInfo();
-  }, [sdk, payload.entries]);
+  }, [sdk, overviewPayload.entries]);
 
   const checkboxEntryRows = useMemo(
-    () => buildCheckboxEntryList(payload, contentTypeDisplayInfoMap, sdk.locales.default),
-    [payload, contentTypeDisplayInfoMap, sdk.locales.default]
+    () => buildCheckboxEntryList(overviewPayload, contentTypeDisplayInfoMap, sdk.locales.default),
+    [overviewPayload, contentTypeDisplayInfoMap, sdk.locales.default]
   );
 
   useEffect(() => {
@@ -78,24 +109,14 @@ const OverviewSection = ({
   };
 
   const handleCreateSelected = async () => {
-    if (selectedEntryTempIds.size === 0) {
+    if (selectedEntryTempIds.size === 0 || !onCreateSelected) {
       return;
     }
+
     setIsCreating(true);
+
     try {
-      const result = await createEntriesFromPreviewPayload(
-        sdk,
-        payload,
-        selectedEntryTempIds,
-        oauthToken
-      );
-      if (result.errors.length > 0) {
-        sdk.notifier.error('Failed to create entries');
-      } else {
-        setSummaryEntries(result.createdEntries);
-      }
-    } catch {
-      sdk.notifier.error('Failed to create entries');
+      await onCreateSelected();
     } finally {
       setIsCreating(false);
     }
@@ -128,7 +149,7 @@ const OverviewSection = ({
             variant="primary"
             onClick={handleCreateSelected}
             isLoading={isCreating}
-            isDisabled={selectedEntryTempIds.size === 0}>
+            isDisabled={selectedEntryTempIds.size === 0 || !onCreateSelected}>
             Create selected entries
           </Button>
         </Flex>
