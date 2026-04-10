@@ -2,7 +2,7 @@ import { AnalyticsAdminServiceClient } from '@google-analytics/admin';
 import { BetaAnalyticsDataClient } from '@google-analytics/data';
 import { expect } from 'chai';
 import { Status } from 'google-gax';
-import { SinonStubbedInstance } from 'sinon';
+import sinon, { SinonStubbedInstance } from 'sinon';
 import {
   mockAccountSummary,
   mockAnalyticsAdminServiceClient,
@@ -47,6 +47,42 @@ describe('GoogleApiService', () => {
         error = e as Error;
       }
       expect(error).to.eq(someError);
+    });
+  });
+
+  describe('runReport', () => {
+    let runReportSpy: sinon.SinonSpy;
+
+    beforeEach(() => {
+      runReportSpy = sinon.spy(() =>
+        Promise.resolve([
+          {
+            rows: [],
+          },
+        ])
+      );
+      mockDataClient = {
+        runReport: runReportSpy,
+      } as unknown as SinonStubbedInstance<BetaAnalyticsDataClient>;
+      googleApi = new GoogleApiService(validServiceAccountKeyFile, mockAdminClient, mockDataClient);
+    });
+
+    it('uses the requested GA4 match dimension in the filter', async () => {
+      await googleApi.runReport(
+        'properties/123',
+        '/article?articleId=360054483454',
+        'pagePathPlusQueryString',
+        'PARTIAL_REGEXP',
+        '2026-04-01',
+        '2026-04-06'
+      );
+
+      expect(runReportSpy.firstCall.args[0].dimensionFilter.filter.fieldName).to.equal(
+        'pagePathPlusQueryString'
+      );
+      expect(runReportSpy.firstCall.args[0].dimensionFilter.filter.stringFilter.matchType).to.equal(
+        'PARTIAL_REGEXP'
+      );
     });
   });
 });

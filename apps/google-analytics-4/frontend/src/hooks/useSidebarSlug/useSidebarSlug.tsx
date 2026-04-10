@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { ContentTypeValue } from 'types';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ContentEntitySys, SidebarExtensionSDK } from '@contentful/app-sdk';
-import { pathJoin } from 'utils/pathJoin';
 import useGetFieldValue from '../useGetFieldValue';
 import { AppInstallationParameters } from 'types';
+import { getReportSlug } from 'utils/getReportSlug';
 
 const SLUG_FIELD_INPUT_DELAY = 500;
 
@@ -13,7 +13,7 @@ export const useSidebarSlug = (slugFieldInfo: ContentTypeValue) => {
 
   const { forceTrailingSlash } = sdk.parameters.installation as AppInstallationParameters;
 
-  const { slugField, urlPrefix } = slugFieldInfo;
+  const { slugField } = slugFieldInfo;
   const slugFieldValue = useGetFieldValue(slugField);
 
   const [isPublished, setIsPublished] = useState(false);
@@ -36,9 +36,7 @@ export const useSidebarSlug = (slugFieldInfo: ContentTypeValue) => {
     sdk.entry.onSysChanged((sys) => handlePublishedStatus(sys));
   }, [sdk.entry]);
 
-  const reportSlug = `/${pathJoin(urlPrefix || '', debouncedSlugFieldValue || '')}${
-    forceTrailingSlash ? '/' : ''
-  }`;
+  const reportSlug = getReportSlug(slugFieldInfo, debouncedSlugFieldValue || '', forceTrailingSlash);
   const slugFieldIsConfigured = Boolean(slugField);
   const contentTypeHasSlugField = slugField in sdk.entry.fields;
 

@@ -18,18 +18,24 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import {
   AllContentTypes,
   AllContentTypeEntries,
-  ContentTypeEntries,
+  ContentTypeRule,
+  ContentTypeRules,
   ContentTypes,
-  ContentTypeValue,
 } from 'types';
 import AssignContentTypeCard from 'components/config-screen/assign-content-type/AssignContentTypeCard';
 import { sortAndFormatAllContentTypes } from 'helpers/contentTypeHelpers/contentTypeHelpers';
+import {
+  createDefaultRule,
+  getUniqueContentTypeIds,
+  normalizeContentTypeRules,
+} from 'helpers/contentTypeRules/contentTypeRules';
 interface Props {
   mergeSdkParameters: Function;
   onIsValidContentTypeAssignment: Function;
   parameters: KeyValueMap;
   currentEditorInterface: Partial<EditorInterface>;
   originalContentTypes: ContentTypes;
+  originalContentTypeRules: ContentTypeRules;
 }
 
 const AssignContentTypeSection = (props: Props) => {
@@ -39,17 +45,15 @@ const AssignContentTypeSection = (props: Props) => {
     parameters,
     currentEditorInterface,
     originalContentTypes,
+    originalContentTypeRules,
   } = props;
 
   const [forceTrailingSlash, setForceTrailingSlash] = useState<boolean>(false);
 
-  // Content type state
-  const [contentTypes, setContentTypes] = useState<ContentTypes>({} as ContentTypes);
+  // Content type rules state
+  const [contentTypeRules, setContentTypeRules] = useState<ContentTypeRules>([] as ContentTypeRules);
   const [loadingContentTypes, setLoadingContentTypes] = useState<boolean>(true);
   const [hasContentTypes, setHasContentTypes] = useState<boolean>(false);
-  const [contentTypeEntries, setContentTypeEntries] = useState<ContentTypeEntries>(
-    [] as ContentTypeEntries
-  );
   const [hasIncompleteContentTypes, setHasIncompleteContentTypes] = useState<boolean>(false);
 
   // All content type state
@@ -64,17 +68,21 @@ const AssignContentTypeSection = (props: Props) => {
   useEffect(() => {
     setLoadingContentTypes(true);
     if (parameters.forceTrailingSlash) setForceTrailingSlash(parameters.forceTrailingSlash);
-    if (parameters.contentTypes) setContentTypes(parameters.contentTypes);
+    setContentTypeRules(
+      normalizeContentTypeRules(
+        parameters.contentTypeRules as ContentTypeRules | undefined,
+        parameters.contentTypes as ContentTypes | undefined
+      )
+    );
     setLoadingContentTypes(false);
-  }, [parameters.contentTypes, parameters.forceTrailingSlash]);
+  }, [parameters.contentTypeRules, parameters.contentTypes, parameters.forceTrailingSlash]);
 
   useEffect(() => {
-    setHasContentTypes(Object.keys(contentTypes).length ? true : false);
-    setContentTypeEntries(Object.entries(contentTypes));
+    setHasContentTypes(contentTypeRules.length > 0);
     setHasIncompleteContentTypes(
-      Object.entries(contentTypes).some(([contentTypeId]) => !contentTypeId)
+      contentTypeRules.some((rule) => !rule.contentTypeId)
     );
-  }, [contentTypes]);
+  }, [contentTypeRules]);
 
   const fetchAllContentTypes = async (sdk: KnownAppSDK): Promise<ContentTypeProps[]> => {
     const cma = createClient({ apiAdapter: sdk.cmaAdapter });
@@ -119,58 +127,52 @@ const AssignContentTypeSection = (props: Props) => {
     onIsValidContentTypeAssignment(true);
   };
 
-  const contentTypeHandler = (newContentTypes: ContentTypes) => {
-    setContentTypes(newContentTypes);
-    const _parameters = { contentTypes: newContentTypes };
+  const contentTypeRulesHandler = (newContentTypeRules: ContentTypeRules) => {
+    setContentTypeRules(newContentTypeRules);
+    const _parameters = { contentTypeRules: newContentTypeRules };
     mergeSdkParameters(_parameters);
     // We always want the user to be able to save the configuration, even if there are errors or warnings
     onIsValidContentTypeAssignment(true);
   };
 
-  const handleContentTypeChange = (prevKey: string, newKey: string) => {
-    const newContentTypes: ContentTypes = {};
+  const handleContentTypeChange = (ruleId: string, newContentTypeId: string) => {
+    const newContentTypeRules = contentTypeRules.map((rule) =>
+      rule.id === ruleId
+        ? {
+            ...rule,
+            contentTypeId: newContentTypeId,
+            slugField: '',
+            additionalFieldIds: [],
+          }
+        : rule
+    );
 
-    for (const [prop, value] of Object.entries(contentTypes)) {
-      if (prop === prevKey) {
-        newContentTypes[newKey as keyof typeof contentTypes] = {
-          slugField: '',
-          urlPrefix: value.urlPrefix,
-        };
-      } else {
-        newContentTypes[prop] = value;
-      }
-    }
-
-    contentTypeHandler(newContentTypes);
+    contentTypeRulesHandler(newContentTypeRules);
   };
 
-  const handleContentTypeFieldChange = (key: string, field: string, value: string) => {
-    const currentContentTypeFields: ContentTypeValue = contentTypes[key];
-    const newContentTypes: ContentTypes = {
-      ...contentTypes,
-      [key]: {
-        ...currentContentTypeFields,
-        [field]: value,
-      },
-    };
+  const handleContentTypeFieldChange = (
+    ruleId: string,
+    field: string,
+    value: string | boolean | string[]
+  ) => {
+    const newContentTypeRules = contentTypeRules.map((rule) =>
+      rule.id === ruleId
+        ? {
+            ...rule,
+            [field]: value,
+          }
+        : rule
+    );
 
-    contentTypeHandler(newContentTypes);
+    contentTypeRulesHandler(newContentTypeRules);
   };
 
   const handleAddContentType = () => {
-    const newContentTypes: ContentTypes = {
-      ...contentTypes,
-      '': { slugField: '', urlPrefix: '' },
-    };
-
-    contentTypeHandler(newContentTypes);
+    contentTypeRulesHandler([...contentTypeRules, createDefaultRule()]);
   };
 
-  const handleRemoveContentType = (key: string) => {
-    const newContentTypes = { ...contentTypes };
-    delete newContentTypes[key];
-
-    contentTypeHandler(newContentTypes);
+  const handleRemoveContentType = (ruleId: string) => {
+    contentTypeRulesHandler(contentTypeRules.filter((rule) => rule.id !== ruleId));
   };
 
   return (
@@ -208,18 +210,17 @@ const AssignContentTypeSection = (props: Props) => {
             <AssignContentTypeCard
               allContentTypes={allContentTypes}
               allContentTypeEntries={allContentTypeEntries}
-              contentTypes={contentTypes}
-              contentTypeEntries={contentTypeEntries}
+              contentTypeRules={contentTypeRules}
               onContentTypeChange={handleContentTypeChange}
               onContentTypeFieldChange={handleContentTypeFieldChange}
               onRemoveContentType={handleRemoveContentType}
               currentEditorInterface={currentEditorInterface}
-              originalContentTypes={originalContentTypes}
+              originalContentTypeRules={originalContentTypeRules}
             />
           )}
-          {Object.keys(contentTypes).length < Object.keys(allContentTypes).length && (
+          {contentTypeRules.length < Object.keys(allContentTypes).length * 5 && (
             <Button onClick={handleAddContentType} isDisabled={hasIncompleteContentTypes}>
-              Add a content type
+              Add a rule
             </Button>
           )}
         </>

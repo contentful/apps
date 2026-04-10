@@ -193,5 +193,23 @@ describe('Api', () => {
       const result = await api.runReports();
       expect(result).toEqual(runReportData);
     });
+
+    it('does not append undefined advanced matching params for standard requests', () => {
+      const api = new Api(contentfulContext, mockCma, validServiceKeyId);
+
+      const url = api.appendQueryParams(new URL('http://example.com/api/run_report'), {
+        propertyId: 'properties/531110338',
+        slug: '/en-us/home/',
+        matchDimension: undefined,
+        matchType: undefined,
+        startDate: '2026-04-01',
+        endDate: '2026-04-07',
+      });
+
+      expect(url.searchParams.get('propertyId')).toBe('properties/531110338');
+      expect(url.searchParams.get('slug')).toBe('/en-us/home/');
+      expect(url.searchParams.get('matchDimension')).toBeNull();
+      expect(url.searchParams.get('matchType')).toBeNull();
+    });
   });
 });
