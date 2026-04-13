@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React, { createRef } from 'react';
+import { createRef } from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { Box, Button } from '@contentful/f36-components';
 import {

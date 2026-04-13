@@ -295,7 +295,7 @@ describe('DocumentOutline', () => {
       },
     ];
 
-    render(<DocumentOutline payload={fixture} onBack={vi.fn()} />);
+    render(<DocumentOutline payload={fixture} />);
 
     expect(screen.getByRole('link', { name: 'Contentful' })).toHaveAttribute(
       'href',
@@ -308,7 +308,7 @@ describe('DocumentOutline', () => {
   });
 
   it('renders highlighted block text spans from entryBlockGraph', () => {
-    render(<DocumentOutline payload={buildFixture()} onBack={vi.fn()} />);
+    render(<DocumentOutline payload={buildFixture()} />);
 
     expect(screen.getByTestId('segment-surface-block-0').getAttribute('style')).toBeNull();
     expect(screen.getByTestId('block-segment-block-1-0')).toHaveAttribute(
@@ -331,7 +331,7 @@ describe('DocumentOutline', () => {
       } as (typeof fixture.entryBlockGraph.entries)[number]['fieldMappings'][number]['sourceRefs'][number],
     ];
 
-    render(<DocumentOutline payload={fixture} onBack={vi.fn()} />);
+    render(<DocumentOutline payload={fixture} />);
 
     expect(screen.getByTestId('mapping-card-block-1-0-body')).toBeTruthy();
     expect(screen.getByTestId('block-segment-block-1-0')).toHaveAttribute(
@@ -341,7 +341,7 @@ describe('DocumentOutline', () => {
   });
 
   it('renders mixed table cell text and image highlights independently', () => {
-    render(<DocumentOutline payload={buildFixture()} onBack={vi.fn()} />);
+    render(<DocumentOutline payload={buildFixture()} />);
 
     expect(screen.getByTestId('segment-surface-table-0').getAttribute('style')).toBeNull();
     expect(screen.queryByText(/^Table$/)).toBeNull();
@@ -387,7 +387,7 @@ describe('DocumentOutline', () => {
       } as (typeof fixture.entryBlockGraph.entries)[number]['fieldMappings'][number]['sourceRefs'][number],
     ];
 
-    render(<DocumentOutline payload={fixture} onBack={vi.fn()} />);
+    render(<DocumentOutline payload={fixture} />);
 
     expect(
       screen.getByTestId('table-text-segment-table-0-row-0-cell-1-part-2-1')
@@ -399,7 +399,7 @@ describe('DocumentOutline', () => {
   });
 
   it('syncs hover styling between mapping cards and their highlights', () => {
-    render(<DocumentOutline payload={buildFixture()} onBack={vi.fn()} />);
+    render(<DocumentOutline payload={buildFixture()} />);
 
     const card = screen.getByTestId('mapping-card-table-0-0-imageCaption');
     const textHighlight = screen.getByTestId('table-text-segment-table-0-row-0-cell-1-part-2-0');
@@ -424,7 +424,7 @@ describe('DocumentOutline', () => {
   });
 
   it('renders ordered and nested unordered list item styling', () => {
-    render(<DocumentOutline payload={buildFixture()} onBack={vi.fn()} />);
+    render(<DocumentOutline payload={buildFixture()} />);
 
     expect(screen.getByTestId('list-marker-block-4')).toHaveTextContent('1.');
     expect(screen.getByTestId('list-item-block-5')).toHaveStyle({
@@ -436,7 +436,7 @@ describe('DocumentOutline', () => {
   });
 
   it('renders field cards with the field type appended and no unmapped empty-state cards', () => {
-    render(<DocumentOutline payload={buildFixture()} onBack={vi.fn()} />);
+    render(<DocumentOutline payload={buildFixture()} />);
 
     expect(screen.getByTestId('mapping-rail-block-1')).toHaveStyle({ maxWidth: '280px' });
 
@@ -469,7 +469,7 @@ describe('DocumentOutline', () => {
       ],
     });
 
-    render(<DocumentOutline payload={fixture} onBack={vi.fn()} />);
+    render(<DocumentOutline payload={fixture} />);
 
     expect(screen.getByTestId('mapping-card-block-1-0-body')).toBeTruthy();
     expect(screen.getByTestId('mapping-card-block-3-1-faqBody')).toBeTruthy();
@@ -556,7 +556,7 @@ describe('DocumentOutline', () => {
       };
     });
 
-    render(<DocumentOutline payload={buildFixture()} onBack={vi.fn()} />);
+    render(<DocumentOutline payload={buildFixture()} />);
 
     expect(screen.getByTestId('mapping-card-position-block-1-0-body')).toHaveStyle({
       top: '80px',

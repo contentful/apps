@@ -10,12 +10,6 @@ export const truncateLabel = (label: string, maxLength: number = 10): string => 
   return `${firstHalf}...${secondHalf}`;
 };
 
-export const isMappingReviewSuspendPayload = (
-  payload: PreviewPayload | MappingReviewSuspendPayload
-): payload is MappingReviewSuspendPayload => {
-  return 'suspendStepId' in payload && payload.suspendStepId === 'mapping-review';
-};
-
 export const isPreviewPayload = (
   payload: PreviewPayload | MappingReviewSuspendPayload
 ): payload is PreviewPayload => {

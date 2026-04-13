@@ -45,7 +45,6 @@ import {
 interface DocumentOutlineProps {
   payload: MappingReviewSuspendPayload;
   showChrome?: boolean;
-  onBack?: () => void;
 }
 
 type AnchoredMappingCard = MappingCardData & {
@@ -173,7 +172,7 @@ function renderTextSegment(
   );
 }
 
-export const DocumentOutline = ({ payload, showChrome = true, onBack }: DocumentOutlineProps) => {
+export const DocumentOutline = ({ payload, showChrome = true }: DocumentOutlineProps) => {
   const [selectedEntryIndex, setSelectedEntryIndex] = useState<number | null>(null);
   const [hoveredMappingKeys, setHoveredMappingKeys] = useState<string[]>([]);
   const [cardOffsetsBySegment, setCardOffsetsBySegment] = useState<

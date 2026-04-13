@@ -4,7 +4,6 @@ import type { MappingReviewSuspendPayload } from '@types';
 import Splitter from './Splitter';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
 import { DocumentOutline } from '../review/DocumentOutline';
-import { isMappingReviewSuspendPayload } from '../../../../utils/utils';
 
 interface MappingReviewPageProps {
   payload: MappingReviewSuspendPayload;
@@ -19,7 +18,6 @@ export const MappingReviewPage = ({
 }: MappingReviewPageProps) => {
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
 
-  const isMappingReview = isMappingReviewSuspendPayload(payload);
   const documentTitle = payload.documentTitle || 'Selected document';
   const title = `Create from document "${documentTitle}"`;
 
@@ -39,13 +37,7 @@ export const MappingReviewPage = ({
       </Layout.Header>
       <Splitter marginTop="spacingS" />
       <Layout.Body>
-        {isMappingReview ? (
-          <DocumentOutline payload={payload} />
-        ) : (
-          <Paragraph marginBottom="none">
-            Standard preview is not available in this context.
-          </Paragraph>
-        )}
+        <DocumentOutline payload={payload} />
       </Layout.Body>
       <ConfirmCancelModal
         isOpen={isConfirmCancelModalOpen}
