@@ -31,7 +31,7 @@ import { isBlockImageSourceRef, isTableImageSourceRef, isTextSourceRef } from '@
 import { FileTextIcon } from '@contentful/f36-icons';
 import { MappingCard, type MappingCardData } from './MappingCard';
 import { getAnchorIdForSourceRef, resolveMarkerOffsets } from './utils/mappingCardPositioning';
-import { type DocSegment, orderDocument } from './utils/buildDocument';
+import { type DocSegment, buildDocument } from './utils/buildDocument';
 import {
   buildListItemPresentations,
   buildOverviewEntries,
@@ -189,9 +189,7 @@ export const DocumentOutline = ({ payload, showChrome = true, onBack }: Document
     [payload.entryBlockGraph]
   );
 
-  const tabs = useMemo(() => orderDocument(document).tabs, [document]);
-
-  const allSegments = useMemo(() => tabs.flatMap((tab) => tab.segments), [tabs]);
+  const { tabs, allSegments } = useMemo(() => buildDocument(document), [document]);
 
   const imageById = useMemo(() => {
     const images = document.images ?? [];
@@ -581,10 +579,6 @@ export const DocumentOutline = ({ payload, showChrome = true, onBack }: Document
                       cursor: 'pointer',
                     }}>
                     <Text fontWeight="fontWeightDemiBold">{entry.title}</Text>
-                    <Text as="span" fontColor="gray600">
-                      {entry.contentType} | {entry.mappingCount} mapping
-                      {entry.mappingCount === 1 ? '' : 's'}
-                    </Text>
                   </Box>
                 );
               })}

@@ -23,7 +23,6 @@ export interface DocumentOutlineOverviewEntry {
   entryIndex: number;
   title: string;
   contentType: string;
-  mappingCount: number;
 }
 
 export interface SourceUsageIndex {

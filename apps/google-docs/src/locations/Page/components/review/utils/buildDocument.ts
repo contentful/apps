@@ -17,9 +17,10 @@ export interface Tab {
 
 interface Document {
   tabs: Tab[];
+  allSegments: DocSegment[];
 }
 
-export const orderDocument = (normalizedDocument: NormalizedDocument): Document => {
+export const buildDocument = (normalizedDocument: NormalizedDocument): Document => {
   type SortableItem =
     | { kind: 'block'; position: number; block: NormalizedDocumentContentBlock }
     | { kind: 'table'; position: number; table: NormalizedDocumentTable }
@@ -77,5 +78,5 @@ export const orderDocument = (normalizedDocument: NormalizedDocument): Document 
     tabs.push({ id: normalizedDocument.documentId, name: '', segments: [] });
   }
 
-  return { tabs };
+  return { tabs, allSegments: tabs.flatMap((tab) => tab.segments) };
 };
