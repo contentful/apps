@@ -28,6 +28,12 @@ import type {
   NormalizedDocumentTable,
   NormalizedDocumentTablePart,
 } from '@types';
+import {
+  isBlockImageSourceRef,
+  isBlockSourceRef,
+  isTableImageSourceRef,
+  isTextSourceRef,
+} from '@types';
 import { FileTextIcon } from '@contentful/f36-icons';
 import { MappingCard, type MappingCardData } from './MappingCard';
 import { getAnchorIdForSourceRef, resolveMarkerOffsets } from './mappingCardPositioning';
@@ -95,8 +101,19 @@ function buildUsageIndexes(entryBlockGraph: EntryBlockGraph): {
           sourceRef,
         };
 
-        if (sourceRef.kind === 'blockText' || sourceRef.kind === 'blockImage') {
+        if (isBlockSourceRef(sourceRef)) {
           blockUsage[sourceRef.blockId] = [...(blockUsage[sourceRef.blockId] ?? []), usage];
+          return;
+        }
+
+        if (
+          !(
+            'tableId' in sourceRef &&
+            'rowId' in sourceRef &&
+            'cellId' in sourceRef &&
+            'partId' in sourceRef
+          )
+        ) {
           return;
         }
 
@@ -134,20 +151,18 @@ function buildTextSegments(
   flattenedRuns: NormalizedDocumentFlattenedRun[],
   usage: Array<{ sourceRef: EntryBlockGraphSourceRef; mappingKey: string }>
 ): TextSegment[] {
-  console.log('flattenedRuns', flattenedRuns);
   if (!flattenedRuns.length) return [];
 
   const textUsage = usage.filter(
     (
       usageItem
     ): usageItem is {
-      sourceRef: Extract<EntryBlockGraphSourceRef, { kind: 'blockText' | 'tableText' }>;
+      sourceRef: isTextSourceRef;
       mappingKey: string;
-    } => usageItem.sourceRef.kind === 'blockText' || usageItem.sourceRef.kind === 'tableText'
+    } => isTextSourceRef(usageItem.sourceRef)
   );
 
-  const fullText = flattenedRuns.map((run) => run.text).join('');
-  const boundaries = new Set<number>([0, fullText.length]);
+  const boundaries = new Set<number>();
   flattenedRuns.forEach((run) => {
     boundaries.add(run.start);
     boundaries.add(run.end);
@@ -165,12 +180,16 @@ function buildTextSegments(
       return [];
     }
 
-    const text = fullText.slice(start, end);
+    const run = flattenedRuns.find((candidate) => start >= candidate.start && end <= candidate.end);
+    if (!run) {
+      return [];
+    }
+
+    const text = run.text.slice(start - run.start, end - run.start);
     if (!text) {
       return [];
     }
 
-    const run = flattenedRuns.find((r) => start >= r.start && end <= r.end);
     const mappingKeys = textUsage
       .filter(({ sourceRef }) => start >= sourceRef.start && end <= sourceRef.end)
       .map(({ mappingKey }) => mappingKey);
@@ -441,7 +460,6 @@ export const DocumentOutline = ({ payload, showChrome = true, onBack }: Document
       sourceRef: usage.sourceRef,
       mappingKey: getMappingCardKey(segmentId, usage),
     }));
-    console.log(block);
     const textSegments = buildTextSegments(block.flattenedTextRuns, textUsage);
     const listItemPresentation = block.type === 'listItem' ? listItemPresentations[block.id] : null;
     const setHoveredMappings = (mappingKeys: string[]) => setHoveredMappingKeys(mappingKeys);
@@ -495,12 +513,12 @@ export const DocumentOutline = ({ payload, showChrome = true, onBack }: Document
           const image = imageById[imageId];
           if (!image) return null;
           const highlighted = visibleRefs.some(
-            (ref) => ref.kind === 'blockImage' && ref.imageId === imageId
+            (ref) => isBlockImageSourceRef(ref) && ref.imageId === imageId
           );
           const mappingKeys = visibleUsage
             .filter(
               (usage) =>
-                usage.sourceRef.kind === 'blockImage' && usage.sourceRef.imageId === imageId
+                isBlockImageSourceRef(usage.sourceRef) && usage.sourceRef.imageId === imageId
             )
             .map((usage) => getMappingCardKey(segmentId, usage));
           const hovered = isMappingHovered(mappingKeys);
@@ -548,9 +566,9 @@ export const DocumentOutline = ({ payload, showChrome = true, onBack }: Document
 
     if (part.type === 'image') {
       const image = imageById[part.imageId];
-      const highlighted = visibleRefs.some((ref) => ref.kind === 'tableImage');
+      const highlighted = visibleRefs.some((ref) => isTableImageSourceRef(ref));
       const mappingKeys = visibleUsage
-        .filter((usage) => usage.sourceRef.kind === 'tableImage')
+        .filter((usage) => isTableImageSourceRef(usage.sourceRef))
         .map((usage) => getMappingCardKey(segmentId, usage));
       const hovered = isMappingHovered(mappingKeys);
 

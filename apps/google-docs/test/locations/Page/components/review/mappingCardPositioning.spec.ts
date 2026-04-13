@@ -9,12 +9,12 @@ describe('mappingCardPositioning', () => {
   it('derives block and table anchors from source refs', () => {
     expect(
       getAnchorIdForSourceRef({
-        kind: 'blockText',
+        type: 'paragraph',
         blockId: 'block-1',
         start: 0,
         end: 5,
         flattenedRuns: [],
-      })
+      } as Parameters<typeof getAnchorIdForSourceRef>[0])
     ).toBe('block:block-1');
 
     expect(

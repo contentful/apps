@@ -172,6 +172,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
+      setFlowStep(null);
       onPreviewReady(workflowRun.googleDocPayload);
     };
 

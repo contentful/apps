@@ -1,42 +1,92 @@
 import type { NormalizedDocumentFlattenedRun } from './normalizedDocument';
 
-export type EntryBlockGraphTextSourceRef =
-  | {
-      kind: 'blockText';
-      blockId: string;
-      start: number;
-      end: number;
-      flattenedRuns: NormalizedDocumentFlattenedRun[];
-    }
-  | {
-      kind: 'tableText';
-      tableId: string;
-      rowId: string;
-      cellId: string;
-      partId: string;
-      start: number;
-      end: number;
-      flattenedRuns: NormalizedDocumentFlattenedRun[];
-    };
+interface TextSourceRefBase {
+  start: number;
+  end: number;
+  flattenedRuns: NormalizedDocumentFlattenedRun[];
+  kind?: 'blockText' | 'tableText';
+  type?: string;
+}
 
-export type EntryBlockGraphImageSourceRef =
-  | {
-      kind: 'blockImage';
-      blockId: string;
-      imageId: string;
-    }
-  | {
-      kind: 'tableImage';
-      tableId: string;
-      rowId: string;
-      cellId: string;
-      partId: string;
-      imageId: string;
-    };
+interface ImageSourceRefBase {
+  imageId: string;
+  kind?: 'blockImage' | 'tableImage';
+  type?: string;
+}
 
-export type EntryBlockGraphSourceRef = EntryBlockGraphTextSourceRef | EntryBlockGraphImageSourceRef;
+export type BlockTextSourceRef = TextSourceRefBase & {
+  blockId: string;
+};
 
-export interface EntryBlockGraphFieldMapping {
+export type TableTextSourceRef = TextSourceRefBase & {
+  tableId: string;
+  rowId: string;
+  cellId: string;
+  partId: string;
+};
+
+export type isTextSourceRef = BlockTextSourceRef | TableTextSourceRef;
+
+export type BlockImageSourceRef = ImageSourceRefBase & {
+  blockId: string;
+};
+
+export type TableImageSourceRef = ImageSourceRefBase & {
+  tableId: string;
+  rowId: string;
+  cellId: string;
+  partId: string;
+};
+
+export type ImageSourceRef = BlockImageSourceRef | TableImageSourceRef;
+
+export type EntryBlockGraphSourceRef = isTextSourceRef | ImageSourceRef;
+
+export const isTextSourceRef = (
+  sourceRef: EntryBlockGraphSourceRef
+): sourceRef is isTextSourceRef => {
+  return 'start' in sourceRef && 'end' in sourceRef && 'flattenedRuns' in sourceRef;
+};
+
+export const isBlockSourceRef = (
+  sourceRef: EntryBlockGraphSourceRef
+): sourceRef is BlockTextSourceRef | BlockImageSourceRef => {
+  return 'blockId' in sourceRef;
+};
+
+export const isTableSourceRef = (
+  sourceRef: EntryBlockGraphSourceRef
+): sourceRef is TableTextSourceRef | TableImageSourceRef => {
+  return (
+    'tableId' in sourceRef && 'rowId' in sourceRef && 'cellId' in sourceRef && 'partId' in sourceRef
+  );
+};
+
+export const isEntryBlockGraphBlockTextSourceRef = (
+  sourceRef: EntryBlockGraphSourceRef
+): sourceRef is BlockTextSourceRef => {
+  return isBlockSourceRef(sourceRef) && isTextSourceRef(sourceRef);
+};
+
+export const isTableTextSourceRef = (
+  sourceRef: EntryBlockGraphSourceRef
+): sourceRef is TableTextSourceRef => {
+  return isTableSourceRef(sourceRef) && isTextSourceRef(sourceRef);
+};
+
+export const isBlockImageSourceRef = (
+  sourceRef: EntryBlockGraphSourceRef
+): sourceRef is BlockImageSourceRef => {
+  return isBlockSourceRef(sourceRef) && 'imageId' in sourceRef;
+};
+
+export const isTableImageSourceRef = (
+  sourceRef: EntryBlockGraphSourceRef
+): sourceRef is TableImageSourceRef => {
+  return isTableSourceRef(sourceRef) && 'imageId' in sourceRef;
+};
+
+export interface FieldMapping {
   fieldId: string;
   fieldType: string;
   sourceRefs: EntryBlockGraphSourceRef[];
@@ -48,7 +98,7 @@ export interface EntryBlockGraphFieldMapping {
 export interface EntryBlockGraphEntry {
   contentTypeId: string;
   tempId?: string;
-  fieldMappings: EntryBlockGraphFieldMapping[];
+  fieldMappings: FieldMapping[];
 }
 
 export interface EntryBlockGraph {

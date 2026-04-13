@@ -318,6 +318,28 @@ describe('DocumentOutline', () => {
     expect(screen.getByText('paragraph')).toBeTruthy();
   });
 
+  it('renders mapping cards and highlights for block refs from the API shape', () => {
+    const fixture = buildFixture();
+
+    fixture.entryBlockGraph.entries[0].fieldMappings[0].sourceRefs = [
+      {
+        type: 'paragraph',
+        blockId: 'block-1',
+        start: 0,
+        end: 5,
+        flattenedRuns: [{ text: 'Body ', start: 0, end: 5, styles: {} }],
+      } as (typeof fixture.entryBlockGraph.entries)[number]['fieldMappings'][number]['sourceRefs'][number],
+    ];
+
+    render(<DocumentOutline payload={fixture} onBack={vi.fn()} />);
+
+    expect(screen.getByTestId('mapping-card-block-1-0-body')).toBeTruthy();
+    expect(screen.getByTestId('block-segment-block-1-0')).toHaveAttribute(
+      'data-highlighted',
+      'true'
+    );
+  });
+
   it('renders mixed table cell text and image highlights independently', () => {
     render(<DocumentOutline payload={buildFixture()} onBack={vi.fn()} />);
 
@@ -335,6 +357,42 @@ describe('DocumentOutline', () => {
       'true'
     );
     expect(screen.getByTestId('table-image-part-table-0-row-0-cell-1-part-1')).toHaveAttribute(
+      'data-highlighted',
+      'true'
+    );
+  });
+
+  it('highlights mapped offsets using flattened run coordinates', () => {
+    const fixture = buildFixture();
+
+    fixture.normalizedDocument.tables[0].rows[0].cells[1].parts[2] = {
+      id: 'table-0-row-0-cell-1-part-2',
+      type: 'text',
+      textRuns: [{ text: 'NoYes', styles: {} }],
+      flattenedTextRuns: [
+        { text: 'No', start: 0, end: 2, styles: {} },
+        { text: 'Yes', start: 6, end: 9, styles: {} },
+      ],
+    };
+    fixture.entryBlockGraph.entries[0].fieldMappings[2].sourceRefs = [
+      {
+        type: 'tableText',
+        tableId: 'table-0',
+        rowId: 'table-0-row-0',
+        cellId: 'table-0-row-0-cell-1',
+        partId: 'table-0-row-0-cell-1-part-2',
+        start: 6,
+        end: 9,
+        flattenedRuns: [{ text: 'Yes', start: 6, end: 9, styles: {} }],
+      } as (typeof fixture.entryBlockGraph.entries)[number]['fieldMappings'][number]['sourceRefs'][number],
+    ];
+
+    render(<DocumentOutline payload={fixture} onBack={vi.fn()} />);
+
+    expect(
+      screen.getByTestId('table-text-segment-table-0-row-0-cell-1-part-2-1')
+    ).toHaveTextContent('Yes');
+    expect(screen.getByTestId('table-text-segment-table-0-row-0-cell-1-part-2-1')).toHaveAttribute(
       'data-highlighted',
       'true'
     );
