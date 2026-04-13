@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { Button, Layout } from '@contentful/f36-components';
@@ -8,7 +8,7 @@ import {
 } from './components/mainpage/ModalOrchestrator';
 import { MainPageView } from './components/mainpage/MainPageView';
 import { MappingReviewPage } from './components/mainpage/MappingReviewPage';
-import fixtureReviewPayload from '../../fixtures/googleDocsReview/fixture.json';
+import { loadFixtureReviewPayload } from '../../fixtures/googleDocsReview/loadFixtureReviewPayload';
 import type { MappingReviewSuspendPayload, PreviewPayload } from '@types';
 
 const Page = () => {
@@ -20,6 +20,28 @@ const Page = () => {
   const [previewPayload, setPreviewPayload] = useState<PreviewPayload | null>(null);
   const [mappingReviewPayload, setMappingReviewPayload] =
     useState<MappingReviewSuspendPayload | null>(null);
+  const [fixtureReviewPayload, setFixtureReviewPayload] =
+    useState<MappingReviewSuspendPayload | null>(null);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    void loadFixtureReviewPayload()
+      .then((payload) => {
+        if (!isCancelled) {
+          setFixtureReviewPayload(payload);
+        }
+      })
+      .catch(() => {
+        if (!isCancelled) {
+          setFixtureReviewPayload(null);
+        }
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   const handleOauthTokenChange = (token: string) => {
     setOauthToken(token);
@@ -58,7 +80,7 @@ const Page = () => {
     await modalOrchestratorRef.current?.resumeMappingReview(mappingReviewPayload);
   };
 
-  const activePreviewPayload = mappingReviewPayload ?? previewPayload;
+  const activePreviewPayload = mappingReviewPayload;
 
   return (
     <>
@@ -72,12 +94,11 @@ const Page = () => {
           />
         ) : (
           <>
-            <Button
-              onClick={() =>
-                setMappingReviewPayload(fixtureReviewPayload as MappingReviewSuspendPayload)
-              }>
-              Mock from fixture
-            </Button>
+            {fixtureReviewPayload ? (
+              <Button onClick={() => setMappingReviewPayload(fixtureReviewPayload)}>
+                Mock from fixture
+              </Button>
+            ) : null}
             <MainPageView
               oauthToken={oauthToken}
               isOAuthConnected={isOAuthConnected}

@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Button, Flex, Heading, Layout, Paragraph } from '@contentful/f36-components';
-import type { MappingReviewSuspendPayload, PreviewPayload } from '@types';
+import type { MappingReviewSuspendPayload } from '@types';
 import Splitter from './Splitter';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
 import { DocumentOutline } from '../review/DocumentOutline';
 import { isMappingReviewSuspendPayload } from '../../../../utils/utils';
 
 interface MappingReviewPageProps {
-  payload: MappingReviewSuspendPayload | PreviewPayload;
+  payload: MappingReviewSuspendPayload;
   oauthToken: string;
   onLeaveReview: () => void;
   onResumeMappingReview?: () => Promise<void>;
@@ -20,12 +20,8 @@ export const MappingReviewPage = ({
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
 
   const isMappingReview = isMappingReviewSuspendPayload(payload);
-  const documentTitle = isMappingReview
-    ? payload.documentTitle ?? payload.normalizedDocument.title
-    : payload.normalizedDocument.title;
-  const title = `${isMappingReview ? 'Review' : 'Create from'} document "${
-    documentTitle ?? 'Selected document'
-  }"`;
+  const documentTitle = payload.documentTitle || 'Selected document';
+  const title = `Create from document "${documentTitle}"`;
 
   return (
     <>
