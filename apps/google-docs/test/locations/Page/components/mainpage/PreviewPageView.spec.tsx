@@ -34,12 +34,7 @@ describe('PreviewPageView', () => {
   it('renders the mapping review screen without the overview action section', async () => {
     render(
       <Layout>
-        <MappingReviewPage
-          payload={mappingReviewPayload}
-          oauthToken="oauth-token"
-          onLeaveReview={vi.fn()}
-          onResumeMappingReview={vi.fn()}
-        />
+        <MappingReviewPage payload={mappingReviewPayload} onLeaveReview={vi.fn()} />
       </Layout>
     );
 
@@ -53,11 +48,7 @@ describe('PreviewPageView', () => {
 
     render(
       <Layout>
-        <MappingReviewPage
-          payload={mappingReviewPayload}
-          oauthToken="oauth-token"
-          onLeaveReview={onLeavePreview}
-        />
+        <MappingReviewPage payload={mappingReviewPayload} onLeaveReview={onLeavePreview} />
       </Layout>
     );
 

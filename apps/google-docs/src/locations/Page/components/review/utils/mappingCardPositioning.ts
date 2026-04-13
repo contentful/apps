@@ -1,8 +1,8 @@
-import { isBlockSourceRef, type EntryBlockGraphSourceRef } from '@types';
+import { isBlockSourceRef, type SourceRef } from '@types';
 
 const DEFAULT_CARD_GAP = 8;
 
-export const getAnchorIdForSourceRef = (sourceRef: EntryBlockGraphSourceRef): string =>
+export const getAnchorIdForSourceRef = (sourceRef: SourceRef): string =>
   isBlockSourceRef(sourceRef)
     ? `block:${sourceRef.blockId}`
     : `row:${sourceRef.tableId}:${sourceRef.rowId}`;

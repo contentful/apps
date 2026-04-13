@@ -9,6 +9,8 @@ export type DocSegment =
   | { kind: 'block'; id: string; position: number; block: NormalizedDocumentContentBlock }
   | { kind: 'table'; id: string; position: number; table: NormalizedDocumentTable };
 
+type SortableItem = DocSegment | { kind: 'tab'; position: number; tab: NormalizedDocumentTabBlock };
+
 export interface Tab {
   id: string;
   name: string;
@@ -21,23 +23,18 @@ interface Document {
 }
 
 export const buildDocument = (normalizedDocument: NormalizedDocument): Document => {
-  type SortableItem =
-    | { kind: 'block'; position: number; block: NormalizedDocumentContentBlock }
-    | { kind: 'table'; position: number; table: NormalizedDocumentTable }
-    | { kind: 'tab'; position: number; tab: NormalizedDocumentTabBlock };
-
   const allItems: SortableItem[] = [];
 
   normalizedDocument.contentBlocks.forEach((block) => {
     if (block.type === 'tab') {
       allItems.push({ kind: 'tab', position: block.position, tab: block });
     } else {
-      allItems.push({ kind: 'block', position: block.position, block });
+      allItems.push({ kind: 'block', id: block.id, position: block.position, block });
     }
   });
 
   normalizedDocument.tables.forEach((table) => {
-    allItems.push({ kind: 'table', position: table.position, table });
+    allItems.push({ kind: 'table', id: table.id, position: table.position, table });
   });
 
   allItems.sort((a, b) => a.position - b.position);
@@ -57,26 +54,8 @@ export const buildDocument = (normalizedDocument: NormalizedDocument): Document 
       tabs.push(currentTab);
     }
 
-    if (item.kind === 'block') {
-      currentTab.segments.push({
-        kind: 'block',
-        id: item.block.id,
-        position: item.position,
-        block: item.block,
-      });
-    } else {
-      currentTab.segments.push({
-        kind: 'table',
-        id: item.table.id,
-        position: item.position,
-        table: item.table,
-      });
-    }
+    currentTab.segments.push(item);
   });
-
-  if (tabs.length === 0) {
-    tabs.push({ id: normalizedDocument.documentId, name: '', segments: [] });
-  }
 
   return { tabs, allSegments: tabs.flatMap((tab) => tab.segments) };
 };

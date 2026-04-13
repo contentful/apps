@@ -7,18 +7,14 @@ import { DocumentOutline } from '../review/DocumentOutline';
 
 interface MappingReviewPageProps {
   payload: MappingReviewSuspendPayload;
-  oauthToken: string;
   onLeaveReview: () => void;
-  onResumeMappingReview?: () => Promise<void>;
 }
 
-export const MappingReviewPage = ({
-  payload,
-  onLeaveReview: onLeavePreview,
-}: MappingReviewPageProps) => {
+export const MappingReviewPage = ({ payload, onLeaveReview }: MappingReviewPageProps) => {
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
 
-  const documentTitle = payload.documentTitle || 'Selected document';
+  const documentTitle =
+    payload.normalizedDocument.title ?? payload.documentTitle ?? 'Selected document';
   const title = `Create from document "${documentTitle}"`;
 
   return (
@@ -41,7 +37,7 @@ export const MappingReviewPage = ({
       </Layout.Body>
       <ConfirmCancelModal
         isOpen={isConfirmCancelModalOpen}
-        onConfirm={onLeavePreview}
+        onConfirm={onLeaveReview}
         onCancel={() => setIsConfirmCancelModalOpen(false)}
       />
     </>

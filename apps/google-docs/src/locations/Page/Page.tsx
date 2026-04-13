@@ -72,14 +72,6 @@ const Page = () => {
     setMappingReviewPayload(null);
   };
 
-  const handleResumeMappingReview = async () => {
-    if (!mappingReviewPayload) {
-      return;
-    }
-
-    await modalOrchestratorRef.current?.resumeMappingReview(mappingReviewPayload);
-  };
-
   const activePreviewPayload = mappingReviewPayload;
 
   return (
@@ -88,9 +80,7 @@ const Page = () => {
         {activePreviewPayload ? (
           <MappingReviewPage
             payload={activePreviewPayload}
-            oauthToken={oauthToken}
             onLeaveReview={handleReturnToMainPage}
-            onResumeMappingReview={handleResumeMappingReview}
           />
         ) : (
           <>

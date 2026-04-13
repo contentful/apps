@@ -61,12 +61,9 @@ vi.mock('../../../src/locations/Page/components/review/DocumentOutline', () => (
   DocumentOutline: () => <div>Mock fixture review</div>,
 }));
 
-const { mockModalOrchestrator, mockResetFlowFromPreviewCancel, mockResumeMappingReview } =
-  vi.hoisted(() => ({
-    mockModalOrchestrator: vi.fn(),
-    mockResetFlowFromPreviewCancel: vi.fn(),
-    mockResumeMappingReview: vi.fn(),
-  }));
+const { mockModalOrchestrator } = vi.hoisted(() => ({
+  mockModalOrchestrator: vi.fn(),
+}));
 
 vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () => ({
   ModalOrchestrator: require('react').forwardRef(
@@ -79,19 +76,10 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
       },
       ref: React.ForwardedRef<{
         startFlow: () => void;
-        resetFlowFromPreviewCancel: () => void;
-        resumeMappingReview: () => Promise<void>;
       }>
     ) => {
       const handle = {
         startFlow: vi.fn(),
-        resetFlowFromPreviewCancel: () => {
-          mockResetFlowFromPreviewCancel();
-          props.onResetToMain();
-        },
-        resumeMappingReview: async () => {
-          mockResumeMappingReview();
-        },
       };
       if (typeof ref === 'function') {
         ref(handle);
@@ -124,10 +112,7 @@ describe('Page component', () => {
     cleanup();
   });
 
-  beforeEach(() => {
-    mockResetFlowFromPreviewCancel.mockClear();
-    mockResumeMappingReview.mockClear();
-  });
+  beforeEach(() => {});
 
   it('renders MainPageView by default', async () => {
     render(<Page />);

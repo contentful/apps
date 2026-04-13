@@ -24,9 +24,6 @@ import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
-  /** Clears in-progress flow state and returns the page to the main state. */
-  resetFlowFromPreviewCancel: () => void;
-  resumeMappingReview: (payload: MappingReviewSuspendPayload) => Promise<void>;
 }
 
 enum FlowStep {
@@ -68,24 +65,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
     useImperativeHandle(ref, () => ({
       startFlow: () => setIsUploadModalOpen(true),
-      resetFlowFromPreviewCancel: () => {
-        resetProgress();
-        onResetToMain();
-      },
-
-      resumeMappingReview: async (payload: MappingReviewSuspendPayload) => {
-        if (!activeRunId) {
-          throw new Error('Workflow run id is missing for resume.');
-        }
-
-        // TODO : modify the normalized document and entry block graph with the edited values
-        const workflowRun = await resumeWorkflow(activeRunId, {
-          editedNormalizedDocument: payload.normalizedDocument,
-          entryBlockGraph: payload.entryBlockGraph,
-        });
-
-        handleWorkflowResult(workflowRun);
-      },
     }));
 
     const resetDocumentScopeReview = () => {
