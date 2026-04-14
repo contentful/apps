@@ -17,7 +17,7 @@
     "add-locations": "contentful-app-scripts add-locations",
     "build:functions": "contentful-app-scripts build-functions --ci",
     "build:all": "npm run build && npm run build:functions && node -e \"require('fs').mkdirSync('out/functions', {recursive: true}); require('fs').cpSync('build/functions', 'out/functions', {recursive: true})\"",
-    "deploy": "npm run build:all && contentful-app-scripts upload --ci --bundle-dir ./out --organization-id ${DEFINITIONS_ORG_ID} --definition-id 5Sr53r0O6UqTBrp0I9S3OV --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy": "npm run build:all && contentful-app-scripts upload --ci --bundle-dir ./out --organization-id ${DEFINITIONS_ORG_ID} --definition-id 55HqLhaYLjQWU5zPfID6mX --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "npm run build:all && contentful-app-scripts upload --ci --bundle-dir ./out --organization-id ${DEV_TESTING_ORG_ID} --definition-id 5Sr53r0O6UqTBrp0I9S3OV --token ${TEST_CMA_TOKEN}",
     "upload": "node scripts/upload-with-env.js",
     "upsert-actions": "node scripts/upsert-actions-with-env.js",
