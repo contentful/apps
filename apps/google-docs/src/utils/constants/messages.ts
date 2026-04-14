@@ -3,7 +3,7 @@ export const ERROR_MESSAGES = {
   NO_DOCUMENT: 'Please select a document',
   NO_CONTENT_TYPE: 'Please select at least one content type',
   CREATE_ENTRIES_ERROR: 'No entries were created, please try again.',
-  GENERIC_ERROR: 'An error occurred while processing your request. Please try again.',
+  GENERIC_ERROR: 'This preview could not be completed. Please start again.',
 } as const;
 
 export const SUCCESS_MESSAGES = {

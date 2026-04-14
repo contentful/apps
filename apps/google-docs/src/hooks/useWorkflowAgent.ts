@@ -26,7 +26,6 @@ interface UseWorkflowParams {
 
 interface WorkflowHook {
   isAnalyzing: boolean;
-  error: string | null;
   startWorkflow: (contentTypeIds: string[]) => Promise<WorkflowRunResult>;
   resumeWorkflow: (runId: string, resumePayload: ResumePayload) => Promise<WorkflowRunResult>;
 }
@@ -156,12 +155,10 @@ export const useWorkflowAgent = ({
   oauthToken,
 }: UseWorkflowParams): WorkflowHook => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const startWorkflow = useCallback(
     async (contentTypeIds: string[]) => {
       setIsAnalyzing(true);
-      setError(null);
 
       const spaceId = sdk.ids.space;
       const environmentId = sdk.ids.environment;
@@ -194,7 +191,6 @@ export const useWorkflowAgent = ({
         return await pollAgentRun(sdk, spaceId, environmentId, runId);
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Workflow failed');
-        setError(error.message);
         throw error;
       } finally {
         setIsAnalyzing(false);
@@ -206,7 +202,6 @@ export const useWorkflowAgent = ({
   const resumeWorkflow = useCallback(
     async (runId: string, resumePayload: ResumePayload) => {
       setIsAnalyzing(true);
-      setError(null);
 
       const spaceId = sdk.ids.space;
       const environmentId = sdk.ids.environment;
@@ -216,7 +211,6 @@ export const useWorkflowAgent = ({
         return await pollAgentRun(sdk, spaceId, environmentId, runId);
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Workflow failed');
-        setError(error.message);
         throw error;
       } finally {
         setIsAnalyzing(false);
@@ -227,7 +221,6 @@ export const useWorkflowAgent = ({
 
   return {
     isAnalyzing,
-    error,
     startWorkflow,
     resumeWorkflow,
   };
