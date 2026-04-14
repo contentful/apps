@@ -186,7 +186,7 @@ const ConfigScreen = () => {
               {Array(11)
                 .fill(0)
                 .map((_, i) => (
-                  <Select.Option key={i} value={i}>
+                  <Select.Option key={i} value={String(i)}>
                     Include: {i}
                   </Select.Option>
                 ))}
