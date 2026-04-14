@@ -5,16 +5,9 @@ interface ErrorModalProps {
   title: string;
   message: string;
   onClose: () => void;
-  onTryAgain: () => void;
 }
 
-export const ErrorModal: React.FC<ErrorModalProps> = ({
-  isOpen,
-  title,
-  message,
-  onClose,
-  onTryAgain,
-}) => {
+export const ErrorModal: React.FC<ErrorModalProps> = ({ isOpen, title, message, onClose }) => {
   return (
     <Modal
       isShown={isOpen}
@@ -29,11 +22,8 @@ export const ErrorModal: React.FC<ErrorModalProps> = ({
             <Paragraph>{message}</Paragraph>
           </Modal.Content>
           <Modal.Controls>
-            <Button onClick={onClose} variant="secondary">
-              Cancel
-            </Button>
-            <Button onClick={onTryAgain} variant="primary">
-              Try again
+            <Button onClick={onClose} variant="primary">
+              Close
             </Button>
           </Modal.Controls>
         </>
