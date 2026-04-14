@@ -1,34 +1,7 @@
-import {
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-  type RefCallback,
-} from 'react';
-import {
-  Box,
-  Card,
-  Flex,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Text,
-  TextLink,
-} from '@contentful/f36-components';
+import { useLayoutEffect, useMemo, useRef, useState, type RefCallback } from 'react';
+import { Box, Card, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import type {
-  SourceRef,
-  MappingReviewSuspendPayload,
-  NormalizedDocumentContentBlock,
-  NormalizedDocumentFlattenedRun,
-  NormalizedDocumentTable,
-  NormalizedDocumentTablePart,
-  TextSourceRef,
-} from '@types';
-import { isBlockImageSourceRef, isTableImageSourceRef, isTextSourceRef } from '@types';
+import type { MappingReviewSuspendPayload, NormalizedDocumentFlattenedRun } from '@types';
 import { FileTextIcon } from '@contentful/f36-icons';
 import { MappingCard, type MappingCardData } from './MappingCard';
 import { getAnchorIdForSourceRef, resolveMarkerOffsets } from './utils/mappingCardPositioning';
@@ -45,123 +18,11 @@ import {
   formatDisplayName,
   getFieldTypeLabel,
 } from './utils/documentOutlineUtils';
+import { BlockRenderer, TableRenderer } from './utils/renderDocument';
 
 type AnchoredMappingCard = MappingCardData & {
   anchorId: string;
 };
-
-type TextSegment = {
-  text: string;
-  styles?: NormalizedDocumentFlattenedRun['styles'];
-  highlighted: boolean;
-  mappingKeys: string[];
-};
-
-function buildTextSegments(
-  flattenedRuns: NormalizedDocumentFlattenedRun[],
-  usage: Array<{ sourceRef: SourceRef; mappingKey: string }>
-): TextSegment[] {
-  if (!flattenedRuns.length) return [];
-
-  const textUsage = usage.filter(
-    (usageItem): usageItem is { sourceRef: TextSourceRef; mappingKey: string } =>
-      isTextSourceRef(usageItem.sourceRef)
-  );
-
-  const boundaries = new Set<number>();
-  flattenedRuns.forEach((run) => {
-    boundaries.add(run.start);
-    boundaries.add(run.end);
-  });
-  textUsage.forEach(({ sourceRef }) => {
-    boundaries.add(sourceRef.start);
-    boundaries.add(sourceRef.end);
-  });
-
-  const sortedBoundaries = [...boundaries].sort((a, b) => a - b);
-
-  return sortedBoundaries.flatMap((start, index) => {
-    const end = sortedBoundaries[index + 1];
-    if (end === undefined || start === end) {
-      return [];
-    }
-
-    const run = flattenedRuns.find((candidate) => start >= candidate.start && end <= candidate.end);
-    if (!run) {
-      return [];
-    }
-
-    const text = run.text.slice(start - run.start, end - run.start);
-    if (!text) {
-      return [];
-    }
-
-    const mappingKeys = textUsage
-      .filter(({ sourceRef }) => start >= sourceRef.start && end <= sourceRef.end)
-      .map(({ mappingKey }) => mappingKey);
-
-    return [
-      {
-        text,
-        styles: run?.styles,
-        highlighted: mappingKeys.length > 0,
-        mappingKeys,
-      },
-    ];
-  });
-}
-
-function getTextSegmentStyle(styles?: NormalizedDocumentFlattenedRun['styles']): CSSProperties {
-  return {
-    fontWeight: styles?.bold ? 600 : undefined,
-    fontStyle: styles?.italic ? 'italic' : undefined,
-    textDecoration: styles?.underline
-      ? 'underline'
-      : styles?.strikethrough
-      ? 'line-through'
-      : undefined,
-    verticalAlign: styles?.superscript ? 'super' : styles?.subscript ? 'sub' : undefined,
-  };
-}
-
-function renderTextSegment(
-  key: string,
-  segment: TextSegment,
-  hovered: boolean,
-  setHoveredMappings: (mappingKeys: string[]) => void
-) {
-  const content = (
-    <Box
-      as="span"
-      key={key}
-      onMouseEnter={segment.highlighted ? () => setHoveredMappings(segment.mappingKeys) : undefined}
-      onMouseLeave={segment.highlighted ? () => setHoveredMappings([]) : undefined}
-      style={{
-        ...getTextSegmentStyle(segment.styles),
-        backgroundColor: segment.highlighted
-          ? hovered
-            ? tokens.green300
-            : tokens.green200
-          : 'transparent',
-        borderRadius: segment.highlighted ? tokens.borderRadiusSmall : undefined,
-        whiteSpace: 'pre-wrap',
-        transition: 'background-color 120ms ease',
-      }}>
-      {segment.text}
-    </Box>
-  );
-
-  const linkUrl = segment.styles?.linkUrl?.trim();
-  if (!linkUrl) {
-    return content;
-  }
-
-  return (
-    <TextLink key={`link-${key}`} href={linkUrl} target="_blank" rel="noreferrer">
-      {content}
-    </TextLink>
-  );
-}
 
 interface DocumentOutlineProps {
   payload: MappingReviewSuspendPayload;
@@ -193,15 +54,7 @@ export const DocumentOutline = ({ payload }: DocumentOutlineProps): JSX.Element 
     }, {});
   }, [document.images]);
 
-  const listMarkers = useMemo(
-    () =>
-      buildListMarkers(
-        allSegments
-          .filter((seg): seg is Extract<DocSegment, { kind: 'block' }> => seg.kind === 'block')
-          .map((seg) => seg.block)
-      ),
-    [allSegments]
-  );
+  const listMarkers = useMemo(() => buildListMarkers(allSegments), [allSegments]);
 
   const overviewEntries = useMemo(
     () => buildOverviewEntries(payload.entryBlockGraph.entries, payload.contentTypes),
@@ -221,9 +74,6 @@ export const DocumentOutline = ({ payload }: DocumentOutlineProps): JSX.Element 
     }
     return uniqueHighlights(highlightIndex.blockHighlights[segment.id] ?? []);
   };
-
-  const isMappingHovered = (mappingKeys: string[]) =>
-    mappingKeys.some((mappingKey) => hoveredMappingKeys.includes(mappingKey));
 
   const getMappingCardsForSegment = (segment: DocSegment): AnchoredMappingCard[] =>
     getVisibleHighlights(getHighlightsForSegment(segment)).map((highlight) => ({
@@ -293,206 +143,7 @@ export const DocumentOutline = ({ payload }: DocumentOutlineProps): JSX.Element 
     };
 
     measureOffsets();
-    window.addEventListener('resize', measureOffsets);
-
-    return () => {
-      window.removeEventListener('resize', measureOffsets);
-    };
   }, [mappingCardsBySegment, allSegments]);
-
-  const renderBlock = (segmentId: string, block: NormalizedDocumentContentBlock) => {
-    const visibleHighlights = getVisibleHighlights(highlightIndex.blockHighlights[block.id] ?? []);
-    const visibleRefs = visibleHighlights.map((h) => h.sourceRef);
-    const textUsage = visibleHighlights.map((h) => ({
-      sourceRef: h.sourceRef,
-      mappingKey: getMappingCardKey(segmentId, h),
-    }));
-    const textSegments = buildTextSegments(block.flattenedTextRuns, textUsage);
-    const listMarker = block.type === 'listItem' ? listMarkers[block.id] : null;
-    const setHoveredMappings = (mappingKeys: string[]) => setHoveredMappingKeys(mappingKeys);
-
-    const renderedText = (
-      <Text as="p" marginBottom="none">
-        {textSegments.map((seg, index) => {
-          const hovered = isMappingHovered(seg.mappingKeys);
-          return renderTextSegment(`${block.id}-${index}`, seg, hovered, setHoveredMappings);
-        })}
-      </Text>
-    );
-
-    return (
-      <Box>
-        {listMarker ? (
-          <Flex
-            data-testid={`list-item-${block.id}`}
-            alignItems="flex-start"
-            gap="spacing2Xs"
-            style={{
-              marginInlineStart:
-                listMarker.nestingLevel > 0
-                  ? `calc(${tokens.spacingM} * ${listMarker.nestingLevel})`
-                  : undefined,
-            }}>
-            <Text
-              as="span"
-              data-testid={`list-marker-${block.id}`}
-              fontColor="gray600"
-              style={{
-                minWidth: tokens.spacingM,
-                lineHeight: tokens.lineHeightM,
-                flex: '0 0 auto',
-              }}>
-              {listMarker.marker}
-            </Text>
-            <Box style={{ minWidth: 0, flex: 1 }}>{renderedText}</Box>
-          </Flex>
-        ) : (
-          renderedText
-        )}
-
-        {block.imageIds.map((imageId: string) => {
-          const image = imageById[imageId];
-          if (!image) return null;
-          const highlighted = visibleRefs.some(
-            (ref) => isBlockImageSourceRef(ref) && ref.imageId === imageId
-          );
-          const mappingKeys = visibleHighlights
-            .filter((h) => isBlockImageSourceRef(h.sourceRef) && h.sourceRef.imageId === imageId)
-            .map((h) => getMappingCardKey(segmentId, h));
-          const hovered = isMappingHovered(mappingKeys);
-
-          return (
-            <Box key={image.id} marginTop="spacingS">
-              <Box
-                as="img"
-                src={image.url}
-                alt={image.altText ?? image.title ?? 'Document image'}
-                data-highlighted={highlighted ? 'true' : 'false'}
-                data-hovered={hovered ? 'true' : 'false'}
-                onMouseEnter={highlighted ? () => setHoveredMappings(mappingKeys) : undefined}
-                onMouseLeave={highlighted ? () => setHoveredMappings([]) : undefined}
-                style={{
-                  width: '100%',
-                  maxHeight: 280,
-                  objectFit: 'contain',
-                  borderRadius: tokens.borderRadiusMedium,
-                  border: `2px solid ${
-                    highlighted ? (hovered ? tokens.green600 : tokens.green500) : tokens.gray300
-                  }`,
-                  backgroundColor: tokens.gray100,
-                  transition: 'border-color 120ms ease',
-                }}
-              />
-            </Box>
-          );
-        })}
-      </Box>
-    );
-  };
-
-  const renderTablePart = (
-    segmentId: string,
-    table: NormalizedDocumentTable,
-    rowId: string,
-    cellId: string,
-    part: NormalizedDocumentTablePart
-  ) => {
-    const partKey = [table.id, rowId, cellId, part.id].join(':');
-    const visibleHighlights = getVisibleHighlights(
-      highlightIndex.tablePartHighlights[partKey] ?? []
-    );
-    const visibleRefs = visibleHighlights.map((h) => h.sourceRef);
-    const setHoveredMappings = (mappingKeys: string[]) => setHoveredMappingKeys(mappingKeys);
-
-    if (part.type === 'image') {
-      const image = imageById[part.imageId];
-      const highlighted = visibleRefs.some((ref) => isTableImageSourceRef(ref));
-      const mappingKeys = visibleHighlights
-        .filter((h) => isTableImageSourceRef(h.sourceRef))
-        .map((h) => getMappingCardKey(segmentId, h));
-      const hovered = isMappingHovered(mappingKeys);
-
-      if (!image) {
-        return null;
-      }
-
-      return (
-        <Box marginTop="spacing2Xs">
-          <Box
-            as="img"
-            src={image.url}
-            alt={image.altText ?? image.title ?? 'Table image'}
-            data-testid={`table-image-part-${part.id}`}
-            onMouseEnter={highlighted ? () => setHoveredMappings(mappingKeys) : undefined}
-            onMouseLeave={highlighted ? () => setHoveredMappings([]) : undefined}
-            style={{
-              width: '100%',
-              maxWidth: 180,
-              objectFit: 'contain',
-              borderRadius: tokens.borderRadiusMedium,
-              border: `2px solid ${
-                highlighted ? (hovered ? tokens.green600 : tokens.green500) : tokens.gray300
-              }`,
-              backgroundColor: tokens.gray100,
-              transition: 'border-color 120ms ease',
-            }}
-          />
-        </Box>
-      );
-    }
-
-    const textUsage = visibleHighlights.map((h) => ({
-      sourceRef: h.sourceRef,
-      mappingKey: getMappingCardKey(segmentId, h),
-    }));
-    const textSegments = buildTextSegments(part.flattenedTextRuns, textUsage);
-
-    return (
-      <Box as="span" style={{ whiteSpace: 'pre-wrap' }}>
-        {textSegments.map((seg, index) => {
-          const hovered = isMappingHovered(seg.mappingKeys);
-          return renderTextSegment(`${part.id}-${index}`, seg, hovered, setHoveredMappings);
-        })}
-      </Box>
-    );
-  };
-
-  const renderTable = (segmentId: string, table: NormalizedDocumentTable) => (
-    <Table>
-      {table.headers.length > 0 && (
-        <TableHead>
-          <TableRow>
-            {table.headers.map((header: string, headerIndex: number) => (
-              <TableCell key={`${table.id}-header-${headerIndex}`}>{header}</TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-      )}
-      <TableBody>
-        {table.rows.map((row) => (
-          <TableRow
-            key={row.id}
-            data-anchor-id={`row:${table.id}:${row.id}`}
-            data-testid={`table-row-${row.id}`}>
-            {row.cells.map((cell) => (
-              <TableCell
-                key={cell.id}
-                data-testid={`table-cell-${cell.id}`}
-                style={{ backgroundColor: 'transparent', verticalAlign: 'top' }}>
-                <Flex flexDirection="column" gap="spacing2Xs">
-                  {cell.parts.map((part) => (
-                    <Box key={part.id}>
-                      {renderTablePart(segmentId, table, row.id, cell.id, part)}
-                    </Box>
-                  ))}
-                </Flex>
-              </TableCell>
-            ))}
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  );
 
   return (
     <Flex flexDirection="column" gap="spacingM" style={{ padding: tokens.spacingL }}>
@@ -598,13 +249,30 @@ export const DocumentOutline = ({ payload }: DocumentOutlineProps): JSX.Element 
                                 : undefined
                             }
                             style={{
-                              borderRadius: tokens.borderRadiusMedium,
-                              padding: tokens.spacingS,
-                              backgroundColor: 'transparent',
+                              padding: tokens.spacingXs,
                             }}>
-                            {segment.kind === 'table'
-                              ? renderTable(segment.id, segment.table)
-                              : renderBlock(segment.id, segment.block)}
+                            {segment.kind === 'table' ? (
+                              <TableRenderer
+                                segmentId={segment.id}
+                                table={segment.table}
+                                highlightIndex={highlightIndex}
+                                imageById={imageById}
+                                selectedEntryIndex={selectedEntryIndex}
+                                hoveredMappingKeys={hoveredMappingKeys}
+                                onSetHoveredMappingKeys={setHoveredMappingKeys}
+                              />
+                            ) : (
+                              <BlockRenderer
+                                segmentId={segment.id}
+                                block={segment.block}
+                                highlightIndex={highlightIndex}
+                                listMarkers={listMarkers}
+                                imageById={imageById}
+                                selectedEntryIndex={selectedEntryIndex}
+                                hoveredMappingKeys={hoveredMappingKeys}
+                                onSetHoveredMappingKeys={setHoveredMappingKeys}
+                              />
+                            )}
                           </Box>
                         </Box>
                       </Box>
@@ -615,23 +283,15 @@ export const DocumentOutline = ({ payload }: DocumentOutlineProps): JSX.Element 
                         <Box style={{ position: 'relative', minHeight: '100%' }}>
                           {mappingCards.length > 0
                             ? mappingCards.map((mappingCard) => (
-                                <Box
+                                <MappingCard
                                   key={mappingCard.key}
-                                  data-testid={`mapping-card-position-${mappingCard.key}`}
-                                  ref={setCardWrapperRef(mappingCard.key)}
-                                  style={{
-                                    position: 'absolute',
-                                    insetInlineStart: 0,
-                                    insetInlineEnd: 0,
-                                    top: cardOffsetsBySegment[segment.id]?.[mappingCard.key] ?? 0,
-                                  }}>
-                                  <MappingCard
-                                    card={mappingCard}
-                                    isHovered={hoveredMappingKeys.includes(mappingCard.key)}
-                                    onMouseEnter={() => setHoveredMappingKeys([mappingCard.key])}
-                                    onMouseLeave={() => setHoveredMappingKeys([])}
-                                  />
-                                </Box>
+                                  card={mappingCard}
+                                  top={cardOffsetsBySegment[segment.id]?.[mappingCard.key] ?? 0}
+                                  wrapperRef={setCardWrapperRef(mappingCard.key)}
+                                  isHovered={hoveredMappingKeys.includes(mappingCard.key)}
+                                  onMouseEnter={() => setHoveredMappingKeys([mappingCard.key])}
+                                  onMouseLeave={() => setHoveredMappingKeys([])}
+                                />
                               ))
                             : null}
                         </Box>

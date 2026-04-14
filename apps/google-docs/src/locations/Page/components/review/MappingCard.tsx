@@ -1,3 +1,4 @@
+import { type Ref } from 'react';
 import { Box, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 
@@ -9,6 +10,8 @@ export interface MappingCardData {
 
 interface MappingCardProps {
   card: MappingCardData;
+  top: number;
+  wrapperRef: Ref<HTMLDivElement>;
   isHovered?: boolean;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
@@ -29,16 +32,23 @@ const valueTextStyle = {
 
 export const MappingCard = ({
   card,
+  top,
+  wrapperRef,
   isHovered = false,
   onMouseEnter,
   onMouseLeave,
 }: MappingCardProps) => (
   <Box
+    ref={wrapperRef}
     data-testid={`mapping-card-${card.key}`}
     data-hovered={isHovered ? 'true' : 'false'}
     onMouseEnter={onMouseEnter}
     onMouseLeave={onMouseLeave}
     style={{
+      position: 'absolute',
+      insetInlineStart: 0,
+      insetInlineEnd: 0,
+      top,
       border: `${isHovered ? 2 : 1}px solid ${isHovered ? tokens.green600 : tokens.green500}`,
       borderRadius: tokens.borderRadiusMedium,
       padding: tokens.spacing2Xs,
