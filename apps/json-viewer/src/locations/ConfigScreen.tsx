@@ -92,7 +92,10 @@ const ConfigScreen = () => {
   }, [sdk]);
 
   useEffect(() => {
-    setParameters((currentParameters) => ({ ...currentParameters, configOptions: reactJsonConfig }));
+    setParameters((currentParameters) => ({
+      ...currentParameters,
+      configOptions: reactJsonConfig,
+    }));
   }, [reactJsonConfig]);
 
   return (

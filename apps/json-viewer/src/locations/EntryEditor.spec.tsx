@@ -59,9 +59,9 @@ describe('Entry component', () => {
     rerender(<EntryEditor />);
 
     await waitFor(() => {
-      expect((container.querySelector('select[name="includeDepth"]') as HTMLSelectElement).value).toBe(
-        '2'
-      );
+      expect(
+        (container.querySelector('select[name="includeDepth"]') as HTMLSelectElement).value
+      ).toBe('2');
       expect(mockCma.entry.references).toHaveBeenCalledWith({
         entryId: 'test-id',
         include: 2,
