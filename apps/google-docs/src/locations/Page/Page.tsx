@@ -17,7 +17,6 @@ const Page = () => {
   const [oauthToken, setOauthToken] = useState<string>('');
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
   const [isOAuthLoading, setIsOAuthLoading] = useState(true);
-  const [previewPayload, setPreviewPayload] = useState<PreviewPayload | null>(null);
   const [mappingReviewPayload, setMappingReviewPayload] =
     useState<MappingReviewSuspendPayload | null>(null);
   const [fixtureReviewPayload, setFixtureReviewPayload] =
@@ -59,27 +58,20 @@ const Page = () => {
     modalOrchestratorRef.current?.startFlow();
   };
 
-  const handlePreviewReady = (payload: PreviewPayload) => {
-    setPreviewPayload(payload);
-  };
-
   const handleMappingReviewReady = (payload: MappingReviewSuspendPayload) => {
     setMappingReviewPayload(payload);
   };
 
   const handleReturnToMainPage = () => {
-    setPreviewPayload(null);
     setMappingReviewPayload(null);
   };
-
-  const activePreviewPayload = mappingReviewPayload;
 
   return (
     <>
       <Layout withBoxShadow={true} offsetTop={10}>
-        {activePreviewPayload ? (
+        {mappingReviewPayload ? (
           <MappingReviewPage
-            payload={activePreviewPayload}
+            payload={mappingReviewPayload}
             onLeaveReview={handleReturnToMainPage}
           />
         ) : (
@@ -107,7 +99,6 @@ const Page = () => {
         ref={modalOrchestratorRef}
         sdk={sdk}
         oauthToken={oauthToken}
-        onPreviewReady={handlePreviewReady}
         onMappingReviewReady={handleMappingReviewReady}
         onResetToMain={handleReturnToMainPage}
       />

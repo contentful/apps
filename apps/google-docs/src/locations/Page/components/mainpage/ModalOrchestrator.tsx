@@ -36,13 +36,12 @@ enum FlowStep {
 interface ModalOrchestratorProps {
   sdk: PageAppSDK;
   oauthToken: string;
-  onPreviewReady: (payload: PreviewPayload) => void;
   onMappingReviewReady: (payload: MappingReviewSuspendPayload) => void;
   onResetToMain: () => void;
 }
 
 export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrchestratorProps>(
-  ({ sdk, oauthToken, onPreviewReady, onMappingReviewReady, onResetToMain }, ref) => {
+  ({ sdk, oauthToken, onMappingReviewReady, onResetToMain }, ref) => {
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
     const [isErrorPreviewModalOpen, setIsErrorPreviewModalOpen] = useState(false);
@@ -152,7 +151,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       }
 
       setFlowStep(null);
-      onPreviewReady(workflowRun.googleDocPayload);
     };
 
     const continueWorkflow = async (resumePayloadOverrides?: Partial<ResumePayload>) => {

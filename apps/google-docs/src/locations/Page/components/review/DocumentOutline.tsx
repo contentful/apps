@@ -1,7 +1,7 @@
 import { useLayoutEffect, useMemo, useRef, useState, type RefCallback } from 'react';
 import { Box, Card, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import type { MappingReviewSuspendPayload, NormalizedDocumentFlattenedRun } from '@types';
+import type { MappingReviewSuspendPayload } from '@types';
 import { FileTextIcon } from '@contentful/f36-icons';
 import { MappingCard, type MappingCardData } from './MappingCard';
 import { getAnchorIdForSourceRef, resolveMarkerOffsets } from './utils/mappingCardPositioning';

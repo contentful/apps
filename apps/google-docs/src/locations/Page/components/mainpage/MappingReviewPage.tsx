@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Flex, Heading, Layout, Paragraph } from '@contentful/f36-components';
+import { Button, Flex, Heading, Layout } from '@contentful/f36-components';
 import type { MappingReviewSuspendPayload } from '@types';
 import Splitter from './Splitter';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
