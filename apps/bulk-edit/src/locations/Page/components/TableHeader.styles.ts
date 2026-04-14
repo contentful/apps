@@ -33,4 +33,15 @@ export const headerStyles = {
     background: tokens.gray200,
     left: CELL_WIDTH,
   },
+  fieldHeaderContent: {
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: tokens.spacingXs,
+    minWidth: 0,
+  },
+  fieldHeaderTitleRow: {
+    alignItems: 'center',
+    gap: tokens.spacingXs,
+    minWidth: 0,
+  },
 } as const;

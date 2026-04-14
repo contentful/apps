@@ -22,7 +22,6 @@
     "@contentful/field-editor-tags": "^1.7.16",
     "@contentful/react-apps-toolkit": "1.2.16",
     "@contentful/rich-text-html-renderer": "^17.1.0",
-    "@phosphor-icons/react": "^2.1.10",
     "@tanstack/react-virtual": "^3.13.12",
     "contentful-management": "^11.52.0",
     "emotion": "10.0.27",
@@ -62,7 +61,7 @@
   },
   "devDependencies": {
     "@contentful/app-scripts": "^2.3.0",
-    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^14.3.1",
     "@types/node": "^22.13.5",
     "@types/react": "18.3.13",

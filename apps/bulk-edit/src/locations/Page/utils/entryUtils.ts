@@ -12,12 +12,13 @@ import {
   CHANGED_STATUS,
   DRAFT_STATUS,
   PUBLISHED_STATUS,
+  ARCHIVED_STATUS,
   UNKNOWN_STATUS,
 } from './constants';
 import { BadgeVariant } from '@contentful/f36-components';
 import { getCustomBooleanLabels } from './fieldEditorUtils';
 
-export const STATUSES = [DRAFT_STATUS, CHANGED_STATUS, PUBLISHED_STATUS];
+export const STATUSES = [PUBLISHED_STATUS, CHANGED_STATUS, DRAFT_STATUS, ARCHIVED_STATUS];
 
 export const getStatusFromEntry = (entry: Entry): string => {
   const { sys } = entry;
@@ -74,6 +75,37 @@ export const isLinkValue = (value: unknown): value is { sys: { linkType: string 
   );
 };
 
+export const isEntryLinkValue = (
+  value: unknown
+): value is { sys: { linkType: 'Entry'; id: string } } =>
+  isLinkValue(value) && value.sys.linkType === 'Entry' && 'id' in (value as any).sys;
+
+export const getEntryLinkIds = (value: unknown): string[] => {
+  if (isEntryLinkValue(value)) {
+    return [value.sys.id];
+  }
+
+  if (Array.isArray(value)) {
+    return value.filter(isEntryLinkValue).map((reference) => reference.sys.id);
+  }
+
+  return [];
+};
+
+export const getReferenceDisplayValue = (
+  value: unknown,
+  referenceDisplayValues: Record<string, string>
+): string | null => {
+  const entryIds = getEntryLinkIds(value);
+
+  if (entryIds.length === 0) {
+    return null;
+  }
+
+  const labels = entryIds.map((entryId) => referenceDisplayValues[entryId] || entryId);
+  return labels.join(', ');
+};
+
 export const truncate = (str: string, max: number = 20) =>
   str.length > max ? str.slice(0, max) + ' ...' : str;
 
@@ -90,7 +122,8 @@ function isBasicField(field: ContentTypeField) {
 export const getFieldDisplayValue = (
   field: ContentTypeField | null,
   value: unknown,
-  maxLength: number = 30
+  maxLength: number = 30,
+  referenceDisplayValues: Record<string, string> = {}
 ): string => {
   if (!field) return '-';
   if (value === undefined || value === null || value === '') return '-';
@@ -109,7 +142,15 @@ export const getFieldDisplayValue = (
   if (field.type === 'Array' && Array.isArray(value)) {
     const count = value.length;
     if (value[0]?.sys?.linkType === 'Entry') {
-      displayValue = count === 1 ? '1 reference field' : `${count} reference fields`;
+      const referenceLabels = value
+        .filter(isEntryLinkValue)
+        .map((reference) => referenceDisplayValues[reference.sys.id] || reference.sys.id);
+      displayValue =
+        referenceLabels.length > 0
+          ? referenceLabels.join(', ')
+          : count === 1
+          ? '1 reference field'
+          : `${count} reference fields`;
     } else if (value[0]?.sys?.linkType === 'Asset') {
       displayValue = count === 1 ? '1 asset' : `${count} assets`;
     } else {
@@ -128,7 +169,7 @@ export const getFieldDisplayValue = (
     displayValue = `1 asset`;
   }
   if (field.type === 'Link' && isLinkValue(value) && value.sys.linkType === 'Entry') {
-    displayValue = `1 reference field`;
+    displayValue = referenceDisplayValues[(value as any).sys.id] || `1 reference field`;
   }
 
   if (field.type === 'RichText' && typeof value === 'object') {
@@ -160,7 +201,17 @@ export const getEntryUrl = (entry: Entry, spaceId: string, environmentId: string
 export const isCheckboxAllowed = (field: ContentTypeField): boolean => {
   if (!field || !field.type) return false;
 
+  const isSingleEntryReferenceField =
+    field.type === 'Link' &&
+    (field.fieldControl?.widgetId === 'entryLinkEditor' ||
+      field.validations.some((validation) => Array.isArray(validation.linkContentType)));
+  const isMultiEntryReferenceField =
+    field.type === 'Array' && field.items?.type === 'Link' && field.items?.linkType === 'Entry';
   const restrictedTypes = ['Location', 'Asset', 'Link', 'ResourceLink', 'RichText'];
+
+  if (isSingleEntryReferenceField || isMultiEntryReferenceField) {
+    return true;
+  }
 
   if (field.type === 'Array') {
     return field.items?.type === 'Symbol';
@@ -269,6 +320,8 @@ export async function fetchEntriesWithBatching(
       };
 
       const response = await sdk.cma.entry.getMany({
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environment,
         query: batchQuery,
       });
 

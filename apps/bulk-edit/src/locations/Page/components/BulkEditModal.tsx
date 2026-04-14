@@ -1,22 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Flex, FormControl, Modal, Note, Text } from '@contentful/f36-components';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import type { PageAppSDK } from '@contentful/app-sdk';
+import type { ContentTypeProps } from 'contentful-management';
 import type { ContentTypeField, Entry } from '../types';
-import { getEntryFieldValue, getFieldDisplayValue } from '../utils/entryUtils';
+import {
+  getEntryFieldValue,
+  getEntryLinkIds,
+  getEntryTitle,
+  getFieldDisplayValue,
+  getReferenceDisplayValue,
+} from '../utils/entryUtils';
+import { API_LIMITS } from '../utils/constants';
 import { ClockIcon } from '@contentful/f36-icons';
 import { FieldEditor } from './FieldEditor';
 import { FieldValidation } from './FieldValidation';
 import type { LocalesAPI } from '@contentful/field-editor-shared';
+import type { FieldValue } from './FieldEditor';
 
 interface BulkEditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (newValue: string | number) => void;
+  onSave: (newValue: FieldValue) => void;
   selectedEntries: Entry[];
   selectedField: ContentTypeField | null;
   locales: LocalesAPI;
   isSaving: boolean;
   totalUpdateCount: number;
   editionCount: number;
+  contentTypes: ContentTypeProps[];
 }
 
 export const BulkEditModal: React.FC<BulkEditModalProps> = ({
@@ -29,9 +41,12 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
   isSaving,
   totalUpdateCount,
   editionCount,
+  contentTypes,
 }) => {
-  const [value, setValue] = useState<any>('');
+  const sdk = useSDK<PageAppSDK>();
+  const [value, setValue] = useState<FieldValue>('');
   const [hasValidationErrors, setHasValidationErrors] = useState(false);
+  const [referenceDisplayValues, setReferenceDisplayValues] = useState<Record<string, string>>({});
   const entryCount = selectedEntries.length;
   const firstEntry = selectedEntries[0];
   const firstValueToUpdate =
@@ -44,6 +59,62 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
     setValue('');
     setHasValidationErrors(false);
   }, [isOpen]);
+
+  useEffect(() => {
+    const referenceIds = getEntryLinkIds(firstValueToUpdate);
+
+    if (!selectedField || referenceIds.length === 0 || !isOpen) {
+      setReferenceDisplayValues({});
+      return;
+    }
+
+    let isMounted = true;
+
+    const loadReferenceTitles = async () => {
+      try {
+        const linkedEntries: Entry[] = [];
+        const contentTypeMap = new Map(contentTypes.map((ct) => [ct.sys.id, ct]));
+
+        for (let i = 0; i < referenceIds.length; i += API_LIMITS.CORS_QUERY_PARAM_LIMIT) {
+          const chunk = referenceIds.slice(i, i + API_LIMITS.CORS_QUERY_PARAM_LIMIT);
+          const response = await sdk.cma.entry.getMany({
+            spaceId: sdk.ids.space,
+            environmentId: sdk.ids.environment,
+            query: { 'sys.id[in]': chunk.join(','), limit: chunk.length },
+          });
+          linkedEntries.push(...((response.items as Entry[]) || []));
+        }
+
+        if (!isMounted) {
+          return;
+        }
+
+        const labels = Object.fromEntries(
+          linkedEntries.map((entry) => {
+            const ct = contentTypeMap.get(entry.sys.contentType.sys.id);
+            const label = ct ? getEntryTitle(entry, ct, locales.default) : entry.sys.id;
+            return [entry.sys.id, label];
+          })
+        );
+
+        setReferenceDisplayValues(labels);
+      } catch {
+        if (isMounted) {
+          setReferenceDisplayValues({});
+        }
+      }
+    };
+
+    void loadReferenceTitles();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [firstValueToUpdate, isOpen, sdk, selectedField, contentTypes, locales.default]);
+
+  const firstValueDisplay = getReferenceDisplayValue(firstValueToUpdate, referenceDisplayValues)
+    ? getFieldDisplayValue(selectedField, firstValueToUpdate, 30, referenceDisplayValues)
+    : getFieldDisplayValue(selectedField, firstValueToUpdate, 30);
 
   return (
     <Modal
@@ -60,9 +131,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
           </Text>
           <Flex>
             <Text>
-              <Text fontWeight="fontWeightDemiBold">
-                {getFieldDisplayValue(selectedField, firstValueToUpdate, 30)}
-              </Text>{' '}
+              <Text fontWeight="fontWeightDemiBold">{firstValueDisplay}</Text>{' '}
               {entryCount === 1 ? 'selected' : `selected and ${entryCount - 1} more`}
             </Text>
           </Flex>
@@ -73,6 +142,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
                 value={value}
                 onChange={setValue}
                 locales={locales}
+                contentTypes={contentTypes}
                 datatest-id="field-editor"
               />
               <FieldValidation

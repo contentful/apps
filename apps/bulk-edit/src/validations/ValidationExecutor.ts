@@ -106,6 +106,8 @@ export class ValidationExecutor {
         return new InValidation(params, customMessage);
       case 'dateRange':
         return new DateRangeValidation(params, customMessage);
+      case 'linkContentType':
+        return null;
       default:
         console.warn(`Unknown validation type: ${validationType}`);
         return null;

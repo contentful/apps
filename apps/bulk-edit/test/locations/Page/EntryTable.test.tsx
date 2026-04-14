@@ -18,38 +18,66 @@ vi.mock('@tanstack/react-virtual', () => ({
 }));
 
 const mockFields: ContentTypeField[] = [
-  { id: 'displayName', uniqueId: 'displayName', name: 'Display Name', type: 'Symbol' },
-  { id: 'description', uniqueId: 'description', name: 'Description', type: 'Text' },
+  {
+    contentTypeId: 'testContentType',
+    id: 'displayName',
+    uniqueId: 'displayName',
+    name: 'Display Name',
+    type: 'Symbol',
+    required: true,
+    validations: [],
+  },
+  {
+    contentTypeId: 'testContentType',
+    id: 'description',
+    uniqueId: 'description',
+    name: 'Description',
+    type: 'Text',
+    required: true,
+    validations: [],
+  },
 ];
 
 const mockLocalizedFields: ContentTypeField[] = [
   {
     id: 'displayName',
+    contentTypeId: 'testContentType',
     uniqueId: 'displayName-en-US',
+    required: true,
+    validations: [],
     name: 'Display Name',
     type: 'Symbol',
     locale: 'en-US',
   },
   {
     id: 'description',
+    contentTypeId: 'testContentType',
     uniqueId: 'description-en-US',
     name: 'Description',
     type: 'Text',
     locale: 'en-US',
+    required: true,
+    validations: [],
   },
   {
     id: 'displayName',
+    contentTypeId: 'testContentType',
     uniqueId: 'displayName-es-AR',
     name: 'Display Name',
     type: 'Symbol',
     locale: 'es-AR',
+    required: true,
+    validations: [],
   },
   {
     id: 'description',
+    contentTypeId: 'testContentType',
     uniqueId: 'description-es-AR',
     name: 'Description',
     type: 'Text',
     locale: 'es-AR',
+    required: true,
+    validations: [],
   },
 ];
 
@@ -136,6 +164,8 @@ describe('EntryTable', () => {
     expect(screen.getByText('Status')).toBeInTheDocument();
     expect(screen.getByText('Display Name')).toBeInTheDocument();
     expect(screen.getByText('Description')).toBeInTheDocument();
+    expect(screen.getByText('Short text')).toBeInTheDocument();
+    expect(screen.getByText('Long text')).toBeInTheDocument();
   });
 
   it('renders all fields with localized fields in the table header', () => {
@@ -162,6 +192,8 @@ describe('EntryTable', () => {
     expect(screen.getByText('(en-US) Description')).toBeInTheDocument();
     expect(screen.getByText('(es-AR) Display Name')).toBeInTheDocument();
     expect(screen.getByText('(es-AR) Description')).toBeInTheDocument();
+    expect(screen.getAllByText('Short text').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Long text').length).toBeGreaterThan(0);
   });
 
   it('renders entry data in the table cells', () => {
@@ -224,6 +256,57 @@ describe('EntryTable', () => {
     expect(screen.getByText('Edificio dos')).toBeInTheDocument();
     expect(screen.getByText('Descripción uno')).toBeInTheDocument();
     expect(screen.getByText('Descripción dos')).toBeInTheDocument();
+  });
+
+  it('renders resolved reference titles in table cells when provided', () => {
+    const referenceFields: ContentTypeField[] = [
+      {
+        contentTypeId: 'testContentType',
+        id: 'author',
+        uniqueId: 'author',
+        name: 'Author',
+        type: 'Link',
+        required: false,
+        validations: [{ linkContentType: ['bulkEditAuthor'] }],
+        fieldControl: { fieldId: 'author', widgetId: 'entryLinkEditor' },
+      },
+    ];
+
+    const referenceEntries: Entry[] = [
+      {
+        sys: {
+          id: 'entry-1',
+          contentType: { sys: { id: 'building' } },
+          publishedVersion: 1,
+          version: 2,
+        },
+        fields: {
+          displayName: { 'en-US': 'Building one' },
+          author: { 'en-US': { sys: { type: 'Link', linkType: 'Entry', id: 'author-1' } } },
+        },
+      },
+    ];
+
+    render(
+      <EntryTable
+        entries={referenceEntries}
+        fields={referenceFields}
+        contentType={mockContentType}
+        spaceId="space-1"
+        environmentId="env-1"
+        defaultLocale="en-US"
+        activePage={0}
+        totalEntries={1}
+        itemsPerPage={15}
+        onPageChange={() => {}}
+        onItemsPerPageChange={() => {}}
+        pageSizeOptions={[15, 50, 100]}
+        referenceDisplayValues={{ 'author-1': 'Jessie Xu' }}
+      />
+    );
+
+    expect(screen.getByText('Jessie Xu')).toBeInTheDocument();
+    expect(screen.getByText('Reference')).toBeInTheDocument();
   });
 
   it('calls onPageChange when pagination is used', () => {
@@ -381,9 +464,33 @@ describe('EntryTable', () => {
 
   it('shows the Status column tooltip on hover with correct text', async () => {
     const fields: ContentTypeField[] = [
-      { id: 'name', uniqueId: 'name', name: 'Name', type: 'Symbol' },
-      { id: 'location', uniqueId: 'location', name: 'Location', type: 'Location' },
-      { id: 'cost', uniqueId: 'cost', name: 'Cost', type: 'Number' },
+      {
+        contentTypeId: 'testContentType',
+        id: 'name',
+        uniqueId: 'name',
+        name: 'Name',
+        type: 'Symbol',
+        required: true,
+        validations: [],
+      },
+      {
+        contentTypeId: 'testContentType',
+        id: 'location',
+        uniqueId: 'location',
+        name: 'Location',
+        type: 'Location',
+        required: true,
+        validations: [],
+      },
+      {
+        contentTypeId: 'testContentType',
+        id: 'cost',
+        uniqueId: 'cost',
+        name: 'Cost',
+        type: 'Number',
+        required: true,
+        validations: [],
+      },
     ];
     render(
       <EntryTable

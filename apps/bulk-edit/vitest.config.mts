@@ -9,5 +9,10 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/setupTests.ts'],
     env: loadEnv('test', process.cwd(), ''),
+    server: {
+      deps: {
+        inline: ['@contentful/f36-icons'],
+      },
+    },
   },
 });
