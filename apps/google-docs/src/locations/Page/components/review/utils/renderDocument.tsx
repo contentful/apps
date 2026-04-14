@@ -23,6 +23,29 @@ import { getMappingCardKey } from './buildHighlights';
 import type { ListMarker } from './documentOutlineUtils';
 import { buildTextSegments, type TextSegment } from './buildTextSegments';
 
+// ─── Shared helpers ─────────────────────────────────────────────────────────
+
+function filterByEntry<T extends MappingHighlight>(
+  highlights: T[],
+  selectedEntryIndex: number | null
+): T[] {
+  return selectedEntryIndex === null
+    ? highlights
+    : highlights.filter((h) => h.entryIndex === selectedEntryIndex);
+}
+
+function isMappingHovered(keys: string[], hoveredMappingKeys: string[]): boolean {
+  return keys.some((k) => hoveredMappingKeys.includes(k));
+}
+
+function getHighlightStyle(highlighted: boolean, hovered: boolean) {
+  if (!highlighted) return { border: tokens.gray300, background: 'transparent' };
+  return {
+    border: hovered ? tokens.green600 : tokens.green500,
+    background: hovered ? tokens.green300 : tokens.green200,
+  };
+}
+
 // ─── TextSegmentSpan ────────────────────────────────────────────────────────
 
 function getTextSegmentStyle(styles?: TextSegment['styles']): CSSProperties {
@@ -56,11 +79,7 @@ const TextSegmentSpan = ({ id, segment, hovered, onSetHoveredMappings }: TextSeg
       onMouseLeave={segment.highlighted ? () => onSetHoveredMappings([]) : undefined}
       style={{
         ...getTextSegmentStyle(segment.styles),
-        backgroundColor: segment.highlighted
-          ? hovered
-            ? tokens.green300
-            : tokens.green200
-          : 'transparent',
+        backgroundColor: getHighlightStyle(segment.highlighted, hovered).background,
         borderRadius: segment.highlighted ? tokens.borderRadiusSmall : undefined,
         whiteSpace: 'pre-wrap',
         transition: 'background-color 120ms ease',
@@ -102,21 +121,12 @@ export const BlockRenderer = ({
   hoveredMappingKeys,
   onSetHoveredMappingKeys,
 }: BlockRendererProps) => {
-  const allHighlights = highlightIndex.blockHighlights[block.id] ?? [];
-  const visibleHighlights =
-    selectedEntryIndex === null
-      ? allHighlights
-      : allHighlights.filter((h) => h.entryIndex === selectedEntryIndex);
-
-  const visibleRefs = visibleHighlights.map((h) => h.sourceRef);
-  const textUsage = visibleHighlights.map((h) => ({
-    sourceRef: h.sourceRef,
-    mappingKey: getMappingCardKey(segmentId, h),
-  }));
-  const textSegments = buildTextSegments(block.flattenedTextRuns, textUsage);
+  const visibleHighlights = filterByEntry(
+    highlightIndex.blockHighlights[block.id] ?? [],
+    selectedEntryIndex
+  );
+  const textSegments = buildTextSegments(block.flattenedTextRuns, segmentId, visibleHighlights);
   const listMarker = block.type === 'listItem' ? listMarkers[block.id] ?? null : null;
-
-  const isMappingHovered = (keys: string[]) => keys.some((k) => hoveredMappingKeys.includes(k));
 
   const renderedText = (
     <Text as="p" marginBottom="none">
@@ -125,7 +135,7 @@ export const BlockRenderer = ({
           key={`${block.id}-${index}`}
           id={`${block.id}-${index}`}
           segment={seg}
-          hovered={isMappingHovered(seg.mappingKeys)}
+          hovered={isMappingHovered(seg.mappingKeys, hoveredMappingKeys)}
           onSetHoveredMappings={onSetHoveredMappingKeys}
         />
       ))}
@@ -161,13 +171,12 @@ export const BlockRenderer = ({
       {block.imageIds.map((imageId) => {
         const image = imageById[imageId];
         if (!image) return null;
-        const highlighted = visibleRefs.some(
-          (ref) => isBlockImageSourceRef(ref) && ref.imageId === imageId
-        );
-        const mappingKeys = visibleHighlights
+
+        const imageMappingKeys = visibleHighlights
           .filter((h) => isBlockImageSourceRef(h.sourceRef) && h.sourceRef.imageId === imageId)
           .map((h) => getMappingCardKey(segmentId, h));
-        const hovered = isMappingHovered(mappingKeys);
+        const highlighted = imageMappingKeys.length > 0;
+        const hovered = isMappingHovered(imageMappingKeys, hoveredMappingKeys);
 
         return (
           <Box key={image.id} marginTop="spacingS">
@@ -177,16 +186,16 @@ export const BlockRenderer = ({
               alt={image.altText ?? image.title ?? 'Document image'}
               data-highlighted={highlighted ? 'true' : 'false'}
               data-hovered={hovered ? 'true' : 'false'}
-              onMouseEnter={highlighted ? () => onSetHoveredMappingKeys(mappingKeys) : undefined}
+              onMouseEnter={
+                highlighted ? () => onSetHoveredMappingKeys(imageMappingKeys) : undefined
+              }
               onMouseLeave={highlighted ? () => onSetHoveredMappingKeys([]) : undefined}
               style={{
                 width: '100%',
                 maxHeight: 280,
                 objectFit: 'contain',
                 borderRadius: tokens.borderRadiusMedium,
-                border: `2px solid ${
-                  highlighted ? (hovered ? tokens.green600 : tokens.green500) : tokens.gray300
-                }`,
+                border: `2px solid ${getHighlightStyle(highlighted, hovered).border}`,
                 backgroundColor: tokens.gray100,
                 transition: 'border-color 120ms ease',
               }}
@@ -212,9 +221,6 @@ interface TableRendererProps {
 
 interface TablePartRendererProps {
   segmentId: string;
-  tableId: string;
-  rowId: string;
-  cellId: string;
   part: NormalizedDocumentTablePart;
   visibleHighlights: MappingHighlight[];
   imageById: Record<string, NormalizedDocumentImage>;
@@ -230,17 +236,15 @@ const TablePartRenderer = ({
   hoveredMappingKeys,
   onSetHoveredMappingKeys,
 }: TablePartRendererProps) => {
-  const isMappingHovered = (keys: string[]) => keys.some((k) => hoveredMappingKeys.includes(k));
-
   if (part.type === 'image') {
     const image = imageById[part.imageId];
     if (!image) return null;
 
-    const highlighted = visibleHighlights.some((h) => isTableImageSourceRef(h.sourceRef));
     const mappingKeys = visibleHighlights
       .filter((h) => isTableImageSourceRef(h.sourceRef))
       .map((h) => getMappingCardKey(segmentId, h));
-    const hovered = isMappingHovered(mappingKeys);
+    const highlighted = mappingKeys.length > 0;
+    const hovered = isMappingHovered(mappingKeys, hoveredMappingKeys);
 
     return (
       <Box marginTop="spacing2Xs">
@@ -256,9 +260,7 @@ const TablePartRenderer = ({
             maxWidth: 180,
             objectFit: 'contain',
             borderRadius: tokens.borderRadiusMedium,
-            border: `2px solid ${
-              highlighted ? (hovered ? tokens.green600 : tokens.green500) : tokens.gray300
-            }`,
+            border: `2px solid ${getHighlightStyle(highlighted, hovered).border}`,
             backgroundColor: tokens.gray100,
             transition: 'border-color 120ms ease',
           }}
@@ -267,11 +269,7 @@ const TablePartRenderer = ({
     );
   }
 
-  const textUsage = visibleHighlights.map((h) => ({
-    sourceRef: h.sourceRef,
-    mappingKey: getMappingCardKey(segmentId, h),
-  }));
-  const textSegments = buildTextSegments(part.flattenedTextRuns, textUsage);
+  const textSegments = buildTextSegments(part.flattenedTextRuns, segmentId, visibleHighlights);
 
   return (
     <Box as="span" style={{ whiteSpace: 'pre-wrap' }}>
@@ -280,7 +278,7 @@ const TablePartRenderer = ({
           key={`${part.id}-${index}`}
           id={`${part.id}-${index}`}
           segment={seg}
-          hovered={hoveredMappingKeys.some((k) => seg.mappingKeys.includes(k))}
+          hovered={isMappingHovered(seg.mappingKeys, hoveredMappingKeys)}
           onSetHoveredMappings={onSetHoveredMappingKeys}
         />
       ))}
@@ -297,12 +295,8 @@ export const TableRenderer = ({
   hoveredMappingKeys,
   onSetHoveredMappingKeys,
 }: TableRendererProps) => {
-  const getVisiblePartHighlights = (partKey: string): MappingHighlight[] => {
-    const highlights = highlightIndex.tablePartHighlights[partKey] ?? [];
-    return selectedEntryIndex === null
-      ? highlights
-      : highlights.filter((h) => h.entryIndex === selectedEntryIndex);
-  };
+  const getVisiblePartHighlights = (partKey: string) =>
+    filterByEntry(highlightIndex.tablePartHighlights[partKey] ?? [], selectedEntryIndex);
 
   return (
     <Table>
@@ -333,9 +327,6 @@ export const TableRenderer = ({
                       <Box key={part.id}>
                         <TablePartRenderer
                           segmentId={segmentId}
-                          tableId={table.id}
-                          rowId={row.id}
-                          cellId={cell.id}
                           part={part}
                           visibleHighlights={getVisiblePartHighlights(partKey)}
                           imageById={imageById}

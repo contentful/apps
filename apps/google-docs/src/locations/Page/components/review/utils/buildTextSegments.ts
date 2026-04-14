@@ -1,5 +1,7 @@
-import type { NormalizedDocumentFlattenedRun, SourceRef, TextSourceRef } from '@types';
+import type { NormalizedDocumentFlattenedRun, TextSourceRef } from '@types';
 import { isTextSourceRef } from '@types';
+import type { MappingHighlight } from './buildHighlights';
+import { getMappingCardKey } from './buildHighlights';
 
 export type TextSegment = {
   text: string;
@@ -10,14 +12,16 @@ export type TextSegment = {
 
 export function buildTextSegments(
   flattenedRuns: NormalizedDocumentFlattenedRun[],
-  usage: Array<{ sourceRef: SourceRef; mappingKey: string }>
+  segmentId: string,
+  highlights: MappingHighlight[]
 ): TextSegment[] {
   if (!flattenedRuns.length) return [];
 
-  const textUsage = usage.filter(
-    (usageItem): usageItem is { sourceRef: TextSourceRef; mappingKey: string } =>
-      isTextSourceRef(usageItem.sourceRef)
-  );
+  const textUsage = highlights
+    .filter((h): h is MappingHighlight & { sourceRef: TextSourceRef } =>
+      isTextSourceRef(h.sourceRef)
+    )
+    .map((h) => ({ sourceRef: h.sourceRef, mappingKey: getMappingCardKey(segmentId, h) }));
 
   const boundaries = new Set<number>();
   flattenedRuns.forEach((run) => {
