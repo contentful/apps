@@ -1,21 +1,30 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button, Flex, Heading, Layout } from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
 import type { MappingReviewSuspendPayload } from '@types';
-import Splitter from './Splitter';
+import Splitter from '../mainpage/Splitter';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
-import { DocumentOutline } from '../review/DocumentOutline';
+import { OverviewPanel } from './overview/OverviewPanel';
+import { buildOverviewEntries } from './overview/buildOverviewEntries';
+import { MappingView } from './mapping/MappingView';
 
-interface MappingReviewPageProps {
+interface ReviewPageProps {
   payload: MappingReviewSuspendPayload;
   onLeaveReview: () => void;
 }
 
-export const MappingReviewPage = ({ payload, onLeaveReview }: MappingReviewPageProps) => {
+export const ReviewPage = ({ payload, onLeaveReview }: ReviewPageProps) => {
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
+  const [selectedEntryIndex, setSelectedEntryIndex] = useState<number | null>(null);
 
   const documentTitle =
     payload.normalizedDocument.title ?? payload.documentTitle ?? 'Selected document';
   const title = `Create from document "${documentTitle}"`;
+
+  const overviewEntries = useMemo(
+    () => buildOverviewEntries(payload.entryBlockGraph.entries, payload.contentTypes),
+    [payload.contentTypes, payload.entryBlockGraph.entries]
+  );
 
   return (
     <>
@@ -33,7 +42,14 @@ export const MappingReviewPage = ({ payload, onLeaveReview }: MappingReviewPageP
       </Layout.Header>
       <Splitter marginTop="spacingS" />
       <Layout.Body>
-        <DocumentOutline payload={payload} />
+        <Flex flexDirection="column" gap="spacingM" style={{ padding: tokens.spacingL }}>
+          <OverviewPanel
+            overviewEntries={overviewEntries}
+            selectedEntryIndex={selectedEntryIndex}
+            onSelectEntryIndex={setSelectedEntryIndex}
+          />
+          <MappingView payload={payload} selectedEntryIndex={selectedEntryIndex} />
+        </Flex>
       </Layout.Body>
       <ConfirmCancelModal
         isOpen={isConfirmCancelModalOpen}

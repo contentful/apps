@@ -57,8 +57,8 @@ vi.mock('../../../src/locations/Page/components/mainpage/OAuthConnector', () => 
   OAuthConnector: () => <div>Mock OAuth Connector</div>,
 }));
 
-vi.mock('../../../src/locations/Page/components/review/DocumentOutline', () => ({
-  DocumentOutline: () => <div>Mock fixture review</div>,
+vi.mock('../../../src/locations/Page/components/review/mapping/MappingView', () => ({
+  MappingView: () => <div>Mock fixture review</div>,
 }));
 
 const { mockModalOrchestrator } = vi.hoisted(() => ({

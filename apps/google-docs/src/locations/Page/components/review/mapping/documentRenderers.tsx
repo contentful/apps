@@ -20,7 +20,7 @@ import type {
 import { isBlockImageSourceRef, isTableImageSourceRef } from '@types';
 import type { MappingHighlight, MappingHighlightIndex } from './buildHighlights';
 import { getMappingCardKey } from './buildHighlights';
-import type { ListMarker } from './documentOutlineUtils';
+import type { ListMarker } from './buildListMarkers';
 import { buildTextSegments, type TextSegment } from './buildTextSegments';
 
 // ─── Shared helpers ─────────────────────────────────────────────────────────

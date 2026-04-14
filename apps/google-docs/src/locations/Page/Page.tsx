@@ -7,7 +7,7 @@ import {
   ModalOrchestratorHandle,
 } from './components/mainpage/ModalOrchestrator';
 import { MainPageView } from './components/mainpage/MainPageView';
-import { MappingReviewPage } from './components/mainpage/MappingReviewPage';
+import { ReviewPage } from './components/review/ReviewPage';
 import { loadFixtureReviewPayload } from '../../fixtures/googleDocsReview/loadFixtureReviewPayload';
 import type { MappingReviewSuspendPayload } from '@types';
 const enableMockReviewPayload = import.meta.env.VITE_ENABLE_MOCK_REVIEW_PAYLOAD === 'true';
@@ -72,10 +72,7 @@ const Page = () => {
     <>
       <Layout withBoxShadow={true} offsetTop={10}>
         {mappingReviewPayload ? (
-          <MappingReviewPage
-            payload={mappingReviewPayload}
-            onLeaveReview={handleReturnToMainPage}
-          />
+          <ReviewPage payload={mappingReviewPayload} onLeaveReview={handleReturnToMainPage} />
         ) : (
           <>
             {/* TODO: remove mock review payload button before launch */}
