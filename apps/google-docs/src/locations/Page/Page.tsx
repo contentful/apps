@@ -9,7 +9,8 @@ import {
 import { MainPageView } from './components/mainpage/MainPageView';
 import { MappingReviewPage } from './components/mainpage/MappingReviewPage';
 import { loadFixtureReviewPayload } from '../../fixtures/googleDocsReview/loadFixtureReviewPayload';
-import type { MappingReviewSuspendPayload, PreviewPayload } from '@types';
+import type { MappingReviewSuspendPayload } from '@types';
+const enableMockReviewPayload = import.meta.env.VITE_ENABLE_MOCK_REVIEW_PAYLOAD === 'true';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -22,6 +23,7 @@ const Page = () => {
   const [fixtureReviewPayload, setFixtureReviewPayload] =
     useState<MappingReviewSuspendPayload | null>(null);
 
+  // TODO: remove fixture review payload loading before launch
   useEffect(() => {
     let isCancelled = false;
 
@@ -76,7 +78,8 @@ const Page = () => {
           />
         ) : (
           <>
-            {fixtureReviewPayload ? (
+            {/* TODO: remove mock review payload button before launch */}
+            {enableMockReviewPayload && fixtureReviewPayload ? (
               <Button onClick={() => setMappingReviewPayload(fixtureReviewPayload)}>
                 Mock from fixture
               </Button>

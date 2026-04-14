@@ -2,10 +2,7 @@ import { ArrowRightIcon } from '@contentful/f36-icons';
 import { Button, Card, Flex, Heading, Layout, Note, Paragraph } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { OAuthConnector } from './OAuthConnector';
-import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
-import { creationPayloadMock } from '../../../../mocks/previewPayloadSample';
 import { PageAppSDK } from '@contentful/app-sdk';
-const enableMockEntryCreation = import.meta.env.VITE_ENABLE_MOCK_ENTRY_CREATION === 'true';
 
 interface MainPageViewProps {
   oauthToken: string;
@@ -72,17 +69,6 @@ export const MainPageView = ({
                 endIcon={<ArrowRightIcon />}>
                 Select your file
               </Button>
-
-              {enableMockEntryCreation ? (
-                <Button
-                  variant="secondary"
-                  size="medium"
-                  isDisabled={!oauthToken}
-                  onClick={() => createEntriesFromPreviewPayload(sdk, creationPayloadMock)}
-                  endIcon={<ArrowRightIcon />}>
-                  Create entries from mock
-                </Button>
-              ) : null}
             </Flex>
           </Flex>
         </Card>

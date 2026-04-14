@@ -1,5 +1,7 @@
 import type { MappingReviewSuspendPayload } from '@types';
 
+// This file is temporary to load a mapping suspend payload from the fixture.json file to speed up development.
+// TODO: remove this file before launch
 type FixtureReviewPayloadModule =
   | MappingReviewSuspendPayload
   | {

@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_ENABLE_MOCK_ENTRY_CREATION?: string;
+  readonly VITE_ENABLE_MOCK_REVIEW_PAYLOAD?: string;
 }
 
 declare module '*.png' {
