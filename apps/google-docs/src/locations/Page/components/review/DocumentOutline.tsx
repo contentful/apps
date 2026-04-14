@@ -1,7 +1,7 @@
-import { useLayoutEffect, useMemo, useRef, useState, type RefCallback } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState, type Ref, type RefCallback } from 'react';
 import { Box, Card, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import type { MappingReviewSuspendPayload } from '@types';
+import type { ImageSourceRef, MappingReviewSuspendPayload } from '@types';
 import { FileTextIcon } from '@contentful/f36-icons';
 import { MappingCard, type MappingCardData } from './MappingCard';
 import { getAnchorIdForSourceRef, resolveMarkerOffsets } from './utils/mappingCardPositioning';
@@ -26,9 +26,17 @@ type AnchoredMappingCard = MappingCardData & {
 
 interface DocumentOutlineProps {
   payload: MappingReviewSuspendPayload;
+  reviewDocumentRootRef?: Ref<HTMLDivElement>;
+  onImageAssign: (sourceRef: ImageSourceRef, assetDisplayName: string) => void;
+  onImageExclude: (sourceRef: ImageSourceRef, assetDisplayName: string) => void;
 }
 
-export const DocumentOutline = ({ payload }: DocumentOutlineProps): JSX.Element => {
+export const DocumentOutline = ({
+  payload,
+  reviewDocumentRootRef,
+  onImageAssign,
+  onImageExclude,
+}: DocumentOutlineProps): JSX.Element => {
   const [selectedEntryIndex, setSelectedEntryIndex] = useState<number | null>(null);
   const [hoveredMappingKeys, setHoveredMappingKeys] = useState<string[]>([]);
   const [cardOffsetsBySegment, setCardOffsetsBySegment] = useState<
@@ -38,6 +46,7 @@ export const DocumentOutline = ({ payload }: DocumentOutlineProps): JSX.Element 
   const cardWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const document = payload.normalizedDocument;
+  const excludedSourceRefs = payload.entryBlockGraph.excludedSourceRefs;
 
   const highlightIndex = useMemo(
     () => buildMappingHighlightIndex(payload.entryBlockGraph),
@@ -214,6 +223,8 @@ export const DocumentOutline = ({ payload }: DocumentOutlineProps): JSX.Element 
         </Flex>
       </Card>
       <Flex
+        ref={reviewDocumentRootRef}
+        data-testid="review-document-root"
         flexDirection="column"
         gap="spacingS"
         style={{ padding: tokens.spacingM, marginTop: tokens.spacingM }}>
@@ -238,7 +249,9 @@ export const DocumentOutline = ({ payload }: DocumentOutlineProps): JSX.Element 
                       data-testid={`segment-layout-${segment.id}`}
                       ref={setSegmentLayoutRef(segment.id)}>
                       <Box style={{ flex: 2 }}>
-                        <Box data-testid={`segment-surface-${segment.id}`}>
+                        <Box
+                          data-testid={`segment-surface-${segment.id}`}
+                          data-review-segment-surface>
                           <Box
                             data-anchor-id={
                               segment.kind === 'block' ? `block:${segment.block.id}` : undefined
@@ -260,6 +273,9 @@ export const DocumentOutline = ({ payload }: DocumentOutlineProps): JSX.Element 
                                 selectedEntryIndex={selectedEntryIndex}
                                 hoveredMappingKeys={hoveredMappingKeys}
                                 onSetHoveredMappingKeys={setHoveredMappingKeys}
+                                onImageAssign={onImageAssign}
+                                onImageExclude={onImageExclude}
+                                excludedSourceRefs={excludedSourceRefs}
                               />
                             ) : (
                               <BlockRenderer
@@ -271,6 +287,9 @@ export const DocumentOutline = ({ payload }: DocumentOutlineProps): JSX.Element 
                                 selectedEntryIndex={selectedEntryIndex}
                                 hoveredMappingKeys={hoveredMappingKeys}
                                 onSetHoveredMappingKeys={setHoveredMappingKeys}
+                                onImageAssign={onImageAssign}
+                                onImageExclude={onImageExclude}
+                                excludedSourceRefs={excludedSourceRefs}
                               />
                             )}
                           </Box>

@@ -1,25 +1,9 @@
 import Page from '../../../src/locations/Page/Page';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { mockCma, mockSdk } from '../../mocks';
-import { vi, describe, it, expect, afterEach, beforeEach } from 'vitest';
+import { vi, describe, it, expect, afterEach } from 'vitest';
 import React from 'react';
-import type { MappingReviewSuspendPayload, PreviewPayload } from '@types';
-
-const previewPayloadMock: PreviewPayload = {
-  entries: [],
-  assets: [],
-  referenceGraph: {},
-  normalizedDocument: {
-    documentId: 'doc-test',
-    title: 'Document from workflow',
-    contentBlocks: [],
-    tables: [],
-  },
-  entryBlockGraph: {
-    entries: [],
-    excludedSourceRefs: [],
-  },
-};
+import type { MappingReviewSuspendPayload } from '@types';
 
 const mappingReviewPayloadMock: MappingReviewSuspendPayload = {
   suspendStepId: 'mapping-review',
@@ -57,6 +41,16 @@ vi.mock('../../../src/locations/Page/components/mainpage/OAuthConnector', () => 
   OAuthConnector: () => <div>Mock OAuth Connector</div>,
 }));
 
+vi.mock('../../../src/fixtures/googleDocsReview/loadFixtureReviewPayload', () => ({
+  loadFixtureReviewPayload: vi.fn(async () => ({
+    ...mappingReviewPayloadMock,
+    normalizedDocument: {
+      ...mappingReviewPayloadMock.normalizedDocument,
+      title: 'Fixture document title',
+    },
+  })),
+}));
+
 vi.mock('../../../src/locations/Page/components/review/DocumentOutline', () => ({
   DocumentOutline: () => <div>Mock fixture review</div>,
 }));
@@ -69,7 +63,6 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
   ModalOrchestrator: require('react').forwardRef(
     (
       props: {
-        onPreviewReady: (payload: PreviewPayload) => void;
         onMappingReviewReady: (payload: MappingReviewSuspendPayload) => void;
         onResetToMain: () => void;
         oauthToken: string;
@@ -90,9 +83,6 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
       mockModalOrchestrator(props);
       return (
         <>
-          <button onClick={() => props.onPreviewReady(previewPayloadMock)} type="button">
-            Trigger Preview Ready
-          </button>
           <button
             onClick={() => props.onMappingReviewReady(mappingReviewPayloadMock)}
             type="button">
@@ -112,8 +102,6 @@ describe('Page component', () => {
     cleanup();
   });
 
-  beforeEach(() => {});
-
   it('renders MainPageView by default', async () => {
     render(<Page />);
 
@@ -123,21 +111,26 @@ describe('Page component', () => {
     });
   });
 
-  it('switches to preview view when preview is ready', async () => {
+  it('switches to mapping review when the workflow pauses for mapping review', async () => {
     render(<Page />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Trigger Preview Ready' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Trigger Mapping Review Ready' }));
 
     await waitFor(() => {
-      expect(screen.getByText('Create from document "Document from workflow"')).toBeTruthy();
+      expect(
+        screen.getByRole('heading', {
+          name: 'Create from document "Document mapping review"',
+        })
+      ).toBeTruthy();
+      expect(screen.getByText('Mock fixture review')).toBeTruthy();
       expect(screen.queryByRole('heading', { name: 'Drive Integration' })).toBeNull();
     });
   });
 
-  it('returns to main view when preview cancel is confirmed', async () => {
+  it('returns to main view when cancel is confirmed from mapping review', async () => {
     render(<Page />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Trigger Preview Ready' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Trigger Mapping Review Ready' }));
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Cancel preview' })).toBeTruthy();
     });
@@ -165,9 +158,13 @@ describe('Page component', () => {
       expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
     });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Trigger Preview Ready' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Trigger Mapping Review Ready' }));
     await waitFor(() => {
-      expect(screen.getByText('Create from document "Document from workflow"')).toBeTruthy();
+      expect(
+        screen.getByRole('heading', {
+          name: 'Create from document "Document mapping review"',
+        })
+      ).toBeTruthy();
     });
 
     fireEvent.click(screen.getByRole('button', { name: 'Trigger Reset To Main' }));
@@ -178,16 +175,20 @@ describe('Page component', () => {
     });
   });
 
-  it('switches to the fixture review screen from the main page', async () => {
+  it('switches to mapping review from the fixture payload when Mock from fixture is used', async () => {
     render(<Page />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Mock from fixture' })).toBeTruthy();
+    });
 
     fireEvent.click(screen.getByRole('button', { name: 'Mock from fixture' }));
 
     await waitFor(() => {
       expect(
-        screen.getByText(
-          'Review document "Pinterest Business Site Brief_Pinterest Top of Search ads"'
-        )
+        screen.getByRole('heading', {
+          name: 'Create from document "Fixture document title"',
+        })
       ).toBeTruthy();
       expect(screen.getByText('Mock fixture review')).toBeTruthy();
       expect(screen.queryByRole('heading', { name: 'Drive Integration' })).toBeNull();
@@ -206,18 +207,6 @@ describe('Page component', () => {
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
       expect(screen.queryByText('Mock fixture review')).toBeNull();
-    });
-  });
-
-  it('switches to the mapping review screen when the workflow pauses for mapping review', async () => {
-    render(<Page />);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Trigger Mapping Review Ready' }));
-
-    await waitFor(() => {
-      expect(screen.getByText('Review document "Document mapping review"')).toBeTruthy();
-      expect(screen.getByText('Mock fixture review')).toBeTruthy();
-      expect(screen.queryByRole('heading', { name: 'Drive Integration' })).toBeNull();
     });
   });
 });

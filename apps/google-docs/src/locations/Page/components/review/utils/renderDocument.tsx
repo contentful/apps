@@ -12,16 +12,21 @@ import {
 } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import type {
+  ImageSourceRef,
   NormalizedDocumentContentBlock,
   NormalizedDocumentImage,
   NormalizedDocumentTable,
   NormalizedDocumentTablePart,
+  SourceRef,
 } from '@types';
 import { isBlockImageSourceRef, isTableImageSourceRef } from '@types';
+import { ReviewImageAssetCard } from '../ReviewImageAssetCard';
+import { isImageSourceRefExcluded } from './sourceRefReview';
 import type { MappingHighlight, MappingHighlightIndex } from './buildHighlights';
 import { getMappingCardKey } from './buildHighlights';
 import type { ListMarker } from './documentOutlineUtils';
 import { buildTextSegments, type TextSegment } from './buildTextSegments';
+import { getNormalizedImageDisplayName } from './normalizedImageDisplayName';
 
 // ─── TextSegmentSpan ────────────────────────────────────────────────────────
 
@@ -90,6 +95,9 @@ interface BlockRendererProps {
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
+  onImageAssign: (sourceRef: ImageSourceRef, assetDisplayName: string) => void;
+  onImageExclude: (sourceRef: ImageSourceRef, assetDisplayName: string) => void;
+  excludedSourceRefs?: SourceRef[];
 }
 
 export const BlockRenderer = ({
@@ -101,6 +109,9 @@ export const BlockRenderer = ({
   selectedEntryIndex,
   hoveredMappingKeys,
   onSetHoveredMappingKeys,
+  onImageAssign,
+  onImageExclude,
+  excludedSourceRefs,
 }: BlockRendererProps) => {
   const allHighlights = highlightIndex.blockHighlights[block.id] ?? [];
   const visibleHighlights =
@@ -169,27 +180,26 @@ export const BlockRenderer = ({
           .map((h) => getMappingCardKey(segmentId, h));
         const hovered = isMappingHovered(mappingKeys);
 
+        const blockImageRef = {
+          type: 'blockImage' as const,
+          blockId: block.id,
+          imageId,
+        };
+        const isExcluded =
+          excludedSourceRefs && isImageSourceRefExcluded(blockImageRef, excludedSourceRefs);
+
         return (
           <Box key={image.id} marginTop="spacingS">
-            <Box
-              as="img"
-              src={image.url}
-              alt={image.altText ?? image.title ?? 'Document image'}
-              data-highlighted={highlighted ? 'true' : 'false'}
-              data-hovered={hovered ? 'true' : 'false'}
+            <ReviewImageAssetCard
+              image={image}
+              sourceRef={blockImageRef}
+              isHighlighted={highlighted}
+              hovered={hovered}
+              isExcluded={Boolean(isExcluded)}
               onMouseEnter={highlighted ? () => onSetHoveredMappingKeys(mappingKeys) : undefined}
               onMouseLeave={highlighted ? () => onSetHoveredMappingKeys([]) : undefined}
-              style={{
-                width: '100%',
-                maxHeight: 280,
-                objectFit: 'contain',
-                borderRadius: tokens.borderRadiusMedium,
-                border: `2px solid ${
-                  highlighted ? (hovered ? tokens.green600 : tokens.green500) : tokens.gray300
-                }`,
-                backgroundColor: tokens.gray100,
-                transition: 'border-color 120ms ease',
-              }}
+              onAssign={() => onImageAssign(blockImageRef, getNormalizedImageDisplayName(image))}
+              onExclude={() => onImageExclude(blockImageRef, getNormalizedImageDisplayName(image))}
             />
           </Box>
         );
@@ -208,6 +218,9 @@ interface TableRendererProps {
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
+  onImageAssign: (sourceRef: ImageSourceRef, assetDisplayName: string) => void;
+  onImageExclude: (sourceRef: ImageSourceRef, assetDisplayName: string) => void;
+  excludedSourceRefs?: SourceRef[];
 }
 
 interface TablePartRendererProps {
@@ -220,15 +233,24 @@ interface TablePartRendererProps {
   imageById: Record<string, NormalizedDocumentImage>;
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
+  onImageAssign: (sourceRef: ImageSourceRef, assetDisplayName: string) => void;
+  onImageExclude: (sourceRef: ImageSourceRef, assetDisplayName: string) => void;
+  excludedSourceRefs?: SourceRef[];
 }
 
 const TablePartRenderer = ({
   segmentId,
+  tableId,
+  rowId,
+  cellId,
   part,
   visibleHighlights,
   imageById,
   hoveredMappingKeys,
   onSetHoveredMappingKeys,
+  onImageAssign,
+  onImageExclude,
+  excludedSourceRefs,
 }: TablePartRendererProps) => {
   const isMappingHovered = (keys: string[]) => keys.some((k) => hoveredMappingKeys.includes(k));
 
@@ -236,32 +258,46 @@ const TablePartRenderer = ({
     const image = imageById[part.imageId];
     if (!image) return null;
 
-    const highlighted = visibleHighlights.some((h) => isTableImageSourceRef(h.sourceRef));
+    const highlighted = visibleHighlights.some(
+      (h) =>
+        isTableImageSourceRef(h.sourceRef) &&
+        h.sourceRef.imageId === part.imageId &&
+        h.sourceRef.partId === part.id
+    );
     const mappingKeys = visibleHighlights
-      .filter((h) => isTableImageSourceRef(h.sourceRef))
+      .filter(
+        (h) =>
+          isTableImageSourceRef(h.sourceRef) &&
+          h.sourceRef.imageId === part.imageId &&
+          h.sourceRef.partId === part.id
+      )
       .map((h) => getMappingCardKey(segmentId, h));
     const hovered = isMappingHovered(mappingKeys);
 
+    const tableImageRef = {
+      type: 'tableImage' as const,
+      tableId,
+      rowId,
+      cellId,
+      partId: part.id,
+      imageId: part.imageId,
+    };
+    const isExcluded =
+      excludedSourceRefs && isImageSourceRefExcluded(tableImageRef, excludedSourceRefs);
+
     return (
-      <Box marginTop="spacing2Xs">
-        <Box
-          as="img"
-          src={image.url}
-          alt={image.altText ?? image.title ?? 'Table image'}
-          data-testid={`table-image-part-${part.id}`}
+      <Box marginTop="spacing2Xs" data-testid={`table-image-part-${part.id}`}>
+        <ReviewImageAssetCard
+          image={image}
+          sourceRef={tableImageRef}
+          isHighlighted={highlighted}
+          hovered={hovered}
+          isExcluded={Boolean(isExcluded)}
+          size="small"
           onMouseEnter={highlighted ? () => onSetHoveredMappingKeys(mappingKeys) : undefined}
           onMouseLeave={highlighted ? () => onSetHoveredMappingKeys([]) : undefined}
-          style={{
-            width: '100%',
-            maxWidth: 180,
-            objectFit: 'contain',
-            borderRadius: tokens.borderRadiusMedium,
-            border: `2px solid ${
-              highlighted ? (hovered ? tokens.green600 : tokens.green500) : tokens.gray300
-            }`,
-            backgroundColor: tokens.gray100,
-            transition: 'border-color 120ms ease',
-          }}
+          onAssign={() => onImageAssign(tableImageRef, getNormalizedImageDisplayName(image))}
+          onExclude={() => onImageExclude(tableImageRef, getNormalizedImageDisplayName(image))}
         />
       </Box>
     );
@@ -296,6 +332,9 @@ export const TableRenderer = ({
   selectedEntryIndex,
   hoveredMappingKeys,
   onSetHoveredMappingKeys,
+  onImageAssign,
+  onImageExclude,
+  excludedSourceRefs,
 }: TableRendererProps) => {
   const getVisiblePartHighlights = (partKey: string): MappingHighlight[] => {
     const highlights = highlightIndex.tablePartHighlights[partKey] ?? [];
@@ -341,6 +380,9 @@ export const TableRenderer = ({
                           imageById={imageById}
                           hoveredMappingKeys={hoveredMappingKeys}
                           onSetHoveredMappingKeys={onSetHoveredMappingKeys}
+                          onImageAssign={onImageAssign}
+                          onImageExclude={onImageExclude}
+                          excludedSourceRefs={excludedSourceRefs}
                         />
                       </Box>
                     );
