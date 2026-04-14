@@ -1,9 +1,9 @@
 import Page from '../../../src/locations/Page/Page';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { mockCma, mockSdk } from '../../mocks';
-import { vi, describe, it, expect, afterEach } from 'vitest';
+import { vi, describe, it, expect, afterEach, beforeEach } from 'vitest';
 import React from 'react';
-import type { PreviewPayload } from '@types';
+import type { MappingReviewSuspendPayload, PreviewPayload } from '@types';
 
 const previewPayloadMock: PreviewPayload = {
   entries: [],
@@ -15,6 +15,37 @@ const previewPayloadMock: PreviewPayload = {
     contentBlocks: [],
     tables: [],
   },
+  entryBlockGraph: {
+    entries: [],
+    excludedSourceRefs: [],
+  },
+};
+
+const mappingReviewPayloadMock: MappingReviewSuspendPayload = {
+  suspendStepId: 'mapping-review',
+  reason: 'Mapping review required before CMA payload generation continues',
+  documentId: 'doc-test',
+  documentTitle: 'Document mapping review',
+  normalizedDocument: {
+    documentId: 'doc-test',
+    title: 'Document mapping review',
+    designValues: [],
+    contentBlocks: [],
+    images: [],
+    tables: [],
+    assets: [],
+  },
+  entryBlockGraph: {
+    entries: [],
+    excludedSourceRefs: [],
+  },
+  referenceGraph: {
+    edges: [],
+    creationOrder: [],
+    deferredFields: [],
+    hasCircularDependency: false,
+  },
+  contentTypes: [],
 };
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
@@ -26,9 +57,12 @@ vi.mock('../../../src/locations/Page/components/mainpage/OAuthConnector', () => 
   OAuthConnector: () => <div>Mock OAuth Connector</div>,
 }));
 
-const { mockModalOrchestrator, mockResetFlowState } = vi.hoisted(() => ({
+vi.mock('../../../src/locations/Page/components/review/DocumentOutline', () => ({
+  DocumentOutline: () => <div>Mock fixture review</div>,
+}));
+
+const { mockModalOrchestrator } = vi.hoisted(() => ({
   mockModalOrchestrator: vi.fn(),
-  mockResetFlowState: vi.fn(),
 }));
 
 vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () => ({
@@ -36,19 +70,16 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
     (
       props: {
         onPreviewReady: (payload: PreviewPayload) => void;
+        onMappingReviewReady: (payload: MappingReviewSuspendPayload) => void;
         onResetToMain: () => void;
         oauthToken: string;
       },
       ref: React.ForwardedRef<{
         startFlow: () => void;
-        resetFlowState: () => void;
       }>
     ) => {
       const handle = {
         startFlow: vi.fn(),
-        resetFlowState: () => {
-          mockResetFlowState();
-        },
       };
       if (typeof ref === 'function') {
         ref(handle);
@@ -61,6 +92,11 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
         <>
           <button onClick={() => props.onPreviewReady(previewPayloadMock)} type="button">
             Trigger Preview Ready
+          </button>
+          <button
+            onClick={() => props.onMappingReviewReady(mappingReviewPayloadMock)}
+            type="button">
+            Trigger Mapping Review Ready
           </button>
           <button onClick={props.onResetToMain} type="button">
             Trigger Reset To Main
@@ -76,9 +112,7 @@ describe('Page component', () => {
     cleanup();
   });
 
-  beforeEach(() => {
-    mockResetFlowState.mockClear();
-  });
+  beforeEach(() => {});
 
   it('renders MainPageView by default', async () => {
     render(<Page />);
@@ -119,7 +153,6 @@ describe('Page component', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cancel without creating' }));
 
     await waitFor(() => {
-      expect(mockResetFlowState).toHaveBeenCalledTimes(1);
       expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
       expect(screen.queryByText(/Create from document "Selected document"/)).toBeNull();
     });
@@ -140,9 +173,51 @@ describe('Page component', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Trigger Reset To Main' }));
 
     await waitFor(() => {
-      expect(mockResetFlowState).toHaveBeenCalledTimes(1);
       expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
       expect(screen.queryByText(/Create from document "Selected document"/)).toBeNull();
+    });
+  });
+
+  it('switches to the fixture review screen from the main page', async () => {
+    render(<Page />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Mock from fixture' }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          'Review document "Pinterest Business Site Brief_Pinterest Top of Search ads"'
+        )
+      ).toBeTruthy();
+      expect(screen.getByText('Mock fixture review')).toBeTruthy();
+      expect(screen.queryByRole('heading', { name: 'Drive Integration' })).toBeNull();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel preview' }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', { name: "You're about to lose your progress" })
+      ).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel without creating' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
+      expect(screen.queryByText('Mock fixture review')).toBeNull();
+    });
+  });
+
+  it('switches to the mapping review screen when the workflow pauses for mapping review', async () => {
+    render(<Page />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Trigger Mapping Review Ready' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Review document "Document mapping review"')).toBeTruthy();
+      expect(screen.getByText('Mock fixture review')).toBeTruthy();
+      expect(screen.queryByRole('heading', { name: 'Drive Integration' })).toBeNull();
     });
   });
 });

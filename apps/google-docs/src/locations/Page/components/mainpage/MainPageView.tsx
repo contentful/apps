@@ -5,7 +5,6 @@ import { OAuthConnector } from './OAuthConnector';
 import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
 import { creationPayloadMock } from '../../../../mocks/previewPayloadSample';
 import { PageAppSDK } from '@contentful/app-sdk';
-
 const enableMockEntryCreation = import.meta.env.VITE_ENABLE_MOCK_ENTRY_CREATION === 'true';
 
 interface MainPageViewProps {
@@ -16,7 +15,6 @@ interface MainPageViewProps {
   onOauthTokenChange: (token: string) => void;
   onLoadingStateChange: (isLoading: boolean) => void;
   onSelectFile: () => void;
-  onUseFixturePreview: () => void;
   sdk: PageAppSDK;
 }
 
@@ -28,7 +26,6 @@ export const MainPageView = ({
   onOauthTokenChange,
   onLoadingStateChange,
   onSelectFile,
-  onUseFixturePreview,
   sdk,
 }: MainPageViewProps) => {
   return (
@@ -66,17 +63,16 @@ export const MainPageView = ({
               </Paragraph>
             </Flex>
 
-            <Flex flexDirection="column" gap="spacingS" alignItems="stretch">
+            <Flex flexDirection="row" alignItems="center" gap="spacingS">
               <Button
                 variant="primary"
+                size="medium"
                 isDisabled={!oauthToken}
                 onClick={onSelectFile}
                 endIcon={<ArrowRightIcon />}>
                 Select your file
               </Button>
-              <Button variant="secondary" onClick={onUseFixturePreview}>
-                Use fixture preview
-              </Button>
+
               {enableMockEntryCreation ? (
                 <Button
                   variant="secondary"

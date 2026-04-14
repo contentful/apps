@@ -1,15 +1,15 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { Layout } from '@contentful/f36-components';
+import { Button, Layout } from '@contentful/f36-components';
 import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
 } from './components/mainpage/ModalOrchestrator';
 import { MainPageView } from './components/mainpage/MainPageView';
-import { PreviewPageView } from './components/mainpage/PreviewPageView';
-import { MappingReviewSuspendPayload, PreviewPayload } from '@types';
-import { isMappingReviewSuspendPayload } from '../../utils/utils';
+import { MappingReviewPage } from './components/mainpage/MappingReviewPage';
+import { loadFixtureReviewPayload } from '../../fixtures/googleDocsReview/loadFixtureReviewPayload';
+import type { MappingReviewSuspendPayload, PreviewPayload } from '@types';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -17,9 +17,31 @@ const Page = () => {
   const [oauthToken, setOauthToken] = useState<string>('');
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
   const [isOAuthLoading, setIsOAuthLoading] = useState(true);
-  const [previewPayload, setPreviewPayload] = useState<
-    PreviewPayload | MappingReviewSuspendPayload | null
-  >(null);
+  const [previewPayload, setPreviewPayload] = useState<PreviewPayload | null>(null);
+  const [mappingReviewPayload, setMappingReviewPayload] =
+    useState<MappingReviewSuspendPayload | null>(null);
+  const [fixtureReviewPayload, setFixtureReviewPayload] =
+    useState<MappingReviewSuspendPayload | null>(null);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    void loadFixtureReviewPayload()
+      .then((payload) => {
+        if (!isCancelled) {
+          setFixtureReviewPayload(payload);
+        }
+      })
+      .catch(() => {
+        if (!isCancelled) {
+          setFixtureReviewPayload(null);
+        }
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   const handleOauthTokenChange = (token: string) => {
     setOauthToken(token);
@@ -42,51 +64,42 @@ const Page = () => {
   };
 
   const handleMappingReviewReady = (payload: MappingReviewSuspendPayload) => {
-    setPreviewPayload(payload);
+    setMappingReviewPayload(payload);
   };
 
   const handleReturnToMainPage = () => {
-    modalOrchestratorRef.current?.resetFlowState();
     setPreviewPayload(null);
+    setMappingReviewPayload(null);
   };
 
-  const handleResumeMappingReview = async () => {
-    if (!previewPayload || !isMappingReviewSuspendPayload(previewPayload)) {
-      return;
-    }
-
-    try {
-      await modalOrchestratorRef.current?.resumeMappingReview(previewPayload);
-    } catch (error) {
-      console.error('Failed to resume mapping review:', error);
-      sdk.notifier.error('Unable to resume preview. Please try again.');
-    }
-  };
-
-  console.log('previewPayload', previewPayload);
+  const activePreviewPayload = mappingReviewPayload;
 
   return (
     <>
       <Layout withBoxShadow={true} offsetTop={10}>
-        {previewPayload ? (
-          <PreviewPageView
-            payload={previewPayload}
-            oauthToken={oauthToken}
-            onLeavePreview={handleReturnToMainPage}
-            onResumeMappingReview={handleResumeMappingReview}
+        {activePreviewPayload ? (
+          <MappingReviewPage
+            payload={activePreviewPayload}
+            onLeaveReview={handleReturnToMainPage}
           />
         ) : (
-          <MainPageView
-            oauthToken={oauthToken}
-            isOAuthConnected={isOAuthConnected}
-            isOAuthLoading={isOAuthLoading}
-            onOAuthConnectedChange={handleOAuthConnectedChange}
-            onOauthTokenChange={handleOauthTokenChange}
-            onLoadingStateChange={handleOAuthLoadingStateChange}
-            onSelectFile={handleSelectFile}
-            onUseFixturePreview={handleUseFixturePreview}
-            sdk={sdk}
-          />
+          <>
+            {fixtureReviewPayload ? (
+              <Button onClick={() => setMappingReviewPayload(fixtureReviewPayload)}>
+                Mock from fixture
+              </Button>
+            ) : null}
+            <MainPageView
+              oauthToken={oauthToken}
+              isOAuthConnected={isOAuthConnected}
+              isOAuthLoading={isOAuthLoading}
+              onOAuthConnectedChange={handleOAuthConnectedChange}
+              onOauthTokenChange={handleOauthTokenChange}
+              onLoadingStateChange={handleOAuthLoadingStateChange}
+              onSelectFile={handleSelectFile}
+              sdk={sdk}
+            />
+          </>
         )}
       </Layout>
 

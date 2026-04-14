@@ -3,7 +3,6 @@ import { collectReferencedTempIdsFromEntry } from '../services/referenceResoluti
 import { type ContentTypeDisplayInfo } from '../services/contentTypeService';
 import { orderEntriesByCreationOrder } from './previewPayload';
 import { getEntryDisplayTitle } from './getEntryDisplayTitle';
-import { isPreviewPayload } from './utils';
 
 export interface CheckboxEntryListRow {
   id: string;
@@ -164,7 +163,6 @@ export function buildCheckboxEntryList(
   defaultLocale?: string
 ): CheckboxEntryListRow[] {
   const { entries, referenceGraph } = payload;
-
   if (entries.length === 0) {
     return [];
   }

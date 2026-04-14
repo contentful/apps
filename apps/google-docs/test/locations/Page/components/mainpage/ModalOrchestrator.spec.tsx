@@ -1,12 +1,12 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React, { createRef } from 'react';
+import { createRef } from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { Box, Button } from '@contentful/f36-components';
 import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
 } from '../../../../../src/locations/Page/components/mainpage/ModalOrchestrator';
-import { PreviewPayload, WorkflowRunResult, RunStatus } from '@types';
+import { MappingReviewSuspendPayload, PreviewPayload, WorkflowRunResult, RunStatus } from '@types';
 import { mockSdk } from '../../../../mocks';
 
 const mockStartWorkflow = vi.fn();
@@ -68,6 +68,33 @@ const defaultProps = {
   onPreviewReady: vi.fn(),
   onMappingReviewReady: vi.fn(),
   onResetToMain: vi.fn(),
+};
+
+const mappingReviewSuspendPayload: MappingReviewSuspendPayload = {
+  suspendStepId: 'mapping-review',
+  reason: 'Mapping review required before CMA payload generation continues',
+  documentId: 'mock-doc-id-123',
+  documentTitle: 'Mock Mapping Review',
+  normalizedDocument: {
+    documentId: 'mock-doc-id-123',
+    title: 'Mock Mapping Review',
+    designValues: [],
+    contentBlocks: [],
+    images: [],
+    tables: [],
+    assets: [],
+  },
+  entryBlockGraph: {
+    entries: [],
+    excludedSourceRefs: [],
+  },
+  referenceGraph: {
+    edges: [],
+    creationOrder: [],
+    deferredFields: [],
+    hasCircularDependency: false,
+  },
+  contentTypes: [],
 };
 
 describe('ModalOrchestrator', () => {
@@ -167,29 +194,6 @@ describe('ModalOrchestrator', () => {
       expect(
         screen.getByRole('heading', { name: "You're about to lose your progress" })
       ).toBeTruthy();
-    });
-  });
-
-  it('clears flow state when resetFlowState is invoked without calling onResetToMain', async () => {
-    const ref = createRef<ModalOrchestratorHandle>();
-    render(<ModalOrchestrator ref={ref} {...defaultProps} />);
-
-    await act(async () => {
-      ref.current?.startFlow();
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Pick document' }));
-
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Select content type(s)' })).toBeTruthy();
-    });
-
-    await act(async () => {
-      ref.current?.resetFlowState();
-    });
-
-    await waitFor(() => {
-      expect(defaultProps.onResetToMain).not.toHaveBeenCalled();
-      expect(screen.queryByRole('heading', { name: 'Select content type(s)' })).toBeNull();
     });
   });
 
@@ -306,6 +310,70 @@ describe('ModalOrchestrator', () => {
       });
       expect(screen.queryByRole('heading', { name: 'Preparing your preview' })).toBeNull();
       expect(defaultProps.onPreviewReady).toHaveBeenCalledWith(mockWorkflowPayload);
+    });
+  });
+
+  it('routes mapping-review suspends to onMappingReviewReady after document scope review', async () => {
+    mockResumeWorkflow.mockResolvedValueOnce({
+      status: RunStatus.PENDING_REVIEW,
+      runId: 'run-123',
+      messages: [],
+      suspendPayload: mappingReviewSuspendPayload,
+    } satisfies WorkflowRunResult);
+
+    const ref = createRef<ModalOrchestratorHandle>();
+    render(<ModalOrchestrator ref={ref} {...defaultProps} />);
+
+    await act(async () => {
+      ref.current?.startFlow();
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Pick document' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Select content type(s)' })).toBeTruthy();
+    });
+
+    const multiselectToggle = screen.getByRole('button', { name: /toggle multiselect/i });
+    fireEvent.click(multiselectToggle);
+
+    await waitFor(() => {
+      const option = document.querySelector('[data-test-id="cf-multiselect-list-item-ct-1"]');
+      expect(option).toBeTruthy();
+    });
+
+    const optionInput = document
+      .querySelector('[data-test-id="cf-multiselect-list-item-ct-1"]')
+      ?.closest('label')
+      ?.querySelector('input') as HTMLInputElement;
+    if (optionInput) fireEvent.click(optionInput);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+
+    await waitFor(() => {
+      expect(mockStartWorkflow).toHaveBeenCalledWith(['ct-1']);
+    });
+
+    await act(async () => {
+      // use the default pending review response configured in beforeEach
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Document tabs' })).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByLabelText('No, import all tabs'));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Images' })).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByLabelText('Yes, include images'));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+
+    await waitFor(() => {
+      expect(defaultProps.onMappingReviewReady).toHaveBeenCalledWith(mappingReviewSuspendPayload);
+      expect(defaultProps.onPreviewReady).not.toHaveBeenCalled();
     });
   });
 });
