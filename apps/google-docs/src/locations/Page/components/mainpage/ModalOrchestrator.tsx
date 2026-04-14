@@ -36,7 +36,7 @@ enum FlowStep {
 interface ModalOrchestratorProps {
   sdk: PageAppSDK;
   oauthToken: string;
-  onMappingReviewReady: (payload: MappingReviewSuspendPayload) => void;
+  onMappingReviewReady: (payload: MappingReviewSuspendPayload, runId: string) => void;
   onResetToMain: () => void;
 }
 
@@ -94,6 +94,21 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       onResetToMain();
     };
 
+    const handleConfirmCancel = async () => {
+      setIsConfirmCancelModalOpen(false);
+
+      if (activeRunId) {
+        try {
+          await resumeWorkflow(activeRunId, { cancelled: true });
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      resetProgress();
+      onResetToMain();
+    };
+
     const showWorkflowError = () => {
       setFlowStep(null);
       setIsErrorPreviewModalOpen(true);
@@ -142,7 +157,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       if (workflowRun.status === RunStatus.PENDING_REVIEW) {
         if (workflowRun.suspendPayload.suspendStepId === 'mapping-review') {
           setFlowStep(null);
-          onMappingReviewReady(workflowRun.suspendPayload);
+          onMappingReviewReady(workflowRun.suspendPayload, workflowRun.runId);
           return;
         }
 
@@ -287,7 +302,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
         <ConfirmCancelModal
           isOpen={isConfirmCancelModalOpen}
-          onConfirm={closeModalAndReset(setIsConfirmCancelModalOpen)}
+          onConfirm={handleConfirmCancel}
           onCancel={() => setIsConfirmCancelModalOpen(false)}
         />
 

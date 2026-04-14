@@ -62,6 +62,35 @@ const previewPayloadFromCompletedRun = (runData: AgentRunData): PreviewPayload =
     throw new Error('Workflow completed but result payload was missing.');
   }
 
+  if (
+    typeof raw === 'object' &&
+    raw !== null &&
+    'cancelled' in raw &&
+    (raw as { cancelled?: unknown }).cancelled === true
+  ) {
+    const documentId =
+      'documentId' in raw && typeof (raw as { documentId?: unknown }).documentId === 'string'
+        ? (raw as { documentId: string }).documentId
+        : '';
+    const title =
+      'title' in raw && typeof (raw as { title?: unknown }).title === 'string'
+        ? (raw as { title: string }).title
+        : undefined;
+
+    // Cancelled runs complete without full preview payload; return a no-op preview shape.
+    return {
+      entries: [],
+      assets: [],
+      referenceGraph: {},
+      normalizedDocument: {
+        documentId,
+        title,
+        contentBlocks: [],
+        tables: [],
+      },
+    };
+  }
+
   return validatePayloadShape(raw);
 };
 
