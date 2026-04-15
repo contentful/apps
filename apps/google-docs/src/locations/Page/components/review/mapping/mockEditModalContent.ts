@@ -1,4 +1,14 @@
-import type { EditModalContent } from '@types';
+import type { EditModalContent, EditModalNewLocation } from '@types';
+
+/** Placeholder destinations until assign flow is backed by real entry/field data. */
+export const placeholderAssignNewLocations: EditModalNewLocation[] = [
+  {
+    title: "Page: Event detail (Don't enter NRF uncaffeinated.)",
+  },
+  {
+    title: "Component: Resource detail hero (Don't enter NRF uncaffeinated.)",
+  },
+];
 
 export const mockExcludeSelection: EditModalContent = {
   selectedText: 'Sample selected content',
@@ -56,12 +66,5 @@ export const mockNewLocationSelection: EditModalContent = {
   selectedText: 'Hot coffee, haute content, on us.',
   isOpen: true,
   currentLocations: [],
-  newLocations: [
-    {
-      title: "Page: Event detail (Don't enter NRF uncaffeinated.)",
-    },
-    {
-      title: "Component: Resource detail hero (Don't enter NRF uncaffeinated.)",
-    },
-  ],
+  newLocations: placeholderAssignNewLocations,
 };

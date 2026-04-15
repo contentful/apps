@@ -15,21 +15,18 @@ import {
 import { buildListMarkers } from './buildListMarkers';
 import { formatDisplayName, getFieldTypeLabel } from './fieldFormatting';
 import { EditModal } from './edit-modals/EditModal';
-import { mockExcludeSelection, mockNewLocationSelection } from './mockEditModalContent';
+import {
+  mockExcludeSelection,
+  mockNewLocationSelection,
+  placeholderAssignNewLocations,
+} from './mockEditModalContent';
 
 import { SelectionActionMenu } from './SelectionActionMenu';
 import { buildSourceRefKey } from './sourceRefUtils';
-import { AssignExcludeModal } from './AssignExcludeModal';
 import { MappingEntryCards, type AnchoredMappingCard } from './MappingEntryCards';
 import { TabSegement } from './TabSegment';
 
 const enableMockEditModal = import.meta.env.VITE_ENABLE_MOCK_EDIT_MODAL === 'true';
-
-type AssignModalState = {
-  isOpen: boolean;
-  title: string;
-  preview: string;
-};
 
 interface EditModalState {
   viewModel: EditModalContent;
@@ -43,18 +40,11 @@ interface MappingViewProps {
   selectedEntryIndex: number | null;
 }
 
-const EMPTY_ASSIGN_MODAL: AssignModalState = {
-  isOpen: false,
-  title: '',
-  preview: '',
-};
-
 export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): JSX.Element => {
   const [hoveredMappingKeys, setHoveredMappingKeys] = useState<string[]>([]);
   const [cardOffsetsBySegment, setCardOffsetsBySegment] = useState<
     Record<string, Record<string, number>>
   >({});
-  const [assignModal, setAssignModal] = useState<AssignModalState>(EMPTY_ASSIGN_MODAL);
   const textSelectionRootRef = useRef<HTMLDivElement | null>(null);
   const [editModalState, setEditModalState] = useState<EditModalState | null>(null);
   const segmentLayoutRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -169,13 +159,23 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
     measureOffsets();
   }, [mappingCardsBySegment, allSegments]);
 
-  const openAssignModal = (title: string, preview: string) => {
-    setAssignModal({ isOpen: true, title, preview });
+  const openAssignContentEditModal = (contentLabel: string) => {
+    setEditModalState({
+      viewModel: {
+        selectedText: contentLabel,
+        isOpen: true,
+        currentLocations: [],
+        newLocations: placeholderAssignNewLocations,
+      },
+      title: 'Assign content',
+      locationSectionDescription: '',
+      primaryButtonLabel: 'Move content',
+    });
   };
 
   const handleAssignFromSelection = () => {
     if (!selectedText.trim()) return;
-    openAssignModal('Assign text selection', selectedText.trim());
+    openAssignContentEditModal(selectedText.trim());
     clearSelection();
   };
 
@@ -196,12 +196,22 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
   };
 
   const handleAssignImage = (_sourceRef: ImageSourceRef, label: string) => {
-    openAssignModal('Assign image selection', label);
+    openAssignContentEditModal(label);
     setHoveredMappingKeys([]);
   };
 
   const handleExcludeImage = (_sourceRef: ImageSourceRef, label: string) => {
-    openAssignModal('Exclude image selection', label);
+    setEditModalState({
+      viewModel: {
+        selectedText: label,
+        isOpen: true,
+        currentLocations: [],
+      },
+      title: 'Exclude content',
+      locationSectionDescription:
+        'This content is used in more than one place in the entry. Select which item to exclude.',
+      primaryButtonLabel: 'Exclude content',
+    });
     setHoveredMappingKeys([]);
   };
 
@@ -336,13 +346,6 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
           primaryButtonLabel={editModalState.primaryButtonLabel}
         />
       )}
-
-      <AssignExcludeModal
-        isOpen={assignModal.isOpen}
-        title={assignModal.title}
-        preview={assignModal.preview}
-        onClose={() => setAssignModal(EMPTY_ASSIGN_MODAL)}
-      />
     </>
   );
 };
