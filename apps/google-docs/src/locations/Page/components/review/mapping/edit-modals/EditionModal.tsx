@@ -22,7 +22,7 @@ export interface EditionLocationOption {
   isSelected?: boolean;
 }
 
-export interface EditionModalViewModel {
+export interface EditionModalContent {
   selectedText: string;
   locations: EditionLocationOption[];
 }
@@ -30,7 +30,7 @@ export interface EditionModalViewModel {
 interface EditionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  viewModel: EditionModalViewModel;
+  viewModel: EditionModalContent;
   title: string;
   locationSectionDescription: string;
   primaryButtonLabel: string;

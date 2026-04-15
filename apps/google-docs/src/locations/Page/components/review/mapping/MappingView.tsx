@@ -16,7 +16,7 @@ import { buildListMarkers } from './buildListMarkers';
 import { formatDisplayName, getFieldTypeLabel } from './fieldFormatting';
 import { BlockRenderer, TableRenderer } from './documentRenderers';
 import { EditionModal } from './edit-modals/EditionModal';
-import { buildExcludeContentModalViewModel } from './edit-modals/utils/buildExcludeContentModalViewModel';
+import { buildExcludeContentModal } from './edit-modals/utils/buildExcludeContentModal';
 
 const enableMockEditModal = import.meta.env.VITE_ENABLE_MOCK_EDIT_MODAL === 'true';
 
@@ -108,11 +108,9 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
 
   const listMarkers = useMemo(() => buildListMarkers(allSegments), [allSegments]);
 
-  const excludeContentViewModel = useMemo(
+  const excludeContentContent = useMemo(
     () =>
-      excludeSelection
-        ? buildExcludeContentModalViewModel(excludeSelection, payload.contentTypes)
-        : null,
+      excludeSelection ? buildExcludeContentModal(excludeSelection, payload.contentTypes) : null,
     [excludeSelection, payload.contentTypes]
   );
 
@@ -305,11 +303,11 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
         ))}
       </Flex>
 
-      {excludeContentViewModel ? (
+      {excludeContentContent ? (
         <EditionModal
           isOpen={true}
           onClose={() => setExcludeSelection(null)}
-          viewModel={excludeContentViewModel}
+          viewModel={excludeContentContent}
           title="Exclude content"
           locationSectionDescription="This content is used in more than one place in the entry. Select which item to exclude."
           primaryButtonLabel="Exclude content"

@@ -1,11 +1,11 @@
 import { type ExcludeSelectionPayload, type WorkflowContentType } from '@types';
-import type { EditionModalViewModel } from '../EditionModal';
+import type { EditionModalContent as EditionModalContent } from '../EditionModal';
 import { formatDisplayName, getFieldTypeLabel } from '../../fieldFormatting';
 
-export const buildExcludeContentModalViewModel = (
+export const buildExcludeContentModal = (
   excludeSelection: ExcludeSelectionPayload,
   contentTypes: WorkflowContentType[]
-): EditionModalViewModel => {
+): EditionModalContent => {
   return {
     selectedText: excludeSelection.selectedText,
     locations: excludeSelection.locations.map((location, index) => {
@@ -34,27 +34,3 @@ export const buildExcludeContentModalViewModel = (
     }),
   };
 };
-
-/*
-return {
-  selectedContent: getSelectedContent(duplicateGroup[0].sourceRef),
-  locations: duplicateGroup.map((item, index) => {
-    const contentType =
-      contentTypes.find((contentType) => contentType.sys.id === item.contentTypeId);
-    const contentTypeName = contentType?.name ??
-      item.contentTypeId;
-    const fieldName = contentType?.fields.find((field) => field.id === item.fieldId)?.name ?? item.fieldId;
-    const displayField = contentType?.displayField ?? "Untitled";
-    const displayFieldName = contentType?.fields.find((field) => field.id === displayField)?.name ?? displayField;
-
-    return {
-      id: `${item.entryIndex}-${item.fieldId}-${index}`,
-      contentType: contentTypeName,
-      entryName: displayFieldName,
-      fieldName,
-      fieldType: getFieldTypeLabel(item.fieldType),
-      isSelected: index === 0,
-    };
-  }),
-};
-*/
