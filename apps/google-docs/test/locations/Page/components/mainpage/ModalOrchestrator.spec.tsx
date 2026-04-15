@@ -65,7 +65,6 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 const defaultProps = {
   sdk: mockSdk,
   oauthToken: 'mock-oauth-token',
-  onPreviewReady: vi.fn(),
   onMappingReviewReady: vi.fn(),
   onResetToMain: vi.fn(),
 };
@@ -100,7 +99,6 @@ const mappingReviewSuspendPayload: MappingReviewSuspendPayload = {
 describe('ModalOrchestrator', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    defaultProps.onPreviewReady.mockReset();
     defaultProps.onMappingReviewReady.mockReset();
     defaultProps.onResetToMain.mockReset();
     mockStartWorkflow.mockResolvedValue({
@@ -224,6 +222,54 @@ describe('ModalOrchestrator', () => {
       expect(
         screen.queryByRole('heading', { name: "You're about to lose your progress" })
       ).toBeNull();
+      expect(mockResumeWorkflow).not.toHaveBeenCalled();
+    });
+  });
+
+  it('resumes suspended workflow as cancelled when confirming discard', async () => {
+    const ref = createRef<ModalOrchestratorHandle>();
+    render(<ModalOrchestrator ref={ref} {...defaultProps} />);
+
+    await act(async () => {
+      ref.current?.startFlow();
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Pick document' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Select content type(s)' })).toBeTruthy();
+    });
+
+    const multiselectToggle = screen.getByRole('button', { name: /toggle multiselect/i });
+    fireEvent.click(multiselectToggle);
+
+    await waitFor(() => {
+      const option = document.querySelector('[data-test-id="cf-multiselect-list-item-ct-1"]');
+      expect(option).toBeTruthy();
+    });
+
+    const optionInput = document
+      .querySelector('[data-test-id="cf-multiselect-list-item-ct-1"]')
+      ?.closest('label')
+      ?.querySelector('input') as HTMLInputElement;
+    if (optionInput) fireEvent.click(optionInput);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Document tabs' })).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', { name: "You're about to lose your progress" })
+      ).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel without creating' }));
+
+    await waitFor(() => {
+      expect(mockResumeWorkflow).toHaveBeenCalledWith('run-123', { cancelled: true });
     });
   });
 
@@ -309,7 +355,7 @@ describe('ModalOrchestrator', () => {
         selectedTabIds: ['tab-1', 'tab-2'],
       });
       expect(screen.queryByRole('heading', { name: 'Preparing your preview' })).toBeNull();
-      expect(defaultProps.onPreviewReady).toHaveBeenCalledWith(mockWorkflowPayload);
+      expect(defaultProps.onMappingReviewReady).not.toHaveBeenCalled();
     });
   });
 
@@ -372,8 +418,10 @@ describe('ModalOrchestrator', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 
     await waitFor(() => {
-      expect(defaultProps.onMappingReviewReady).toHaveBeenCalledWith(mappingReviewSuspendPayload);
-      expect(defaultProps.onPreviewReady).not.toHaveBeenCalled();
+      expect(defaultProps.onMappingReviewReady).toHaveBeenCalledWith(
+        mappingReviewSuspendPayload,
+        'run-123'
+      );
     });
   });
 });

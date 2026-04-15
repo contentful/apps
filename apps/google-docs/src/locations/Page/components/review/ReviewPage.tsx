@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Button, Flex, Heading, Layout } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import type { MappingReviewSuspendPayload } from '@types';
@@ -10,12 +10,24 @@ import { MappingView } from './mapping/MappingView';
 
 interface ReviewPageProps {
   payload: MappingReviewSuspendPayload;
-  onLeaveReview: () => void;
+  onCancelReview: () => Promise<void>;
 }
 
-export const ReviewPage = ({ payload, onLeaveReview }: ReviewPageProps) => {
+export const ReviewPage = ({ payload, onCancelReview }: ReviewPageProps) => {
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
   const [selectedEntryIndex, setSelectedEntryIndex] = useState<number | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
+
+  const handleConfirmCancel = useCallback(async () => {
+    setIsCancelling(true);
+
+    try {
+      await onCancelReview();
+    } finally {
+      setIsCancelling(false);
+      setIsConfirmCancelModalOpen(false);
+    }
+  }, [onCancelReview]);
 
   const documentTitle =
     payload.normalizedDocument.title ?? payload.documentTitle ?? 'Selected document';
@@ -53,8 +65,8 @@ export const ReviewPage = ({ payload, onLeaveReview }: ReviewPageProps) => {
       </Layout.Body>
       <ConfirmCancelModal
         isOpen={isConfirmCancelModalOpen}
-        onConfirm={onLeaveReview}
-        onCancel={() => setIsConfirmCancelModalOpen(false)}
+        onConfirm={() => void handleConfirmCancel()}
+        onCancel={() => !isCancelling && setIsConfirmCancelModalOpen(false)}
       />
     </>
   );

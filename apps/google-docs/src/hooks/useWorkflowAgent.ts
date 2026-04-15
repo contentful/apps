@@ -57,12 +57,43 @@ const getAgentPayload = (runData: AgentRunData): string | null => {
 };
 
 const previewPayloadFromCompletedRun = (runData: AgentRunData): PreviewPayload => {
-  const raw = runData.metadata?.googleDocPayload;
-  if (raw == null) {
+  const googleDocPayload = runData.metadata?.googleDocPayload;
+  if (googleDocPayload == null) {
     throw new Error('Workflow completed but result payload was missing.');
   }
 
-  return validatePayloadShape(raw);
+  if (
+    typeof googleDocPayload === 'object' &&
+    googleDocPayload !== null &&
+    'cancelled' in googleDocPayload &&
+    (googleDocPayload as { cancelled?: unknown }).cancelled === true
+  ) {
+    const documentId =
+      'documentId' in googleDocPayload &&
+      typeof (googleDocPayload as { documentId?: unknown }).documentId === 'string'
+        ? (googleDocPayload as { documentId: string }).documentId
+        : '';
+    const title =
+      'title' in googleDocPayload &&
+      typeof (googleDocPayload as { title?: unknown }).title === 'string'
+        ? (googleDocPayload as { title: string }).title
+        : undefined;
+
+    // Cancelled runs complete without full preview payload; return a no-op preview shape.
+    return {
+      entries: [],
+      assets: [],
+      referenceGraph: {},
+      normalizedDocument: {
+        documentId,
+        title,
+        contentBlocks: [],
+        tables: [],
+      },
+    };
+  }
+
+  return validatePayloadShape(googleDocPayload);
 };
 
 const getRunErrorMessage = (runData: AgentRunData): string => {

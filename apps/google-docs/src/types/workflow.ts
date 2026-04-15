@@ -121,4 +121,5 @@ export interface ResumePayload {
   selectedTabIds?: string[];
   editedNormalizedDocument?: NormalizedDocument;
   entryBlockGraph?: EntryBlockGraph;
+  cancelled?: true;
 }

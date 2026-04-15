@@ -10,6 +10,8 @@ import { MainPageView } from './components/mainpage/MainPageView';
 import { ReviewPage } from './components/review/ReviewPage';
 import { loadFixtureReviewPayload } from '../../fixtures/googleDocsReview/loadFixtureReviewPayload';
 import type { MappingReviewSuspendPayload } from '@types';
+import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
+
 const enableMockReviewPayload = import.meta.env.VITE_ENABLE_MOCK_REVIEW_PAYLOAD === 'true';
 
 const Page = () => {
@@ -18,10 +20,17 @@ const Page = () => {
   const [oauthToken, setOauthToken] = useState<string>('');
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
   const [isOAuthLoading, setIsOAuthLoading] = useState(true);
-  const [mappingReviewPayload, setMappingReviewPayload] =
-    useState<MappingReviewSuspendPayload | null>(null);
+  const [mappingReviewState, setMappingReviewState] = useState<{
+    payload: MappingReviewSuspendPayload;
+    runId?: string;
+  } | null>(null);
   const [fixtureReviewPayload, setFixtureReviewPayload] =
     useState<MappingReviewSuspendPayload | null>(null);
+  const { resumeWorkflow } = useWorkflowAgent({
+    sdk,
+    documentId: '',
+    oauthToken: '',
+  });
 
   // TODO: remove fixture review payload loading before launch
   useEffect(() => {
@@ -60,24 +69,42 @@ const Page = () => {
     modalOrchestratorRef.current?.startFlow();
   };
 
-  const handleMappingReviewReady = (payload: MappingReviewSuspendPayload) => {
-    setMappingReviewPayload(payload);
+  const handleMappingReviewReady = (payload: MappingReviewSuspendPayload, runId: string) => {
+    setMappingReviewState({ payload, runId });
   };
 
   const handleReturnToMainPage = () => {
-    setMappingReviewPayload(null);
+    setMappingReviewState(null);
+  };
+
+  const handleCancelMappingReview = async () => {
+    if (!mappingReviewState?.runId) {
+      handleReturnToMainPage();
+      return;
+    }
+
+    try {
+      await resumeWorkflow(mappingReviewState.runId, { cancelled: true });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      handleReturnToMainPage();
+    }
   };
 
   return (
     <>
       <Layout withBoxShadow={true} offsetTop={10}>
-        {mappingReviewPayload ? (
-          <ReviewPage payload={mappingReviewPayload} onLeaveReview={handleReturnToMainPage} />
+        {mappingReviewState ? (
+          <ReviewPage
+            payload={mappingReviewState.payload}
+            onCancelReview={handleCancelMappingReview}
+          />
         ) : (
           <>
             {/* TODO: remove mock review payload button before launch */}
             {enableMockReviewPayload && fixtureReviewPayload ? (
-              <Button onClick={() => setMappingReviewPayload(fixtureReviewPayload)}>
+              <Button onClick={() => setMappingReviewState({ payload: fixtureReviewPayload })}>
                 Mock from fixture
               </Button>
             ) : null}

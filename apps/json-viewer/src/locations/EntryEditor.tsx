@@ -4,15 +4,30 @@ import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { Box, CopyButton, Flex, FormControl, Select, Stack } from '@contentful/f36-components';
 import ReactJson from 'react-json-view';
 
+const defaultConfigOptions = {
+  displayDataTypes: 'false',
+  iconStyle: 'triangle',
+  collapsed: 'false',
+  theme: 'rjv-default',
+  defaultIncludeDepth: '0',
+};
+
 const Entry = () => {
   const sdk = useSDK<EditorExtensionSDK>();
   const cma = useCMA();
   const currentEntry = sdk.entry.getSys();
   const [entry, setEntry] = useState({});
-  const [selectValue, setSelectValue] = useState('0');
-  const handleOnChange = (event: any) => setSelectValue(event.target.value);
   // Get the viewer options set in app config.
-  const { configOptions } = sdk.parameters.installation;
+  const configOptions = {
+    ...defaultConfigOptions,
+    ...(sdk.parameters.installation?.configOptions ?? sdk.parameters.configOptions ?? {}),
+  };
+  const [selectValue, setSelectValue] = useState(configOptions.defaultIncludeDepth);
+  const handleOnChange = (event: any) => setSelectValue(event.target.value);
+
+  useEffect(() => {
+    setSelectValue(configOptions.defaultIncludeDepth);
+  }, [configOptions.defaultIncludeDepth]);
 
   useEffect(() => {
     let entryData = {};
@@ -55,7 +70,7 @@ const Entry = () => {
                 Array(11)
                   .fill(0)
                   .map((_, i) => (
-                    <Select.Option key={i} value={i}>
+                    <Select.Option key={i} value={String(i)}>
                       Include: {i}
                     </Select.Option>
                   ))

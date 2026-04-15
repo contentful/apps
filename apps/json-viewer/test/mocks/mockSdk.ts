@@ -2,10 +2,13 @@ import { vi } from 'vitest';
 
 const parameters = {
   installation: {
-    displayDataTypes: 'true',
-    iconStyle: {},
-    collapsed: 'true',
-    theme: {},
+    configOptions: {
+      displayDataTypes: 'true',
+      iconStyle: 'triangle',
+      collapsed: 'true',
+      theme: 'rjv-default',
+      defaultIncludeDepth: '0',
+    },
   },
   instance: {},
   configOptions: {},
@@ -14,9 +17,9 @@ const parameters = {
 const mockSdk: any = {
   app: {
     onConfigure: vi.fn(),
-    getParameters: vi.fn().mockReturnValueOnce(parameters),
+    getParameters: vi.fn().mockResolvedValue(parameters),
     setReady: vi.fn(),
-    getCurrentState: vi.fn(),
+    getCurrentState: vi.fn().mockResolvedValue({}),
   },
   ids: {
     app: 'test-app',
