@@ -20,7 +20,7 @@ import { SelectionActionMenu } from './SelectionActionMenu';
 import { buildSourceRefKey } from './sourceRefUtils';
 import { AssignExcludeModal } from './AssignExcludeModal';
 import { MappingEntryCards, type AnchoredMappingCard } from './MappingEntryCards';
-import { ReviewDocumentBody } from './ReviewDocumentBody';
+import { TabSegement } from './TabSegment';
 
 type AssignModalState = {
   isOpen: boolean;
@@ -222,7 +222,7 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
                       alignItems="stretch"
                       data-testid={`segment-layout-${segment.id}`}
                       ref={setSegmentLayoutRef(segment.id)}>
-                      <ReviewDocumentBody
+                      <TabSegement
                         segment={segment}
                         highlightIndex={highlightIndex}
                         imageById={imageById}
