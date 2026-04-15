@@ -1,7 +1,7 @@
 import { useLayoutEffect, useMemo, useRef, useState, type RefCallback } from 'react';
 import { Box, Button, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import type { ExcludeSelectionPayload, MappingReviewSuspendPayload } from '@types';
+import type { EditionModalContent, MappingReviewSuspendPayload } from '@types';
 import { FileTextIcon } from '@contentful/f36-icons';
 import { MappingCard, type MappingCardData } from './MappingCard';
 import { getAnchorIdForSourceRef, resolveMarkerOffsets } from './resolveMappingCardOffsets';
@@ -16,7 +16,6 @@ import { buildListMarkers } from './buildListMarkers';
 import { formatDisplayName, getFieldTypeLabel } from './fieldFormatting';
 import { BlockRenderer, TableRenderer } from './documentRenderers';
 import { EditionModal } from './edit-modals/EditionModal';
-import { buildExcludeContentModal } from './edit-modals/utils/buildExcludeContentModal';
 
 const enableMockEditModal = import.meta.env.VITE_ENABLE_MOCK_EDIT_MODAL === 'true';
 
@@ -29,7 +28,7 @@ interface MappingViewProps {
   selectedEntryIndex: number | null;
 }
 
-const buildMockExcludeSelection = (): ExcludeSelectionPayload => ({
+const buildMockExcludeSelection: EditionModalContent = {
   selectedText: 'Sample selected content',
   locations: [
     {
@@ -78,14 +77,14 @@ const buildMockExcludeSelection = (): ExcludeSelectionPayload => ({
       },
     },
   ],
-});
+};
 
 export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): JSX.Element => {
   const [hoveredMappingKeys, setHoveredMappingKeys] = useState<string[]>([]);
   const [cardOffsetsBySegment, setCardOffsetsBySegment] = useState<
     Record<string, Record<string, number>>
   >({});
-  const [excludeSelection, setExcludeSelection] = useState<ExcludeSelectionPayload | null>(null);
+  const [excludeSelection, setExcludeSelection] = useState<EditionModalContent | null>(null);
   const segmentLayoutRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const cardWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -107,12 +106,6 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
   }, [document.images]);
 
   const listMarkers = useMemo(() => buildListMarkers(allSegments), [allSegments]);
-
-  const excludeContentContent = useMemo(
-    () =>
-      excludeSelection ? buildExcludeContentModal(excludeSelection, payload.contentTypes) : null,
-    [excludeSelection, payload.contentTypes]
-  );
 
   const getVisibleHighlights = <T extends MappingHighlight>(highlights: T[]): T[] => {
     if (selectedEntryIndex === null) {
@@ -209,7 +202,7 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
             <Button
               variant="secondary"
               size="small"
-              onClick={() => setExcludeSelection(buildMockExcludeSelection())}>
+              onClick={() => setExcludeSelection(buildMockExcludeSelection)}>
               Mock exclude modal
             </Button>
           </Flex>
@@ -303,11 +296,11 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
         ))}
       </Flex>
 
-      {excludeContentContent ? (
+      {excludeSelection ? (
         <EditionModal
           isOpen={true}
           onClose={() => setExcludeSelection(null)}
-          viewModel={excludeContentContent}
+          viewModel={excludeSelection}
           title="Exclude content"
           locationSectionDescription="This content is used in more than one place in the entry. Select which item to exclude."
           primaryButtonLabel="Exclude content"

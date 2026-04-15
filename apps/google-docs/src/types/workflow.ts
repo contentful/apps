@@ -69,20 +69,20 @@ export interface WorkflowContentType {
   fields: WorkflowContentTypeField[];
 }
 
-export interface ExcludeSelectionLocation {
+export interface EditionLocationOption {
   id: string;
   contentTypeId: string;
-  entryName?: string;
+  entryName: string;
   fieldId: string;
-  fieldName?: string;
+  fieldName: string;
   fieldType: string;
   sourceRef: SourceRef;
   isSelected?: boolean;
 }
 
-export interface ExcludeSelectionPayload {
+export interface EditionModalContent {
   selectedText: string;
-  locations: ExcludeSelectionLocation[];
+  locations: EditionLocationOption[];
 }
 
 export interface PreviewPayload {

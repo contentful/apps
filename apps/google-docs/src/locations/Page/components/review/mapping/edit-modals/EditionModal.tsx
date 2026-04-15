@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Box, Button, Modal, Paragraph, Text } from '@contentful/f36-components';
-import type { SourceRef } from '@types';
+import type { EditionModalContent, SourceRef } from '@types';
 import {
   locationButton,
   locationButtonSelected,
@@ -10,22 +10,6 @@ import {
   modalContent,
   sectionCard,
 } from './EditionModal.styles';
-
-export interface EditionLocationOption {
-  id: string;
-  contentType: string;
-  entryName: string;
-  fieldId: string;
-  fieldName: string;
-  fieldType: string;
-  sourceRef: SourceRef;
-  isSelected?: boolean;
-}
-
-export interface EditionModalContent {
-  selectedText: string;
-  locations: EditionLocationOption[];
-}
 
 interface EditionModalProps {
   isOpen: boolean;
@@ -101,7 +85,7 @@ export const EditionModal = ({
                           <Text as="p" fontColor="gray600" marginBottom="spacing2Xs">
                             Content type{' '}
                             <Text as="span" fontWeight="fontWeightDemiBold" fontColor="gray900">
-                              {location.contentType}
+                              {location.contentTypeId}
                             </Text>
                           </Text>
                           <Text as="p" fontColor="gray600" marginBottom="spacing2Xs">

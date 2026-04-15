@@ -10,7 +10,7 @@ const viewModel = {
   locations: [
     {
       id: 'summary',
-      contentType: 'Sample Content Type',
+      contentTypeId: 'sampleContentType',
       entryName: 'Sample entry',
       fieldId: 'summary',
       fieldName: 'Summary',
@@ -33,7 +33,7 @@ const viewModel = {
     },
     {
       id: 'description',
-      contentType: 'Sample Content Type',
+      contentTypeId: 'sampleContentType',
       entryName: 'Sample entry',
       fieldId: 'description',
       fieldName: 'Description',
