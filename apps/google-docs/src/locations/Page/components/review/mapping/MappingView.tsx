@@ -1,9 +1,9 @@
 import { useLayoutEffect, useMemo, useRef, useState, type RefCallback } from 'react';
 import { Box, Button, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import type { EditModalContent, MappingReviewSuspendPayload } from '@types';
+import type { ImageSourceRef, MappingReviewSuspendPayload, EditModalContent } from '@types';
 import { FileTextIcon } from '@contentful/f36-icons';
-import { MappingCard, type MappingCardData } from './MappingCard';
+import { useReviewTextSelection } from '@hooks/useReviewTextSelection';
 import { getAnchorIdForSourceRef, resolveMarkerOffsets } from './resolveMappingCardOffsets';
 import { type DocSegment, buildDocument } from './buildDocument';
 import {
@@ -14,14 +14,18 @@ import {
 } from './buildHighlights';
 import { buildListMarkers } from './buildListMarkers';
 import { formatDisplayName, getFieldTypeLabel } from './fieldFormatting';
-import { BlockRenderer, TableRenderer } from './documentRenderers';
 import { EditModal } from './edit-modals/EditModal';
-import { mockExcludeSelection } from './mockEditModalContent';
 
-const enableMockEditModal = import.meta.env.VITE_ENABLE_MOCK_EDIT_MODAL === 'true';
+import { SelectionActionMenu } from './SelectionActionMenu';
+import { buildSourceRefKey } from './sourceRefUtils';
+import { AssignExcludeModal } from './AssignExcludeModal';
+import { MappingEntryCards, type AnchoredMappingCard } from './MappingEntryCards';
+import { ReviewDocumentBody } from './ReviewDocumentBody';
 
-type AnchoredMappingCard = MappingCardData & {
-  anchorId: string;
+type AssignModalState = {
+  isOpen: boolean;
+  title: string;
+  preview: string;
 };
 
 interface MappingViewProps {
@@ -29,20 +33,37 @@ interface MappingViewProps {
   selectedEntryIndex: number | null;
 }
 
+const EMPTY_ASSIGN_MODAL: AssignModalState = {
+  isOpen: false,
+  title: '',
+  preview: '',
+};
+
+const EMPTY_EXCLUDE_MODAL: EditModalContent = {
+  selectedText: '',
+  locations: [],
+  isOpen: false,
+};
+
 export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): JSX.Element => {
   const [hoveredMappingKeys, setHoveredMappingKeys] = useState<string[]>([]);
   const [cardOffsetsBySegment, setCardOffsetsBySegment] = useState<
     Record<string, Record<string, number>>
   >({});
-  const [excludeSelection, setExcludeSelection] = useState<EditModalContent | null>(null);
+  const [excludeSelection, setExcludeSelection] = useState<EditModalContent>(EMPTY_EXCLUDE_MODAL);
+  const [assignModal, setAssignModal] = useState<AssignModalState>(EMPTY_ASSIGN_MODAL);
+  const textSelectionRootRef = useRef<HTMLDivElement | null>(null);
   const segmentLayoutRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const cardWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const document = payload.normalizedDocument;
+  const entryBlockGraph = payload.entryBlockGraph;
+  const { actionMenuPosition, selectedText, clearSelection } =
+    useReviewTextSelection(textSelectionRootRef);
 
   const highlightIndex = useMemo(
-    () => buildMappingHighlightIndex(payload.entryBlockGraph),
-    [payload.entryBlockGraph]
+    () => buildMappingHighlightIndex(entryBlockGraph),
+    [entryBlockGraph]
   );
 
   const { tabs, allSegments } = useMemo(() => buildDocument(document), [document]);
@@ -58,10 +79,16 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
   const listMarkers = useMemo(() => buildListMarkers(allSegments), [allSegments]);
 
   const getVisibleHighlights = <T extends MappingHighlight>(highlights: T[]): T[] => {
+    const filtered = highlights.filter(
+      (highlight) =>
+        !entryBlockGraph.excludedSourceRefs.some(
+          (excluded) => buildSourceRefKey(excluded) === buildSourceRefKey(highlight.sourceRef)
+        )
+    );
     if (selectedEntryIndex === null) {
-      return highlights;
+      return filtered;
     }
-    return highlights.filter((item) => item.entryIndex === selectedEntryIndex);
+    return filtered.filter((item) => item.entryIndex === selectedEntryIndex);
   };
 
   const getHighlightsForSegment = (segment: DocSegment): MappingHighlight[] => {
@@ -114,13 +141,10 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
         }
 
         const segmentTop = segmentNode.getBoundingClientRect().top;
-        const anchorNodes = Array.from(
-          segmentNode.querySelectorAll<HTMLElement>('[data-anchor-id]')
-        );
 
         const cards = segmentCards.map((card) => {
-          const anchorNode = anchorNodes.find(
-            (node) => node.getAttribute('data-anchor-id') === card.anchorId
+          const anchorNode = segmentNode.querySelector<HTMLElement>(
+            `#${CSS.escape(card.anchorId)}`
           );
           const wrapperNode = cardWrapperRefs.current[card.key];
           const rawTop = anchorNode
@@ -141,23 +165,43 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
     measureOffsets();
   }, [mappingCardsBySegment, allSegments]);
 
+  const openAssignModal = (title: string, preview: string) => {
+    setAssignModal({ isOpen: true, title, preview });
+  };
+
+  const handleAssignFromSelection = () => {
+    if (!selectedText.trim()) return;
+    openAssignModal('Assign text selection', selectedText.trim());
+    clearSelection();
+  };
+
+  const handleExcludeFromSelection = () => {
+    if (!selectedText.trim()) return;
+   // openAssignModal('Exclude text selection', selectedText.trim());
+    setExcludeSelection({
+      selectedText: selectedText.trim(),
+      locations: [],
+    });
+    clearSelection();
+  };
+
+  const handleAssignImage = (_sourceRef: ImageSourceRef, label: string) => {
+    openAssignModal('Assign image selection', label);
+    setHoveredMappingKeys([]);
+  };
+
+  const handleExcludeImage = (_sourceRef: ImageSourceRef, label: string) => {
+    openAssignModal('Exclude image selection', label);
+    setHoveredMappingKeys([]);
+  };
+
   return (
     <>
       <Flex
+        ref={textSelectionRootRef}
         flexDirection="column"
         gap="spacingS"
         style={{ padding: tokens.spacingM, marginTop: tokens.spacingM }}>
-        {enableMockEditModal ? (
-          <Flex justifyContent="flex-end">
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={() => setExcludeSelection(mockExcludeSelection)}>
-              Mock exclude modal
-            </Button>
-          </Flex>
-        ) : null}
-
         {tabs.map((tab) => (
           <Box key={tab.id}>
             {tab.name && (
@@ -178,65 +222,27 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
                       alignItems="stretch"
                       data-testid={`segment-layout-${segment.id}`}
                       ref={setSegmentLayoutRef(segment.id)}>
-                      <Box style={{ flex: 2 }}>
-                        <Box data-testid={`segment-surface-${segment.id}`}>
-                          <Box
-                            data-anchor-id={
-                              segment.kind === 'block' ? `block:${segment.block.id}` : undefined
-                            }
-                            data-testid={
-                              segment.kind === 'block'
-                                ? `block-anchor-${segment.block.id}`
-                                : undefined
-                            }
-                            style={{
-                              padding: tokens.spacingXs,
-                            }}>
-                            {segment.kind === 'table' ? (
-                              <TableRenderer
-                                segmentId={segment.id}
-                                table={segment.table}
-                                highlightIndex={highlightIndex}
-                                imageById={imageById}
-                                selectedEntryIndex={selectedEntryIndex}
-                                hoveredMappingKeys={hoveredMappingKeys}
-                                onSetHoveredMappingKeys={setHoveredMappingKeys}
-                              />
-                            ) : (
-                              <BlockRenderer
-                                segmentId={segment.id}
-                                block={segment.block}
-                                highlightIndex={highlightIndex}
-                                listMarkers={listMarkers}
-                                imageById={imageById}
-                                selectedEntryIndex={selectedEntryIndex}
-                                hoveredMappingKeys={hoveredMappingKeys}
-                                onSetHoveredMappingKeys={setHoveredMappingKeys}
-                              />
-                            )}
-                          </Box>
-                        </Box>
-                      </Box>
+                      <ReviewDocumentBody
+                        segment={segment}
+                        highlightIndex={highlightIndex}
+                        imageById={imageById}
+                        listMarkers={listMarkers}
+                        excludedSourceRefs={entryBlockGraph.excludedSourceRefs}
+                        selectedEntryIndex={selectedEntryIndex}
+                        hoveredMappingKeys={hoveredMappingKeys}
+                        onSetHoveredMappingKeys={setHoveredMappingKeys}
+                        onAssignImage={handleAssignImage}
+                        onExcludeImage={handleExcludeImage}
+                      />
 
-                      <Box
-                        data-testid={`mapping-rail-${segment.id}`}
-                        style={{ flex: '0 0 280px', maxWidth: 280, position: 'relative' }}>
-                        <Box style={{ position: 'relative', minHeight: '100%' }}>
-                          {mappingCards.length > 0
-                            ? mappingCards.map((mappingCard) => (
-                                <MappingCard
-                                  key={mappingCard.key}
-                                  card={mappingCard}
-                                  top={cardOffsetsBySegment[segment.id]?.[mappingCard.key] ?? 0}
-                                  wrapperRef={setCardWrapperRef(mappingCard.key)}
-                                  isHovered={hoveredMappingKeys.includes(mappingCard.key)}
-                                  onMouseEnter={() => setHoveredMappingKeys([mappingCard.key])}
-                                  onMouseLeave={() => setHoveredMappingKeys([])}
-                                />
-                              ))
-                            : null}
-                        </Box>
-                      </Box>
+                      <MappingEntryCards
+                        segmentId={segment.id}
+                        mappingCards={mappingCards}
+                        cardOffsetsBySegment={cardOffsetsBySegment}
+                        hoveredMappingKeys={hoveredMappingKeys}
+                        onSetHoveredMappingKeys={setHoveredMappingKeys}
+                        setCardWrapperRef={setCardWrapperRef}
+                      />
                     </Flex>
                   </Box>
                 );
@@ -246,16 +252,29 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
         ))}
       </Flex>
 
-      {excludeSelection ? (
+      {actionMenuPosition ? (
+        <SelectionActionMenu
+          actionMenuPosition={actionMenuPosition}
+          onAssign={handleAssignFromSelection}
+          onExclude={handleExcludeFromSelection}
+        />
+      ) : null}
+
+      <AssignExcludeModal
+        isOpen={assignModal.isOpen}
+        title={assignModal.title}
+        preview={assignModal.preview}
+        onClose={() => setAssignModal(EMPTY_ASSIGN_MODAL)}
+      />
+
         <EditModal
-          isOpen={true}
-          onClose={() => setExcludeSelection(null)}
-          viewModel={excludeSelection}
+          isOpen={excludeSelection.isOpen}
+          onClose={() => setExcludeSelection(EMPTY_EXCLUDE_MODAL)}
+          viewModel={excludeSelection ?? {}}
           title="Exclude content"
           locationSectionDescription="This content is used in more than one place in the entry. Select which item to exclude."
           primaryButtonLabel="Exclude content"
         />
-      ) : null}
     </>
   );
 };

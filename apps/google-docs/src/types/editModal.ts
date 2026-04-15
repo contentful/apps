@@ -14,4 +14,5 @@ export interface EditLocationOption {
 export interface EditModalContent {
   selectedText: string;
   locations: EditLocationOption[];
+  isOpen: boolean;
 }
