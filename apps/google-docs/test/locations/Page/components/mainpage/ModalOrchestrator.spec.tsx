@@ -65,7 +65,6 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 const defaultProps = {
   sdk: mockSdk,
   oauthToken: 'mock-oauth-token',
-  onPreviewReady: vi.fn(),
   onMappingReviewReady: vi.fn(),
   onResetToMain: vi.fn(),
 };
@@ -100,7 +99,6 @@ const mappingReviewSuspendPayload: MappingReviewSuspendPayload = {
 describe('ModalOrchestrator', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    defaultProps.onPreviewReady.mockReset();
     defaultProps.onMappingReviewReady.mockReset();
     defaultProps.onResetToMain.mockReset();
     mockStartWorkflow.mockResolvedValue({
@@ -309,7 +307,7 @@ describe('ModalOrchestrator', () => {
         selectedTabIds: ['tab-1', 'tab-2'],
       });
       expect(screen.queryByRole('heading', { name: 'Preparing your preview' })).toBeNull();
-      expect(defaultProps.onPreviewReady).toHaveBeenCalledWith(mockWorkflowPayload);
+      expect(defaultProps.onMappingReviewReady).not.toHaveBeenCalled();
     });
   });
 
@@ -373,7 +371,6 @@ describe('ModalOrchestrator', () => {
 
     await waitFor(() => {
       expect(defaultProps.onMappingReviewReady).toHaveBeenCalledWith(mappingReviewSuspendPayload);
-      expect(defaultProps.onPreviewReady).not.toHaveBeenCalled();
     });
   });
 });
