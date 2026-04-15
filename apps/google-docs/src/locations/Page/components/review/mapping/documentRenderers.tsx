@@ -12,16 +12,21 @@ import {
 } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import type {
+  BlockTextSourceRef,
   NormalizedDocumentContentBlock,
   NormalizedDocumentImage,
   NormalizedDocumentTable,
   NormalizedDocumentTablePart,
+  SourceRef,
+  TableTextSourceRef,
 } from '@types';
-import { isBlockImageSourceRef, isTableImageSourceRef } from '@types';
+import { isBlockImageSourceRef, isTableImageSourceRef, isTableSourceRef } from '@types';
 import type { MappingHighlight, MappingHighlightIndex } from './buildHighlights';
 import { getMappingCardKey } from './buildHighlights';
 import type { ListMarker } from './buildListMarkers';
 import { buildTextSegments, type TextSegment } from './buildTextSegments';
+import { ReviewImageAssetCard } from './ReviewImageAssetCard';
+import { isImageSourceRefExcluded } from './sourceRefUtils';
 
 // ─── Shared helpers ─────────────────────────────────────────────────────────
 
@@ -64,15 +69,30 @@ function getTextSegmentStyle(styles?: TextSegment['styles']): CSSProperties {
 interface TextSegmentSpanProps {
   id: string;
   segment: TextSegment;
+  sourceRef: BlockTextSourceRef | TableTextSourceRef;
   hovered: boolean;
   onSetHoveredMappings: (keys: string[]) => void;
 }
 
-const TextSegmentSpan = ({ id, segment, hovered, onSetHoveredMappings }: TextSegmentSpanProps) => {
+const TextSegmentSpan = ({
+  id,
+  segment,
+  sourceRef,
+  hovered,
+  onSetHoveredMappings,
+}: TextSegmentSpanProps) => {
+  const sourceContainer =
+    isTableSourceRef(sourceRef) && !isTableImageSourceRef(sourceRef)
+      ? `table:${sourceRef.tableId}:${sourceRef.rowId}:${sourceRef.cellId}:${sourceRef.partId}`
+      : `block:${sourceRef.blockId}`;
   const content = (
     <Box
       as="span"
       key={id}
+      data-review-text-segment="true"
+      data-source-container={sourceContainer}
+      data-source-start={segment.start}
+      data-source-end={segment.end}
       onMouseEnter={
         segment.highlighted ? () => onSetHoveredMappings(segment.mappingKeys) : undefined
       }
@@ -106,9 +126,18 @@ interface BlockRendererProps {
   highlightIndex: MappingHighlightIndex;
   listMarkers: Record<string, ListMarker>;
   imageById: Record<string, NormalizedDocumentImage>;
+  excludedSourceRefs: SourceRef[];
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
+  onAssignImage: (
+    sourceRef: { type: 'blockImage'; blockId: string; imageId: string },
+    label: string
+  ) => void;
+  onExcludeImage: (
+    sourceRef: { type: 'blockImage'; blockId: string; imageId: string },
+    label: string
+  ) => void;
 }
 
 export const BlockRenderer = ({
@@ -117,9 +146,12 @@ export const BlockRenderer = ({
   highlightIndex,
   listMarkers,
   imageById,
+  excludedSourceRefs,
   selectedEntryIndex,
   hoveredMappingKeys,
   onSetHoveredMappingKeys,
+  onAssignImage,
+  onExcludeImage,
 }: BlockRendererProps) => {
   const visibleHighlights = filterByEntry(
     highlightIndex.blockHighlights[block.id] ?? [],
@@ -135,6 +167,13 @@ export const BlockRenderer = ({
           key={`${block.id}-${index}`}
           id={`${block.id}-${index}`}
           segment={seg}
+          sourceRef={{
+            type: 'blockText',
+            blockId: block.id,
+            start: seg.start,
+            end: seg.end,
+            flattenedRuns: block.flattenedTextRuns,
+          }}
           hovered={isMappingHovered(seg.mappingKeys, hoveredMappingKeys)}
           onSetHoveredMappings={onSetHoveredMappingKeys}
         />
@@ -172,6 +211,11 @@ export const BlockRenderer = ({
         const image = imageById[imageId];
         if (!image) return null;
 
+        const imageSourceRef = {
+          type: 'blockImage' as const,
+          blockId: block.id,
+          imageId,
+        };
         const imageMappingKeys = visibleHighlights
           .filter((h) => isBlockImageSourceRef(h.sourceRef) && h.sourceRef.imageId === imageId)
           .map((h) => getMappingCardKey(segmentId, h));
@@ -180,25 +224,22 @@ export const BlockRenderer = ({
 
         return (
           <Box key={image.id} marginTop="spacingS">
-            <Box
-              as="img"
-              src={image.url}
-              alt={image.altText ?? image.title ?? 'Document image'}
-              data-highlighted={highlighted ? 'true' : 'false'}
-              data-hovered={hovered ? 'true' : 'false'}
+            <ReviewImageAssetCard
+              image={image}
+              sourceRef={imageSourceRef}
+              isHighlighted={highlighted}
+              hovered={hovered}
+              isExcluded={isImageSourceRefExcluded(imageSourceRef, excludedSourceRefs)}
               onMouseEnter={
                 highlighted ? () => onSetHoveredMappingKeys(imageMappingKeys) : undefined
               }
               onMouseLeave={highlighted ? () => onSetHoveredMappingKeys([]) : undefined}
-              style={{
-                width: '100%',
-                maxHeight: 280,
-                objectFit: 'contain',
-                borderRadius: tokens.borderRadiusMedium,
-                border: `2px solid ${getHighlightStyle(highlighted, hovered).border}`,
-                backgroundColor: tokens.gray100,
-                transition: 'border-color 120ms ease',
-              }}
+              onAssign={() =>
+                onAssignImage(imageSourceRef, image.title ?? image.altText ?? image.id)
+              }
+              onExclude={() =>
+                onExcludeImage(imageSourceRef, image.title ?? image.altText ?? image.id)
+              }
             />
           </Box>
         );
@@ -214,56 +255,102 @@ interface TableRendererProps {
   table: NormalizedDocumentTable;
   highlightIndex: MappingHighlightIndex;
   imageById: Record<string, NormalizedDocumentImage>;
+  excludedSourceRefs: SourceRef[];
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
+  onAssignImage: (
+    sourceRef: {
+      type: 'tableImage';
+      tableId: string;
+      rowId: string;
+      cellId: string;
+      partId: string;
+      imageId: string;
+    },
+    label: string
+  ) => void;
+  onExcludeImage: (
+    sourceRef: {
+      type: 'tableImage';
+      tableId: string;
+      rowId: string;
+      cellId: string;
+      partId: string;
+      imageId: string;
+    },
+    label: string
+  ) => void;
 }
 
 interface TablePartRendererProps {
   segmentId: string;
+  tableId: string;
+  rowId: string;
+  cellId: string;
   part: NormalizedDocumentTablePart;
   visibleHighlights: MappingHighlight[];
   imageById: Record<string, NormalizedDocumentImage>;
+  excludedSourceRefs: SourceRef[];
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
+  onAssignImage: TableRendererProps['onAssignImage'];
+  onExcludeImage: TableRendererProps['onExcludeImage'];
 }
 
 const TablePartRenderer = ({
   segmentId,
+  tableId,
+  rowId,
+  cellId,
   part,
   visibleHighlights,
   imageById,
+  excludedSourceRefs,
   hoveredMappingKeys,
   onSetHoveredMappingKeys,
+  onAssignImage,
+  onExcludeImage,
 }: TablePartRendererProps) => {
   if (part.type === 'image') {
     const image = imageById[part.imageId];
     if (!image) return null;
 
+    const imageSourceRef = {
+      type: 'tableImage' as const,
+      tableId,
+      rowId,
+      cellId,
+      partId: part.id,
+      imageId: part.imageId,
+    };
     const mappingKeys = visibleHighlights
-      .filter((h) => isTableImageSourceRef(h.sourceRef))
+      .filter(
+        (h) =>
+          isTableImageSourceRef(h.sourceRef) &&
+          h.sourceRef.tableId === tableId &&
+          h.sourceRef.rowId === rowId &&
+          h.sourceRef.cellId === cellId &&
+          h.sourceRef.partId === part.id &&
+          h.sourceRef.imageId === part.imageId
+      )
       .map((h) => getMappingCardKey(segmentId, h));
     const highlighted = mappingKeys.length > 0;
     const hovered = isMappingHovered(mappingKeys, hoveredMappingKeys);
 
     return (
       <Box marginTop="spacing2Xs">
-        <Box
-          as="img"
-          src={image.url}
-          alt={image.altText ?? image.title ?? 'Table image'}
-          data-testid={`table-image-part-${part.id}`}
+        <ReviewImageAssetCard
+          image={image}
+          sourceRef={imageSourceRef}
+          isHighlighted={highlighted}
+          hovered={hovered}
+          isExcluded={isImageSourceRefExcluded(imageSourceRef, excludedSourceRefs)}
+          size="small"
           onMouseEnter={highlighted ? () => onSetHoveredMappingKeys(mappingKeys) : undefined}
           onMouseLeave={highlighted ? () => onSetHoveredMappingKeys([]) : undefined}
-          style={{
-            width: '100%',
-            maxWidth: 180,
-            objectFit: 'contain',
-            borderRadius: tokens.borderRadiusMedium,
-            border: `2px solid ${getHighlightStyle(highlighted, hovered).border}`,
-            backgroundColor: tokens.gray100,
-            transition: 'border-color 120ms ease',
-          }}
+          onAssign={() => onAssignImage(imageSourceRef, image.title ?? image.altText ?? image.id)}
+          onExclude={() => onExcludeImage(imageSourceRef, image.title ?? image.altText ?? image.id)}
         />
       </Box>
     );
@@ -278,6 +365,16 @@ const TablePartRenderer = ({
           key={`${part.id}-${index}`}
           id={`${part.id}-${index}`}
           segment={seg}
+          sourceRef={{
+            type: 'tableText',
+            tableId,
+            rowId,
+            cellId,
+            partId: part.id,
+            start: seg.start,
+            end: seg.end,
+            flattenedRuns: part.flattenedTextRuns,
+          }}
           hovered={isMappingHovered(seg.mappingKeys, hoveredMappingKeys)}
           onSetHoveredMappings={onSetHoveredMappingKeys}
         />
@@ -291,9 +388,12 @@ export const TableRenderer = ({
   table,
   highlightIndex,
   imageById,
+  excludedSourceRefs,
   selectedEntryIndex,
   hoveredMappingKeys,
   onSetHoveredMappingKeys,
+  onAssignImage,
+  onExcludeImage,
 }: TableRendererProps) => {
   const getVisiblePartHighlights = (partKey: string) =>
     filterByEntry(highlightIndex.tablePartHighlights[partKey] ?? [], selectedEntryIndex);
@@ -313,7 +413,7 @@ export const TableRenderer = ({
         {table.rows.map((row) => (
           <TableRow
             key={row.id}
-            data-anchor-id={`row:${table.id}:${row.id}`}
+            id={`row:${table.id}:${row.id}`}
             data-testid={`table-row-${row.id}`}>
             {row.cells.map((cell) => (
               <TableCell
@@ -327,11 +427,17 @@ export const TableRenderer = ({
                       <Box key={part.id}>
                         <TablePartRenderer
                           segmentId={segmentId}
+                          tableId={table.id}
+                          rowId={row.id}
+                          cellId={cell.id}
                           part={part}
                           visibleHighlights={getVisiblePartHighlights(partKey)}
                           imageById={imageById}
+                          excludedSourceRefs={excludedSourceRefs}
                           hoveredMappingKeys={hoveredMappingKeys}
                           onSetHoveredMappingKeys={onSetHoveredMappingKeys}
+                          onAssignImage={onAssignImage}
+                          onExcludeImage={onExcludeImage}
                         />
                       </Box>
                     );
