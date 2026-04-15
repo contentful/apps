@@ -177,10 +177,10 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
 
   const handleExcludeFromSelection = () => {
     if (!selectedText.trim()) return;
-   // openAssignModal('Exclude text selection', selectedText.trim());
     setExcludeSelection({
       selectedText: selectedText.trim(),
       locations: [],
+      isOpen: true,
     });
     clearSelection();
   };
@@ -267,14 +267,14 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
         onClose={() => setAssignModal(EMPTY_ASSIGN_MODAL)}
       />
 
-        <EditModal
-          isOpen={excludeSelection.isOpen}
-          onClose={() => setExcludeSelection(EMPTY_EXCLUDE_MODAL)}
-          viewModel={excludeSelection ?? {}}
-          title="Exclude content"
-          locationSectionDescription="This content is used in more than one place in the entry. Select which item to exclude."
-          primaryButtonLabel="Exclude content"
-        />
+      <EditModal
+        isOpen={excludeSelection.isOpen}
+        onClose={() => setExcludeSelection(EMPTY_EXCLUDE_MODAL)}
+        viewModel={excludeSelection ?? {}}
+        title="Exclude content"
+        locationSectionDescription="This content is used in more than one place in the entry. Select which item to exclude."
+        primaryButtonLabel="Exclude content"
+      />
     </>
   );
 };
