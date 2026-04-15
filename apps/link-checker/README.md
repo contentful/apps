@@ -6,14 +6,14 @@ A [Contentful app](https://www.contentful.com/developers/docs/extensibility/app-
 
 - **URL extraction**: Reads `sdk.entry.fields` and, for each **Symbol** and **Text** field, gets the value per locale and extracts URLs with a standard URL regex. Results are `{ url, fieldId, fieldName, locale }[]`.
 - **Link checking**: Runs **only** via a Contentful **App Function** (Premium/Partners), invoked as an **App Action**. There is no CORS proxy and no browser `fetch` fallback—checking is server-side only to avoid CORS and to comply with static-app hosting.
-- **Allow List**: Optional installation parameter **“Allow list”** (comma-separated substrings). When configured, any resolved URL that does not match one of those patterns is flagged as invalid before Link Checker makes a request.
-- **Deny List**: Optional installation parameter **“Deny list”** (comma-separated substrings). Any extracted URL containing one of these is marked invalid / on the deny list (no HTTP check).
+- **Allow List**: Optional installation parameter **“Allow list”** (comma-separated hostnames). When configured, any resolved URL whose hostname does not exactly match or fall under one of those hostnames is flagged as invalid before Link Checker makes a request.
+- **Deny List**: Optional installation parameter **“Deny list”** (comma-separated hostnames). Any extracted URL whose hostname exactly matches or falls under one of these is marked invalid / on the deny list (no HTTP check).
 - **UI**: “Check links” button, progress, and a results list (invalid/broken links; optional “show all”). Results distinguish between allow-list failures, deny-list failures, and HTTP/network issues. If the App Action is not available, the sidebar shows a message and disables link checking.
 
 ## Design (no hosting, static only)
 
 - **No hosting**: No backend or API route in the app bundle. The UI is static and runs in the browser.
-- **Static site**: The app is client-side only (no Next.js API routes, no custom backend). The built bundle is uploaded and hosted by Contentful.
+- **Static site**: The app is client-side only (no custom backend). The Vite-built bundle is uploaded and hosted by Contentful.
 - **Server-side when needed**: Checking arbitrary URLs uses an **App Function** invoked via an **App Action**. The function runs on Contentful’s infrastructure; the app bundle stays static.
 
 ## Requirements
@@ -30,11 +30,11 @@ Runs the app in development mode. Open your app to view it in the browser. The p
 
 #### `npm run build`
 
-Builds the app for production to the `.next` folder. It correctly bundles Next in production mode and optimizes the build for the best performance. Your app is ready to be deployed!
+Builds the app for production to the `build` folder.
 
 #### `npm run build:all`
 
-Builds the static app and the App Function, then copies the function into `out/functions/`. Use this before uploading so the bundle includes the Check Link function.
+Builds the static app and the App Function into `build/`. Use this before uploading so the bundle includes the Check Link function.
 
 #### `npm run upsert-actions`
 
@@ -70,11 +70,11 @@ To build and upload the app so Contentful hosts it (and you can test it in a spa
 
 Link checking runs **only** via the server-side App Function (Premium/Partners). The upload bundle must include both the static app and the built function.
 
-- **Build everything** (static app in `./out` and function in `./out/functions`):
+- **Build everything** (static app and function in `./build`):
   ```bash
   npm run build:all
   ```
-  This runs `npm run build`, then `npm run build:functions`, then copies the built function into `out/functions/`.
+  This runs `npm run build`, then `npm run build:functions`, so the upload bundle includes the `build/functions/` output.
 
 - **Upload** the build to Contentful (creates a new app bundle and activates it):
   ```bash
@@ -85,7 +85,7 @@ Link checking runs **only** via the server-side App Function (Premium/Partners).
   For CI or scripting you can pass options directly:
   ```bash
   npx contentful-app-scripts upload --ci \
-    --bundle-dir ./out \
+    --bundle-dir ./build \
     --organization-id YOUR_ORG_ID \
     --definition-id YOUR_APP_DEF_ID \
     --token YOUR_CONTENTFUL_ACCESS_TOKEN
@@ -127,7 +127,7 @@ This app is intended to meet the **Field Team Guide – Requirements for buildin
 |-------------|--------|
 | **Code ownership** | No ongoing ownership expected after submission; Marketplace team maintains. |
 | **TypeScript** | Project uses TypeScript (`.ts`/`.tsx`). |
-| **Linting** | `npm run lint` (Next.js ESLint) in `package.json`. |
+| **Linting** | `npm run lint` performs a TypeScript no-emit validation pass. |
 | **Boilerplate** | No placeholder or unnecessary boilerplate; config and sidebar are app-specific. |
 | **Tests** | `npm run test` and `npm run test:ci`; tests run without `--passWithNoTests`. |
 | **Build and start** | `npm run build`, `npm run start` in `package.json`. |
@@ -137,7 +137,7 @@ This app is intended to meet the **Field Team Guide – Requirements for buildin
 | **Accessibility** | Sidebar and Config use Forma 36; region and labels; `aria-live` for result updates; buttons and controls labeled. |
 | **PR / app name** | Submit final version via PR to MPA repo; use app name in PR title; `package.json` name: `contentful-link-checker`. |
 | **Secrets** | `.env` and `.env.*` in `.gitignore`; no API keys or tokens committed. |
-| **Bundle size** | Build output (`out/`) kept under 10 MB (current build ~1.3 MB). |
+| **Bundle size** | Build output (`build/`) kept under 10 MB (current build ~1.3 MB). |
 | **Static site** | Client-side only; no SSR, no API routes; server-side logic via App Function + App Action. |
 
 ---

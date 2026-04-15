@@ -13,8 +13,9 @@ import {
 } from '@contentful/f36-components';
 import { SidebarAppSDK } from '@contentful/app-sdk';
 import { useSDK, useAutoResizer } from '@contentful/react-apps-toolkit';
+import { normalizeDomainPattern, urlMatchesAnyDomainPattern } from '@/utils/domainPatterns';
 import { extractUrlsFromEntry, isRelativeUrl, type ExtractedUrl } from '@/utils/extractUrls';
-import { normalizeDomainPattern, type AppInstallationParameters } from './ConfigScreen';
+import { type AppInstallationParameters } from './ConfigScreen';
 
 const CHECK_LINK_FUNCTION_ID = 'checkLink';
 const CONCURRENCY = 3;
@@ -36,18 +37,6 @@ export interface LinkCheckResult {
 /** 2xx status codes (e.g. 200 OK, 204 No Content) indicate success. */
 function isSuccessStatus(status: number): boolean {
   return status >= 200 && status < 300;
-}
-
-function isUrlOnDenyList(url: string, patterns: string[]): boolean {
-  if (!patterns.length) return false;
-  const normalized = url.toLowerCase();
-  return patterns.some((p) => p.trim() && normalized.includes(p.trim().toLowerCase()));
-}
-
-function isUrlAllowedByAllowList(url: string, patterns: string[]): boolean {
-  if (!patterns.length) return true;
-  const normalized = url.toLowerCase();
-  return patterns.some((p) => p.trim() && normalized.includes(p.trim().toLowerCase()));
 }
 
 function ResultBadges({ result }: { result: LinkCheckResult }) {
@@ -221,8 +210,9 @@ export default function Sidebar() {
       const processOne = async (
         item: ExtractedUrl & { urlToCheck: string }
       ): Promise<LinkCheckResult> => {
-        const isAllowed = isUrlAllowedByAllowList(item.urlToCheck, allowedPatterns);
-        const onDenyList = isUrlOnDenyList(item.urlToCheck, forbiddenPatterns);
+        const isAllowed =
+          allowedPatterns.length === 0 || urlMatchesAnyDomainPattern(item.urlToCheck, allowedPatterns);
+        const onDenyList = urlMatchesAnyDomainPattern(item.urlToCheck, forbiddenPatterns);
         const resolvedUrl = item.urlToCheck !== item.url ? item.urlToCheck : undefined;
 
         if (!isAllowed) {

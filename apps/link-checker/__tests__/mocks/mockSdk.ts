@@ -1,9 +1,11 @@
+import { vi } from 'vitest';
+
 const mockSdk: any = {
   app: {
-    onConfigure: jest.fn(),
-    getParameters: jest.fn().mockReturnValueOnce({}),
-    setReady: jest.fn(),
-    getCurrentState: jest.fn(),
+    onConfigure: vi.fn(),
+    getParameters: vi.fn().mockReturnValueOnce({}),
+    setReady: vi.fn(),
+    getCurrentState: vi.fn(),
   },
   ids: {
     app: 'test-app',
@@ -21,11 +23,11 @@ const mockSdk: any = {
     fields: {},
   },
   navigator: {
-    openEntry: jest.fn(),
-    openAppConfig: jest.fn(),
+    openEntry: vi.fn(),
+    openAppConfig: vi.fn(),
   },
   cma: {},
-  location: { is: jest.fn().mockReturnValue(false) },
+  location: { is: vi.fn().mockReturnValue(false) },
 };
 
 export { mockSdk };

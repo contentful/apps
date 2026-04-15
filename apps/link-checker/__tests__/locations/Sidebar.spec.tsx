@@ -1,9 +1,10 @@
 import React from 'react';
 import { act, render, screen, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
 import { mockCma, mockSdk } from '../mocks';
 import Sidebar from '@/components/locations/Sidebar';
 
-jest.mock('@contentful/react-apps-toolkit', () => ({
+vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
   useAutoResizer: () => {},
@@ -33,7 +34,7 @@ describe('Sidebar component', () => {
   });
 
   it('flags links that are not on the allow list before calling the app action', async () => {
-    const createWithResponse = jest.fn();
+    const createWithResponse = vi.fn();
 
     mockSdk.parameters.installation = {
       allowedUrlPatterns: 'contentful.com',
@@ -49,7 +50,51 @@ describe('Sidebar component', () => {
     };
     mockSdk.cma = {
       appAction: {
-        getMany: jest.fn().mockResolvedValue({
+        getMany: vi.fn().mockResolvedValue({
+          items: [
+            {
+              sys: {
+                id: 'check-link-action',
+                appDefinition: { sys: { id: mockSdk.ids.app } },
+              },
+              function: { sys: { id: 'checkLink' } },
+            },
+          ],
+        }),
+      },
+      appActionCall: {
+        createWithResponse,
+      },
+    };
+
+    render(<Sidebar />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /check links/i }));
+    });
+
+    await screen.findByText(/not on allow list/i);
+    expect(createWithResponse).not.toHaveBeenCalled();
+  });
+
+  it('does not allow spoofed hostnames that only contain the pattern', async () => {
+    const createWithResponse = vi.fn();
+
+    mockSdk.parameters.installation = {
+      allowedUrlPatterns: 'contentful.com',
+    };
+    mockSdk.entry.fields = {
+      body: {
+        id: 'body',
+        name: 'Body',
+        type: 'Text',
+        locales: ['en-US'],
+        getValue: () => 'Visit https://contentful.com.evil.test/path for more details.',
+      },
+    };
+    mockSdk.cma = {
+      appAction: {
+        getMany: vi.fn().mockResolvedValue({
           items: [
             {
               sys: {
@@ -77,7 +122,7 @@ describe('Sidebar component', () => {
   });
 
   it('does not implicitly allow the current domain when the allow list is configured', async () => {
-    const createWithResponse = jest.fn();
+    const createWithResponse = vi.fn();
 
     mockSdk.parameters.installation = {
       baseUrl: 'https://contentful.com',
@@ -94,7 +139,7 @@ describe('Sidebar component', () => {
     };
     mockSdk.cma = {
       appAction: {
-        getMany: jest.fn().mockResolvedValue({
+        getMany: vi.fn().mockResolvedValue({
           items: [
             {
               sys: {
@@ -126,7 +171,7 @@ describe('Sidebar component', () => {
   });
 
   it('shows only non-invalid results when remaining links are expanded', async () => {
-    const createWithResponse = jest
+    const createWithResponse = vi
       .fn()
       .mockResolvedValueOnce({ response: { body: JSON.stringify({ status: 404 }) } })
       .mockResolvedValueOnce({ response: { body: JSON.stringify({ status: 200 }) } });
@@ -143,7 +188,7 @@ describe('Sidebar component', () => {
     };
     mockSdk.cma = {
       appAction: {
-        getMany: jest.fn().mockResolvedValue({
+        getMany: vi.fn().mockResolvedValue({
           items: [
             {
               sys: {

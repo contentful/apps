@@ -16,7 +16,7 @@ const result = spawnSync(
     'upload',
     '--ci',
     '--bundle-dir',
-    './out',
+    './build',
     '--organization-id',
     process.env.CONTENTFUL_ORG_ID,
     '--definition-id',

@@ -26,6 +26,28 @@ function isPlainEmailAddress(url: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(url);
 }
 
+function countOccurrences(value: string, target: string): number {
+  return [...value].filter((character) => character === target).length;
+}
+
+function trimTrailingUrlPunctuation(value: string): string {
+  let normalized = value.trim();
+
+  while (normalized && /[.,;:!?]$/.test(normalized)) {
+    normalized = normalized.slice(0, -1);
+  }
+
+  while (normalized.endsWith(')') && countOccurrences(normalized, ')') > countOccurrences(normalized, '(')) {
+    normalized = normalized.slice(0, -1);
+  }
+
+  while (normalized.endsWith(']') && countOccurrences(normalized, ']') > countOccurrences(normalized, '[')) {
+    normalized = normalized.slice(0, -1);
+  }
+
+  return normalized;
+}
+
 /** Field-like shape from sdk.entry.fields[id] */
 interface FieldLike {
   id: string;
@@ -112,7 +134,7 @@ export function extractUrlsFromEntry(entry: EntryLike): ExtractedUrl[] {
         URL_REGEX.lastIndex = 0;
         let match: RegExpExecArray | null;
         while ((match = URL_REGEX.exec(text)) !== null) {
-          const url = match[0].trim();
+          const url = trimTrailingUrlPunctuation(match[0]);
           if (!url) continue;
           if (isPlainEmailAddress(url)) continue;
           const key = `${url}\0${fieldId}\0${locale}`;
@@ -128,7 +150,7 @@ export function extractUrlsFromEntry(entry: EntryLike): ExtractedUrl[] {
 
         RELATIVE_PATH_REGEX.lastIndex = 0;
         while ((match = RELATIVE_PATH_REGEX.exec(text)) !== null) {
-          const url = match[1].trim();
+          const url = trimTrailingUrlPunctuation(match[1]);
           if (!url) continue;
           const key = `${url}\0${fieldId}\0${locale}`;
           if (seen.has(key)) continue;

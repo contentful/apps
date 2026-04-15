@@ -1,6 +1,7 @@
 import { handler } from '../../functions/checkLink';
+import { vi } from 'vitest';
 
-const mockFetch = jest.fn();
+const mockFetch = vi.fn();
 
 beforeEach(() => {
   mockFetch.mockReset();

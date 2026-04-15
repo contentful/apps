@@ -18,8 +18,9 @@ import {
 } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import { normalizeDomainPattern, urlMatchesAnyDomainPattern } from '@/utils/domainPatterns';
 import { extractUrlsFromEntry, isRelativeUrl, type ExtractedUrl } from '@/utils/extractUrls';
-import { normalizeDomainPattern, type AppInstallationParameters } from './ConfigScreen';
+import { type AppInstallationParameters } from './ConfigScreen';
 
 const CHECK_LINK_FUNCTION_ID = 'checkLink';
 const FETCH_LIMIT = 1000;
@@ -70,18 +71,6 @@ interface PageLinkResult {
 
 function isSuccessStatus(status: number): boolean {
   return status >= 200 && status < 300;
-}
-
-function isUrlOnDenyList(url: string, patterns: string[]): boolean {
-  if (!patterns.length) return false;
-  const normalized = url.toLowerCase();
-  return patterns.some((p) => p.trim() && normalized.includes(p.trim().toLowerCase()));
-}
-
-function isUrlAllowedByAllowList(url: string, patterns: string[]): boolean {
-  if (!patterns.length) return true;
-  const normalized = url.toLowerCase();
-  return patterns.some((p) => p.trim() && normalized.includes(p.trim().toLowerCase()));
 }
 
 function getEntryTitle(
@@ -174,6 +163,7 @@ export default function Page() {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | LinkStatus>('all');
   const [contentTypeFilter, setContentTypeFilter] = useState('all');
+  const [scanNotice, setScanNotice] = useState<string | null>(null);
 
   const installation = (sdk.parameters.installation || {}) as AppInstallationParameters;
   const hasAssignedContentTypes = Boolean(installation.selectedContentTypeIds?.length);
@@ -190,6 +180,7 @@ export default function Page() {
 
   const loadAuditResults = useCallback(async () => {
     setError(null);
+    setScanNotice(null);
     setLoading(true);
     setScanning(false);
     setProgress(null);
@@ -259,6 +250,16 @@ export default function Page() {
           )
           .map((contentType) => [contentType.id, contentType])
       );
+
+      if (contentTypeMap.size === 0) {
+        setResults([]);
+        setLoading(false);
+        setScanNotice(
+          'The assigned content types do not contain any supported Symbol, Text, Rich Text, or matching list fields.'
+        );
+        return;
+      }
+
       const appDefinitionId = sdk.ids.app;
 
       if (!appDefinitionId) {
@@ -354,10 +355,9 @@ export default function Page() {
       let hasLoadedFirstBatch = false;
       let entriesScanned = 0;
       let linksFound = 0;
-      const entryQueryBase =
-        contentTypeMap.size > 0
-          ? { 'sys.contentType.sys.id[in]': Array.from(contentTypeMap.keys()).join(',') }
-          : {};
+      const entryQueryBase = {
+        'sys.contentType.sys.id[in]': Array.from(contentTypeMap.keys()).join(','),
+      };
 
       while (true) {
         const response = await sdk.cma.entry.getMany({
@@ -523,7 +523,7 @@ export default function Page() {
           const resultId = `${item.entryId}-${item.extractedUrl.fieldId}-${item.extractedUrl.locale}-${item.extractedUrl.url}`;
           let nextResult: PageLinkResult;
 
-          if (!isUrlAllowedByAllowList(item.urlToCheck, allowedPatterns)) {
+          if (allowedPatterns.length > 0 && !urlMatchesAnyDomainPattern(item.urlToCheck, allowedPatterns)) {
             nextResult = {
               id: resultId,
               entryId: item.entryId,
@@ -539,7 +539,7 @@ export default function Page() {
               status: 'invalid',
               reason: 'Not on allow list',
             };
-          } else if (isUrlOnDenyList(item.urlToCheck, forbiddenPatterns)) {
+          } else if (urlMatchesAnyDomainPattern(item.urlToCheck, forbiddenPatterns)) {
             nextResult = {
               id: resultId,
               entryId: item.entryId,
@@ -686,6 +686,14 @@ export default function Page() {
           <Box marginTop="spacingL">
             <Note variant="negative" title="Could not load the link audit">
               {error}
+            </Note>
+          </Box>
+        )}
+
+        {!error && scanNotice && (
+          <Box marginTop="spacingL">
+            <Note variant="neutral" title="Nothing to scan">
+              {scanNotice}
             </Note>
           </Box>
         )}

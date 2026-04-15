@@ -12,30 +12,18 @@ import {
 } from '@contentful/f36-components';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import ContentTypeMultiSelect from '@/components/ContentTypeMultiSelect';
+import { normalizeDomainPattern } from '@/utils/domainPatterns';
 import { styles } from './ConfigScreen.styles';
 
 export interface AppInstallationParameters {
-  /** Comma-separated production domain substrings to require for valid links. */
+  /** Comma-separated allowed hostnames used for exact or subdomain matching. */
   allowedUrlPatterns?: string;
-  /** Comma-separated non-production domain substrings to treat as invalid (deny list). */
+  /** Comma-separated blocked hostnames used for exact or subdomain matching. */
   forbiddenUrlPatterns?: string;
   /** Base URL used to resolve relative links for checking. */
   baseUrl?: string;
   /** Explicit content type ids assigned to the app from the configuration screen. */
   selectedContentTypeIds?: string[];
-}
-
-export function normalizeDomainPattern(value: string): string {
-  const trimmed = value.trim().replace(/\/+$/, '');
-  if (!trimmed) return '';
-
-  try {
-    return new URL(
-      trimmed.startsWith('http') ? trimmed : `https://${trimmed}`
-    ).hostname.toLowerCase();
-  } catch {
-    return trimmed.replace(/^https?:\/\//i, '').toLowerCase();
-  }
 }
 
 export interface ContentTypeItem {
@@ -331,8 +319,8 @@ function ConfigScreen() {
               </Flex>
             )}
             <FormControl.HelpText>
-              Optional. Add one domain pattern at a time. When set, Link Checker marks any resolved
-              URL that does not include one of these patterns as invalid.
+              Optional. Add one hostname at a time. Link Checker matches the exact hostname or one
+              of its subdomains before making a request.
             </FormControl.HelpText>
           </FormControl>
           <FormControl marginTop="spacingM">
@@ -368,8 +356,9 @@ function ConfigScreen() {
               </Flex>
             )}
             <FormControl.HelpText>
-              Optional. Add one domain pattern at a time. Anything listed here is always flagged as
-              invalid, which is useful for blocking staging, QA, or other non-production domains.
+              Optional. Add one hostname at a time. Anything listed here is always flagged as
+              invalid, including its subdomains, which is useful for blocking staging, QA, or
+              other non-production domains.
             </FormControl.HelpText>
           </FormControl>
         </Form>

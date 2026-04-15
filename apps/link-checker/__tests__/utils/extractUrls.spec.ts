@@ -85,6 +85,44 @@ describe('extractUrlsFromEntry', () => {
     expect(urls.some((u) => u === '/about' || u.startsWith('/about'))).toBe(true);
   });
 
+  it('strips trailing punctuation from absolute URLs in prose', () => {
+    const entry = {
+      fields: {
+        body: {
+          id: 'body',
+          name: 'Body',
+          type: 'Text',
+          locales: ['en-US'],
+          getValue: () => 'See https://example.com. Then visit https://example.com/docs, too.',
+        },
+      },
+    };
+
+    expect(extractUrlsFromEntry(entry).map((result) => result.url)).toEqual([
+      'https://example.com',
+      'https://example.com/docs',
+    ]);
+  });
+
+  it('strips trailing punctuation from relative URLs in prose', () => {
+    const entry = {
+      fields: {
+        body: {
+          id: 'body',
+          name: 'Body',
+          type: 'Text',
+          locales: ['en-US'],
+          getValue: () => 'Review /about. Then check ../team/contact).',
+        },
+      },
+    };
+
+    expect(extractUrlsFromEntry(entry).map((result) => result.url)).toEqual([
+      '/about',
+      '../team/contact',
+    ]);
+  });
+
   it('deduplicates same URL in same field/locale', () => {
     const entry = {
       fields: {
