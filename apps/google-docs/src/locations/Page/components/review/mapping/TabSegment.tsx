@@ -19,7 +19,7 @@ interface ReviewDocumentBodyProps {
   onExcludeImage: (sourceRef: ImageSourceRef, label: string) => void;
 }
 
-export const ReviewDocumentBody = ({
+export const TabSegement = ({
   segment,
   highlightIndex,
   imageById,
