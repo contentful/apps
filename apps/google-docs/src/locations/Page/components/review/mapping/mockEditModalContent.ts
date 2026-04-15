@@ -50,6 +50,7 @@ export const mockExcludeSelection: EditModalContent = {
       },
     },
   ],
+  isOpen: true,
 };
 
 export const mockNewLocationSelection: EditModalContent = {

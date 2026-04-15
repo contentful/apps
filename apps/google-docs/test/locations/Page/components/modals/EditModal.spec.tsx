@@ -55,6 +55,7 @@ const viewModel = {
       },
     },
   ],
+  isOpen: true,
 };
 
 describe('EditModal', () => {
