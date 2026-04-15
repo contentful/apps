@@ -18,6 +18,8 @@ import { BlockRenderer, TableRenderer } from './documentRenderers';
 import { EditionModal } from './edit-modals/EditionModal';
 import { buildExcludeContentModalViewModel } from './edit-modals/utils/buildExcludeContentModalViewModel';
 
+const enableMockEditModal = import.meta.env.VITE_ENABLE_MOCK_EDIT_MODAL === 'true';
+
 type AnchoredMappingCard = MappingCardData & {
   anchorId: string;
 };
@@ -204,14 +206,16 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
         flexDirection="column"
         gap="spacingS"
         style={{ padding: tokens.spacingM, marginTop: tokens.spacingM }}>
-        <Flex justifyContent="flex-end">
-          <Button
-            variant="secondary"
-            size="small"
-            onClick={() => setExcludeSelection(buildMockExcludeSelection())}>
-            Mock exclude modal
-          </Button>
-        </Flex>
+        {enableMockEditModal ? (
+          <Flex justifyContent="flex-end">
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={() => setExcludeSelection(buildMockExcludeSelection())}>
+              Mock exclude modal
+            </Button>
+          </Flex>
+        ) : null}
 
         {tabs.map((tab) => (
           <Box key={tab.id}>
