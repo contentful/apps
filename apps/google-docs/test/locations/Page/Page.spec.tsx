@@ -45,43 +45,6 @@ vi.mock('../../../src/locations/Page/components/review/mapping/MappingView', () 
   MappingView: () => <div>Mock fixture review</div>,
 }));
 
-vi.mock('../../../src/hooks/useWorkflowAgent', () => ({
-  useWorkflowAgent: () => ({
-    isAnalyzing: false,
-    startWorkflow: vi.fn(),
-    resumeWorkflow: vi.fn().mockResolvedValue(undefined),
-  }),
-}));
-
-vi.mock('../../../src/fixtures/googleDocsReview/loadFixtureReviewPayload', () => ({
-  loadFixtureReviewPayload: vi.fn().mockResolvedValue({
-    suspendStepId: 'mapping-review',
-    reason: 'Fixture mapping review payload',
-    documentId: 'fixture-doc-id',
-    documentTitle: 'Document mapping review',
-    normalizedDocument: {
-      documentId: 'fixture-doc-id',
-      title: 'Document mapping review',
-      designValues: [],
-      contentBlocks: [],
-      images: [],
-      tables: [],
-      assets: [],
-    },
-    entryBlockGraph: {
-      entries: [],
-      excludedSourceRefs: [],
-    },
-    referenceGraph: {
-      edges: [],
-      creationOrder: [],
-      deferredFields: [],
-      hasCircularDependency: false,
-    },
-    contentTypes: [],
-  }),
-}));
-
 const { mockModalOrchestrator } = vi.hoisted(() => ({
   mockModalOrchestrator: vi.fn(),
 }));
