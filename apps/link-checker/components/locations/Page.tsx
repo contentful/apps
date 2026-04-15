@@ -523,7 +523,10 @@ export default function Page() {
           const resultId = `${item.entryId}-${item.extractedUrl.fieldId}-${item.extractedUrl.locale}-${item.extractedUrl.url}`;
           let nextResult: PageLinkResult;
 
-          if (allowedPatterns.length > 0 && !urlMatchesAnyDomainPattern(item.urlToCheck, allowedPatterns)) {
+          if (
+            allowedPatterns.length > 0 &&
+            !urlMatchesAnyDomainPattern(item.urlToCheck, allowedPatterns)
+          ) {
             nextResult = {
               id: resultId,
               entryId: item.entryId,

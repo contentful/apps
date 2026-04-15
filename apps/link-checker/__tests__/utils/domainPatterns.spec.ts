@@ -15,9 +15,9 @@ describe('urlMatchesAnyDomainPattern', () => {
   });
 
   it('matches subdomains of an allowed hostname', () => {
-    expect(
-      urlMatchesAnyDomainPattern('https://www.contentful.com/help', ['contentful.com'])
-    ).toBe(true);
+    expect(urlMatchesAnyDomainPattern('https://www.contentful.com/help', ['contentful.com'])).toBe(
+      true
+    );
   });
 
   it('does not match spoofed hostnames that only contain the pattern', () => {

@@ -3,7 +3,9 @@ export function normalizeDomainPattern(value: string): string {
   if (!trimmed) return '';
 
   try {
-    return new URL(trimmed.startsWith('http') ? trimmed : `https://${trimmed}`).hostname.toLowerCase();
+    return new URL(
+      trimmed.startsWith('http') ? trimmed : `https://${trimmed}`
+    ).hostname.toLowerCase();
   } catch {
     return trimmed.replace(/^https?:\/\//i, '').toLowerCase();
   }

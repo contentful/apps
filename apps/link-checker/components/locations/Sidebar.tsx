@@ -211,7 +211,8 @@ export default function Sidebar() {
         item: ExtractedUrl & { urlToCheck: string }
       ): Promise<LinkCheckResult> => {
         const isAllowed =
-          allowedPatterns.length === 0 || urlMatchesAnyDomainPattern(item.urlToCheck, allowedPatterns);
+          allowedPatterns.length === 0 ||
+          urlMatchesAnyDomainPattern(item.urlToCheck, allowedPatterns);
         const onDenyList = urlMatchesAnyDomainPattern(item.urlToCheck, forbiddenPatterns);
         const resolvedUrl = item.urlToCheck !== item.url ? item.urlToCheck : undefined;
 

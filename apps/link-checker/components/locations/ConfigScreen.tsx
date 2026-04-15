@@ -357,8 +357,8 @@ function ConfigScreen() {
             )}
             <FormControl.HelpText>
               Optional. Add one hostname at a time. Anything listed here is always flagged as
-              invalid, including its subdomains, which is useful for blocking staging, QA, or
-              other non-production domains.
+              invalid, including its subdomains, which is useful for blocking staging, QA, or other
+              non-production domains.
             </FormControl.HelpText>
           </FormControl>
         </Form>

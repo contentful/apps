@@ -37,11 +37,17 @@ function trimTrailingUrlPunctuation(value: string): string {
     normalized = normalized.slice(0, -1);
   }
 
-  while (normalized.endsWith(')') && countOccurrences(normalized, ')') > countOccurrences(normalized, '(')) {
+  while (
+    normalized.endsWith(')') &&
+    countOccurrences(normalized, ')') > countOccurrences(normalized, '(')
+  ) {
     normalized = normalized.slice(0, -1);
   }
 
-  while (normalized.endsWith(']') && countOccurrences(normalized, ']') > countOccurrences(normalized, '[')) {
+  while (
+    normalized.endsWith(']') &&
+    countOccurrences(normalized, ']') > countOccurrences(normalized, '[')
+  ) {
     normalized = normalized.slice(0, -1);
   }
 
