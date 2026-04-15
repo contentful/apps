@@ -4,6 +4,8 @@ import type { MappingHighlight } from './buildHighlights';
 import { getMappingCardKey } from './buildHighlights';
 
 export type TextSegment = {
+  start: number;
+  end: number;
   text: string;
   styles?: NormalizedDocumentFlattenedRun['styles'];
   highlighted: boolean;
@@ -49,6 +51,8 @@ export function buildTextSegments(
       .filter(({ sourceRef }) => start >= sourceRef.start && end <= sourceRef.end)
       .map(({ mappingKey }) => mappingKey);
 
-    return [{ text, styles: run.styles, highlighted: mappingKeys.length > 0, mappingKeys }];
+    return [
+      { start, end, text, styles: run.styles, highlighted: mappingKeys.length > 0, mappingKeys },
+    ];
   });
 }
