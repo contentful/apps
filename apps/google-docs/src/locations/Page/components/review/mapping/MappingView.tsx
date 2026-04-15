@@ -173,17 +173,10 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
     });
   };
 
-  const handleAssignFromSelection = () => {
-    if (!selectedText.trim()) return;
-    openAssignContentEditModal(selectedText.trim());
-    clearSelection();
-  };
-
-  const handleExcludeFromSelection = () => {
-    if (!selectedText.trim()) return;
+  const openExcludeContentEditModal = (contentLabel: string) => {
     setEditModalState({
       viewModel: {
-        selectedText: selectedText.trim(),
+        selectedText: contentLabel,
         isOpen: true,
         currentLocations: [],
       },
@@ -192,6 +185,17 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
         'This content is used in more than one place in the entry. Select which item to exclude.',
       primaryButtonLabel: 'Exclude content',
     });
+  };
+
+  const handleAssignFromSelection = () => {
+    if (!selectedText.trim()) return;
+    openAssignContentEditModal(selectedText.trim());
+    clearSelection();
+  };
+
+  const handleExcludeFromSelection = () => {
+    if (!selectedText.trim()) return;
+    openExcludeContentEditModal(selectedText.trim());
     clearSelection();
   };
 
@@ -201,17 +205,7 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
   };
 
   const handleExcludeImage = (_sourceRef: ImageSourceRef, label: string) => {
-    setEditModalState({
-      viewModel: {
-        selectedText: label,
-        isOpen: true,
-        currentLocations: [],
-      },
-      title: 'Exclude content',
-      locationSectionDescription:
-        'This content is used in more than one place in the entry. Select which item to exclude.',
-      primaryButtonLabel: 'Exclude content',
-    });
+    openExcludeContentEditModal(label);
     setHoveredMappingKeys([]);
   };
 
