@@ -15,6 +15,7 @@ import {
 import { buildListMarkers } from './buildListMarkers';
 import { formatDisplayName, getFieldTypeLabel } from './fieldFormatting';
 import { EditModal } from './edit-modals/EditModal';
+import { mockExcludeSelection, mockNewLocationSelection } from './mockEditModalContent';
 
 import { SelectionActionMenu } from './SelectionActionMenu';
 import { buildSourceRefKey } from './sourceRefUtils';
@@ -22,11 +23,20 @@ import { AssignExcludeModal } from './AssignExcludeModal';
 import { MappingEntryCards, type AnchoredMappingCard } from './MappingEntryCards';
 import { TabSegement } from './TabSegment';
 
+const enableMockEditModal = import.meta.env.VITE_ENABLE_MOCK_EDIT_MODAL === 'true';
+
 type AssignModalState = {
   isOpen: boolean;
   title: string;
   preview: string;
 };
+
+interface EditModalState {
+  viewModel: EditModalContent;
+  title: string;
+  locationSectionDescription: string;
+  primaryButtonLabel: string;
+}
 
 interface MappingViewProps {
   payload: MappingReviewSuspendPayload;
@@ -39,20 +49,14 @@ const EMPTY_ASSIGN_MODAL: AssignModalState = {
   preview: '',
 };
 
-const EMPTY_EXCLUDE_MODAL: EditModalContent = {
-  selectedText: '',
-  locations: [],
-  isOpen: false,
-};
-
 export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): JSX.Element => {
   const [hoveredMappingKeys, setHoveredMappingKeys] = useState<string[]>([]);
   const [cardOffsetsBySegment, setCardOffsetsBySegment] = useState<
     Record<string, Record<string, number>>
   >({});
-  const [excludeSelection, setExcludeSelection] = useState<EditModalContent>(EMPTY_EXCLUDE_MODAL);
   const [assignModal, setAssignModal] = useState<AssignModalState>(EMPTY_ASSIGN_MODAL);
   const textSelectionRootRef = useRef<HTMLDivElement | null>(null);
+  const [editModalState, setEditModalState] = useState<EditModalState | null>(null);
   const segmentLayoutRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const cardWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -177,10 +181,16 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
 
   const handleExcludeFromSelection = () => {
     if (!selectedText.trim()) return;
-    setExcludeSelection({
-      selectedText: selectedText.trim(),
-      locations: [],
-      isOpen: true,
+    setEditModalState({
+      viewModel: {
+        selectedText: selectedText.trim(),
+        isOpen: true,
+        currentLocations: [],
+      },
+      title: 'Exclude content',
+      locationSectionDescription:
+        'This content is used in more than one place in the entry. Select which item to exclude.',
+      primaryButtonLabel: 'Exclude content',
     });
     clearSelection();
   };
@@ -202,6 +212,38 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
         flexDirection="column"
         gap="spacingS"
         style={{ padding: tokens.spacingM, marginTop: tokens.spacingM }}>
+        {enableMockEditModal ? (
+          <Flex justifyContent="flex-end" gap="spacingS">
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={() =>
+                setEditModalState({
+                  viewModel: mockExcludeSelection,
+                  title: 'Exclude content',
+                  locationSectionDescription:
+                    'This content is used in more than one place in the entry. Select which item to exclude.',
+                  primaryButtonLabel: 'Exclude content',
+                })
+              }>
+              Mock exclude modal
+            </Button>
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={() =>
+                setEditModalState({
+                  viewModel: mockNewLocationSelection,
+                  title: 'Assign content',
+                  locationSectionDescription: '',
+                  primaryButtonLabel: 'Move content',
+                })
+              }>
+              Mock new location modal
+            </Button>
+          </Flex>
+        ) : null}
+
         {tabs.map((tab) => (
           <Box key={tab.id}>
             {tab.name && (
@@ -252,28 +294,30 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
         ))}
       </Flex>
 
-      {actionMenuPosition ? (
+      {actionMenuPosition && (
         <SelectionActionMenu
           actionMenuPosition={actionMenuPosition}
           onAssign={handleAssignFromSelection}
           onExclude={handleExcludeFromSelection}
         />
-      ) : null}
+      )}
+
+      {editModalState && (
+        <EditModal
+          isOpen={true}
+          onClose={() => setEditModalState(null)}
+          viewModel={editModalState.viewModel}
+          title={editModalState.title}
+          locationSectionDescription={editModalState.locationSectionDescription}
+          primaryButtonLabel={editModalState.primaryButtonLabel}
+        />
+      )}
 
       <AssignExcludeModal
         isOpen={assignModal.isOpen}
         title={assignModal.title}
         preview={assignModal.preview}
         onClose={() => setAssignModal(EMPTY_ASSIGN_MODAL)}
-      />
-
-      <EditModal
-        isOpen={excludeSelection.isOpen}
-        onClose={() => setExcludeSelection(EMPTY_EXCLUDE_MODAL)}
-        viewModel={excludeSelection ?? {}}
-        title="Exclude content"
-        locationSectionDescription="This content is used in more than one place in the entry. Select which item to exclude."
-        primaryButtonLabel="Exclude content"
       />
     </>
   );

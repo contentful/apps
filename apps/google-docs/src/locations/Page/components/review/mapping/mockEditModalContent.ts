@@ -2,7 +2,8 @@ import type { EditModalContent } from '@types';
 
 export const mockExcludeSelection: EditModalContent = {
   selectedText: 'Sample selected content',
-  locations: [
+  isOpen: true,
+  currentLocations: [
     {
       id: 'mock-summary',
       contentTypeId: 'sampleContentType',
@@ -47,6 +48,20 @@ export const mockExcludeSelection: EditModalContent = {
           },
         ],
       },
+    },
+  ],
+};
+
+export const mockNewLocationSelection: EditModalContent = {
+  selectedText: 'Hot coffee, haute content, on us.',
+  isOpen: true,
+  currentLocations: [],
+  newLocations: [
+    {
+      title: "Page: Event detail (Don't enter NRF uncaffeinated.)",
+    },
+    {
+      title: "Component: Resource detail hero (Don't enter NRF uncaffeinated.)",
     },
   ],
 };
