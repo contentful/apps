@@ -13,17 +13,30 @@ import { css } from 'emotion';
 import { useSDK } from '@contentful/react-apps-toolkit';
 
 // Stores config options
-export interface AppInstallationParameters {}
+interface ReactJsonConfig {
+  displayDataTypes: string;
+  iconStyle: string;
+  collapsed: string;
+  theme: string;
+  defaultIncludeDepth: string;
+}
+
+export interface AppInstallationParameters {
+  configOptions?: ReactJsonConfig;
+}
+
+const defaultReactJsonConfig: ReactJsonConfig = {
+  displayDataTypes: 'false',
+  iconStyle: 'triangle',
+  collapsed: 'false',
+  theme: 'rjv-default',
+  defaultIncludeDepth: '0',
+};
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
   const sdk = useSDK<AppExtensionSDK>();
-  const [reactJsonConfig, setReactJsonConfig] = useState({
-    displayDataTypes: 'false',
-    iconStyle: 'triangle',
-    collapsed: 'false',
-    theme: 'rjv-default',
-  });
+  const [reactJsonConfig, setReactJsonConfig] = useState<ReactJsonConfig>(defaultReactJsonConfig);
 
   const onChangeHandler = (event: any) => {
     // Handles changes to the configuration form fields.
@@ -66,7 +79,10 @@ const ConfigScreen = () => {
       const currentParameters = await sdk.app.getParameters();
       if (currentParameters) {
         setParameters(currentParameters);
-        setReactJsonConfig(currentParameters.configOptions);
+        setReactJsonConfig({
+          ...defaultReactJsonConfig,
+          ...currentParameters.configOptions,
+        });
       }
 
       // Once preparation has finished, call `setReady` to hide
@@ -76,8 +92,10 @@ const ConfigScreen = () => {
   }, [sdk]);
 
   useEffect(() => {
-    setParameters({ ...parameters, configOptions: reactJsonConfig });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setParameters((currentParameters) => ({
+      ...currentParameters,
+      configOptions: reactJsonConfig,
+    }));
   }, [reactJsonConfig]);
 
   return (
@@ -155,6 +173,26 @@ const ConfigScreen = () => {
             </Select>
             <FormControl.HelpText>
               When set to true, all nodes will be collapsed by default
+            </FormControl.HelpText>
+          </Box>
+
+          <Box marginTop="spacingM">
+            <FormControl.Label>Default reference include depth:</FormControl.Label>
+            <Select
+              id="defaultIncludeDepth"
+              name="defaultIncludeDepth"
+              value={reactJsonConfig.defaultIncludeDepth}
+              onChange={onChangeHandler}>
+              {Array(11)
+                .fill(0)
+                .map((_, i) => (
+                  <Select.Option key={i} value={String(i)}>
+                    Include: {i}
+                  </Select.Option>
+                ))}
+            </Select>
+            <FormControl.HelpText>
+              Sets the default include depth shown when opening the JSON Viewer tab
             </FormControl.HelpText>
           </Box>
         </Form>
