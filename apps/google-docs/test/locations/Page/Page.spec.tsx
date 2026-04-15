@@ -163,11 +163,10 @@ describe('Page component', () => {
   it('switches to the fixture review screen from the main page', async () => {
     render(<Page />);
 
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Mock from fixture' })).toBeTruthy();
+    const mockFromFixtureButton = screen.getByRole('button', {
+      name: 'Trigger Mapping Review Ready',
     });
-
-    fireEvent.click(screen.getByRole('button', { name: 'Mock from fixture' }));
+    fireEvent.click(mockFromFixtureButton);
 
     await waitFor(() => {
       expect(screen.getByText('Create from document "Document mapping review"')).toBeTruthy();
