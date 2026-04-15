@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Box, Button, Modal, Paragraph, Text } from '@contentful/f36-components';
 import type { EditModalContent } from '@types';
 import {
+  fieldPlaceholder,
   locationButton,
   locationButtonSelected,
   locationButtonUnselected,
@@ -30,12 +31,15 @@ export const EditModal = ({
   primaryButtonLabel,
   additionalContent,
 }: EditModalProps) => {
+  const hasLocationSectionDescription = locationSectionDescription.trim().length > 0;
+  const hasCurrentLocations = viewModel.currentLocations.length > 0;
+  const hasNewLocations = (viewModel.newLocations?.length ?? 0) > 0;
   const initialSelectedLocationId = useMemo(
     () =>
-      viewModel.locations.find((location) => location.isSelected)?.id ??
-      viewModel.locations[0]?.id ??
+      viewModel.currentLocations.find((location) => location.isSelected)?.id ??
+      viewModel.currentLocations[0]?.id ??
       null,
-    [viewModel.locations]
+    [viewModel.currentLocations]
   );
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
     initialSelectedLocationId
@@ -62,51 +66,78 @@ export const EditModal = ({
               </Box>
 
               <Box className={sectionCard}>
-                <Text as="p" fontWeight="fontWeightDemiBold" marginBottom="spacing2Xs">
+                <Text fontWeight="fontWeightDemiBold" marginBottom="spacing2Xs">
                   Current location
                 </Text>
-                <Paragraph marginBottom="spacingM">{locationSectionDescription}</Paragraph>
+                {hasLocationSectionDescription ? (
+                  <Paragraph marginBottom={hasCurrentLocations ? 'spacingM' : 'none'}>
+                    {locationSectionDescription}
+                  </Paragraph>
+                ) : null}
 
-                <Box className={locationList}>
-                  {viewModel.locations.map((location) => {
-                    const isSelected = location.id === selectedLocationId;
+                {hasCurrentLocations ? (
+                  <Box className={locationList}>
+                    {viewModel.currentLocations.map((location) => {
+                      const isSelected = location.id === selectedLocationId;
 
-                    return (
-                      <Box
-                        as="button"
-                        type="button"
-                        key={location.id}
-                        onClick={() => setSelectedLocationId(location.id)}
-                        aria-pressed={isSelected}
-                        className={`${locationButton} ${
-                          isSelected ? locationButtonSelected : locationButtonUnselected
-                        }`}>
-                        <Box className={locationContent}>
-                          <Text as="p" fontColor="gray600" marginBottom="spacing2Xs">
-                            Content type{' '}
-                            <Text as="span" fontWeight="fontWeightDemiBold" fontColor="gray900">
-                              {location.contentTypeId}
+                      return (
+                        <Box
+                          as="button"
+                          type="button"
+                          key={location.id}
+                          onClick={() => setSelectedLocationId(location.id)}
+                          aria-pressed={isSelected}
+                          className={`${locationButton} ${
+                            isSelected ? locationButtonSelected : locationButtonUnselected
+                          }`}>
+                          <Box className={locationContent}>
+                            <Text as="p" fontColor="gray600" marginBottom="spacing2Xs">
+                              Content type{' '}
+                              <Text as="span" fontWeight="fontWeightDemiBold" fontColor="gray900">
+                                {location.contentTypeId}
+                              </Text>
                             </Text>
-                          </Text>
-                          <Text as="p" fontColor="gray600" marginBottom="spacing2Xs">
-                            Entry name{' '}
-                            <Text as="span" fontWeight="fontWeightDemiBold" fontColor="gray900">
-                              {location.entryName}
+                            <Text as="p" fontColor="gray600" marginBottom="spacing2Xs">
+                              Entry name{' '}
+                              <Text as="span" fontWeight="fontWeightDemiBold" fontColor="gray900">
+                                {location.entryName}
+                              </Text>
                             </Text>
-                          </Text>
-                          <Text as="p" fontColor="gray600">
-                            Field{' '}
-                            <Text as="span" fontWeight="fontWeightDemiBold" fontColor="gray900">
-                              {location.fieldName}
-                            </Text>{' '}
-                            | {location.fieldType}
-                          </Text>
+                            <Text as="p" fontColor="gray600">
+                              Field{' '}
+                              <Text as="span" fontWeight="fontWeightDemiBold" fontColor="gray900">
+                                {location.fieldName}
+                              </Text>{' '}
+                              | {location.fieldType}
+                            </Text>
+                          </Box>
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                ) : null}
+              </Box>
+
+              {hasNewLocations ? (
+                <Box>
+                  <Text as="p" fontWeight="fontWeightDemiBold" marginBottom="spacingM">
+                    New location
+                  </Text>
+                  <Box className={locationList}>
+                    {viewModel.newLocations?.map((newLocation) => (
+                      <Box className={sectionCard} key={newLocation.title}>
+                        <Text as="p" fontWeight="fontWeightDemiBold" marginBottom="spacingM">
+                          {newLocation.title}
+                        </Text>
+                        <Text marginBottom="spacing2Xs">Fields</Text>
+                        <Box className={fieldPlaceholder}>
+                          <Text as="span">Select one or more</Text>
                         </Box>
                       </Box>
-                    );
-                  })}
+                    ))}
+                  </Box>
                 </Box>
-              </Box>
+              ) : null}
 
               {additionalContent}
             </Box>

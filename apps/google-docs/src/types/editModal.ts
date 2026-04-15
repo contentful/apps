@@ -11,7 +11,13 @@ export interface EditLocationOption {
   isSelected?: boolean;
 }
 
+export interface EditModalNewLocation {
+  title: string;
+}
+
 export interface EditModalContent {
   selectedText: string;
-  locations: EditLocationOption[];
+  isOpen: boolean;
+  currentLocations: EditLocationOption[];
+  newLocations?: EditModalNewLocation[];
 }

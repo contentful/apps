@@ -16,13 +16,20 @@ import { buildListMarkers } from './buildListMarkers';
 import { formatDisplayName, getFieldTypeLabel } from './fieldFormatting';
 import { BlockRenderer, TableRenderer } from './documentRenderers';
 import { EditModal } from './edit-modals/EditModal';
-import { mockExcludeSelection } from './mockEditModalContent';
+import { mockExcludeSelection, mockNewLocationSelection } from './mockEditModalContent';
 
 const enableMockEditModal = import.meta.env.VITE_ENABLE_MOCK_EDIT_MODAL === 'true';
 
 type AnchoredMappingCard = MappingCardData & {
   anchorId: string;
 };
+
+interface EditModalState {
+  viewModel: EditModalContent;
+  title: string;
+  locationSectionDescription: string;
+  primaryButtonLabel: string;
+}
 
 interface MappingViewProps {
   payload: MappingReviewSuspendPayload;
@@ -35,6 +42,7 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
     Record<string, Record<string, number>>
   >({});
   const [excludeSelection, setExcludeSelection] = useState<EditModalContent | null>(null);
+  const [editModalState, setEditModalState] = useState<EditModalState | null>(null);
   const segmentLayoutRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const cardWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -148,12 +156,33 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
         gap="spacingS"
         style={{ padding: tokens.spacingM, marginTop: tokens.spacingM }}>
         {enableMockEditModal ? (
-          <Flex justifyContent="flex-end">
+          <Flex justifyContent="flex-end" gap="spacingS">
             <Button
               variant="secondary"
               size="small"
-              onClick={() => setExcludeSelection(mockExcludeSelection)}>
+              onClick={() =>
+                setEditModalState({
+                  viewModel: mockExcludeSelection,
+                  title: 'Exclude content',
+                  locationSectionDescription:
+                    'This content is used in more than one place in the entry. Select which item to exclude.',
+                  primaryButtonLabel: 'Exclude content',
+                })
+              }>
               Mock exclude modal
+            </Button>
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={() =>
+                setEditModalState({
+                  viewModel: mockNewLocationSelection,
+                  title: 'Assign content',
+                  locationSectionDescription: '',
+                  primaryButtonLabel: 'Move content',
+                })
+              }>
+              Mock new location modal
             </Button>
           </Flex>
         ) : null}
