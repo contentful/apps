@@ -90,6 +90,7 @@ const TextSegmentSpan = ({
       as="span"
       key={id}
       data-review-text-segment="true"
+      data-is-mapped={segment.highlighted ? 'true' : 'false'}
       data-source-container={sourceContainer}
       data-source-start={segment.start}
       data-source-end={segment.end}
