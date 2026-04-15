@@ -4,7 +4,7 @@ A [Contentful app](https://www.contentful.com/developers/docs/extensibility/app-
 
 ## What this app does
 
-- **URL extraction**: Reads `sdk.entry.fields` and, for each **Symbol** and **Text** field, gets the value per locale and extracts URLs with a standard URL regex. Results are `{ url, fieldId, fieldName, locale }[]`.
+- **URL extraction**: Reads `sdk.entry.fields` and, for each **Symbol** and **Text** field, gets the value per locale and extracts URLs with a standard URL regex. `www.` links are normalized to `https://...` before checking so they are handled as external web URLs rather than relative paths.
 - **Link checking**: Runs **only** via a Contentful **App Function** (Premium/Partners), invoked as an **App Action**. There is no CORS proxy and no browser `fetch` fallback—checking is server-side only to avoid CORS and to comply with static-app hosting.
 - **Allow List**: Optional installation parameter **“Allow list”** (comma-separated hostnames). When configured, any resolved URL whose hostname does not exactly match or fall under one of those hostnames is flagged as invalid before Link Checker makes a request.
 - **Deny List**: Optional installation parameter **“Deny list”** (comma-separated hostnames). Any extracted URL whose hostname exactly matches or falls under one of these is marked invalid / on the deny list (no HTTP check).
@@ -19,6 +19,7 @@ A [Contentful app](https://www.contentful.com/developers/docs/extensibility/app-
 ## Requirements
 
 - **Link checking**: Requires a space on a **Premium/Partners** plan with an **App Action** that invokes the “Check Link” function. If the action is missing or the plan doesn’t support it, the sidebar shows a message and does not run checks.
+- **Function egress policy**: The manifest currently allows outbound checks to a broad set of public web hostnames via wildcard TLD entries such as `*.com`, `*.org`, and `*.io`. Before shipping a manifest change, smoke-test the function against at least one non-Contentful host such as `https://example.com`.
 
 ## Available Scripts
 

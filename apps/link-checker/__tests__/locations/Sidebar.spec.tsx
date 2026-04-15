@@ -170,6 +170,66 @@ describe('Sidebar component', () => {
     expect(createWithResponse).not.toHaveBeenCalled();
   });
 
+  it('checks www URLs as absolute https URLs instead of resolving them against the current domain', async () => {
+    const createWithResponse = vi.fn().mockResolvedValue({
+      response: { body: JSON.stringify({ status: 200 }) },
+    });
+
+    mockSdk.parameters.installation = {
+      baseUrl: 'https://contentful.com',
+    };
+    mockSdk.entry.fields = {
+      body: {
+        id: 'body',
+        name: 'Body',
+        type: 'Text',
+        locales: ['en-US'],
+        getValue: () => 'Visit www.example.com/help for more details.',
+      },
+    };
+    mockSdk.cma = {
+      appAction: {
+        getMany: vi.fn().mockResolvedValue({
+          items: [
+            {
+              sys: {
+                id: 'check-link-action',
+                appDefinition: { sys: { id: mockSdk.ids.app } },
+              },
+              function: { sys: { id: 'checkLink' } },
+            },
+          ],
+        }),
+      },
+      appActionCall: {
+        createWithResponse,
+      },
+    };
+
+    render(<Sidebar />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /check links/i }));
+    });
+
+    await screen.findByText(/1 valid link/i);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('checkbox', { name: /show valid links/i }));
+    });
+
+    expect(screen.getByRole('link', { name: 'https://www.example.com/help' })).toHaveAttribute(
+      'href',
+      'https://www.example.com/help'
+    );
+    expect(createWithResponse).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({
+        parameters: { url: 'https://www.example.com/help' },
+      })
+    );
+  });
+
   it('shows only non-invalid results when remaining links are expanded', async () => {
     const createWithResponse = vi
       .fn()

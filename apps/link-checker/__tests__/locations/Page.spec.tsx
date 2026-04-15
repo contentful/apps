@@ -248,4 +248,84 @@ describe('Page component', () => {
       expect(createWithResponse).not.toHaveBeenCalled();
     });
   });
+
+  it('checks www URLs as absolute https URLs instead of resolving them against the current domain', async () => {
+    const createWithResponse = vi.fn().mockResolvedValue({
+      response: { body: JSON.stringify({ status: 200 }) },
+    });
+
+    mockSdk.parameters.installation = {
+      selectedContentTypeIds: ['article'],
+      baseUrl: 'https://contentful.com',
+    };
+    mockSdk.cma = {
+      contentType: {
+        getMany: vi.fn().mockResolvedValue({
+          items: [
+            {
+              sys: { id: 'article' },
+              name: 'Article',
+              displayField: 'title',
+              fields: [
+                { id: 'title', name: 'Title', type: 'Symbol' },
+                { id: 'body', name: 'Body', type: 'Text' },
+              ],
+            },
+          ],
+        }),
+      },
+      entry: {
+        getMany: vi
+          .fn()
+          .mockResolvedValueOnce({
+            items: [
+              {
+                sys: {
+                  id: 'entry-1',
+                  contentType: { sys: { id: 'article' } },
+                },
+                fields: {
+                  title: { 'en-US': 'Release Notes' },
+                  body: { 'en-US': 'Visit www.example.com/help' },
+                },
+              },
+            ],
+          })
+          .mockResolvedValueOnce({ items: [] }),
+      },
+      appAction: {
+        getMany: vi.fn().mockResolvedValue({
+          items: [
+            {
+              sys: {
+                id: 'check-link-action',
+                appDefinition: { sys: { id: mockSdk.ids.app } },
+              },
+              function: { sys: { id: 'checkLink' } },
+            },
+          ],
+        }),
+      },
+      appActionCall: {
+        createWithResponse,
+      },
+    };
+
+    render(<Page />);
+    fireEvent.click(screen.getByRole('button', { name: 'Run scan' }));
+
+    await screen.findByRole('link', { name: 'https://www.example.com/help' });
+    expect(screen.getByRole('link', { name: 'https://www.example.com/help' })).toHaveAttribute(
+      'href',
+      'https://www.example.com/help'
+    );
+    await waitFor(() => {
+      expect(createWithResponse).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({
+          parameters: { url: 'https://www.example.com/help' },
+        })
+      );
+    });
+  });
 });

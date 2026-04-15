@@ -11,6 +11,11 @@ describe('isRelativeUrl', () => {
     expect(isRelativeUrl('https://example.com/path')).toBe(false);
   });
 
+  it('returns false for www URLs', () => {
+    expect(isRelativeUrl('www.example.com')).toBe(false);
+    expect(isRelativeUrl('www.example.com/help')).toBe(false);
+  });
+
   it('returns true for path-only URLs', () => {
     expect(isRelativeUrl('/about')).toBe(true);
     expect(isRelativeUrl('/path/to/page')).toBe(true);
@@ -83,6 +88,24 @@ describe('extractUrlsFromEntry', () => {
     expect(result.length).toBeGreaterThanOrEqual(1);
     const urls = result.map((r) => r.url);
     expect(urls.some((u) => u === '/about' || u.startsWith('/about'))).toBe(true);
+  });
+
+  it('normalizes www URLs to https URLs during extraction', () => {
+    const entry = {
+      fields: {
+        body: {
+          id: 'body',
+          name: 'Body',
+          type: 'Text',
+          locales: ['en-US'],
+          getValue: () => 'Visit www.example.com/help for more details.',
+        },
+      },
+    };
+
+    expect(extractUrlsFromEntry(entry).map((result) => result.url)).toEqual([
+      'https://www.example.com/help',
+    ]);
   });
 
   it('strips trailing punctuation from absolute URLs in prose', () => {

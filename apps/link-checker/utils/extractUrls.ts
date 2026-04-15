@@ -19,7 +19,7 @@ export interface ExtractedUrl {
 /** Returns true if the URL is relative (not http/https). */
 export function isRelativeUrl(url: string): boolean {
   const t = url.trim();
-  return !/^https?:\/\//i.test(t);
+  return !/^(?:https?:\/\/|www\.)/i.test(t);
 }
 
 function isPlainEmailAddress(url: string): boolean {
@@ -52,6 +52,17 @@ function trimTrailingUrlPunctuation(value: string): string {
   }
 
   return normalized;
+}
+
+function normalizeExtractedUrl(value: string): string {
+  const trimmed = trimTrailingUrlPunctuation(value);
+  if (!trimmed) return '';
+
+  if (/^www\./i.test(trimmed)) {
+    return `https://${trimmed}`;
+  }
+
+  return trimmed;
 }
 
 /** Field-like shape from sdk.entry.fields[id] */
@@ -88,7 +99,7 @@ function extractUrlsFromRichTextValue(
 ): void {
   if (!node) return;
   if (node.nodeType === 'hyperlink' && node.data?.uri) {
-    const url = node.data.uri.trim();
+    const url = normalizeExtractedUrl(node.data.uri);
     if (url) {
       const key = `${url}\0${fieldId}\0${locale}`;
       if (!seen.has(key)) {
@@ -140,7 +151,7 @@ export function extractUrlsFromEntry(entry: EntryLike): ExtractedUrl[] {
         URL_REGEX.lastIndex = 0;
         let match: RegExpExecArray | null;
         while ((match = URL_REGEX.exec(text)) !== null) {
-          const url = trimTrailingUrlPunctuation(match[0]);
+          const url = normalizeExtractedUrl(match[0]);
           if (!url) continue;
           if (isPlainEmailAddress(url)) continue;
           const key = `${url}\0${fieldId}\0${locale}`;
@@ -156,7 +167,7 @@ export function extractUrlsFromEntry(entry: EntryLike): ExtractedUrl[] {
 
         RELATIVE_PATH_REGEX.lastIndex = 0;
         while ((match = RELATIVE_PATH_REGEX.exec(text)) !== null) {
-          const url = trimTrailingUrlPunctuation(match[1]);
+          const url = normalizeExtractedUrl(match[1]);
           if (!url) continue;
           const key = `${url}\0${fieldId}\0${locale}`;
           if (seen.has(key)) continue;

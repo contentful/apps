@@ -9,7 +9,18 @@
       "accepts": [
         "appaction.call"
       ],
-      "allowNetworks": []
+      "allowNetworks": [
+        "*.ai",
+        "*.app",
+        "*.co",
+        "*.com",
+        "*.dev",
+        "*.edu",
+        "*.gov",
+        "*.io",
+        "*.net",
+        "*.org"
+      ]
     }
   ],
   "actions": [
