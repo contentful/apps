@@ -8,12 +8,13 @@ interface SelectionActionMenuProps {
   actionMenuPosition: ActionMenuPosition;
   onAssign: () => void;
   onExclude: () => void;
+  isMappedContent: boolean;
 }
 
 const MENU_ESTIMATE_WIDTH_PX = 180;
 
 export const SelectionActionMenu = forwardRef<HTMLDivElement, SelectionActionMenuProps>(
-  ({ actionMenuPosition, onAssign, onExclude }, ref) => {
+  ({ actionMenuPosition, onAssign, onExclude, isMappedContent }, ref) => {
     const centerX = (actionMenuPosition.left + actionMenuPosition.right) / 2;
     const half = MENU_ESTIMATE_WIDTH_PX / 2;
     const clampedCenterX = Math.min(Math.max(centerX, 8 + half), window.innerWidth - 8 - half);
@@ -43,10 +44,11 @@ export const SelectionActionMenu = forwardRef<HTMLDivElement, SelectionActionMen
             size="small"
             onClick={onAssign}
             style={{ borderBottomRightRadius: 0, borderTopRightRadius: 0 }}>
-            Assign
+            {isMappedContent ? 'Reassign' : 'Assign'}
           </Button>
           <Splitter />
           <Button
+            isDisabled={!isMappedContent}
             variant="transparent"
             size="small"
             onClick={onExclude}

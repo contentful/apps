@@ -62,7 +62,7 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
 
   const document = payload.normalizedDocument;
   const entryBlockGraph = payload.entryBlockGraph;
-  const { actionMenuPosition, selectedText, clearSelection } =
+  const { actionMenuPosition, selectedText, selectedRange, clearSelection } =
     useReviewTextSelection(textSelectionRootRef);
 
   const highlightIndex = useMemo(
@@ -205,6 +205,29 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
     setHoveredMappingKeys([]);
   };
 
+  const canExcludeSelectedText = useMemo(() => {
+    const root = textSelectionRootRef.current;
+    if (!root || !selectedRange) {
+      return false;
+    }
+
+    const selectedSegments = root.querySelectorAll<HTMLElement>(
+      '[data-review-text-segment="true"]'
+    );
+
+    return Array.from(selectedSegments).some((segment) => {
+      try {
+        if (!selectedRange.intersectsNode(segment)) {
+          return false;
+        }
+
+        return segment.dataset.isMapped === 'true';
+      } catch {
+        return false;
+      }
+    });
+  }, [selectedRange]);
+
   return (
     <>
       <Flex
@@ -299,6 +322,7 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
           actionMenuPosition={actionMenuPosition}
           onAssign={handleAssignFromSelection}
           onExclude={handleExcludeFromSelection}
+          isMappedContent={canExcludeSelectedText}
         />
       )}
 
