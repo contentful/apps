@@ -1,5 +1,5 @@
 import type { AssetToCreate, EntryToCreate } from './entry';
-import type { EntryBlockGraph } from './entryBlockGraph';
+import type { EntryBlockGraph, SourceRef } from './entryBlockGraph';
 import type { NormalizedDocument } from './normalizedDocument';
 
 export enum RunStatus {
@@ -67,6 +67,22 @@ export interface WorkflowContentType {
   name?: string;
   description?: string | null;
   fields: WorkflowContentTypeField[];
+}
+
+export interface ExcludeSelectionLocation {
+  id: string;
+  contentTypeId: string;
+  entryName?: string;
+  fieldId: string;
+  fieldName?: string;
+  fieldType: string;
+  sourceRef: SourceRef;
+  isSelected?: boolean;
+}
+
+export interface ExcludeSelectionPayload {
+  selectedText: string;
+  locations: ExcludeSelectionLocation[];
 }
 
 export interface PreviewPayload {
