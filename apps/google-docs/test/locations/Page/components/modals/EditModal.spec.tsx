@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { EditionModal } from '../../../../../src/locations/Page/components/review/mapping/edit-modals/EditionModal';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { EditModal } from '../../../../../src/locations/Page/components/review/mapping/edit-modals/EditModal';
 import React from 'react';
 
 const onClose = vi.fn();
@@ -56,14 +56,14 @@ const viewModel = {
   ],
 };
 
-describe('EditionModal', () => {
+describe('EditModal', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('renders the provided title and configured labels', async () => {
     render(
-      <EditionModal
+      <EditModal
         isOpen={true}
         onClose={onClose}
         viewModel={viewModel}
@@ -83,7 +83,7 @@ describe('EditionModal', () => {
 
   it('allows switching the selected location card', async () => {
     render(
-      <EditionModal
+      <EditModal
         isOpen={true}
         onClose={onClose}
         viewModel={viewModel}

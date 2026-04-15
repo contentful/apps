@@ -1,7 +1,7 @@
 import { useLayoutEffect, useMemo, useRef, useState, type RefCallback } from 'react';
 import { Box, Button, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import type { EditionModalContent, MappingReviewSuspendPayload } from '@types';
+import type { EditModalContent, MappingReviewSuspendPayload } from '@types';
 import { FileTextIcon } from '@contentful/f36-icons';
 import { MappingCard, type MappingCardData } from './MappingCard';
 import { getAnchorIdForSourceRef, resolveMarkerOffsets } from './resolveMappingCardOffsets';
@@ -15,7 +15,7 @@ import {
 import { buildListMarkers } from './buildListMarkers';
 import { formatDisplayName, getFieldTypeLabel } from './fieldFormatting';
 import { BlockRenderer, TableRenderer } from './documentRenderers';
-import { EditionModal } from './edit-modals/EditionModal';
+import { EditModal } from './edit-modals/EditModal';
 import { mockExcludeSelection } from './mockEditModalContent';
 
 const enableMockEditModal = import.meta.env.VITE_ENABLE_MOCK_EDIT_MODAL === 'true';
@@ -34,7 +34,7 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
   const [cardOffsetsBySegment, setCardOffsetsBySegment] = useState<
     Record<string, Record<string, number>>
   >({});
-  const [excludeSelection, setExcludeSelection] = useState<EditionModalContent | null>(null);
+  const [excludeSelection, setExcludeSelection] = useState<EditModalContent | null>(null);
   const segmentLayoutRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const cardWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -247,7 +247,7 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
       </Flex>
 
       {excludeSelection ? (
-        <EditionModal
+        <EditModal
           isOpen={true}
           onClose={() => setExcludeSelection(null)}
           viewModel={excludeSelection}

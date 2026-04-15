@@ -1,6 +1,6 @@
-import type { EditionModalContent } from '@types';
+import type { EditModalContent } from '@types';
 
-export const mockExcludeSelection: EditionModalContent = {
+export const mockExcludeSelection: EditModalContent = {
   selectedText: 'Sample selected content',
   locations: [
     {

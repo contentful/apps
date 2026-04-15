@@ -1,6 +1,6 @@
 import type { SourceRef } from './entryBlockGraph';
 
-export interface EditionLocationOption {
+export interface EditLocationOption {
   id: string;
   contentTypeId: string;
   entryName: string;
@@ -11,7 +11,7 @@ export interface EditionLocationOption {
   isSelected?: boolean;
 }
 
-export interface EditionModalContent {
+export interface EditModalContent {
   selectedText: string;
-  locations: EditionLocationOption[];
+  locations: EditLocationOption[];
 }

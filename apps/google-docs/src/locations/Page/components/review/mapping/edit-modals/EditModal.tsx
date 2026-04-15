@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Box, Button, Modal, Paragraph, Text } from '@contentful/f36-components';
-import type { EditionModalContent, SourceRef } from '@types';
+import type { EditModalContent } from '@types';
 import {
   locationButton,
   locationButtonSelected,
@@ -9,19 +9,19 @@ import {
   locationList,
   modalContent,
   sectionCard,
-} from './EditionModal.styles';
+} from './EditModal.styles';
 
-interface EditionModalProps {
+interface EditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  viewModel: EditionModalContent;
+  viewModel: EditModalContent;
   title: string;
   locationSectionDescription: string;
   primaryButtonLabel: string;
   additionalContent?: ReactNode;
 }
 
-export const EditionModal = ({
+export const EditModal = ({
   isOpen,
   onClose,
   viewModel,
@@ -29,7 +29,7 @@ export const EditionModal = ({
   locationSectionDescription,
   primaryButtonLabel,
   additionalContent,
-}: EditionModalProps) => {
+}: EditModalProps) => {
   const initialSelectedLocationId = useMemo(
     () =>
       viewModel.locations.find((location) => location.isSelected)?.id ??
