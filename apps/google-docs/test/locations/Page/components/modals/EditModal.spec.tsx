@@ -123,6 +123,7 @@ describe('EditModal', () => {
           ...viewModel,
           newLocations: [
             {
+              id: 'page-event-detail',
               title: "Page: Event detail (Don't enter NRF uncaffeinated.)",
               fieldMappings: [],
               fieldOptions: [
@@ -134,6 +135,7 @@ describe('EditModal', () => {
               ],
             },
             {
+              id: 'component-resource-detail-hero',
               title: "Component: Resource detail hero (Don't enter NRF uncaffeinated.)",
               fieldMappings: [{ fieldId: 'headline' }],
               fieldOptions: [
