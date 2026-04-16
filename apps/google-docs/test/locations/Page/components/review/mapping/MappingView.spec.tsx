@@ -159,13 +159,13 @@ describe('MappingView', () => {
         node instanceof HTMLElement && node.dataset.isMapped === 'true',
     } as unknown as Range;
     mockUseReviewTextSelection.mockReturnValueOnce({
-      actionMenuPosition: null,
+      selectionRectangle: null,
       selectedText: '',
       selectedRange: null,
       clearSelection: mockClearSelection,
     });
     mockUseReviewTextSelection.mockReturnValue({
-      actionMenuPosition: { top: 100, left: 100, right: 160, bottom: 120 },
+      selectionRectangle: { top: 100, left: 100, right: 160, bottom: 120 },
       selectedText: 'selected body text',
       selectedRange,
       clearSelection: mockClearSelection,
