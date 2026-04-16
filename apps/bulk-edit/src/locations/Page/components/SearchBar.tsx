@@ -9,6 +9,7 @@ import { fieldFilterValuesToQuery } from '../utils/contentfulQueryUtils';
 import StatusFilter from './StatusFilter';
 import tokens from '@contentful/f36-tokens';
 import { SortMenu } from './SortMenu';
+import { scrollableMenuListStyle } from './menuStyles';
 
 function toggleFieldInFilter(
   field: ContentTypeField,
@@ -133,7 +134,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               Fields
             </Button>
           </Menu.Trigger>
-          <Menu.List>
+          <Menu.List style={scrollableMenuListStyle}>
             <Menu.Item
               onClick={() => {
                 setFieldFilterValues([]);

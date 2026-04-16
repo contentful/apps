@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/re
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { FieldVisibiltyMenu } from '../../../src/locations/Page/components/FieldVisibiltyMenu';
 import { ContentTypeField, FilterOption } from '../../../src/locations/Page/types';
+import { scrollableMenuListStyle } from '../../../src/locations/Page/components/menuStyles';
 
 // Non-localized fields for basic tests
 const mockFields: ContentTypeField[] = [
@@ -107,6 +108,19 @@ describe('FieldVisibiltyMenu (Column Selection)', () => {
       await waitFor(() => {
         expect(screen.getByText('Select all')).toBeInTheDocument();
         expect(screen.getByText('Clear all')).toBeInTheDocument();
+      });
+    });
+
+    it('caps the menu height so the field list can scroll on short viewports', async () => {
+      render(<FieldVisibiltyMenu {...defaultProps} />);
+
+      const triggerButton = screen.getByRole('button', { name: /field visibility/i });
+      fireEvent.click(triggerButton);
+
+      await waitFor(() => {
+        expect(screen.getByRole('menu')).toHaveStyle(
+          `max-height: ${scrollableMenuListStyle.maxHeight}; overflow-y: ${scrollableMenuListStyle.overflowY};`
+        );
       });
     });
 

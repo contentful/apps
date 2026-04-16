@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SearchBar } from '../../../src/locations/Page/components/SearchBar';
 import { ContentTypeField, FieldFilterValue } from '../../../src/locations/Page/types';
+import { scrollableMenuListStyle } from '../../../src/locations/Page/components/menuStyles';
 
 vi.mock('use-debounce', () => ({
   useDebounce: (value: string, delay: number) => {
@@ -245,6 +246,18 @@ describe('SearchFilter', () => {
         expect(screen.getByText('Title')).toBeInTheDocument();
         expect(screen.getByText('Description')).toBeInTheDocument();
         expect(screen.getByText('Count')).toBeInTheDocument();
+      });
+    });
+
+    it('caps the fields menu height so it remains scrollable on short viewports', async () => {
+      render(<SearchBar {...defaultProps} />);
+
+      fireEvent.click(screen.getByText('Fields'));
+
+      await waitFor(() => {
+        expect(screen.getByRole('menu')).toHaveStyle(
+          `max-height: ${scrollableMenuListStyle.maxHeight}; overflow-y: ${scrollableMenuListStyle.overflowY};`
+        );
       });
     });
 
