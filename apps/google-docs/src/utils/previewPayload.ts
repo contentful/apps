@@ -12,32 +12,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-const EMPTY_NORMALIZED_DOCUMENT: NormalizedDocument = {
-  documentId: '',
-  contentBlocks: [],
-  tables: [],
-};
-
-/** Shallow parse: coerce top-level fields, default arrays; does not validate nested block/table shape. */
-function parseNormalizedDocument(raw: unknown): NormalizedDocument {
-  if (!isRecord(raw)) {
-    return { ...EMPTY_NORMALIZED_DOCUMENT };
-  }
-  return {
-    documentId: typeof raw.documentId === 'string' ? raw.documentId : '',
-    title: typeof raw.title === 'string' ? raw.title : undefined,
-    designValues: Array.isArray(raw.designValues)
-      ? (raw.designValues as NormalizedDocument['designValues'])
-      : undefined,
-    contentBlocks: Array.isArray(raw.contentBlocks)
-      ? (raw.contentBlocks as NormalizedDocument['contentBlocks'])
-      : [],
-    images: Array.isArray(raw.images) ? (raw.images as NormalizedDocument['images']) : undefined,
-    tables: Array.isArray(raw.tables) ? (raw.tables as NormalizedDocument['tables']) : [],
-    assets: Array.isArray(raw.assets) ? (raw.assets as NormalizedDocument['assets']) : undefined,
-  };
-}
-
 function parseReferenceGraph(raw: unknown): ReviewedReferenceGraph | undefined {
   if (raw === undefined) {
     return undefined;
