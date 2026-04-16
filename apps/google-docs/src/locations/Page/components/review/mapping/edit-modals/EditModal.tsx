@@ -94,7 +94,7 @@ export const EditModal = ({
                             <Text as="p" fontColor="gray600" marginBottom="spacing2Xs">
                               Content type{' '}
                               <Text as="span" fontWeight="fontWeightDemiBold" fontColor="gray900">
-                                {location.contentTypeId}
+                                {location.contentTypeName}
                               </Text>
                             </Text>
                             <Text as="p" fontColor="gray600" marginBottom="spacing2Xs">

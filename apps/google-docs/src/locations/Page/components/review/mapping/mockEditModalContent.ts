@@ -7,6 +7,7 @@ export const mockExcludeSelection: EditModalContent = {
     {
       id: 'mock-summary',
       contentTypeId: 'sampleContentType',
+      contentTypeName: 'Sample content type',
       entryName: 'Sample entry',
       fieldId: 'summary',
       fieldName: 'Summary',
@@ -30,6 +31,7 @@ export const mockExcludeSelection: EditModalContent = {
     {
       id: 'mock-description',
       contentTypeId: 'sampleContentType',
+      contentTypeName: 'Sample content type',
       entryName: 'Sample entry',
       fieldId: 'description',
       fieldName: 'Description',

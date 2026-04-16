@@ -1,3 +1,4 @@
+import type { EntryToCreate } from './entry';
 import type { NormalizedDocumentFlattenedRun } from './normalizedDocument';
 
 export type BlockTextSourceRef = {
@@ -88,6 +89,7 @@ export interface FieldMapping {
 export interface EntryBlockGraphEntry {
   contentTypeId: string;
   tempId?: string;
+  fields?: EntryToCreate['fields'];
   fieldMappings: FieldMapping[];
 }
 
