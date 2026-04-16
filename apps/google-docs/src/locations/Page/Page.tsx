@@ -94,31 +94,24 @@ const Page = () => {
   };
 
   const handleCreateEntriesMappingReview = async (): Promise<PreviewPayload | null> => {
-    console.log('[create-entries] button clicked, runId:', mappingReviewState?.runId);
-
     if (!mappingReviewState?.runId) {
-      console.warn('[create-entries] no runId — returning to main page');
       handleReturnToMainPage();
       return null;
     }
 
     try {
-      console.log('[create-entries] resuming workflow with entryBlockGraph');
       const result = await resumeWorkflow(mappingReviewState.runId, {
         entryBlockGraph: mappingReviewState.payload.entryBlockGraph,
       });
-      console.log('[create-entries] workflow result status:', result.status);
 
       if (result.status === RunStatus.COMPLETED && 'googleDocPayload' in result) {
-        console.log('[create-entries] workflow completed, returning preview payload');
         return result.googleDocPayload;
       }
 
-      console.warn('[create-entries] unexpected result status after resume:', result.status);
       handleReturnToMainPage();
       return null;
     } catch (error) {
-      console.error('[create-entries] workflow resume failed:', error);
+      console.error(error);
       handleReturnToMainPage();
       return null;
     }

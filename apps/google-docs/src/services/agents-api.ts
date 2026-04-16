@@ -144,29 +144,17 @@ export async function resumeWorkflowRun(
   runId: string,
   resumePayload: ResumePayload
 ): Promise<void> {
-  console.log(
-    '[agents-api] resumeWorkflowRun, runId:',
-    runId,
-    'payload keys:',
-    Object.keys(resumePayload)
-  );
-  console.log('[agents-api] resumePayload:', resumePayload);
   if (LOCAL_AGENTS_API_BASE_URL) {
-    const body = JSON.stringify({ resumePayload });
-    console.log('[agents-api] POST to local agents API, body size (bytes):', body.length);
     const response = await fetch(
       `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}/resume`,
       {
         method: 'POST',
         headers: getJsonHeaders(),
-        body,
+        body: JSON.stringify({ resumePayload }),
       }
     );
 
-    console.log('[agents-api] resume response status:', response.status);
     if (!response.ok) {
-      const text = await response.text().catch(() => '');
-      console.error('[agents-api] resume failed, response body:', text);
       throw new Error(`Failed to resume agent run: ${response.status} ${response.statusText}`);
     }
 

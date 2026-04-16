@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { cx } from '@emotion/css';
 import { Box, Button, Flex, Note, Paragraph, Text } from '@contentful/f36-components';
 import { LightbulbIcon } from '@contentful/f36-icons';
 import { PageAppSDK } from '@contentful/app-sdk';
@@ -80,9 +79,7 @@ const OverviewSection = ({
 
   return (
     <>
-      <Box
-        padding="spacingL"
-        className={cx(overviewSectionBox, entryRows.length > 3 && overviewSectionBoxScrollable)}>
+      <Box padding="spacingL" className={overviewSectionBox}>
         <Flex flexDirection="column" gap="spacingS">
           <Flex flexDirection="column" gap="spacingXs">
             <Flex alignItems="center" gap="spacingXs">
@@ -115,11 +112,13 @@ const OverviewSection = ({
               entries to create will appear here.
             </Note>
           ) : (
-            <EntryList
-              rows={entryRows}
-              selectedEntryIndex={selectedEntryIndex}
-              onSelect={onSelectEntryIndex}
-            />
+            <Box className={overviewSectionBoxScrollable}>
+              <EntryList
+                rows={entryRows}
+                selectedEntryIndex={selectedEntryIndex}
+                onSelect={onSelectEntryIndex}
+              />
+            </Box>
           )}
         </Flex>
       </Box>
