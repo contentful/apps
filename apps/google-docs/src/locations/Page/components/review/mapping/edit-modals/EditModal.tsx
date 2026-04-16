@@ -69,13 +69,13 @@ export const EditModal = ({
                 <Text fontWeight="fontWeightDemiBold" marginBottom="spacing2Xs">
                   Current location
                 </Text>
-                {hasLocationSectionDescription ? (
+                {hasLocationSectionDescription && (
                   <Paragraph marginBottom={hasCurrentLocations ? 'spacingM' : 'none'}>
                     {locationSectionDescription}
                   </Paragraph>
-                ) : null}
+                )}
 
-                {hasCurrentLocations ? (
+                {hasCurrentLocations && (
                   <Box className={locationList}>
                     {viewModel.currentLocations.map((location) => {
                       const isSelected = location.id === selectedLocationId;
@@ -115,10 +115,10 @@ export const EditModal = ({
                       );
                     })}
                   </Box>
-                ) : null}
+                )}
               </Box>
 
-              {hasNewLocations ? (
+              {hasNewLocations && (
                 <Box>
                   <Text as="p" fontWeight="fontWeightDemiBold" marginBottom="spacingM">
                     New location
@@ -137,7 +137,7 @@ export const EditModal = ({
                     ))}
                   </Box>
                 </Box>
-              ) : null}
+              )}
 
               {additionalContent}
             </Box>
