@@ -84,8 +84,6 @@ export const EditModal = ({
     // TODO: Wire the primary edit-modal action to use the selected fields per new location.
   };
 
-  console.log('selectedFieldIdsByLocationId', selectedFieldIdsByLocationId);
-
   return (
     <Modal isShown={isOpen} onClose={onClose} size="large" shouldCloseOnOverlayClick={false}>
       {() => (
