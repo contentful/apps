@@ -12,6 +12,7 @@ const viewModel = {
     {
       id: 'summary',
       contentTypeId: 'sampleContentType',
+      contentTypeName: 'Sample content type',
       entryName: 'Sample entry',
       fieldId: 'summary',
       fieldName: 'Summary',
@@ -35,6 +36,7 @@ const viewModel = {
     {
       id: 'description',
       contentTypeId: 'sampleContentType',
+      contentTypeName: 'Sample content type',
       entryName: 'Sample entry',
       fieldId: 'description',
       fieldName: 'Description',
@@ -77,6 +79,7 @@ describe('EditModal', () => {
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'Exclude content' })).toBeTruthy();
       expect(screen.getByText('"Sample selected content"')).toBeTruthy();
+      expect(screen.getAllByText('Sample content type')).toHaveLength(2);
       expect(screen.getByText('Choose which location to use.')).toBeTruthy();
       expect(screen.getByRole('button', { name: 'Exclude content' })).toBeTruthy();
       expect(screen.queryByText('New location')).toBeNull();
