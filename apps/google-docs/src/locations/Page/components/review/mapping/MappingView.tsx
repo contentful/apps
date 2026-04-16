@@ -166,10 +166,10 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
     measureOffsets();
   }, [mappingCardsBySegment, allSegments]);
 
-  const openAssignModal = (title: string, preview: string) => {
+  const openAssignModal = (preview: string) => {
     setEditModalState({
       viewModel: {
-        selectedText: selectedText.trim(),
+        selectedText: preview,
         currentLocations: [],
         isOpen: true,
       },
@@ -179,10 +179,10 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
     });
   };
 
-  const openExcludeModal = (title: string, preview: string) => {
+  const openExcludeModal = (preview: string) => {
     setEditModalState({
       viewModel: {
-        selectedText: selectedText.trim(),
+        selectedText: preview,
         currentLocations: [],
         isOpen: true,
       },
@@ -195,23 +195,23 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
 
   const handleAssignFromSelection = () => {
     if (!selectedText.trim()) return;
-    openAssignModal('Assign text selection', selectedText.trim());
+    openAssignModal(selectedText.trim());
     clearSelection();
   };
 
   const handleExcludeFromSelection = () => {
     if (!selectedText.trim()) return;
-    openExcludeModal('Exclude text selection', selectedText.trim());
+    openExcludeModal(selectedText.trim());
     clearSelection();
   };
 
   const handleAssignImage = (_sourceRef: ImageSourceRef, label: string) => {
-    openAssignModal('Assign image selection', label);
+    openAssignModal(label);
     setHoveredMappingKeys([]);
   };
 
   const handleExcludeImage = (_sourceRef: ImageSourceRef, label: string) => {
-    openExcludeModal('Exclude image selection', label);
+    openExcludeModal(label);
     setHoveredMappingKeys([]);
   };
 
