@@ -224,7 +224,6 @@ async function createAssetsFromAgentOutput(
 export async function createEntriesFromPreviewPayload(
   sdk: PageAppSDK | ConfigAppSDK,
   payload: PreviewPayload,
-  selectedEntryTempIds?: Set<string>,
   oauthToken?: string
 ): Promise<EntryCreationResult> {
   const orderedEntries = orderEntriesByCreationOrder(
