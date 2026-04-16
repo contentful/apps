@@ -46,6 +46,7 @@ const createPayload = (excludedSourceRefs: SourceRef[] = []): MappingReviewSuspe
     entries: [
       {
         contentTypeId: 'article',
+        fields: { title: { 'en-US': 'Draft title from display field' } },
         fieldMappings: [
           {
             fieldId: 'body',
@@ -64,7 +65,25 @@ const createPayload = (excludedSourceRefs: SourceRef[] = []): MappingReviewSuspe
     deferredFields: [],
     hasCircularDependency: false,
   },
-  contentTypes: [],
+  contentTypes: [
+    {
+      sys: { id: 'article' },
+      name: 'Article',
+      displayField: 'title',
+      fields: [
+        {
+          id: 'title',
+          name: 'Title',
+          type: 'Symbol',
+        },
+        {
+          id: 'body',
+          name: 'Body copy',
+          type: 'Text',
+        },
+      ],
+    },
+  ],
 });
 
 describe('MappingView', () => {
@@ -109,6 +128,12 @@ describe('MappingView', () => {
 
     expect(screen.getByRole('heading', { name: 'Assign content' })).toBeTruthy();
     expect(screen.getByText('"selected body text"')).toBeTruthy();
+    expect(screen.getByText('Article')).toBeTruthy();
+    expect(screen.getByText('Article #1')).toBeTruthy();
+    expect(screen.getByText('Body copy')).toBeTruthy();
+    expect(
+      screen.getAllByText((_, node) => node?.textContent?.includes('| Long text') ?? false).length
+    ).toBeGreaterThan(0);
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
 
@@ -126,5 +151,39 @@ describe('MappingView', () => {
     expect(screen.getByRole('button', { name: 'Assign' })).toBeTruthy();
     const excludeButton = screen.getByRole('button', { name: 'Exclude' }) as HTMLButtonElement;
     expect(excludeButton.disabled).toBe(true);
+  });
+
+  it('opens exclude modal with current locations for mapped text', () => {
+    const selectedRange = {
+      intersectsNode: (node: Node) =>
+        node instanceof HTMLElement && node.dataset.isMapped === 'true',
+    } as unknown as Range;
+    mockUseReviewTextSelection.mockReturnValueOnce({
+      actionMenuPosition: null,
+      selectedText: '',
+      selectedRange: null,
+      clearSelection: mockClearSelection,
+    });
+    mockUseReviewTextSelection.mockReturnValue({
+      actionMenuPosition: { top: 100, left: 100, right: 160, bottom: 120 },
+      selectedText: 'selected body text',
+      selectedRange,
+      clearSelection: mockClearSelection,
+    });
+
+    const { rerender } = render(
+      <MappingView payload={createPayload()} selectedEntryIndex={null} />
+    );
+    rerender(<MappingView payload={createPayload()} selectedEntryIndex={null} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Exclude' }));
+
+    expect(screen.getByRole('heading', { name: 'Exclude content' })).toBeTruthy();
+    expect(screen.getByText('Article')).toBeTruthy();
+    expect(screen.getByText('Body copy')).toBeTruthy();
+    expect(
+      screen.getAllByText((_, node) => node?.textContent?.includes('| Long text') ?? false).length
+    ).toBeGreaterThan(0);
+    expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
 });
