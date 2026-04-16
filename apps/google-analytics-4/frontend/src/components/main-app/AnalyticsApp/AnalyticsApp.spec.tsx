@@ -20,12 +20,29 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 
 const mockApi = vi.fn();
 
-const { findByTestId, getByTestId, getByText, queryByTestId } = screen;
+const { findAllByTestId, getByTestId, getByText, queryByTestId } = screen;
 
 const SELECT_TEST_ID = 'cf-ui-select';
 const NOTE_TEST_ID = 'cf-ui-note';
+const stableValidRules = [
+  {
+    id: 'rule-title',
+    contentTypeId: 'category',
+    slugField: 'title',
+    urlPrefix: '',
+    reportSlug: 'report slug',
+    enableAdvancedMatching: false,
+  },
+];
+const stableSidebarRulesState = {
+  validRules: stableValidRules,
+  summaryLabel: 'report slug',
+  isContentTypeWarning: false,
+  warningRule: undefined,
+  haveLoadedFieldValues: true,
+};
 
-const renderAnalyticsApp = async () =>
+const renderAnalyticsApp = () =>
   render(
     <AnalyticsApp
       api={{ runReports: mockApi } as unknown as Api}
@@ -39,36 +56,32 @@ const renderAnalyticsApp = async () =>
 
 describe('AnalyticsApp with correct content types configured', () => {
   beforeEach(() => {
+    mockApi.mockReset();
     mockSdk.app.getParameters.mockReturnValue({
       serviceAccountKeyId: validServiceKeyId,
     });
+    mockSdk.entry = {
+      onSysChanged: vi.fn((handler) => {
+        handler({ publishedAt: '2026-04-16T00:00:00.000Z' });
+        return vi.fn();
+      }),
+      fields: {
+        title: {},
+        slug: {},
+      },
+    };
 
-    vi.spyOn(useSidebarRules, 'useSidebarRules').mockImplementation(() => ({
-      validRules: [
-        {
-          id: 'rule-title',
-          contentTypeId: 'category',
-          slugField: 'title',
-          urlPrefix: '',
-          reportSlug: 'report slug',
-          enableAdvancedMatching: false,
-        },
-      ],
-      summaryLabel: 'report slug',
-      isContentTypeWarning: false,
-      warningRule: undefined,
-      haveLoadedFieldValues: true,
-    }));
+    vi.spyOn(useSidebarRules, 'useSidebarRules').mockImplementation(() => stableSidebarRulesState);
   });
 
   it('mounts data', async () => {
     mockApi.mockImplementation(() => runReportResponseHasViews);
     renderAnalyticsApp();
 
-    const dropdown = await findByTestId(SELECT_TEST_ID);
+    const dropdowns = await findAllByTestId(SELECT_TEST_ID);
     const chart = document.querySelector('canvas');
 
-    expect(dropdown).toBeVisible();
+    expect(dropdowns).toHaveLength(2);
     expect(chart).toBeVisible();
   });
 
@@ -76,24 +89,24 @@ describe('AnalyticsApp with correct content types configured', () => {
     mockApi.mockImplementation(() => runReportResponseNoView);
     renderAnalyticsApp();
 
-    const dropdown = await findByTestId(SELECT_TEST_ID);
+    const dropdowns = await findAllByTestId(SELECT_TEST_ID);
     const warningNote = getByTestId(NOTE_TEST_ID);
     const noteText = getByText(EMPTY_DATA_MSG);
 
-    expect(dropdown).toBeVisible();
+    expect(dropdowns).toHaveLength(2);
     expect(warningNote).toBeVisible();
     expect(noteText).toBeVisible();
   });
 
   it('mounts with error message when error thrown', async () => {
-    mockApi.mockRejectedValue(() => new Error('api error'));
+    mockApi.mockRejectedValue(new Error('api error'));
     renderAnalyticsApp();
 
-    const dropdown = await findByTestId(SELECT_TEST_ID);
+    const dropdowns = await findAllByTestId(SELECT_TEST_ID);
     const warningNote = getByTestId(NOTE_TEST_ID);
     const noteText = getByText('api error');
 
-    expect(dropdown).toBeVisible();
+    expect(dropdowns).toHaveLength(2);
     expect(warningNote).toBeVisible();
     expect(noteText).toBeVisible();
   });
@@ -109,17 +122,27 @@ describe('AnalyticsApp with correct content types configured', () => {
 
 describe('AnalyticsApp when content types are not configured correctly', () => {
   it('renders SlugWarningDisplay component when slug field is not configured', async () => {
+    mockSdk.entry = {
+      onSysChanged: vi.fn((handler) => {
+        handler({ publishedAt: '2026-04-16T00:00:00.000Z' });
+        return vi.fn();
+      }),
+      fields: {
+        title: {},
+      },
+    };
+    const warningRule = {
+      id: 'rule-title',
+      contentTypeId: 'category',
+      slugField: 'slug',
+      urlPrefix: '',
+    };
     vi.spyOn(useSidebarRules, 'useSidebarRules').mockImplementation(() => ({
       validRules: [],
       summaryLabel: '',
       isContentTypeWarning: true,
       haveLoadedFieldValues: true,
-      warningRule: {
-        id: 'rule-title',
-        contentTypeId: 'category',
-        slugField: 'slug',
-        urlPrefix: '',
-      },
+      warningRule,
     }));
     mockApi.mockImplementation(() => runReportResponseHasViews);
     const warningMessage = getContentTypeSpecificMsg('Category')
@@ -128,7 +151,7 @@ describe('AnalyticsApp when content types are not configured correctly', () => {
     renderAnalyticsApp();
 
     const dropdown = queryByTestId(SELECT_TEST_ID);
-    const warningNote = await findByTestId(NOTE_TEST_ID);
+    const warningNote = await screen.findByTestId(NOTE_TEST_ID);
     const noteText = getByText(warningMessage);
 
     expect(dropdown).toBeFalsy();
