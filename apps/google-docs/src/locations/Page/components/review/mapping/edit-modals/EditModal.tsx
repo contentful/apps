@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Box, Button, Modal, Paragraph, Text } from '@contentful/f36-components';
 import type { EditModalContent } from '@types';
 import {
-  fieldPlaceholder,
   locationButton,
   locationButtonSelected,
   locationButtonUnselected,
@@ -11,6 +10,7 @@ import {
   modalContent,
   sectionCard,
 } from './EditModal.styles';
+import { FieldSelectionDropdown } from './FieldSelectionDropdown';
 
 interface EditModalProps {
   isOpen: boolean;
@@ -130,9 +130,11 @@ export const EditModal = ({
                           {newLocation.title}
                         </Text>
                         <Text marginBottom="spacing2Xs">Fields</Text>
-                        <Box className={fieldPlaceholder}>
-                          <Text as="span">Select one or more</Text>
-                        </Box>
+                        <FieldSelectionDropdown
+                          fieldOptions={newLocation.fieldOptions}
+                          fieldMappings={newLocation.fieldMappings}
+                          selectedFieldIds={newLocation.selectedFieldIds}
+                        />
                       </Box>
                     ))}
                   </Box>

@@ -7,6 +7,7 @@
     "@contentful/app-sdk": "^4.51.3",
     "@contentful/f36-components": "^5.6.0",
     "@contentful/f36-icons": "^6.7.1",
+    "@contentful/f36-multiselect": "^6.7.1",
     "@contentful/f36-tokens": "^5.1.0",
     "@contentful/field-editor-json": "^3.3.38",
     "@contentful/node-apps-toolkit": "^3.13.0",

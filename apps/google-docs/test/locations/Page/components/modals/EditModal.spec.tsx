@@ -124,9 +124,25 @@ describe('EditModal', () => {
           newLocations: [
             {
               title: "Page: Event detail (Don't enter NRF uncaffeinated.)",
+              fieldMappings: [],
+              fieldOptions: [
+                {
+                  id: 'title',
+                  fieldName: 'Title',
+                  fieldType: 'Short text',
+                },
+              ],
             },
             {
               title: "Component: Resource detail hero (Don't enter NRF uncaffeinated.)",
+              fieldMappings: [{ fieldId: 'headline' }],
+              fieldOptions: [
+                {
+                  id: 'headline',
+                  fieldName: 'Headline',
+                  fieldType: 'Short text',
+                },
+              ],
             },
           ],
         }}
