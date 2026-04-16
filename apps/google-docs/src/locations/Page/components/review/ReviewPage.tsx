@@ -3,6 +3,8 @@ import { Button, Flex, Heading, Layout } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { PageAppSDK } from '@contentful/app-sdk';
 import type { MappingReviewSuspendPayload, CompletedWorkflowPayload } from '@types';
+import { RunStatus } from '@types';
+import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
 import Splitter from '../mainpage/Splitter';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
 import OverviewSection from '../overview/OverviewSection';
@@ -11,21 +13,47 @@ import { MappingView } from './mapping/MappingView';
 interface ReviewPageProps {
   sdk: PageAppSDK;
   payload: MappingReviewSuspendPayload;
+  runId?: string;
   onCancelReview: () => Promise<void>;
-  onCreateEntries: () => Promise<CompletedWorkflowPayload | null>;
   onReturnToMainPage: () => void;
 }
 
 export const ReviewPage = ({
   sdk,
   payload,
+  runId,
   onCancelReview,
-  onCreateEntries,
   onReturnToMainPage,
 }: ReviewPageProps) => {
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
   const [selectedEntryIndex, setSelectedEntryIndex] = useState<number>(0);
   const [isCancelling, setIsCancelling] = useState(false);
+
+  const { resumeWorkflow } = useWorkflowAgent({ sdk, documentId: '', oauthToken: '' });
+
+  const handleCreateEntries = useCallback(async (): Promise<CompletedWorkflowPayload | null> => {
+    if (!runId) {
+      onReturnToMainPage();
+      return null;
+    }
+
+    try {
+      const result = await resumeWorkflow(runId, {
+        entryBlockGraph: payload.entryBlockGraph,
+      });
+
+      if (result.status === RunStatus.COMPLETED && 'googleDocPayload' in result) {
+        return result.googleDocPayload;
+      }
+
+      onReturnToMainPage();
+      return null;
+    } catch (error) {
+      console.error(error);
+      onReturnToMainPage();
+      return null;
+    }
+  }, [runId, resumeWorkflow, payload.entryBlockGraph, onReturnToMainPage]);
 
   const handleConfirmCancel = useCallback(async () => {
     setIsCancelling(true);
@@ -64,7 +92,7 @@ export const ReviewPage = ({
             payload={payload}
             selectedEntryIndex={selectedEntryIndex}
             onSelectEntryIndex={setSelectedEntryIndex}
-            onCreateEntries={onCreateEntries}
+            onCreateEntries={handleCreateEntries}
             onReturnToMainPage={onReturnToMainPage}
           />
           <MappingView payload={payload} selectedEntryIndex={selectedEntryIndex} />

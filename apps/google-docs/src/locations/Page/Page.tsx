@@ -9,8 +9,7 @@ import {
 import { MainPageView } from './components/mainpage/MainPageView';
 import { ReviewPage } from './components/review/ReviewPage';
 import { loadFixtureReviewPayload } from '../../fixtures/googleDocsReview/loadFixtureReviewPayload';
-import type { MappingReviewSuspendPayload, CompletedWorkflowPayload } from '@types';
-import { RunStatus } from '@types';
+import type { MappingReviewSuspendPayload } from '@types';
 import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
 
 const enableMockReviewPayload = import.meta.env.VITE_ENABLE_MOCK_REVIEW_PAYLOAD === 'true';
@@ -93,30 +92,6 @@ const Page = () => {
     }
   };
 
-  const handleCreateEntriesMappingReview = async (): Promise<CompletedWorkflowPayload | null> => {
-    if (!mappingReviewState?.runId) {
-      handleReturnToMainPage();
-      return null;
-    }
-
-    try {
-      const result = await resumeWorkflow(mappingReviewState.runId, {
-        entryBlockGraph: mappingReviewState.payload.entryBlockGraph,
-      });
-
-      if (result.status === RunStatus.COMPLETED && 'googleDocPayload' in result) {
-        return result.googleDocPayload;
-      }
-
-      handleReturnToMainPage();
-      return null;
-    } catch (error) {
-      console.error(error);
-      handleReturnToMainPage();
-      return null;
-    }
-  };
-
   return (
     <>
       <Layout withBoxShadow={true} offsetTop={10}>
@@ -124,8 +99,8 @@ const Page = () => {
           <ReviewPage
             sdk={sdk}
             payload={mappingReviewState.payload}
+            runId={mappingReviewState.runId}
             onCancelReview={handleCancelMappingReview}
-            onCreateEntries={handleCreateEntriesMappingReview}
             onReturnToMainPage={handleReturnToMainPage}
           />
         ) : (
