@@ -22,7 +22,7 @@ const FIELD_TYPE_LABELS: Record<string, string> = {
   Boolean: 'Boolean',
   Object: 'JSON object',
   Location: 'Location',
-  Link: 'Reference',
+  Link: 'Media',
   Array: 'List',
   ResourceLink: 'Resource link',
 };

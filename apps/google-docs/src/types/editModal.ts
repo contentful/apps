@@ -3,6 +3,7 @@ import type { SourceRef } from './entryBlockGraph';
 export interface EditLocationOption {
   id: string;
   contentTypeId: string;
+  contentTypeName: string;
   entryName: string;
   fieldId: string;
   fieldName: string;

@@ -1,7 +1,13 @@
 import { useLayoutEffect, useMemo, useRef, useState, type RefCallback } from 'react';
 import { Box, Button, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import type { ImageSourceRef, MappingReviewSuspendPayload, EditModalContent } from '@types';
+import type {
+  ImageSourceRef,
+  MappingReviewSuspendPayload,
+  EditModalContent,
+  EditLocationOption,
+  SourceRef,
+} from '@types';
 import { FileTextIcon } from '@contentful/f36-icons';
 import { useReviewTextSelection } from '@hooks/useReviewTextSelection';
 import { getAnchorIdForSourceRef, resolveMarkerOffsets } from './resolveMappingCardOffsets';
@@ -46,6 +52,20 @@ const EMPTY_EDIT_MODAL: EditModalState = {
   locationSectionDescription: '',
   primaryButtonLabel: '',
 };
+
+function getEntryName(contentTypeName: string | undefined, entryIndex: number): string {
+  const displayName = contentTypeName ?? 'Untitled';
+  return `${displayName} #${entryIndex + 1}`;
+}
+
+/** `Range#intersectsNode` can throw when the range and node are in inconsistent trees. */
+function rangeIntersectsNode(range: Range, node: Node): boolean {
+  try {
+    return range.intersectsNode(node);
+  } catch {
+    return false;
+  }
+}
 
 export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): JSX.Element => {
   const [hoveredMappingKeys, setHoveredMappingKeys] = useState<string[]>([]);
@@ -107,6 +127,128 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
       anchorId: getAnchorIdForSourceRef(highlight.sourceRef),
     }));
 
+  const buildLocationOption = (
+    entryIndex: number,
+    fieldId: string,
+    fieldType: string,
+    sourceRef: SourceRef,
+    isSelected = false
+  ): EditLocationOption | null => {
+    const graphEntry = entryBlockGraph.entries[entryIndex];
+    if (!graphEntry) {
+      return null;
+    }
+    const contentType = payload.contentTypes.find(
+      (item) => item.sys.id === graphEntry.contentTypeId
+    );
+    const contentTypeDisplayName = (contentType?.name ?? '').trim();
+    const contentTypeField = contentType?.fields.find((field) => field.id === fieldId);
+    const fieldDisplayName = (contentTypeField?.name ?? '').trim();
+    const fieldDisplayType = getFieldTypeLabel(fieldType);
+
+    return {
+      id: `${entryIndex}-${graphEntry.contentTypeId}-${fieldId}`,
+      contentTypeId: graphEntry.contentTypeId,
+      contentTypeName: contentTypeDisplayName,
+      entryName: getEntryName(contentTypeDisplayName, entryIndex),
+      fieldId,
+      fieldName: fieldDisplayName,
+      fieldType: fieldDisplayType,
+      sourceRef,
+      isSelected,
+    };
+  };
+
+  const locationsByMappingKey = useMemo(() => {
+    const byKey = new Map<string, EditLocationOption>();
+
+    allSegments.forEach((segment) => {
+      const highlights = getVisibleHighlights(getHighlightsForSegment(segment));
+      highlights.forEach((highlight) => {
+        const mappingKey = getMappingCardKey(segment.id, highlight);
+        if (byKey.has(mappingKey)) {
+          return;
+        }
+        const nextLocation = buildLocationOption(
+          highlight.entryIndex,
+          highlight.fieldId,
+          highlight.fieldType,
+          highlight.sourceRef,
+          byKey.size === 0
+        );
+        if (nextLocation) {
+          byKey.set(mappingKey, nextLocation);
+        }
+      });
+    });
+
+    return byKey;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allSegments, entryBlockGraph, payload.contentTypes, selectedEntryIndex]);
+
+  const getLocationsForSourceRef = (sourceRef: SourceRef): EditLocationOption[] => {
+    const targetKey = buildSourceRefKey(sourceRef);
+    const matches: EditLocationOption[] = [];
+
+    entryBlockGraph.entries.forEach((entry, entryIndex) => {
+      entry.fieldMappings.forEach((fieldMapping) => {
+        const matchingSourceRef = fieldMapping.sourceRefs.find(
+          (candidate) => buildSourceRefKey(candidate) === targetKey
+        );
+        if (!matchingSourceRef) {
+          return;
+        }
+
+        const nextLocation = buildLocationOption(
+          entryIndex,
+          fieldMapping.fieldId,
+          fieldMapping.fieldType,
+          matchingSourceRef,
+          matches.length === 0
+        );
+        if (nextLocation) {
+          matches.push(nextLocation);
+        }
+      });
+    });
+
+    return matches;
+  };
+
+  const getLocationsForSelectedText = (): EditLocationOption[] => {
+    const root = textSelectionRootRef.current;
+    if (!root || !selectedRange) {
+      return [];
+    }
+
+    const selectedMappedSegments = root.querySelectorAll<HTMLElement>(
+      '[data-review-text-segment="true"][data-is-mapped="true"]'
+    );
+    const mappingKeys = new Set<string>();
+
+    for (const segment of selectedMappedSegments) {
+      if (!rangeIntersectsNode(selectedRange, segment)) {
+        continue;
+      }
+
+      const serializedMappingKeys = segment.dataset.mappingKeys ?? '';
+      serializedMappingKeys
+        .split('|')
+        .map((key) => key.trim())
+        .filter(Boolean)
+        .forEach((key) => mappingKeys.add(key));
+    }
+
+    const locations = Array.from(mappingKeys)
+      .map((key) => locationsByMappingKey.get(key))
+      .filter((location): location is EditLocationOption => Boolean(location));
+
+    return locations.map((location, index) => ({
+      ...location,
+      isSelected: index === 0,
+    }));
+  };
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const mappingCardsBySegment = useMemo(
     () =>
@@ -166,11 +308,11 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
     measureOffsets();
   }, [mappingCardsBySegment, allSegments]);
 
-  const openAssignModal = (preview: string) => {
+  const openAssignModal = (preview: string, currentLocations: EditLocationOption[]) => {
     setEditModalState({
       viewModel: {
         selectedText: preview,
-        currentLocations: [],
+        currentLocations,
         isOpen: true,
       },
       title: 'Assign content',
@@ -179,11 +321,11 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
     });
   };
 
-  const openExcludeModal = (preview: string) => {
+  const openExcludeModal = (preview: string, currentLocations: EditLocationOption[]) => {
     setEditModalState({
       viewModel: {
         selectedText: preview,
-        currentLocations: [],
+        currentLocations,
         isOpen: true,
       },
       title: 'Exclude content',
@@ -195,23 +337,23 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
 
   const handleAssignFromSelection = () => {
     if (!selectedText.trim()) return;
-    openAssignModal(selectedText.trim());
+    openAssignModal(selectedText.trim(), getLocationsForSelectedText());
     clearSelection();
   };
 
   const handleExcludeFromSelection = () => {
     if (!selectedText.trim()) return;
-    openExcludeModal(selectedText.trim());
+    openExcludeModal(selectedText.trim(), getLocationsForSelectedText());
     clearSelection();
   };
 
-  const handleAssignImage = (_sourceRef: ImageSourceRef, label: string) => {
-    openAssignModal(label);
+  const handleAssignImage = (sourceRef: ImageSourceRef, label: string) => {
+    openAssignModal(label, getLocationsForSourceRef(sourceRef));
     setHoveredMappingKeys([]);
   };
 
-  const handleExcludeImage = (_sourceRef: ImageSourceRef, label: string) => {
-    openExcludeModal(label);
+  const handleExcludeImage = (sourceRef: ImageSourceRef, label: string) => {
+    openExcludeModal(label, getLocationsForSourceRef(sourceRef));
     setHoveredMappingKeys([]);
   };
 
@@ -225,17 +367,10 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
       '[data-review-text-segment="true"]'
     );
 
-    return Array.from(selectedSegments).some((segment) => {
-      try {
-        if (!selectedRange.intersectsNode(segment)) {
-          return false;
-        }
-
-        return segment.dataset.isMapped === 'true';
-      } catch {
-        return false;
-      }
-    });
+    return Array.from(selectedSegments).some(
+      (segment) =>
+        rangeIntersectsNode(selectedRange, segment) && segment.dataset.isMapped === 'true'
+    );
   }, [selectedRange]);
 
   return (

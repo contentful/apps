@@ -78,6 +78,7 @@ const TextSegmentSpan = ({ id, segment, hovered, onSetHoveredMappings }: TextSeg
       key={id}
       data-review-text-segment="true"
       data-is-mapped={segment.highlighted ? 'true' : 'false'}
+      data-mapping-keys={segment.mappingKeys.join('|')}
       onMouseEnter={
         segment.highlighted ? () => onSetHoveredMappings(segment.mappingKeys) : undefined
       }
