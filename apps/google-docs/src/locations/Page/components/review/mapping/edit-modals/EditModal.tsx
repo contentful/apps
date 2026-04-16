@@ -34,6 +34,7 @@ export const EditModal = ({
   const hasLocationSectionDescription = locationSectionDescription.trim().length > 0;
   const hasCurrentLocations = viewModel.currentLocations.length > 0;
   const hasNewLocations = (viewModel.newLocations?.length ?? 0) > 0;
+
   const initialSelectedLocationId = useMemo(
     () =>
       viewModel.currentLocations.find((location) => location.isSelected)?.id ??
@@ -41,13 +42,49 @@ export const EditModal = ({
       null,
     [viewModel.currentLocations]
   );
+
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
     initialSelectedLocationId
+  );
+
+  const [selectedFieldIdsByLocationId, setSelectedFieldIdsByLocationId] = useState<
+    Record<string, string[]>
+  >(() =>
+    Object.fromEntries(
+      (viewModel.newLocations ?? []).map((newLocation) => [
+        newLocation.id,
+        [...(newLocation.selectedFieldIds ?? [])],
+      ])
+    )
   );
 
   useEffect(() => {
     setSelectedLocationId(initialSelectedLocationId);
   }, [initialSelectedLocationId]);
+
+  useEffect(() => {
+    setSelectedFieldIdsByLocationId(
+      Object.fromEntries(
+        (viewModel.newLocations ?? []).map((newLocation) => [
+          newLocation.id,
+          [...(newLocation.selectedFieldIds ?? [])],
+        ])
+      )
+    );
+  }, [viewModel.newLocations]);
+
+  const handleSelectedFieldIdsChange = (locationId: string, selectedFieldIds: string[]) => {
+    setSelectedFieldIdsByLocationId((previous) => ({
+      ...previous,
+      [locationId]: selectedFieldIds,
+    }));
+  };
+
+  const handlePrimaryAction = () => {
+    // TODO: Wire the primary edit-modal action to use the selected fields per new location.
+  };
+
+  console.log('selectedFieldIdsByLocationId', selectedFieldIdsByLocationId);
 
   return (
     <Modal isShown={isOpen} onClose={onClose} size="large" shouldCloseOnOverlayClick={false}>
@@ -133,7 +170,14 @@ export const EditModal = ({
                         <FieldSelectionDropdown
                           fieldOptions={newLocation.fieldOptions}
                           fieldMappings={newLocation.fieldMappings}
-                          selectedFieldIds={newLocation.selectedFieldIds}
+                          selectedFieldIds={
+                            selectedFieldIdsByLocationId[newLocation.id] ??
+                            newLocation.selectedFieldIds ??
+                            []
+                          }
+                          onSelectedFieldIdsChange={(selectedFieldIds) =>
+                            handleSelectedFieldIdsChange(newLocation.id, selectedFieldIds)
+                          }
                         />
                       </Box>
                     ))}
@@ -148,7 +192,7 @@ export const EditModal = ({
             <Button onClick={onClose} size="small" variant="secondary">
               Cancel
             </Button>
-            <Button onClick={() => undefined} size="small" variant="primary">
+            <Button onClick={handlePrimaryAction} size="small" variant="primary">
               {primaryButtonLabel}
             </Button>
           </Modal.Controls>

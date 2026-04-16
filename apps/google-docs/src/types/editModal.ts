@@ -23,6 +23,7 @@ export interface EditModalFieldMapping {
 }
 
 export interface EditModalNewLocation {
+  id: string;
   title: string;
   fieldOptions: EditModalFieldOption[];
   fieldMappings: EditModalFieldMapping[];

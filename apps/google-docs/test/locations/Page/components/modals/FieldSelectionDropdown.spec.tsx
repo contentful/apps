@@ -1,10 +1,12 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import React from 'react';
 import { FieldSelectionDropdown } from '../../../../../src/locations/Page/components/review/mapping/edit-modals/FieldSelectionDropdown';
 
 describe('FieldSelectionDropdown', () => {
   it('renders field status from field mappings and disables non-text options', async () => {
+    const onSelectedFieldIdsChange = vi.fn();
+
     render(
       <FieldSelectionDropdown
         fieldMappings={[{ fieldId: 'name' }]}
@@ -21,6 +23,7 @@ describe('FieldSelectionDropdown', () => {
           },
         ]}
         selectedFieldIds={[]}
+        onSelectedFieldIdsChange={onSelectedFieldIdsChange}
       />
     );
 
@@ -44,9 +47,7 @@ describe('FieldSelectionDropdown', () => {
     fireEvent.click(enabledOption);
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Toggle Multiselect' })).toHaveTextContent(
-        'Name (Internal)'
-      );
+      expect(onSelectedFieldIdsChange).toHaveBeenCalledWith(['name']);
     });
   });
 });

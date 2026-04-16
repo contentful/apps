@@ -1,34 +1,28 @@
-import { useEffect, useId, useMemo, useState } from 'react';
+import { useId, useMemo } from 'react';
 import { Flex, Stack, Text } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import type { EditModalFieldMapping, EditModalFieldOption } from '@types';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
 
-const EMPTY_SELECTED_FIELD_IDS: string[] = [];
-
 interface FieldSelectionDropdownProps {
   fieldOptions: EditModalFieldOption[];
   fieldMappings: EditModalFieldMapping[];
-  selectedFieldIds?: string[];
+  selectedFieldIds: string[];
+  onSelectedFieldIdsChange: (selectedFieldIds: string[]) => void;
 }
 
 export const FieldSelectionDropdown = ({
   fieldOptions,
   fieldMappings,
   selectedFieldIds,
+  onSelectedFieldIdsChange,
 }: FieldSelectionDropdownProps) => {
   const key = useId();
-  const propSelectedIds = selectedFieldIds ?? EMPTY_SELECTED_FIELD_IDS;
-  const [selectedIds, setSelectedIds] = useState<string[]>(() => [...propSelectedIds]);
   const selectedOptions = useMemo(
-    () => fieldOptions.filter((option) => selectedIds.includes(option.id)),
-    [fieldOptions, selectedIds]
+    () => fieldOptions.filter((option) => selectedFieldIds.includes(option.id)),
+    [fieldOptions, selectedFieldIds]
   );
-  const multiselectListRef = useMultiselectScrollReflow(selectedIds);
-
-  useEffect(() => {
-    setSelectedIds([...propSelectedIds]);
-  }, [propSelectedIds]);
+  const multiselectListRef = useMultiselectScrollReflow(selectedFieldIds);
 
   const filledFieldIds = useMemo(
     () => new Set(fieldMappings.map((fieldMapping) => fieldMapping.fieldId)),
@@ -38,8 +32,8 @@ export const FieldSelectionDropdown = ({
   const handleSelectField = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { checked, value } = event.target;
 
-    setSelectedIds((previous) =>
-      checked ? [...previous, value] : previous.filter((id) => id !== value)
+    onSelectedFieldIdsChange(
+      checked ? [...selectedFieldIds, value] : selectedFieldIds.filter((id) => id !== value)
     );
   };
 
@@ -71,7 +65,7 @@ export const FieldSelectionDropdown = ({
                 key={`${key}-${option.id}`}
                 value={option.id}
                 itemId={option.id}
-                isChecked={selectedIds.includes(option.id)}
+                isChecked={selectedFieldIds.includes(option.id)}
                 isDisabled={isDisabled}
                 onSelectItem={handleSelectField}>
                 <Flex gap="spacingS">

@@ -3,6 +3,7 @@ import type { EditModalContent, EditModalNewLocation } from '@types';
 /** Placeholder destinations until assign flow is backed by real entry/field data. */
 export const placeholderAssignNewLocations: EditModalNewLocation[] = [
   {
+    id: 'page-event-detail',
     title: "Page: Event detail (Don't enter NRF uncaffeinated.)",
     selectedFieldIds: ['name', 'description'],
     fieldMappings: [{ fieldId: 'name' }, { fieldId: 'description' }],
@@ -37,6 +38,7 @@ export const placeholderAssignNewLocations: EditModalNewLocation[] = [
     ],
   },
   {
+    id: 'component-resource-detail-hero',
     title: "Component: Resource detail hero (Don't enter NRF uncaffeinated.)",
     fieldMappings: [{ fieldId: 'headline' }, { fieldId: 'ctaLink' }],
     fieldOptions: [
