@@ -19,7 +19,7 @@ interface ReviewDocumentBodyProps {
   onExcludeImage: (sourceRef: ImageSourceRef, label: string) => void;
 }
 
-export const TabSegement = ({
+export const NormalizedDocumentSection = ({
   segment,
   highlightIndex,
   imageById,

@@ -1,8 +1,8 @@
 /**
- * Viewport rectangle for positioning the review text selection action menu.
+ * Viewport rectangle for a text selection, used to anchor the review action menu.
  * Kept separate from UI components so hooks do not depend on feature components.
  */
-export interface ActionMenuPosition {
+export interface SelectionViewportRectangle {
   top: number;
   left: number;
   bottom: number;

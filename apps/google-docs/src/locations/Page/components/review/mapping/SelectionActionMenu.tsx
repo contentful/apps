@@ -2,10 +2,10 @@ import { forwardRef } from 'react';
 import { Box, Button, Flex } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import Splitter from '../../mainpage/Splitter';
-import type { ActionMenuPosition } from './actionMenuPosition';
+import type { SelectionViewportRectangle } from './selectionViewportRectangle';
 
 interface SelectionActionMenuProps {
-  actionMenuPosition: ActionMenuPosition;
+  anchorRectangle: SelectionViewportRectangle;
   onAssign: () => void;
   onExclude: () => void;
   isMappedContent: boolean;
@@ -14,8 +14,8 @@ interface SelectionActionMenuProps {
 const MENU_ESTIMATE_WIDTH_PX = 180;
 
 export const SelectionActionMenu = forwardRef<HTMLDivElement, SelectionActionMenuProps>(
-  ({ actionMenuPosition, onAssign, onExclude, isMappedContent }, ref) => {
-    const centerX = (actionMenuPosition.left + actionMenuPosition.right) / 2;
+  ({ anchorRectangle, onAssign, onExclude, isMappedContent }, ref) => {
+    const centerX = (anchorRectangle.left + anchorRectangle.right) / 2;
     const half = MENU_ESTIMATE_WIDTH_PX / 2;
     const clampedCenterX = Math.min(Math.max(centerX, 8 + half), window.innerWidth - 8 - half);
 
@@ -26,7 +26,7 @@ export const SelectionActionMenu = forwardRef<HTMLDivElement, SelectionActionMen
         data-testid="review-selection-menu"
         style={{
           position: 'fixed',
-          top: Math.max(actionMenuPosition.top - 36, 8),
+          top: Math.max(anchorRectangle.top - 36, 8),
           left: clampedCenterX,
           transform: 'translateX(-50%)',
           zIndex: 3,

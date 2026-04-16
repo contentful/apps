@@ -75,7 +75,7 @@ describe('MappingView', () => {
       escape: (value: string) => value.replaceAll(':', '\\:'),
     });
     mockUseReviewTextSelection.mockReturnValue({
-      actionMenuPosition: null,
+      selectionRectangle: null,
       selectedText: '',
       selectedRange: null,
       clearSelection: mockClearSelection,
@@ -88,13 +88,13 @@ describe('MappingView', () => {
         node instanceof HTMLElement && node.dataset.isMapped === 'true',
     } as unknown as Range;
     mockUseReviewTextSelection.mockReturnValueOnce({
-      actionMenuPosition: null,
+      selectionRectangle: null,
       selectedText: '',
       selectedRange: null,
       clearSelection: mockClearSelection,
     });
     mockUseReviewTextSelection.mockReturnValue({
-      actionMenuPosition: { top: 100, left: 100, right: 160, bottom: 120 },
+      selectionRectangle: { top: 100, left: 100, right: 160, bottom: 120 },
       selectedText: '  selected body text  ',
       selectedRange,
       clearSelection: mockClearSelection,
@@ -115,7 +115,7 @@ describe('MappingView', () => {
   it('disables exclude when selected text has no mapped segments', () => {
     const selectedRange = { intersectsNode: () => false } as unknown as Range;
     mockUseReviewTextSelection.mockReturnValue({
-      actionMenuPosition: { top: 100, left: 100, right: 160, bottom: 120 },
+      selectionRectangle: { top: 100, left: 100, right: 160, bottom: 120 },
       selectedText: 'plain text',
       selectedRange,
       clearSelection: mockClearSelection,

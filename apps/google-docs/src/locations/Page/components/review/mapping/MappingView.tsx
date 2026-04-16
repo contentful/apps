@@ -20,7 +20,7 @@ import { mockExcludeSelection, mockNewLocationSelection } from './mockEditModalC
 import { SelectionActionMenu } from './SelectionActionMenu';
 import { buildSourceRefKey } from './sourceRefUtils';
 import { MappingEntryCards, type AnchoredMappingCard } from './MappingEntryCards';
-import { TabSegement } from './TabSegment';
+import { NormalizedDocumentSection } from './NormalizedDocumentSection';
 
 const enableMockEditModal = import.meta.env.VITE_ENABLE_MOCK_EDIT_MODAL === 'true';
 
@@ -59,7 +59,7 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
 
   const document = payload.normalizedDocument;
   const entryBlockGraph = payload.entryBlockGraph;
-  const { actionMenuPosition, selectedText, selectedRange, clearSelection } =
+  const { selectionRectangle, selectedText, selectedRange, clearSelection } =
     useReviewTextSelection(textSelectionRootRef);
 
   const highlightIndex = useMemo(
@@ -297,7 +297,7 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
                       alignItems="stretch"
                       data-testid={`segment-layout-${segment.id}`}
                       ref={setSegmentLayoutRef(segment.id)}>
-                      <TabSegement
+                      <NormalizedDocumentSection
                         segment={segment}
                         highlightIndex={highlightIndex}
                         imageById={imageById}
@@ -327,9 +327,9 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
         ))}
       </Flex>
 
-      {actionMenuPosition ? (
+      {selectionRectangle ? (
         <SelectionActionMenu
-          actionMenuPosition={actionMenuPosition}
+          anchorRectangle={selectionRectangle}
           onAssign={handleAssignFromSelection}
           onExclude={handleExcludeFromSelection}
           isMappedContent={canExcludeSelectedText}
