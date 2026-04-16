@@ -6,7 +6,7 @@ import type { EntryProps } from 'contentful-management';
 import type { MappingReviewSuspendPayload, CompletedWorkflowPayload } from '@types';
 import { buildEntryListFromEntryBlockGraph } from '../../../../utils/entryList';
 import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
-import { EntryList } from './EntryList';
+import { OverviewEntryList } from './OverviewEntryList';
 import { overviewSectionBox, overviewSectionBoxScrollable } from './OverviewSection.styles';
 import { SummaryModal } from '../modals/SummaryModal';
 import Splitter from '../mainpage/Splitter';
@@ -113,7 +113,7 @@ const OverviewSection = ({
             </Note>
           ) : (
             <Box className={overviewSectionBoxScrollable}>
-              <EntryList
+              <OverviewEntryList
                 rows={entryRows}
                 selectedEntryIndex={selectedEntryIndex}
                 onSelect={onSelectEntryIndex}

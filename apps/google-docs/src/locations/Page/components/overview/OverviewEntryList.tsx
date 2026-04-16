@@ -1,36 +1,36 @@
 import { Box, Card, Flex, Paragraph, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { cx } from '@emotion/css';
-import type { EntryListRow } from '../../../../utils/entryList';
+import type { EntryListRow as OverviewEntryListRow } from '../../../../utils/entryList';
 import {
   treeChildRowBase,
   treeChildRowLast,
   treeChildRowNotLast,
   treeChildrenList,
-} from './EntryList.styles';
+} from './OverviewEntryList.styles';
 import { truncateLabel } from '../../../../utils/utils';
 
-export interface EntryListProps {
-  rows: EntryListRow[];
+export interface OverviewEntryListProps {
+  rows: OverviewEntryListRow[];
   selectedEntryIndex: number;
   onSelect: (entryIndex: number) => void;
 }
 
-interface EntryRowCardProps {
-  row: EntryListRow;
+interface OverviewEntryRowCardProps {
+  row: OverviewEntryListRow;
   selectedEntryIndex: number;
   onSelect: (entryIndex: number) => void;
   showTreeLines: boolean;
   isLastRow?: boolean;
 }
 
-function EntryRowCard({
+function OverviewEntryRowCard({
   row,
   selectedEntryIndex,
   onSelect,
   showTreeLines,
   isLastRow = true,
-}: EntryRowCardProps) {
+}: OverviewEntryRowCardProps) {
   const isSelected = row.entryIndex === selectedEntryIndex;
 
   const treeLineClass =
@@ -67,7 +67,7 @@ function EntryRowCard({
       {row.children.length > 0 ? (
         <Box className={treeChildrenList}>
           {row.children.map((child, index) => (
-            <EntryRowCard
+            <OverviewEntryRowCard
               key={child.id}
               row={child}
               selectedEntryIndex={selectedEntryIndex}
@@ -92,11 +92,11 @@ function EntryRowCard({
   );
 }
 
-export function EntryList({ rows, selectedEntryIndex, onSelect }: EntryListProps) {
+export function OverviewEntryList({ rows, selectedEntryIndex, onSelect }: OverviewEntryListProps) {
   return (
     <Flex flexDirection="column" gap="spacingS">
       {rows.map((row) => (
-        <EntryRowCard
+        <OverviewEntryRowCard
           key={row.id}
           row={row}
           selectedEntryIndex={selectedEntryIndex}
