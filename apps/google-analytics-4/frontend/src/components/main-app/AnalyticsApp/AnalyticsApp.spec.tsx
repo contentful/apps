@@ -8,7 +8,7 @@ import {
   EMPTY_DATA_MSG,
   getContentTypeSpecificMsg,
 } from 'components/main-app/constants/noteMessages';
-import * as useSidebarSlug from 'hooks/useSidebarSlug/useSidebarSlug';
+import * as useSidebarRules from 'hooks/useSidebarRules/useSidebarRules';
 import { vi } from 'vitest';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
@@ -30,7 +30,10 @@ const renderAnalyticsApp = async () =>
     <AnalyticsApp
       api={{ runReports: mockApi } as unknown as Api}
       propertyId="properties/12345"
-      slugFieldInfo={{ slugField: 'title', urlPrefix: '' }}
+      slugFieldRules={[
+        { id: 'rule-title', contentTypeId: 'category', slugField: 'title', urlPrefix: '' } as any,
+      ]}
+      openCustomRangeDialog={vi.fn()}
     />
   );
 
@@ -40,13 +43,21 @@ describe('AnalyticsApp with correct content types configured', () => {
       serviceAccountKeyId: validServiceKeyId,
     });
 
-    vi.spyOn(useSidebarSlug, 'useSidebarSlug').mockImplementation(() => ({
-      slugFieldIsConfigured: true,
-      contentTypeHasSlugField: true,
-      isPublished: true,
-      reportSlug: 'report slug',
-      slugFieldValue: '',
+    vi.spyOn(useSidebarRules, 'useSidebarRules').mockImplementation(() => ({
+      validRules: [
+        {
+          id: 'rule-title',
+          contentTypeId: 'category',
+          slugField: 'title',
+          urlPrefix: '',
+          reportSlug: 'report slug',
+          enableAdvancedMatching: false,
+        },
+      ],
+      summaryLabel: 'report slug',
       isContentTypeWarning: false,
+      warningRule: undefined,
+      haveLoadedFieldValues: true,
     }));
   });
 
@@ -98,13 +109,17 @@ describe('AnalyticsApp with correct content types configured', () => {
 
 describe('AnalyticsApp when content types are not configured correctly', () => {
   it('renders SlugWarningDisplay component when slug field is not configured', async () => {
-    vi.spyOn(useSidebarSlug, 'useSidebarSlug').mockImplementation(() => ({
-      slugFieldIsConfigured: true,
-      contentTypeHasSlugField: false,
-      isPublished: true,
-      reportSlug: '',
-      slugFieldValue: '',
+    vi.spyOn(useSidebarRules, 'useSidebarRules').mockImplementation(() => ({
+      validRules: [],
+      summaryLabel: '',
       isContentTypeWarning: true,
+      haveLoadedFieldValues: true,
+      warningRule: {
+        id: 'rule-title',
+        contentTypeId: 'category',
+        slugField: 'slug',
+        urlPrefix: '',
+      },
     }));
     mockApi.mockImplementation(() => runReportResponseHasViews);
     const warningMessage = getContentTypeSpecificMsg('Category')

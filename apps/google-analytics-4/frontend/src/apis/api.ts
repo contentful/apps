@@ -66,7 +66,10 @@ export class Api {
   encodeParam = (param: any) => encodeURIComponent(param);
 
   appendQueryParams = (url: URL, queryParams: any) => {
-    Object.keys(queryParams).forEach((key) => url.searchParams.append(key, queryParams[key]));
+    Object.entries(queryParams).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === '') return;
+      url.searchParams.append(key, String(value));
+    });
     return url;
   };
 

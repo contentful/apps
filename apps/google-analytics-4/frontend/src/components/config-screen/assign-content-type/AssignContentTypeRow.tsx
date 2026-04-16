@@ -1,132 +1,115 @@
 import { useEffect, useState } from 'react';
-import { Box, Select, Stack, TextInput, TextLink } from '@contentful/f36-components';
+import {
+  Box,
+  Checkbox,
+  Flex,
+  FormControl,
+  Select,
+  Stack,
+  Text,
+  TextInput,
+  TextLink,
+  Tooltip,
+} from '@contentful/f36-components';
+import { HelpCircleIcon } from '@contentful/f36-icons';
 import { styles } from 'components/config-screen/assign-content-type/AssignContentType.styles';
 import { EditorInterface } from '@contentful/app-sdk';
-import { AllContentTypes, AllContentTypeEntries, ContentTypes, ContentTypeValue } from 'types';
+import {
+  AllContentTypes,
+  AllContentTypeEntries,
+  ContentTypeRule,
+  ContentTypeRules,
+  ContentTypeValue,
+} from 'types';
 import ContentTypeWarning from 'components/config-screen/assign-content-type/ContentTypeWarning';
+import { pathPatternPreview } from 'utils/getReportSlug';
+import { hasAdvancedMatchingConfigured } from 'utils/contentTypeMatching';
 
 interface Props {
-  contentTypeEntry: [string, ContentTypeValue];
+  contentTypeRule: ContentTypeRule;
   index: number;
   allContentTypes: AllContentTypes;
   allContentTypeEntries: AllContentTypeEntries;
-  contentTypes: ContentTypes;
-  onContentTypeChange: (prevKey: string, newKey: string) => void;
-  onContentTypeFieldChange: (key: string, field: string, value: string) => void;
-  onRemoveContentType: (key: string) => void;
+  contentTypeRules: ContentTypeRules;
+  onContentTypeChange: (ruleId: string, newContentTypeId: string) => void;
+  onContentTypeFieldChange: (
+    ruleId: string,
+    field: string,
+    value: string | boolean | string[]
+  ) => void;
+  onRemoveContentType: (ruleId: string) => void;
   currentEditorInterface: Partial<EditorInterface>;
-  originalContentTypes: ContentTypes;
+  originalContentTypeRules: ContentTypeRules;
   focus: boolean;
 }
 
 const AssignContentTypeRow = (props: Props) => {
   const {
-    contentTypeEntry,
+    contentTypeRule,
     index,
     allContentTypes,
     allContentTypeEntries,
-    contentTypes,
+    contentTypeRules,
     onContentTypeChange,
     onContentTypeFieldChange,
     onRemoveContentType,
     currentEditorInterface,
-    originalContentTypes,
+    originalContentTypeRules,
     focus,
   } = props;
 
-  const [contentTypeId, { slugField, urlPrefix }] = contentTypeEntry;
+  const [
+    ruleId,
+    {
+      contentTypeId,
+      slugField,
+      urlPrefix,
+      enableAdvancedMatching,
+      pathPattern = '',
+      additionalFieldIds = [],
+      matchDimension = 'unifiedPagePathScreen',
+      matchType = 'EXACT',
+    },
+  ] = [contentTypeRule.id, contentTypeRule];
 
-  const [isSaved, setIsSaved] = useState<boolean>(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [contentTypeOptions, setContentTypeOptions] = useState<AllContentTypeEntries>([]);
-  const [isContentTypeInOptions, setIsContentTypeInOptions] = useState<boolean>(true);
-  const [isSlugFieldInOptions, setIsSlugFieldInOptions] = useState<boolean>(true);
-  const [isInSidebar, setIsInSidebar] = useState<boolean>(false);
+  const [isContentTypeInOptions, setIsContentTypeInOptions] = useState(true);
+  const [isSlugFieldInOptions, setIsSlugFieldInOptions] = useState(true);
+  const [isInSidebar, setIsInSidebar] = useState(false);
+  const [showAdvancedMatching, setShowAdvancedMatching] = useState(
+    Boolean(enableAdvancedMatching || hasAdvancedMatchingConfigured(contentTypeRule))
+  );
 
   useEffect(() => {
-    const originalContentTypeIds = Object.keys(originalContentTypes);
-    if (originalContentTypeIds.includes(contentTypeId)) {
-      setIsSaved(true);
-    } else {
-      setIsSaved(false);
-    }
-  }, [contentTypeId, originalContentTypes]);
+    setIsSaved(originalContentTypeRules.some((rule) => rule.id === ruleId));
+  }, [originalContentTypeRules, ruleId]);
 
   useEffect(() => {
-    const savedSidebarLocations = Object.keys(currentEditorInterface);
-    if (savedSidebarLocations.includes(contentTypeId)) {
-      setIsInSidebar(true);
-    } else {
-      setIsInSidebar(false);
-    }
+    setIsInSidebar(Object.keys(currentEditorInterface).includes(contentTypeId));
   }, [contentTypeId, currentEditorInterface]);
 
   useEffect(() => {
-    const contentTypeOptions = allContentTypeEntries.filter(
-      ([type]) => type === contentTypeId || !contentTypes[type]
-    );
-    setContentTypeOptions(contentTypeOptions);
+    const nextContentTypeOptions = allContentTypeEntries;
+    setContentTypeOptions(nextContentTypeOptions);
+
     if (isSaved) {
-      setIsContentTypeInOptions(contentTypeOptions.some((option) => option[0] === contentTypeId));
+      setIsContentTypeInOptions(
+        nextContentTypeOptions.some((option) => option[0] === contentTypeId)
+      );
       if (slugField !== undefined) {
         setIsSlugFieldInOptions(
           allContentTypes[contentTypeId]?.fields.some((field) => field.id === slugField)
         );
       }
     }
-  }, [allContentTypeEntries, contentTypeId, contentTypes, allContentTypes, isSaved, slugField]);
+  }, [allContentTypeEntries, allContentTypes, contentTypeId, contentTypeRules, isSaved, slugField]);
 
-  const validateSelectedOption = (contentTypeId: string, slugField?: string) => {
-    let value = '';
-
-    if (
-      slugField === undefined &&
-      contentTypeOptions.some((option) => option[0] === contentTypeId)
-    ) {
-      value = contentTypeId;
-    }
-
-    if (
-      slugField !== undefined &&
-      allContentTypes[contentTypeId]?.fields.some((field) => field.id === slugField)
-    ) {
-      value = slugField;
-    }
-
-    return value;
-  };
-
-  const ContentTypeOptions = () => {
-    return (
-      <>
-        <Select.Option value="" isDisabled>
-          Select content type
-        </Select.Option>
-        {contentTypeOptions.map(([type, { name: typeName }]) => {
-          return (
-            <Select.Option value={type} key={`type-${type}`}>
-              {typeName}
-            </Select.Option>
-          );
-        })}
-      </>
+  useEffect(() => {
+    setShowAdvancedMatching(
+      Boolean(enableAdvancedMatching || hasAdvancedMatchingConfigured(contentTypeRule))
     );
-  };
-
-  const SlugFieldOptions = () => {
-    return (
-      <>
-        <Select.Option value="" isDisabled>
-          Select slug field
-        </Select.Option>
-        {contentTypeId &&
-          allContentTypes[contentTypeId]?.fields?.map((field) => (
-            <Select.Option key={`${contentTypeId}.${field.id}`} value={field.id}>
-              {field.name}
-            </Select.Option>
-          ))}
-      </>
-    );
-  };
+  }, [contentTypeRule, enableAdvancedMatching]);
 
   useEffect(() => {
     if (focus) {
@@ -135,8 +118,38 @@ const AssignContentTypeRow = (props: Props) => {
     }
   }, [focus, index]);
 
+  const validateSelectedOption = (entryContentTypeId: string, fieldId?: string) => {
+    let value = '';
+
+    if (
+      fieldId === undefined &&
+      contentTypeOptions.some((option) => option[0] === entryContentTypeId)
+    ) {
+      value = entryContentTypeId;
+    }
+
+    if (
+      fieldId !== undefined &&
+      allContentTypes[entryContentTypeId]?.fields.some((field) => field.id === fieldId)
+    ) {
+      value = fieldId;
+    }
+
+    return value;
+  };
+
+  const selectableAdditionalFields =
+    contentTypeId && allContentTypes[contentTypeId]?.fields
+      ? allContentTypes[contentTypeId].fields.filter((field) => field.id !== slugField)
+      : [];
+
   return (
-    <Stack spacing="spacingXs" paddingBottom="spacingS" key={contentTypeId} testId="contentTypeRow">
+    <Stack
+      spacing="spacingS"
+      paddingBottom="spacingS"
+      flexDirection="column"
+      key={contentTypeId}
+      testId="contentTypeRow">
       <ContentTypeWarning
         contentTypeId={contentTypeId}
         slugField={slugField}
@@ -145,49 +158,203 @@ const AssignContentTypeRow = (props: Props) => {
         isContentTypeInOptions={isContentTypeInOptions}
         isSlugFieldInOptions={isSlugFieldInOptions}
       />
-      <Box className={styles.contentTypeItem}>
-        <Select
-          id={`contentType-${index}`}
-          name={`contentType-${index}`}
-          testId="contentTypeSelect"
-          isInvalid={!isContentTypeInOptions && contentTypeId !== ''}
-          onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-            onContentTypeChange(contentTypeId, event.target.value)
-          }
-          value={validateSelectedOption(contentTypeId)}>
-          <ContentTypeOptions />
-        </Select>
-      </Box>
-      <Box className={styles.contentTypeItem}>
-        <Select
-          id={`slugField-${index}`}
-          name={`slugField-${index}`}
-          testId="slugFieldSelect"
-          isDisabled={!contentTypeId || !isContentTypeInOptions}
-          onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-            onContentTypeFieldChange(contentTypeId, 'slugField', event.target.value)
-          }
-          value={validateSelectedOption(contentTypeId, slugField)}>
-          <SlugFieldOptions />
-        </Select>
-      </Box>
-      <Box className={styles.contentTypeItem}>
-        <TextInput
-          id={`urlPrefix-${index}`}
-          name={`urlPrefix-${index}`}
-          testId="urlPrefixInput"
-          isDisabled={!contentTypeId || !isContentTypeInOptions}
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-            onContentTypeFieldChange(contentTypeId, 'urlPrefix', event.target.value)
-          }
-          value={urlPrefix}
-        />
-      </Box>
-      <Box className={styles.removeItem}>
-        <TextLink as="button" onClick={() => onRemoveContentType(contentTypeId)}>
-          Remove
-        </TextLink>
-      </Box>
+      <Flex className={styles.baseRow}>
+        <Box className={styles.contentTypeItem}>
+          <Select
+            id={`contentType-${index}`}
+            name={`contentType-${index}`}
+            testId="contentTypeSelect"
+            isInvalid={!isContentTypeInOptions && contentTypeId !== ''}
+            onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+              onContentTypeChange(ruleId, event.target.value)
+            }
+            value={validateSelectedOption(contentTypeId)}>
+            <Select.Option value="" isDisabled>
+              Select content type
+            </Select.Option>
+            {contentTypeOptions.map(([type, { name: typeName }]) => (
+              <Select.Option value={type} key={`type-${type}`}>
+                {typeName}
+              </Select.Option>
+            ))}
+          </Select>
+        </Box>
+        <Box className={styles.contentTypeItem}>
+          <Select
+            id={`slugField-${index}`}
+            name={`slugField-${index}`}
+            testId="slugFieldSelect"
+            isDisabled={!contentTypeId || !isContentTypeInOptions}
+            onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+              onContentTypeFieldChange(ruleId, 'slugField', event.target.value)
+            }
+            value={validateSelectedOption(contentTypeId, slugField)}>
+            <Select.Option value="" isDisabled>
+              Select slug field
+            </Select.Option>
+            {contentTypeId &&
+              allContentTypes[contentTypeId]?.fields?.map((field) => (
+                <Select.Option key={`${contentTypeId}.${field.id}`} value={field.id}>
+                  {field.name}
+                </Select.Option>
+              ))}
+          </Select>
+        </Box>
+        <Box className={styles.urlPrefixItem}>
+          {!showAdvancedMatching ? (
+            <TextInput
+              id={`urlPrefix-${index}`}
+              name={`urlPrefix-${index}`}
+              testId="urlPrefixInput"
+              isDisabled={!contentTypeId || !isContentTypeInOptions}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                onContentTypeFieldChange(ruleId, 'urlPrefix', event.target.value)
+              }
+              value={urlPrefix}
+            />
+          ) : (
+            <Text fontColor="gray500">Configured below</Text>
+          )}
+        </Box>
+        <Box className={styles.toggleItem}>
+          <Checkbox
+            id={`advancedMatching-${index}`}
+            name={`advancedMatching-${index}`}
+            testId="advancedMatchingToggle"
+            isChecked={showAdvancedMatching}
+            isDisabled={!contentTypeId || !isContentTypeInOptions}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+              const nextIsAdvanced = event.target.checked;
+              setShowAdvancedMatching(nextIsAdvanced);
+              onContentTypeFieldChange(ruleId, 'enableAdvancedMatching', nextIsAdvanced);
+            }}>
+            Advanced
+          </Checkbox>
+        </Box>
+        <Box className={styles.removeItem}>
+          <TextLink as="button" onClick={() => onRemoveContentType(ruleId)}>
+            Remove
+          </TextLink>
+        </Box>
+      </Flex>
+      {showAdvancedMatching && (
+        <Box className={styles.advancedMatchingPanel} testId="advancedMatchingPanel">
+          <Text fontColor="gray600" className={styles.advancedMatchingIntro}>
+            Use this for query strings or variable prefixes.
+          </Text>
+          <Box className={styles.advancedMatchingFields}>
+            <Flex className={styles.advancedMatchingTopRow}>
+              <Box className={styles.stackedField}>
+                <FormControl marginBottom="none">
+                  <FormControl.Label>Additional page properties</FormControl.Label>
+                  <Stack spacing="spacing2Xs" flexDirection="column" alignItems="flex-start">
+                    {selectableAdditionalFields.length ? (
+                      selectableAdditionalFields.map((field) => (
+                        <Checkbox
+                          key={`${contentTypeId}.${field.id}`}
+                          testId={`additionalFieldOption-${field.id}`}
+                          isChecked={additionalFieldIds.includes(field.id)}
+                          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                            const checked = event.target.checked;
+                            const nextSelectedFields = checked
+                              ? [...additionalFieldIds, field.id]
+                              : additionalFieldIds.filter(
+                                  (selectedFieldId) => selectedFieldId !== field.id
+                                );
+
+                            onContentTypeFieldChange(
+                              ruleId,
+                              'additionalFieldIds',
+                              nextSelectedFields
+                            );
+                          }}>
+                          {field.name}
+                        </Checkbox>
+                      ))
+                    ) : (
+                      <Text fontColor="gray500">
+                        No extra fields available for this content type.
+                      </Text>
+                    )}
+                  </Stack>
+                  <FormControl.HelpText>
+                    Select any extra fields you want to reference in the pattern.
+                  </FormControl.HelpText>
+                </FormControl>
+              </Box>
+              <Box className={styles.stackedField}>
+                <FormControl marginBottom="none">
+                  <FormControl.Label>Pattern</FormControl.Label>
+                  <TextInput
+                    id={`pathPattern-${index}`}
+                    name={`pathPattern-${index}`}
+                    testId="pathPatternInput"
+                    isDisabled={!contentTypeId || !isContentTypeInOptions}
+                    placeholder="/blog/{slug}"
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                      onContentTypeFieldChange(ruleId, 'pathPattern', event.target.value)
+                    }
+                    value={pathPattern}
+                  />
+                  <FormControl.HelpText>
+                    Use {'{slug}'} plus any selected property tokens. Example: /{'{sectionSlug}'}/
+                    {'{slug}'}
+                  </FormControl.HelpText>
+                </FormControl>
+              </Box>
+            </Flex>
+            <Flex className={styles.advancedMatchingBottomRow}>
+              <Box className={styles.compactField}>
+                <FormControl>
+                  <FormControl.Label>Match against</FormControl.Label>
+                  <Select
+                    id={`matchDimension-${index}`}
+                    name={`matchDimension-${index}`}
+                    testId="matchDimensionSelect"
+                    isDisabled={!contentTypeId || !isContentTypeInOptions}
+                    onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+                      onContentTypeFieldChange(ruleId, 'matchDimension', event.target.value)
+                    }
+                    value={matchDimension}>
+                    <Select.Option value="unifiedPagePathScreen">Page path</Select.Option>
+                    <Select.Option value="pagePathPlusQueryString">
+                      Page path + query string
+                    </Select.Option>
+                  </Select>
+                </FormControl>
+              </Box>
+              <Box className={styles.compactField}>
+                <FormControl>
+                  <FormControl.Label>
+                    <Flex alignItems="center">
+                      Matching mode
+                      <Tooltip
+                        placement="top"
+                        content="Use Literal for one exact URL. Use Flexible pattern when parts of the URL can vary, like multiple category prefixes.">
+                        <Flex marginLeft="spacing2Xs" className={styles.tooltipIcon}>
+                          <HelpCircleIcon />
+                        </Flex>
+                      </Tooltip>
+                    </Flex>
+                  </FormControl.Label>
+                  <Select
+                    id={`matchType-${index}`}
+                    name={`matchType-${index}`}
+                    testId="matchTypeSelect"
+                    isDisabled={!contentTypeId || !isContentTypeInOptions}
+                    onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+                      onContentTypeFieldChange(ruleId, 'matchType', event.target.value)
+                    }
+                    value={matchType}>
+                    <Select.Option value="EXACT">Literal</Select.Option>
+                    <Select.Option value="PARTIAL_REGEXP">Flexible pattern</Select.Option>
+                  </Select>
+                </FormControl>
+              </Box>
+            </Flex>
+          </Box>
+        </Box>
+      )}
     </Stack>
   );
 };
