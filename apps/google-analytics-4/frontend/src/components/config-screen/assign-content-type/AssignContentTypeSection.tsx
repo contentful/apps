@@ -51,7 +51,9 @@ const AssignContentTypeSection = (props: Props) => {
   const [forceTrailingSlash, setForceTrailingSlash] = useState<boolean>(false);
 
   // Content type rules state
-  const [contentTypeRules, setContentTypeRules] = useState<ContentTypeRules>([] as ContentTypeRules);
+  const [contentTypeRules, setContentTypeRules] = useState<ContentTypeRules>(
+    [] as ContentTypeRules
+  );
   const [loadingContentTypes, setLoadingContentTypes] = useState<boolean>(true);
   const [hasContentTypes, setHasContentTypes] = useState<boolean>(false);
   const [hasIncompleteContentTypes, setHasIncompleteContentTypes] = useState<boolean>(false);
@@ -79,9 +81,7 @@ const AssignContentTypeSection = (props: Props) => {
 
   useEffect(() => {
     setHasContentTypes(contentTypeRules.length > 0);
-    setHasIncompleteContentTypes(
-      contentTypeRules.some((rule) => !rule.contentTypeId)
-    );
+    setHasIncompleteContentTypes(contentTypeRules.some((rule) => !rule.contentTypeId));
   }, [contentTypeRules]);
 
   const fetchAllContentTypes = async (sdk: KnownAppSDK): Promise<ContentTypeProps[]> => {

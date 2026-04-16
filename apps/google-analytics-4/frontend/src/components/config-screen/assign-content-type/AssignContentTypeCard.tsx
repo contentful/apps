@@ -10,7 +10,11 @@ interface AssignContentTypeCardProps {
   allContentTypeEntries: AllContentTypeEntries;
   contentTypeRules: ContentTypeRules;
   onContentTypeChange: (ruleId: string, newContentTypeId: string) => void;
-  onContentTypeFieldChange: (ruleId: string, field: string, value: string | boolean | string[]) => void;
+  onContentTypeFieldChange: (
+    ruleId: string,
+    field: string,
+    value: string | boolean | string[]
+  ) => void;
   onRemoveContentType: (ruleId: string) => void;
   currentEditorInterface: Partial<EditorInterface>;
   originalContentTypeRules: ContentTypeRules;

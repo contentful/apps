@@ -21,7 +21,9 @@ interface Props {
   api: Api;
   propertyId: string;
   slugFieldRules: ContentTypeRule[];
-  openCustomRangeDialog: (startEndDates: StartEndDates) => Promise<CustomRangeDialogResult | undefined>;
+  openCustomRangeDialog: (
+    startEndDates: StartEndDates
+  ) => Promise<CustomRangeDialogResult | undefined>;
 }
 
 const mergeRunReportResponses = (responses: RunReportData[]): RunReportData => {
@@ -160,12 +162,12 @@ const AnalyticsApp = (props: Props) => {
     }
 
     return (
-        <AnalyticsMetricDisplay
-          handleDateRangeChange={handleDateRangeChange}
-          handleMetricChange={handleMetricChange}
-          handleCustomRangeRequest={() => handleDateRangeChange('custom')}
-          runReportResponse={runReportResponse}
-          metricName={metricName}
+      <AnalyticsMetricDisplay
+        handleDateRangeChange={handleDateRangeChange}
+        handleMetricChange={handleMetricChange}
+        handleCustomRangeRequest={() => handleDateRangeChange('custom')}
+        runReportResponse={runReportResponse}
+        metricName={metricName}
         reportSlug={summaryLabel}
         includedPaths={validRules.map((rule) => rule.reportSlug)}
         canOpenInGoogleAnalytics={validRules.length === 1}

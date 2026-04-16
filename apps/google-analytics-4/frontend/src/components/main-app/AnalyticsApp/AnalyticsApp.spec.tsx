@@ -30,7 +30,9 @@ const renderAnalyticsApp = async () =>
     <AnalyticsApp
       api={{ runReports: mockApi } as unknown as Api}
       propertyId="properties/12345"
-      slugFieldRules={[{ id: 'rule-title', contentTypeId: 'category', slugField: 'title', urlPrefix: '' } as any]}
+      slugFieldRules={[
+        { id: 'rule-title', contentTypeId: 'category', slugField: 'title', urlPrefix: '' } as any,
+      ]}
       openCustomRangeDialog={vi.fn()}
     />
   );
@@ -110,7 +112,12 @@ describe('AnalyticsApp when content types are not configured correctly', () => {
       validRules: [],
       summaryLabel: '',
       isContentTypeWarning: true,
-      warningRule: { id: 'rule-title', contentTypeId: 'category', slugField: 'slug', urlPrefix: '' },
+      warningRule: {
+        id: 'rule-title',
+        contentTypeId: 'category',
+        slugField: 'slug',
+        urlPrefix: '',
+      },
     }));
     mockApi.mockImplementation(() => runReportResponseHasViews);
     const warningMessage = getContentTypeSpecificMsg('Category')

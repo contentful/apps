@@ -66,8 +66,16 @@ const ApiController = {
     try {
       const serviceAccountKey = requireServiceAccountKey(req.serviceAccountKey);
 
-      const { propertyId, slug, matchDimension, matchType, startDate, endDate, dimensions, metrics } =
-        req.query as unknown as RunReportParamsType;
+      const {
+        propertyId,
+        slug,
+        matchDimension,
+        matchType,
+        startDate,
+        endDate,
+        dimensions,
+        metrics,
+      } = req.query as unknown as RunReportParamsType;
       const googleApi = GoogleApiService.fromServiceAccountKeyFile(serviceAccountKey);
       const result =
         dimensions && metrics

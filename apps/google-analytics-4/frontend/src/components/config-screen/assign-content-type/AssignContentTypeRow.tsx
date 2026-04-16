@@ -32,7 +32,11 @@ interface Props {
   allContentTypeEntries: AllContentTypeEntries;
   contentTypeRules: ContentTypeRules;
   onContentTypeChange: (ruleId: string, newContentTypeId: string) => void;
-  onContentTypeFieldChange: (ruleId: string, field: string, value: string | boolean | string[]) => void;
+  onContentTypeFieldChange: (
+    ruleId: string,
+    field: string,
+    value: string | boolean | string[]
+  ) => void;
   onRemoveContentType: (ruleId: string) => void;
   currentEditorInterface: Partial<EditorInterface>;
   originalContentTypeRules: ContentTypeRules;
@@ -161,7 +165,7 @@ const AssignContentTypeRow = (props: Props) => {
             name={`contentType-${index}`}
             testId="contentTypeSelect"
             isInvalid={!isContentTypeInOptions && contentTypeId !== ''}
-              onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+            onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
               onContentTypeChange(ruleId, event.target.value)
             }
             value={validateSelectedOption(contentTypeId)}>
@@ -181,10 +185,10 @@ const AssignContentTypeRow = (props: Props) => {
             name={`slugField-${index}`}
             testId="slugFieldSelect"
             isDisabled={!contentTypeId || !isContentTypeInOptions}
-              onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-                onContentTypeFieldChange(ruleId, 'slugField', event.target.value)
-              }
-              value={validateSelectedOption(contentTypeId, slugField)}>
+            onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+              onContentTypeFieldChange(ruleId, 'slugField', event.target.value)
+            }
+            value={validateSelectedOption(contentTypeId, slugField)}>
             <Select.Option value="" isDisabled>
               Select slug field
             </Select.Option>
@@ -193,7 +197,7 @@ const AssignContentTypeRow = (props: Props) => {
                 <Select.Option key={`${contentTypeId}.${field.id}`} value={field.id}>
                   {field.name}
                 </Select.Option>
-            ))}
+              ))}
           </Select>
         </Box>
         <Box className={styles.urlPrefixItem}>
@@ -254,21 +258,29 @@ const AssignContentTypeRow = (props: Props) => {
                             const checked = event.target.checked;
                             const nextSelectedFields = checked
                               ? [...additionalFieldIds, field.id]
-                              : additionalFieldIds.filter((selectedFieldId) => selectedFieldId !== field.id);
+                              : additionalFieldIds.filter(
+                                  (selectedFieldId) => selectedFieldId !== field.id
+                                );
 
-                            onContentTypeFieldChange(ruleId, 'additionalFieldIds', nextSelectedFields);
+                            onContentTypeFieldChange(
+                              ruleId,
+                              'additionalFieldIds',
+                              nextSelectedFields
+                            );
                           }}>
                           {field.name}
                         </Checkbox>
                       ))
                     ) : (
-                      <Text fontColor="gray500">No extra fields available for this content type.</Text>
+                      <Text fontColor="gray500">
+                        No extra fields available for this content type.
+                      </Text>
                     )}
                   </Stack>
-                <FormControl.HelpText>
-                  Select any extra fields you want to reference in the pattern.
-                </FormControl.HelpText>
-              </FormControl>
+                  <FormControl.HelpText>
+                    Select any extra fields you want to reference in the pattern.
+                  </FormControl.HelpText>
+                </FormControl>
               </Box>
               <Box className={styles.stackedField}>
                 <FormControl marginBottom="none">
@@ -285,7 +297,8 @@ const AssignContentTypeRow = (props: Props) => {
                     value={pathPattern}
                   />
                   <FormControl.HelpText>
-                    Use {'{slug}'} plus any selected property tokens. Example: /{'{sectionSlug}'}/{'{slug}'}
+                    Use {'{slug}'} plus any selected property tokens. Example: /{'{sectionSlug}'}/
+                    {'{slug}'}
                   </FormControl.HelpText>
                 </FormControl>
               </Box>

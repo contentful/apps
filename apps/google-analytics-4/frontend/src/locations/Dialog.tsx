@@ -41,7 +41,11 @@ const Dialog = () => {
               onSelect={setStartDate}
               toDate={endDate}
               inputProps={{ isReadOnly: true }}
-              popoverProps={{ usePortal: true, placement: 'bottom-start', isAutoalignmentEnabled: true }}
+              popoverProps={{
+                usePortal: true,
+                placement: 'bottom-start',
+                isAutoalignmentEnabled: true,
+              }}
             />
           </FormControl>
           <FormControl style={{ flex: 1, marginBottom: 0 }}>
@@ -52,7 +56,11 @@ const Dialog = () => {
               fromDate={startDate}
               toDate={new Date()}
               inputProps={{ isReadOnly: true }}
-              popoverProps={{ usePortal: true, placement: 'bottom-end', isAutoalignmentEnabled: true }}
+              popoverProps={{
+                usePortal: true,
+                placement: 'bottom-end',
+                isAutoalignmentEnabled: true,
+              }}
             />
           </FormControl>
         </Flex>
