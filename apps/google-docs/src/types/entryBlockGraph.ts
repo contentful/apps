@@ -4,12 +4,12 @@ export type BlockTextSourceRef = {
   start: number;
   end: number;
   flattenedRuns: NormalizedDocumentFlattenedRun[];
-  type: 'blockText' | 'paragraph' | 'heading';
+  type: 'blockText';
   blockId: string;
 };
 
 export type TableTextSourceRef = {
-  type: 'tableText' | 'tableCell' | 'tableParagraph';
+  type: 'tableText';
   start: number;
   end: number;
   flattenedRuns: NormalizedDocumentFlattenedRun[];
