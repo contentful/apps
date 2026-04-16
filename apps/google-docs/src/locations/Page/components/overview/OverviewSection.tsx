@@ -1,122 +1,73 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { cx } from '@emotion/css';
-import { Box, Button, Flex, Heading, Note, Paragraph } from '@contentful/f36-components';
-import type { MappingReviewSuspendPayload, PreviewPayload } from '@types';
-import {
-  buildCheckboxEntryList,
-  collectCheckboxEntryListRowIds,
-  type ContentTypeDisplayInfoMap,
-} from '../../../../utils/checkboxEntryList';
-import { fetchContentTypesInfoByIds } from '../../../../services/contentTypeService';
-import { CheckboxEntryList } from './CheckboxEntryList';
-import { overviewSectionBox, overviewSectionBoxScrollable } from './OverviewSection.styles';
+import { Box, Button, Flex, Note, Paragraph, Text } from '@contentful/f36-components';
+import { LightbulbIcon } from '@contentful/f36-icons';
 import { PageAppSDK } from '@contentful/app-sdk';
 import type { EntryProps } from 'contentful-management';
+import type { MappingReviewSuspendPayload, PreviewPayload } from '@types';
+import { buildEntryListFromEntryBlockGraph } from '../../../../utils/entryList';
+import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
+import { EntryList } from './EntryList';
+import { overviewSectionBox, overviewSectionBoxScrollable } from './OverviewSection.styles';
 import { SummaryModal } from '../modals/SummaryModal';
-import { isPreviewPayload } from '../../../../utils/utils';
+import Splitter from '../mainpage/Splitter';
+import type { ContentTypeDisplayInfoMap } from '../../../../utils/entryList';
 
-interface OverviewSectionProps {
+interface OverviewProps {
   sdk: PageAppSDK;
-  payload: PreviewPayload | MappingReviewSuspendPayload;
-  oauthToken: string;
+  payload: MappingReviewSuspendPayload;
+  selectedEntryIndex: number;
+  onSelectEntryIndex: (index: number) => void;
+  onCreateEntries: () => Promise<PreviewPayload | null>;
   onReturnToMainPage: () => void;
-  onCreateSelected?: () => Promise<void>;
 }
 
 const OverviewSection = ({
   sdk,
   payload,
-  oauthToken,
+  selectedEntryIndex,
+  onSelectEntryIndex,
+  onCreateEntries,
   onReturnToMainPage,
-  onCreateSelected,
-}: OverviewSectionProps) => {
-  const [contentTypeDisplayInfoMap, setContentTypeDisplayInfoMap] = useState<
-    ContentTypeDisplayInfoMap | undefined
-  >();
-  const [selectedEntryTempIds, setSelectedEntryTempIds] = useState<Set<string>>(() => new Set());
+}: OverviewProps) => {
   const [isCreating, setIsCreating] = useState(false);
   const [summaryEntries, setSummaryEntries] = useState<EntryProps[] | null>(null);
 
-  const overviewPayload = useMemo<PreviewPayload>(() => {
-    if (isPreviewPayload(payload)) {
-      return payload;
-    }
-
-    return {
-      // TODO: remove this temporary mock once the backend provides preview entries
-      entries: [
-        {
-          fields: {
-            url: {
-              'en-US': '/blog/an-url',
-            },
-            internalLabel: {
-              'en-US': '/blog/another-url',
-            },
-          },
-          tempId: 'url_1',
-          contentTypeId: 'url',
-        },
-      ],
-      assets: [],
-      referenceGraph: payload.referenceGraph,
-      normalizedDocument: payload.normalizedDocument,
-    };
-  }, [payload]);
-
-  useEffect(() => {
-    const fetchContentTypesInfo = async () => {
-      const contentTypeIds = [
-        ...new Set(overviewPayload.entries.map((entry) => entry.contentTypeId)),
-      ]
-        .filter((id): id is string => Boolean(id))
-        .sort();
-      if (contentTypeIds.length === 0) {
-        setContentTypeDisplayInfoMap(undefined);
-        return;
-      }
-      try {
-        const map = await fetchContentTypesInfoByIds(sdk, contentTypeIds);
-        setContentTypeDisplayInfoMap(map);
-      } catch (error) {
-        console.error('Failed to fetch content type names for overview labels:', error);
-        setContentTypeDisplayInfoMap(undefined);
-      }
-    };
-
-    fetchContentTypesInfo();
-  }, [sdk, overviewPayload.entries]);
-
-  const checkboxEntryRows = useMemo(
-    () => buildCheckboxEntryList(overviewPayload, contentTypeDisplayInfoMap, sdk.locales.default),
-    [overviewPayload, contentTypeDisplayInfoMap, sdk.locales.default]
+  const entryRows = useMemo(
+    () =>
+      buildEntryListFromEntryBlockGraph(
+        payload.entryBlockGraph.entries,
+        payload.contentTypes,
+        payload.referenceGraph.edges
+      ),
+    [payload.entryBlockGraph.entries, payload.contentTypes, payload.referenceGraph.edges]
   );
 
-  useEffect(() => {
-    setSelectedEntryTempIds(new Set(collectCheckboxEntryListRowIds(checkboxEntryRows)));
-  }, [checkboxEntryRows]);
-
-  const handleToggle = (id: string, checked: boolean) => {
-    setSelectedEntryTempIds((prev) => {
-      const next = new Set(prev);
-      if (checked) {
-        next.add(id);
-      } else {
-        next.delete(id);
-      }
-      return next;
-    });
-  };
-
-  const handleCreateSelected = async () => {
-    if (selectedEntryTempIds.size === 0 || !onCreateSelected) {
-      return;
+  const contentTypeDisplayInfoMap = useMemo<ContentTypeDisplayInfoMap>(() => {
+    const map = new Map<string, { name: string; displayField?: string }>();
+    for (const ct of payload.contentTypes) {
+      map.set(ct.sys.id, {
+        name: ct.name ?? ct.sys.id,
+        displayField: ct.displayField,
+      });
     }
+    return map;
+  }, [payload.contentTypes]);
 
+  const handleCreateEntries = async () => {
+    console.log('[create-entries] creating entries, calling onCreateEntries');
     setIsCreating(true);
 
     try {
-      await onCreateSelected();
+      const previewPayload = await onCreateEntries();
+
+      if (!previewPayload) {
+        return;
+      }
+      const result = await createEntriesFromPreviewPayload(sdk, previewPayload);
+
+      setSummaryEntries(result.createdEntries);
+    } catch (error) {
     } finally {
       setIsCreating(false);
     }
@@ -128,45 +79,50 @@ const OverviewSection = ({
   };
 
   return (
-    <Box
-      padding="spacingL"
-      className={cx(
-        overviewSectionBox,
-        checkboxEntryRows.length > 3 && overviewSectionBoxScrollable
-      )}>
-      <Flex flexDirection="column" gap="spacingL">
-        <Flex justifyContent="space-between" alignItems="flex-start" gap="spacingL" flexWrap="wrap">
-          <Flex flexDirection="column" gap="spacingXs" style={{ flex: '1 1 240px' }}>
-            <Heading as="h2" marginBottom="none">
-              Overview
-            </Heading>
-            <Paragraph marginBottom="none">
-              Review your content and associated entries below. Select which entries you&apos;d like
-              to create.
+    <>
+      <Box
+        padding="spacingL"
+        className={cx(overviewSectionBox, entryRows.length > 3 && overviewSectionBoxScrollable)}>
+        <Flex flexDirection="column" gap="spacingS">
+          <Flex flexDirection="column" gap="spacingXs">
+            <Flex alignItems="center" gap="spacingXs">
+              <LightbulbIcon size="small" />
+              <Text fontWeight="fontWeightDemiBold">How to use this app</Text>
+            </Flex>
+            <Paragraph marginBottom="none" fontColor="gray600">
+              Review your content and associated entries below. Highlight text to make adjustments.
+              Select which entries you&apos;d like to create.
             </Paragraph>
           </Flex>
-          <Button
-            variant="primary"
-            onClick={handleCreateSelected}
-            isLoading={isCreating}
-            isDisabled={selectedEntryTempIds.size === 0 || !onCreateSelected}>
-            Create selected entries
-          </Button>
-        </Flex>
 
-        {checkboxEntryRows.length === 0 ? (
-          <Note variant="neutral">
-            No entries were found in this preview. When the document is parsed successfully, entries
-            to create will appear here.
-          </Note>
-        ) : (
-          <CheckboxEntryList
-            rows={checkboxEntryRows}
-            selectedIds={selectedEntryTempIds}
-            onToggle={handleToggle}
-          />
-        )}
-      </Flex>
+          <Splitter />
+
+          <Flex justifyContent="space-between" alignItems="center">
+            <Text fontWeight="fontWeightDemiBold" fontSize="fontSizeL">
+              Entries
+            </Text>
+            <Button
+              variant="primary"
+              onClick={() => void handleCreateEntries()}
+              isLoading={isCreating}>
+              Create entries
+            </Button>
+          </Flex>
+
+          {entryRows.length === 0 ? (
+            <Note variant="neutral">
+              No entries were found in this preview. When the document is parsed successfully,
+              entries to create will appear here.
+            </Note>
+          ) : (
+            <EntryList
+              rows={entryRows}
+              selectedEntryIndex={selectedEntryIndex}
+              onSelect={onSelectEntryIndex}
+            />
+          )}
+        </Flex>
+      </Box>
 
       <SummaryModal
         isOpen={summaryEntries !== null}
@@ -176,7 +132,7 @@ const OverviewSection = ({
         defaultLocale={sdk.locales.default}
         onDone={handleSummaryDone}
       />
-    </Box>
+    </>
   );
 };
 

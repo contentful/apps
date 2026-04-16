@@ -73,8 +73,6 @@ export interface PreviewPayload {
   entries: EntryToCreate[];
   assets: AssetToCreate[];
   referenceGraph: ReviewedReferenceGraph;
-  normalizedDocument: NormalizedDocument;
-  entryBlockGraph?: EntryBlockGraph;
 }
 
 export interface TabsImagesSuspendPayload {

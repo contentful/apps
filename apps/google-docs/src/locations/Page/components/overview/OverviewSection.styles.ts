@@ -8,6 +8,6 @@ export const overviewSectionBox = css({
 });
 
 export const overviewSectionBoxScrollable = css({
-  maxHeight: '300px',
-  overflowY: 'auto',
+  maxHeight: '348px',
+  overflow: 'scroll',
 });

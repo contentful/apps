@@ -1,15 +1,17 @@
 import type { EntryToCreate, PreviewPayload } from '@types';
+import type { EntryBlockGraphEntry } from '../types/entryBlockGraph';
+import type { WorkflowContentType } from '../types/workflow';
 import { collectReferencedTempIdsFromEntry } from '../services/referenceResolution';
 import { type ContentTypeDisplayInfo } from '../services/contentTypeService';
 import { orderEntriesByCreationOrder } from './previewPayload';
 import { getEntryDisplayTitle } from './getEntryDisplayTitle';
 
-export interface CheckboxEntryListRow {
+export interface EntryListRow {
   id: string;
   entryIndex: number;
   contentTypeName: string;
   entryTitle?: string;
-  children: CheckboxEntryListRow[];
+  children: EntryListRow[];
 }
 
 export type ContentTypeDisplayInfoMap = ReadonlyMap<string, ContentTypeDisplayInfo>;
@@ -38,11 +40,11 @@ function resolveContentTypeLabel(
 function createRow(
   entry: EntryToCreate,
   entryIndex: number,
-  children: CheckboxEntryListRow[] = [],
+  children: EntryListRow[] = [],
   id: string,
   contentTypeDisplayInfoMap?: ContentTypeDisplayInfoMap,
   defaultLocale?: string
-): CheckboxEntryListRow {
+): EntryListRow {
   const contentTypeName = resolveContentTypeLabel(entry.contentTypeId, contentTypeDisplayInfoMap);
   const title = getEntryDisplayTitle(
     entry,
@@ -108,14 +110,14 @@ function collectChildTempIds(childTempIdsByParentTempId: Map<string, string[]>):
 function buildRowTreeForTempId(
   tempId: string,
   context: TreeBuildContext
-): CheckboxEntryListRow | undefined {
+): EntryListRow | undefined {
   const entry = context.orderedEntriesContext.entriesByTempId.get(tempId);
   if (!entry) return undefined;
 
   const entryIndex = context.orderedEntriesContext.orderedIndexByTempId.get(tempId) ?? -1;
   const childRows = (context.childTempIdsByParentTempId.get(tempId) ?? [])
     .map((childTempId) => buildRowTreeForTempId(childTempId, context))
-    .filter((row): row is CheckboxEntryListRow => row !== undefined);
+    .filter((row): row is EntryListRow => row !== undefined);
 
   return createRow(
     entry,
@@ -127,11 +129,8 @@ function buildRowTreeForTempId(
   );
 }
 
-function buildTreeRootRows(
-  context: TreeBuildContext,
-  childTempIds: Set<string>
-): CheckboxEntryListRow[] {
-  const roots: CheckboxEntryListRow[] = [];
+function buildTreeRootRows(context: TreeBuildContext, childTempIds: Set<string>): EntryListRow[] {
+  const roots: EntryListRow[] = [];
 
   for (const entry of context.orderedEntriesContext.entries) {
     if (!entry.tempId) continue;
@@ -148,8 +147,8 @@ function buildFlatRows(
   orderedEntries: EntryToCreate[],
   contentTypeDisplayInfoMap?: ContentTypeDisplayInfoMap,
   defaultLocale?: string
-): CheckboxEntryListRow[] {
-  const rows: CheckboxEntryListRow[] = [];
+): EntryListRow[] {
+  const rows: EntryListRow[] = [];
   orderedEntries.forEach((entry, index) => {
     if (!entry.tempId) return;
     rows.push(createRow(entry, index, [], entry.tempId, contentTypeDisplayInfoMap, defaultLocale));
@@ -157,11 +156,11 @@ function buildFlatRows(
   return rows;
 }
 
-export function buildCheckboxEntryList(
+export function buildEntryList(
   payload: PreviewPayload,
   contentTypeDisplayInfoMap?: ContentTypeDisplayInfoMap,
   defaultLocale?: string
-): CheckboxEntryListRow[] {
+): EntryListRow[] {
   const { entries, referenceGraph } = payload;
   if (entries.length === 0) {
     return [];
@@ -188,14 +187,11 @@ export function buildCheckboxEntryList(
   return roots;
 }
 
-export function collectCheckboxEntryListRowIds(rows: CheckboxEntryListRow[]): string[] {
-  return rows.flatMap((row) => [row.id, ...collectCheckboxEntryListRowIds(row.children)]);
+export function collectEntryListRowIds(rows: EntryListRow[]): string[] {
+  return rows.flatMap((row) => [row.id, ...collectEntryListRowIds(row.children)]);
 }
 
-function collectSelectedEntryIndices(
-  rows: CheckboxEntryListRow[],
-  selectedRowIds: Set<string>
-): number[] {
+function collectSelectedEntryIndices(rows: EntryListRow[], selectedRowIds: Set<string>): number[] {
   return rows.flatMap((row) => [
     ...(selectedRowIds.has(row.id) ? [row.entryIndex] : []),
     ...collectSelectedEntryIndices(row.children, selectedRowIds),
@@ -206,7 +202,7 @@ export function filterPreviewPayloadBySelectedRowIds(
   payload: PreviewPayload,
   selectedRowIds: Set<string>
 ): PreviewPayload {
-  const rows = buildCheckboxEntryList(payload);
+  const rows = buildEntryList(payload);
   const indices = new Set(collectSelectedEntryIndices(rows, selectedRowIds));
   if (indices.size === 0) {
     return { ...payload, entries: [] };
@@ -220,4 +216,56 @@ export function filterPreviewPayloadBySelectedRowIds(
     ...payload,
     entries: filteredEntries,
   };
+}
+
+export function buildEntryListFromEntryBlockGraph(
+  entries: EntryBlockGraphEntry[],
+  contentTypes: WorkflowContentType[],
+  referenceEdges?: Array<{ from: string; to: string }>
+): EntryListRow[] {
+  const contentTypeNameById = new Map(contentTypes.map((ct) => [ct.sys.id, ct.name ?? '']));
+
+  const indexByTempId = new Map<string, number>();
+  entries.forEach((entry, index) => {
+    if (entry.tempId) indexByTempId.set(entry.tempId, index);
+  });
+
+  // Build parent→children map from reference edges (edge.from is parent, edge.to is child)
+  const childrenByParent = new Map<string, string[]>();
+  const assignedChildren = new Set<string>();
+  for (const edge of referenceEdges ?? []) {
+    if (!edge.from || !edge.to) continue;
+    if (!indexByTempId.has(edge.from) || !indexByTempId.has(edge.to)) continue;
+    if (assignedChildren.has(edge.to)) continue;
+    assignedChildren.add(edge.to);
+    const children = childrenByParent.get(edge.from) ?? [];
+    children.push(edge.to);
+    childrenByParent.set(edge.from, children);
+  }
+
+  const makeRow = (entry: EntryBlockGraphEntry, index: number): EntryListRow => {
+    const id = entry.tempId ?? String(index);
+    const childTempIds = entry.tempId ? childrenByParent.get(entry.tempId) ?? [] : [];
+    const childRows = childTempIds
+      .map((childId) => {
+        const childIndex = indexByTempId.get(childId);
+        if (childIndex === undefined) return undefined;
+        return makeRow(entries[childIndex], childIndex);
+      })
+      .filter((r): r is EntryListRow => r !== undefined);
+
+    return {
+      id,
+      entryIndex: index,
+      contentTypeName: contentTypeNameById.get(entry.contentTypeId) ?? entry.contentTypeId,
+      entryTitle: undefined,
+      children: childRows,
+    };
+  };
+
+  // Only render root entries (those not assigned as children)
+  return entries
+    .map((entry, index) => ({ entry, index }))
+    .filter(({ entry }) => !entry.tempId || !assignedChildren.has(entry.tempId))
+    .map(({ entry, index }) => makeRow(entry, index));
 }

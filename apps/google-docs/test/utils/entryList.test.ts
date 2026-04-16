@@ -1,12 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import type { PreviewPayload } from '../../src/types';
 import type { ContentTypeDisplayInfo } from '../../src/services/contentTypeService';
-import {
-  buildCheckboxEntryList,
-  filterPreviewPayloadBySelectedRowIds,
-} from '../../src/utils/checkboxEntryList';
+import { buildEntryList, filterPreviewPayloadBySelectedRowIds } from '../../src/utils/entryList';
 
-describe('buildCheckboxEntryList', () => {
+describe('buildEntryList', () => {
   it('omits entries without tempId', () => {
     const payload: PreviewPayload = {
       entries: [
@@ -22,13 +19,8 @@ describe('buildCheckboxEntryList', () => {
       ],
       assets: [],
       referenceGraph: {},
-      normalizedDocument: {
-        documentId: 'doc-test',
-        contentBlocks: [],
-        tables: [],
-      },
     };
-    const rows = buildCheckboxEntryList(payload);
+    const rows = buildEntryList(payload);
     expect(rows).toHaveLength(1);
     expect(rows[0].id).toBe('only');
     expect(rows[0].entryIndex).toBe(1);
@@ -39,13 +31,8 @@ describe('buildCheckboxEntryList', () => {
       entries: [],
       assets: [],
       referenceGraph: {},
-      normalizedDocument: {
-        documentId: 'doc-test',
-        contentBlocks: [],
-        tables: [],
-      },
     };
-    expect(buildCheckboxEntryList(payload)).toEqual([]);
+    expect(buildEntryList(payload)).toEqual([]);
   });
 
   it('nests rows when a parent references a child tempId', () => {
@@ -70,14 +57,9 @@ describe('buildCheckboxEntryList', () => {
       ],
       assets: [],
       referenceGraph: { creationOrder: ['page_1', 'hero_1'] },
-      normalizedDocument: {
-        documentId: 'doc-test',
-        contentBlocks: [],
-        tables: [],
-      },
     };
 
-    const rows = buildCheckboxEntryList(payload);
+    const rows = buildEntryList(payload);
     expect(rows).toHaveLength(1);
     expect(rows[0].entryIndex).toBe(0);
     expect(rows[0].contentTypeName).toBe('');
@@ -99,14 +81,9 @@ describe('buildCheckboxEntryList', () => {
       ],
       assets: [],
       referenceGraph: {},
-      normalizedDocument: {
-        documentId: 'doc-test',
-        contentBlocks: [],
-        tables: [],
-      },
     };
 
-    const rows = buildCheckboxEntryList(
+    const rows = buildEntryList(
       payload,
       new Map<string, ContentTypeDisplayInfo>([
         ['other', { name: 'Other', displayField: 'title' }],
@@ -130,17 +107,12 @@ describe('buildCheckboxEntryList', () => {
       ],
       assets: [],
       referenceGraph: {},
-      normalizedDocument: {
-        documentId: 'doc-test',
-        contentBlocks: [],
-        tables: [],
-      },
     };
 
     const contentTypeDisplayInfoById = new Map<string, ContentTypeDisplayInfo>([
       ['page', { name: 'Page (space name)', displayField: 'title' }],
     ]);
-    const rows = buildCheckboxEntryList(payload, contentTypeDisplayInfoById, 'en-US');
+    const rows = buildEntryList(payload, contentTypeDisplayInfoById, 'en-US');
     expect(rows[0].contentTypeName).toBe('Page (space name)');
     expect(rows[0].entryTitle).toBe('Event Detail');
   });
@@ -161,11 +133,6 @@ describe('buildCheckboxEntryList', () => {
       ],
       assets: [],
       referenceGraph: {},
-      normalizedDocument: {
-        documentId: 'doc-test',
-        contentBlocks: [],
-        tables: [],
-      },
     };
 
     const filtered = filterPreviewPayloadBySelectedRowIds(payload, new Set(['b']));

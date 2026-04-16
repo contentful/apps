@@ -84,12 +84,6 @@ const previewPayloadFromCompletedRun = (runData: AgentRunData): PreviewPayload =
       entries: [],
       assets: [],
       referenceGraph: {},
-      normalizedDocument: {
-        documentId,
-        title,
-        contentBlocks: [],
-        tables: [],
-      },
     };
   }
 

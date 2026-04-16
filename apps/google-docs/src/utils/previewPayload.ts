@@ -165,12 +165,9 @@ export function validatePayloadShape(payload: unknown): PreviewPayload {
 
   const referenceGraph = parseReferenceGraph(payload.referenceGraph);
 
-  const normalizedDocument = parseNormalizedDocument(payload.normalizedDocument);
-
   return {
     entries: payload.entries as EntryToCreate[],
     assets,
     referenceGraph: referenceGraph ?? {},
-    normalizedDocument,
   };
 }
