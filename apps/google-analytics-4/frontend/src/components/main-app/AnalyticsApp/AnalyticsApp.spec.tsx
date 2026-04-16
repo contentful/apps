@@ -57,6 +57,7 @@ describe('AnalyticsApp with correct content types configured', () => {
       summaryLabel: 'report slug',
       isContentTypeWarning: false,
       warningRule: undefined,
+      haveLoadedFieldValues: true,
     }));
   });
 
@@ -112,6 +113,7 @@ describe('AnalyticsApp when content types are not configured correctly', () => {
       validRules: [],
       summaryLabel: '',
       isContentTypeWarning: true,
+      haveLoadedFieldValues: true,
       warningRule: {
         id: 'rule-title',
         contentTypeId: 'category',
