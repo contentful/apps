@@ -19,17 +19,10 @@ import { mockExcludeSelection, mockNewLocationSelection } from './mockEditModalC
 
 import { SelectionActionMenu } from './SelectionActionMenu';
 import { buildSourceRefKey } from './sourceRefUtils';
-import { AssignExcludeModal } from './AssignExcludeModal';
 import { MappingEntryCards, type AnchoredMappingCard } from './MappingEntryCards';
 import { TabSegement } from './TabSegment';
 
 const enableMockEditModal = import.meta.env.VITE_ENABLE_MOCK_EDIT_MODAL === 'true';
-
-type AssignModalState = {
-  isOpen: boolean;
-  title: string;
-  preview: string;
-};
 
 interface EditModalState {
   viewModel: EditModalContent;
@@ -43,22 +36,15 @@ interface MappingViewProps {
   selectedEntryIndex: number | null;
 }
 
-const EMPTY_ASSIGN_MODAL: AssignModalState = {
-  isOpen: false,
-  title: '',
-  preview: '',
-};
-
-const EMPTY_EXCLUDE_MODAL: EditModalState = {
+const EMPTY_EDIT_MODAL: EditModalState = {
   viewModel: {
     selectedText: '',
     currentLocations: [],
     isOpen: false,
   },
-  title: 'Exclude content',
-  locationSectionDescription:
-    'This content is used in more than one place in the entry. Select which item to exclude.',
-  primaryButtonLabel: 'Exclude content',
+  title: '',
+  locationSectionDescription: '',
+  primaryButtonLabel: '',
 };
 
 export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): JSX.Element => {
@@ -66,8 +52,7 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
   const [cardOffsetsBySegment, setCardOffsetsBySegment] = useState<
     Record<string, Record<string, number>>
   >({});
-  const [editModalState, setEditModalState] = useState<EditModalState>(EMPTY_EXCLUDE_MODAL);
-  const [assignModal, setAssignModal] = useState<AssignModalState>(EMPTY_ASSIGN_MODAL);
+  const [editModalState, setEditModalState] = useState<EditModalState>(EMPTY_EDIT_MODAL);
   const textSelectionRootRef = useRef<HTMLDivElement | null>(null);
   const segmentLayoutRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const cardWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -182,17 +167,19 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
   }, [mappingCardsBySegment, allSegments]);
 
   const openAssignModal = (title: string, preview: string) => {
-    setAssignModal({ isOpen: true, title, preview });
+    setEditModalState({
+      viewModel: {
+        selectedText: selectedText.trim(),
+        currentLocations: [],
+        isOpen: true,
+      },
+      title: 'Assign content',
+      locationSectionDescription: '',
+      primaryButtonLabel: 'Move content',
+    });
   };
 
-  const handleAssignFromSelection = () => {
-    if (!selectedText.trim()) return;
-    openAssignModal('Assign text selection', selectedText.trim());
-    clearSelection();
-  };
-
-  const handleExcludeFromSelection = () => {
-    if (!selectedText.trim()) return;
+  const openExcludeModal = (title: string, preview: string) => {
     setEditModalState({
       viewModel: {
         selectedText: selectedText.trim(),
@@ -204,6 +191,17 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
         'This content is used in more than one place in the entry. Select which item to exclude.',
       primaryButtonLabel: 'Exclude content',
     });
+  };
+
+  const handleAssignFromSelection = () => {
+    if (!selectedText.trim()) return;
+    openAssignModal('Assign text selection', selectedText.trim());
+    clearSelection();
+  };
+
+  const handleExcludeFromSelection = () => {
+    if (!selectedText.trim()) return;
+    openExcludeModal('Exclude text selection', selectedText.trim());
     clearSelection();
   };
 
@@ -213,7 +211,7 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
   };
 
   const handleExcludeImage = (_sourceRef: ImageSourceRef, label: string) => {
-    openAssignModal('Exclude image selection', label);
+    openExcludeModal('Exclude image selection', label);
     setHoveredMappingKeys([]);
   };
 
@@ -338,16 +336,9 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
         />
       ) : null}
 
-      <AssignExcludeModal
-        isOpen={assignModal.isOpen}
-        title={assignModal.title}
-        preview={assignModal.preview}
-        onClose={() => setAssignModal(EMPTY_ASSIGN_MODAL)}
-      />
-
       <EditModal
         isOpen={editModalState.viewModel.isOpen}
-        onClose={() => setEditModalState(EMPTY_EXCLUDE_MODAL)}
+        onClose={() => setEditModalState(EMPTY_EDIT_MODAL)}
         viewModel={editModalState.viewModel}
         title={editModalState.title}
         locationSectionDescription={editModalState.locationSectionDescription}
