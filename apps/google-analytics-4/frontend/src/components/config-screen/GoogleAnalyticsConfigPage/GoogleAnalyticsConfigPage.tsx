@@ -18,7 +18,10 @@ import { config } from 'config';
 import { convertServiceAccountKeyToServiceAccountKeyId } from 'utils/serviceAccountKey';
 import HyperLink from 'components/common/HyperLink/HyperLink';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
-import { getUniqueContentTypeIds, normalizeContentTypeRules } from 'helpers/contentTypeRules/contentTypeRules';
+import {
+  getUniqueContentTypeIds,
+  normalizeContentTypeRules,
+} from 'helpers/contentTypeRules/contentTypeRules';
 
 export default function GoogleAnalyticsConfigPage() {
   const [accountsSummaries, setAccountsSummaries] = useState<AccountSummariesType[]>([]);

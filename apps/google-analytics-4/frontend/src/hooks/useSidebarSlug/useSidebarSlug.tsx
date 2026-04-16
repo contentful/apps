@@ -36,7 +36,11 @@ export const useSidebarSlug = (slugFieldInfo: ContentTypeValue) => {
     sdk.entry.onSysChanged((sys) => handlePublishedStatus(sys));
   }, [sdk.entry]);
 
-  const reportSlug = getReportSlug(slugFieldInfo, debouncedSlugFieldValue || '', forceTrailingSlash);
+  const reportSlug = getReportSlug(
+    slugFieldInfo,
+    debouncedSlugFieldValue || '',
+    forceTrailingSlash
+  );
   const slugFieldIsConfigured = Boolean(slugField);
   const contentTypeHasSlugField = slugField in sdk.entry.fields;
 

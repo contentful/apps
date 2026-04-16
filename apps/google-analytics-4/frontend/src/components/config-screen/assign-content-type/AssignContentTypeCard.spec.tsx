@@ -1,9 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import {
-  AllContentTypes,
-  AllContentTypeEntries,
-  ContentTypeRules,
-} from '../../../types';
+import { AllContentTypes, AllContentTypeEntries, ContentTypeRules } from '../../../types';
 import AssignContentTypeCard from 'components/config-screen/assign-content-type/AssignContentTypeCard';
 
 const allContentTypes: AllContentTypes = {

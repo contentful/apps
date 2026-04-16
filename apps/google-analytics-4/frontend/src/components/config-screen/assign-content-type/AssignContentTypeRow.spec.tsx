@@ -113,12 +113,7 @@ describe('Assign Content Type Card for Config Screen', () => {
 
   it('calls change handler when content type selection is changed', async () => {
     const user = userEvent.setup();
-    render(
-      <AssignContentTypeRow
-        contentTypeRule={contentTypeRules[0]}
-        {...props}
-      />
-    );
+    render(<AssignContentTypeRow contentTypeRule={contentTypeRules[0]} {...props} />);
 
     await user.selectOptions(screen.getByTestId('contentTypeSelect'), ['course']);
 
@@ -127,12 +122,7 @@ describe('Assign Content Type Card for Config Screen', () => {
 
   it('calls field change handler when slug field selection is changed', async () => {
     const user = userEvent.setup();
-    render(
-      <AssignContentTypeRow
-        contentTypeRule={contentTypeRules[0]}
-        {...props}
-      />
-    );
+    render(<AssignContentTypeRow contentTypeRule={contentTypeRules[0]} {...props} />);
 
     await user.selectOptions(screen.getByTestId('slugFieldSelect'), ['slug']);
 
@@ -165,7 +155,11 @@ describe('Assign Content Type Card for Config Screen', () => {
     await user.click(screen.getByTestId('advancedMatchingToggle'));
 
     expect(screen.getByTestId('advancedMatchingPanel')).toBeVisible();
-    expect(onContentTypeFieldChange).toHaveBeenCalledWith('rule-course', 'enableAdvancedMatching', true);
+    expect(onContentTypeFieldChange).toHaveBeenCalledWith(
+      'rule-course',
+      'enableAdvancedMatching',
+      true
+    );
   });
 
   it('shows advanced matching controls when a row is already configured for them', () => {

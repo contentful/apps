@@ -15,7 +15,11 @@ const ChartFooter = (props: Props) => {
     <Flex flexDirection="column" alignItems="flex-start">
       {isAggregated ? (
         <>
-          <Text fontColor="gray600" fontSize="fontSizeS" marginTop="spacingS" marginBottom="spacing2Xs">
+          <Text
+            fontColor="gray600"
+            fontSize="fontSizeS"
+            marginTop="spacingS"
+            marginBottom="spacing2Xs">
             Included paths ({includedPaths.length})
           </Text>
           <Flex flexDirection="column" alignItems="flex-start" marginBottom="spacingS">

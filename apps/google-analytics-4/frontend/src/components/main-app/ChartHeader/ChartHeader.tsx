@@ -1,5 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Box, Button, DisplayText, Flex, Paragraph, Select, Text } from '@contentful/f36-components';
+import {
+  Box,
+  Button,
+  DisplayText,
+  Flex,
+  Paragraph,
+  Select,
+  Text,
+} from '@contentful/f36-components';
 import { AnalyticsMetricType, DateRangeType, StartEndDates } from 'types';
 import { DATE_RANGE_SELECT_OPTIONS, DateRange } from 'helpers/DateRangeHelpers/DateRangeHelpers';
 import { styles } from './ChartHeader.styles';
@@ -101,7 +109,9 @@ const ChartHeader = (props: Props) => {
         </Select>
         <Flex
           className={`${styles.customRangeRow} ${
-            dateSelection === DateRange.Custom ? styles.customRangeRowVisible : styles.customRangeRowHidden
+            dateSelection === DateRange.Custom
+              ? styles.customRangeRowVisible
+              : styles.customRangeRowHidden
           }`}>
           <Text fontColor="gray700" className={styles.customRangeSummary}>
             {startEndDates.start} to {startEndDates.end}

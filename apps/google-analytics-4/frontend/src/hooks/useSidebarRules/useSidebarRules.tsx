@@ -22,7 +22,9 @@ export const useSidebarRules = (slugFieldRules: ContentTypeRule[]) => {
 
   const [isPublished, setIsPublished] = useState(false);
   const [fieldValues, setFieldValues] = useState<Record<string, string | object>>({});
-  const [debouncedFieldValues, setDebouncedFieldValues] = useState<Record<string, string | object>>({});
+  const [debouncedFieldValues, setDebouncedFieldValues] = useState<Record<string, string | object>>(
+    {}
+  );
   const [haveLoadedFieldValues, setHaveLoadedFieldValues] = useState(false);
   const relevantFieldIds = useMemo(
     () =>
@@ -87,8 +89,7 @@ export const useSidebarRules = (slugFieldRules: ContentTypeRule[]) => {
         const contentTypeHasSlugField = rule.slugField in entryFields;
         const additionalFieldIds = rule.additionalFieldIds || [];
         const contentTypeHasAllFields =
-          contentTypeHasSlugField &&
-          additionalFieldIds.every((fieldId) => fieldId in entryFields);
+          contentTypeHasSlugField && additionalFieldIds.every((fieldId) => fieldId in entryFields);
         const tokenValues = {
           slug: slugFieldValue,
           ...Object.fromEntries(

@@ -57,5 +57,7 @@ export const normalizeContentTypeRules = (
 
 export const getUniqueContentTypeIds = (contentTypeRules: ContentTypeRules) =>
   Array.from(
-    new Set(contentTypeRules.map((rule) => rule.contentTypeId).filter((contentTypeId) => contentTypeId))
+    new Set(
+      contentTypeRules.map((rule) => rule.contentTypeId).filter((contentTypeId) => contentTypeId)
+    )
   );
