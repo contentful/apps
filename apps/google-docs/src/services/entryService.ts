@@ -1,7 +1,7 @@
 import { PageAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
 import { normalizeAgentRichTextJson } from './richtext';
-import { EntryToCreate, AssetToCreate, PreviewPayload } from '@types';
+import { EntryToCreate, AssetToCreate, CompletedWorkflowPayload } from '@types';
 import {
   entryHasReferences,
   separateReferenceFields,
@@ -223,7 +223,7 @@ async function createAssetsFromAgentOutput(
 
 export async function createEntriesFromPreviewPayload(
   sdk: PageAppSDK | ConfigAppSDK,
-  payload: PreviewPayload,
+  payload: CompletedWorkflowPayload,
   oauthToken?: string
 ): Promise<EntryCreationResult> {
   const orderedEntries = orderEntriesByCreationOrder(

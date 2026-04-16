@@ -3,7 +3,7 @@ import { Box, Button, Flex, Note, Paragraph, Text } from '@contentful/f36-compon
 import { LightbulbIcon } from '@contentful/f36-icons';
 import { PageAppSDK } from '@contentful/app-sdk';
 import type { EntryProps } from 'contentful-management';
-import type { MappingReviewSuspendPayload, PreviewPayload } from '@types';
+import type { MappingReviewSuspendPayload, CompletedWorkflowPayload } from '@types';
 import { buildEntryListFromEntryBlockGraph } from '../../../../utils/entryList';
 import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
 import { EntryList } from './EntryList';
@@ -17,7 +17,7 @@ interface OverviewProps {
   payload: MappingReviewSuspendPayload;
   selectedEntryIndex: number;
   onSelectEntryIndex: (index: number) => void;
-  onCreateEntries: () => Promise<PreviewPayload | null>;
+  onCreateEntries: () => Promise<CompletedWorkflowPayload | null>;
   onReturnToMainPage: () => void;
 }
 

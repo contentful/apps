@@ -9,7 +9,7 @@ import {
 import { MainPageView } from './components/mainpage/MainPageView';
 import { ReviewPage } from './components/review/ReviewPage';
 import { loadFixtureReviewPayload } from '../../fixtures/googleDocsReview/loadFixtureReviewPayload';
-import type { MappingReviewSuspendPayload, PreviewPayload } from '@types';
+import type { MappingReviewSuspendPayload, CompletedWorkflowPayload } from '@types';
 import { RunStatus } from '@types';
 import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
 
@@ -93,7 +93,7 @@ const Page = () => {
     }
   };
 
-  const handleCreateEntriesMappingReview = async (): Promise<PreviewPayload | null> => {
+  const handleCreateEntriesMappingReview = async (): Promise<CompletedWorkflowPayload | null> => {
     if (!mappingReviewState?.runId) {
       handleReturnToMainPage();
       return null;

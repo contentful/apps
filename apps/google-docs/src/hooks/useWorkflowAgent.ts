@@ -5,7 +5,7 @@ import {
   MappingReviewSuspendPayload,
   ResumePayload,
   TabsImagesSuspendPayload,
-  PreviewPayload,
+  CompletedWorkflowPayload,
   WorkflowRunResult,
   RunStatus,
 } from '@types';
@@ -56,7 +56,7 @@ const getAgentPayload = (runData: AgentRunData): string | null => {
   return textPart?.text || null;
 };
 
-const previewPayloadFromCompletedRun = (runData: AgentRunData): PreviewPayload => {
+const previewPayloadFromCompletedRun = (runData: AgentRunData): CompletedWorkflowPayload => {
   const googleDocPayload = runData.metadata?.googleDocPayload;
   if (googleDocPayload == null) {
     throw new Error('Workflow completed but result payload was missing.');

@@ -6,7 +6,12 @@ import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
 } from '../../../../../src/locations/Page/components/mainpage/ModalOrchestrator';
-import { MappingReviewSuspendPayload, PreviewPayload, WorkflowRunResult, RunStatus } from '@types';
+import {
+  MappingReviewSuspendPayload,
+  CompletedWorkflowPayload,
+  WorkflowRunResult,
+  RunStatus,
+} from '@types';
 import { mockSdk } from '../../../../mocks';
 
 const mockStartWorkflow = vi.fn();
@@ -16,7 +21,7 @@ const mockWorkflowPayload = {
   entries: [],
   assets: [],
   referenceGraph: {},
-} satisfies PreviewPayload;
+} satisfies CompletedWorkflowPayload;
 
 vi.mock('../../../../../src/locations/Page/components/modals/step_1/SelectDocumentModal', () => ({
   __esModule: true,

@@ -5,7 +5,7 @@ import {
   createEntriesFromPreview,
   createEntriesFromPreviewPayload,
 } from '../../src/services/entryService';
-import { EntryToCreate, type PreviewPayload } from '@types';
+import { EntryToCreate, type CompletedWorkflowPayload } from '@types';
 import { createMockSDK } from '../mocks';
 
 describe('createEntriesFromPreview', () => {
@@ -267,7 +267,9 @@ describe('createEntriesFromPreviewPayload', () => {
     } as any);
   });
 
-  function buildPayload(overrides: Partial<PreviewPayload> = {}): PreviewPayload {
+  function buildPayload(
+    overrides: Partial<CompletedWorkflowPayload> = {}
+  ): CompletedWorkflowPayload {
     return {
       entries: [],
       assets: [],

@@ -2,7 +2,7 @@ import type {
   AssetToCreate,
   EntryToCreate,
   NormalizedDocument,
-  PreviewPayload,
+  CompletedWorkflowPayload,
   ReviewedReferenceGraph,
   ReviewedReferenceGraphDeferredField,
   ReviewedReferenceGraphEdge,
@@ -107,7 +107,7 @@ function isAssetToCreateShape(value: unknown): value is AssetToCreate {
   return isRecord(value) && typeof value.url === 'string' && value.url.trim() !== '';
 }
 
-export function validatePayloadShape(payload: unknown): PreviewPayload {
+export function validatePayloadShape(payload: unknown): CompletedWorkflowPayload {
   if (!isRecord(payload)) {
     throw new Error('Reviewed payload must be a JSON object.');
   }

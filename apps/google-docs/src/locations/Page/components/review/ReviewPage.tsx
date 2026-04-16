@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { Button, Flex, Heading, Layout } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { PageAppSDK } from '@contentful/app-sdk';
-import type { MappingReviewSuspendPayload, PreviewPayload } from '@types';
+import type { MappingReviewSuspendPayload, CompletedWorkflowPayload } from '@types';
 import Splitter from '../mainpage/Splitter';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
 import OverviewSection from '../overview/OverviewSection';
@@ -12,7 +12,7 @@ interface ReviewPageProps {
   sdk: PageAppSDK;
   payload: MappingReviewSuspendPayload;
   onCancelReview: () => Promise<void>;
-  onCreateEntries: () => Promise<PreviewPayload | null>;
+  onCreateEntries: () => Promise<CompletedWorkflowPayload | null>;
   onReturnToMainPage: () => void;
 }
 

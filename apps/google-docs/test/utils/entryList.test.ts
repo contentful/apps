@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import type { PreviewPayload } from '../../src/types';
+import type { CompletedWorkflowPayload } from '../../src/types';
 import type { ContentTypeDisplayInfo } from '../../src/services/contentTypeService';
 import { buildEntryList, filterPreviewPayloadBySelectedRowIds } from '../../src/utils/entryList';
 
 describe('buildEntryList', () => {
   it('omits entries without tempId', () => {
-    const payload: PreviewPayload = {
+    const payload: CompletedWorkflowPayload = {
       entries: [
         {
           contentTypeId: 'blogPost',
@@ -27,7 +27,7 @@ describe('buildEntryList', () => {
   });
 
   it('returns empty array when there are no entries', () => {
-    const payload: PreviewPayload = {
+    const payload: CompletedWorkflowPayload = {
       entries: [],
       assets: [],
       referenceGraph: {},
@@ -36,7 +36,7 @@ describe('buildEntryList', () => {
   });
 
   it('nests rows when a parent references a child tempId', () => {
-    const payload: PreviewPayload = {
+    const payload: CompletedWorkflowPayload = {
       entries: [
         {
           tempId: 'page_1',
@@ -71,7 +71,7 @@ describe('buildEntryList', () => {
   });
 
   it('uses empty type prefix when content type names map has no entry for that id', () => {
-    const payload: PreviewPayload = {
+    const payload: CompletedWorkflowPayload = {
       entries: [
         {
           tempId: 'x',
@@ -95,7 +95,7 @@ describe('buildEntryList', () => {
   });
 
   it('uses CMA content type names when a map is provided', () => {
-    const payload: PreviewPayload = {
+    const payload: CompletedWorkflowPayload = {
       entries: [
         {
           tempId: 'page_1',
@@ -118,7 +118,7 @@ describe('buildEntryList', () => {
   });
 
   it('filterPreviewPayloadBySelectedRowIds keeps only selected rows', () => {
-    const payload: PreviewPayload = {
+    const payload: CompletedWorkflowPayload = {
       entries: [
         {
           tempId: 'a',

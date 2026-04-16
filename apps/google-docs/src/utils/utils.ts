@@ -1,4 +1,4 @@
-import type { MappingReviewSuspendPayload, PreviewPayload } from '../types/workflow';
+import type { MappingReviewSuspendPayload, CompletedWorkflowPayload } from '../types/workflow';
 
 export const truncateLabel = (label: string, maxLength: number = 10): string => {
   if (label.length <= maxLength) return label;
@@ -11,7 +11,7 @@ export const truncateLabel = (label: string, maxLength: number = 10): string => 
 };
 
 export const isPreviewPayload = (
-  payload: PreviewPayload | MappingReviewSuspendPayload
-): payload is PreviewPayload => {
+  payload: CompletedWorkflowPayload | MappingReviewSuspendPayload
+): payload is CompletedWorkflowPayload => {
   return 'entries' in payload && 'referenceGraph' in payload;
 };

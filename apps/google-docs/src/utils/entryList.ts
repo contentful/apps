@@ -1,4 +1,4 @@
-import type { EntryToCreate, PreviewPayload } from '@types';
+import type { EntryToCreate, CompletedWorkflowPayload } from '@types';
 import type { EntryBlockGraphEntry } from '../types/entryBlockGraph';
 import type { WorkflowContentType } from '../types/workflow';
 import { collectReferencedTempIdsFromEntry } from '../services/referenceResolution';
@@ -157,7 +157,7 @@ function buildFlatRows(
 }
 
 export function buildEntryList(
-  payload: PreviewPayload,
+  payload: CompletedWorkflowPayload,
   contentTypeDisplayInfoMap?: ContentTypeDisplayInfoMap,
   defaultLocale?: string
 ): EntryListRow[] {
@@ -199,9 +199,9 @@ function collectSelectedEntryIndices(rows: EntryListRow[], selectedRowIds: Set<s
 }
 
 export function filterPreviewPayloadBySelectedRowIds(
-  payload: PreviewPayload,
+  payload: CompletedWorkflowPayload,
   selectedRowIds: Set<string>
-): PreviewPayload {
+): CompletedWorkflowPayload {
   const rows = buildEntryList(payload);
   const indices = new Set(collectSelectedEntryIndices(rows, selectedRowIds));
   if (indices.size === 0) {
