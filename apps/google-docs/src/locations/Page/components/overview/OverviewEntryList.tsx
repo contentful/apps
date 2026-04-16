@@ -1,7 +1,7 @@
 import { Box, Card, Flex, Paragraph, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { cx } from '@emotion/css';
-import type { EntryListRow as OverviewEntryListRow } from '../../../../utils/entryList';
+import type { EntryListRow as OverviewEntryListRow } from '../../../../utils/overviewEntryList';
 import {
   treeChildRowBase,
   treeChildRowLast,

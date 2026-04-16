@@ -2,7 +2,7 @@ import { Button, EntryCard, Flex, Modal, Paragraph } from '@contentful/f36-compo
 import { PageAppSDK } from '@contentful/app-sdk';
 import type { EntryProps } from 'contentful-management';
 import { getEntryDisplayTitle } from '../../../../utils/getEntryDisplayTitle';
-import type { ContentTypeDisplayInfoMap } from '../../../../utils/entryList';
+import type { ContentTypeDisplayInfoMap } from '../../../../utils/overviewEntryList';
 
 export interface SummaryModalProps {
   isOpen: boolean;

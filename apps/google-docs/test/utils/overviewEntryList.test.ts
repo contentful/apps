@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { CompletedWorkflowPayload } from '../../src/types';
 import type { ContentTypeDisplayInfo } from '../../src/services/contentTypeService';
-import { buildEntryList, filterPreviewPayloadBySelectedRowIds } from '../../src/utils/entryList';
+import { buildEntryList } from '../../src/utils/overviewEntryList';
 
 describe('buildEntryList', () => {
   it('omits entries without tempId', () => {
@@ -115,28 +115,5 @@ describe('buildEntryList', () => {
     const rows = buildEntryList(payload, contentTypeDisplayInfoById, 'en-US');
     expect(rows[0].contentTypeName).toBe('Page (space name)');
     expect(rows[0].entryTitle).toBe('Event Detail');
-  });
-
-  it('filterPreviewPayloadBySelectedRowIds keeps only selected rows', () => {
-    const payload: CompletedWorkflowPayload = {
-      entries: [
-        {
-          tempId: 'a',
-          contentTypeId: 'blogPost',
-          fields: { title: { 'en-US': 'A' } },
-        },
-        {
-          tempId: 'b',
-          contentTypeId: 'blogPost',
-          fields: { title: { 'en-US': 'B' } },
-        },
-      ],
-      assets: [],
-      referenceGraph: {},
-    };
-
-    const filtered = filterPreviewPayloadBySelectedRowIds(payload, new Set(['b']));
-    expect(filtered.entries).toHaveLength(1);
-    expect(filtered.entries[0].tempId).toBe('b');
   });
 });

@@ -7,7 +7,7 @@ import {
   separateReferenceFields,
   resolveReferences,
 } from './referenceResolution';
-import { orderEntriesByCreationOrder } from '../utils/previewPayload';
+import { orderEntriesByCreationOrder } from '../utils/createEntries';
 import { mapFieldValuesToSpaceDefaultLocale } from '../utils/remapEntryLocales';
 
 export interface EntryCreationResult {

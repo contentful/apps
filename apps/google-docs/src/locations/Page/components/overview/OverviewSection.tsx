@@ -4,14 +4,16 @@ import { LightbulbIcon } from '@contentful/f36-icons';
 import { PageAppSDK } from '@contentful/app-sdk';
 import type { EntryProps } from 'contentful-management';
 import type { MappingReviewSuspendPayload, CompletedWorkflowPayload } from '@types';
-import { buildEntryListFromEntryBlockGraph } from '../../../../utils/entryList';
+import {
+  buildEntryListFromEntryBlockGraph,
+  ContentTypeDisplayInfoMap,
+} from '../../../../utils/overviewEntryList';
 import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
 import { OverviewEntryList } from './OverviewEntryList';
 import { overviewSectionBox, overviewSectionBoxScrollable } from './OverviewSection.styles';
 import { SummaryModal } from '../modals/SummaryModal';
 import { ErrorModal } from '../modals/ErrorModal';
 import Splitter from '../mainpage/Splitter';
-import type { ContentTypeDisplayInfoMap } from '../../../../utils/entryList';
 
 interface OverviewProps {
   sdk: PageAppSDK;

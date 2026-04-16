@@ -16,7 +16,7 @@ import {
   resumeWorkflowRun,
   startAgentRun,
 } from '../services/agents-api';
-import { validatePayloadShape } from '../utils/previewPayload';
+import { validatePayloadShape } from '../utils/createEntries';
 
 interface UseWorkflowParams {
   sdk: PageAppSDK;

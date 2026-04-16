@@ -1,7 +1,6 @@
 import type {
   AssetToCreate,
   EntryToCreate,
-  NormalizedDocument,
   CompletedWorkflowPayload,
   ReviewedReferenceGraph,
   ReviewedReferenceGraphDeferredField,

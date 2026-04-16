@@ -3,7 +3,7 @@ import type { EntryBlockGraphEntry } from '../types/entryBlockGraph';
 import type { WorkflowContentType } from '../types/workflow';
 import { collectReferencedTempIdsFromEntry } from '../services/referenceResolution';
 import { type ContentTypeDisplayInfo } from '../services/contentTypeService';
-import { orderEntriesByCreationOrder } from './previewPayload';
+import { orderEntriesByCreationOrder } from './createEntries';
 import { getEntryDisplayTitle } from './getEntryDisplayTitle';
 
 export interface EntryListRow {
@@ -189,33 +189,6 @@ export function buildEntryList(
 
 export function collectEntryListRowIds(rows: EntryListRow[]): string[] {
   return rows.flatMap((row) => [row.id, ...collectEntryListRowIds(row.children)]);
-}
-
-function collectSelectedEntryIndices(rows: EntryListRow[], selectedRowIds: Set<string>): number[] {
-  return rows.flatMap((row) => [
-    ...(selectedRowIds.has(row.id) ? [row.entryIndex] : []),
-    ...collectSelectedEntryIndices(row.children, selectedRowIds),
-  ]);
-}
-
-export function filterPreviewPayloadBySelectedRowIds(
-  payload: CompletedWorkflowPayload,
-  selectedRowIds: Set<string>
-): CompletedWorkflowPayload {
-  const rows = buildEntryList(payload);
-  const indices = new Set(collectSelectedEntryIndices(rows, selectedRowIds));
-  if (indices.size === 0) {
-    return { ...payload, entries: [] };
-  }
-  const ordered = orderEntriesByCreationOrder(
-    payload.entries,
-    payload.referenceGraph.creationOrder
-  );
-  const filteredEntries = ordered.filter((_, i) => indices.has(i));
-  return {
-    ...payload,
-    entries: filteredEntries,
-  };
 }
 
 export function buildEntryListFromEntryBlockGraph(

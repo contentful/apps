@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { orderEntriesByCreationOrder } from '../../src/utils/previewPayload';
+import { orderEntriesByCreationOrder } from '../../src/utils/createEntries';
 import type { EntryToCreate } from '@types';
 
 describe('orderEntriesByCreationOrder', () => {
