@@ -74,14 +74,14 @@ export function ReviewImageAssetCard({
           <Image
             alt={title}
             height={imageHeight}
-            width="auto"
+            width="100%"
             src={image.url}
             referrerPolicy="no-referrer"
             style={{
               display: 'block',
               maxWidth: '100%',
               height: imageHeight,
-              width: 'auto',
+              width: '100%',
               objectFit: 'contain',
             }}
           />
