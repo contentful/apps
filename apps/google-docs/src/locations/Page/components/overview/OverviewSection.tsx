@@ -9,6 +9,7 @@ import { createEntriesFromPreviewPayload } from '../../../../services/entryServi
 import { OverviewEntryList } from './OverviewEntryList';
 import { overviewSectionBox, overviewSectionBoxScrollable } from './OverviewSection.styles';
 import { SummaryModal } from '../modals/SummaryModal';
+import { ErrorModal } from '../modals/ErrorModal';
 import Splitter from '../mainpage/Splitter';
 import type { ContentTypeDisplayInfoMap } from '../../../../utils/entryList';
 
@@ -31,6 +32,7 @@ const OverviewSection = ({
 }: OverviewProps) => {
   const [isCreating, setIsCreating] = useState(false);
   const [summaryEntries, setSummaryEntries] = useState<EntryProps[] | null>(null);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   const entryRows = useMemo(
     () =>
@@ -67,6 +69,11 @@ const OverviewSection = ({
 
       setSummaryEntries(result.createdEntries);
     } catch (error) {
+      setCreateError(
+        error instanceof Error
+          ? error.message
+          : 'An unexpected error occurred while creating entries.'
+      );
     } finally {
       setIsCreating(false);
     }
@@ -130,6 +137,13 @@ const OverviewSection = ({
         contentTypeDisplayInfoMap={contentTypeDisplayInfoMap}
         defaultLocale={sdk.locales.default}
         onDone={handleSummaryDone}
+      />
+
+      <ErrorModal
+        isOpen={createError !== null}
+        title="Failed to create entries"
+        message={createError ?? ''}
+        onClose={() => setCreateError(null)}
       />
     </>
   );
