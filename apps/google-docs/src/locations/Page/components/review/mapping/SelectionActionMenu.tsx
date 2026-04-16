@@ -35,7 +35,6 @@ export const SelectionActionMenu = forwardRef<HTMLDivElement, SelectionActionMen
           borderRadius: tokens.borderRadiusMedium,
           border: `1px solid ${tokens.gray300}`,
           backgroundColor: tokens.colorWhite,
-          boxShadow: tokens.boxShadowDefault,
           width: 'fit-content',
         }}>
         <Flex alignItems="center" gap="none">
