@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Box, Button, Modal, Paragraph, Text } from '@contentful/f36-components';
 import type { EditModalContent } from '@types';
 import {
+  fieldPlaceholder,
   locationButton,
   locationButtonSelected,
   locationButtonUnselected,
@@ -34,7 +35,6 @@ export const EditModal = ({
   const hasLocationSectionDescription = locationSectionDescription.trim().length > 0;
   const hasCurrentLocations = viewModel.currentLocations.length > 0;
   const hasNewLocations = (viewModel.newLocations?.length ?? 0) > 0;
-
   const initialSelectedLocationId = useMemo(
     () =>
       viewModel.currentLocations.find((location) => location.isSelected)?.id ??
@@ -104,13 +104,13 @@ export const EditModal = ({
                 <Text fontWeight="fontWeightDemiBold" marginBottom="spacing2Xs">
                   Current location
                 </Text>
-                {hasLocationSectionDescription ? (
+                {hasLocationSectionDescription && (
                   <Paragraph marginBottom={hasCurrentLocations ? 'spacingM' : 'none'}>
                     {locationSectionDescription}
                   </Paragraph>
-                ) : null}
+                )}
 
-                {hasCurrentLocations ? (
+                {hasCurrentLocations && (
                   <Box className={locationList}>
                     {viewModel.currentLocations.map((location) => {
                       const isSelected = location.id === selectedLocationId;
@@ -150,7 +150,7 @@ export const EditModal = ({
                       );
                     })}
                   </Box>
-                ) : null}
+                )}
               </Box>
 
               {hasNewLocations ? (

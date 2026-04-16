@@ -1,0 +1,44 @@
+{
+  "functions": [
+    {
+      "id": "checkLink",
+      "name": "Check Link",
+      "description": "Checks a URL and returns its HTTP status (used by the Link Checker sidebar).",
+      "path": "functions/checkLink.js",
+      "entryFile": "functions/checkLink.ts",
+      "accepts": [
+        "appaction.call"
+      ],
+      "allowNetworks": [
+        "*.ai",
+        "*.app",
+        "*.co",
+        "*.com",
+        "*.dev",
+        "*.edu",
+        "*.gov",
+        "*.io",
+        "*.net",
+        "*.org"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "checkLink",
+      "name": "Check Link",
+      "description": "Checks a URL and returns its HTTP status (used by the Link Checker sidebar).",
+      "type": "function-invocation",
+      "functionId": "checkLink",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "url",
+          "name": "URL",
+          "type": "Symbol",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

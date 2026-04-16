@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useState, type RefObject } from 'react';
-import type { ActionMenuPosition } from '../locations/Page/components/review/mapping/actionMenuPosition';
+import type { SelectionViewportRectangle } from '../locations/Page/components/review/mapping/selectionViewportRectangle';
 
 const SEGMENT_SURFACE_SELECTOR = '[data-review-segment-surface]';
 
-function elementFromNode(node: Node | null): Element | null {
-  if (!node) return null;
+function elementFromNode(node: Node): Element | null {
   if (node.nodeType === Node.TEXT_NODE) {
     return node.parentElement;
   }
@@ -26,7 +25,7 @@ function isSelectionInDocumentBody(range: Range, root: HTMLElement): boolean {
   return endpointInSurface(range.startContainer) && endpointInSurface(range.endContainer);
 }
 
-function rangeToActionMenuPosition(range: Range): ActionMenuPosition {
+function getSelectionViewportRectangle(range: Range): SelectionViewportRectangle {
   const rect = range.getBoundingClientRect();
   return {
     top: rect.top,
@@ -54,7 +53,7 @@ function isValidReviewSelection(root: HTMLElement, sel: Selection): boolean {
 
 export interface UseReviewTextSelectionResult {
   /** Derived from {@link selectedRange} via `getBoundingClientRect()` for the floating menu. */
-  actionMenuPosition: ActionMenuPosition | null;
+  selectionRectangle: SelectionViewportRectangle | null;
   selectedText: string;
   selectedRange: Range | null;
   clearSelection: () => void;
@@ -68,16 +67,16 @@ export function useReviewTextSelection(
 
   const updateFromSelection = useCallback(() => {
     const root = rootRef.current;
-    const sel = window.getSelection();
-    if (!root || !sel) {
+    const currentSelection = window.getSelection();
+    if (!root || !currentSelection) {
       setSelectedText('');
       setSelectedRange(null);
       return;
     }
 
-    if (isValidReviewSelection(root, sel)) {
-      setSelectedText(sel.toString());
-      setSelectedRange(sel.getRangeAt(0).cloneRange());
+    if (isValidReviewSelection(root, currentSelection)) {
+      setSelectedText(currentSelection.toString());
+      setSelectedRange(currentSelection.getRangeAt(0).cloneRange());
       return;
     }
 
@@ -91,7 +90,7 @@ export function useReviewTextSelection(
     setSelectedRange(null);
   }, []);
 
-  const actionMenuPosition = selectedRange ? rangeToActionMenuPosition(selectedRange) : null;
+  const selectionRectangle = selectedRange ? getSelectionViewportRectangle(selectedRange) : null;
 
   useEffect(() => {
     document.addEventListener('selectionchange', updateFromSelection);
@@ -107,5 +106,5 @@ export function useReviewTextSelection(
     };
   }, [rootRef, updateFromSelection]);
 
-  return { actionMenuPosition, selectedText, selectedRange, clearSelection };
+  return { selectionRectangle, selectedText, selectedRange, clearSelection };
 }
