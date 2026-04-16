@@ -12,15 +12,13 @@ import {
 } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import type {
-  BlockTextSourceRef,
   NormalizedDocumentContentBlock,
   NormalizedDocumentImage,
   NormalizedDocumentTable,
   NormalizedDocumentTablePart,
   SourceRef,
-  TableTextSourceRef,
 } from '@types';
-import { isBlockImageSourceRef, isTableImageSourceRef, isTableSourceRef } from '@types';
+import { isBlockImageSourceRef, isTableImageSourceRef } from '@types';
 import type { MappingHighlight, MappingHighlightIndex } from './buildHighlights';
 import { getMappingCardKey } from './buildHighlights';
 import type { ListMarker } from './buildListMarkers';
@@ -69,31 +67,17 @@ function getTextSegmentStyle(styles?: TextSegment['styles']): CSSProperties {
 interface TextSegmentSpanProps {
   id: string;
   segment: TextSegment;
-  sourceRef: BlockTextSourceRef | TableTextSourceRef;
   hovered: boolean;
   onSetHoveredMappings: (keys: string[]) => void;
 }
 
-const TextSegmentSpan = ({
-  id,
-  segment,
-  sourceRef,
-  hovered,
-  onSetHoveredMappings,
-}: TextSegmentSpanProps) => {
-  const sourceContainer =
-    isTableSourceRef(sourceRef) && !isTableImageSourceRef(sourceRef)
-      ? `table:${sourceRef.tableId}:${sourceRef.rowId}:${sourceRef.cellId}:${sourceRef.partId}`
-      : `block:${sourceRef.blockId}`;
+const TextSegmentSpan = ({ id, segment, hovered, onSetHoveredMappings }: TextSegmentSpanProps) => {
   const content = (
     <Box
       as="span"
       key={id}
       data-review-text-segment="true"
       data-is-mapped={segment.highlighted ? 'true' : 'false'}
-      data-source-container={sourceContainer}
-      data-source-start={segment.start}
-      data-source-end={segment.end}
       onMouseEnter={
         segment.highlighted ? () => onSetHoveredMappings(segment.mappingKeys) : undefined
       }
@@ -168,13 +152,6 @@ export const BlockRenderer = ({
           key={`${block.id}-${index}`}
           id={`${block.id}-${index}`}
           segment={seg}
-          sourceRef={{
-            type: 'blockText',
-            blockId: block.id,
-            start: seg.start,
-            end: seg.end,
-            flattenedRuns: block.flattenedTextRuns,
-          }}
           hovered={isMappingHovered(seg.mappingKeys, hoveredMappingKeys)}
           onSetHoveredMappings={onSetHoveredMappingKeys}
         />
@@ -366,16 +343,6 @@ const TablePartRenderer = ({
           key={`${part.id}-${index}`}
           id={`${part.id}-${index}`}
           segment={seg}
-          sourceRef={{
-            type: 'tableText',
-            tableId,
-            rowId,
-            cellId,
-            partId: part.id,
-            start: seg.start,
-            end: seg.end,
-            flattenedRuns: part.flattenedTextRuns,
-          }}
           hovered={isMappingHovered(seg.mappingKeys, hoveredMappingKeys)}
           onSetHoveredMappings={onSetHoveredMappingKeys}
         />
