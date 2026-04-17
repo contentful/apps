@@ -2,10 +2,7 @@ service: sls-apps-google-analytics-4
 
 frameworkVersion: '>=3.0.0 <4.0.0'
 
-plugins:
-  - serverless-domain-manager
-  - serverless-offline
-  - serverless-prune-plugin
+plugins: ${file(./serverless-plugins.cjs):plugins}
 
 custom:
   sentryDSN: https://b8f524eae7c446fb8071476431426640@o2239.ingest.sentry.io/4504725335834624
