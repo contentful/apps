@@ -39,7 +39,6 @@ function OverviewEntryRowCard({
   const rowContent = (
     <>
       <Card
-        padding="default"
         as="button"
         type="button"
         onClick={() => {
@@ -51,6 +50,7 @@ function OverviewEntryRowCard({
           cursor: isSelected ? 'default' : 'pointer',
           textAlign: 'left',
           width: '100%',
+          padding: `${tokens.spacingXs} ${tokens.spacingS}`,
         }}>
         <Paragraph marginBottom="none">
           <Text as="span" fontWeight="fontWeightDemiBold">
