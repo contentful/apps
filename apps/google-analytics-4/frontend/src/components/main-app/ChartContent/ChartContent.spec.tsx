@@ -39,4 +39,10 @@ describe('ChartContent component', () => {
 
     expect(noteText).toBeVisible();
   });
+
+  it('shows a loading spinner while chart data is refreshing', () => {
+    render(<ChartContent pageViewData={runReportResponseHasViews} isLoading />);
+
+    expect(screen.getByTestId('chart-loading-spinner')).toBeVisible();
+  });
 });

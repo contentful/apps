@@ -14,12 +14,16 @@ describe('Analytics metric display components for the analytics app', () => {
     render(
       <AnalyticsMetricDisplay
         handleDateRangeChange={() => {}}
+        handleMetricChange={() => {}}
+        handleCustomRangeRequest={() => {}}
         pageViews={PAGE_VIEWS}
         metricName={METRIC_NAME}
         runReportResponse={runReportResponseHasViews}
         reportSlug="/en-US"
+        includedPaths={['/en-US']}
         propertyId=""
         startEndDates={{ start: '2023-03-26', end: '2023-03-27' }}
+        selectedMetric="screenPageViews"
       />
     );
 

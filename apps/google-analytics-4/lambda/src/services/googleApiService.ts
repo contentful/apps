@@ -1,6 +1,11 @@
 import { AnalyticsAdminServiceClient, protos } from '@google-analytics/admin';
 import { GoogleAuthOptions } from 'google-auth-library';
-import { ServiceAccountKeyFile, ReportRowType } from '../types';
+import {
+  ServiceAccountKeyFile,
+  ReportRowType,
+  GAMatchDimension,
+  GAStringMatchType,
+} from '../types';
 import { BetaAnalyticsDataClient } from '@google-analytics/data';
 import {
   isGoogleError,
@@ -108,6 +113,8 @@ export class GoogleApiService {
   async runReport(
     property: string,
     slug: string,
+    matchDimension: GAMatchDimension = 'unifiedPagePathScreen',
+    matchType: GAStringMatchType = 'EXACT',
     startDate?: string,
     endDate?: string,
     dimensions?: string[],
@@ -134,8 +141,9 @@ export class GoogleApiService {
         }),
         dimensionFilter: {
           filter: {
-            fieldName: 'unifiedPagePathScreen',
+            fieldName: matchDimension,
             stringFilter: {
+              matchType,
               value: slug,
             },
           },
