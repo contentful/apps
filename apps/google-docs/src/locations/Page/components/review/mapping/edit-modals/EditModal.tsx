@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Box, Button, Modal, Paragraph, Text } from '@contentful/f36-components';
 import type { EditModalContent } from '@types';
 import {
-  fieldPlaceholder,
   locationButton,
   locationButtonSelected,
   locationButtonUnselected,
@@ -168,6 +167,7 @@ export const EditModal = ({
                           Fields
                         </Text>
                         <FieldSelectionDropdown
+                          selectedText={viewModel.selectedText}
                           fieldOptions={newLocation.fieldOptions}
                           fieldMappings={newLocation.fieldMappings}
                           selectedFieldIds={

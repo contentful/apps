@@ -46,10 +46,3 @@ export const locationContent = css({
   minWidth: 0,
   textAlign: 'left',
 });
-
-export const fieldPlaceholder = css({
-  border: `1px solid ${tokens.gray300}`,
-  borderRadius: tokens.borderRadiusMedium,
-  color: tokens.gray500,
-  padding: `${tokens.spacingS} ${tokens.spacingM}`,
-});
