@@ -1,3 +1,4 @@
+import { Spinner } from '@contentful/f36-components';
 import { Row, RunReportResponse } from 'types';
 import Note from 'components/common/Note/Note';
 import LineChart from 'components/main-app/LineChart/LineChart';
@@ -9,10 +10,11 @@ import { styles } from './ChartContent.styles';
 interface Props {
   pageViewData: RunReportResponse;
   error?: Error;
+  isLoading?: boolean;
 }
 
 const ChartContent = (props: Props) => {
-  const { pageViewData, error } = props;
+  const { pageViewData, error, isLoading = false } = props;
 
   const parseRowViews = (): number[] => {
     return pageViewData.rows.map((r: Row) => +r.metricValues[0].value);
@@ -27,6 +29,10 @@ const ChartContent = (props: Props) => {
   };
 
   const renderChartContent = () => {
+    if (isLoading) {
+      return <Spinner size="medium" testId="chart-loading-spinner" />;
+    }
+
     if (error) {
       return <ErrorDisplay error={error} />;
     }
