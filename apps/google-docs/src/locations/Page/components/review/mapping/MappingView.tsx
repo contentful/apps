@@ -32,9 +32,11 @@ import { MappingEntryCards, type AnchoredMappingCard } from './MappingEntryCards
 import { NormalizedDocumentSection } from './NormalizedDocumentSection';
 import {
   applyImageExclusionToEntryBlockGraph,
+  applyTextAssignToEntryBlockGraph,
   applyTextExclusionToEntryBlockGraph,
   applyTextReassignToEntryBlockGraph,
   collectMappedExclusionPreviewText,
+  collectTextAssignRangesFromSelection,
   collectTextExclusionRangesFromSelection,
   fullSpanTextExclusionRangesForSourceRef,
   type TextExclusionRange,
@@ -121,6 +123,7 @@ export const MappingView = ({
   const [pendingTextReassignRanges, setPendingTextReassignRanges] = useState<TextExclusionRange[]>(
     []
   );
+  const [pendingTextAssignRanges, setPendingTextAssignRanges] = useState<TextExclusionRange[]>([]);
   const textSelectionRootRef = useRef<HTMLDivElement | null>(null);
   const segmentLayoutRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const cardWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -132,6 +135,7 @@ export const MappingView = ({
     setPendingTextExclusionRanges(null);
     setPendingImageSourceRef(null);
     setPendingTextReassignRanges([]);
+    setPendingTextAssignRanges([]);
   };
 
   const previousSelectedEntryIndexRef = useRef<number | null | undefined>(undefined);
@@ -419,11 +423,13 @@ export const MappingView = ({
   const openAssignModal = (
     preview: string,
     currentLocations: EditLocationOption[],
-    reassignRanges: TextExclusionRange[]
+    reassignRanges: TextExclusionRange[],
+    assignRanges: TextExclusionRange[]
   ) => {
     setPendingTextExclusionRanges(null);
     setPendingImageSourceRef(null);
     setPendingTextReassignRanges(reassignRanges);
+    setPendingTextAssignRanges(assignRanges);
     setEditModalState({
       mode: 'assign',
       viewModel: {
@@ -465,7 +471,16 @@ export const MappingView = ({
       textSelectionRootRef.current,
       selectedRange
     );
-    openAssignModal(selectedText.trim(), getLocationsForSelectedText(), reassignRanges);
+    const assignRanges = collectTextAssignRangesFromSelection(
+      textSelectionRootRef.current,
+      selectedRange
+    );
+    openAssignModal(
+      selectedText.trim(),
+      getLocationsForSelectedText(),
+      reassignRanges,
+      assignRanges
+    );
     clearSelection();
   };
 
@@ -490,7 +505,7 @@ export const MappingView = ({
   };
 
   const handleAssignImage = (sourceRef: ImageSourceRef, label: string) => {
-    openAssignModal(label, getLocationsForSourceRef(sourceRef), []);
+    openAssignModal(label, getLocationsForSourceRef(sourceRef), [], []);
     setHoveredMappingKeys([]);
   };
 
@@ -513,20 +528,6 @@ export const MappingView = ({
   }) => {
     if (editModalState.mode === 'assign') {
       const locations = editModalState.viewModel.currentLocations;
-      if (!locations.length) {
-        closeEditModal();
-        return;
-      }
-
-      const from =
-        locations.find((location) => location.id === selectedLocationId) ??
-        locations.find((location) => location.isSelected) ??
-        locations[0];
-
-      if (!from || !isTextSourceRef(from.sourceRef)) {
-        closeEditModal();
-        return;
-      }
 
       const targets: { entryIndex: number; fieldId: string; fieldType: string }[] = [];
       for (let entryIndex = 0; entryIndex < entryBlockGraph.entries.length; entryIndex++) {
@@ -553,12 +554,45 @@ export const MappingView = ({
         return;
       }
 
-      const effectiveRanges = pendingTextReassignRanges.length
-        ? pendingTextReassignRanges
-        : fullSpanTextExclusionRangesForSourceRef(from.sourceRef);
+      if (locations.length > 0) {
+        const from =
+          locations.find((location) => location.id === selectedLocationId) ??
+          locations.find((location) => location.isSelected) ??
+          locations[0];
+
+        if (!from || !isTextSourceRef(from.sourceRef)) {
+          closeEditModal();
+          return;
+        }
+
+        const effectiveRanges = pendingTextReassignRanges.length
+          ? pendingTextReassignRanges
+          : fullSpanTextExclusionRangesForSourceRef(from.sourceRef);
+
+        onEntryBlockGraphChange(
+          applyTextReassignToEntryBlockGraph(
+            entryBlockGraph,
+            from,
+            effectiveRanges,
+            resolvedTargets
+          )
+        );
+        closeEditModal();
+        return;
+      }
+
+      if (!pendingTextAssignRanges.length) {
+        closeEditModal();
+        return;
+      }
 
       onEntryBlockGraphChange(
-        applyTextReassignToEntryBlockGraph(entryBlockGraph, from, effectiveRanges, resolvedTargets)
+        applyTextAssignToEntryBlockGraph(
+          entryBlockGraph,
+          document,
+          pendingTextAssignRanges,
+          resolvedTargets
+        )
       );
       closeEditModal();
       return;

@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import type { EditLocationOption, EntryBlockGraph, SourceRef } from '@types';
+import type { EditLocationOption, EntryBlockGraph, NormalizedDocument, SourceRef } from '@types';
 import {
+  applyTextAssignToEntryBlockGraph,
   applyTextExclusionToEntryBlockGraph,
   applyTextReassignToEntryBlockGraph,
   collectMappedExclusionPreviewText,
+  collectTextAssignRangesFromSelection,
   collectTextExclusionRangesFromSelection,
 } from '../../../../../../src/locations/Page/components/review/mapping/entryBlockGraphExclusion';
 
@@ -150,6 +152,133 @@ describe('entryBlockGraphExclusion', () => {
       { scope: 'block', blockId: 'block-1', start: 5, end: 8 },
     ]);
     expect(collectMappedExclusionPreviewText(root, range)).toBe('567');
+  });
+
+  it('collectTextAssignRangesFromSelection reads unmapped segment datasets', () => {
+    const root = document.createElement('div');
+    const span = document.createElement('span');
+    span.setAttribute('data-review-text-segment', 'true');
+    span.setAttribute('data-is-mapped', 'false');
+    span.setAttribute('data-text-scope', 'block');
+    span.setAttribute('data-range-start', '3');
+    span.setAttribute('data-range-end', '7');
+    span.setAttribute('data-block-id', 'b1');
+    span.appendChild(document.createTextNode('abcd'));
+    root.appendChild(span);
+
+    const range = document.createRange();
+    range.selectNodeContents(span);
+
+    expect(collectTextAssignRangesFromSelection(root, range)).toEqual([
+      { scope: 'block', blockId: 'b1', start: 3, end: 7 },
+    ]);
+  });
+
+  it('collectTextAssignRangesFromSelection uses partial highlight within one unmapped segment', () => {
+    const root = document.createElement('div');
+    const span = document.createElement('span');
+    span.setAttribute('data-review-text-segment', 'true');
+    span.setAttribute('data-is-mapped', 'false');
+    span.setAttribute('data-text-scope', 'block');
+    span.setAttribute('data-range-start', '0');
+    span.setAttribute('data-range-end', '20');
+    span.setAttribute('data-block-id', 'block-1');
+    const text = '01234567890123456789';
+    span.appendChild(document.createTextNode(text));
+    root.appendChild(span);
+
+    const tn = span.firstChild as Text;
+    const range = document.createRange();
+    range.setStart(tn, 5);
+    range.setEnd(tn, 8);
+
+    expect(collectTextAssignRangesFromSelection(root, range)).toEqual([
+      { scope: 'block', blockId: 'block-1', start: 5, end: 8 },
+    ]);
+  });
+});
+
+const minimalNormalizedDoc = (text: string, blockId = 'block-1'): NormalizedDocument => ({
+  documentId: 'doc-1',
+  contentBlocks: [
+    {
+      id: blockId,
+      position: 0,
+      type: 'paragraph',
+      textRuns: [{ text }],
+      flattenedTextRuns: [{ text, start: 0, end: text.length, styles: {} }],
+      designValueIds: [],
+      imageIds: [],
+    },
+  ],
+  tables: [],
+});
+
+describe('applyTextAssignToEntryBlockGraph', () => {
+  it('appends refs from unmapped ranges without changing existing field mappings', () => {
+    const graph = baseGraph();
+    const doc = minimalNormalizedDoc('abcdefghijklmnopqrst');
+    const next = applyTextAssignToEntryBlockGraph(
+      graph,
+      doc,
+      [{ scope: 'block', blockId: 'block-1', start: 5, end: 8 }],
+      [{ entryIndex: 0, fieldId: 'subtitle', fieldType: 'Text' }]
+    );
+
+    const bodyRefs = next.entries[0]!.fieldMappings.find((f) => f.fieldId === 'body')!.sourceRefs;
+    expect(bodyRefs).toHaveLength(1);
+    expect(bodyRefs[0]).toMatchObject({ start: 0, end: 20, type: 'blockText' });
+
+    const subtitleFm = next.entries[0]!.fieldMappings.find((f) => f.fieldId === 'subtitle');
+    expect(subtitleFm?.sourceRefs).toHaveLength(1);
+    expect(subtitleFm?.sourceRefs[0]).toMatchObject({ start: 5, end: 8, type: 'blockText' });
+    expect(
+      (subtitleFm?.sourceRefs[0] as { flattenedRuns: { text: string }[] }).flattenedRuns[0]?.text
+    ).toBe('fgh');
+  });
+
+  it('appends the same assign slice to two target fields', () => {
+    const graph = baseGraph();
+    const doc = minimalNormalizedDoc('0123456789');
+    const next = applyTextAssignToEntryBlockGraph(
+      graph,
+      doc,
+      [{ scope: 'block', blockId: 'block-1', start: 3, end: 7 }],
+      [
+        { entryIndex: 0, fieldId: 'a', fieldType: 'Text' },
+        { entryIndex: 0, fieldId: 'b', fieldType: 'Text' },
+      ]
+    );
+
+    const bodyRefs = next.entries[0]!.fieldMappings.find((f) => f.fieldId === 'body')!.sourceRefs;
+    expect(bodyRefs).toHaveLength(1);
+    const aRefs = next.entries[0]!.fieldMappings.find((f) => f.fieldId === 'a')!.sourceRefs;
+    const bRefs = next.entries[0]!.fieldMappings.find((f) => f.fieldId === 'b')!.sourceRefs;
+    expect(aRefs).toHaveLength(1);
+    expect(bRefs).toHaveLength(1);
+    expect(aRefs[0]).toMatchObject({ start: 3, end: 7 });
+    expect(bRefs[0]).toMatchObject({ start: 3, end: 7 });
+  });
+
+  it('returns the same graph when ranges or targets are empty', () => {
+    const graph = baseGraph();
+    const doc = minimalNormalizedDoc('abc');
+    expect(
+      applyTextAssignToEntryBlockGraph(
+        graph,
+        doc,
+        [],
+        [{ entryIndex: 0, fieldId: 'x', fieldType: 'Text' }]
+      )
+    ).toBe(graph);
+    expect(
+      applyTextAssignToEntryBlockGraph(
+        graph,
+        doc,
+        [{ scope: 'block', blockId: 'block-1', start: 0, end: 1 }],
+        []
+      )
+    ).toBe(graph);
   });
 });
 

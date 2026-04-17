@@ -2,6 +2,8 @@ import type {
   EditLocationOption,
   EntryBlockGraph,
   ImageSourceRef,
+  NormalizedDocument,
+  NormalizedDocumentContentBlock,
   NormalizedDocumentFlattenedRun,
   SourceRef,
   TextSourceRef,
@@ -330,6 +332,162 @@ export function collectTextExclusionRangesFromSelection(
   });
 
   return mergeTextExclusionRanges(raw);
+}
+
+/**
+ * Unmapped review segments touched by the selection → merged absolute ranges (same shape as exclusion).
+ */
+export function collectTextAssignRangesFromSelection(
+  root: HTMLElement | null,
+  selectedRange: Range | null
+): TextExclusionRange[] {
+  if (!root || !selectedRange) return [];
+
+  const unmapped = root.querySelectorAll<HTMLElement>(
+    '[data-review-text-segment="true"][data-is-mapped="false"]'
+  );
+  const raw: TextExclusionRange[] = [];
+
+  unmapped.forEach((el) => {
+    if (!rangeIntersectsNodeSafe(selectedRange, el)) return;
+
+    const scope = el.dataset.textScope;
+    const segStart = Number(el.dataset.rangeStart);
+    const segEnd = Number(el.dataset.rangeEnd);
+    if (!Number.isFinite(segStart) || !Number.isFinite(segEnd) || segStart >= segEnd) return;
+
+    const abs = getAbsoluteIntersectionForMappedSegment(el, selectedRange, segStart, segEnd);
+    if (!abs) return;
+    const [start, end] = abs;
+
+    if (scope === 'block' && el.dataset.blockId) {
+      raw.push({ scope: 'block', blockId: el.dataset.blockId, start, end });
+      return;
+    }
+
+    if (
+      scope === 'table' &&
+      el.dataset.tableId &&
+      el.dataset.rowId &&
+      el.dataset.cellId &&
+      el.dataset.partId
+    ) {
+      raw.push({
+        scope: 'table',
+        tableId: el.dataset.tableId,
+        rowId: el.dataset.rowId,
+        cellId: el.dataset.cellId,
+        partId: el.dataset.partId,
+        start,
+        end,
+      });
+    }
+  });
+
+  return mergeTextExclusionRanges(raw);
+}
+
+function findContentBlockById(
+  document: NormalizedDocument,
+  blockId: string
+): NormalizedDocumentContentBlock | undefined {
+  for (const block of document.contentBlocks) {
+    if (block.type !== 'tab' && block.id === blockId) {
+      return block;
+    }
+  }
+  return undefined;
+}
+
+function findTableTextPart(
+  document: NormalizedDocument,
+  tableId: string,
+  rowId: string,
+  cellId: string,
+  partId: string
+): { flattenedTextRuns: NormalizedDocumentFlattenedRun[] } | undefined {
+  const table = document.tables.find((t) => t.id === tableId);
+  const row = table?.rows.find((r) => r.id === rowId);
+  const cell = row?.cells.find((c) => c.id === cellId);
+  const part = cell?.parts.find((p) => p.id === partId);
+  if (!part || part.type !== 'text') return undefined;
+  return part;
+}
+
+/**
+ * Builds `blockText` / `tableText` refs for assign from merged ranges and the normalized document.
+ */
+export function buildTextSourceRefsForAssignRanges(
+  document: NormalizedDocument,
+  ranges: TextExclusionRange[]
+): TextSourceRef[] {
+  const out: TextSourceRef[] = [];
+
+  for (const r of ranges) {
+    if (r.scope === 'block') {
+      const block = findContentBlockById(document, r.blockId);
+      if (!block?.flattenedTextRuns?.length) continue;
+      const flattenedRuns = clipFlattenedRuns(block.flattenedTextRuns, r.start, r.end);
+      if (!flattenedRuns.length) continue;
+      out.push({
+        type: 'blockText',
+        blockId: r.blockId,
+        start: r.start,
+        end: r.end,
+        flattenedRuns,
+      });
+      continue;
+    }
+
+    const part = findTableTextPart(document, r.tableId, r.rowId, r.cellId, r.partId);
+    if (!part?.flattenedTextRuns?.length) continue;
+    const flattenedRuns = clipFlattenedRuns(part.flattenedTextRuns, r.start, r.end);
+    if (!flattenedRuns.length) continue;
+    out.push({
+      type: 'tableText',
+      tableId: r.tableId,
+      rowId: r.rowId,
+      cellId: r.cellId,
+      partId: r.partId,
+      start: r.start,
+      end: r.end,
+      flattenedRuns,
+    });
+  }
+
+  return out;
+}
+
+export type TextAssignTarget = { entryIndex: number; fieldId: string; fieldType: string };
+
+/**
+ * Appends new text source refs from unmapped document ranges to each target field (no removal from any field).
+ */
+export function applyTextAssignToEntryBlockGraph(
+  graph: EntryBlockGraph,
+  document: NormalizedDocument,
+  ranges: TextExclusionRange[],
+  targets: ReadonlyArray<TextAssignTarget>
+): EntryBlockGraph {
+  if (!ranges.length || !targets.length) return graph;
+
+  const movedRefs = buildTextSourceRefsForAssignRanges(document, mergeTextExclusionRanges(ranges));
+  if (!movedRefs.length) return graph;
+
+  const seen = new Set<string>();
+  const dedupedTargets = targets.filter((t) => {
+    const k = `${t.entryIndex}|${t.fieldId}`;
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+  if (!dedupedTargets.length) return graph;
+
+  let next = graph;
+  for (const t of dedupedTargets) {
+    next = appendTextRefsToFieldMapping(next, t.entryIndex, t.fieldId, t.fieldType, movedRefs);
+  }
+  return next;
 }
 
 /**
