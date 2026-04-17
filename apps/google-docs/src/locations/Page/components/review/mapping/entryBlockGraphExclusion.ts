@@ -6,7 +6,7 @@ import type {
   NormalizedDocumentContentBlock,
   NormalizedDocumentFlattenedRun,
   SourceRef,
-  TextSourceRef,
+  TextRangeSourceRef,
 } from '@types';
 import { isTableSourceRef, isTableTextSourceRef, isTextSourceRef } from '@types';
 import { buildSourceRefKey } from './sourceRefUtils';
@@ -80,9 +80,9 @@ function clipFlattenedRuns(
 }
 
 function buildTextRefsFromSpans(
-  baseRef: TextSourceRef,
+  baseRef: TextRangeSourceRef,
   spans: [number, number][]
-): TextSourceRef[] {
+): TextRangeSourceRef[] {
   return spans.map(([s, e]) => ({
     ...baseRef,
     start: s,
@@ -104,7 +104,7 @@ function intersectSpan(
 }
 
 function rangesOverlappingTextSourceRef(
-  ref: TextSourceRef,
+  ref: TextRangeSourceRef,
   pending: TextExclusionRange[]
 ): [number, number][] {
   const cuts: [number, number][] = [];
@@ -415,27 +415,42 @@ function findTableTextPart(
 }
 
 /**
- * Builds `blockText` / `tableText` refs for assign from merged ranges and the normalized document.
+ * Builds indexed text refs for assign (same discriminant vocabulary as agents-api
+ * `indexedEntryBlockGraph`) so mapping-review resume passes Zod.
  */
 export function buildTextSourceRefsForAssignRanges(
   document: NormalizedDocument,
   ranges: TextExclusionRange[]
-): TextSourceRef[] {
-  const out: TextSourceRef[] = [];
+): TextRangeSourceRef[] {
+  const out: TextRangeSourceRef[] = [];
 
   for (const r of ranges) {
     if (r.scope === 'block') {
       const block = findContentBlockById(document, r.blockId);
-      if (!block?.flattenedTextRuns?.length) continue;
+      if (!block?.flattenedTextRuns?.length || block.type === 'image') continue;
       const flattenedRuns = clipFlattenedRuns(block.flattenedTextRuns, r.start, r.end);
       if (!flattenedRuns.length) continue;
-      out.push({
-        type: 'blockText',
-        blockId: r.blockId,
-        start: r.start,
-        end: r.end,
-        flattenedRuns,
-      });
+
+      const base = { blockId: r.blockId, start: r.start, end: r.end, flattenedRuns };
+
+      if (block.type === 'heading') {
+        out.push({
+          type: 'heading',
+          ...base,
+          ...(block.headingLevel !== undefined && { headingLevel: block.headingLevel }),
+        });
+        continue;
+      }
+      if (block.type === 'listItem') {
+        out.push({
+          type: 'listItem',
+          ...base,
+          ...(block.bullet !== undefined && { bullet: block.bullet }),
+        });
+        continue;
+      }
+
+      out.push({ type: 'paragraph', ...base });
       continue;
     }
 
@@ -529,7 +544,7 @@ export function applyTextExclusionToEntryBlockGraph(
   return { ...graph, entries: nextEntries };
 }
 
-function cloneTextSourceRef(ref: TextSourceRef): TextSourceRef {
+function cloneTextRangeSourceRef(ref: TextRangeSourceRef): TextRangeSourceRef {
   return {
     ...ref,
     flattenedRuns: ref.flattenedRuns.map((run) => ({ ...run })),
@@ -537,7 +552,7 @@ function cloneTextSourceRef(ref: TextSourceRef): TextSourceRef {
 }
 
 function textExclusionRangesForCuts(
-  sourceRef: TextSourceRef,
+  sourceRef: TextRangeSourceRef,
   cuts: [number, number][]
 ): TextExclusionRange[] {
   if (isTableTextSourceRef(sourceRef)) {
@@ -564,7 +579,7 @@ function appendTextRefsToFieldMapping(
   entryIndex: number,
   fieldId: string,
   fieldType: string,
-  refs: TextSourceRef[]
+  refs: TextRangeSourceRef[]
 ): EntryBlockGraph {
   if (!refs.length) return graph;
 
@@ -579,7 +594,7 @@ function appendTextRefsToFieldMapping(
           ...entry,
           fieldMappings: [
             ...entry.fieldMappings,
-            { fieldId, fieldType, sourceRefs: refs.map(cloneTextSourceRef), confidence: 1 },
+            { fieldId, fieldType, sourceRefs: refs.map(cloneTextRangeSourceRef), confidence: 1 },
           ],
         };
       }
@@ -588,7 +603,7 @@ function appendTextRefsToFieldMapping(
         ...entry,
         fieldMappings: entry.fieldMappings.map((fm, j) =>
           j === fmIdx
-            ? { ...fm, sourceRefs: [...fm.sourceRefs, ...refs.map(cloneTextSourceRef)] }
+            ? { ...fm, sourceRefs: [...fm.sourceRefs, ...refs.map(cloneTextRangeSourceRef)] }
             : fm
         ),
       };
@@ -623,7 +638,7 @@ export function applyTextReassignToEntryBlockGraph(
   const fromFm = fromEntry?.fieldMappings.find((fm) => fm.fieldId === from.fieldId);
   const fromSr = fromFm?.sourceRefs.find(
     (sr) => buildSourceRefKey(sr) === fromKey && isTextSourceRef(sr)
-  ) as TextSourceRef | undefined;
+  ) as TextRangeSourceRef | undefined;
   if (!fromSr) return graph;
 
   const mergedCuts = mergeIntervals(rangesOverlappingTextSourceRef(fromSr, pendingRanges));

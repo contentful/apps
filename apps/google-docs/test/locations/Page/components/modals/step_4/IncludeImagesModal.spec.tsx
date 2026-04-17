@@ -1,6 +1,6 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useState } from 'react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { afterEach, describe, expect, it, vi, beforeEach } from 'vitest';
 import { Modal } from '@contentful/f36-components';
 import { IncludeImagesModal } from '../../../../../../src/locations/Page/components/modals/step_4/IncludeImagesModal';
 import React from 'react';

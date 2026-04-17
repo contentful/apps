@@ -231,7 +231,7 @@ describe('applyTextAssignToEntryBlockGraph', () => {
 
     const subtitleFm = next.entries[0]!.fieldMappings.find((f) => f.fieldId === 'subtitle');
     expect(subtitleFm?.sourceRefs).toHaveLength(1);
-    expect(subtitleFm?.sourceRefs[0]).toMatchObject({ start: 5, end: 8, type: 'blockText' });
+    expect(subtitleFm?.sourceRefs[0]).toMatchObject({ start: 5, end: 8, type: 'paragraph' });
     expect(
       (subtitleFm?.sourceRefs[0] as { flattenedRuns: { text: string }[] }).flattenedRuns[0]?.text
     ).toBe('fgh');
