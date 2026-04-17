@@ -3,7 +3,6 @@ import tokens from '@contentful/f36-tokens';
 import type { ImageSourceRef, NormalizedDocumentImage, SourceRef } from '@types';
 import Splitter from '../../mainpage/Splitter';
 import { buildSourceRefKey, isImageSourceRefExcluded } from './sourceRefUtils';
-import { isDataUIPart } from 'ai';
 
 export interface ReviewImageAssetCardProps {
   image: NormalizedDocumentImage;
