@@ -119,6 +119,7 @@ jobs:
       - run:
           name: Build
           command: |
+            VITE_ENV='test' \
             REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
             REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
             NODE_ENV='staging' \
@@ -129,6 +130,7 @@ jobs:
             STATIC_S3_BASE="s3://cf-apps-static-dev/apps" \
             STATIC_TEST_S3_BASE="s3://cf-apps-static-dev/apps/apps-test-$CIRCLE_SHA1" \
             STATIC_KLAVIYO_S3_BASE="s3://cf-apps-klaviyo/apps" \
+            VITE_ENV='test' \
             REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
             REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
             GOOGLE_DOCS_TEST_CLOUDFRONT_DIST_ID=$GOOGLE_DOCS_TEST_CLOUDFRONT_DIST_ID \
