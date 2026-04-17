@@ -59,24 +59,24 @@ export async function getWorkflowRun(
   environmentId: string,
   runId: string
 ): Promise<AgentRunData | null> {
-  if (LOCAL_AGENTS_API_BASE_URL) {
-    const response = await fetch(
-      `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}`,
-      {
-        headers: AGENTS_API_HEADERS,
-      }
-    );
+  // if (LOCAL_AGENTS_API_BASE_URL) {
+  //   const response = await fetch(
+  //     `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}`,
+  //     {
+  //       headers: AGENTS_API_HEADERS,
+  //     }
+  //   );
 
-    if (response.status === 404) {
-      return null;
-    }
+  //   if (response.status === 404) {
+  //     return null;
+  //   }
 
-    if (!response.ok) {
-      throw new Error(`Failed to poll agent run: ${response.status} ${response.statusText}`);
-    }
+  //   if (!response.ok) {
+  //     throw new Error(`Failed to poll agent run: ${response.status} ${response.statusText}`);
+  //   }
 
-    return (await response.json()) as AgentRunData;
-  }
+  //   return (await response.json()) as AgentRunData;
+  // }
 
   try {
     return (await sdk.cma.agentRun.get({
@@ -102,33 +102,34 @@ export async function startAgentRun(
 ): Promise<string> {
   let runData: AgentRunData;
 
-  if (LOCAL_AGENTS_API_BASE_URL) {
-    const response = await fetch(
-      `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${WORKFLOW_AGENT_ID}/generate`,
-      {
-        method: 'POST',
-        headers: getJsonHeaders(),
-        body: JSON.stringify(payload),
-      }
-    );
+  // if (LOCAL_AGENTS_API_BASE_URL) {
+  //   const response = await fetch(
+  //     `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${WORKFLOW_AGENT_ID}/generate`,
+  //     {
+  //       method: 'POST',
+  //       headers: getJsonHeaders(),
+  //       body: JSON.stringify(payload),
+  //     }
+  //   );
 
-    if (!response.ok) {
-      throw new Error(
-        `Failed to start workflow agent run: ${response.status} ${response.statusText}`
-      );
-    }
+  //   if (!response.ok) {
+  //     throw new Error(
+  //       `Failed to start workflow agent run: ${response.status} ${response.statusText}`
+  //     );
+  //   }
 
-    runData = (await response.json()) as AgentRunData;
-  } else {
-    try {
-      runData = (await sdk.cma.agent.generate(
-        { agentId: WORKFLOW_AGENT_ID, spaceId, environmentId },
-        payload
-      )) as AgentRunData;
-    } catch (error) {
-      throw new Error(`Failed to start workflow agent run: ${error as Error}`);
-    }
+  //   runData = (await response.json()) as AgentRunData;
+  // } else {
+  try {
+    runData = (await sdk.cma.agent.generate(
+      { agentId: WORKFLOW_AGENT_ID, spaceId, environmentId },
+      payload
+    )) as AgentRunData;
+    console.log('calling agent via sdk');
+  } catch (error) {
+    throw new Error(`Failed to start workflow agent run: ${error as Error}`);
   }
+  // }
 
   if (!runData.sys?.id) {
     throw new Error('Agent run started but no run ID was returned');
@@ -144,22 +145,23 @@ export async function resumeWorkflowRun(
   runId: string,
   resumePayload: ResumePayload
 ): Promise<void> {
-  if (LOCAL_AGENTS_API_BASE_URL) {
-    const response = await fetch(
-      `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}/resume`,
-      {
-        method: 'POST',
-        headers: getJsonHeaders(),
-        body: JSON.stringify({ resumePayload }),
-      }
-    );
+  // if (LOCAL_AGENTS_API_BASE_URL) {
+  //   console.log('resuming locally)')
+  //   const response = await fetch(
+  //     `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}/resume`,
+  //     {
+  //       method: 'POST',
+  //       headers: getJsonHeaders(),
+  //       body: JSON.stringify({ resumePayload }),
+  //     }
+  //   );
 
-    if (!response.ok) {
-      throw new Error(`Failed to resume agent run: ${response.status} ${response.statusText}`);
-    }
+  //   if (!response.ok) {
+  //     throw new Error(`Failed to resume agent run: ${response.status} ${response.statusText}`);
+  //   }
 
-    return;
-  }
+  //   return;
+  // }
 
   const agentRunApi = sdk.cma.agentRun as {
     resume?: (
@@ -168,6 +170,7 @@ export async function resumeWorkflowRun(
     ) => Promise<unknown>;
   };
 
+  console.log(' resumeing agentRunApi', agentRunApi.resume);
   if (!agentRunApi.resume) {
     throw new Error('Agent run resume is not available in the current SDK.');
   }
