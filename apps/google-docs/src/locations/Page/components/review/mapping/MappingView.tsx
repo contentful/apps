@@ -10,6 +10,7 @@ import type {
   EditModalNewLocation,
   SourceRef,
 } from '@types';
+import { isTextSourceRef } from '@types';
 import { FileTextIcon } from '@contentful/f36-icons';
 import { useReviewTextSelection } from '@hooks/useReviewTextSelection';
 import { getEntryTitleFromFieldMappings } from '../../../../../utils/getEntryTitle';
@@ -32,8 +33,10 @@ import { NormalizedDocumentSection } from './NormalizedDocumentSection';
 import {
   applyImageExclusionToEntryBlockGraph,
   applyTextExclusionToEntryBlockGraph,
+  applyTextReassignToEntryBlockGraph,
   collectMappedExclusionPreviewText,
   collectTextExclusionRangesFromSelection,
+  fullSpanTextExclusionRangesForSourceRef,
   type TextExclusionRange,
 } from './entryBlockGraphExclusion';
 
@@ -115,6 +118,9 @@ export const MappingView = ({
     TextExclusionRange[] | null
   >(null);
   const [pendingImageSourceRef, setPendingImageSourceRef] = useState<ImageSourceRef | null>(null);
+  const [pendingTextReassignRanges, setPendingTextReassignRanges] = useState<TextExclusionRange[]>(
+    []
+  );
   const textSelectionRootRef = useRef<HTMLDivElement | null>(null);
   const segmentLayoutRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const cardWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -125,6 +131,7 @@ export const MappingView = ({
     setEditModalState(EMPTY_EDIT_MODAL);
     setPendingTextExclusionRanges(null);
     setPendingImageSourceRef(null);
+    setPendingTextReassignRanges([]);
   };
 
   const previousSelectedEntryIndexRef = useRef<number | null | undefined>(undefined);
@@ -409,9 +416,14 @@ export const MappingView = ({
     measureOffsets();
   }, [mappingCardsBySegment, allSegments]);
 
-  const openAssignModal = (preview: string, currentLocations: EditLocationOption[]) => {
+  const openAssignModal = (
+    preview: string,
+    currentLocations: EditLocationOption[],
+    reassignRanges: TextExclusionRange[]
+  ) => {
     setPendingTextExclusionRanges(null);
     setPendingImageSourceRef(null);
+    setPendingTextReassignRanges(reassignRanges);
     setEditModalState({
       mode: 'assign',
       viewModel: {
@@ -449,7 +461,11 @@ export const MappingView = ({
 
   const handleAssignFromSelection = () => {
     if (!selectedText.trim()) return;
-    openAssignModal(selectedText.trim(), getLocationsForSelectedText());
+    const reassignRanges = collectTextExclusionRangesFromSelection(
+      textSelectionRootRef.current,
+      selectedRange
+    );
+    openAssignModal(selectedText.trim(), getLocationsForSelectedText(), reassignRanges);
     clearSelection();
   };
 
@@ -474,7 +490,7 @@ export const MappingView = ({
   };
 
   const handleAssignImage = (sourceRef: ImageSourceRef, label: string) => {
-    openAssignModal(label, getLocationsForSourceRef(sourceRef));
+    openAssignModal(label, getLocationsForSourceRef(sourceRef), []);
     setHoveredMappingKeys([]);
   };
 
@@ -490,10 +506,60 @@ export const MappingView = ({
 
   const handleEditModalConfirmPrimary = ({
     selectedLocationId,
+    selectedFieldIdsByLocationId = {},
   }: {
     selectedLocationId: string | null;
+    selectedFieldIdsByLocationId?: Record<string, string[]>;
   }) => {
     if (editModalState.mode === 'assign') {
+      const locations = editModalState.viewModel.currentLocations;
+      if (!locations.length) {
+        closeEditModal();
+        return;
+      }
+
+      const from =
+        locations.find((location) => location.id === selectedLocationId) ??
+        locations.find((location) => location.isSelected) ??
+        locations[0];
+
+      if (!from || !isTextSourceRef(from.sourceRef)) {
+        closeEditModal();
+        return;
+      }
+
+      const targets: { entryIndex: number; fieldId: string; fieldType: string }[] = [];
+      for (let entryIndex = 0; entryIndex < entryBlockGraph.entries.length; entryIndex++) {
+        const entry = entryBlockGraph.entries[entryIndex];
+        const newLocId = entry.tempId ?? `${entry.contentTypeId}-${entryIndex}`;
+        const fieldIds = selectedFieldIdsByLocationId[newLocId] ?? [];
+        const contentType = payload.contentTypes.find((c) => c.sys.id === entry.contentTypeId);
+        for (const fieldId of fieldIds) {
+          const field = contentType?.fields?.find((f) => 'id' in f && f.id === fieldId);
+          const fieldType =
+            field && 'type' in field && typeof field.type === 'string' ? field.type : 'Text';
+          targets.push({
+            entryIndex,
+            fieldId,
+            fieldType,
+          });
+        }
+      }
+
+      const resolvedTargets = targets.filter((t) => t.fieldId.length > 0);
+
+      if (!resolvedTargets.length) {
+        closeEditModal();
+        return;
+      }
+
+      const effectiveRanges = pendingTextReassignRanges.length
+        ? pendingTextReassignRanges
+        : fullSpanTextExclusionRangesForSourceRef(from.sourceRef);
+
+      onEntryBlockGraphChange(
+        applyTextReassignToEntryBlockGraph(entryBlockGraph, from, effectiveRanges, resolvedTargets)
+      );
       closeEditModal();
       return;
     }

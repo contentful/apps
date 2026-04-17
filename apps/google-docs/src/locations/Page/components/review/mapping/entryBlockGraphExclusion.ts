@@ -3,9 +3,10 @@ import type {
   EntryBlockGraph,
   ImageSourceRef,
   NormalizedDocumentFlattenedRun,
+  SourceRef,
   TextSourceRef,
 } from '@types';
-import { isTableSourceRef, isTextSourceRef } from '@types';
+import { isTableSourceRef, isTableTextSourceRef, isTextSourceRef } from '@types';
 import { buildSourceRefKey } from './sourceRefUtils';
 
 export type TextExclusionRange =
@@ -368,6 +369,142 @@ export function applyTextExclusionToEntryBlockGraph(
   });
 
   return { ...graph, entries: nextEntries };
+}
+
+function cloneTextSourceRef(ref: TextSourceRef): TextSourceRef {
+  return {
+    ...ref,
+    flattenedRuns: ref.flattenedRuns.map((run) => ({ ...run })),
+  };
+}
+
+function textExclusionRangesForCuts(
+  sourceRef: TextSourceRef,
+  cuts: [number, number][]
+): TextExclusionRange[] {
+  if (isTableTextSourceRef(sourceRef)) {
+    return cuts.map(([start, end]) => ({
+      scope: 'table' as const,
+      tableId: sourceRef.tableId,
+      rowId: sourceRef.rowId,
+      cellId: sourceRef.cellId,
+      partId: sourceRef.partId,
+      start,
+      end,
+    }));
+  }
+  return cuts.map(([start, end]) => ({
+    scope: 'block' as const,
+    blockId: sourceRef.blockId,
+    start,
+    end,
+  }));
+}
+
+function appendTextRefsToFieldMapping(
+  graph: EntryBlockGraph,
+  entryIndex: number,
+  fieldId: string,
+  fieldType: string,
+  refs: TextSourceRef[]
+): EntryBlockGraph {
+  if (!refs.length) return graph;
+
+  return {
+    ...graph,
+    entries: graph.entries.map((entry, idx) => {
+      if (idx !== entryIndex) return entry;
+
+      const fmIdx = entry.fieldMappings.findIndex((fm) => fm.fieldId === fieldId);
+      if (fmIdx === -1) {
+        return {
+          ...entry,
+          fieldMappings: [
+            ...entry.fieldMappings,
+            { fieldId, fieldType, sourceRefs: refs.map(cloneTextSourceRef), confidence: 1 },
+          ],
+        };
+      }
+
+      return {
+        ...entry,
+        fieldMappings: entry.fieldMappings.map((fm, j) =>
+          j === fmIdx
+            ? { ...fm, sourceRefs: [...fm.sourceRefs, ...refs.map(cloneTextSourceRef)] }
+            : fm
+        ),
+      };
+    }),
+  };
+}
+
+/**
+ * Moves selected character ranges from a text `sourceRef` on `from` into one or more target fields.
+ * Reuses exclusion-style splitting on the source field, then appends moved slices to each target.
+ */
+export function applyTextReassignToEntryBlockGraph(
+  graph: EntryBlockGraph,
+  from: EditLocationOption,
+  pendingRanges: TextExclusionRange[],
+  targets: ReadonlyArray<{ entryIndex: number; fieldId: string; fieldType: string }>
+): EntryBlockGraph {
+  if (!isTextSourceRef(from.sourceRef) || !targets.length) return graph;
+
+  const fromKey = buildSourceRefKey(from.sourceRef);
+  const seen = new Set<string>();
+  const dedupedTargets = targets.filter((t) => {
+    if (t.entryIndex === from.entryIndex && t.fieldId === from.fieldId) return false;
+    const k = `${t.entryIndex}|${t.fieldId}`;
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+  if (!dedupedTargets.length) return graph;
+
+  const fromEntry = graph.entries[from.entryIndex];
+  const fromFm = fromEntry?.fieldMappings.find((fm) => fm.fieldId === from.fieldId);
+  const fromSr = fromFm?.sourceRefs.find(
+    (sr) => buildSourceRefKey(sr) === fromKey && isTextSourceRef(sr)
+  ) as TextSourceRef | undefined;
+  if (!fromSr) return graph;
+
+  const mergedCuts = mergeIntervals(rangesOverlappingTextSourceRef(fromSr, pendingRanges));
+  if (!mergedCuts.length) return graph;
+
+  const movedRefs = buildTextRefsFromSpans(fromSr, mergedCuts).filter((r) => r.start < r.end);
+  if (!movedRefs.length) return graph;
+
+  const exclusionRanges = textExclusionRangesForCuts(fromSr, mergedCuts);
+  let next = applyTextExclusionToEntryBlockGraph(graph, from, exclusionRanges);
+
+  for (const t of dedupedTargets) {
+    next = appendTextRefsToFieldMapping(next, t.entryIndex, t.fieldId, t.fieldType, movedRefs);
+  }
+
+  return next;
+}
+
+/** When the DOM produced no merged ranges, use the whole mapped text ref span for reassign. */
+export function fullSpanTextExclusionRangesForSourceRef(
+  sourceRef: SourceRef
+): TextExclusionRange[] {
+  if (!isTextSourceRef(sourceRef)) return [];
+  if (isTableTextSourceRef(sourceRef)) {
+    return [
+      {
+        scope: 'table',
+        tableId: sourceRef.tableId,
+        rowId: sourceRef.rowId,
+        cellId: sourceRef.cellId,
+        partId: sourceRef.partId,
+        start: sourceRef.start,
+        end: sourceRef.end,
+      },
+    ];
+  }
+  return [
+    { scope: 'block', blockId: sourceRef.blockId, start: sourceRef.start, end: sourceRef.end },
+  ];
 }
 
 /**

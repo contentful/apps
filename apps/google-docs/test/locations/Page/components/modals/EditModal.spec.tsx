@@ -167,6 +167,42 @@ describe('EditModal', () => {
     });
   });
 
+  it('keys new location rows by id so duplicate titles do not break reconciliation', async () => {
+    const duplicateTitle = 'Article: Untitled';
+    render(
+      <EditModal
+        isOpen={true}
+        onClose={onClose}
+        viewModel={{
+          ...viewModel,
+          newLocations: [
+            {
+              id: 'entry-a',
+              title: duplicateTitle,
+              fieldMappings: [],
+              fieldOptions: [{ id: 'body', fieldName: 'Body', fieldType: 'Text' }],
+            },
+            {
+              id: 'entry-b',
+              title: duplicateTitle,
+              fieldMappings: [],
+              fieldOptions: [{ id: 'summary', fieldName: 'Summary', fieldType: 'Text' }],
+            },
+          ],
+        }}
+        title="Assign content"
+        locationSectionDescription=""
+        primaryButtonLabel="Move content"
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getAllByText(duplicateTitle)).toHaveLength(2);
+      expect(screen.getAllByText('Fields')).toHaveLength(2);
+      expect(screen.getAllByText('Select one or more')).toHaveLength(2);
+    });
+  });
+
   it('keeps the current location heading visible when the section is empty', async () => {
     render(
       <EditModal

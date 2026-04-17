@@ -20,7 +20,10 @@ interface EditModalProps {
   locationSectionDescription: string;
   primaryButtonLabel: string;
   additionalContent?: ReactNode;
-  onConfirmPrimary?: (details: { selectedLocationId: string | null }) => void;
+  onConfirmPrimary?: (details: {
+    selectedLocationId: string | null;
+    selectedFieldIdsByLocationId: Record<string, string[]>;
+  }) => void;
 }
 
 export const EditModal = ({
@@ -63,7 +66,12 @@ export const EditModal = ({
     setSelectedLocationId(initialSelectedLocationId);
   }, [initialSelectedLocationId]);
 
+  const newLocationRowIdsKey = (viewModel.newLocations ?? []).map((nl) => nl.id).join('|');
+
+  // Reset field multiselect when the modal opens or when the set of destination rows changes.
+  // Do not depend on `viewModel.newLocations` reference (it can churn without semantic change).
   useEffect(() => {
+    if (!isOpen) return;
     setSelectedFieldIdsByLocationId(
       Object.fromEntries(
         (viewModel.newLocations ?? []).map((newLocation) => [
@@ -72,17 +80,24 @@ export const EditModal = ({
         ])
       )
     );
-  }, [viewModel.newLocations]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync from props only on open / row-id set change, not array identity
+  }, [isOpen, newLocationRowIdsKey]);
 
-  const handleSelectedFieldIdsChange = (locationId: string, selectedFieldIds: string[]) => {
+  const handleSelectedFieldIdsChange = (
+    locationId: string,
+    updater: (previous: string[]) => string[]
+  ) => {
     setSelectedFieldIdsByLocationId((previous) => ({
       ...previous,
-      [locationId]: selectedFieldIds,
+      [locationId]: updater(previous[locationId] ?? []),
     }));
   };
 
   const handlePrimaryAction = () => {
-    onConfirmPrimary?.({ selectedLocationId: selectedLocationId });
+    onConfirmPrimary?.({
+      selectedLocationId,
+      selectedFieldIdsByLocationId: { ...selectedFieldIdsByLocationId },
+    });
   };
 
   const previewSectionTitle = viewModel.previewSectionTitle ?? 'Selected content';
@@ -164,7 +179,7 @@ export const EditModal = ({
                   </Text>
                   <Box className={locationList}>
                     {viewModel.newLocations?.map((newLocation) => (
-                      <Box className={sectionCard} key={newLocation.title}>
+                      <Box className={sectionCard} key={newLocation.id}>
                         <Text as="p" fontWeight="fontWeightDemiBold" marginBottom="spacingM">
                           {newLocation.title}
                         </Text>
@@ -180,8 +195,8 @@ export const EditModal = ({
                             newLocation.selectedFieldIds ??
                             []
                           }
-                          onSelectedFieldIdsChange={(selectedFieldIds) =>
-                            handleSelectedFieldIdsChange(newLocation.id, selectedFieldIds)
+                          onSelectedFieldIdsChange={(updater) =>
+                            handleSelectedFieldIdsChange(newLocation.id, updater)
                           }
                         />
                       </Box>

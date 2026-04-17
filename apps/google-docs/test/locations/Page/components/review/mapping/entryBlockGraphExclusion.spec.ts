@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { EditLocationOption, EntryBlockGraph, SourceRef } from '@types';
 import {
   applyTextExclusionToEntryBlockGraph,
+  applyTextReassignToEntryBlockGraph,
   collectMappedExclusionPreviewText,
   collectTextExclusionRangesFromSelection,
 } from '../../../../../../src/locations/Page/components/review/mapping/entryBlockGraphExclusion';
@@ -149,5 +150,150 @@ describe('entryBlockGraphExclusion', () => {
       { scope: 'block', blockId: 'block-1', start: 5, end: 8 },
     ]);
     expect(collectMappedExclusionPreviewText(root, range)).toBe('567');
+  });
+});
+
+describe('applyTextReassignToEntryBlockGraph', () => {
+  it('moves a short middle slice from body to subtitle and splits the source ref', () => {
+    const graph: EntryBlockGraph = {
+      entries: [
+        {
+          contentTypeId: 'article',
+          fieldMappings: [
+            {
+              fieldId: 'body',
+              fieldType: 'Text',
+              sourceRefs: [blockRef(0, 11, 'Hello world')],
+              confidence: 1,
+            },
+          ],
+        },
+      ],
+      excludedSourceRefs: [],
+    };
+    const from: EditLocationOption = {
+      entryIndex: 0,
+      id: '0-article-body',
+      contentTypeId: 'article',
+      contentTypeName: 'Article',
+      entryName: 'A',
+      fieldId: 'body',
+      fieldName: 'Body',
+      fieldType: 'Text',
+      sourceRef: blockRef(0, 11, 'Hello world'),
+    };
+
+    const next = applyTextReassignToEntryBlockGraph(
+      graph,
+      from,
+      [{ scope: 'block', blockId: 'block-1', start: 6, end: 11 }],
+      [{ entryIndex: 0, fieldId: 'subtitle', fieldType: 'Text' }]
+    );
+
+    const bodyRefs = next.entries[0]!.fieldMappings.find((f) => f.fieldId === 'body')!.sourceRefs;
+    const subtitleFm = next.entries[0]!.fieldMappings.find((f) => f.fieldId === 'subtitle');
+    expect(bodyRefs).toHaveLength(1);
+    expect(bodyRefs[0]).toMatchObject({ start: 0, end: 6, type: 'blockText' });
+    expect(subtitleFm?.sourceRefs).toHaveLength(1);
+    expect(subtitleFm?.sourceRefs[0]).toMatchObject({ start: 6, end: 11, type: 'blockText' });
+    expect(
+      (subtitleFm?.sourceRefs[0] as { flattenedRuns: { text: string }[] }).flattenedRuns[0]?.text
+    ).toBe('world');
+  });
+
+  it('moves a slice from long body text to another field', () => {
+    const longBody = 'a'.repeat(100);
+    const graph: EntryBlockGraph = {
+      entries: [
+        {
+          contentTypeId: 'article',
+          fieldMappings: [
+            {
+              fieldId: 'body',
+              fieldType: 'Text',
+              sourceRefs: [blockRef(0, 100, longBody)],
+              confidence: 1,
+            },
+          ],
+        },
+      ],
+      excludedSourceRefs: [],
+    };
+    const from: EditLocationOption = {
+      entryIndex: 0,
+      id: '0-article-body',
+      contentTypeId: 'article',
+      contentTypeName: 'Article',
+      entryName: 'A',
+      fieldId: 'body',
+      fieldName: 'Body',
+      fieldType: 'Text',
+      sourceRef: blockRef(0, 100, longBody),
+    };
+
+    const next = applyTextReassignToEntryBlockGraph(
+      graph,
+      from,
+      [{ scope: 'block', blockId: 'block-1', start: 40, end: 60 }],
+      [{ entryIndex: 0, fieldId: 'subtitle', fieldType: 'Text' }]
+    );
+
+    const bodyRefs = next.entries[0]!.fieldMappings.find((f) => f.fieldId === 'body')!.sourceRefs;
+    const subRefs = next.entries[0]!.fieldMappings.find(
+      (f) => f.fieldId === 'subtitle'
+    )!.sourceRefs;
+    expect(bodyRefs).toHaveLength(2);
+    expect(subRefs).toHaveLength(1);
+    expect(subRefs[0]).toMatchObject({ start: 40, end: 60 });
+    expect((subRefs[0] as { flattenedRuns: { text: string }[] }).flattenedRuns[0]?.text).toBe(
+      'a'.repeat(20)
+    );
+  });
+
+  it('appends the same moved slice to two target fields', () => {
+    const graph: EntryBlockGraph = {
+      entries: [
+        {
+          contentTypeId: 'article',
+          fieldMappings: [
+            {
+              fieldId: 'body',
+              fieldType: 'Text',
+              sourceRefs: [blockRef(0, 10, '0123456789')],
+              confidence: 1,
+            },
+          ],
+        },
+      ],
+      excludedSourceRefs: [],
+    };
+    const from: EditLocationOption = {
+      entryIndex: 0,
+      id: '0-article-body',
+      contentTypeId: 'article',
+      contentTypeName: 'Article',
+      entryName: 'A',
+      fieldId: 'body',
+      fieldName: 'Body',
+      fieldType: 'Text',
+      sourceRef: blockRef(0, 10, '0123456789'),
+    };
+
+    const next = applyTextReassignToEntryBlockGraph(
+      graph,
+      from,
+      [{ scope: 'block', blockId: 'block-1', start: 3, end: 7 }],
+      [
+        { entryIndex: 0, fieldId: 'a', fieldType: 'Text' },
+        { entryIndex: 0, fieldId: 'b', fieldType: 'Text' },
+      ]
+    );
+
+    const aRefs = next.entries[0]!.fieldMappings.find((f) => f.fieldId === 'a')!.sourceRefs;
+    const bRefs = next.entries[0]!.fieldMappings.find((f) => f.fieldId === 'b')!.sourceRefs;
+    expect(aRefs).toHaveLength(1);
+    expect(bRefs).toHaveLength(1);
+    expect(aRefs[0]).toMatchObject({ start: 3, end: 7 });
+    expect(bRefs[0]).toMatchObject({ start: 3, end: 7 });
   });
 });

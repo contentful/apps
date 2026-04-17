@@ -11,7 +11,8 @@ interface FieldSelectionDropdownProps {
   fieldOptions: EditModalFieldOption[];
   fieldMappings: EditModalFieldMapping[];
   selectedFieldIds: string[];
-  onSelectedFieldIdsChange: (selectedFieldIds: string[]) => void;
+  /** Functional updates avoid stale `selectedFieldIds` when selecting multiple fields quickly. */
+  onSelectedFieldIdsChange: (updater: (previous: string[]) => string[]) => void;
 }
 
 export const FieldSelectionDropdown = ({
@@ -36,8 +37,12 @@ export const FieldSelectionDropdown = ({
   const handleSelectField = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { checked, value } = event.target;
 
-    onSelectedFieldIdsChange(
-      checked ? [...selectedFieldIds, value] : selectedFieldIds.filter((id) => id !== value)
+    onSelectedFieldIdsChange((previous) =>
+      checked
+        ? previous.includes(value)
+          ? previous
+          : [...previous, value]
+        : previous.filter((id) => id !== value)
     );
   };
 

@@ -5,7 +5,10 @@ import { FieldSelectionDropdown } from '../../../../../src/locations/Page/compon
 
 describe('FieldSelectionDropdown', () => {
   it('enables numeric field types only when the selected text is numeric', async () => {
-    const onSelectedFieldIdsChange = vi.fn();
+    let selectedFieldIds: string[] = [];
+    const onSelectedFieldIdsChange = vi.fn((updater: (prev: string[]) => string[]) => {
+      selectedFieldIds = updater(selectedFieldIds);
+    });
 
     render(
       <FieldSelectionDropdown
@@ -68,9 +71,7 @@ describe('FieldSelectionDropdown', () => {
     fireEvent.click(decimalOption);
 
     await waitFor(() => {
-      expect(onSelectedFieldIdsChange).toHaveBeenCalledWith(['name']);
-      expect(onSelectedFieldIdsChange).toHaveBeenCalledWith(['headingSize']);
-      expect(onSelectedFieldIdsChange).toHaveBeenCalledWith(['price']);
+      expect(selectedFieldIds).toEqual(['name', 'headingSize', 'price']);
     });
   });
 
