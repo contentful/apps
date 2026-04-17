@@ -21,14 +21,11 @@ import {
 import { buildListMarkers } from './buildListMarkers';
 import { formatDisplayName, getFieldTypeLabel } from './fieldFormatting';
 import { EditModal } from './edit-modals/EditModal';
-import { mockExcludeSelection, mockNewLocationSelection } from './mockEditModalContent';
 
 import { SelectionActionMenu } from './SelectionActionMenu';
 import { buildSourceRefKey } from './sourceRefUtils';
 import { MappingEntryCards, type AnchoredMappingCard } from './MappingEntryCards';
 import { NormalizedDocumentSection } from './NormalizedDocumentSection';
-
-const enableMockEditModal = import.meta.env.VITE_ENABLE_MOCK_EDIT_MODAL === 'true';
 
 interface EditModalState {
   viewModel: EditModalContent;
@@ -380,38 +377,6 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
         flexDirection="column"
         gap="spacingS"
         style={{ padding: tokens.spacingM, marginTop: tokens.spacingM }}>
-        {enableMockEditModal ? (
-          <Flex justifyContent="flex-end" gap="spacingS">
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={() =>
-                setEditModalState({
-                  viewModel: mockExcludeSelection,
-                  title: 'Exclude content',
-                  locationSectionDescription:
-                    'This content is used in more than one place in the entry. Select which item to exclude.',
-                  primaryButtonLabel: 'Exclude content',
-                })
-              }>
-              Mock exclude modal
-            </Button>
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={() =>
-                setEditModalState({
-                  viewModel: mockNewLocationSelection,
-                  title: 'Assign content',
-                  locationSectionDescription: '',
-                  primaryButtonLabel: 'Move content',
-                })
-              }>
-              Mock new location modal
-            </Button>
-          </Flex>
-        ) : null}
-
         {tabs.map((tab) => (
           <Box key={tab.id}>
             {tab.name && (
