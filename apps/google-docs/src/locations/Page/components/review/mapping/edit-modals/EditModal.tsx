@@ -164,7 +164,9 @@ export const EditModal = ({
                         <Text as="p" fontWeight="fontWeightDemiBold" marginBottom="spacingM">
                           {newLocation.title}
                         </Text>
-                        <Text marginBottom="spacing2Xs">Fields</Text>
+                        <Text as="p" marginBottom="spacingXs">
+                          Fields
+                        </Text>
                         <FieldSelectionDropdown
                           fieldOptions={newLocation.fieldOptions}
                           fieldMappings={newLocation.fieldMappings}

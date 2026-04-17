@@ -6,10 +6,12 @@ import type {
   MappingReviewSuspendPayload,
   EditModalContent,
   EditLocationOption,
+  EditModalNewLocation,
   SourceRef,
 } from '@types';
 import { FileTextIcon } from '@contentful/f36-icons';
 import { useReviewTextSelection } from '@hooks/useReviewTextSelection';
+import { getEntryTitleFromFieldMappings } from '../../../../../utils/getEntryTitle';
 import { getAnchorIdForSourceRef, resolveMarkerOffsets } from './resolveMappingCardOffsets';
 import { type DocSegment, buildDocument } from './buildDocument';
 import {
@@ -53,6 +55,26 @@ const EMPTY_EDIT_MODAL: EditModalState = {
 function getEntryName(contentTypeName: string | undefined, entryIndex: number): string {
   const displayName = contentTypeName ?? 'Untitled';
   return `${displayName} #${entryIndex + 1}`;
+}
+
+function getEntryReviewTitle(
+  entry: MappingReviewSuspendPayload['entryBlockGraph']['entries'][number],
+  displayField: string | undefined,
+  fallbackEntryName: string
+): string {
+  const localizedFieldValue = displayField ? entry.fields?.[displayField] : undefined;
+  if (localizedFieldValue) {
+    const populatedValue = Object.values(localizedFieldValue).find(
+      (candidate): candidate is string =>
+        typeof candidate === 'string' && candidate.trim().length > 0
+    );
+    if (populatedValue) {
+      return populatedValue.trim();
+    }
+  }
+
+  const mappedTitle = getEntryTitleFromFieldMappings(entry, displayField).trim();
+  return mappedTitle && mappedTitle !== 'Untitled' ? mappedTitle : fallbackEntryName;
 }
 
 /** `Range#intersectsNode` can throw when the range and node are in inconsistent trees. */
@@ -183,6 +205,42 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allSegments, entryBlockGraph, payload.contentTypes, selectedEntryIndex]);
 
+  const newLocations = useMemo<EditModalNewLocation[]>(() => {
+    return entryBlockGraph.entries.map((entry, entryIndex) => {
+      const contentType = payload.contentTypes.find((item) => item.sys.id === entry.contentTypeId);
+      const contentTypeName =
+        (contentType?.name ?? entry.contentTypeId).trim() || entry.contentTypeId;
+      const fallbackEntryName = getEntryName(contentTypeName, entryIndex);
+      const entryTitle = getEntryReviewTitle(entry, contentType?.displayField, fallbackEntryName);
+      const contentTypeFields = contentType?.fields ?? [];
+      const fieldOptions =
+        contentTypeFields.length > 0
+          ? contentTypeFields
+              .filter((field): field is (typeof contentTypeFields)[number] & { id: string } =>
+                Boolean(field.id)
+              )
+              .map((field) => ({
+                id: field.id,
+                fieldName: (field.name ?? '').trim() || formatDisplayName(field.id),
+                fieldType: getFieldTypeLabel(field.type ?? ''),
+              }))
+          : entry.fieldMappings.map((fieldMapping) => ({
+              id: fieldMapping.fieldId,
+              fieldName: formatDisplayName(fieldMapping.fieldId),
+              fieldType: getFieldTypeLabel(fieldMapping.fieldType),
+            }));
+
+      return {
+        id: entry.tempId ?? `${entry.contentTypeId}-${entryIndex}`,
+        title: `${contentTypeName}: ${entryTitle}`,
+        fieldOptions,
+        fieldMappings: entry.fieldMappings.map((fieldMapping) => ({
+          fieldId: fieldMapping.fieldId,
+        })),
+      };
+    });
+  }, [entryBlockGraph.entries, payload.contentTypes]);
+
   const getLocationsForSourceRef = (sourceRef: SourceRef): EditLocationOption[] => {
     const targetKey = buildSourceRefKey(sourceRef);
     const matches: EditLocationOption[] = [];
@@ -310,6 +368,7 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
       viewModel: {
         selectedText: preview,
         currentLocations,
+        newLocations,
         isOpen: true,
       },
       title: 'Assign content',

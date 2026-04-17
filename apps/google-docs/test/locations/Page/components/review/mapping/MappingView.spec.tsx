@@ -130,10 +130,33 @@ describe('MappingView', () => {
     expect(screen.getByText('"selected body text"')).toBeTruthy();
     expect(screen.getByText('Article')).toBeTruthy();
     expect(screen.getByText('Article #1')).toBeTruthy();
-    expect(screen.getByText('Body copy')).toBeTruthy();
+    expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
+    expect(screen.getByText('New location')).toBeTruthy();
+    expect(screen.getByText('Article: Draft title from display field')).toBeTruthy();
     expect(
       screen.getAllByText((_, node) => node?.textContent?.includes('| Long text') ?? false).length
     ).toBeGreaterThan(0);
+    expect(mockClearSelection).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens assign modal with new locations for unmapped text', () => {
+    const selectedRange = { intersectsNode: () => false } as unknown as Range;
+    mockUseReviewTextSelection.mockReturnValue({
+      selectionRectangle: { top: 100, left: 100, right: 160, bottom: 120 },
+      selectedText: 'fresh body text',
+      selectedRange,
+      clearSelection: mockClearSelection,
+    });
+
+    render(<MappingView payload={createPayload()} selectedEntryIndex={null} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Assign' }));
+
+    expect(screen.getByRole('heading', { name: 'Assign content' })).toBeTruthy();
+    expect(screen.getByText('"fresh body text"')).toBeTruthy();
+    expect(screen.getByText('Current location')).toBeTruthy();
+    expect(screen.getByText('New location')).toBeTruthy();
+    expect(screen.getByText('Article: Draft title from display field')).toBeTruthy();
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
 
@@ -180,7 +203,8 @@ describe('MappingView', () => {
 
     expect(screen.getByRole('heading', { name: 'Exclude content' })).toBeTruthy();
     expect(screen.getByText('Article')).toBeTruthy();
-    expect(screen.getByText('Body copy')).toBeTruthy();
+    expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
+    expect(screen.queryByText('New location')).toBeNull();
     expect(
       screen.getAllByText((_, node) => node?.textContent?.includes('| Long text') ?? false).length
     ).toBeGreaterThan(0);
