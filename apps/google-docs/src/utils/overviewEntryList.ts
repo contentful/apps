@@ -1,5 +1,6 @@
 import type { EntryToCreate, CompletedWorkflowPayload } from '@types';
 import type { EntryBlockGraphEntry } from '../types/entryBlockGraph';
+import { isTextSourceRef } from '../types/entryBlockGraph';
 import type { WorkflowContentType } from '../types/workflow';
 import { collectReferencedTempIdsFromEntry } from '../services/referenceResolution';
 import { type ContentTypeDisplayInfo } from '../services/contentTypeService';
@@ -35,6 +36,24 @@ function resolveContentTypeLabel(
 ): string {
   const name = contentTypeDisplayInfoMap?.get(contentTypeId)?.name?.trim();
   return name && name.length > 0 ? name : '';
+}
+
+function getTitleFromFieldMappings(
+  entry: EntryBlockGraphEntry,
+  displayField?: string
+): string | undefined {
+  if (!displayField) return undefined;
+  const fieldMapping = entry.fieldMappings.find((m) => m.fieldId === displayField);
+  if (!fieldMapping) return undefined;
+
+  const text = fieldMapping.sourceRefs
+    .filter(isTextSourceRef)
+    .flatMap((ref) => ref.flattenedRuns)
+    .map((run) => run.text)
+    .join('')
+    .trim();
+
+  return text.length > 0 ? text : undefined;
 }
 
 function createRow(
@@ -197,6 +216,9 @@ export function buildEntryListFromEntryBlockGraph(
   referenceEdges?: Array<{ from: string; to: string }>
 ): EntryListRow[] {
   const contentTypeNameById = new Map(contentTypes.map((ct) => [ct.sys.id, ct.name ?? '']));
+  const contentTypeDisplayInfoById = new Map(
+    contentTypes.map((ct) => [ct.sys.id, { name: ct.name ?? '', displayField: ct.displayField }])
+  );
 
   const indexByTempId = new Map<string, number>();
   entries.forEach((entry, index) => {
@@ -227,11 +249,16 @@ export function buildEntryListFromEntryBlockGraph(
       })
       .filter((r): r is EntryListRow => r !== undefined);
 
+    const contentTypeDisplayInfo = contentTypeDisplayInfoById.get(entry.contentTypeId);
+    const entryTitle = getTitleFromFieldMappings(entry, contentTypeDisplayInfo?.displayField);
+
+    console.log('entryTitle', entryTitle);
+
     return {
       id,
       entryIndex: index,
       contentTypeName: contentTypeNameById.get(entry.contentTypeId) ?? entry.contentTypeId,
-      entryTitle: undefined,
+      entryTitle,
       children: childRows,
     };
   };
