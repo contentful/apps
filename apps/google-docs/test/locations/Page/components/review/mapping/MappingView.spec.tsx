@@ -129,7 +129,7 @@ describe('MappingView', () => {
     expect(screen.getByRole('heading', { name: 'Assign content' })).toBeTruthy();
     expect(screen.getByText('"selected body text"')).toBeTruthy();
     expect(screen.getByText('Article')).toBeTruthy();
-    expect(screen.getByText('Article #1')).toBeTruthy();
+    expect(screen.getByText('Untitled')).toBeTruthy();
     expect(screen.getByText('Body copy')).toBeTruthy();
     expect(
       screen.getAllByText((_, node) => node?.textContent?.includes('| Long text') ?? false).length

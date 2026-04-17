@@ -26,6 +26,7 @@ import { SelectionActionMenu } from './SelectionActionMenu';
 import { buildSourceRefKey } from './sourceRefUtils';
 import { MappingEntryCards, type AnchoredMappingCard } from './MappingEntryCards';
 import { NormalizedDocumentSection } from './NormalizedDocumentSection';
+import { getTitleFromFieldMappings } from '../../../../../utils/overviewEntryList';
 
 interface EditModalState {
   viewModel: EditModalContent;
@@ -49,11 +50,6 @@ const EMPTY_EDIT_MODAL: EditModalState = {
   locationSectionDescription: '',
   primaryButtonLabel: '',
 };
-
-function getEntryName(contentTypeName: string | undefined, entryIndex: number): string {
-  const displayName = contentTypeName ?? 'Untitled';
-  return `${displayName} #${entryIndex + 1}`;
-}
 
 /** `Range#intersectsNode` can throw when the range and node are in inconsistent trees. */
 function rangeIntersectsNode(range: Range, node: Node): boolean {
@@ -142,12 +138,13 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
     const contentTypeField = contentType?.fields.find((field) => field.id === fieldId);
     const fieldDisplayName = (contentTypeField?.name ?? '').trim();
     const fieldDisplayType = getFieldTypeLabel(fieldType);
+    const entryName = getTitleFromFieldMappings(graphEntry, contentType?.displayField);
 
     return {
       id: `${entryIndex}-${graphEntry.contentTypeId}-${fieldId}`,
       contentTypeId: graphEntry.contentTypeId,
       contentTypeName: contentTypeDisplayName,
-      entryName: getEntryName(contentTypeDisplayName, entryIndex),
+      entryName,
       fieldId,
       fieldName: fieldDisplayName,
       fieldType: fieldDisplayType,
