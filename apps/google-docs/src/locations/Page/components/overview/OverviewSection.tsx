@@ -97,7 +97,7 @@ const OverviewSection = ({
             </Flex>
             <Paragraph marginBottom="none" fontColor="gray600">
               Review your content and associated entries below. Highlight text to make adjustments.
-              Select which entries you&apos;d like to create.
+              Create entries when you are complete.
             </Paragraph>
           </Flex>
 
