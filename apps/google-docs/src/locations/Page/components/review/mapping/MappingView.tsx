@@ -26,7 +26,7 @@ import { SelectionActionMenu } from './SelectionActionMenu';
 import { buildSourceRefKey } from './sourceRefUtils';
 import { MappingEntryCards, type AnchoredMappingCard } from './MappingEntryCards';
 import { NormalizedDocumentSection } from './NormalizedDocumentSection';
-import { getTitleFromFieldMappings } from '../../../../../utils/overviewEntryList';
+import { getEntryTitleFromFieldMappings } from '../../../../../utils/getEntryTitle';
 
 interface EditModalState {
   viewModel: EditModalContent;
@@ -138,7 +138,7 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
     const contentTypeField = contentType?.fields.find((field) => field.id === fieldId);
     const fieldDisplayName = (contentTypeField?.name ?? '').trim();
     const fieldDisplayType = getFieldTypeLabel(fieldType);
-    const entryName = getTitleFromFieldMappings(graphEntry, contentType?.displayField);
+    const entryName = getEntryTitleFromFieldMappings(graphEntry, contentType?.displayField);
 
     return {
       id: `${entryIndex}-${graphEntry.contentTypeId}-${fieldId}`,
