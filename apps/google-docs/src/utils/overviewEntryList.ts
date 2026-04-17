@@ -15,8 +15,6 @@ export interface EntryListRow {
   children: EntryListRow[];
 }
 
-const UNTITLED = 'Untitled';
-
 export type ContentTypeDisplayInfoMap = ReadonlyMap<string, ContentTypeDisplayInfo>;
 
 interface OrderedEntriesContext {
