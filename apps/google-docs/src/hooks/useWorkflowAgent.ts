@@ -30,6 +30,11 @@ interface WorkflowHook {
   resumeWorkflow: (runId: string, resumePayload: ResumePayload) => Promise<WorkflowRunResult>;
 }
 
+interface ResumeWorkflowHook {
+  isAnalyzing: boolean;
+  resumeWorkflow: (runId: string, resumePayload: ResumePayload) => Promise<WorkflowRunResult>;
+}
+
 const wait = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
 };
@@ -174,12 +179,32 @@ const pollAgentRun = async (
   throw new Error('Workflow polling timeout');
 };
 
+const createResumeWorkflow =
+  (sdk: PageAppSDK, setIsAnalyzing: (value: boolean) => void) =>
+  async (runId: string, resumePayload: ResumePayload): Promise<WorkflowRunResult> => {
+    setIsAnalyzing(true);
+
+    const spaceId = sdk.ids.space;
+    const environmentId = sdk.ids.environment;
+
+    try {
+      await resumeWorkflowRun(sdk, spaceId, environmentId, runId, resumePayload);
+      return await pollAgentRun(sdk, spaceId, environmentId, runId);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Workflow failed');
+      throw error;
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
 export const useWorkflowAgent = ({
   sdk,
   documentId,
   oauthToken,
 }: UseWorkflowParams): WorkflowHook => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const resumeWorkflow = useCallback(createResumeWorkflow(sdk, setIsAnalyzing), [sdk]);
 
   const startWorkflow = useCallback(
     async (contentTypeIds: string[]) => {
@@ -224,29 +249,19 @@ export const useWorkflowAgent = ({
     [sdk, documentId, oauthToken]
   );
 
-  const resumeWorkflow = useCallback(
-    async (runId: string, resumePayload: ResumePayload) => {
-      setIsAnalyzing(true);
-
-      const spaceId = sdk.ids.space;
-      const environmentId = sdk.ids.environment;
-
-      try {
-        await resumeWorkflowRun(sdk, spaceId, environmentId, runId, resumePayload);
-        return await pollAgentRun(sdk, spaceId, environmentId, runId);
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error('Workflow failed');
-        throw error;
-      } finally {
-        setIsAnalyzing(false);
-      }
-    },
-    [sdk]
-  );
-
   return {
     isAnalyzing,
     startWorkflow,
+    resumeWorkflow,
+  };
+};
+
+export const useResumeWorkflowAgent = (sdk: PageAppSDK): ResumeWorkflowHook => {
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const resumeWorkflow = useCallback(createResumeWorkflow(sdk, setIsAnalyzing), [sdk]);
+
+  return {
+    isAnalyzing,
     resumeWorkflow,
   };
 };

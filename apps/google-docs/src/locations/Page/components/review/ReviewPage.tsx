@@ -4,7 +4,7 @@ import tokens from '@contentful/f36-tokens';
 import { PageAppSDK } from '@contentful/app-sdk';
 import type { MappingReviewSuspendPayload, CompletedWorkflowPayload } from '@types';
 import { RunStatus } from '@types';
-import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
+import { useResumeWorkflowAgent } from '@hooks/useWorkflowAgent';
 import Splitter from '../mainpage/Splitter';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
 import OverviewSection from '../overview/OverviewSection';
@@ -29,7 +29,7 @@ export const ReviewPage = ({
   const [selectedEntryIndex, setSelectedEntryIndex] = useState<number>(0);
   const [isCancelling, setIsCancelling] = useState(false);
 
-  const { resumeWorkflow } = useWorkflowAgent({ sdk, documentId: '', oauthToken: '' });
+  const { resumeWorkflow } = useResumeWorkflowAgent(sdk);
 
   const handleCreateEntries = useCallback(async (): Promise<CompletedWorkflowPayload | null> => {
     if (!runId) {

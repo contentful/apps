@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState, type RefCallback } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Box, Button, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import type {
@@ -10,7 +10,7 @@ import type {
 } from '@types';
 import { FileTextIcon } from '@contentful/f36-icons';
 import { useReviewTextSelection } from '@hooks/useReviewTextSelection';
-import { getAnchorIdForSourceRef, resolveMarkerOffsets } from './resolveMappingCardOffsets';
+import { getAnchorIdForSourceRef } from './resolveMappingCardOffsets';
 import { type DocSegment, buildDocument } from './buildDocument';
 import {
   buildMappingHighlightIndex,
@@ -27,6 +27,7 @@ import { SelectionActionMenu } from './SelectionActionMenu';
 import { buildSourceRefKey } from './sourceRefUtils';
 import { MappingEntryCards, type AnchoredMappingCard } from './MappingEntryCards';
 import { NormalizedDocumentSection } from './NormalizedDocumentSection';
+import { useSegmentCardOffsets } from '@hooks/useSegmentCardOffsets';
 
 const enableMockEditModal = import.meta.env.VITE_ENABLE_MOCK_EDIT_MODAL === 'true';
 
@@ -69,13 +70,8 @@ function rangeIntersectsNode(range: Range, node: Node): boolean {
 
 export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): JSX.Element => {
   const [hoveredMappingKeys, setHoveredMappingKeys] = useState<string[]>([]);
-  const [cardOffsetsBySegment, setCardOffsetsBySegment] = useState<
-    Record<string, Record<string, number>>
-  >({});
   const [editModalState, setEditModalState] = useState<EditModalState>(EMPTY_EDIT_MODAL);
   const textSelectionRootRef = useRef<HTMLDivElement | null>(null);
-  const segmentLayoutRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const cardWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const document = payload.normalizedDocument;
   const entryBlockGraph = payload.entryBlockGraph;
@@ -99,67 +95,71 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
 
   const listMarkers = useMemo(() => buildListMarkers(allSegments), [allSegments]);
 
-  const getVisibleHighlights = <T extends MappingHighlight>(highlights: T[]): T[] => {
-    const filtered = highlights.filter(
-      (highlight) =>
-        !entryBlockGraph.excludedSourceRefs.some(
-          (excluded) => buildSourceRefKey(excluded) === buildSourceRefKey(highlight.sourceRef)
-        )
-    );
-    if (selectedEntryIndex === null) {
-      return filtered;
-    }
-    return filtered.filter((item) => item.entryIndex === selectedEntryIndex);
-  };
+  const excludedSourceRefKeys = useMemo(
+    () =>
+      new Set(entryBlockGraph.excludedSourceRefs.map((sourceRef) => buildSourceRefKey(sourceRef))),
+    [entryBlockGraph.excludedSourceRefs]
+  );
 
-  const getHighlightsForSegment = (segment: DocSegment): MappingHighlight[] => {
-    if (segment.kind === 'table') {
-      return uniqueHighlights(highlightIndex.tableHighlights[segment.id] ?? []);
-    }
-    return uniqueHighlights(highlightIndex.blockHighlights[segment.id] ?? []);
-  };
+  const getVisibleHighlights = useCallback(
+    (highlights: MappingHighlight[]): MappingHighlight[] => {
+      const filtered = highlights.filter(
+        (highlight) => !excludedSourceRefKeys.has(buildSourceRefKey(highlight.sourceRef))
+      );
+      if (selectedEntryIndex === null) {
+        return filtered;
+      }
+      return filtered.filter((item) => item.entryIndex === selectedEntryIndex);
+    },
+    [excludedSourceRefKeys, selectedEntryIndex]
+  );
 
-  const getMappingCardsForSegment = (segment: DocSegment): AnchoredMappingCard[] =>
-    getVisibleHighlights(getHighlightsForSegment(segment)).map((highlight) => ({
-      key: getMappingCardKey(segment.id, highlight),
-      fieldName: formatDisplayName(highlight.fieldId),
-      fieldType: getFieldTypeLabel(highlight.fieldType),
-      anchorId: getAnchorIdForSourceRef(highlight.sourceRef),
-    }));
+  const getHighlightsForSegment = useCallback(
+    (segment: DocSegment): MappingHighlight[] => {
+      if (segment.kind === 'table') {
+        return uniqueHighlights(highlightIndex.tableHighlights[segment.id] ?? []);
+      }
+      return uniqueHighlights(highlightIndex.blockHighlights[segment.id] ?? []);
+    },
+    [highlightIndex.blockHighlights, highlightIndex.tableHighlights]
+  );
 
-  const buildLocationOption = (
-    entryIndex: number,
-    fieldId: string,
-    fieldType: string,
-    sourceRef: SourceRef,
-    isSelected = false
-  ): EditLocationOption | null => {
-    const graphEntry = entryBlockGraph.entries[entryIndex];
-    if (!graphEntry) {
-      return null;
-    }
-    const contentType = payload.contentTypes.find(
-      (item) => item.sys.id === graphEntry.contentTypeId
-    );
-    const contentTypeDisplayName = (contentType?.name ?? '').trim();
-    const contentTypeField = contentType?.fields.find((field) => field.id === fieldId);
-    const fieldDisplayName = (contentTypeField?.name ?? '').trim();
-    const fieldDisplayType = getFieldTypeLabel(fieldType);
+  const buildLocationOption = useCallback(
+    (
+      entryIndex: number,
+      fieldId: string,
+      fieldType: string,
+      sourceRef: SourceRef,
+      isSelected = false
+    ): EditLocationOption | null => {
+      const graphEntry = entryBlockGraph.entries[entryIndex];
+      if (!graphEntry) {
+        return null;
+      }
+      const contentType = payload.contentTypes.find(
+        (item) => item.sys.id === graphEntry.contentTypeId
+      );
+      const contentTypeDisplayName = (contentType?.name ?? '').trim();
+      const contentTypeField = contentType?.fields.find((field) => field.id === fieldId);
+      const fieldDisplayName = (contentTypeField?.name ?? '').trim();
+      const fieldDisplayType = getFieldTypeLabel(fieldType);
 
-    return {
-      id: `${entryIndex}-${graphEntry.contentTypeId}-${fieldId}`,
-      contentTypeId: graphEntry.contentTypeId,
-      contentTypeName: contentTypeDisplayName,
-      entryName: getEntryName(contentTypeDisplayName, entryIndex),
-      fieldId,
-      fieldName: fieldDisplayName,
-      fieldType: fieldDisplayType,
-      sourceRef,
-      isSelected,
-    };
-  };
+      return {
+        id: `${entryIndex}-${graphEntry.contentTypeId}-${fieldId}`,
+        contentTypeId: graphEntry.contentTypeId,
+        contentTypeName: contentTypeDisplayName,
+        entryName: getEntryName(contentTypeDisplayName, entryIndex),
+        fieldId,
+        fieldName: fieldDisplayName,
+        fieldType: fieldDisplayType,
+        sourceRef,
+        isSelected,
+      };
+    },
+    [entryBlockGraph.entries, payload.contentTypes]
+  );
 
-  const locationsByMappingKey = useMemo(() => {
+  const locationsByMappingKey = useMemo<Map<string, EditLocationOption>>(() => {
     const byKey = new Map<string, EditLocationOption>();
 
     allSegments.forEach((segment) => {
@@ -183,8 +183,7 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
     });
 
     return byKey;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allSegments, entryBlockGraph, payload.contentTypes, selectedEntryIndex]);
+  }, [allSegments, buildLocationOption, getHighlightsForSegment, getVisibleHighlights]);
 
   const getLocationsForSourceRef = (sourceRef: SourceRef): EditLocationOption[] => {
     const targetKey = buildSourceRefKey(sourceRef);
@@ -249,64 +248,26 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
     }));
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const mappingCardsBySegment = useMemo(
     () =>
       allSegments.reduce<Record<string, AnchoredMappingCard[]>>((acc, segment) => {
-        acc[segment.id] = getMappingCardsForSegment(segment);
+        acc[segment.id] = getVisibleHighlights(getHighlightsForSegment(segment)).map(
+          (highlight) => ({
+            key: getMappingCardKey(segment.id, highlight),
+            fieldName: formatDisplayName(highlight.fieldId),
+            fieldType: getFieldTypeLabel(highlight.fieldType),
+            anchorId: getAnchorIdForSourceRef(highlight.sourceRef),
+          })
+        );
         return acc;
       }, {}),
-    [allSegments, selectedEntryIndex, highlightIndex]
+    [allSegments, getHighlightsForSegment, getVisibleHighlights]
   );
 
-  const setSegmentLayoutRef =
-    (segmentId: string): RefCallback<HTMLDivElement> =>
-    (node) => {
-      segmentLayoutRefs.current[segmentId] = node;
-    };
-
-  const setCardWrapperRef =
-    (cardKey: string): RefCallback<HTMLDivElement> =>
-    (node) => {
-      cardWrapperRefs.current[cardKey] = node;
-    };
-
-  useLayoutEffect(() => {
-    const measureOffsets = () => {
-      const nextOffsets: Record<string, Record<string, number>> = {};
-
-      allSegments.forEach((segment) => {
-        const segmentNode = segmentLayoutRefs.current[segment.id];
-        const segmentCards = mappingCardsBySegment[segment.id] ?? [];
-
-        if (!segmentNode || segmentCards.length === 0) {
-          return;
-        }
-
-        const segmentTop = segmentNode.getBoundingClientRect().top;
-
-        const cards = segmentCards.map((card) => {
-          const anchorNode = segmentNode.querySelector<HTMLElement>(
-            `#${CSS.escape(card.anchorId)}`
-          );
-          const wrapperNode = cardWrapperRefs.current[card.key];
-          const rawTop = anchorNode
-            ? Math.max(0, anchorNode.getBoundingClientRect().top - segmentTop)
-            : 0;
-          const height =
-            wrapperNode?.getBoundingClientRect().height || wrapperNode?.offsetHeight || 28;
-
-          return { key: card.key, rawTop, height };
-        });
-
-        nextOffsets[segment.id] = resolveMarkerOffsets(cards);
-      });
-
-      setCardOffsetsBySegment(nextOffsets);
-    };
-
-    measureOffsets();
-  }, [mappingCardsBySegment, allSegments]);
+  const { cardOffsetsBySegment, setSegmentLayoutRef, setCardWrapperRef } = useSegmentCardOffsets({
+    allSegments,
+    mappingCardsBySegment,
+  });
 
   const openAssignModal = (preview: string, currentLocations: EditLocationOption[]) => {
     setEditModalState({

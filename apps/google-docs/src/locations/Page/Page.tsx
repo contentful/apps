@@ -10,7 +10,7 @@ import { MainPageView } from './components/mainpage/MainPageView';
 import { ReviewPage } from './components/review/ReviewPage';
 import { loadFixtureReviewPayload } from '../../fixtures/googleDocsReview/loadFixtureReviewPayload';
 import type { MappingReviewSuspendPayload } from '@types';
-import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
+import { useResumeWorkflowAgent } from '@hooks/useWorkflowAgent';
 
 const enableMockReviewPayload = import.meta.env.VITE_ENABLE_MOCK_REVIEW_PAYLOAD === 'true';
 
@@ -26,11 +26,7 @@ const Page = () => {
   } | null>(null);
   const [fixtureReviewPayload, setFixtureReviewPayload] =
     useState<MappingReviewSuspendPayload | null>(null);
-  const { resumeWorkflow } = useWorkflowAgent({
-    sdk,
-    documentId: '',
-    oauthToken: '',
-  });
+  const { resumeWorkflow } = useResumeWorkflowAgent(sdk);
 
   // TODO: remove fixture review payload loading before launch
   useEffect(() => {
