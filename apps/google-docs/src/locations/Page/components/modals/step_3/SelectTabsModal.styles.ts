@@ -5,10 +5,6 @@ export const multiselect = css({
   maxWidth: '68%',
 });
 
-export const multiselectOption = css({
-  padding: tokens.spacing2Xs,
-});
-
 export const pillsContainer = css({
   marginRight: tokens.spacingXl,
   maxHeight: '100px',
