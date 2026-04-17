@@ -3,6 +3,7 @@ import { Flex, Stack, Text } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import type { EditModalFieldMapping, EditModalFieldOption } from '@types';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
+import { getFieldTypeLabel } from '../fieldFormatting';
 import { isSelectableFieldType } from './utils';
 
 interface FieldSelectionDropdownProps {
@@ -56,7 +57,8 @@ export const FieldSelectionDropdown = ({
         }}>
         {fieldOptions.map((option) =>
           (() => {
-            const isDisabled = !isSelectableFieldType(option.fieldType, selectedText);
+            const fieldTypeDisplay = getFieldTypeLabel(option.fieldType);
+            const isDisabled = !isSelectableFieldType(fieldTypeDisplay, selectedText);
             const isFilled = filledFieldIds.has(option.id);
             return (
               <Multiselect.Option
@@ -72,7 +74,7 @@ export const FieldSelectionDropdown = ({
                       {option.fieldName}
                     </Text>
                     <Text as="div" fontColor="gray700" fontWeight="fontWeightNormal">
-                      ({option.fieldType})
+                      ({fieldTypeDisplay})
                     </Text>
                   </Flex>
                   <Text as="div" fontColor="gray700" fontWeight="fontWeightNormal">

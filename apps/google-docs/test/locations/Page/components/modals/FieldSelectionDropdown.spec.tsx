@@ -9,18 +9,18 @@ describe('FieldSelectionDropdown', () => {
 
     render(
       <FieldSelectionDropdown
-        selectedText="5 "
+        selectedText="+5 "
         fieldMappings={[{ fieldId: 'name' }]}
         fieldOptions={[
           {
             id: 'name',
             fieldName: 'Name (Internal)',
-            fieldType: 'Short text',
+            fieldType: 'Symbol',
           },
           {
             id: 'marketo',
             fieldName: 'Marketo',
-            fieldType: 'Reference',
+            fieldType: 'Link',
           },
           {
             id: 'headingSize',
@@ -30,7 +30,7 @@ describe('FieldSelectionDropdown', () => {
           {
             id: 'price',
             fieldName: 'Price',
-            fieldType: 'Decimal',
+            fieldType: 'Number',
           },
         ]}
         selectedFieldIds={[]}
@@ -45,12 +45,12 @@ describe('FieldSelectionDropdown', () => {
       expect(screen.getByText('(Short text)')).toBeTruthy();
       expect(screen.getByText('Filled')).toBeTruthy();
       expect(screen.getByText('Marketo')).toBeTruthy();
-      expect(screen.getByText('(Reference)')).toBeTruthy();
+      expect(screen.getByText('(Media)')).toBeTruthy();
       expect(screen.getAllByText('Empty').length).toBeGreaterThan(0);
       expect(screen.getByText('Heading size')).toBeTruthy();
       expect(screen.getByText('(Integer)')).toBeTruthy();
       expect(screen.getByText('Price')).toBeTruthy();
-      expect(screen.getByText('(Decimal)')).toBeTruthy();
+      expect(screen.getByText('(Number)')).toBeTruthy();
     });
 
     const enabledOption = screen.getByDisplayValue('name');
@@ -83,7 +83,7 @@ describe('FieldSelectionDropdown', () => {
           {
             id: 'title',
             fieldName: 'Title',
-            fieldType: 'Short text',
+            fieldType: 'Symbol',
           },
           {
             id: 'headingSize',
@@ -93,7 +93,7 @@ describe('FieldSelectionDropdown', () => {
           {
             id: 'price',
             fieldName: 'Price',
-            fieldType: 'Decimal',
+            fieldType: 'Number',
           },
         ]}
         selectedFieldIds={[]}

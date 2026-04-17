@@ -27,5 +27,12 @@ const FIELD_TYPE_LABELS: Record<string, string> = {
   ResourceLink: 'Resource link',
 };
 
+export const FIELD_TYPE_DISPLAY = {
+  SHORT_TEXT: FIELD_TYPE_LABELS.Symbol,
+  LONG_TEXT: FIELD_TYPE_LABELS.Text,
+  INTEGER: FIELD_TYPE_LABELS.Integer,
+  DECIMAL: FIELD_TYPE_LABELS.Number,
+} as const;
+
 export const getFieldTypeLabel = (fieldType: string): string =>
   FIELD_TYPE_LABELS[fieldType] ?? fieldType;
