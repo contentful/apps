@@ -137,6 +137,12 @@ export async function startAgentRun(
   return runData.sys.id;
 }
 
+/**
+ * Resumes a suspended agent run. For the Google Docs mapping-review step, the
+ * edited `entryBlockGraph` must live in `resumePayload` (see Network tab). After resume,
+ * mapping-review repopulates `metadata.suspendPayload` with the reviewed graph (the resume
+ * handler clears it first).
+ */
 export async function resumeWorkflowRun(
   sdk: PageAppSDK,
   spaceId: string,

@@ -1,7 +1,8 @@
-import { useLayoutEffect, useMemo, useRef, useState, type RefCallback } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefCallback } from 'react';
 import { Box, Button, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import type {
+  EntryBlockGraph,
   ImageSourceRef,
   MappingReviewSuspendPayload,
   EditModalContent,
@@ -28,8 +29,18 @@ import { SelectionActionMenu } from './SelectionActionMenu';
 import { buildSourceRefKey } from './sourceRefUtils';
 import { MappingEntryCards, type AnchoredMappingCard } from './MappingEntryCards';
 import { NormalizedDocumentSection } from './NormalizedDocumentSection';
+import {
+  applyImageExclusionToEntryBlockGraph,
+  applyTextExclusionToEntryBlockGraph,
+  collectMappedExclusionPreviewText,
+  collectTextExclusionRangesFromSelection,
+  type TextExclusionRange,
+} from './entryBlockGraphExclusion';
+
+type EditModalMode = 'exclude' | 'assign' | null;
 
 interface EditModalState {
+  mode: EditModalMode;
   viewModel: EditModalContent;
   title: string;
   locationSectionDescription: string;
@@ -38,10 +49,13 @@ interface EditModalState {
 
 interface MappingViewProps {
   payload: MappingReviewSuspendPayload;
+  entryBlockGraph: EntryBlockGraph;
+  onEntryBlockGraphChange: (next: EntryBlockGraph) => void;
   selectedEntryIndex: number | null;
 }
 
 const EMPTY_EDIT_MODAL: EditModalState = {
+  mode: null,
   viewModel: {
     selectedText: '',
     currentLocations: [],
@@ -86,18 +100,48 @@ function rangeIntersectsNode(range: Range, node: Node): boolean {
   }
 }
 
-export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): JSX.Element => {
+export const MappingView = ({
+  payload,
+  entryBlockGraph,
+  onEntryBlockGraphChange,
+  selectedEntryIndex,
+}: MappingViewProps): JSX.Element => {
   const [hoveredMappingKeys, setHoveredMappingKeys] = useState<string[]>([]);
   const [cardOffsetsBySegment, setCardOffsetsBySegment] = useState<
     Record<string, Record<string, number>>
   >({});
   const [editModalState, setEditModalState] = useState<EditModalState>(EMPTY_EDIT_MODAL);
+  const [pendingTextExclusionRanges, setPendingTextExclusionRanges] = useState<
+    TextExclusionRange[] | null
+  >(null);
+  const [pendingImageSourceRef, setPendingImageSourceRef] = useState<ImageSourceRef | null>(null);
   const textSelectionRootRef = useRef<HTMLDivElement | null>(null);
   const segmentLayoutRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const cardWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const document = payload.normalizedDocument;
-  const entryBlockGraph = payload.entryBlockGraph;
+
+  const closeEditModal = () => {
+    setEditModalState(EMPTY_EDIT_MODAL);
+    setPendingTextExclusionRanges(null);
+    setPendingImageSourceRef(null);
+  };
+
+  const previousSelectedEntryIndexRef = useRef<number | null | undefined>(undefined);
+
+  // Avoid confirming an exclude/assign that was opened under a different overview entry.
+  useEffect(() => {
+    if (previousSelectedEntryIndexRef.current === undefined) {
+      previousSelectedEntryIndexRef.current = selectedEntryIndex;
+      return;
+    }
+    if (previousSelectedEntryIndexRef.current !== selectedEntryIndex) {
+      previousSelectedEntryIndexRef.current = selectedEntryIndex;
+      closeEditModal();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to entry focus changes
+  }, [selectedEntryIndex]);
+
   const { selectionRectangle, selectedText, selectedRange, clearSelection } =
     useReviewTextSelection(textSelectionRootRef);
 
@@ -167,6 +211,7 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
     const entryName = getEntryTitleFromFieldMappings(graphEntry, contentType?.displayField);
 
     return {
+      entryIndex,
       id: `${entryIndex}-${graphEntry.contentTypeId}-${fieldId}`,
       contentTypeId: graphEntry.contentTypeId,
       contentTypeName: contentTypeDisplayName,
@@ -365,7 +410,10 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
   }, [mappingCardsBySegment, allSegments]);
 
   const openAssignModal = (preview: string, currentLocations: EditLocationOption[]) => {
+    setPendingTextExclusionRanges(null);
+    setPendingImageSourceRef(null);
     setEditModalState({
+      mode: 'assign',
       viewModel: {
         selectedText: preview,
         currentLocations,
@@ -378,10 +426,17 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
     });
   };
 
-  const openExcludeModal = (preview: string, currentLocations: EditLocationOption[]) => {
+  const openExcludeModal = (
+    selectedText: string,
+    currentLocations: EditLocationOption[],
+    preview?: { contentPreview: string; previewSectionTitle: string }
+  ) => {
     setEditModalState({
+      mode: 'exclude',
       viewModel: {
-        selectedText: preview,
+        selectedText,
+        contentPreview: preview?.contentPreview,
+        previewSectionTitle: preview?.previewSectionTitle,
         currentLocations,
         isOpen: true,
       },
@@ -400,7 +455,21 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
 
   const handleExcludeFromSelection = () => {
     if (!selectedText.trim()) return;
-    openExcludeModal(selectedText.trim(), getLocationsForSelectedText());
+    const ranges = collectTextExclusionRangesFromSelection(
+      textSelectionRootRef.current,
+      selectedRange
+    );
+    setPendingTextExclusionRanges(ranges.length ? ranges : null);
+    setPendingImageSourceRef(null);
+    const trimmed = selectedText.trim();
+    const mappedPreview = collectMappedExclusionPreviewText(
+      textSelectionRootRef.current,
+      selectedRange
+    ).trim();
+    openExcludeModal(trimmed, getLocationsForSelectedText(), {
+      contentPreview: mappedPreview || trimmed,
+      previewSectionTitle: 'Text to exclude',
+    });
     clearSelection();
   };
 
@@ -410,8 +479,52 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
   };
 
   const handleExcludeImage = (sourceRef: ImageSourceRef, label: string) => {
-    openExcludeModal(label, getLocationsForSourceRef(sourceRef));
+    setPendingImageSourceRef(sourceRef);
+    setPendingTextExclusionRanges(null);
+    openExcludeModal(label, getLocationsForSourceRef(sourceRef), {
+      contentPreview: label,
+      previewSectionTitle: 'Image to exclude',
+    });
     setHoveredMappingKeys([]);
+  };
+
+  const handleEditModalConfirmPrimary = ({
+    selectedLocationId,
+  }: {
+    selectedLocationId: string | null;
+  }) => {
+    if (editModalState.mode === 'assign') {
+      closeEditModal();
+      return;
+    }
+
+    if (editModalState.mode !== 'exclude') {
+      closeEditModal();
+      return;
+    }
+
+    const locations = editModalState.viewModel.currentLocations;
+    const selected =
+      locations.find((location) => location.id === selectedLocationId) ??
+      locations.find((location) => location.isSelected) ??
+      locations[0];
+
+    if (!selected) {
+      closeEditModal();
+      return;
+    }
+
+    if (pendingImageSourceRef) {
+      onEntryBlockGraphChange(
+        applyImageExclusionToEntryBlockGraph(entryBlockGraph, selected, pendingImageSourceRef)
+      );
+    } else if (pendingTextExclusionRanges?.length) {
+      onEntryBlockGraphChange(
+        applyTextExclusionToEntryBlockGraph(entryBlockGraph, selected, pendingTextExclusionRanges)
+      );
+    }
+
+    closeEditModal();
   };
 
   const canExcludeSelectedText = useMemo(() => {
@@ -498,11 +611,12 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
 
       <EditModal
         isOpen={editModalState.viewModel.isOpen}
-        onClose={() => setEditModalState(EMPTY_EDIT_MODAL)}
+        onClose={closeEditModal}
         viewModel={editModalState.viewModel}
         title={editModalState.title}
         locationSectionDescription={editModalState.locationSectionDescription}
         primaryButtonLabel={editModalState.primaryButtonLabel}
+        onConfirmPrimary={handleEditModalConfirmPrimary}
       />
     </>
   );

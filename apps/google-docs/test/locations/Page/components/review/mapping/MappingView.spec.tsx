@@ -18,6 +18,11 @@ const blockTextSourceRef: SourceRef = {
   flattenedRuns: [{ text: 'Hello world', start: 0, end: 11 }],
 };
 
+const mappingViewGraphProps = (payload: MappingReviewSuspendPayload) => ({
+  entryBlockGraph: payload.entryBlockGraph,
+  onEntryBlockGraphChange: vi.fn(),
+});
+
 const createPayload = (excludedSourceRefs: SourceRef[] = []): MappingReviewSuspendPayload => ({
   suspendStepId: 'mapping-review',
   reason: 'Mapping review required before CMA payload generation continues',
@@ -119,10 +124,21 @@ describe('MappingView', () => {
       clearSelection: mockClearSelection,
     });
 
+    const payload = createPayload();
     const { rerender } = render(
-      <MappingView payload={createPayload()} selectedEntryIndex={null} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={null}
+      />
     );
-    rerender(<MappingView payload={createPayload()} selectedEntryIndex={null} />);
+    rerender(
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={null}
+      />
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Reassign' }));
 
@@ -148,7 +164,14 @@ describe('MappingView', () => {
       clearSelection: mockClearSelection,
     });
 
-    render(<MappingView payload={createPayload()} selectedEntryIndex={null} />);
+    const payload = createPayload();
+    render(
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={null}
+      />
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Assign' }));
 
@@ -169,7 +192,14 @@ describe('MappingView', () => {
       clearSelection: mockClearSelection,
     });
 
-    render(<MappingView payload={createPayload()} selectedEntryIndex={null} />);
+    const payload = createPayload();
+    render(
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={null}
+      />
+    );
 
     expect(screen.getByRole('button', { name: 'Assign' })).toBeTruthy();
     const excludeButton = screen.getByRole('button', { name: 'Exclude' }) as HTMLButtonElement;
@@ -194,10 +224,21 @@ describe('MappingView', () => {
       clearSelection: mockClearSelection,
     });
 
+    const payload = createPayload();
     const { rerender } = render(
-      <MappingView payload={createPayload()} selectedEntryIndex={null} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={null}
+      />
     );
-    rerender(<MappingView payload={createPayload()} selectedEntryIndex={null} />);
+    rerender(
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={null}
+      />
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Exclude' }));
 

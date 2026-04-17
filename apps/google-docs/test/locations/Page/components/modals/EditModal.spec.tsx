@@ -10,6 +10,7 @@ const viewModel = {
   isOpen: true,
   currentLocations: [
     {
+      entryIndex: 0,
       id: 'summary',
       contentTypeId: 'sampleContentType',
       contentTypeName: 'Sample content type',
@@ -34,6 +35,7 @@ const viewModel = {
       isSelected: true,
     },
     {
+      entryIndex: 0,
       id: 'description',
       contentTypeId: 'sampleContentType',
       contentTypeName: 'Sample content type',

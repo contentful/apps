@@ -69,15 +69,44 @@ interface TextSegmentSpanProps {
   segment: TextSegment;
   hovered: boolean;
   onSetHoveredMappings: (keys: string[]) => void;
+  textScope: 'block' | 'table';
+  rangeStart: number;
+  rangeEnd: number;
+  blockId?: string;
+  tableId?: string;
+  rowId?: string;
+  cellId?: string;
+  partId?: string;
 }
 
-const TextSegmentSpan = ({ id, segment, hovered, onSetHoveredMappings }: TextSegmentSpanProps) => {
+const TextSegmentSpan = ({
+  id,
+  segment,
+  hovered,
+  onSetHoveredMappings,
+  textScope,
+  rangeStart,
+  rangeEnd,
+  blockId,
+  tableId,
+  rowId,
+  cellId,
+  partId,
+}: TextSegmentSpanProps) => {
   const content = (
     <Box
       as="span"
       key={id}
       data-review-text-segment="true"
       data-is-mapped={segment.highlighted ? 'true' : 'false'}
+      data-text-scope={textScope}
+      data-range-start={String(rangeStart)}
+      data-range-end={String(rangeEnd)}
+      data-block-id={blockId ?? undefined}
+      data-table-id={tableId ?? undefined}
+      data-row-id={rowId ?? undefined}
+      data-cell-id={cellId ?? undefined}
+      data-part-id={partId ?? undefined}
       data-mapping-keys={segment.mappingKeys.join('|')}
       onMouseEnter={
         segment.highlighted ? () => onSetHoveredMappings(segment.mappingKeys) : undefined
@@ -155,6 +184,10 @@ export const BlockRenderer = ({
           segment={seg}
           hovered={isMappingHovered(seg.mappingKeys, hoveredMappingKeys)}
           onSetHoveredMappings={onSetHoveredMappingKeys}
+          textScope="block"
+          rangeStart={seg.start}
+          rangeEnd={seg.end}
+          blockId={block.id}
         />
       ))}
     </Text>
@@ -346,6 +379,13 @@ const TablePartRenderer = ({
           segment={seg}
           hovered={isMappingHovered(seg.mappingKeys, hoveredMappingKeys)}
           onSetHoveredMappings={onSetHoveredMappingKeys}
+          textScope="table"
+          rangeStart={seg.start}
+          rangeEnd={seg.end}
+          tableId={tableId}
+          rowId={rowId}
+          cellId={cellId}
+          partId={part.id}
         />
       ))}
     </Box>

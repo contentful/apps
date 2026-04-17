@@ -1,6 +1,7 @@
 import type { SourceRef } from './entryBlockGraph';
 
 export interface EditLocationOption {
+  entryIndex: number;
   id: string;
   contentTypeId: string;
   contentTypeName: string;
@@ -32,6 +33,10 @@ export interface EditModalNewLocation {
 
 export interface EditModalContent {
   selectedText: string;
+  /** Mapped-only preview for exclude flow; falls back to selectedText in the modal when absent. */
+  contentPreview?: string;
+  /** Replaces the default "Selected content" heading for the preview card. */
+  previewSectionTitle?: string;
   isOpen: boolean;
   currentLocations: EditLocationOption[];
   newLocations?: EditModalNewLocation[];

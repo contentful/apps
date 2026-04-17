@@ -2,6 +2,7 @@ import { ContentType, PageAppSDK } from '@contentful/app-sdk';
 import type { EntryToCreate } from '@types';
 import type { EntryBlockGraphEntry } from '../types/entryBlockGraph';
 import { isTextSourceRef } from '../types/entryBlockGraph';
+import { truncateLabel } from './utils';
 
 /**
  * Gets the title of an entry by fetching its content type's display field
@@ -13,6 +14,9 @@ export interface GetEntryTitleProps {
 }
 
 const UNTITLED_ENTRY_LABEL = 'Untitled';
+
+/** Max length for overview row titles derived from display-field source refs (before card-level truncate). */
+const DISPLAY_FIELD_TITLE_EXCERPT_MAX = 80;
 
 export const getEntryTitle = async ({
   sdk,
@@ -60,12 +64,15 @@ export function getEntryTitleFromFieldMappings(
   const fieldMapping = entry.fieldMappings.find((mapping) => mapping.fieldId === displayField);
   if (!fieldMapping) return UNTITLED_ENTRY_LABEL;
 
-  const text = fieldMapping.sourceRefs
-    .filter(isTextSourceRef)
-    .flatMap((ref) => ref.flattenedRuns)
+  const firstTextRef = fieldMapping.sourceRefs.find(isTextSourceRef);
+  if (!firstTextRef) return UNTITLED_ENTRY_LABEL;
+
+  const text = firstTextRef.flattenedRuns
     .map((run) => run.text)
     .join('')
     .trim();
 
-  return text.length > 0 ? text : UNTITLED_ENTRY_LABEL;
+  if (!text.length) return UNTITLED_ENTRY_LABEL;
+
+  return truncateLabel(text, DISPLAY_FIELD_TITLE_EXCERPT_MAX);
 }

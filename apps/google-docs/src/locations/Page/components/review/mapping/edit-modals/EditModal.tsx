@@ -20,6 +20,7 @@ interface EditModalProps {
   locationSectionDescription: string;
   primaryButtonLabel: string;
   additionalContent?: ReactNode;
+  onConfirmPrimary?: (details: { selectedLocationId: string | null }) => void;
 }
 
 export const EditModal = ({
@@ -30,6 +31,7 @@ export const EditModal = ({
   locationSectionDescription,
   primaryButtonLabel,
   additionalContent,
+  onConfirmPrimary,
 }: EditModalProps) => {
   const hasLocationSectionDescription = locationSectionDescription.trim().length > 0;
   const hasCurrentLocations = viewModel.currentLocations.length > 0;
@@ -80,8 +82,11 @@ export const EditModal = ({
   };
 
   const handlePrimaryAction = () => {
-    // TODO: Wire the primary edit-modal action to use the selected fields per new location.
+    onConfirmPrimary?.({ selectedLocationId: selectedLocationId });
   };
+
+  const previewSectionTitle = viewModel.previewSectionTitle ?? 'Selected content';
+  const previewQuotedText = (viewModel.contentPreview ?? viewModel.selectedText).trim();
 
   return (
     <Modal isShown={isOpen} onClose={onClose} size="large" shouldCloseOnOverlayClick={false}>
@@ -92,10 +97,10 @@ export const EditModal = ({
             <Box className={modalContent}>
               <Box className={sectionCard}>
                 <Text as="p" fontWeight="fontWeightDemiBold" marginBottom="spacingM">
-                  Selected content
+                  {previewSectionTitle}
                 </Text>
                 <Text as="p" fontSize="fontSizeL">
-                  "{viewModel.selectedText}"
+                  "{previewQuotedText}"
                 </Text>
               </Box>
 

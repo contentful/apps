@@ -1,0 +1,406 @@
+import type {
+  EditLocationOption,
+  EntryBlockGraph,
+  ImageSourceRef,
+  NormalizedDocumentFlattenedRun,
+  TextSourceRef,
+} from '@types';
+import { isTableSourceRef, isTextSourceRef } from '@types';
+import { buildSourceRefKey } from './sourceRefUtils';
+
+export type TextExclusionRange =
+  | { scope: 'block'; blockId: string; start: number; end: number }
+  | {
+      scope: 'table';
+      tableId: string;
+      rowId: string;
+      cellId: string;
+      partId: string;
+      start: number;
+      end: number;
+    };
+
+function mergeIntervals(intervals: [number, number][]): [number, number][] {
+  if (!intervals.length) return [];
+  const sorted = [...intervals].sort((a, b) => a[0] - b[0]);
+  const merged: [number, number][] = [];
+  for (const [s, e] of sorted) {
+    if (e <= s) continue;
+    const last = merged[merged.length - 1];
+    if (!last || s > last[1]) merged.push([s, e]);
+    else last[1] = Math.max(last[1], e);
+  }
+  return merged;
+}
+
+function subtractIntervalsFromSpan(
+  spanStart: number,
+  spanEnd: number,
+  remove: [number, number][]
+): [number, number][] {
+  const cuts = mergeIntervals(
+    remove
+      .map(([s, e]) => [Math.max(s, spanStart), Math.min(e, spanEnd)] as [number, number])
+      .filter(([s, e]) => s < e)
+  );
+  if (!cuts.length) return [[spanStart, spanEnd]];
+  const out: [number, number][] = [];
+  let cur = spanStart;
+  for (const [cs, ce] of cuts) {
+    if (cur < cs) out.push([cur, cs]);
+    cur = Math.max(cur, ce);
+  }
+  if (cur < spanEnd) out.push([cur, spanEnd]);
+  return out;
+}
+
+function clipFlattenedRuns(
+  runs: NormalizedDocumentFlattenedRun[],
+  segStart: number,
+  segEnd: number
+): NormalizedDocumentFlattenedRun[] {
+  const out: NormalizedDocumentFlattenedRun[] = [];
+  for (const run of runs) {
+    const innerStart = Math.max(run.start, segStart);
+    const innerEnd = Math.min(run.end, segEnd);
+    if (innerStart >= innerEnd) continue;
+    const textSliceStart = innerStart - run.start;
+    const textSliceEnd = innerEnd - run.start;
+    out.push({
+      ...run,
+      start: innerStart,
+      end: innerEnd,
+      text: run.text.slice(textSliceStart, textSliceEnd),
+    });
+  }
+  return out;
+}
+
+function buildTextRefsFromSpans(
+  baseRef: TextSourceRef,
+  spans: [number, number][]
+): TextSourceRef[] {
+  return spans.map(([s, e]) => ({
+    ...baseRef,
+    start: s,
+    end: e,
+    flattenedRuns: clipFlattenedRuns(baseRef.flattenedRuns, s, e),
+  }));
+}
+
+function intersectSpan(
+  refStart: number,
+  refEnd: number,
+  rStart: number,
+  rEnd: number
+): [number, number] | null {
+  const start = Math.max(refStart, rStart);
+  const end = Math.min(refEnd, rEnd);
+  if (start >= end) return null;
+  return [start, end];
+}
+
+function rangesOverlappingTextSourceRef(
+  ref: TextSourceRef,
+  pending: TextExclusionRange[]
+): [number, number][] {
+  const cuts: [number, number][] = [];
+  for (const r of pending) {
+    if (r.scope === 'block' && 'blockId' in ref && !isTableSourceRef(ref)) {
+      if (r.blockId === ref.blockId) {
+        const hit = intersectSpan(ref.start, ref.end, r.start, r.end);
+        if (hit) cuts.push(hit);
+      }
+    }
+    if (r.scope === 'table' && isTableSourceRef(ref) && isTextSourceRef(ref)) {
+      if (
+        ref.tableId === r.tableId &&
+        ref.rowId === r.rowId &&
+        ref.cellId === r.cellId &&
+        ref.partId === r.partId
+      ) {
+        const hit = intersectSpan(ref.start, ref.end, r.start, r.end);
+        if (hit) cuts.push(hit);
+      }
+    }
+  }
+  return cuts;
+}
+
+function rangeIntersectsNodeSafe(range: Range, node: Node): boolean {
+  try {
+    return range.intersectsNode(node);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Character offsets `[localStart, localEnd)` within `el.textContent` for the
+ * intersection of `selection` with the text inside `el`.
+ */
+function getIntersectionCharOffsetsWithinElement(
+  el: HTMLElement,
+  selection: Range
+): [number, number] | null {
+  if (!rangeIntersectsNodeSafe(selection, el)) return null;
+
+  const innerStart = document.createRange();
+  innerStart.selectNodeContents(el);
+  innerStart.collapse(true);
+
+  const selStart = selection.cloneRange();
+  selStart.collapse(true);
+
+  let localStart: number;
+  if (innerStart.compareBoundaryPoints(Range.START_TO_START, selStart) > 0) {
+    localStart = 0;
+  } else {
+    const pre = document.createRange();
+    pre.selectNodeContents(el);
+    try {
+      pre.setEnd(selection.startContainer, selection.startOffset);
+    } catch {
+      return null;
+    }
+    localStart = pre.toString().length;
+  }
+
+  const innerEnd = document.createRange();
+  innerEnd.selectNodeContents(el);
+  innerEnd.collapse(false);
+
+  const selEnd = selection.cloneRange();
+  selEnd.collapse(false);
+
+  const textLen = (el.textContent ?? '').length;
+  let localEnd: number;
+  if (innerEnd.compareBoundaryPoints(Range.END_TO_END, selEnd) > 0) {
+    const pre = document.createRange();
+    pre.selectNodeContents(el);
+    try {
+      pre.setEnd(selection.endContainer, selection.endOffset);
+    } catch {
+      return null;
+    }
+    localEnd = pre.toString().length;
+  } else {
+    localEnd = textLen;
+  }
+
+  localStart = Math.max(0, Math.min(textLen, localStart));
+  localEnd = Math.max(0, Math.min(textLen, localEnd));
+
+  if (localEnd <= localStart) return null;
+  return [localStart, localEnd];
+}
+
+/**
+ * Maps DOM-local intersection to absolute normalized-document indices for this segment.
+ */
+function getAbsoluteIntersectionForMappedSegment(
+  el: HTMLElement,
+  selection: Range,
+  segStart: number,
+  segEnd: number
+): [number, number] | null {
+  const local = getIntersectionCharOffsetsWithinElement(el, selection);
+  if (!local) return null;
+
+  const [localStart, localEnd] = local;
+  const absStart = segStart + localStart;
+  const absEnd = segStart + localEnd;
+  const clampedStart = Math.max(segStart, Math.min(segEnd, absStart));
+  const clampedEnd = Math.max(segStart, Math.min(segEnd, absEnd));
+  if (clampedEnd <= clampedStart) return null;
+  return [clampedStart, clampedEnd];
+}
+
+function mergeTextExclusionRanges(ranges: TextExclusionRange[]): TextExclusionRange[] {
+  const blockBuckets = new Map<string, [number, number][]>();
+  const tableBuckets = new Map<string, [number, number][]>();
+
+  for (const r of ranges) {
+    if (r.scope === 'block') {
+      const arr = blockBuckets.get(r.blockId) ?? [];
+      arr.push([r.start, r.end]);
+      blockBuckets.set(r.blockId, arr);
+    } else {
+      const key = JSON.stringify([r.tableId, r.rowId, r.cellId, r.partId]);
+      const arr = tableBuckets.get(key) ?? [];
+      arr.push([r.start, r.end]);
+      tableBuckets.set(key, arr);
+    }
+  }
+
+  const out: TextExclusionRange[] = [];
+  for (const [blockId, intervals] of blockBuckets) {
+    for (const [start, end] of mergeIntervals(intervals)) {
+      out.push({ scope: 'block', blockId, start, end });
+    }
+  }
+  for (const [key, intervals] of tableBuckets) {
+    const [tableId, rowId, cellId, partId] = JSON.parse(key) as [string, string, string, string];
+    for (const [start, end] of mergeIntervals(intervals)) {
+      out.push({ scope: 'table', tableId, rowId, cellId, partId, start, end });
+    }
+  }
+  return out;
+}
+
+/**
+ * Text from mapped review segments that intersect the selection (DOM order).
+ * Omits unmapped text so the exclude modal shows only what maps to fields.
+ */
+export function collectMappedExclusionPreviewText(
+  root: HTMLElement | null,
+  selectedRange: Range | null
+): string {
+  if (!root || !selectedRange) return '';
+
+  const mapped = root.querySelectorAll<HTMLElement>(
+    '[data-review-text-segment="true"][data-is-mapped="true"]'
+  );
+  const pieces: string[] = [];
+  mapped.forEach((el) => {
+    if (!rangeIntersectsNodeSafe(selectedRange, el)) return;
+
+    const segStart = Number(el.dataset.rangeStart);
+    const segEnd = Number(el.dataset.rangeEnd);
+    if (!Number.isFinite(segStart) || !Number.isFinite(segEnd) || segStart >= segEnd) return;
+
+    const local = getIntersectionCharOffsetsWithinElement(el, selectedRange);
+    if (!local) return;
+    const [ls, le] = local;
+    pieces.push((el.textContent ?? '').slice(ls, le));
+  });
+  return pieces.join('');
+}
+
+/**
+ * Reads mapped review text segments touched by the selection and returns merged
+ * character ranges in normalized-document coordinates (per block or table text part).
+ */
+export function collectTextExclusionRangesFromSelection(
+  root: HTMLElement | null,
+  selectedRange: Range | null
+): TextExclusionRange[] {
+  if (!root || !selectedRange) return [];
+
+  const mapped = root.querySelectorAll<HTMLElement>(
+    '[data-review-text-segment="true"][data-is-mapped="true"]'
+  );
+  const raw: TextExclusionRange[] = [];
+
+  mapped.forEach((el) => {
+    if (!rangeIntersectsNodeSafe(selectedRange, el)) return;
+
+    const scope = el.dataset.textScope;
+    const segStart = Number(el.dataset.rangeStart);
+    const segEnd = Number(el.dataset.rangeEnd);
+    if (!Number.isFinite(segStart) || !Number.isFinite(segEnd) || segStart >= segEnd) return;
+
+    const abs = getAbsoluteIntersectionForMappedSegment(el, selectedRange, segStart, segEnd);
+    if (!abs) return;
+    const [start, end] = abs;
+
+    if (scope === 'block' && el.dataset.blockId) {
+      raw.push({ scope: 'block', blockId: el.dataset.blockId, start, end });
+      return;
+    }
+
+    if (
+      scope === 'table' &&
+      el.dataset.tableId &&
+      el.dataset.rowId &&
+      el.dataset.cellId &&
+      el.dataset.partId
+    ) {
+      raw.push({
+        scope: 'table',
+        tableId: el.dataset.tableId,
+        rowId: el.dataset.rowId,
+        cellId: el.dataset.cellId,
+        partId: el.dataset.partId,
+        start,
+        end,
+      });
+    }
+  });
+
+  return mergeTextExclusionRanges(raw);
+}
+
+/**
+ * Returns a new graph where the chosen field's matching text source ref(s) are split/shrunk
+ * so excluded character ranges are no longer part of any source ref (for CMA resume).
+ */
+export function applyTextExclusionToEntryBlockGraph(
+  graph: EntryBlockGraph,
+  location: EditLocationOption,
+  pendingRanges: TextExclusionRange[]
+): EntryBlockGraph {
+  if (!pendingRanges.length) return graph;
+
+  const nextEntries = graph.entries.map((entry, idx) => {
+    if (idx !== location.entryIndex) return entry;
+
+    return {
+      ...entry,
+      fieldMappings: entry.fieldMappings.map((fm) => {
+        if (fm.fieldId !== location.fieldId) return fm;
+
+        const nextRefs = fm.sourceRefs.flatMap((sr) => {
+          if (buildSourceRefKey(sr) !== buildSourceRefKey(location.sourceRef)) return [sr];
+          if (!isTextSourceRef(sr)) return [sr];
+
+          const cuts = rangesOverlappingTextSourceRef(sr, pendingRanges);
+          if (!cuts.length) return [sr];
+
+          const remaining = subtractIntervalsFromSpan(sr.start, sr.end, cuts);
+          const pieces = buildTextRefsFromSpans(sr, remaining).filter((r) => r.start < r.end);
+          return pieces.length ? pieces : [];
+        });
+
+        return { ...fm, sourceRefs: nextRefs };
+      }),
+    };
+  });
+
+  return { ...graph, entries: nextEntries };
+}
+
+/**
+ * Removes the image ref from the chosen field mapping and records it in excludedSourceRefs for UI.
+ */
+export function applyImageExclusionToEntryBlockGraph(
+  graph: EntryBlockGraph,
+  location: EditLocationOption,
+  imageRef: ImageSourceRef
+): EntryBlockGraph {
+  const key = buildSourceRefKey(imageRef);
+
+  const nextEntries = graph.entries.map((entry, idx) => {
+    if (idx !== location.entryIndex) return entry;
+
+    return {
+      ...entry,
+      fieldMappings: entry.fieldMappings.map((fm) => {
+        if (fm.fieldId !== location.fieldId) return fm;
+        return {
+          ...fm,
+          sourceRefs: fm.sourceRefs.filter((sr) => buildSourceRefKey(sr) !== key),
+        };
+      }),
+    };
+  });
+
+  const already = graph.excludedSourceRefs.some((r) => buildSourceRefKey(r) === key);
+  return {
+    ...graph,
+    entries: nextEntries,
+    excludedSourceRefs: already
+      ? graph.excludedSourceRefs
+      : [...graph.excludedSourceRefs, imageRef],
+  };
+}
