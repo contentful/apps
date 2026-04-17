@@ -164,12 +164,13 @@ export const MappingView = ({ payload, selectedEntryIndex }: MappingViewProps): 
     const contentTypeField = contentType?.fields.find((field) => field.id === fieldId);
     const fieldDisplayName = (contentTypeField?.name ?? '').trim();
     const fieldDisplayType = getFieldTypeLabel(fieldType);
+    const entryName = getEntryTitleFromFieldMappings(graphEntry, contentType?.displayField);
 
     return {
       id: `${entryIndex}-${graphEntry.contentTypeId}-${fieldId}`,
       contentTypeId: graphEntry.contentTypeId,
       contentTypeName: contentTypeDisplayName,
-      entryName: getEntryName(contentTypeDisplayName, entryIndex),
+      entryName,
       fieldId,
       fieldName: fieldDisplayName,
       fieldType: fieldDisplayType,

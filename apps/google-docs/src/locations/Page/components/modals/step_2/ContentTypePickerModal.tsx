@@ -155,7 +155,6 @@ export const ContentTypePickerModal = ({
             }}>
             {filteredContentTypes.map((ct) => (
               <Multiselect.Option
-                className={css({ padding: `0.25rem` })}
                 key={ct.sys.id}
                 value={ct.sys.id}
                 itemId={ct.sys.id}

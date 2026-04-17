@@ -129,7 +129,7 @@ describe('MappingView', () => {
     expect(screen.getByRole('heading', { name: 'Assign content' })).toBeTruthy();
     expect(screen.getByText('"selected body text"')).toBeTruthy();
     expect(screen.getByText('Article')).toBeTruthy();
-    expect(screen.getByText('Article #1')).toBeTruthy();
+    expect(screen.getByText('Untitled')).toBeTruthy();
     expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
     expect(screen.getByText('New location')).toBeTruthy();
     expect(screen.getByText('Article: Draft title from display field')).toBeTruthy();
