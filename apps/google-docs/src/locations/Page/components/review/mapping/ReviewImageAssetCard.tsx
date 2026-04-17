@@ -3,6 +3,7 @@ import tokens from '@contentful/f36-tokens';
 import type { ImageSourceRef, NormalizedDocumentImage, SourceRef } from '@types';
 import Splitter from '../../mainpage/Splitter';
 import { buildSourceRefKey, isImageSourceRefExcluded } from './sourceRefUtils';
+import { isDataUIPart } from 'ai';
 
 export interface ReviewImageAssetCardProps {
   image: NormalizedDocumentImage;
@@ -62,10 +63,10 @@ export function ReviewImageAssetCard({
       <Card
         ariaLabel={title}
         actions={[
-          <MenuItem key="assigned" onClick={onAssign}>
+          <MenuItem key="assigned" onClick={onAssign} isDisabled>
             Assign
           </MenuItem>,
-          <MenuItem key="exclude" onClick={onExclude}>
+          <MenuItem key="exclude" onClick={onExclude} isDisabled>
             Exclude
           </MenuItem>,
         ]}>
