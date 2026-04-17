@@ -39,7 +39,6 @@ function OverviewEntryRowCard({
   const rowContent = (
     <>
       <Card
-        padding="none"
         as="button"
         type="button"
         onClick={() => {
