@@ -6,22 +6,20 @@
 
 const TIMEOUT_MS = 10000;
 
-interface CheckLinkParameters {
+export interface CheckLinkParameters {
   url?: string;
 }
 
-interface CheckLinkEvent {
+export interface CheckLinkEvent {
   body: CheckLinkParameters;
 }
 
-export const handler = async (
-  event: CheckLinkEvent
-): Promise<{ status?: number; error?: string }> => {
-  const url = event?.body?.url;
-  if (typeof url !== 'string' || !url.trim()) {
-    return { error: 'Missing or invalid url parameter' };
-  }
+export interface CheckLinkResult {
+  status?: number;
+  error?: string;
+}
 
+export async function checkUrl(url: string): Promise<CheckLinkResult> {
   const trimmed = url.trim();
   if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
     return { error: 'URL must use http or https' };
@@ -57,4 +55,15 @@ export const handler = async (
     const message = err instanceof Error ? err.message : 'Request failed';
     return { error: message };
   }
+}
+
+export const handler = async (
+  event: CheckLinkEvent
+): Promise<CheckLinkResult> => {
+  const url = event?.body?.url;
+  if (typeof url !== 'string' || !url.trim()) {
+    return { error: 'Missing or invalid url parameter' };
+  }
+
+  return checkUrl(url);
 };
