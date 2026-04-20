@@ -62,8 +62,14 @@ const AnalyticsApp = (props: Props) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error>();
 
-  const { validRules, summaryLabel, isContentTypeWarning, warningRule, haveLoadedFieldValues } =
-    useSidebarRules(slugFieldRules);
+  const {
+    validRules,
+    summaryLabel,
+    isContentTypeWarning,
+    warningRule,
+    haveLoadedFieldValues,
+    haveLoadedPublicationState,
+  } = useSidebarRules(slugFieldRules);
 
   useAutoResizer();
 
@@ -144,7 +150,8 @@ const AnalyticsApp = (props: Props) => {
   const metricName = runReportResponse.metricHeaders && runReportResponse.metricHeaders[0].name;
 
   const pendingData = isEmpty(runReportResponse) && !error && runReportFetchRequirements;
-  const showInitialLoadingSkeleton = (loading && pendingData) || !haveLoadedFieldValues;
+  const showInitialLoadingSkeleton =
+    (loading && pendingData) || !haveLoadedFieldValues || !haveLoadedPublicationState;
 
   const renderAnalyticContent = () => {
     if (showInitialLoadingSkeleton) {
