@@ -24,7 +24,6 @@ import {
 } from 'types';
 import ContentTypeWarning from 'components/config-screen/assign-content-type/ContentTypeWarning';
 import { buildDefaultPathPattern } from 'utils/getReportSlug';
-import { hasAdvancedMatchingConfigured } from 'utils/contentTypeMatching';
 
 interface Props {
   contentTypeRule: ContentTypeRule;
@@ -82,9 +81,7 @@ const AssignContentTypeRow = (props: Props) => {
   const [isContentTypeInOptions, setIsContentTypeInOptions] = useState(true);
   const [isSlugFieldInOptions, setIsSlugFieldInOptions] = useState(true);
   const [isInSidebar, setIsInSidebar] = useState(false);
-  const [showAdvancedMatching, setShowAdvancedMatching] = useState(
-    Boolean(enableAdvancedMatching || hasAdvancedMatchingConfigured(contentTypeRule))
-  );
+  const [showAdvancedMatching, setShowAdvancedMatching] = useState(Boolean(enableAdvancedMatching));
 
   useEffect(() => {
     setIsSaved(originalContentTypeRules.some((rule) => rule.id === ruleId));
@@ -111,10 +108,8 @@ const AssignContentTypeRow = (props: Props) => {
   }, [allContentTypeEntries, allContentTypes, contentTypeId, contentTypeRules, isSaved, slugField]);
 
   useEffect(() => {
-    setShowAdvancedMatching(
-      Boolean(enableAdvancedMatching || hasAdvancedMatchingConfigured(contentTypeRule))
-    );
-  }, [contentTypeRule, enableAdvancedMatching]);
+    setShowAdvancedMatching(Boolean(enableAdvancedMatching));
+  }, [enableAdvancedMatching]);
 
   useEffect(() => {
     if (focus) {
