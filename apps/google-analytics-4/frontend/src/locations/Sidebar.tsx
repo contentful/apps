@@ -11,7 +11,9 @@ import { normalizeContentTypeRules } from 'helpers/contentTypeRules/contentTypeR
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarExtensionSDK>();
-  const installationParameters = sdk.parameters.installation as AppInstallationParameters | undefined;
+  const installationParameters = sdk.parameters.installation as
+    | AppInstallationParameters
+    | undefined;
 
   const { serviceAccountKeyId, propertyId, contentTypes, contentTypeRules } =
     installationParameters || {};
