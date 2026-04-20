@@ -38,9 +38,11 @@ describe('Assign Content Type Card for Config Screen', () => {
         contentTypeRules={contentTypeRules}
         onContentTypeChange={() => {}}
         onContentTypeFieldChange={() => {}}
+        onContentTypeRuleChange={() => {}}
         onRemoveContentType={() => {}}
         currentEditorInterface={{}}
         originalContentTypeRules={[]}
+        rulesMissingPattern={new Set()}
       />
     );
 
@@ -58,9 +60,11 @@ describe('Assign Content Type Card for Config Screen', () => {
         contentTypeRules={contentTypeRules}
         onContentTypeChange={() => {}}
         onContentTypeFieldChange={() => {}}
+        onContentTypeRuleChange={() => {}}
         onRemoveContentType={() => {}}
         currentEditorInterface={{}}
         originalContentTypeRules={[]}
+        rulesMissingPattern={new Set()}
       />
     );
 
