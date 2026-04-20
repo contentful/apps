@@ -84,6 +84,18 @@ const AssignContentTypeSection = (props: Props) => {
     setHasIncompleteContentTypes(contentTypeRules.some((rule) => !rule.contentTypeId));
   }, [contentTypeRules]);
 
+  const rulesMissingPattern = new Set(
+    contentTypeRules
+      .filter((rule) => rule.enableAdvancedMatching && rule.contentTypeId && !rule.pathPattern?.trim())
+      .map((rule) => rule.id)
+  );
+
+  const isContentTypeAssignmentValid = rulesMissingPattern.size === 0;
+
+  useEffect(() => {
+    onIsValidContentTypeAssignment(isContentTypeAssignmentValid);
+  }, [isContentTypeAssignmentValid, onIsValidContentTypeAssignment]);
+
   const fetchAllContentTypes = async (sdk: KnownAppSDK): Promise<ContentTypeProps[]> => {
     const cma = createClient({ apiAdapter: sdk.cmaAdapter });
     const space = await cma.getSpace(sdk.ids.space);
@@ -124,15 +136,12 @@ const AssignContentTypeSection = (props: Props) => {
   const trailingSlashHandler = () => {
     setForceTrailingSlash(!forceTrailingSlash);
     mergeSdkParameters({ forceTrailingSlash: !forceTrailingSlash });
-    onIsValidContentTypeAssignment(true);
   };
 
   const contentTypeRulesHandler = (newContentTypeRules: ContentTypeRules) => {
     setContentTypeRules(newContentTypeRules);
     const _parameters = { contentTypeRules: newContentTypeRules };
     mergeSdkParameters(_parameters);
-    // We always want the user to be able to save the configuration, even if there are errors or warnings
-    onIsValidContentTypeAssignment(true);
   };
 
   const handleContentTypeChange = (ruleId: string, newContentTypeId: string) => {
@@ -160,6 +169,19 @@ const AssignContentTypeSection = (props: Props) => {
         ? {
             ...rule,
             [field]: value,
+          }
+        : rule
+    );
+
+    contentTypeRulesHandler(newContentTypeRules);
+  };
+
+  const handleContentTypeRuleChange = (ruleId: string, updates: Partial<ContentTypeRule>) => {
+    const newContentTypeRules = contentTypeRules.map((rule) =>
+      rule.id === ruleId
+        ? {
+            ...rule,
+            ...updates,
           }
         : rule
     );
@@ -203,6 +225,9 @@ const AssignContentTypeSection = (props: Props) => {
           onChange={trailingSlashHandler}>
           Use trailing slash for all page paths
         </Checkbox>
+        <Paragraph marginTop="spacing2Xs" marginBottom="none">
+          Applies to standard configurations only. Advanced patterns are used exactly as written.
+        </Paragraph>
       </Box>
       {!loadingContentTypes && !loadingAllContentTypes ? (
         <>
@@ -213,9 +238,11 @@ const AssignContentTypeSection = (props: Props) => {
               contentTypeRules={contentTypeRules}
               onContentTypeChange={handleContentTypeChange}
               onContentTypeFieldChange={handleContentTypeFieldChange}
+              onContentTypeRuleChange={handleContentTypeRuleChange}
               onRemoveContentType={handleRemoveContentType}
               currentEditorInterface={currentEditorInterface}
               originalContentTypeRules={originalContentTypeRules}
+              rulesMissingPattern={rulesMissingPattern}
             />
           )}
           {contentTypeRules.length < Object.keys(allContentTypes).length * 5 && (
