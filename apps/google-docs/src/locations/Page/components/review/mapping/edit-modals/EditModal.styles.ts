@@ -8,8 +8,8 @@ export const modalContent = css({
 });
 
 export const sectionCard = css({
-  border: `1px solid ${tokens.gray300}`,
-  borderRadius: tokens.borderRadiusMedium,
+  border: `1px solid ${tokens.gray200}`,
+  borderRadius: tokens.borderRadiusSmall,
   padding: tokens.spacingS,
 });
 
@@ -22,9 +22,9 @@ export const locationList = css({
 export const locationButton = css({
   appearance: 'none',
   width: '100%',
-  borderRadius: tokens.borderRadiusMedium,
-  padding: tokens.spacingM,
-  backgroundColor: tokens.colorWhite,
+  borderRadius: tokens.borderRadiusSmall,
+  padding: tokens.spacingXs,
+  backgroundColor: tokens.gray100,
   textAlign: 'left',
   cursor: 'pointer',
   transition: 'border-color 120ms ease, background-color 120ms ease',
@@ -39,10 +39,9 @@ export const locationButtonSelected = css({
 });
 
 export const locationButtonUnselected = css({
-  border: `2px solid ${tokens.gray300}`,
+  border: `1px solid ${tokens.gray200}`,
 });
 
 export const locationContent = css({
   minWidth: 0,
-  textAlign: 'left',
 });

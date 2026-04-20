@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { Box, Button, Modal, Note, Paragraph, Text } from '@contentful/f36-components';
+import { Box, Button, Modal, Note, Flex, Text } from '@contentful/f36-components';
 import {
   EditModalDestinationStateKind,
   createEditModalDestinationState,
   type EditModalContent,
 } from '@types';
+
 import {
   locationButton,
   locationButtonSelected,
@@ -138,68 +139,92 @@ export const EditModal = ({
           <Modal.Content>
             <Box className={modalContent}>
               <Box className={sectionCard}>
-                <Text as="p" fontWeight="fontWeightDemiBold" marginBottom="spacingM">
-                  {previewSectionTitle}
-                </Text>
-                <Text as="p" fontSize="fontSizeL">
-                  "{previewQuotedText}"
-                </Text>
+                <Flex flexDirection="column" gap="spacingXs">
+                  <Text as="p" fontWeight="fontWeightDemiBold">
+                    {previewSectionTitle}
+                  </Text>
+                  <Text as="p">"{previewQuotedText}"</Text>
+                </Flex>
               </Box>
 
               <Box className={sectionCard}>
-                <Text fontWeight="fontWeightDemiBold" marginBottom="spacing2Xs">
-                  Current location
-                </Text>
-                {hasLocationSectionDescription && (
-                  <Paragraph marginBottom={hasCurrentLocations ? 'spacingM' : 'none'}>
-                    {locationSectionDescription}
-                  </Paragraph>
-                )}
-
-                {hasCurrentLocations && (
-                  <Box className={locationList}>
-                    {viewModel.currentLocations.map((location) => {
-                      const isSelected = location.id === selectedLocationId;
-
-                      return (
-                        <Box
-                          as="button"
-                          type="button"
-                          key={location.id}
-                          onClick={() => setSelectedLocationId(location.id)}
-                          aria-pressed={isSelected}
-                          className={`${locationButton} ${
-                            isSelected ? locationButtonSelected : locationButtonUnselected
-                          }`}>
-                          <Box className={locationContent}>
-                            <Text as="p" fontColor="gray600" marginBottom="spacing2Xs">
-                              Content type{' '}
-                              <Text as="span" fontWeight="fontWeightDemiBold" fontColor="gray900">
-                                {location.contentTypeName}
+                <Flex flexDirection="column" gap="spacingXs">
+                  <Text fontWeight="fontWeightDemiBold">Current location</Text>
+                  {hasLocationSectionDescription && (
+                    <Text as="p" marginBottom="none">
+                      {locationSectionDescription}
+                    </Text>
+                  )}
+                  {hasCurrentLocations && (
+                    <Box className={locationList}>
+                      {viewModel.currentLocations.map((location) => {
+                        const isSelected = location.id === selectedLocationId;
+                        return (
+                          <Box
+                            as="button"
+                            type="button"
+                            key={location.id}
+                            onClick={() => setSelectedLocationId(location.id)}
+                            aria-pressed={isSelected}
+                            className={`${locationButton} ${
+                              isSelected ? locationButtonSelected : locationButtonUnselected
+                            }`}>
+                            <Box className={locationContent}>
+                              <Text
+                                as="p"
+                                fontSize="fontSizeS"
+                                fontColor="gray600"
+                                marginBottom="none">
+                                Content type{' '}
+                                <Text
+                                  as="span"
+                                  fontSize="fontSizeS"
+                                  fontWeight="fontWeightMedium"
+                                  fontColor="gray900">
+                                  {location.contentTypeName}
+                                </Text>
                               </Text>
-                            </Text>
-                            <Text as="p" fontColor="gray600" marginBottom="spacing2Xs">
-                              Entry name{' '}
-                              <Text as="span" fontWeight="fontWeightDemiBold" fontColor="gray900">
-                                {location.entryName}
+                              <Text
+                                as="p"
+                                fontSize="fontSizeS"
+                                fontColor="gray600"
+                                marginBottom="none">
+                                Entry name{' '}
+                                <Text
+                                  as="span"
+                                  fontSize="fontSizeS"
+                                  fontWeight="fontWeightMedium"
+                                  fontColor="gray900">
+                                  {location.entryName}
+                                </Text>
                               </Text>
-                            </Text>
-                            <Text as="p" fontColor="gray600">
-                              Field{' '}
-                              <Text as="span" fontWeight="fontWeightDemiBold" fontColor="gray900">
-                                {location.fieldName}
-                              </Text>{' '}
-                              | {location.fieldType}
-                            </Text>
+                              <Text
+                                as="p"
+                                fontSize="fontSizeS"
+                                fontColor="gray600"
+                                marginBottom="none">
+                                Field{' '}
+                                <Text
+                                  as="span"
+                                  fontSize="fontSizeS"
+                                  fontWeight="fontWeightMedium"
+                                  fontColor="gray900">
+                                  {location.fieldName}
+                                </Text>{' '}
+                                <Text as="span" fontSize="fontSizeS" fontColor="gray700">
+                                  | {location.fieldType}
+                                </Text>
+                              </Text>
+                            </Box>
                           </Box>
-                        </Box>
-                      );
-                    })}
-                  </Box>
-                )}
+                        );
+                      })}
+                    </Box>
+                  )}
+                </Flex>
               </Box>
 
-              {hasNewLocation ? (
+              {hasNewLocation && (
                 <Box>
                   <Text as="p" fontWeight="fontWeightDemiBold" marginBottom="spacingM">
                     New location
@@ -223,7 +248,7 @@ export const EditModal = ({
                     </Box>
                   </Box>
                 </Box>
-              ) : null}
+              )}
 
               {isAssignMode && destinationState.kind !== EditModalDestinationStateKind.Ready ? (
                 <Note
