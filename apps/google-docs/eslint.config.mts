@@ -28,7 +28,7 @@ export default defineConfig([
     },
     rules: {
       'react/react-in-jsx-scope': 'off',
-      'react/prop-types': 'off',
+      'react/prop-types': 'warn',
       'react/no-unescaped-entities': 'off',
       'react-hooks/exhaustive-deps': 'off',
       'react-hooks/refs': 'off',
