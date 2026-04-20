@@ -158,13 +158,10 @@ describe('Assign Content Type Card for Config Screen', () => {
     await user.click(screen.getByTestId('advancedMatchingToggle'));
 
     expect(screen.getByTestId('advancedMatchingPanel')).toBeVisible();
-    expect(onContentTypeRuleChange).toHaveBeenCalledWith(
-      'rule-course',
-      {
-        enableAdvancedMatching: true,
-        pathPattern: '/about/{slug}',
-      }
-    );
+    expect(onContentTypeRuleChange).toHaveBeenCalledWith('rule-course', {
+      enableAdvancedMatching: true,
+      pathPattern: '/about/{slug}',
+    });
   });
 
   it('shows advanced matching controls when a row is already configured for them', () => {
@@ -205,16 +202,13 @@ describe('Assign Content Type Card for Config Screen', () => {
     await user.click(screen.getByTestId('advancedMatchingToggle'));
 
     expect(screen.queryByTestId('advancedMatchingPanel')).not.toBeInTheDocument();
-    expect(onContentTypeRuleChange).toHaveBeenCalledWith(
-      'rule-course',
-      {
-        enableAdvancedMatching: false,
-        additionalFieldIds: [],
-        pathPattern: '',
-        matchDimension: 'unifiedPagePathScreen',
-        matchType: 'EXACT',
-      }
-    );
+    expect(onContentTypeRuleChange).toHaveBeenCalledWith('rule-course', {
+      enableAdvancedMatching: false,
+      additionalFieldIds: [],
+      pathPattern: '',
+      matchDimension: 'unifiedPagePathScreen',
+      matchType: 'EXACT',
+    });
   });
 
   it('shows a preview with additional page property tokens when configured', () => {
@@ -393,13 +387,10 @@ describe('Assign Content Type Card for Config Screen', () => {
 
     await user.click(screen.getByTestId('additionalFieldOption-sectionSlug'));
 
-    expect(onContentTypeRuleChange).toHaveBeenCalledWith(
-      'rule-category',
-      {
-        additionalFieldIds: ['sectionSlug'],
-        pathPattern: '/search/{slug}?sectionSlug={sectionSlug}',
-      }
-    );
+    expect(onContentTypeRuleChange).toHaveBeenCalledWith('rule-category', {
+      additionalFieldIds: ['sectionSlug'],
+      pathPattern: '/search/{slug}?sectionSlug={sectionSlug}',
+    });
   });
 
   it('updates the generated pattern when selected page-path fields change', async () => {
@@ -422,13 +413,10 @@ describe('Assign Content Type Card for Config Screen', () => {
 
     await user.click(screen.getByTestId('additionalFieldOption-sectionSlug'));
 
-    expect(onContentTypeRuleChange).toHaveBeenCalledWith(
-      'rule-category',
-      {
-        additionalFieldIds: ['sectionSlug'],
-        pathPattern: '/{sectionSlug}/{slug}',
-      }
-    );
+    expect(onContentTypeRuleChange).toHaveBeenCalledWith('rule-category', {
+      additionalFieldIds: ['sectionSlug'],
+      pathPattern: '/{sectionSlug}/{slug}',
+    });
   });
 
   it('does not overwrite a custom pattern when selected query-string fields change', async () => {
@@ -451,11 +439,9 @@ describe('Assign Content Type Card for Config Screen', () => {
 
     await user.click(screen.getByTestId('additionalFieldOption-sectionSlug'));
 
-    expect(onContentTypeFieldChange).toHaveBeenCalledWith(
-      'rule-category',
-      'additionalFieldIds',
-      ['sectionSlug']
-    );
+    expect(onContentTypeFieldChange).toHaveBeenCalledWith('rule-category', 'additionalFieldIds', [
+      'sectionSlug',
+    ]);
   });
 
   it('calls field change handler when matching mode selection is changed', async () => {

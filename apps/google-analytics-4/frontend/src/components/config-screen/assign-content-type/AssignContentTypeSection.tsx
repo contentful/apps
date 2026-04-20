@@ -86,7 +86,9 @@ const AssignContentTypeSection = (props: Props) => {
 
   const rulesMissingPattern = new Set(
     contentTypeRules
-      .filter((rule) => rule.enableAdvancedMatching && rule.contentTypeId && !rule.pathPattern?.trim())
+      .filter(
+        (rule) => rule.enableAdvancedMatching && rule.contentTypeId && !rule.pathPattern?.trim()
+      )
       .map((rule) => rule.id)
   );
 

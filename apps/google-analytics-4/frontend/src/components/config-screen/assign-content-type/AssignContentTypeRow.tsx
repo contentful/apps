@@ -279,8 +279,7 @@ const AssignContentTypeRow = (props: Props) => {
             </Note>
           )}
           <Text fontColor="gray600" className={styles.advancedMatchingIntro}>
-            Build a custom URL pattern for query strings, extra path segments, or variable
-            prefixes.
+            Build a custom URL pattern for query strings, extra path segments, or variable prefixes.
           </Text>
           <Box className={styles.advancedMatchingFields}>
             <Flex className={styles.advancedMatchingTopRow}>
@@ -312,7 +311,11 @@ const AssignContentTypeRow = (props: Props) => {
                               return;
                             }
 
-                            onContentTypeFieldChange(ruleId, 'additionalFieldIds', nextSelectedFields);
+                            onContentTypeFieldChange(
+                              ruleId,
+                              'additionalFieldIds',
+                              nextSelectedFields
+                            );
                           }}>
                           <Flex alignItems="center" gap="spacing2Xs">
                             <Text as="span">{field.name}</Text>
@@ -375,26 +378,24 @@ const AssignContentTypeRow = (props: Props) => {
                     name={`matchDimension-${index}`}
                     testId="matchDimensionSelect"
                     isDisabled={!contentTypeId || !isContentTypeInOptions}
-                    onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-                      {
-                        const nextMatchDimension = event.target.value;
-                        const currentGeneratedPattern = getGeneratedPattern();
-                        const nextGeneratedPattern = getGeneratedPattern(
-                          additionalFieldIds,
-                          nextMatchDimension as ContentTypeValue['matchDimension']
-                        );
+                    onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
+                      const nextMatchDimension = event.target.value;
+                      const currentGeneratedPattern = getGeneratedPattern();
+                      const nextGeneratedPattern = getGeneratedPattern(
+                        additionalFieldIds,
+                        nextMatchDimension as ContentTypeValue['matchDimension']
+                      );
 
-                        if (!pathPattern.trim() || pathPattern === currentGeneratedPattern) {
-                          onContentTypeRuleChange(ruleId, {
-                            matchDimension: nextMatchDimension,
-                            pathPattern: nextGeneratedPattern,
-                          });
-                          return;
-                        }
-
-                        onContentTypeFieldChange(ruleId, 'matchDimension', nextMatchDimension);
+                      if (!pathPattern.trim() || pathPattern === currentGeneratedPattern) {
+                        onContentTypeRuleChange(ruleId, {
+                          matchDimension: nextMatchDimension,
+                          pathPattern: nextGeneratedPattern,
+                        });
+                        return;
                       }
-                    }
+
+                      onContentTypeFieldChange(ruleId, 'matchDimension', nextMatchDimension);
+                    }}
                     value={matchDimension}>
                     <Select.Option value="unifiedPagePathScreen">Page path</Select.Option>
                     <Select.Option value="pagePathPlusQueryString">

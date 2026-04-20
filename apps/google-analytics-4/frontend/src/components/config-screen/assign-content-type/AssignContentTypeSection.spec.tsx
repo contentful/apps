@@ -59,9 +59,7 @@ describe('Assign Content Type Section for Config Screen', () => {
       await screen.findByText('Add a pattern for this advanced rule before saving.')
     ).toBeVisible();
 
-    await waitFor(() =>
-      expect(onIsValidContentTypeAssignment).toHaveBeenLastCalledWith(false)
-    );
+    await waitFor(() => expect(onIsValidContentTypeAssignment).toHaveBeenLastCalledWith(false));
   });
 
   it('keeps trailing slash enabled when any rule uses advanced matching', async () => {

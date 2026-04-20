@@ -33,15 +33,17 @@ export const buildDefaultPathPattern = (
   const basePath =
     matchDimension === 'pagePathPlusQueryString'
       ? `/${pathJoin(urlPrefix, SLUG_TOKEN)}`
-      : `/${pathJoin(urlPrefix, ...additionalFieldIds.map((fieldId) => `{${fieldId}}`), SLUG_TOKEN)}`;
+      : `/${pathJoin(
+          urlPrefix,
+          ...additionalFieldIds.map((fieldId) => `{${fieldId}}`),
+          SLUG_TOKEN
+        )}`;
 
   if (matchDimension !== 'pagePathPlusQueryString' || additionalFieldIds.length === 0) {
     return basePath;
   }
 
-  const queryString = additionalFieldIds
-    .map((fieldId) => `${fieldId}={${fieldId}}`)
-    .join('&');
+  const queryString = additionalFieldIds.map((fieldId) => `${fieldId}={${fieldId}}`).join('&');
 
   return `${basePath}?${queryString}`;
 };
