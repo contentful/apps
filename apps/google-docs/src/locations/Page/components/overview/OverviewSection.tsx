@@ -21,7 +21,7 @@ interface OverviewProps {
   selectedEntryIndex: number;
   onSelectEntryIndex: (index: number) => void;
   onCreateEntries: () => Promise<CompletedWorkflowPayload | null>;
-  onReturnToMainPage: () => void;
+  onIsCreatingChange: (isCreating: boolean) => void;
 }
 
 const OverviewSection = ({
@@ -30,7 +30,7 @@ const OverviewSection = ({
   selectedEntryIndex,
   onSelectEntryIndex,
   onCreateEntries,
-  onReturnToMainPage,
+  onIsCreatingChange,
 }: OverviewProps) => {
   const [isCreating, setIsCreating] = useState(false);
   const [summaryEntries, setSummaryEntries] = useState<EntryProps[] | null>(null);
@@ -60,6 +60,8 @@ const OverviewSection = ({
   const handleCreateEntries = async () => {
     console.log('[create-entries] creating entries, calling onCreateEntries');
     setIsCreating(true);
+    onIsCreatingChange(true);
+    let succeeded = false;
 
     try {
       const previewPayload = await onCreateEntries();
@@ -70,6 +72,7 @@ const OverviewSection = ({
       const result = await createEntriesFromPreviewPayload(sdk, previewPayload);
 
       setSummaryEntries(result.createdEntries);
+      succeeded = true;
     } catch (error) {
       setCreateError(
         error instanceof Error
@@ -78,12 +81,12 @@ const OverviewSection = ({
       );
     } finally {
       setIsCreating(false);
+      if (!succeeded) onIsCreatingChange(false);
     }
   };
 
   const handleSummaryDone = () => {
     setSummaryEntries(null);
-    onReturnToMainPage();
   };
 
   return (

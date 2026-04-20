@@ -1,6 +1,10 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefCallback } from 'react';
 import { Box, Button, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
+import {
+  buildEntryListFromEntryBlockGraph,
+  type EntryListRow,
+} from '../../../../../utils/overviewEntryList';
 import type {
   EntryBlockGraph,
   ImageSourceRef,
@@ -61,6 +65,7 @@ interface MappingViewProps {
   entryBlockGraph: EntryBlockGraph;
   onEntryBlockGraphChange: (next: EntryBlockGraph) => void;
   selectedEntryIndex: number | null;
+  isDisabled?: boolean;
 }
 
 const EMPTY_NEW_LOCATION: EditModalNewLocation = {
@@ -82,6 +87,15 @@ const EMPTY_EDIT_MODAL: EditModalState = {
   locationSectionDescription: '',
   primaryButtonLabel: '',
 };
+
+function findRowByEntryIndex(rows: EntryListRow[], index: number): EntryListRow | null {
+  for (const row of rows) {
+    if (row.entryIndex === index) return row;
+    const found = findRowByEntryIndex(row.children, index);
+    if (found) return found;
+  }
+  return null;
+}
 
 function getEntryName(contentTypeName: string | undefined, entryIndex: number): string {
   const displayName = contentTypeName ?? 'Untitled';
@@ -122,7 +136,25 @@ export const MappingView = ({
   entryBlockGraph,
   onEntryBlockGraphChange,
   selectedEntryIndex,
+  isDisabled = false,
 }: MappingViewProps): JSX.Element => {
+  const selectedEntryRow = useMemo(() => {
+    const rows = buildEntryListFromEntryBlockGraph(
+      payload.entryBlockGraph.entries,
+      payload.contentTypes,
+      payload.referenceGraph.edges
+    );
+    return (
+      (selectedEntryIndex !== null ? findRowByEntryIndex(rows, selectedEntryIndex) : null) ??
+      rows[0] ??
+      null
+    );
+  }, [
+    payload.entryBlockGraph.entries,
+    payload.contentTypes,
+    payload.referenceGraph.edges,
+    selectedEntryIndex,
+  ]);
   const [hoveredMappingKeys, setHoveredMappingKeys] = useState<string[]>([]);
   const [cardOffsetsBySegment, setCardOffsetsBySegment] = useState<
     Record<string, Record<string, number>>
@@ -492,7 +524,7 @@ export const MappingView = ({
   };
 
   const handleAssignFromSelection = () => {
-    if (!selectedText.trim()) return;
+    if (isDisabled || !selectedText.trim()) return;
     const reassignRanges = collectTextExclusionRangesFromSelection(
       textSelectionRootRef.current,
       selectedRange
@@ -511,7 +543,7 @@ export const MappingView = ({
   };
 
   const handleExcludeFromSelection = () => {
-    if (!selectedText.trim()) return;
+    if (isDisabled || !selectedText.trim()) return;
     const ranges = collectTextExclusionRangesFromSelection(
       textSelectionRootRef.current,
       selectedRange
@@ -531,11 +563,13 @@ export const MappingView = ({
   };
 
   const handleAssignImage = (sourceRef: ImageSourceRef, label: string) => {
+    if (isDisabled) return;
     openAssignModal(label, getLocationsForSourceRef(sourceRef), [], []);
     setHoveredMappingKeys([]);
   };
 
   const handleExcludeImage = (sourceRef: ImageSourceRef, label: string) => {
+    if (isDisabled) return;
     setPendingImageSourceRef(sourceRef);
     setPendingTextExclusionRanges(null);
     openExcludeModal(label, getLocationsForSourceRef(sourceRef), {
@@ -680,7 +714,33 @@ export const MappingView = ({
         ref={textSelectionRootRef}
         flexDirection="column"
         gap="spacingS"
-        style={{ padding: tokens.spacingM, marginTop: tokens.spacingM }}>
+        style={{ marginTop: tokens.spacingM }}>
+        {selectedEntryRow && (
+          <Box
+            style={{
+              borderBottom: `1px solid ${tokens.gray200}`,
+              paddingBottom: tokens.spacingXs,
+            }}>
+            <Text
+              as="p"
+              fontSize="fontSizeS"
+              fontWeight="fontWeightMedium"
+              marginBottom="spacing2Xs">
+              Currently viewing:
+            </Text>
+            <Text as="p" marginBottom="none">
+              <Text as="span" fontWeight="fontWeightDemiBold">
+                {selectedEntryRow.contentTypeName}
+              </Text>
+              {selectedEntryRow.entryTitle ? (
+                <Text as="span" fontColor="gray600">
+                  {' '}
+                  ({selectedEntryRow.entryTitle})
+                </Text>
+              ) : null}
+            </Text>
+          </Box>
+        )}
         {tabs.map((tab) => (
           <Box key={tab.id}>
             {tab.name && (
@@ -731,7 +791,7 @@ export const MappingView = ({
         ))}
       </Flex>
 
-      {selectionRectangle ? (
+      {selectionRectangle && !isDisabled ? (
         <SelectionActionMenu
           anchorRectangle={selectionRectangle}
           onAssign={handleAssignFromSelection}

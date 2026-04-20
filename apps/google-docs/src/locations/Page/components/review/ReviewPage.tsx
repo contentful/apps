@@ -32,6 +32,7 @@ export const ReviewPage = ({
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
   const [selectedEntryIndex, setSelectedEntryIndex] = useState<number>(0);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [entryBlockGraph, setEntryBlockGraph] = useState<EntryBlockGraph>(() =>
     structuredClone(payload.entryBlockGraph)
   );
@@ -98,7 +99,7 @@ export const ReviewPage = ({
             variant="transparent"
             size="small"
             onClick={() => setIsConfirmCancelModalOpen(true)}
-            aria-label="Cancel preview">
+            aria-label="Cancel review">
             Cancel
           </Button>
         </Flex>
@@ -112,13 +113,14 @@ export const ReviewPage = ({
             selectedEntryIndex={selectedEntryIndex}
             onSelectEntryIndex={setSelectedEntryIndex}
             onCreateEntries={handleCreateEntries}
-            onReturnToMainPage={onReturnToMainPage}
+            onIsCreatingChange={setIsCreating}
           />
           <MappingView
             payload={reviewPayload}
             entryBlockGraph={entryBlockGraph}
             onEntryBlockGraphChange={setEntryBlockGraph}
             selectedEntryIndex={selectedEntryIndex}
+            isDisabled={isCreating}
           />
         </Flex>
       </Layout.Body>
