@@ -1,18 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { Button, Layout } from '@contentful/f36-components';
+import { Layout } from '@contentful/f36-components';
 import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
 } from './components/mainpage/ModalOrchestrator';
 import { MainPageView } from './components/mainpage/MainPageView';
 import { ReviewPage } from './components/review/ReviewPage';
-import { loadFixtureReviewPayload } from '../../fixtures/googleDocsReview/loadFixtureReviewPayload';
 import type { MappingReviewSuspendPayload } from '@types';
 import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
-
-const enableMockReviewPayload = import.meta.env.VITE_ENABLE_MOCK_REVIEW_PAYLOAD === 'true';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -24,34 +21,11 @@ const Page = () => {
     payload: MappingReviewSuspendPayload;
     runId?: string;
   } | null>(null);
-  const [fixtureReviewPayload, setFixtureReviewPayload] =
-    useState<MappingReviewSuspendPayload | null>(null);
   const { resumeWorkflow } = useWorkflowAgent({
     sdk,
     documentId: '',
     oauthToken: '',
   });
-
-  // TODO: remove fixture review payload loading before launch
-  useEffect(() => {
-    let isCancelled = false;
-
-    void loadFixtureReviewPayload()
-      .then((payload) => {
-        if (!isCancelled) {
-          setFixtureReviewPayload(payload);
-        }
-      })
-      .catch(() => {
-        if (!isCancelled) {
-          setFixtureReviewPayload(null);
-        }
-      });
-
-    return () => {
-      isCancelled = true;
-    };
-  }, []);
 
   const handleOauthTokenChange = (token: string) => {
     setOauthToken(token);
@@ -104,24 +78,16 @@ const Page = () => {
             onReturnToMainPage={handleReturnToMainPage}
           />
         ) : (
-          <>
-            {/* TODO: remove mock review payload button before launch */}
-            {enableMockReviewPayload && fixtureReviewPayload ? (
-              <Button onClick={() => setMappingReviewState({ payload: fixtureReviewPayload })}>
-                Mock from fixture
-              </Button>
-            ) : null}
-            <MainPageView
-              oauthToken={oauthToken}
-              isOAuthConnected={isOAuthConnected}
-              isOAuthLoading={isOAuthLoading}
-              onOAuthConnectedChange={handleOAuthConnectedChange}
-              onOauthTokenChange={handleOauthTokenChange}
-              onLoadingStateChange={handleOAuthLoadingStateChange}
-              onSelectFile={handleSelectFile}
-              sdk={sdk}
-            />
-          </>
+          <MainPageView
+            oauthToken={oauthToken}
+            isOAuthConnected={isOAuthConnected}
+            isOAuthLoading={isOAuthLoading}
+            onOAuthConnectedChange={handleOAuthConnectedChange}
+            onOauthTokenChange={handleOauthTokenChange}
+            onLoadingStateChange={handleOAuthLoadingStateChange}
+            onSelectFile={handleSelectFile}
+            sdk={sdk}
+          />
         )}
       </Layout>
 
