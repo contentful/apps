@@ -151,7 +151,7 @@ const AnalyticsApp = (props: Props) => {
 
   const pendingData = isEmpty(runReportResponse) && !error && runReportFetchRequirements;
   const showInitialLoadingSkeleton =
-    (loading && pendingData) || !haveLoadedFieldValues || !haveLoadedPublicationState;
+    pendingData || !haveLoadedFieldValues || !haveLoadedPublicationState;
 
   const renderAnalyticContent = () => {
     if (showInitialLoadingSkeleton) {

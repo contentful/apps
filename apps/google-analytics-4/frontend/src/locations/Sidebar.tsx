@@ -1,6 +1,7 @@
 import AnalyticsApp from 'components/main-app/AnalyticsApp/AnalyticsApp';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { SidebarExtensionSDK } from '@contentful/app-sdk';
+import { Skeleton } from '@contentful/f36-components';
 import { useApi } from 'hooks/useApi';
 import { AppInstallationParameters, CustomRangeDialogResult, StartEndDates } from 'types';
 import Note from 'components/common/Note/Note';
@@ -10,9 +11,10 @@ import { normalizeContentTypeRules } from 'helpers/contentTypeRules/contentTypeR
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarExtensionSDK>();
+  const installationParameters = sdk.parameters.installation as AppInstallationParameters | undefined;
 
-  const { serviceAccountKeyId, propertyId, contentTypes, contentTypeRules } = sdk.parameters
-    .installation as AppInstallationParameters;
+  const { serviceAccountKeyId, propertyId, contentTypes, contentTypeRules } =
+    installationParameters || {};
 
   const currentContentType = sdk.contentType.sys.id;
   const slugFieldRules = normalizeContentTypeRules(contentTypeRules, contentTypes).filter(
@@ -41,6 +43,16 @@ const Sidebar = () => {
 
     return result as CustomRangeDialogResult | undefined;
   };
+
+  if (!installationParameters) {
+    return (
+      <Skeleton.Container svgHeight={300}>
+        <Skeleton.Image height={68} width={325} offsetTop={10} />
+        <Skeleton.Image height={160} width={325} offsetTop={93} />
+        <Skeleton.Image height={25} width={200} offsetTop={268} />
+      </Skeleton.Container>
+    );
+  }
 
   if (!hasInstallationParams) {
     const bodyMsg = getMissingParamsMsg(!serviceAccountKeyId, !propertyId);
