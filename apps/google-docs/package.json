@@ -42,10 +42,12 @@
     "deploy:flinkly": "npm run build && npm run upload:app-flinkly && npm run deploy:sync-flinkly",
     "deploy:sync-prod": "aws s3 sync ./build ${PROD_STATIC_S3_BASE}/google-docs && aws cloudfront create-invalidation --distribution-id $GOOGLE_DOCS_PROD_CLOUDFRONT_DIST_ID --paths \"/*\" > /dev/null 2>&1",
     "upload": "contentful-app-scripts upload --bundle-dir ./build --organization-id 5EJGHo8tYJcjnEhYWDxivp --definition-id 3EaGZUMKRKVZUyrcoNJ4o4 --token $CONTENTFUL_ACCESS_TOKEN",
-    "deploy:prod": "npm run build && npm run upload && npm run deploy:sync-prod"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
+    "deploy:prod": "npm run build && npm run upload && npm run deploy:sync-prod",
+    "lint": "eslint .",
+    "lint:write": "eslint . --fix",
+    "prettier:write": "prettier --write .",
+    "prettier:check": "prettier --check .",
+    "prettier:list": "prettier -l ."
   },
   "browserslist": {
     "production": [
@@ -62,15 +64,24 @@
   "devDependencies": {
     "@contentful/app-scripts": "^2.3.0",
     "@contentful/node-apps-toolkit": "^3.11.1",
+    "@eslint/js": "^9.39.4",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
     "@types/node": "^22.13.5",
     "@types/react": "^18.3.13",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
+    "baseline-browser-mapping": "^2.10.20",
     "cross-env": "^7.0.3",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "globals": "^16.5.0",
+    "jiti": "^2.6.1",
     "jsdom": "^26.0.0",
+    "prettier": "^3.8.3",
     "typescript": "^5.7.3",
+    "typescript-eslint": "^8.58.2",
     "vite": "^6.2.2",
     "vitest": "^3.0.9"
   },

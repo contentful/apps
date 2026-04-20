@@ -23,7 +23,6 @@ export const MainPageView = ({
   onOauthTokenChange,
   onLoadingStateChange,
   onSelectFile,
-  sdk,
 }: MainPageViewProps) => {
   return (
     <Layout.Body>

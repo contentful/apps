@@ -17,12 +17,8 @@
       "description": "Initiates the OAuth flow for Drive Integration",
       "path": "functions/oauth/initiateOauth.js",
       "entryFile": "functions/oauth/initiateOauth.ts",
-      "allowNetworks": [
-        "oauth2.googleapis.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
+      "allowNetworks": ["oauth2.googleapis.com"],
+      "accepts": ["appaction.call"]
     },
     {
       "id": "completeGdocOauth",
@@ -30,12 +26,8 @@
       "description": "Completes the OAuth flow for Drive Integration",
       "path": "functions/oauth/completeOauth.js",
       "entryFile": "functions/oauth/completeOauth.ts",
-      "allowNetworks": [
-        "oauth2.googleapis.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
+      "allowNetworks": ["oauth2.googleapis.com"],
+      "accepts": ["appaction.call"]
     },
     {
       "id": "revokeGdocOauthToken",
@@ -43,12 +35,8 @@
       "description": "Revoke token for the Drive Integration app to disconnect from the app",
       "path": "functions/oauth/disconnect.js",
       "entryFile": "functions/oauth/disconnect.ts",
-      "allowNetworks": [
-        "oauth2.googleapis.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
+      "allowNetworks": ["oauth2.googleapis.com"],
+      "accepts": ["appaction.call"]
     },
     {
       "id": "checkGdocOauthTokenStatus",
@@ -56,12 +44,8 @@
       "description": "Checks the status of the Drive Integration OAuth token to see if it is valid",
       "path": "functions/oauth/checkStatus.js",
       "entryFile": "functions/oauth/checkStatus.ts",
-      "allowNetworks": [
-        "oauth2.googleapis.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
+      "allowNetworks": ["oauth2.googleapis.com"],
+      "accepts": ["appaction.call"]
     }
   ],
   "actions": []

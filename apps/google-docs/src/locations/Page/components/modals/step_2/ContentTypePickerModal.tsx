@@ -10,7 +10,6 @@ import {
 } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
-import { css } from '@emotion/css';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
 import { multiselect, pillsContainer } from './ContentTypePickerModal.styles';
 import { truncateLabel } from '../../../../../utils/utils';

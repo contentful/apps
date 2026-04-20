@@ -50,41 +50,39 @@ const { mockModalOrchestrator } = vi.hoisted(() => ({
 }));
 
 vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () => ({
-  ModalOrchestrator: require('react').forwardRef(
-    (
-      props: {
-        onMappingReviewReady: (payload: MappingReviewSuspendPayload, runId: string) => void;
-        onResetToMain: () => void;
-        oauthToken: string;
-      },
-      ref: React.ForwardedRef<{
-        startFlow: () => void;
-      }>
-    ) => {
-      const handle = {
-        startFlow: vi.fn(),
-      };
-      if (typeof ref === 'function') {
-        ref(handle);
-      } else if (ref) {
-        ref.current = handle;
-      }
-
-      mockModalOrchestrator(props);
-      return (
-        <>
-          <button
-            onClick={() => props.onMappingReviewReady(mappingReviewPayloadMock, 'run-123')}
-            type="button">
-            Trigger Mapping Review Ready
-          </button>
-          <button onClick={props.onResetToMain} type="button">
-            Trigger Reset To Main
-          </button>
-        </>
-      );
+  ModalOrchestrator: React.forwardRef(function MockModalOrchestrator(
+    props: {
+      onMappingReviewReady: (payload: MappingReviewSuspendPayload, runId: string) => void;
+      onResetToMain: () => void;
+      oauthToken: string;
+    },
+    ref: React.ForwardedRef<{
+      startFlow: () => void;
+    }>
+  ) {
+    const handle = {
+      startFlow: vi.fn(),
+    };
+    if (typeof ref === 'function') {
+      ref(handle);
+    } else if (ref) {
+      ref.current = handle;
     }
-  ),
+
+    mockModalOrchestrator(props);
+    return (
+      <>
+        <button
+          onClick={() => props.onMappingReviewReady(mappingReviewPayloadMock, 'run-123')}
+          type="button">
+          Trigger Mapping Review Ready
+        </button>
+        <button onClick={props.onResetToMain} type="button">
+          Trigger Reset To Main
+        </button>
+      </>
+    );
+  }),
 }));
 
 describe('Page component', () => {

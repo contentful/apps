@@ -1,5 +1,4 @@
 import { PageAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
-import { ERROR_MESSAGES } from './constants/messages';
 
 /**
  * Call a specified app action and return the result if there are no errors or processing states. The function is written such that processing and failure states are considered

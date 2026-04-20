@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefCallback } from 'react';
-import { Box, Button, Flex, Text } from '@contentful/f36-components';
+import { Box, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import type {
   EntryBlockGraph,
@@ -150,7 +150,6 @@ export const MappingView = ({
       previousSelectedEntryIndexRef.current = selectedEntryIndex;
       closeEditModal();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to entry focus changes
   }, [selectedEntryIndex]);
 
   const { selectionRectangle, selectedText, selectedRange, clearSelection } =
@@ -259,7 +258,6 @@ export const MappingView = ({
     });
 
     return byKey;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allSegments, entryBlockGraph, payload.contentTypes, selectedEntryIndex]);
 
   const newLocations = useMemo<EditModalNewLocation[]>(() => {
@@ -361,7 +359,6 @@ export const MappingView = ({
     }));
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const mappingCardsBySegment = useMemo(
     () =>
       allSegments.reduce<Record<string, AnchoredMappingCard[]>>((acc, segment) => {
