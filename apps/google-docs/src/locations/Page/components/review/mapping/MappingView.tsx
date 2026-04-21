@@ -10,7 +10,11 @@ import type {
   EditModalNewLocation,
   SourceRef,
 } from '@types';
-import { isTextSourceRef } from '@types';
+import {
+  EditModalDestinationStateKind,
+  createEditModalDestinationState,
+  isTextSourceRef,
+} from '@types';
 import { FileTextIcon } from '@contentful/f36-icons';
 import { useReviewTextSelection } from '@hooks/useReviewTextSelection';
 import { getEntryTitleFromFieldMappings } from '../../../../../utils/getEntryTitle';
@@ -59,11 +63,19 @@ interface MappingViewProps {
   selectedEntryIndex: number | null;
 }
 
+const EMPTY_NEW_LOCATION: EditModalNewLocation = {
+  id: '',
+  title: '',
+  fieldOptions: [],
+  fieldMappings: [],
+};
+
 const EMPTY_EDIT_MODAL: EditModalState = {
   mode: null,
   viewModel: {
     selectedText: '',
     currentLocations: [],
+    newLocation: EMPTY_NEW_LOCATION,
     isOpen: false,
   },
   title: '',
@@ -262,41 +274,54 @@ export const MappingView = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allSegments, entryBlockGraph, payload.contentTypes, selectedEntryIndex]);
 
-  const newLocations = useMemo<EditModalNewLocation[]>(() => {
-    return entryBlockGraph.entries.map((entry, entryIndex) => {
-      const contentType = payload.contentTypes.find((item) => item.sys.id === entry.contentTypeId);
-      const contentTypeName =
-        (contentType?.name ?? entry.contentTypeId).trim() || entry.contentTypeId;
-      const fallbackEntryName = getEntryName(contentTypeName, entryIndex);
-      const entryTitle = getEntryReviewTitle(entry, contentType?.displayField, fallbackEntryName);
-      const contentTypeFields = contentType?.fields ?? [];
-      const fieldOptions =
-        contentTypeFields.length > 0
-          ? contentTypeFields
-              .filter((field): field is (typeof contentTypeFields)[number] & { id: string } =>
-                Boolean(field.id)
-              )
-              .map((field) => ({
-                id: field.id,
-                fieldName: (field.name ?? '').trim() || formatDisplayName(field.id),
-                fieldType: getFieldTypeLabel(field.type ?? ''),
-              }))
-          : entry.fieldMappings.map((fieldMapping) => ({
-              id: fieldMapping.fieldId,
-              fieldName: formatDisplayName(fieldMapping.fieldId),
-              fieldType: getFieldTypeLabel(fieldMapping.fieldType),
-            }));
+  const getNewLocationForEntry = (
+    entry: EntryBlockGraph['entries'][number],
+    entryIndex: number
+  ): EditModalNewLocation => {
+    const contentType = payload.contentTypes.find((item) => item.sys.id === entry.contentTypeId);
+    const contentTypeName = contentType?.name ?? entry.contentTypeId;
+    const fallbackEntryName = getEntryName(contentTypeName, entryIndex);
+    const entryTitle = getEntryReviewTitle(entry, contentType?.displayField, fallbackEntryName);
+    const contentTypeFields = contentType?.fields ?? [];
+    const fieldOptions =
+      contentTypeFields.length > 0
+        ? contentTypeFields
+            .filter((field): field is (typeof contentTypeFields)[number] & { id: string } =>
+              Boolean(field.id)
+            )
+            .map((field) => ({
+              id: field.id,
+              fieldName: (field.name ?? '').trim() || formatDisplayName(field.id),
+              fieldType: getFieldTypeLabel(field.type ?? ''),
+            }))
+        : entry.fieldMappings.map((fieldMapping) => ({
+            id: fieldMapping.fieldId,
+            fieldName: formatDisplayName(fieldMapping.fieldId),
+            fieldType: getFieldTypeLabel(fieldMapping.fieldType),
+          }));
 
-      return {
-        id: entry.tempId ?? `${entry.contentTypeId}-${entryIndex}`,
-        title: `${contentTypeName}: ${entryTitle}`,
-        fieldOptions,
-        fieldMappings: entry.fieldMappings.map((fieldMapping) => ({
-          fieldId: fieldMapping.fieldId,
-        })),
-      };
-    });
-  }, [entryBlockGraph.entries, payload.contentTypes]);
+    return {
+      id: entry.tempId ?? `${entry.contentTypeId}-${entryIndex}`,
+      title: `${contentTypeName}: ${entryTitle}`,
+      fieldOptions,
+      fieldMappings: entry.fieldMappings.map((fieldMapping) => ({
+        fieldId: fieldMapping.fieldId,
+      })),
+    };
+  };
+
+  const newLocation = useMemo<EditModalNewLocation>(() => {
+    if (selectedEntryIndex === null) {
+      return EMPTY_NEW_LOCATION;
+    }
+
+    const selectedEntry = entryBlockGraph.entries[selectedEntryIndex];
+    if (!selectedEntry) {
+      return EMPTY_NEW_LOCATION;
+    }
+
+    return getNewLocationForEntry(selectedEntry, selectedEntryIndex);
+  }, [entryBlockGraph.entries, payload.contentTypes, selectedEntryIndex]);
 
   const getLocationsForSourceRef = (sourceRef: SourceRef): EditLocationOption[] => {
     const targetKey = buildSourceRefKey(sourceRef);
@@ -435,7 +460,7 @@ export const MappingView = ({
       viewModel: {
         selectedText: preview,
         currentLocations,
-        newLocations,
+        newLocation,
         isOpen: true,
       },
       title: 'Assign content',
@@ -456,6 +481,7 @@ export const MappingView = ({
         contentPreview: preview?.contentPreview,
         previewSectionTitle: preview?.previewSectionTitle,
         currentLocations,
+        newLocation: EMPTY_NEW_LOCATION,
         isOpen: true,
       },
       title: 'Exclude content',
@@ -521,36 +547,41 @@ export const MappingView = ({
 
   const handleEditModalConfirmPrimary = ({
     selectedLocationId,
-    selectedFieldIdsByLocationId = {},
+    selectedFieldIds = {},
   }: {
     selectedLocationId: string | null;
-    selectedFieldIdsByLocationId?: Record<string, string[]>;
+    selectedFieldIds?: Record<string, string[]>;
   }) => {
     if (editModalState.mode === 'assign') {
       const locations = editModalState.viewModel.currentLocations;
 
-      const targets: { entryIndex: number; fieldId: string; fieldType: string }[] = [];
-      for (let entryIndex = 0; entryIndex < entryBlockGraph.entries.length; entryIndex++) {
-        const entry = entryBlockGraph.entries[entryIndex];
-        const newLocId = entry.tempId ?? `${entry.contentTypeId}-${entryIndex}`;
-        const fieldIds = selectedFieldIdsByLocationId[newLocId] ?? [];
-        const contentType = payload.contentTypes.find((c) => c.sys.id === entry.contentTypeId);
+      const newLocation = editModalState.viewModel.newLocation;
+      const resolvedTargets: { entryIndex: number; fieldId: string; fieldType: string }[] = [];
+
+      if (newLocation && selectedEntryIndex !== null) {
+        const entry = entryBlockGraph.entries[selectedEntryIndex];
+        const fieldIds = selectedFieldIds[newLocation.id] ?? [];
+        const contentType = entry
+          ? payload.contentTypes.find((c) => c.sys.id === entry.contentTypeId)
+          : undefined;
+
         for (const fieldId of fieldIds) {
           const field = contentType?.fields?.find((f) => 'id' in f && f.id === fieldId);
           const fieldType =
             field && 'type' in field && typeof field.type === 'string' ? field.type : 'Text';
-          targets.push({
-            entryIndex,
+          if (!fieldId.length) {
+            continue;
+          }
+
+          resolvedTargets.push({
+            entryIndex: selectedEntryIndex,
             fieldId,
             fieldType,
           });
         }
       }
 
-      const resolvedTargets = targets.filter((t) => t.fieldId.length > 0);
-
       if (!resolvedTargets.length) {
-        closeEditModal();
         return;
       }
 
@@ -712,6 +743,7 @@ export const MappingView = ({
       <EditModal
         isOpen={editModalState.viewModel.isOpen}
         onClose={closeEditModal}
+        mode={editModalState.mode}
         viewModel={editModalState.viewModel}
         title={editModalState.title}
         locationSectionDescription={editModalState.locationSectionDescription}

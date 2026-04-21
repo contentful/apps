@@ -31,6 +31,39 @@ export interface EditModalNewLocation {
   selectedFieldIds?: string[];
 }
 
+export enum EditModalDestinationStateKind {
+  Ready = 'ready',
+  MissingEntry = 'missing-entry',
+  NoFields = 'no-fields',
+  NoCompatibleFields = 'no-compatible-fields',
+  RequiresSelection = 'requires-selection',
+}
+
+export interface EditModalDestinationState {
+  kind: EditModalDestinationStateKind;
+  message?: string;
+}
+
+const DEFAULT_DESTINATION_STATE_MESSAGES: Record<EditModalDestinationStateKind, string> = {
+  [EditModalDestinationStateKind.Ready]: '',
+  [EditModalDestinationStateKind.MissingEntry]:
+    'No destination entry is available for the entry currently in view.',
+  [EditModalDestinationStateKind.NoFields]:
+    'The current entry does not have any destination fields available.',
+  [EditModalDestinationStateKind.NoCompatibleFields]:
+    'The current entry does not have any compatible destination fields for this content.',
+  [EditModalDestinationStateKind.RequiresSelection]:
+    'Select at least one destination field in the current entry to continue.',
+};
+
+export const createEditModalDestinationState = (
+  kind: EditModalDestinationStateKind,
+  message?: string
+): EditModalDestinationState => ({
+  kind,
+  message: message ?? DEFAULT_DESTINATION_STATE_MESSAGES[kind] ?? undefined,
+});
+
 export interface EditModalContent {
   selectedText: string;
   /** Mapped-only preview for exclude flow; falls back to selectedText in the modal when absent. */
@@ -39,5 +72,5 @@ export interface EditModalContent {
   previewSectionTitle?: string;
   isOpen: boolean;
   currentLocations: EditLocationOption[];
-  newLocations?: EditModalNewLocation[];
+  newLocation: EditModalNewLocation;
 }

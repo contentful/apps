@@ -1,4 +1,4 @@
-import { useId, useMemo } from 'react';
+import { useEffect, useId, useMemo } from 'react';
 import { Flex, Stack, Text } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import type { EditModalFieldMapping, EditModalFieldOption } from '@types';
@@ -13,6 +13,10 @@ interface FieldSelectionDropdownProps {
   selectedFieldIds: string[];
   /** Functional updates avoid stale `selectedFieldIds` when selecting multiple fields quickly. */
   onSelectedFieldIdsChange: (updater: (previous: string[]) => string[]) => void;
+  onSelectableStateChange?: (state: {
+    hasFieldOptions: boolean;
+    hasSelectableOptions: boolean;
+  }) => void;
 }
 
 export const FieldSelectionDropdown = ({
@@ -21,6 +25,7 @@ export const FieldSelectionDropdown = ({
   fieldMappings,
   selectedFieldIds,
   onSelectedFieldIdsChange,
+  onSelectableStateChange,
 }: FieldSelectionDropdownProps) => {
   const key = useId();
   const selectedOptions = useMemo(
@@ -33,6 +38,20 @@ export const FieldSelectionDropdown = ({
     () => new Set(fieldMappings.map((fieldMapping) => fieldMapping.fieldId)),
     [fieldMappings]
   );
+  const selectableOptions = useMemo(
+    () =>
+      fieldOptions.filter((option) =>
+        isSelectableFieldType(getFieldTypeLabel(option.fieldType), selectedText)
+      ),
+    [fieldOptions, selectedText]
+  );
+
+  useEffect(() => {
+    onSelectableStateChange?.({
+      hasFieldOptions: fieldOptions.length > 0,
+      hasSelectableOptions: selectableOptions.length > 0,
+    });
+  }, [fieldOptions.length, onSelectableStateChange, selectableOptions.length]);
 
   const handleSelectField = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { checked, value } = event.target;

@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { Box, Button, Modal, Paragraph, Text } from '@contentful/f36-components';
-import type { EditModalContent } from '@types';
+import { Box, Button, Modal, Note, Paragraph, Text } from '@contentful/f36-components';
+import {
+  EditModalDestinationStateKind,
+  createEditModalDestinationState,
+  type EditModalContent,
+} from '@types';
 import {
   locationButton,
   locationButtonSelected,
@@ -15,6 +19,7 @@ import { FieldSelectionDropdown } from './FieldSelectionDropdown';
 interface EditModalProps {
   isOpen: boolean;
   onClose: () => void;
+  mode: 'assign' | 'exclude' | null;
   viewModel: EditModalContent;
   title: string;
   locationSectionDescription: string;
@@ -22,13 +27,14 @@ interface EditModalProps {
   additionalContent?: ReactNode;
   onConfirmPrimary?: (details: {
     selectedLocationId: string | null;
-    selectedFieldIdsByLocationId: Record<string, string[]>;
+    selectedFieldIds: Record<string, string[]>;
   }) => void;
 }
 
 export const EditModal = ({
   isOpen,
   onClose,
+  mode,
   viewModel,
   title,
   locationSectionDescription,
@@ -38,7 +44,7 @@ export const EditModal = ({
 }: EditModalProps) => {
   const hasLocationSectionDescription = locationSectionDescription.trim().length > 0;
   const hasCurrentLocations = viewModel.currentLocations.length > 0;
-  const hasNewLocations = (viewModel.newLocations?.length ?? 0) > 0;
+  const hasNewLocation = viewModel.newLocation.id !== '';
   const initialSelectedLocationId = useMemo(
     () =>
       viewModel.currentLocations.find((location) => location.isSelected)?.id ??
@@ -51,57 +57,78 @@ export const EditModal = ({
     initialSelectedLocationId
   );
 
-  const [selectedFieldIdsByLocationId, setSelectedFieldIdsByLocationId] = useState<
-    Record<string, string[]>
-  >(() =>
-    Object.fromEntries(
-      (viewModel.newLocations ?? []).map((newLocation) => [
-        newLocation.id,
-        [...(newLocation.selectedFieldIds ?? [])],
-      ])
-    )
+  const [selectedFieldIds, setSelectedFieldIds] = useState(
+    () => viewModel.newLocation.selectedFieldIds ?? []
   );
+
+  const [destinationFieldState, setDestinationFieldState] = useState<{
+    hasFieldOptions: boolean;
+    hasSelectableOptions: boolean;
+  } | null>(null);
 
   useEffect(() => {
     setSelectedLocationId(initialSelectedLocationId);
   }, [initialSelectedLocationId]);
 
-  const newLocationRowIdsKey = (viewModel.newLocations ?? []).map((nl) => nl.id).join('|');
+  const newLocationRowIdsKey = viewModel.newLocation.id;
 
   // Reset field multiselect when the modal opens or when the set of destination rows changes.
-  // Do not depend on `viewModel.newLocations` reference (it can churn without semantic change).
+  // Do not depend on `viewModel.newLocation` reference (it can churn without semantic change).
   useEffect(() => {
     if (!isOpen) return;
-    setSelectedFieldIdsByLocationId(
-      Object.fromEntries(
-        (viewModel.newLocations ?? []).map((newLocation) => [
-          newLocation.id,
-          [...(newLocation.selectedFieldIds ?? [])],
-        ])
-      )
-    );
+    setSelectedFieldIds(viewModel.newLocation.selectedFieldIds ?? []);
+    setDestinationFieldState(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sync from props only on open / row-id set change, not array identity
   }, [isOpen, newLocationRowIdsKey]);
 
-  const handleSelectedFieldIdsChange = (
-    locationId: string,
-    updater: (previous: string[]) => string[]
-  ) => {
-    setSelectedFieldIdsByLocationId((previous) => ({
-      ...previous,
-      [locationId]: updater(previous[locationId] ?? []),
-    }));
+  const handleSelectedFieldIdsChange = (updater: (previous: string[]) => string[]) => {
+    setSelectedFieldIds((previous) => updater(previous));
   };
 
   const handlePrimaryAction = () => {
     onConfirmPrimary?.({
       selectedLocationId,
-      selectedFieldIdsByLocationId: { ...selectedFieldIdsByLocationId },
+      selectedFieldIds: {
+        [viewModel.newLocation.id]: [...selectedFieldIds],
+      },
     });
   };
 
   const previewSectionTitle = viewModel.previewSectionTitle ?? 'Selected content';
   const previewQuotedText = (viewModel.contentPreview ?? viewModel.selectedText).trim();
+  const selectedDestinationCount = selectedFieldIds.length;
+  const isAssignMode = mode === 'assign';
+  const destinationState = useMemo(() => {
+    if (!isAssignMode) {
+      return createEditModalDestinationState(EditModalDestinationStateKind.Ready);
+    }
+
+    if (!hasNewLocation) {
+      return createEditModalDestinationState(EditModalDestinationStateKind.MissingEntry);
+    }
+
+    if (viewModel.newLocation.fieldOptions.length === 0) {
+      return createEditModalDestinationState(EditModalDestinationStateKind.NoFields);
+    }
+
+    if (destinationFieldState?.hasSelectableOptions === false) {
+      return createEditModalDestinationState(EditModalDestinationStateKind.NoCompatibleFields);
+    }
+
+    if (selectedDestinationCount === 0) {
+      return createEditModalDestinationState(EditModalDestinationStateKind.RequiresSelection);
+    }
+
+    return createEditModalDestinationState(EditModalDestinationStateKind.Ready);
+  }, [
+    isAssignMode,
+    destinationFieldState?.hasSelectableOptions,
+    hasNewLocation,
+    selectedDestinationCount,
+    viewModel.newLocation.fieldOptions.length,
+  ]);
+  const isPrimaryDisabled =
+    isAssignMode && destinationState.kind !== EditModalDestinationStateKind.Ready;
 
   return (
     <Modal isShown={isOpen} onClose={onClose} size="large" shouldCloseOnOverlayClick={false}>
@@ -172,37 +199,41 @@ export const EditModal = ({
                 )}
               </Box>
 
-              {hasNewLocations ? (
+              {hasNewLocation ? (
                 <Box>
                   <Text as="p" fontWeight="fontWeightDemiBold" marginBottom="spacingM">
                     New location
                   </Text>
                   <Box className={locationList}>
-                    {viewModel.newLocations?.map((newLocation) => (
-                      <Box className={sectionCard} key={newLocation.id}>
-                        <Text as="p" fontWeight="fontWeightDemiBold" marginBottom="spacingM">
-                          {newLocation.title}
-                        </Text>
-                        <Text as="p" marginBottom="spacingXs">
-                          Fields
-                        </Text>
-                        <FieldSelectionDropdown
-                          selectedText={viewModel.selectedText}
-                          fieldOptions={newLocation.fieldOptions}
-                          fieldMappings={newLocation.fieldMappings}
-                          selectedFieldIds={
-                            selectedFieldIdsByLocationId[newLocation.id] ??
-                            newLocation.selectedFieldIds ??
-                            []
-                          }
-                          onSelectedFieldIdsChange={(updater) =>
-                            handleSelectedFieldIdsChange(newLocation.id, updater)
-                          }
-                        />
-                      </Box>
-                    ))}
+                    <Box className={sectionCard} key={viewModel.newLocation.id}>
+                      <Text as="p" fontWeight="fontWeightDemiBold" marginBottom="spacingM">
+                        {viewModel.newLocation.title}
+                      </Text>
+                      <Text as="p" marginBottom="spacingXs">
+                        Fields
+                      </Text>
+                      <FieldSelectionDropdown
+                        selectedText={viewModel.selectedText}
+                        fieldOptions={viewModel.newLocation.fieldOptions}
+                        fieldMappings={viewModel.newLocation.fieldMappings}
+                        selectedFieldIds={selectedFieldIds}
+                        onSelectedFieldIdsChange={handleSelectedFieldIdsChange}
+                        onSelectableStateChange={setDestinationFieldState}
+                      />
+                    </Box>
                   </Box>
                 </Box>
+              ) : null}
+
+              {isAssignMode && destinationState.kind !== EditModalDestinationStateKind.Ready ? (
+                <Note
+                  variant={
+                    destinationState.kind === EditModalDestinationStateKind.RequiresSelection
+                      ? 'warning'
+                      : 'neutral'
+                  }>
+                  {destinationState.message}
+                </Note>
               ) : null}
 
               {additionalContent}
@@ -212,7 +243,11 @@ export const EditModal = ({
             <Button onClick={onClose} size="small" variant="secondary">
               Cancel
             </Button>
-            <Button onClick={handlePrimaryAction} size="small" variant="primary">
+            <Button
+              onClick={handlePrimaryAction}
+              size="small"
+              variant="primary"
+              isDisabled={isPrimaryDisabled}>
               {primaryButtonLabel}
             </Button>
           </Modal.Controls>

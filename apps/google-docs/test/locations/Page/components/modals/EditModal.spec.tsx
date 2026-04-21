@@ -59,6 +59,12 @@ const viewModel = {
       },
     },
   ],
+  newLocation: {
+    id: '',
+    title: '',
+    fieldMappings: [],
+    fieldOptions: [],
+  },
 };
 
 describe('EditModal', () => {
@@ -71,6 +77,7 @@ describe('EditModal', () => {
       <EditModal
         isOpen={true}
         onClose={onClose}
+        mode="exclude"
         viewModel={viewModel}
         title="Exclude content"
         locationSectionDescription="Choose which location to use."
@@ -93,6 +100,7 @@ describe('EditModal', () => {
       <EditModal
         isOpen={true}
         onClose={onClose}
+        mode="exclude"
         viewModel={viewModel}
         title="Exclude content"
         locationSectionDescription="Choose which location to use."
@@ -121,34 +129,21 @@ describe('EditModal', () => {
       <EditModal
         isOpen={true}
         onClose={onClose}
+        mode="assign"
         viewModel={{
           ...viewModel,
-          newLocations: [
-            {
-              id: 'page-event-detail',
-              title: "Page: Event detail (Don't enter NRF uncaffeinated.)",
-              fieldMappings: [],
-              fieldOptions: [
-                {
-                  id: 'title',
-                  fieldName: 'Title',
-                  fieldType: 'Short text',
-                },
-              ],
-            },
-            {
-              id: 'component-resource-detail-hero',
-              title: "Component: Resource detail hero (Don't enter NRF uncaffeinated.)",
-              fieldMappings: [{ fieldId: 'headline' }],
-              fieldOptions: [
-                {
-                  id: 'headline',
-                  fieldName: 'Headline',
-                  fieldType: 'Short text',
-                },
-              ],
-            },
-          ],
+          newLocation: {
+            id: 'page-event-detail',
+            title: "Page: Event detail (Don't enter NRF uncaffeinated.)",
+            fieldMappings: [],
+            fieldOptions: [
+              {
+                id: 'title',
+                fieldName: 'Title',
+                fieldType: 'Short text',
+              },
+            ],
+          },
         }}
         title="Assign content"
         locationSectionDescription=""
@@ -159,47 +154,29 @@ describe('EditModal', () => {
     await waitFor(() => {
       expect(screen.getByText('New location')).toBeTruthy();
       expect(screen.getByText("Page: Event detail (Don't enter NRF uncaffeinated.)")).toBeTruthy();
-      expect(
-        screen.getByText("Component: Resource detail hero (Don't enter NRF uncaffeinated.)")
-      ).toBeTruthy();
-      expect(screen.getAllByText('Fields')).toHaveLength(2);
-      expect(screen.getAllByText('Select one or more')).toHaveLength(2);
+      expect(screen.getAllByText('Fields')).toHaveLength(1);
+      expect(screen.getAllByText('Select one or more')).toHaveLength(1);
     });
   });
 
-  it('keys new location rows by id so duplicate titles do not break reconciliation', async () => {
-    const duplicateTitle = 'Article: Untitled';
+  it('does not show destination validation or disable submit in exclude mode', async () => {
     render(
       <EditModal
         isOpen={true}
         onClose={onClose}
-        viewModel={{
-          ...viewModel,
-          newLocations: [
-            {
-              id: 'entry-a',
-              title: duplicateTitle,
-              fieldMappings: [],
-              fieldOptions: [{ id: 'body', fieldName: 'Body', fieldType: 'Text' }],
-            },
-            {
-              id: 'entry-b',
-              title: duplicateTitle,
-              fieldMappings: [],
-              fieldOptions: [{ id: 'summary', fieldName: 'Summary', fieldType: 'Text' }],
-            },
-          ],
-        }}
-        title="Assign content"
-        locationSectionDescription=""
-        primaryButtonLabel="Move content"
+        mode="exclude"
+        viewModel={viewModel}
+        title="Exclude content"
+        locationSectionDescription="Choose which location to use."
+        primaryButtonLabel="Exclude content"
       />
     );
 
     await waitFor(() => {
-      expect(screen.getAllByText(duplicateTitle)).toHaveLength(2);
-      expect(screen.getAllByText('Fields')).toHaveLength(2);
-      expect(screen.getAllByText('Select one or more')).toHaveLength(2);
+      expect(
+        screen.queryByText('No destination entry is available for the entry currently in view.')
+      ).toBeNull();
+      expect(screen.getByRole('button', { name: 'Exclude content' })).not.toBeDisabled();
     });
   });
 
@@ -208,6 +185,7 @@ describe('EditModal', () => {
       <EditModal
         isOpen={true}
         onClose={onClose}
+        mode="assign"
         viewModel={{ ...viewModel, currentLocations: [] }}
         title="Assign content"
         locationSectionDescription=""
