@@ -167,8 +167,15 @@ export async function resumeWorkflowRun(
     return;
   }
 
-  await sdk.cma.agentRun.resumeRun(
-    { spaceId, environmentId, runId },
-    { resumePayload: resumePayload as Record<string, unknown> }
-  );
+  try {
+    console.log('[resumeWorkflowRun] calling sdk.cma.agentRun.resumeRun for run', runId, 'payload:', resumePayload);
+    await sdk.cma.agentRun.resumeRun(
+      { spaceId, environmentId, runId },
+      { resumePayload: resumePayload as Record<string, unknown> }
+    );
+    console.log('[resumeWorkflowRun] resumeRun succeeded');
+  } catch (error) {
+    console.error('[resumeWorkflowRun] resumeRun failed:', error);
+    throw error;
+  }
 }
