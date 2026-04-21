@@ -9,18 +9,7 @@
       "accepts": [
         "appaction.call"
       ],
-      "allowNetworks": [
-        "*.ai",
-        "*.app",
-        "*.co",
-        "*.com",
-        "*.dev",
-        "*.edu",
-        "*.gov",
-        "*.io",
-        "*.net",
-        "*.org"
-      ]
+      "allowNetworks": []
     },
     {
       "id": "checkEntryLinks",
@@ -31,18 +20,7 @@
       "accepts": [
         "appaction.call"
       ],
-      "allowNetworks": [
-        "*.ai",
-        "*.app",
-        "*.co",
-        "*.com",
-        "*.dev",
-        "*.edu",
-        "*.gov",
-        "*.io",
-        "*.net",
-        "*.org"
-      ]
+      "allowNetworks": []
     },
     {
       "id": "checkAllEntryLinks",
@@ -53,18 +31,7 @@
       "accepts": [
         "appaction.call"
       ],
-      "allowNetworks": [
-        "*.ai",
-        "*.app",
-        "*.co",
-        "*.com",
-        "*.dev",
-        "*.edu",
-        "*.gov",
-        "*.io",
-        "*.net",
-        "*.org"
-      ]
+      "allowNetworks": []
     }
   ],
   "actions": [
