@@ -23,6 +23,18 @@ const mappingViewGraphProps = (payload: MappingReviewSuspendPayload) => ({
   onEntryBlockGraphChange: vi.fn(),
 });
 
+const createDomRange = (textNode: Text, start: number, end: number) => {
+  const range = document.createRange();
+  range.setStart(textNode, start);
+  range.setEnd(textNode, end);
+  return range;
+};
+
+const createDetachedRange = (text: string, start: number, end: number) => {
+  const textNode = document.createTextNode(text);
+  return createDomRange(textNode, start, end);
+};
+
 const createPayload = (excludedSourceRefs: SourceRef[] = []): MappingReviewSuspendPayload => ({
   suspendStepId: 'mapping-review',
   reason: 'Mapping review required before CMA payload generation continues',
@@ -107,37 +119,30 @@ describe('MappingView', () => {
   });
 
   it('opens assign modal from text selection menu and clears selection', () => {
-    const selectedRange = {
-      intersectsNode: (node: Node) =>
-        node instanceof HTMLElement && node.dataset.isMapped === 'true',
-    } as unknown as Range;
     mockUseReviewTextSelection.mockReturnValueOnce({
       selectionRectangle: null,
       selectedText: '',
       selectedRange: null,
       clearSelection: mockClearSelection,
     });
+
+    const payload = createPayload();
+    const { container, rerender } = render(
+      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+    );
+    const selectedRange = createDomRange(
+      container.querySelector('[data-review-text-segment="true"]')?.firstChild as Text,
+      0,
+      5
+    );
     mockUseReviewTextSelection.mockReturnValue({
       selectionRectangle: { top: 100, left: 100, right: 160, bottom: 120 },
       selectedText: '  selected body text  ',
       selectedRange,
       clearSelection: mockClearSelection,
     });
-
-    const payload = createPayload();
-    const { rerender } = render(
-      <MappingView
-        payload={payload}
-        {...mappingViewGraphProps(payload)}
-        selectedEntryIndex={null}
-      />
-    );
     rerender(
-      <MappingView
-        payload={payload}
-        {...mappingViewGraphProps(payload)}
-        selectedEntryIndex={null}
-      />
+      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Reassign' }));
@@ -156,7 +161,7 @@ describe('MappingView', () => {
   });
 
   it('opens assign modal with new locations for unmapped text', () => {
-    const selectedRange = { intersectsNode: () => false } as unknown as Range;
+    const selectedRange = createDetachedRange('fresh body text', 0, 5);
     mockUseReviewTextSelection.mockReturnValue({
       selectionRectangle: { top: 100, left: 100, right: 160, bottom: 120 },
       selectedText: 'fresh body text',
@@ -166,11 +171,7 @@ describe('MappingView', () => {
 
     const payload = createPayload();
     render(
-      <MappingView
-        payload={payload}
-        {...mappingViewGraphProps(payload)}
-        selectedEntryIndex={null}
-      />
+      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Assign' }));
@@ -184,7 +185,7 @@ describe('MappingView', () => {
   });
 
   it('disables exclude when selected text has no mapped segments', () => {
-    const selectedRange = { intersectsNode: () => false } as unknown as Range;
+    const selectedRange = createDetachedRange('plain text', 0, 5);
     mockUseReviewTextSelection.mockReturnValue({
       selectionRectangle: { top: 100, left: 100, right: 160, bottom: 120 },
       selectedText: 'plain text',
@@ -207,37 +208,30 @@ describe('MappingView', () => {
   });
 
   it('opens exclude modal with current locations for mapped text', () => {
-    const selectedRange = {
-      intersectsNode: (node: Node) =>
-        node instanceof HTMLElement && node.dataset.isMapped === 'true',
-    } as unknown as Range;
     mockUseReviewTextSelection.mockReturnValueOnce({
       selectionRectangle: null,
       selectedText: '',
       selectedRange: null,
       clearSelection: mockClearSelection,
     });
+
+    const payload = createPayload();
+    const { container, rerender } = render(
+      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+    );
+    const selectedRange = createDomRange(
+      container.querySelector('[data-review-text-segment="true"]')?.firstChild as Text,
+      0,
+      5
+    );
     mockUseReviewTextSelection.mockReturnValue({
       selectionRectangle: { top: 100, left: 100, right: 160, bottom: 120 },
       selectedText: 'selected body text',
       selectedRange,
       clearSelection: mockClearSelection,
     });
-
-    const payload = createPayload();
-    const { rerender } = render(
-      <MappingView
-        payload={payload}
-        {...mappingViewGraphProps(payload)}
-        selectedEntryIndex={null}
-      />
-    );
     rerender(
-      <MappingView
-        payload={payload}
-        {...mappingViewGraphProps(payload)}
-        selectedEntryIndex={null}
-      />
+      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Exclude' }));
