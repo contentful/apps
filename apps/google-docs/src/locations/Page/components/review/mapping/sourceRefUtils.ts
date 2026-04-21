@@ -21,7 +21,7 @@ function isTableTextRangeLike(ref: SourceRef): ref is TableTextSourceRef {
 
 export function buildSourceRefKey(sourceRef: SourceRef): string {
   if (isBlockImageSourceRef(sourceRef)) {
-    return `blockImage:${sourceRef.blockId}:${sourceRef.imageId}`;
+    return `image:${sourceRef.blockId}:${sourceRef.imageId}`;
   }
 
   if (isTableImageSourceRef(sourceRef)) {

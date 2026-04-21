@@ -431,7 +431,7 @@ describe('applyTextReassignToEntryBlockGraph', () => {
 
 describe('applyImageReassignToEntryBlockGraph', () => {
   const imageRef: SourceRef = {
-    type: 'blockImage',
+    type: 'image',
     blockId: 'block-1',
     imageId: 'image-1',
   };
@@ -548,7 +548,7 @@ describe('applyImageReassignToEntryBlockGraph', () => {
 describe('appendImageToTargets', () => {
   it('adds excluded image to target field and clears exclusion', () => {
     const imageRef: SourceRef = {
-      type: 'blockImage',
+      type: 'image',
       blockId: 'block-1',
       imageId: 'image-1',
     };

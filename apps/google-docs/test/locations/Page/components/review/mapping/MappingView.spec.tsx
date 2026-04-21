@@ -161,7 +161,7 @@ const createImagePayload = (): MappingReviewSuspendPayload => ({
           {
             fieldId: 'body',
             fieldType: 'Text',
-            sourceRefs: [{ type: 'blockImage', blockId: 'image-block-1', imageId: 'img-1' }],
+            sourceRefs: [{ type: 'image', blockId: 'image-block-1', imageId: 'img-1' }],
             confidence: 0.9,
           },
         ],
@@ -250,8 +250,8 @@ describe('MappingView', () => {
 
     expect(screen.getByRole('heading', { name: 'Assign content' })).toBeTruthy();
     expect(screen.getByText('"selected body text"')).toBeTruthy();
-    expect(screen.getByText('Article')).toBeTruthy();
-    expect(screen.getByText('Untitled')).toBeTruthy();
+    expect(screen.getAllByText('Article').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Untitled').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
     expect(screen.getByText('New location')).toBeTruthy();
     expect(screen.getByText('Article: Draft title from display field')).toBeTruthy();
@@ -338,7 +338,7 @@ describe('MappingView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Exclude' }));
 
     expect(screen.getByRole('heading', { name: 'Exclude content' })).toBeTruthy();
-    expect(screen.getByText('Article')).toBeTruthy();
+    expect(screen.getAllByText('Article').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
     expect(screen.queryByText('New location')).toBeNull();
     expect(

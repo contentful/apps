@@ -64,7 +64,7 @@ export type TextRangeSourceRef = TextSourceRef | IndexedBlockTextSourceRef;
 export type BlockImageSourceRef = {
   blockId: string;
   imageId: string;
-  type: 'blockImage';
+  type: 'image';
 };
 
 export type TableImageSourceRef = {
@@ -82,7 +82,7 @@ export type SourceRef = TextSourceRef | ImageSourceRef | IndexedBlockTextSourceR
 
 export const isTextSourceRef = (sourceRef: SourceRef): sourceRef is TextRangeSourceRef => {
   if (typeof sourceRef !== 'object' || sourceRef === null) return false;
-  if (sourceRef.type === 'blockImage' || sourceRef.type === 'tableImage') return false;
+  if ('imageId' in sourceRef) return false;
   if (!('start' in sourceRef) || !('end' in sourceRef) || !('flattenedRuns' in sourceRef)) {
     return false;
   }
