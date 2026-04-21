@@ -40,6 +40,7 @@ const AnalyticsMetricDisplay = (props: Props) => {
     selectedMetric,
     isLoading = false,
   } = props;
+  const safePageViews = Number.isFinite(pageViews) ? pageViews : 0;
 
   const propertyIdNumber = propertyId.split('/')[1] || '';
   const viewUrl = canOpenInGoogleAnalytics
@@ -50,7 +51,7 @@ const AnalyticsMetricDisplay = (props: Props) => {
     <>
       <ChartHeader
         metricName={metricName ? metricName : ''}
-        metricValue={Intl.NumberFormat('en', { notation: 'compact' }).format(pageViews)}
+        metricValue={Intl.NumberFormat('en', { notation: 'compact' }).format(safePageViews)}
         handleChange={handleDateRangeChange}
         handleMetricChange={handleMetricChange}
         handleCustomRangeRequest={handleCustomRangeRequest}

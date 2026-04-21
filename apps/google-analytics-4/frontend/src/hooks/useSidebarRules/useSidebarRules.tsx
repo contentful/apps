@@ -21,6 +21,7 @@ export const useSidebarRules = (slugFieldRules: ContentTypeRule[]) => {
   const entryFields = sdk.entry?.fields ?? {};
 
   const [isPublished, setIsPublished] = useState(false);
+  const [haveLoadedPublicationState, setHaveLoadedPublicationState] = useState(false);
   const [fieldValues, setFieldValues] = useState<Record<string, string | object>>({});
   const [debouncedFieldValues, setDebouncedFieldValues] = useState<Record<string, string | object>>(
     {}
@@ -46,9 +47,13 @@ export const useSidebarRules = (slugFieldRules: ContentTypeRule[]) => {
   useEffect(() => {
     const handlePublishedStatus = (sys: ContentEntitySys) => {
       setIsPublished(Boolean(sys.publishedAt));
+      setHaveLoadedPublicationState(true);
     };
 
-    if (!sdk.entry?.onSysChanged) return;
+    if (!sdk.entry?.onSysChanged) {
+      setHaveLoadedPublicationState(true);
+      return;
+    }
     return sdk.entry.onSysChanged((sys) => handlePublishedStatus(sys));
   }, [sdk.entry]);
 
@@ -131,6 +136,7 @@ export const useSidebarRules = (slugFieldRules: ContentTypeRule[]) => {
   return {
     isPublished,
     haveLoadedFieldValues,
+    haveLoadedPublicationState,
     resolvedRules,
     validRules,
     summaryLabel,

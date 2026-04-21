@@ -46,14 +46,17 @@ const contentTypeRules: ContentTypeRules = [
 const onRemoveContentType = vi.fn();
 const onContentTypeChange = vi.fn();
 const onContentTypeFieldChange = vi.fn();
+const onContentTypeRuleChange = vi.fn();
 
 const props = {
   index: 0,
   allContentTypes,
   allContentTypeEntries,
   contentTypeRules,
+  isMissingPattern: false,
   onContentTypeChange,
   onContentTypeFieldChange,
+  onContentTypeRuleChange,
   onRemoveContentType,
   currentEditorInterface: {},
   originalContentTypeRules: [],
@@ -147,7 +150,7 @@ describe('Assign Content Type Card for Config Screen', () => {
     const user = userEvent.setup();
     render(
       <AssignContentTypeRow
-        contentTypeRule={{ ...contentTypeRules[0], urlPrefix: '' }}
+        contentTypeRule={{ ...contentTypeRules[0], urlPrefix: '/about' }}
         {...props}
       />
     );
@@ -155,11 +158,10 @@ describe('Assign Content Type Card for Config Screen', () => {
     await user.click(screen.getByTestId('advancedMatchingToggle'));
 
     expect(screen.getByTestId('advancedMatchingPanel')).toBeVisible();
-    expect(onContentTypeFieldChange).toHaveBeenCalledWith(
-      'rule-course',
-      'enableAdvancedMatching',
-      true
-    );
+    expect(onContentTypeRuleChange).toHaveBeenCalledWith('rule-course', {
+      enableAdvancedMatching: true,
+      pathPattern: '/about/{slug}',
+    });
   });
 
   it('shows advanced matching controls when a row is already configured for them', () => {
@@ -180,6 +182,35 @@ describe('Assign Content Type Card for Config Screen', () => {
     expect(screen.queryByTestId('urlPrefixInput')).not.toBeInTheDocument();
   });
 
+  it('clears advanced-only fields when advanced matching is turned off', async () => {
+    const user = userEvent.setup();
+    render(
+      <AssignContentTypeRow
+        contentTypeRule={{
+          ...contentTypeRules[0],
+          urlPrefix: '',
+          enableAdvancedMatching: true,
+          additionalFieldIds: ['slug'],
+          pathPattern: '/blog/{slug}',
+          matchDimension: 'pagePathPlusQueryString',
+          matchType: 'PARTIAL_REGEXP',
+        }}
+        {...props}
+      />
+    );
+
+    await user.click(screen.getByTestId('advancedMatchingToggle'));
+
+    expect(screen.queryByTestId('advancedMatchingPanel')).not.toBeInTheDocument();
+    expect(onContentTypeRuleChange).toHaveBeenCalledWith('rule-course', {
+      enableAdvancedMatching: false,
+      additionalFieldIds: [],
+      pathPattern: '',
+      matchDimension: 'unifiedPagePathScreen',
+      matchType: 'EXACT',
+    });
+  });
+
   it('shows a preview with additional page property tokens when configured', () => {
     render(
       <AssignContentTypeRow
@@ -196,6 +227,52 @@ describe('Assign Content Type Card for Config Screen', () => {
     );
 
     expect(screen.getByTestId('pathPatternInput')).toHaveValue('/{sectionSlug}/{slug}');
+  });
+
+  it('explains token usage and updated matching terminology in advanced mode', () => {
+    render(
+      <AssignContentTypeRow
+        contentTypeRule={{
+          ...contentTypeRules[1],
+          contentTypeId: 'category',
+          slugField: 'title',
+          enableAdvancedMatching: true,
+          additionalFieldIds: ['sectionSlug'],
+          pathPattern: '/{sectionSlug}/{slug}',
+        }}
+        {...props}
+      />
+    );
+
+    expect(
+      screen.getByText(
+        /A pattern is generated for you automatically\. Edit it if you need a different URL structure/
+      )
+    ).toBeVisible();
+    expect(
+      screen.getByText(/Use the placeholder shown next to each field in the pattern\./)
+    ).toBeVisible();
+    expect(screen.getByText('{sectionSlug}')).toBeVisible();
+    expect(screen.getByRole('option', { name: 'Flexible match' })).toBeInTheDocument();
+  });
+
+  it('shows missing pattern validation inside the advanced panel', () => {
+    render(
+      <AssignContentTypeRow
+        contentTypeRule={{
+          ...contentTypeRules[0],
+          enableAdvancedMatching: true,
+          pathPattern: '',
+        }}
+        {...props}
+        isMissingPattern={true}
+      />
+    );
+
+    expect(screen.getByText('Add a pattern for this advanced rule before saving.')).toBeVisible();
+    expect(screen.getByTestId('advancedMatchingPanel')).toContainElement(
+      screen.getByText('Add a pattern for this advanced rule before saving.')
+    );
   });
 
   it('calls field change handler when path pattern input is changed', async () => {
@@ -235,7 +312,136 @@ describe('Assign Content Type Card for Config Screen', () => {
       'pagePathPlusQueryString',
     ]);
 
-    expect(onContentTypeFieldChange).toHaveBeenCalled();
+    expect(onContentTypeFieldChange).toHaveBeenCalledWith(
+      'rule-course',
+      'matchDimension',
+      'pagePathPlusQueryString'
+    );
+  });
+
+  it('updates the generated pattern when match dimension changes before customization', async () => {
+    const user = userEvent.setup();
+    render(
+      <AssignContentTypeRow
+        contentTypeRule={{
+          ...contentTypeRules[0],
+          urlPrefix: '/article',
+          enableAdvancedMatching: true,
+          pathPattern: '/article/{articleId}/{slug}',
+          additionalFieldIds: ['articleId'],
+        }}
+        allContentTypes={{
+          ...allContentTypes,
+          course: {
+            name: 'Course',
+            fields: [
+              { id: 'slug', name: 'Slug', type: 'Symbol' },
+              { id: 'articleId', name: 'Article ID', type: 'Symbol' },
+            ],
+          },
+        }}
+        allContentTypeEntries={[
+          [
+            'course',
+            {
+              name: 'Course',
+              fields: [
+                { id: 'slug', name: 'Slug', type: 'Symbol' },
+                { id: 'articleId', name: 'Article ID', type: 'Symbol' },
+              ],
+            },
+          ],
+          allContentTypeEntries[1],
+        ]}
+        {...props}
+      />
+    );
+
+    await user.selectOptions(screen.getByTestId('matchDimensionSelect'), [
+      'pagePathPlusQueryString',
+    ]);
+
+    expect(onContentTypeRuleChange).toHaveBeenCalledWith('rule-course', {
+      matchDimension: 'pagePathPlusQueryString',
+      pathPattern: '/article/{slug}?articleId={articleId}',
+    });
+  });
+
+  it('updates the generated pattern when selected query-string fields change', async () => {
+    const user = userEvent.setup();
+    render(
+      <AssignContentTypeRow
+        contentTypeRule={{
+          ...contentTypeRules[1],
+          contentTypeId: 'category',
+          slugField: 'title',
+          urlPrefix: '/search',
+          enableAdvancedMatching: true,
+          pathPattern: '/search/{slug}',
+          matchDimension: 'pagePathPlusQueryString',
+          additionalFieldIds: [],
+        }}
+        {...props}
+      />
+    );
+
+    await user.click(screen.getByTestId('additionalFieldOption-sectionSlug'));
+
+    expect(onContentTypeRuleChange).toHaveBeenCalledWith('rule-category', {
+      additionalFieldIds: ['sectionSlug'],
+      pathPattern: '/search/{slug}?sectionSlug={sectionSlug}',
+    });
+  });
+
+  it('updates the generated pattern when selected page-path fields change', async () => {
+    const user = userEvent.setup();
+    render(
+      <AssignContentTypeRow
+        contentTypeRule={{
+          ...contentTypeRules[1],
+          contentTypeId: 'category',
+          slugField: 'title',
+          urlPrefix: '',
+          enableAdvancedMatching: true,
+          pathPattern: '/{slug}',
+          matchDimension: 'unifiedPagePathScreen',
+          additionalFieldIds: [],
+        }}
+        {...props}
+      />
+    );
+
+    await user.click(screen.getByTestId('additionalFieldOption-sectionSlug'));
+
+    expect(onContentTypeRuleChange).toHaveBeenCalledWith('rule-category', {
+      additionalFieldIds: ['sectionSlug'],
+      pathPattern: '/{sectionSlug}/{slug}',
+    });
+  });
+
+  it('does not overwrite a custom pattern when selected query-string fields change', async () => {
+    const user = userEvent.setup();
+    render(
+      <AssignContentTypeRow
+        contentTypeRule={{
+          ...contentTypeRules[1],
+          contentTypeId: 'category',
+          slugField: 'title',
+          urlPrefix: '/search',
+          enableAdvancedMatching: true,
+          pathPattern: '/search?category={slug}',
+          matchDimension: 'pagePathPlusQueryString',
+          additionalFieldIds: [],
+        }}
+        {...props}
+      />
+    );
+
+    await user.click(screen.getByTestId('additionalFieldOption-sectionSlug'));
+
+    expect(onContentTypeFieldChange).toHaveBeenCalledWith('rule-category', 'additionalFieldIds', [
+      'sectionSlug',
+    ]);
   });
 
   it('calls field change handler when matching mode selection is changed', async () => {

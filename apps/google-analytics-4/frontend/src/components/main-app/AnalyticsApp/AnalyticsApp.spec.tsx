@@ -40,6 +40,7 @@ const stableSidebarRulesState = {
   isContentTypeWarning: false,
   warningRule: undefined,
   haveLoadedFieldValues: true,
+  haveLoadedPublicationState: true,
 };
 
 const renderAnalyticsApp = () =>
@@ -142,6 +143,7 @@ describe('AnalyticsApp when content types are not configured correctly', () => {
       summaryLabel: '',
       isContentTypeWarning: true,
       haveLoadedFieldValues: true,
+      haveLoadedPublicationState: true,
       warningRule,
     }));
     mockApi.mockImplementation(() => runReportResponseHasViews);
