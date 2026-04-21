@@ -19,6 +19,7 @@
     "build:all": "npm run build && npm run build:functions",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
     "deploy": "npm run build:all && contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 55HqLhaYLjQWU5zPfID6mX --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:prod-with-actions": "node scripts/release-prod-with-actions.js",
     "deploy:test": "npm run build:all && contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 5Sr53r0O6UqTBrp0I9S3OV --token ${TEST_CMA_TOKEN}",
     "upload": "node scripts/upload-with-env.js",
     "upsert-actions": "node scripts/upsert-actions-with-env.js",
