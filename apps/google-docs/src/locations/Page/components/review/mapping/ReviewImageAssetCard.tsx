@@ -1,8 +1,8 @@
 import { Box, Card, Image, MenuItem } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import type { ImageSourceRef, NormalizedDocumentImage, SourceRef } from '@types';
+import type { ImageSourceRef, NormalizedDocumentImage } from '@types';
 import Splitter from '../../mainpage/Splitter';
-import { buildSourceRefKey, isImageSourceRefExcluded } from './sourceRefUtils';
+import { buildSourceRefKey } from './sourceRefUtils';
 
 export interface ReviewImageAssetCardProps {
   image: NormalizedDocumentImage;

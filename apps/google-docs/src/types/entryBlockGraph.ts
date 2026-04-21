@@ -106,7 +106,7 @@ export const isTableSourceRef = (
 export const isEntryBlockGraphBlockTextSourceRef = (
   sourceRef: SourceRef
 ): sourceRef is BlockTextSourceRef | IndexedBlockTextSourceRef => {
-  return isBlockSourceRef(sourceRef) && isTextSourceRef(sourceRef) && !('imageId' in sourceRef);
+  return isBlockSourceRef(sourceRef) && isTextSourceRef(sourceRef);
 };
 
 export const isTableTextSourceRef = (sourceRef: SourceRef): sourceRef is TableTextSourceRef => {

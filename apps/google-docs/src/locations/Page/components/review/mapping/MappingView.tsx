@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefCallback } from 'react';
-import { Box, Button, Flex, Text } from '@contentful/f36-components';
+import { Box, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import {
   buildEntryListFromEntryBlockGraph,
@@ -13,13 +13,8 @@ import type {
   EditLocationOption,
   EditModalNewLocation,
   SourceRef,
-  WorkflowContentTypeField,
 } from '@types';
-import {
-  EditModalDestinationStateKind,
-  createEditModalDestinationState,
-  isTextSourceRef,
-} from '@types';
+import { isTextSourceRef } from '@types';
 import { FileTextIcon } from '@contentful/f36-icons';
 import { useReviewTextSelection } from '@hooks/useReviewTextSelection';
 import { getEntryTitleFromFieldMappings } from '../../../../../utils/getEntryTitle';
@@ -34,6 +29,7 @@ import {
 import { buildListMarkers } from './buildListMarkers';
 import { formatDisplayName, getFieldTypeLabel } from './fieldFormatting';
 import { EditModal } from './edit-modals/EditModal';
+import { isAssetFieldForImageAssign, isWorkflowContentTypeFieldWithId } from './edit-modals/utils';
 
 import { SelectionActionMenu } from './SelectionActionMenu';
 import { buildSourceRefKey } from './sourceRefUtils';
@@ -98,42 +94,6 @@ function findRowByEntryIndex(rows: EntryListRow[], index: number): EntryListRow 
     if (found) return found;
   }
   return null;
-}
-
-function hasAssetLinkValidation(validations: unknown[] | undefined): boolean {
-  if (!Array.isArray(validations)) {
-    return false;
-  }
-  return validations.some((validation) => {
-    if (!validation || typeof validation !== 'object') {
-      return false;
-    }
-    const maybeLinkType = (validation as { linkType?: unknown }).linkType;
-    if (Array.isArray(maybeLinkType)) {
-      return maybeLinkType.includes('Asset');
-    }
-    return maybeLinkType === 'Asset';
-  });
-}
-
-function isAssetLinkField(
-  value: Pick<WorkflowContentTypeField, 'type' | 'linkType' | 'validations'>
-): boolean {
-  return (
-    value.type === 'Link' &&
-    (value.linkType === 'Asset' || hasAssetLinkValidation(value.validations))
-  );
-}
-
-function isAssetFieldForImageAssign(field: WorkflowContentTypeField): boolean {
-  switch (field.type) {
-    case 'Link':
-      return isAssetLinkField(field);
-    case 'Array':
-      return field.items ? isAssetLinkField(field.items) : false;
-    default:
-      return false;
-  }
 }
 
 function getEntryName(contentTypeName: string | undefined, entryIndex: number): string {
@@ -357,23 +317,14 @@ export const MappingView = ({
     const fallbackEntryName = getEntryName(contentTypeName, entryIndex);
     const entryTitle = getEntryReviewTitle(entry, contentType?.displayField, fallbackEntryName);
     const contentTypeFields = contentType?.fields ?? [];
-    const fieldOptions =
-      contentTypeFields.length > 0
-        ? contentTypeFields
-            .filter((field): field is (typeof contentTypeFields)[number] & { id: string } =>
-              Boolean(field.id)
-            )
-            .map((field) => ({
-              id: field.id,
-              fieldName: (field.name ?? '').trim() || formatDisplayName(field.id),
-              fieldType: getFieldTypeLabel(field.type ?? ''),
-              isAssetField: isAssetFieldForImageAssign(field),
-            }))
-        : entry.fieldMappings.map((fieldMapping) => ({
-            id: fieldMapping.fieldId,
-            fieldName: formatDisplayName(fieldMapping.fieldId),
-            fieldType: getFieldTypeLabel(fieldMapping.fieldType),
-          }));
+    const fieldOptions = contentTypeFields
+      .filter(isWorkflowContentTypeFieldWithId)
+      .map((field) => ({
+        id: field.id,
+        fieldName: (field.name ?? '').trim() || formatDisplayName(field.id),
+        fieldType: getFieldTypeLabel(field.type ?? ''),
+        isAssetField: isAssetFieldForImageAssign(field),
+      }));
 
     return {
       id: entry.tempId ?? `${entry.contentTypeId}-${entryIndex}`,

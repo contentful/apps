@@ -4,7 +4,7 @@ import { Multiselect } from '@contentful/f36-multiselect';
 import type { EditModalFieldMapping, EditModalFieldOption } from '@types';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
 import { getFieldTypeLabel } from '../fieldFormatting';
-import { isSelectableFieldType } from './utils';
+import { isLinkOrArrayFieldType, isSelectableFieldType } from './utils';
 
 interface FieldSelectionDropdownProps {
   selectedText: string;
@@ -42,9 +42,10 @@ export const FieldSelectionDropdown = ({
           return true;
         }
 
-        const isReferenceField =
-          (option.fieldType === 'Link' || option.fieldType === 'Array') && !option.isAssetField;
-        return !isReferenceField;
+        if (isLinkOrArrayFieldType(option.fieldType) && !option.isAssetField) {
+          return false;
+        }
+        return true;
       }),
     [isImageContent, fieldOptions]
   );
@@ -53,20 +54,19 @@ export const FieldSelectionDropdown = ({
     () => new Set(fieldMappings.map((fieldMapping) => fieldMapping.fieldId)),
     [fieldMappings]
   );
-  const selectableOptions = useMemo(
-    () =>
-      fieldOptions.filter((option) =>
-        isSelectableFieldType(getFieldTypeLabel(option.fieldType), selectedText)
-      ),
-    [fieldOptions, selectedText]
-  );
+  const selectableOptions = useMemo(() => {
+    if (isImageContent) {
+      return fieldOptions.filter((option) => option.isAssetField === true);
+    }
+    return fieldOptions.filter((option) => isSelectableFieldType(option.fieldType, selectedText));
+  }, [fieldOptions, isImageContent, selectedText]);
 
   useEffect(() => {
     onSelectableStateChange?.({
       hasFieldOptions: fieldOptions.length > 0,
       hasSelectableOptions: selectableOptions.length > 0,
     });
-  }, [fieldOptions.length, onSelectableStateChange, selectableOptions.length]);
+  }, [fieldOptions.length, isImageContent, onSelectableStateChange, selectableOptions.length]);
 
   const handleSelectField = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { checked, value } = event.target;
