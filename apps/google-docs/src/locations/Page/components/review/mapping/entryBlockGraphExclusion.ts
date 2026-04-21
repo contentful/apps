@@ -148,6 +148,10 @@ function getIntersectionCharOffsetsWithinElement(
 ): [number, number] | null {
   if (!rangeIntersectsNodeSafe(selection, el)) return null;
 
+  if (typeof selection.cloneRange !== 'function') {
+    return null;
+  }
+
   const innerStart = document.createRange();
   innerStart.selectNodeContents(el);
   innerStart.collapse(true);
@@ -689,21 +693,12 @@ export function applyImageExclusionToEntryBlockGraph(
   imageRef: ImageSourceRef
 ): EntryBlockGraph {
   const key = buildSourceRefKey(imageRef);
-
-  const nextEntries = graph.entries.map((entry, idx) => {
-    if (idx !== location.entryIndex) return entry;
-
-    return {
-      ...entry,
-      fieldMappings: entry.fieldMappings.map((fm) => {
-        if (fm.fieldId !== location.fieldId) return fm;
-        return {
-          ...fm,
-          sourceRefs: fm.sourceRefs.filter((sr) => buildSourceRefKey(sr) !== key),
-        };
-      }),
-    };
-  });
+  const nextEntries = removeImageRefFromFieldMapping(
+    graph.entries,
+    location.entryIndex,
+    location.fieldId,
+    key
+  );
 
   const already = graph.excludedSourceRefs.some((r) => buildSourceRefKey(r) === key);
   return {
@@ -713,4 +708,131 @@ export function applyImageExclusionToEntryBlockGraph(
       ? graph.excludedSourceRefs
       : [...graph.excludedSourceRefs, imageRef],
   };
+}
+
+function removeImageRefFromFieldMapping(
+  entries: EntryBlockGraph['entries'],
+  entryIndexToUpdate: number,
+  fieldIdToUpdate: string,
+  sourceRefKey: string
+): EntryBlockGraph['entries'] {
+  return entries.map((entry, idx) => {
+    if (idx !== entryIndexToUpdate) return entry;
+
+    return {
+      ...entry,
+      fieldMappings: entry.fieldMappings.map((fm) => {
+        if (fm.fieldId !== fieldIdToUpdate) return fm;
+        return {
+          ...fm,
+          sourceRefs: fm.sourceRefs.filter((sr) => buildSourceRefKey(sr) !== sourceRefKey),
+        };
+      }),
+    };
+  });
+}
+
+export type ImageAssignTarget = { entryIndex: number; fieldId: string; fieldType: string };
+
+function dedupeImageTargets(
+  targets: ReadonlyArray<ImageAssignTarget>,
+  exclude?: { entryIndex: number; fieldId: string }
+): ImageAssignTarget[] {
+  const seen = new Set<string>();
+  return targets.filter((target) => {
+    if (exclude && target.entryIndex === exclude.entryIndex && target.fieldId === exclude.fieldId) {
+      return false;
+    }
+    const key = `${target.entryIndex}|${target.fieldId}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function groupImageTargetsByEntry(
+  targets: ReadonlyArray<ImageAssignTarget>
+): Map<number, ImageAssignTarget[]> {
+  return targets.reduce((acc, target) => {
+    const entryTargets = acc.get(target.entryIndex) ?? [];
+    entryTargets.push(target);
+    acc.set(target.entryIndex, entryTargets);
+    return acc;
+  }, new Map<number, ImageAssignTarget[]>());
+}
+
+export function appendImageToTargets(
+  graph: EntryBlockGraph,
+  imageRef: ImageSourceRef,
+  targets: ReadonlyArray<ImageAssignTarget>
+): EntryBlockGraph {
+  const key = buildSourceRefKey(imageRef);
+  const dedupedTargets = dedupeImageTargets(targets);
+  if (!dedupedTargets.length) return graph;
+  const targetsByEntry = groupImageTargetsByEntry(dedupedTargets);
+
+  const nextEntries = graph.entries.map((entry, entryIndex) => {
+    const targetForEntry = targetsByEntry.get(entryIndex) ?? [];
+    if (!targetForEntry.length) return entry;
+
+    const targetFieldIds = new Set(targetForEntry.map((target) => target.fieldId));
+    const touchedFieldIds = new Set<string>();
+
+    const nextFieldMappings = entry.fieldMappings.map((fieldMapping) => {
+      if (!targetFieldIds.has(fieldMapping.fieldId)) {
+        return fieldMapping;
+      }
+      touchedFieldIds.add(fieldMapping.fieldId);
+      if (fieldMapping.sourceRefs.some((sourceRef) => buildSourceRefKey(sourceRef) === key)) {
+        return fieldMapping;
+      }
+      return { ...fieldMapping, sourceRefs: [...fieldMapping.sourceRefs, imageRef] };
+    });
+
+    const appendedFieldMappings = targetForEntry
+      .filter((target) => !touchedFieldIds.has(target.fieldId))
+      .map((target) => ({
+        fieldId: target.fieldId,
+        fieldType: target.fieldType,
+        sourceRefs: [imageRef],
+        confidence: 1,
+      }));
+
+    return { ...entry, fieldMappings: [...nextFieldMappings, ...appendedFieldMappings] };
+  });
+
+  return {
+    ...graph,
+    entries: nextEntries,
+    excludedSourceRefs: graph.excludedSourceRefs.filter(
+      (sourceRef) => buildSourceRefKey(sourceRef) !== key
+    ),
+  };
+}
+
+/**
+ * Moves an image source ref from one mapped field to selected destination fields.
+ */
+export function applyImageReassignToEntryBlockGraph(
+  graph: EntryBlockGraph,
+  from: EditLocationOption,
+  imageRef: ImageSourceRef,
+  targets: ReadonlyArray<ImageAssignTarget>
+): EntryBlockGraph {
+  const key = buildSourceRefKey(imageRef);
+  const dedupedTargets = dedupeImageTargets(targets, {
+    entryIndex: from.entryIndex,
+    fieldId: from.fieldId,
+  });
+
+  if (!dedupedTargets.length) {
+    return graph;
+  }
+
+  const graphWithoutSource = {
+    ...graph,
+    entries: removeImageRefFromFieldMapping(graph.entries, from.entryIndex, from.fieldId, key),
+  };
+
+  return appendImageToTargets(graphWithoutSource, imageRef, dedupedTargets);
 }

@@ -55,6 +55,12 @@ export interface WorkflowContentTypeField {
   id?: string;
   name?: string;
   type?: string;
+  linkType?: string;
+  items?: {
+    type?: string;
+    linkType?: string;
+    validations?: unknown[];
+  };
   required?: boolean;
   validations?: unknown[];
 }

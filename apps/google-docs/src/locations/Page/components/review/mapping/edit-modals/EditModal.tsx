@@ -22,6 +22,7 @@ interface EditModalProps {
   onClose: () => void;
   mode: 'assign' | 'exclude' | null;
   viewModel: EditModalContent;
+  isImageContent?: boolean;
   title: string;
   locationSectionDescription: string;
   primaryButtonLabel: string;
@@ -37,6 +38,7 @@ export const EditModal = ({
   onClose,
   mode,
   viewModel,
+  isImageContent = false,
   title,
   locationSectionDescription,
   primaryButtonLabel,
@@ -238,6 +240,7 @@ export const EditModal = ({
                         Fields
                       </Text>
                       <FieldSelectionDropdown
+                        isImageContent={isImageContent}
                         selectedText={viewModel.selectedText}
                         fieldOptions={viewModel.newLocation.fieldOptions}
                         fieldMappings={viewModel.newLocation.fieldMappings}

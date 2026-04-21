@@ -35,6 +35,7 @@ export function ReviewImageAssetCard({
   onExclude,
 }: ReviewImageAssetCardProps): JSX.Element {
   const title = getNormalizedImageDisplayName(image);
+  const assignLabel = isHighlighted ? 'Reassign' : 'Assign';
 
   const imageHeight = size === 'small' ? '180px' : '280px';
 
@@ -62,10 +63,10 @@ export function ReviewImageAssetCard({
       <Card
         ariaLabel={title}
         actions={[
-          <MenuItem key="assigned" onClick={onAssign} isDisabled>
-            Assign
+          <MenuItem key="assigned" onClick={onAssign}>
+            {assignLabel}
           </MenuItem>,
-          <MenuItem key="exclude" onClick={onExclude} isDisabled>
+          <MenuItem key="exclude" onClick={onExclude} isDisabled={!isHighlighted}>
             Exclude
           </MenuItem>,
         ]}>

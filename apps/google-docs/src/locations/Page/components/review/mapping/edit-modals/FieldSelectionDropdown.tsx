@@ -8,6 +8,7 @@ import { isSelectableFieldType } from './utils';
 
 interface FieldSelectionDropdownProps {
   selectedText: string;
+  isImageContent?: boolean;
   fieldOptions: EditModalFieldOption[];
   fieldMappings: EditModalFieldMapping[];
   selectedFieldIds: string[];
@@ -21,6 +22,7 @@ interface FieldSelectionDropdownProps {
 
 export const FieldSelectionDropdown = ({
   selectedText,
+  isImageContent = false,
   fieldOptions,
   fieldMappings,
   selectedFieldIds,
@@ -33,6 +35,19 @@ export const FieldSelectionDropdown = ({
     [fieldOptions, selectedFieldIds]
   );
   const multiselectListRef = useMultiselectScrollReflow(selectedFieldIds);
+  const visibleFieldOptions = useMemo(
+    () =>
+      fieldOptions.filter((option) => {
+        if (!isImageContent) {
+          return true;
+        }
+
+        const isReferenceField =
+          (option.fieldType === 'Link' || option.fieldType === 'Array') && !option.isAssetField;
+        return !isReferenceField;
+      }),
+    [isImageContent, fieldOptions]
+  );
 
   const filledFieldIds = useMemo(
     () => new Set(fieldMappings.map((fieldMapping) => fieldMapping.fieldId)),
@@ -79,36 +94,36 @@ export const FieldSelectionDropdown = ({
           listMaxHeight: 360,
           listRef: multiselectListRef,
         }}>
-        {fieldOptions.map((option) =>
-          (() => {
-            const fieldTypeDisplay = getFieldTypeLabel(option.fieldType);
-            const isDisabled = !isSelectableFieldType(fieldTypeDisplay, selectedText);
-            const isFilled = filledFieldIds.has(option.id);
-            return (
-              <Multiselect.Option
-                key={`${key}-${option.id}`}
-                value={option.id}
-                itemId={option.id}
-                isChecked={selectedFieldIds.includes(option.id)}
-                isDisabled={isDisabled}
-                onSelectItem={handleSelectField}>
-                <Flex gap="spacingS">
-                  <Flex gap="spacing2Xs">
-                    <Text as="div" fontColor="gray700" fontWeight="fontWeightDemiBold">
-                      {option.fieldName}
-                    </Text>
-                    <Text as="div" fontColor="gray700" fontWeight="fontWeightNormal">
-                      ({fieldTypeDisplay})
-                    </Text>
-                  </Flex>
+        {visibleFieldOptions.map((option) => {
+          const fieldTypeDisplay = getFieldTypeLabel(option.fieldType);
+          const isDisabled = isImageContent
+            ? !option.isAssetField
+            : !isSelectableFieldType(option.fieldType, selectedText);
+          const isFilled = filledFieldIds.has(option.id);
+          return (
+            <Multiselect.Option
+              key={`${key}-${option.id}`}
+              value={option.id}
+              itemId={option.id}
+              isChecked={selectedFieldIds.includes(option.id)}
+              isDisabled={isDisabled}
+              onSelectItem={handleSelectField}>
+              <Flex gap="spacingS">
+                <Flex gap="spacing2Xs">
+                  <Text as="div" fontColor="gray700" fontWeight="fontWeightDemiBold">
+                    {option.fieldName}
+                  </Text>
                   <Text as="div" fontColor="gray700" fontWeight="fontWeightNormal">
-                    {isFilled ? 'Filled' : 'Empty'}
+                    ({fieldTypeDisplay})
                   </Text>
                 </Flex>
-              </Multiselect.Option>
-            );
-          })()
-        )}
+                <Text as="div" fontColor="gray700" fontWeight="fontWeightNormal">
+                  {isFilled ? 'Filled' : 'Empty'}
+                </Text>
+              </Flex>
+            </Multiselect.Option>
+          );
+        })}
       </Multiselect>
     </Stack>
   );

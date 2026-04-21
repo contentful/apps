@@ -13,6 +13,7 @@ import type {
   EditLocationOption,
   EditModalNewLocation,
   SourceRef,
+  WorkflowContentTypeField,
 } from '@types';
 import {
   EditModalDestinationStateKind,
@@ -40,6 +41,8 @@ import { MappingEntryCards, type AnchoredMappingCard } from './MappingEntryCards
 import { NormalizedDocumentSection } from './NormalizedDocumentSection';
 import {
   applyImageExclusionToEntryBlockGraph,
+  applyImageReassignToEntryBlockGraph,
+  appendImageToTargets,
   applyTextAssignToEntryBlockGraph,
   applyTextExclusionToEntryBlockGraph,
   applyTextReassignToEntryBlockGraph,
@@ -95,6 +98,42 @@ function findRowByEntryIndex(rows: EntryListRow[], index: number): EntryListRow 
     if (found) return found;
   }
   return null;
+}
+
+function hasAssetLinkValidation(validations: unknown[] | undefined): boolean {
+  if (!Array.isArray(validations)) {
+    return false;
+  }
+  return validations.some((validation) => {
+    if (!validation || typeof validation !== 'object') {
+      return false;
+    }
+    const maybeLinkType = (validation as { linkType?: unknown }).linkType;
+    if (Array.isArray(maybeLinkType)) {
+      return maybeLinkType.includes('Asset');
+    }
+    return maybeLinkType === 'Asset';
+  });
+}
+
+function isAssetLinkField(
+  value: Pick<WorkflowContentTypeField, 'type' | 'linkType' | 'validations'>
+): boolean {
+  return (
+    value.type === 'Link' &&
+    (value.linkType === 'Asset' || hasAssetLinkValidation(value.validations))
+  );
+}
+
+function isAssetFieldForImageAssign(field: WorkflowContentTypeField): boolean {
+  switch (field.type) {
+    case 'Link':
+      return isAssetLinkField(field);
+    case 'Array':
+      return field.items ? isAssetLinkField(field.items) : false;
+    default:
+      return false;
+  }
 }
 
 function getEntryName(contentTypeName: string | undefined, entryIndex: number): string {
@@ -164,6 +203,8 @@ export const MappingView = ({
     TextExclusionRange[] | null
   >(null);
   const [pendingImageSourceRef, setPendingImageSourceRef] = useState<ImageSourceRef | null>(null);
+  const [pendingImageReassignSourceRef, setPendingImageReassignSourceRef] =
+    useState<ImageSourceRef | null>(null);
   const [pendingTextReassignRanges, setPendingTextReassignRanges] = useState<TextExclusionRange[]>(
     []
   );
@@ -178,6 +219,7 @@ export const MappingView = ({
     setEditModalState(EMPTY_EDIT_MODAL);
     setPendingTextExclusionRanges(null);
     setPendingImageSourceRef(null);
+    setPendingImageReassignSourceRef(null);
     setPendingTextReassignRanges([]);
     setPendingTextAssignRanges([]);
   };
@@ -325,6 +367,7 @@ export const MappingView = ({
               id: field.id,
               fieldName: (field.name ?? '').trim() || formatDisplayName(field.id),
               fieldType: getFieldTypeLabel(field.type ?? ''),
+              isAssetField: isAssetFieldForImageAssign(field),
             }))
         : entry.fieldMappings.map((fieldMapping) => ({
             id: fieldMapping.fieldId,
@@ -481,10 +524,12 @@ export const MappingView = ({
     preview: string,
     currentLocations: EditLocationOption[],
     reassignRanges: TextExclusionRange[],
-    assignRanges: TextExclusionRange[]
+    assignRanges: TextExclusionRange[],
+    imageSourceRef: ImageSourceRef | null = null
   ) => {
     setPendingTextExclusionRanges(null);
     setPendingImageSourceRef(null);
+    setPendingImageReassignSourceRef(imageSourceRef);
     setPendingTextReassignRanges(reassignRanges);
     setPendingTextAssignRanges(assignRanges);
     setEditModalState({
@@ -564,7 +609,7 @@ export const MappingView = ({
 
   const handleAssignImage = (sourceRef: ImageSourceRef, label: string) => {
     if (isDisabled) return;
-    openAssignModal(label, getLocationsForSourceRef(sourceRef), [], []);
+    openAssignModal(label, getLocationsForSourceRef(sourceRef), [], [], sourceRef);
     setHoveredMappingKeys([]);
   };
 
@@ -616,6 +661,37 @@ export const MappingView = ({
       }
 
       if (!resolvedTargets.length) {
+        return;
+      }
+
+      if (pendingImageReassignSourceRef) {
+        if (locations.length === 0) {
+          onEntryBlockGraphChange(
+            appendImageToTargets(entryBlockGraph, pendingImageReassignSourceRef, resolvedTargets)
+          );
+          closeEditModal();
+          return;
+        }
+
+        const from =
+          locations.find((location) => location.id === selectedLocationId) ??
+          locations.find((location) => location.isSelected) ??
+          locations[0];
+
+        if (!from) {
+          closeEditModal();
+          return;
+        }
+
+        onEntryBlockGraphChange(
+          applyImageReassignToEntryBlockGraph(
+            entryBlockGraph,
+            from,
+            pendingImageReassignSourceRef,
+            resolvedTargets
+          )
+        );
+        closeEditModal();
         return;
       }
 
@@ -805,6 +881,7 @@ export const MappingView = ({
         onClose={closeEditModal}
         mode={editModalState.mode}
         viewModel={editModalState.viewModel}
+        isImageContent={Boolean(pendingImageReassignSourceRef)}
         title={editModalState.title}
         locationSectionDescription={editModalState.locationSectionDescription}
         primaryButtonLabel={editModalState.primaryButtonLabel}
