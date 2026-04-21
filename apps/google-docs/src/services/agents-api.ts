@@ -100,16 +100,5 @@ export async function resumeWorkflowRun(
   runId: string,
   resumePayload: ResumePayload
 ): Promise<void> {
-  const agentRunApi = sdk.cma.agentRun as {
-    resume?: (
-      params: { spaceId: string; environmentId: string; runId: string },
-      body: { resumePayload: ResumePayload }
-    ) => Promise<unknown>;
-  };
-
-  if (!agentRunApi.resume) {
-    throw new Error('Agent run resume is not available in the current SDK.');
-  }
-
-  await agentRunApi.resume({ spaceId, environmentId, runId }, { resumePayload });
+  await sdk.cma.agentRun.resumeRun({ spaceId, environmentId, runId }, { resumePayload });
 }
