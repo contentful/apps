@@ -15,6 +15,13 @@ export const styles = {
     flexWrap: 'wrap',
     width: '100%',
   }),
+  advancedMatchingGroup: css({
+    background: '#F7FAFC',
+    border: '1px solid #D5DFE5',
+    borderRadius: '8px',
+    marginBottom: '16px',
+    padding: '12px',
+  }),
   advancedMatchingTopRow: css({
     alignItems: 'flex-start',
     display: 'flex',
@@ -32,10 +39,10 @@ export const styles = {
     flex: 4,
   }),
   advancedMatchingPanel: css({
-    background: '#FCFDFD',
+    background: '#FFFFFF',
     border: '1px solid #E5EBED',
     borderRadius: '6px',
-    marginTop: '4px',
+    marginTop: '8px',
     padding: '10px 12px 12px',
     width: '100%',
   }),
@@ -47,6 +54,17 @@ export const styles = {
     alignItems: 'center',
     display: 'flex',
     gap: '12px',
+    width: '100%',
+  }),
+  baseRowPanel: css({
+    background: '#FFFFFF',
+    border: '1px solid #E5EBED',
+    borderRadius: '6px',
+    padding: '12px',
+    width: '100%',
+  }),
+  rowSpacing: css({
+    marginBottom: '16px',
     width: '100%',
   }),
   removeItem: css({

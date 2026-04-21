@@ -1,4 +1,5 @@
 import { ContentTypeRule, ContentTypeRules, ContentTypes, ContentTypeValue } from 'types';
+import { hasAdvancedMatchingConfigured } from 'utils/contentTypeMatching';
 
 const createRuleId = () =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -26,7 +27,7 @@ export const createRuleFromContentType = (
   slugField: value.slugField,
   urlPrefix: value.urlPrefix,
   additionalFieldIds: value.additionalFieldIds || [],
-  enableAdvancedMatching: value.enableAdvancedMatching || false,
+  enableAdvancedMatching: hasAdvancedMatchingConfigured(value),
   pathPattern: value.pathPattern || '',
   matchDimension: value.matchDimension || 'unifiedPagePathScreen',
   matchType: value.matchType || 'EXACT',
@@ -46,8 +47,17 @@ export const normalizeContentTypeRules = (
 ): ContentTypeRules => {
   if (contentTypeRules?.length) {
     return contentTypeRules.map((rule) => ({
-      ...createDefaultRule(rule.contentTypeId),
-      ...rule,
+      ...(() => {
+        const normalizedRule = {
+          ...createDefaultRule(rule.contentTypeId),
+          ...rule,
+        };
+
+        return {
+          ...normalizedRule,
+          enableAdvancedMatching: hasAdvancedMatchingConfigured(normalizedRule),
+        };
+      })(),
       id: rule.id || createRuleId(),
     }));
   }

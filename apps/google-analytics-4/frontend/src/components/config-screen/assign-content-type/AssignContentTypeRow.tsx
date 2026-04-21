@@ -4,6 +4,7 @@ import {
   Checkbox,
   Flex,
   FormControl,
+  Note,
   Select,
   Stack,
   Text,
@@ -22,8 +23,7 @@ import {
   ContentTypeValue,
 } from 'types';
 import ContentTypeWarning from 'components/config-screen/assign-content-type/ContentTypeWarning';
-import { pathPatternPreview } from 'utils/getReportSlug';
-import { hasAdvancedMatchingConfigured } from 'utils/contentTypeMatching';
+import { buildDefaultPathPattern } from 'utils/getReportSlug';
 
 interface Props {
   contentTypeRule: ContentTypeRule;
@@ -31,12 +31,14 @@ interface Props {
   allContentTypes: AllContentTypes;
   allContentTypeEntries: AllContentTypeEntries;
   contentTypeRules: ContentTypeRules;
+  isMissingPattern: boolean;
   onContentTypeChange: (ruleId: string, newContentTypeId: string) => void;
   onContentTypeFieldChange: (
     ruleId: string,
     field: string,
     value: string | boolean | string[]
   ) => void;
+  onContentTypeRuleChange: (ruleId: string, updates: Partial<ContentTypeRule>) => void;
   onRemoveContentType: (ruleId: string) => void;
   currentEditorInterface: Partial<EditorInterface>;
   originalContentTypeRules: ContentTypeRules;
@@ -50,8 +52,10 @@ const AssignContentTypeRow = (props: Props) => {
     allContentTypes,
     allContentTypeEntries,
     contentTypeRules,
+    isMissingPattern,
     onContentTypeChange,
     onContentTypeFieldChange,
+    onContentTypeRuleChange,
     onRemoveContentType,
     currentEditorInterface,
     originalContentTypeRules,
@@ -77,9 +81,7 @@ const AssignContentTypeRow = (props: Props) => {
   const [isContentTypeInOptions, setIsContentTypeInOptions] = useState(true);
   const [isSlugFieldInOptions, setIsSlugFieldInOptions] = useState(true);
   const [isInSidebar, setIsInSidebar] = useState(false);
-  const [showAdvancedMatching, setShowAdvancedMatching] = useState(
-    Boolean(enableAdvancedMatching || hasAdvancedMatchingConfigured(contentTypeRule))
-  );
+  const [showAdvancedMatching, setShowAdvancedMatching] = useState(Boolean(enableAdvancedMatching));
 
   useEffect(() => {
     setIsSaved(originalContentTypeRules.some((rule) => rule.id === ruleId));
@@ -106,10 +108,8 @@ const AssignContentTypeRow = (props: Props) => {
   }, [allContentTypeEntries, allContentTypes, contentTypeId, contentTypeRules, isSaved, slugField]);
 
   useEffect(() => {
-    setShowAdvancedMatching(
-      Boolean(enableAdvancedMatching || hasAdvancedMatchingConfigured(contentTypeRule))
-    );
-  }, [contentTypeRule, enableAdvancedMatching]);
+    setShowAdvancedMatching(Boolean(enableAdvancedMatching));
+  }, [enableAdvancedMatching]);
 
   useEffect(() => {
     if (focus) {
@@ -138,16 +138,35 @@ const AssignContentTypeRow = (props: Props) => {
     return value;
   };
 
+  const resetAdvancedMatching = () => {
+    onContentTypeRuleChange(ruleId, {
+      enableAdvancedMatching: false,
+      additionalFieldIds: [],
+      pathPattern: '',
+      matchDimension: 'unifiedPagePathScreen',
+      matchType: 'EXACT',
+    });
+  };
+
   const selectableAdditionalFields =
     contentTypeId && allContentTypes[contentTypeId]?.fields
       ? allContentTypes[contentTypeId].fields.filter((field) => field.id !== slugField)
       : [];
 
+  const getGeneratedPattern = (
+    selectedFieldIds = additionalFieldIds,
+    selectedMatchDimension = matchDimension
+  ) => buildDefaultPathPattern(urlPrefix, selectedFieldIds, selectedMatchDimension);
+
   return (
     <Stack
       spacing="spacingS"
-      paddingBottom="spacingS"
       flexDirection="column"
+      className={
+        showAdvancedMatching
+          ? `${styles.advancedMatchingGroup} ${styles.rowSpacing}`
+          : styles.rowSpacing
+      }
       key={contentTypeId}
       testId="contentTypeRow">
       <ContentTypeWarning
@@ -158,89 +177,104 @@ const AssignContentTypeRow = (props: Props) => {
         isContentTypeInOptions={isContentTypeInOptions}
         isSlugFieldInOptions={isSlugFieldInOptions}
       />
-      <Flex className={styles.baseRow}>
-        <Box className={styles.contentTypeItem}>
-          <Select
-            id={`contentType-${index}`}
-            name={`contentType-${index}`}
-            testId="contentTypeSelect"
-            isInvalid={!isContentTypeInOptions && contentTypeId !== ''}
-            onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-              onContentTypeChange(ruleId, event.target.value)
-            }
-            value={validateSelectedOption(contentTypeId)}>
-            <Select.Option value="" isDisabled>
-              Select content type
-            </Select.Option>
-            {contentTypeOptions.map(([type, { name: typeName }]) => (
-              <Select.Option value={type} key={`type-${type}`}>
-                {typeName}
+      <Box className={styles.baseRowPanel}>
+        <Flex className={styles.baseRow}>
+          <Box className={styles.contentTypeItem}>
+            <Select
+              id={`contentType-${index}`}
+              name={`contentType-${index}`}
+              testId="contentTypeSelect"
+              isInvalid={!isContentTypeInOptions && contentTypeId !== ''}
+              onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+                onContentTypeChange(ruleId, event.target.value)
+              }
+              value={validateSelectedOption(contentTypeId)}>
+              <Select.Option value="" isDisabled>
+                Select content type
               </Select.Option>
-            ))}
-          </Select>
-        </Box>
-        <Box className={styles.contentTypeItem}>
-          <Select
-            id={`slugField-${index}`}
-            name={`slugField-${index}`}
-            testId="slugFieldSelect"
-            isDisabled={!contentTypeId || !isContentTypeInOptions}
-            onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-              onContentTypeFieldChange(ruleId, 'slugField', event.target.value)
-            }
-            value={validateSelectedOption(contentTypeId, slugField)}>
-            <Select.Option value="" isDisabled>
-              Select slug field
-            </Select.Option>
-            {contentTypeId &&
-              allContentTypes[contentTypeId]?.fields?.map((field) => (
-                <Select.Option key={`${contentTypeId}.${field.id}`} value={field.id}>
-                  {field.name}
+              {contentTypeOptions.map(([type, { name: typeName }]) => (
+                <Select.Option value={type} key={`type-${type}`}>
+                  {typeName}
                 </Select.Option>
               ))}
-          </Select>
-        </Box>
-        <Box className={styles.urlPrefixItem}>
-          {!showAdvancedMatching ? (
-            <TextInput
-              id={`urlPrefix-${index}`}
-              name={`urlPrefix-${index}`}
-              testId="urlPrefixInput"
+            </Select>
+          </Box>
+          <Box className={styles.contentTypeItem}>
+            <Select
+              id={`slugField-${index}`}
+              name={`slugField-${index}`}
+              testId="slugFieldSelect"
               isDisabled={!contentTypeId || !isContentTypeInOptions}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                onContentTypeFieldChange(ruleId, 'urlPrefix', event.target.value)
+              onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+                onContentTypeFieldChange(ruleId, 'slugField', event.target.value)
               }
-              value={urlPrefix}
-            />
-          ) : (
-            <Text fontColor="gray500">Configured below</Text>
-          )}
-        </Box>
-        <Box className={styles.toggleItem}>
-          <Checkbox
-            id={`advancedMatching-${index}`}
-            name={`advancedMatching-${index}`}
-            testId="advancedMatchingToggle"
-            isChecked={showAdvancedMatching}
-            isDisabled={!contentTypeId || !isContentTypeInOptions}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              const nextIsAdvanced = event.target.checked;
-              setShowAdvancedMatching(nextIsAdvanced);
-              onContentTypeFieldChange(ruleId, 'enableAdvancedMatching', nextIsAdvanced);
-            }}>
-            Advanced
-          </Checkbox>
-        </Box>
-        <Box className={styles.removeItem}>
-          <TextLink as="button" onClick={() => onRemoveContentType(ruleId)}>
-            Remove
-          </TextLink>
-        </Box>
-      </Flex>
+              value={validateSelectedOption(contentTypeId, slugField)}>
+              <Select.Option value="" isDisabled>
+                Select slug field
+              </Select.Option>
+              {contentTypeId &&
+                allContentTypes[contentTypeId]?.fields?.map((field) => (
+                  <Select.Option key={`${contentTypeId}.${field.id}`} value={field.id}>
+                    {field.name}
+                  </Select.Option>
+                ))}
+            </Select>
+          </Box>
+          <Box className={styles.urlPrefixItem}>
+            {!showAdvancedMatching ? (
+              <TextInput
+                id={`urlPrefix-${index}`}
+                name={`urlPrefix-${index}`}
+                testId="urlPrefixInput"
+                isDisabled={!contentTypeId || !isContentTypeInOptions}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                  onContentTypeFieldChange(ruleId, 'urlPrefix', event.target.value)
+                }
+                value={urlPrefix}
+              />
+            ) : (
+              <Text fontColor="gray500">Configured below</Text>
+            )}
+          </Box>
+          <Box className={styles.toggleItem}>
+            <Checkbox
+              id={`advancedMatching-${index}`}
+              name={`advancedMatching-${index}`}
+              testId="advancedMatchingToggle"
+              isChecked={showAdvancedMatching}
+              isDisabled={!contentTypeId || !isContentTypeInOptions}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                const nextIsAdvanced = event.target.checked;
+                setShowAdvancedMatching(nextIsAdvanced);
+                if (nextIsAdvanced) {
+                  onContentTypeRuleChange(ruleId, {
+                    enableAdvancedMatching: true,
+                    pathPattern: pathPattern.trim() ? pathPattern : getGeneratedPattern(),
+                  });
+                  return;
+                }
+
+                resetAdvancedMatching();
+              }}>
+              Advanced
+            </Checkbox>
+          </Box>
+          <Box className={styles.removeItem}>
+            <TextLink as="button" onClick={() => onRemoveContentType(ruleId)}>
+              Remove
+            </TextLink>
+          </Box>
+        </Flex>
+      </Box>
       {showAdvancedMatching && (
         <Box className={styles.advancedMatchingPanel} testId="advancedMatchingPanel">
+          {isMissingPattern && (
+            <Note variant="negative" title="Fix this before saving">
+              Add a pattern for this advanced rule before saving.
+            </Note>
+          )}
           <Text fontColor="gray600" className={styles.advancedMatchingIntro}>
-            Use this for query strings or variable prefixes.
+            Build a custom URL pattern for query strings, extra path segments, or variable prefixes.
           </Text>
           <Box className={styles.advancedMatchingFields}>
             <Flex className={styles.advancedMatchingTopRow}>
@@ -261,6 +295,16 @@ const AssignContentTypeRow = (props: Props) => {
                               : additionalFieldIds.filter(
                                   (selectedFieldId) => selectedFieldId !== field.id
                                 );
+                            const currentGeneratedPattern = getGeneratedPattern();
+                            const nextGeneratedPattern = getGeneratedPattern(nextSelectedFields);
+
+                            if (!pathPattern.trim() || pathPattern === currentGeneratedPattern) {
+                              onContentTypeRuleChange(ruleId, {
+                                additionalFieldIds: nextSelectedFields,
+                                pathPattern: nextGeneratedPattern,
+                              });
+                              return;
+                            }
 
                             onContentTypeFieldChange(
                               ruleId,
@@ -268,7 +312,12 @@ const AssignContentTypeRow = (props: Props) => {
                               nextSelectedFields
                             );
                           }}>
-                          {field.name}
+                          <Flex alignItems="center" gap="spacing2Xs">
+                            <Text as="span">{field.name}</Text>
+                            <Text as="span" fontColor="gray600">
+                              {`{${field.id}}`}
+                            </Text>
+                          </Flex>
                         </Checkbox>
                       ))
                     ) : (
@@ -278,7 +327,8 @@ const AssignContentTypeRow = (props: Props) => {
                     )}
                   </Stack>
                   <FormControl.HelpText>
-                    Select any extra fields you want to reference in the pattern.
+                    Select extra fields to include in the URL. Use the placeholder shown next to
+                    each field in the pattern.
                   </FormControl.HelpText>
                 </FormControl>
               </Box>
@@ -297,8 +347,8 @@ const AssignContentTypeRow = (props: Props) => {
                     value={pathPattern}
                   />
                   <FormControl.HelpText>
-                    Use {'{slug}'} plus any selected property tokens. Example: /{'{sectionSlug}'}/
-                    {'{slug}'}
+                    A pattern is generated for you automatically. Edit it if you need a different
+                    URL structure or want to use placeholders from the left.
                   </FormControl.HelpText>
                 </FormControl>
               </Box>
@@ -306,15 +356,41 @@ const AssignContentTypeRow = (props: Props) => {
             <Flex className={styles.advancedMatchingBottomRow}>
               <Box className={styles.compactField}>
                 <FormControl>
-                  <FormControl.Label>Match against</FormControl.Label>
+                  <FormControl.Label>
+                    <Flex alignItems="center">
+                      Match against
+                      <Tooltip
+                        placement="top"
+                        content="Choose whether to match just the page path, or the page path plus any query parameters in the URL.">
+                        <Flex marginLeft="spacing2Xs" className={styles.tooltipIcon}>
+                          <HelpCircleIcon />
+                        </Flex>
+                      </Tooltip>
+                    </Flex>
+                  </FormControl.Label>
                   <Select
                     id={`matchDimension-${index}`}
                     name={`matchDimension-${index}`}
                     testId="matchDimensionSelect"
                     isDisabled={!contentTypeId || !isContentTypeInOptions}
-                    onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-                      onContentTypeFieldChange(ruleId, 'matchDimension', event.target.value)
-                    }
+                    onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
+                      const nextMatchDimension = event.target.value;
+                      const currentGeneratedPattern = getGeneratedPattern();
+                      const nextGeneratedPattern = getGeneratedPattern(
+                        additionalFieldIds,
+                        nextMatchDimension as ContentTypeValue['matchDimension']
+                      );
+
+                      if (!pathPattern.trim() || pathPattern === currentGeneratedPattern) {
+                        onContentTypeRuleChange(ruleId, {
+                          matchDimension: nextMatchDimension,
+                          pathPattern: nextGeneratedPattern,
+                        });
+                        return;
+                      }
+
+                      onContentTypeFieldChange(ruleId, 'matchDimension', nextMatchDimension);
+                    }}
                     value={matchDimension}>
                     <Select.Option value="unifiedPagePathScreen">Page path</Select.Option>
                     <Select.Option value="pagePathPlusQueryString">
@@ -330,7 +406,7 @@ const AssignContentTypeRow = (props: Props) => {
                       Matching mode
                       <Tooltip
                         placement="top"
-                        content="Use Literal for one exact URL. Use Flexible pattern when parts of the URL can vary, like multiple category prefixes.">
+                        content="Use Literal for one exact URL pattern. Use Flexible match when part of the URL can vary, like different category prefixes.">
                         <Flex marginLeft="spacing2Xs" className={styles.tooltipIcon}>
                           <HelpCircleIcon />
                         </Flex>
@@ -347,7 +423,7 @@ const AssignContentTypeRow = (props: Props) => {
                     }
                     value={matchType}>
                     <Select.Option value="EXACT">Literal</Select.Option>
-                    <Select.Option value="PARTIAL_REGEXP">Flexible pattern</Select.Option>
+                    <Select.Option value="PARTIAL_REGEXP">Flexible match</Select.Option>
                   </Select>
                 </FormControl>
               </Box>

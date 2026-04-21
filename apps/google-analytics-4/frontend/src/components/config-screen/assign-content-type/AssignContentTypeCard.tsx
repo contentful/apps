@@ -2,7 +2,7 @@ import { Box, Card, Flex, FormControl, Tooltip } from '@contentful/f36-component
 import { HelpCircleIcon } from '@contentful/f36-icons';
 import { styles } from 'components/config-screen/assign-content-type/AssignContentType.styles';
 import { EditorInterface } from '@contentful/app-sdk';
-import { AllContentTypes, AllContentTypeEntries, ContentTypeRules } from 'types';
+import { AllContentTypes, AllContentTypeEntries, ContentTypeRule, ContentTypeRules } from 'types';
 import AssignContentTypeRow from 'components/config-screen/assign-content-type/AssignContentTypeRow';
 
 interface AssignContentTypeCardProps {
@@ -15,9 +15,11 @@ interface AssignContentTypeCardProps {
     field: string,
     value: string | boolean | string[]
   ) => void;
+  onContentTypeRuleChange: (ruleId: string, updates: Partial<ContentTypeRule>) => void;
   onRemoveContentType: (ruleId: string) => void;
   currentEditorInterface: Partial<EditorInterface>;
   originalContentTypeRules: ContentTypeRules;
+  rulesMissingPattern: Set<string>;
 }
 
 interface HeaderLabelProps {
@@ -58,9 +60,11 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
     contentTypeRules,
     onContentTypeChange,
     onContentTypeFieldChange,
+    onContentTypeRuleChange,
     onRemoveContentType,
     currentEditorInterface,
     originalContentTypeRules,
+    rulesMissingPattern,
   } = props;
 
   return (
@@ -81,7 +85,7 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
         <HeaderLabel
           label="Advanced"
           className={styles.toggleItem}
-          helpText="Use advanced matching for query strings or variable prefixes that do not fit the standard URL prefix plus slug setup."
+          helpText="Use advanced matching when the URL needs more than a fixed prefix plus the selected slug field, like query strings or custom path patterns."
         />
         <Box className={styles.removeItem}></Box>
       </Flex>
@@ -96,9 +100,11 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
             contentTypeRules={contentTypeRules}
             onContentTypeChange={onContentTypeChange}
             onContentTypeFieldChange={onContentTypeFieldChange}
+            onContentTypeRuleChange={onContentTypeRuleChange}
             onRemoveContentType={onRemoveContentType}
             currentEditorInterface={currentEditorInterface}
             originalContentTypeRules={originalContentTypeRules}
+            isMissingPattern={rulesMissingPattern.has(contentTypeRule.id)}
             focus={index + 1 === contentTypeRules.length}
           />
         );
