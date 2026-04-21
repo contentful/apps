@@ -1,5 +1,5 @@
 import { PageAppSDK } from '@contentful/app-sdk';
-import { WORKFLOW_AGENT_ID } from '../utils/constants/agent';
+import { LOCAL_AGENTS_API_BASE_URL, USE_LOCAL_AGENTS_API, WORKFLOW_AGENT_ID } from '../utils/constants/agent';
 import {
   AgentRunMessage,
   MappingReviewSuspendPayload,
@@ -7,6 +7,18 @@ import {
   RunStatus,
   TabsImagesSuspendPayload,
 } from '@types';
+
+const AGENTS_API_HEADERS = {
+  'x-contentful-enable-alpha-feature': 'agents-api',
+  'X-Contentful-App-Definition-Id': '653vTnuQw3j5onU1tUoH6t',
+};
+
+function getJsonHeaders(): HeadersInit {
+  return {
+    ...AGENTS_API_HEADERS,
+    'Content-Type': 'application/json',
+  };
+}
 
 export interface AgentGeneratePayload {
   messages: Array<{
@@ -47,6 +59,25 @@ export async function getWorkflowRun(
   environmentId: string,
   runId: string
 ): Promise<AgentRunData | null> {
+  if (USE_LOCAL_AGENTS_API) {
+    const response = await fetch(
+      `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}`,
+      {
+        headers: AGENTS_API_HEADERS,
+      }
+    );
+
+    if (response.status === 404) {
+      return null;
+    }
+
+    if (!response.ok) {
+      throw new Error(`Failed to poll agent run: ${response.status} ${response.statusText}`);
+    }
+
+    return (await response.json()) as AgentRunData;
+  }
+
   try {
     return (await sdk.cma.agentRun.get({
       spaceId,
@@ -71,13 +102,32 @@ export async function startAgentRun(
 ): Promise<string> {
   let runData: AgentRunData;
 
-  try {
-    runData = (await sdk.cma.agent.generate(
-      { agentId: WORKFLOW_AGENT_ID, spaceId, environmentId },
-      payload
-    )) as AgentRunData;
-  } catch (error) {
-    throw new Error(`Failed to start workflow agent run: ${error as Error}`);
+  if (USE_LOCAL_AGENTS_API) {
+    const response = await fetch(
+      `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${WORKFLOW_AGENT_ID}/generate`,
+      {
+        method: 'POST',
+        headers: getJsonHeaders(),
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to start workflow agent run: ${response.status} ${response.statusText}`
+      );
+    }
+
+    runData = (await response.json()) as AgentRunData;
+  } else {
+    try {
+      runData = (await sdk.cma.agent.generate(
+        { agentId: WORKFLOW_AGENT_ID, spaceId, environmentId },
+        payload
+      )) as AgentRunData;
+    } catch (error) {
+      throw new Error(`Failed to start workflow agent run: ${error as Error}`);
+    }
   }
 
   if (!runData.sys?.id) {
@@ -100,5 +150,22 @@ export async function resumeWorkflowRun(
   runId: string,
   resumePayload: ResumePayload
 ): Promise<void> {
+  if (USE_LOCAL_AGENTS_API) {
+    const response = await fetch(
+      `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}/resume`,
+      {
+        method: 'POST',
+        headers: getJsonHeaders(),
+        body: JSON.stringify({ resumePayload }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to resume agent run: ${response.status} ${response.statusText}`);
+    }
+
+    return;
+  }
+
   await sdk.cma.agentRun.resumeRun({ spaceId, environmentId, runId }, { resumePayload });
 }
