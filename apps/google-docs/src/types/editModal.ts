@@ -25,6 +25,7 @@ export interface EditModalFieldOption {
 
 export interface EditModalFieldMapping {
   fieldId: string;
+  sourceRefs: SourceRef[];
 }
 
 export interface EditModalNewLocation {

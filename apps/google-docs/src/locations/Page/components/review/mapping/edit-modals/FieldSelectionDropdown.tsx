@@ -36,7 +36,12 @@ export const FieldSelectionDropdown = ({
   const multiselectListRef = useMultiselectScrollReflow(selectedFieldIds);
 
   const filledFieldIds = useMemo(
-    () => new Set(fieldMappings.map((fieldMapping) => fieldMapping.fieldId)),
+    () =>
+      new Set(
+        fieldMappings
+          .filter((fieldMapping) => fieldMapping.sourceRefs.length > 0)
+          .map((fieldMapping) => fieldMapping.fieldId)
+      ),
     [fieldMappings]
   );
   const selectableOptions = useMemo(() => {

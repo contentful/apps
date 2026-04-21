@@ -815,23 +815,25 @@ export function applyTextExclusionToEntryBlockGraph(
 
     return {
       ...entry,
-      fieldMappings: entry.fieldMappings.map((fm) => {
-        if (fm.fieldId !== location.fieldId) return fm;
+      fieldMappings: entry.fieldMappings
+        .map((fm) => {
+          if (fm.fieldId !== location.fieldId) return fm;
 
         const nextRefs = fm.sourceRefs.flatMap((sr) => {
           if (!locationSourceRefKeys.has(buildSourceRefKey(sr))) return [sr];
           if (!isTextSourceRef(sr)) return [sr];
 
-          const cuts = rangesOverlappingTextSourceRef(sr, pendingRanges);
-          if (!cuts.length) return [sr];
+            const cuts = rangesOverlappingTextSourceRef(sr, pendingRanges);
+            if (!cuts.length) return [sr];
 
-          const remaining = subtractIntervalsFromSpan(sr.start, sr.end, cuts);
-          const pieces = buildTextRefsFromSpans(sr, remaining).filter((r) => r.start < r.end);
-          return pieces.length ? pieces : [];
-        });
+            const remaining = subtractIntervalsFromSpan(sr.start, sr.end, cuts);
+            const pieces = buildTextRefsFromSpans(sr, remaining).filter((r) => r.start < r.end);
+            return pieces.length ? pieces : [];
+          });
 
-        return { ...fm, sourceRefs: nextRefs };
-      }),
+          return nextRefs.length ? { ...fm, sourceRefs: nextRefs } : null;
+        })
+        .filter((fm): fm is NonNullable<typeof fm> => fm !== null),
     };
   });
 
@@ -1144,12 +1146,19 @@ export function applyImageExclusionToEntryBlockGraph(
   imageRef: ImageSourceRef
 ): EntryBlockGraph {
   const key = buildSourceRefKey(imageRef);
-  const nextEntries = removeImageRefFromFieldMapping(
-    graph.entries,
-    location.entryIndex,
-    location.fieldId,
-    key
-  );
+
+  const nextEntries = graph.entries.map((entry, idx) => {
+    if (idx !== location.entryIndex) return entry;
+
+    return {
+      ...entry,
+      fieldMappings: entry.fieldMappings.flatMap((fm) => {
+        if (fm.fieldId !== location.fieldId) return [fm];
+        const nextRefs = fm.sourceRefs.filter((sr) => buildSourceRefKey(sr) !== key);
+        return nextRefs.length ? [{ ...fm, sourceRefs: nextRefs }] : [];
+      }),
+    };
+  });
 
   const already = graph.excludedSourceRefs.some((r) => buildSourceRefKey(r) === key);
   return {

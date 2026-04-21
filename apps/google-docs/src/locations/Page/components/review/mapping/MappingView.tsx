@@ -377,6 +377,7 @@ export const MappingView = ({
       fieldOptions,
       fieldMappings: entry.fieldMappings.map((fieldMapping) => ({
         fieldId: fieldMapping.fieldId,
+        sourceRefs: fieldMapping.sourceRefs,
       })),
     };
   };
