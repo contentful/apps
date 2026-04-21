@@ -1,16 +1,19 @@
 import AnalyticsApp from 'components/main-app/AnalyticsApp/AnalyticsApp';
-import { useSDK } from '@contentful/react-apps-toolkit';
+import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { SidebarExtensionSDK } from '@contentful/app-sdk';
+import { useMemo } from 'react';
 import { Skeleton } from '@contentful/f36-components';
-import { useApi } from 'hooks/useApi';
 import { AppInstallationParameters, CustomRangeDialogResult, StartEndDates } from 'types';
 import Note from 'components/common/Note/Note';
 import { getMissingParamsMsg } from 'components/main-app/constants/noteMessages';
 import { AppConfigPageHyperLink } from 'components/main-app/ErrorDisplay/CommonErrorDisplays';
 import { normalizeContentTypeRules } from 'helpers/contentTypeRules/contentTypeRules';
+import { Api } from 'apis/api';
+import { contentfulContext } from 'helpers/contentfulContext';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarExtensionSDK>();
+  const cma = useCMA();
   const installationParameters = sdk.parameters.installation as
     | AppInstallationParameters
     | undefined;
@@ -22,8 +25,10 @@ const Sidebar = () => {
   const slugFieldRules = normalizeContentTypeRules(contentTypeRules, contentTypes).filter(
     (rule) => rule.contentTypeId === currentContentType
   );
-
-  const api = useApi(serviceAccountKeyId);
+  const api = useMemo(
+    () => new Api(contentfulContext(sdk), cma, serviceAccountKeyId),
+    [cma, sdk, serviceAccountKeyId]
+  );
 
   const hasInstallationParams = serviceAccountKeyId && propertyId;
 
