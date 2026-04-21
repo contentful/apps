@@ -1,5 +1,6 @@
 import { PageAppSDK } from '@contentful/app-sdk';
 import { WORKFLOW_AGENT_ID } from '../utils/constants/agent';
+import { normalizeAiAccessError } from '../utils/aiAccess';
 import {
   AgentRunMessage,
   MappingReviewSuspendPayload,
@@ -75,6 +76,10 @@ export async function getWorkflowRun(
     }
 
     if (!response.ok) {
+      if (response.status === 403) {
+        throw normalizeAiAccessError({ status: response.status });
+      }
+
       throw new Error(`Failed to poll agent run: ${response.status} ${response.statusText}`);
     }
 
@@ -93,7 +98,7 @@ export async function getWorkflowRun(
       return null;
     }
 
-    throw error;
+    throw normalizeAiAccessError(error);
   }
 }
 
@@ -117,6 +122,10 @@ export async function startAgentRun(
     );
 
     if (!response.ok) {
+      if (response.status === 403) {
+        throw normalizeAiAccessError({ status: response.status });
+      }
+
       throw new Error(
         `Failed to start workflow agent run: ${response.status} ${response.statusText}`
       );
@@ -130,7 +139,7 @@ export async function startAgentRun(
         payload
       )) as AgentRunData;
     } catch (error) {
-      throw new Error(`Failed to start workflow agent run: ${error as Error}`);
+      throw normalizeAiAccessError(error);
     }
   }
 
@@ -166,14 +175,46 @@ export async function resumeWorkflowRun(
     );
 
     if (!response.ok) {
+      if (response.status === 403) {
+        throw normalizeAiAccessError({ status: response.status });
+      }
+
       throw new Error(`Failed to resume agent run: ${response.status} ${response.statusText}`);
     }
 
     return;
   }
 
-  await sdk.cma.agentRun.resumeRun(
-    { spaceId, environmentId, runId },
-    { resumePayload: resumePayload as Record<string, unknown> }
-  );
+  const agentRunApi = sdk.cma.agentRun as {
+    resumeRun?: (
+      params: { spaceId: string; environmentId: string; runId: string },
+      body: { resumePayload: Record<string, unknown> }
+    ) => Promise<unknown>;
+    resume?: (
+      params: { spaceId: string; environmentId: string; runId: string },
+      body: { resumePayload: ResumePayload }
+    ) => Promise<unknown>;
+  };
+
+  if (agentRunApi.resumeRun) {
+    try {
+      await agentRunApi.resumeRun(
+        { spaceId, environmentId, runId },
+        { resumePayload: resumePayload as Record<string, unknown> }
+      );
+      return;
+    } catch (error) {
+      throw normalizeAiAccessError(error);
+    }
+  }
+
+  if (!agentRunApi.resume) {
+    throw new Error('Agent run resume is not available in the current SDK.');
+  }
+
+  try {
+    await agentRunApi.resume({ spaceId, environmentId, runId }, { resumePayload });
+  } catch (error) {
+    throw normalizeAiAccessError(error);
+  }
 }

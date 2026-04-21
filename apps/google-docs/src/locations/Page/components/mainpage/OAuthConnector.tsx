@@ -4,8 +4,10 @@ import { Button, Flex, Text, Image } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { CheckCircleIcon } from '@contentful/f36-icons';
 import googleDriveLogo from '../../../../assets/drive-integration.svg';
+import { isAiAccessDeniedError } from '../../../../utils/aiAccess';
 
 type OAuthConnectorProps = {
+  onAiAccessDenied?: () => void;
   isOAuthConnected: boolean;
   isOAuthBusy: boolean;
   onConnect: () => Promise<void>;
@@ -17,6 +19,7 @@ const ConnectedStatusIcon = ({ size }: Pick<ComponentProps<typeof CheckCircleIco
 );
 
 export const OAuthConnector = ({
+  onAiAccessDenied,
   isOAuthConnected,
   isOAuthBusy,
   onConnect,
@@ -38,12 +41,24 @@ export const OAuthConnector = ({
     if (isOAuthBusy) return;
 
     if (isOAuthConnected && isHoveringConnected) {
-      await onDisconnect();
+      try {
+        await onDisconnect();
+      } catch (error) {
+        if (isAiAccessDeniedError(error)) {
+          onAiAccessDenied?.();
+        }
+      }
       return;
     }
 
     if (!isOAuthConnected) {
-      await onConnect();
+      try {
+        await onConnect();
+      } catch (error) {
+        if (isAiAccessDeniedError(error)) {
+          onAiAccessDenied?.();
+        }
+      }
     }
   };
 

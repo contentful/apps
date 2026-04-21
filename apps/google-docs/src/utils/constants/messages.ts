@@ -1,4 +1,5 @@
 export const ERROR_MESSAGES = {
+  AI_ACCESS_DENIED: 'AI features are currently disabled for this space or organization.',
   NO_API_KEY: 'OpenAI API key is not configured. Please configure it in the app settings.',
   NO_DOCUMENT: 'Please select a document',
   NO_CONTENT_TYPE: 'Please select at least one content type',

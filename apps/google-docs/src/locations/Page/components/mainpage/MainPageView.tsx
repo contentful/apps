@@ -19,6 +19,7 @@ interface MainPageViewProps {
   isOAuthBusy: boolean;
   onConnectGoogleDrive: () => Promise<void>;
   onDisconnectGoogleDrive: () => Promise<void>;
+  onAiAccessDenied?: () => void;
   onSelectFile: () => void;
 }
 
@@ -29,6 +30,7 @@ export const MainPageView = ({
   isOAuthBusy,
   onConnectGoogleDrive,
   onDisconnectGoogleDrive,
+  onAiAccessDenied,
   onSelectFile,
 }: MainPageViewProps) => {
   return (
@@ -39,6 +41,7 @@ export const MainPageView = ({
         style={{ maxWidth: '900px', margin: `${tokens.spacingL} auto` }}>
         <Heading marginBottom="none">Google Drive Integration</Heading>
         <OAuthConnector
+          onAiAccessDenied={onAiAccessDenied}
           isOAuthConnected={isOAuthConnected}
           isOAuthBusy={isOAuthBusy}
           onConnect={onConnectGoogleDrive}

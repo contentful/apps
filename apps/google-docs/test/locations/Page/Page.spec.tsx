@@ -37,7 +37,14 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 vi.mock('../../../src/locations/Page/components/mainpage/OAuthConnector', () => ({
-  OAuthConnector: () => <div>Mock OAuth Connector</div>,
+  OAuthConnector: ({ onAiAccessDenied }: { onAiAccessDenied?: () => void }) => (
+    <>
+      <div>Mock OAuth Connector</div>
+      <button onClick={() => onAiAccessDenied?.()} type="button">
+        Trigger AI Access Denied
+      </button>
+    </>
+  ),
 }));
 
 const { mockModalOrchestrator, mockResumeWorkflow, mockResetFlow } = vi.hoisted(() => ({
@@ -78,6 +85,7 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
   ModalOrchestrator: require('react').forwardRef(
     (
       props: {
+        onAiAccessDenied: () => void;
         onMappingReviewReady: (payload: MappingReviewSuspendPayload, runId: string) => void;
         onResetToMain: () => void;
         oauthToken: string;
@@ -107,6 +115,9 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
           </button>
           <button onClick={props.onResetToMain} type="button">
             Trigger Reset To Main
+          </button>
+          <button onClick={props.onAiAccessDenied} type="button">
+            Trigger Modal AI Access Denied
           </button>
         </>
       );
@@ -200,5 +211,17 @@ describe('Page component', () => {
     });
 
     expect(mockResetFlow).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders a blocked state when AI access is denied from the OAuth flow', async () => {
+    render(<Page />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Trigger AI Access Denied' }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('AI features are currently disabled for this space or organization.')
+      ).toBeTruthy();
+    });
   });
 });
