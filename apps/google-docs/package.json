@@ -14,7 +14,7 @@
     "@contentful/react-apps-toolkit": "^1.2.22",
     "@emotion/css": "^11.13.4",
     "ai": "^5.0.81",
-    "contentful-management": "^11.61.0",
+    "contentful-management": "^11.76.0",
     "googleapis": "^166.0.0",
     "mammoth": "^1.11.0",
     "react": "^18.3.1",
