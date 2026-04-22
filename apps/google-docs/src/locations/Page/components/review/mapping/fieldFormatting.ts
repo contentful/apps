@@ -37,34 +37,6 @@ export function isWorkflowContentTypeFieldWithId(
   return Boolean(field.id);
 }
 
-function hasEntryLinkContentTypeValidation(validations: unknown[] | undefined): boolean {
-  if (!Array.isArray(validations)) {
-    return false;
-  }
-
-  return validations.some((validation) => {
-    if (!validation || typeof validation !== 'object') {
-      return false;
-    }
-
-    return Array.isArray((validation as { linkContentType?: unknown }).linkContentType);
-  });
-}
-
-export function isSingleEntryReferenceField(field: WorkflowContentTypeField): boolean {
-  return (
-    field.type === 'Link' &&
-    (field.fieldControl?.widgetId === 'entryLinkEditor' ||
-      hasEntryLinkContentTypeValidation(field.validations))
-  );
-}
-
-export function isMultipleEntryReferenceField(field: WorkflowContentTypeField): boolean {
-  return (
-    field.type === 'Array' && field.items?.type === 'Link' && field.items?.linkType === 'Entry'
-  );
-}
-
 function hasAssetLinkValidation(validations: unknown[] | undefined): boolean {
   if (!Array.isArray(validations)) {
     return false;

@@ -18,25 +18,21 @@ describe('FieldSelectionDropdown', () => {
           {
             id: 'name',
             fieldName: 'Name (Internal)',
-            fieldType: 'Symbol',
             fieldDisplayType: 'Short text',
           },
           {
             id: 'marketo',
             fieldName: 'Marketo',
-            fieldType: 'Link',
             fieldDisplayType: 'Media',
           },
           {
             id: 'headingSize',
             fieldName: 'Heading size',
-            fieldType: 'Integer',
             fieldDisplayType: 'Integer',
           },
           {
             id: 'price',
             fieldName: 'Price',
-            fieldType: 'Number',
             fieldDisplayType: 'Number',
           },
         ]}
@@ -88,19 +84,16 @@ describe('FieldSelectionDropdown', () => {
           {
             id: 'title',
             fieldName: 'Title',
-            fieldType: 'Symbol',
             fieldDisplayType: 'Short text',
           },
           {
             id: 'headingSize',
             fieldName: 'Heading size',
-            fieldType: 'Integer',
             fieldDisplayType: 'Integer',
           },
           {
             id: 'price',
             fieldName: 'Price',
-            fieldType: 'Number',
             fieldDisplayType: 'Number',
           },
         ]}
@@ -131,25 +124,21 @@ describe('FieldSelectionDropdown', () => {
           {
             id: 'title',
             fieldName: 'Title',
-            fieldType: 'Short text',
             fieldDisplayType: 'Short text',
           },
           {
             id: 'overrideTheme',
             fieldName: 'Override Theme',
-            fieldType: 'Link',
             fieldDisplayType: 'Reference',
           },
           {
             id: 'notes',
             fieldName: 'Notes',
-            fieldType: 'Array',
             fieldDisplayType: 'Reference list',
           },
           {
             id: 'heroImage',
             fieldName: 'Hero image',
-            fieldType: 'Link',
             fieldDisplayType: 'Media',
             isAssetField: true,
           },
