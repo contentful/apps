@@ -249,7 +249,7 @@ export const MappingView = ({
 
       return {
         key: getMappingCardKey(segment.id, highlight),
-        fieldName: formatDisplayName(highlight.fieldId),
+        fieldName: (field?.name ?? '').trim() || formatDisplayName(highlight.fieldId),
         fieldType: field
           ? displayType(field.type ?? '', field.linkType, field.items)
           : displayType(highlight.fieldType),

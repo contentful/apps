@@ -1,6 +1,7 @@
 import { type Ref } from 'react';
 import { Box, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
+import { truncateLabel } from '../../../../../utils/utils';
 
 export interface MappingCardData {
   key: string;
@@ -27,7 +28,6 @@ const valueTextStyle = {
   lineHeight: tokens.lineHeightS,
   whiteSpace: 'nowrap',
   overflow: 'hidden',
-  textOverflow: 'ellipsis',
 } as const;
 
 export const MappingCard = ({
@@ -37,38 +37,42 @@ export const MappingCard = ({
   isHovered = false,
   onMouseEnter,
   onMouseLeave,
-}: MappingCardProps) => (
-  <Box
-    ref={wrapperRef}
-    data-testid={`mapping-card-${card.key}`}
-    data-hovered={isHovered ? 'true' : 'false'}
-    onMouseEnter={onMouseEnter}
-    onMouseLeave={onMouseLeave}
-    style={{
-      position: 'absolute',
-      insetInlineStart: 0,
-      insetInlineEnd: 0,
-      top,
-      border: `${isHovered ? 2 : 1}px solid ${isHovered ? tokens.green600 : tokens.green500}`,
-      borderRadius: tokens.borderRadiusMedium,
-      padding: tokens.spacing2Xs,
-      backgroundColor: tokens.green100,
-      transition: 'border-color 120ms ease, border-width 120ms ease',
-    }}>
-    <Text as="span" fontColor="gray600" style={labelTextStyle} marginRight="spacingXs">
-      Field:
-    </Text>
-    <Text
-      as="span"
-      fontWeight="fontWeightDemiBold"
-      title={`${card.fieldName} (${card.fieldType})`}
-      style={valueTextStyle}>
-      {card.fieldName}
+}: MappingCardProps) => {
+  const fieldName = truncateLabel(card.fieldName, 30);
 
-      <Box as="span" style={{ color: tokens.gray600 }}>
-        {' | '}
-        {card.fieldType}
-      </Box>
-    </Text>
-  </Box>
-);
+  return (
+    <Box
+      ref={wrapperRef}
+      data-testid={`mapping-card-${card.key}`}
+      data-hovered={isHovered ? 'true' : 'false'}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      style={{
+        position: 'absolute',
+        insetInlineStart: 0,
+        insetInlineEnd: 0,
+        top,
+        border: `${isHovered ? 2 : 1}px solid ${isHovered ? tokens.green600 : tokens.green500}`,
+        borderRadius: tokens.borderRadiusMedium,
+        padding: tokens.spacing2Xs,
+        backgroundColor: tokens.green100,
+        transition: 'border-color 120ms ease, border-width 120ms ease',
+      }}>
+      <Text as="span" fontColor="gray600" style={labelTextStyle} marginRight="spacingXs">
+        Field:
+      </Text>
+      <Text
+        as="span"
+        fontWeight="fontWeightDemiBold"
+        title={`${card.fieldName} (${card.fieldType})`}
+        style={valueTextStyle}>
+        {fieldName}
+
+        <Box as="span" style={{ color: tokens.gray600 }}>
+          {' | '}
+          {card.fieldType}
+        </Box>
+      </Text>
+    </Box>
+  );
+};
