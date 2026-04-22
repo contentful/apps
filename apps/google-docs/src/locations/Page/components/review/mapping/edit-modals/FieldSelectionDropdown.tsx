@@ -3,7 +3,6 @@ import { Flex, Stack, Text } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import type { EditModalFieldMapping, EditModalFieldOption } from '@types';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
-import { getFieldTypeLabel } from '../fieldFormatting';
 import { isSelectableFieldType } from './utils';
 
 interface FieldSelectionDropdownProps {
@@ -44,7 +43,7 @@ export const FieldSelectionDropdown = ({
     if (isImageContent) {
       return fieldOptions.filter((option) => option.isAssetField === true);
     }
-    return fieldOptions.filter((option) => isSelectableFieldType(option.fieldType, selectedText));
+    return fieldOptions.filter((option) => isSelectableFieldType(option, selectedText));
   }, [fieldOptions, isImageContent, selectedText]);
 
   useEffect(() => {
@@ -81,10 +80,10 @@ export const FieldSelectionDropdown = ({
           listRef: multiselectListRef,
         }}>
         {fieldOptions.map((option) => {
-          const fieldTypeDisplay = getFieldTypeLabel(option.fieldType);
+          const fieldTypeDisplay = option.fieldDisplayType;
           const isDisabled = isImageContent
             ? !option.isAssetField
-            : !isSelectableFieldType(option.fieldType, selectedText);
+            : !isSelectableFieldType(option, selectedText);
           const isFilled = filledFieldIds.has(option.id);
           return (
             <Multiselect.Option

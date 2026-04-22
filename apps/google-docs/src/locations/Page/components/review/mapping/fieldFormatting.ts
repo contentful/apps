@@ -1,4 +1,4 @@
-import { WorkflowContentTypeField } from '@types';
+import type { WorkflowContentTypeField } from '@types';
 
 export const formatDisplayName = (value: string): string => {
   const normalized = value
@@ -14,7 +14,7 @@ export const formatDisplayName = (value: string): string => {
   return normalized.replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
-const FIELD_TYPE_LABELS: Record<string, string> = {
+export const FIELD_TYPE_LABELS: Record<string, string> = {
   Symbol: 'Short text',
   Text: 'Long text',
   RichText: 'Rich text',
@@ -29,15 +29,7 @@ const FIELD_TYPE_LABELS: Record<string, string> = {
   ResourceLink: 'Resource link',
 };
 
-export const FIELD_TYPE_DISPLAY = {
-  SHORT_TEXT: FIELD_TYPE_LABELS.Symbol,
-  LONG_TEXT: FIELD_TYPE_LABELS.Text,
-  INTEGER: FIELD_TYPE_LABELS.Integer,
-  DECIMAL: FIELD_TYPE_LABELS.Number,
-} as const;
-
-export const getFieldTypeLabel = (fieldType: string): string =>
-  FIELD_TYPE_LABELS[fieldType] ?? fieldType;
+export type FieldItems = NonNullable<WorkflowContentTypeField['items']>;
 
 export function isWorkflowContentTypeFieldWithId(
   field: WorkflowContentTypeField
@@ -109,14 +101,34 @@ export function isAssetFieldForImageAssign(field: WorkflowContentTypeField): boo
   }
 }
 
-export function getFieldOptionTypeLabel(field: WorkflowContentTypeField): string {
-  if (isSingleEntryReferenceField(field)) {
-    return 'Reference';
+export const displayType = (type: string, linkType?: string, items?: FieldItems) => {
+  switch (type) {
+    case 'Symbol':
+      return FIELD_TYPE_LABELS.Symbol;
+    case 'Text':
+      return FIELD_TYPE_LABELS.Text;
+    case 'RichText':
+      return FIELD_TYPE_LABELS.RichText;
+    case 'Link':
+      return linkType === 'Entry' ? 'Reference' : 'Media';
+    case 'Array':
+      if (items?.type === 'Symbol') return 'Short text list';
+      return items?.linkType === 'Entry' ? 'Reference list' : 'Media list';
+    case 'Integer':
+      return FIELD_TYPE_LABELS.Integer;
+    case 'Number':
+      return FIELD_TYPE_LABELS.Number;
+    case 'Date':
+      return FIELD_TYPE_LABELS.Date;
+    case 'Boolean':
+      return FIELD_TYPE_LABELS.Boolean;
+    case 'Object':
+      return FIELD_TYPE_LABELS.Object;
+    case 'Location':
+      return FIELD_TYPE_LABELS.Location;
+    case 'ResourceLink':
+      return FIELD_TYPE_LABELS.ResourceLink;
+    default:
+      return type;
   }
-
-  if (isMultipleEntryReferenceField(field)) {
-    return 'References';
-  }
-
-  return getFieldTypeLabel(field.type ?? '');
-}
+};

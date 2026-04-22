@@ -27,7 +27,7 @@ import {
   uniqueHighlights,
 } from './buildHighlights';
 import { buildListMarkers } from './buildListMarkers';
-import { formatDisplayName, getFieldOptionTypeLabel, getFieldTypeLabel } from './fieldFormatting';
+import { displayType, formatDisplayName } from './fieldFormatting';
 import { EditModal } from './edit-modals/EditModal';
 import { isAssetFieldForImageAssign, isWorkflowContentTypeFieldWithId } from './fieldFormatting';
 
@@ -240,12 +240,22 @@ export const MappingView = ({
   };
 
   const getMappingCardsForSegment = (segment: DocSegment): AnchoredMappingCard[] =>
-    getVisibleHighlights(getHighlightsForSegment(segment)).map((highlight) => ({
-      key: getMappingCardKey(segment.id, highlight),
-      fieldName: formatDisplayName(highlight.fieldId),
-      fieldType: getFieldTypeLabel(highlight.fieldType),
-      anchorId: getAnchorIdForSourceRef(highlight.sourceRef),
-    }));
+    getVisibleHighlights(getHighlightsForSegment(segment)).map((highlight) => {
+      const graphEntry = entryBlockGraph.entries[highlight.entryIndex];
+      const contentType = payload.contentTypes.find(
+        (item) => item.sys.id === graphEntry?.contentTypeId
+      );
+      const field = contentType?.fields.find((item) => item.id === highlight.fieldId);
+
+      return {
+        key: getMappingCardKey(segment.id, highlight),
+        fieldName: formatDisplayName(highlight.fieldId),
+        fieldType: field
+          ? displayType(field.type ?? '', field.linkType, field.items)
+          : displayType(highlight.fieldType),
+        anchorId: getAnchorIdForSourceRef(highlight.sourceRef),
+      };
+    });
 
   const buildLocationOption = (
     entryIndex: number,
@@ -264,7 +274,9 @@ export const MappingView = ({
     const contentTypeDisplayName = (contentType?.name ?? '').trim();
     const contentTypeField = contentType?.fields.find((field) => field.id === fieldId);
     const fieldDisplayName = (contentTypeField?.name ?? '').trim();
-    const fieldDisplayType = getFieldTypeLabel(fieldType);
+    const fieldDisplayType = contentTypeField
+      ? displayType(contentTypeField.type ?? '', contentTypeField.linkType, contentTypeField.items)
+      : displayType(fieldType);
     const entryName = getEntryTitleFromFieldMappings(graphEntry, contentType?.displayField);
 
     return {
@@ -322,7 +334,8 @@ export const MappingView = ({
       .map((field) => ({
         id: field.id,
         fieldName: (field.name ?? '').trim() || formatDisplayName(field.id),
-        fieldType: getFieldOptionTypeLabel(field),
+        fieldType: field.type ?? '',
+        fieldDisplayType: displayType(field.type ?? '', field.linkType, field.items),
         isAssetField: isAssetFieldForImageAssign(field),
       }));
 
