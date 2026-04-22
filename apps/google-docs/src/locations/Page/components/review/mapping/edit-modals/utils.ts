@@ -1,4 +1,12 @@
-import { FIELD_TYPE_DISPLAY, getFieldTypeLabel } from '../fieldFormatting';
+import type { EditModalFieldOption } from '@types';
+import { FIELD_TYPE_LABELS } from '../fieldFormatting';
+
+const FIELD_TYPE_DISPLAY = {
+  SHORT_TEXT: FIELD_TYPE_LABELS.Symbol,
+  LONG_TEXT: FIELD_TYPE_LABELS.Text,
+  INTEGER: FIELD_TYPE_LABELS.Integer,
+  DECIMAL: FIELD_TYPE_LABELS.Number,
+} as const;
 
 export const getSelectedContentMatch = (value: string) => {
   const trimmedValue = value?.trim() ?? '';
@@ -14,9 +22,12 @@ export const getSelectedContentMatch = (value: string) => {
   return;
 };
 
-export const isSelectableFieldType = (fieldType: string, selectedText: string) => {
+export const isSelectableFieldType = (
+  field: Pick<EditModalFieldOption, 'fieldDisplayType'>,
+  selectedText: string
+) => {
   const highlightedTextMatch = getSelectedContentMatch(selectedText);
-  const normalizedFieldType = getFieldTypeLabel(fieldType).trim();
+  const normalizedFieldType = field.fieldDisplayType.trim();
 
   switch (normalizedFieldType) {
     case FIELD_TYPE_DISPLAY.SHORT_TEXT:

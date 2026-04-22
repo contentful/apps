@@ -3,11 +3,11 @@ import { Flex, Stack, Text } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import type { EditModalFieldMapping, EditModalFieldOption } from '@types';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
-import { getFieldTypeLabel } from '../fieldFormatting';
 import { isSelectableFieldType } from './utils';
 
 interface FieldSelectionDropdownProps {
   selectedText: string;
+  isImageContent?: boolean;
   fieldOptions: EditModalFieldOption[];
   fieldMappings: EditModalFieldMapping[];
   selectedFieldIds: string[];
@@ -21,6 +21,7 @@ interface FieldSelectionDropdownProps {
 
 export const FieldSelectionDropdown = ({
   selectedText,
+  isImageContent = false,
   fieldOptions,
   fieldMappings,
   selectedFieldIds,
@@ -38,20 +39,19 @@ export const FieldSelectionDropdown = ({
     () => new Set(fieldMappings.map((fieldMapping) => fieldMapping.fieldId)),
     [fieldMappings]
   );
-  const selectableOptions = useMemo(
-    () =>
-      fieldOptions.filter((option) =>
-        isSelectableFieldType(getFieldTypeLabel(option.fieldType), selectedText)
-      ),
-    [fieldOptions, selectedText]
-  );
+  const selectableOptions = useMemo(() => {
+    if (isImageContent) {
+      return fieldOptions.filter((option) => option.isAssetField === true);
+    }
+    return fieldOptions.filter((option) => isSelectableFieldType(option, selectedText));
+  }, [fieldOptions, isImageContent, selectedText]);
 
   useEffect(() => {
     onSelectableStateChange?.({
       hasFieldOptions: fieldOptions.length > 0,
       hasSelectableOptions: selectableOptions.length > 0,
     });
-  }, [fieldOptions.length, onSelectableStateChange, selectableOptions.length]);
+  }, [fieldOptions.length, isImageContent, onSelectableStateChange, selectableOptions.length]);
 
   const handleSelectField = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { checked, value } = event.target;
@@ -79,36 +79,36 @@ export const FieldSelectionDropdown = ({
           listMaxHeight: 360,
           listRef: multiselectListRef,
         }}>
-        {fieldOptions.map((option) =>
-          (() => {
-            const fieldTypeDisplay = getFieldTypeLabel(option.fieldType);
-            const isDisabled = !isSelectableFieldType(fieldTypeDisplay, selectedText);
-            const isFilled = filledFieldIds.has(option.id);
-            return (
-              <Multiselect.Option
-                key={`${key}-${option.id}`}
-                value={option.id}
-                itemId={option.id}
-                isChecked={selectedFieldIds.includes(option.id)}
-                isDisabled={isDisabled}
-                onSelectItem={handleSelectField}>
-                <Flex gap="spacingS">
-                  <Flex gap="spacing2Xs">
-                    <Text as="div" fontColor="gray700" fontWeight="fontWeightDemiBold">
-                      {option.fieldName}
-                    </Text>
-                    <Text as="div" fontColor="gray700" fontWeight="fontWeightNormal">
-                      ({fieldTypeDisplay})
-                    </Text>
-                  </Flex>
+        {fieldOptions.map((option) => {
+          const fieldTypeDisplay = option.fieldDisplayType;
+          const isDisabled = isImageContent
+            ? !option.isAssetField
+            : !isSelectableFieldType(option, selectedText);
+          const isFilled = filledFieldIds.has(option.id);
+          return (
+            <Multiselect.Option
+              key={`${key}-${option.id}`}
+              value={option.id}
+              itemId={option.id}
+              isChecked={selectedFieldIds.includes(option.id)}
+              isDisabled={isDisabled}
+              onSelectItem={handleSelectField}>
+              <Flex gap="spacingS">
+                <Flex gap="spacing2Xs">
+                  <Text as="div" fontColor="gray700" fontWeight="fontWeightDemiBold">
+                    {option.fieldName}
+                  </Text>
                   <Text as="div" fontColor="gray700" fontWeight="fontWeightNormal">
-                    {isFilled ? 'Filled' : 'Empty'}
+                    ({fieldTypeDisplay})
                   </Text>
                 </Flex>
-              </Multiselect.Option>
-            );
-          })()
-        )}
+                <Text as="div" fontColor="gray700" fontWeight="fontWeightNormal">
+                  {isFilled ? 'Filled' : 'Empty'}
+                </Text>
+              </Flex>
+            </Multiselect.Option>
+          );
+        })}
       </Multiselect>
     </Stack>
   );

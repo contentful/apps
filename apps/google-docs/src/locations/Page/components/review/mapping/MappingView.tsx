@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefCallback } from 'react';
-import { Box, Button, Flex, Text } from '@contentful/f36-components';
+import { Box, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import {
   buildEntryListFromEntryBlockGraph,
@@ -14,11 +14,7 @@ import type {
   EditModalNewLocation,
   SourceRef,
 } from '@types';
-import {
-  EditModalDestinationStateKind,
-  createEditModalDestinationState,
-  isTextSourceRef,
-} from '@types';
+import { isTextSourceRef } from '@types';
 import { FileTextIcon } from '@contentful/f36-icons';
 import { useReviewTextSelection } from '@hooks/useReviewTextSelection';
 import { getEntryTitleFromFieldMappings } from '../../../../../utils/getEntryTitle';
@@ -31,8 +27,9 @@ import {
   uniqueHighlights,
 } from './buildHighlights';
 import { buildListMarkers } from './buildListMarkers';
-import { formatDisplayName, getFieldTypeLabel } from './fieldFormatting';
+import { displayType, formatDisplayName } from './fieldFormatting';
 import { EditModal } from './edit-modals/EditModal';
+import { isAssetFieldForImageAssign, isWorkflowContentTypeFieldWithId } from './fieldFormatting';
 
 import { SelectionActionMenu } from './SelectionActionMenu';
 import { buildSourceRefKey } from './sourceRefUtils';
@@ -40,6 +37,8 @@ import { MappingEntryCards, type AnchoredMappingCard } from './MappingEntryCards
 import { NormalizedDocumentSection } from './NormalizedDocumentSection';
 import {
   applyImageExclusionToEntryBlockGraph,
+  applyImageReassignToEntryBlockGraph,
+  appendImageToTargets,
   applyTextAssignToEntryBlockGraph,
   applyTextExclusionToEntryBlockGraph,
   applyTextReassignToEntryBlockGraph,
@@ -164,6 +163,8 @@ export const MappingView = ({
     TextExclusionRange[] | null
   >(null);
   const [pendingImageSourceRef, setPendingImageSourceRef] = useState<ImageSourceRef | null>(null);
+  const [pendingImageReassignSourceRef, setPendingImageReassignSourceRef] =
+    useState<ImageSourceRef | null>(null);
   const [pendingTextReassignRanges, setPendingTextReassignRanges] = useState<TextExclusionRange[]>(
     []
   );
@@ -178,6 +179,7 @@ export const MappingView = ({
     setEditModalState(EMPTY_EDIT_MODAL);
     setPendingTextExclusionRanges(null);
     setPendingImageSourceRef(null);
+    setPendingImageReassignSourceRef(null);
     setPendingTextReassignRanges([]);
     setPendingTextAssignRanges([]);
   };
@@ -238,12 +240,22 @@ export const MappingView = ({
   };
 
   const getMappingCardsForSegment = (segment: DocSegment): AnchoredMappingCard[] =>
-    getVisibleHighlights(getHighlightsForSegment(segment)).map((highlight) => ({
-      key: getMappingCardKey(segment.id, highlight),
-      fieldName: formatDisplayName(highlight.fieldId),
-      fieldType: getFieldTypeLabel(highlight.fieldType),
-      anchorId: getAnchorIdForSourceRef(highlight.sourceRef),
-    }));
+    getVisibleHighlights(getHighlightsForSegment(segment)).map((highlight) => {
+      const graphEntry = entryBlockGraph.entries[highlight.entryIndex];
+      const contentType = payload.contentTypes.find(
+        (item) => item.sys.id === graphEntry?.contentTypeId
+      );
+      const field = contentType?.fields.find((item) => item.id === highlight.fieldId);
+
+      return {
+        key: getMappingCardKey(segment.id, highlight),
+        fieldName: formatDisplayName(highlight.fieldId),
+        fieldType: field
+          ? displayType(field.type ?? '', field.linkType, field.items)
+          : displayType(highlight.fieldType),
+        anchorId: getAnchorIdForSourceRef(highlight.sourceRef),
+      };
+    });
 
   const buildLocationOption = (
     entryIndex: number,
@@ -262,7 +274,9 @@ export const MappingView = ({
     const contentTypeDisplayName = (contentType?.name ?? '').trim();
     const contentTypeField = contentType?.fields.find((field) => field.id === fieldId);
     const fieldDisplayName = (contentTypeField?.name ?? '').trim();
-    const fieldDisplayType = getFieldTypeLabel(fieldType);
+    const fieldDisplayType = contentTypeField
+      ? displayType(contentTypeField.type ?? '', contentTypeField.linkType, contentTypeField.items)
+      : displayType(fieldType);
     const entryName = getEntryTitleFromFieldMappings(graphEntry, contentType?.displayField);
 
     return {
@@ -315,22 +329,14 @@ export const MappingView = ({
     const fallbackEntryName = getEntryName(contentTypeName, entryIndex);
     const entryTitle = getEntryReviewTitle(entry, contentType?.displayField, fallbackEntryName);
     const contentTypeFields = contentType?.fields ?? [];
-    const fieldOptions =
-      contentTypeFields.length > 0
-        ? contentTypeFields
-            .filter((field): field is (typeof contentTypeFields)[number] & { id: string } =>
-              Boolean(field.id)
-            )
-            .map((field) => ({
-              id: field.id,
-              fieldName: (field.name ?? '').trim() || formatDisplayName(field.id),
-              fieldType: getFieldTypeLabel(field.type ?? ''),
-            }))
-        : entry.fieldMappings.map((fieldMapping) => ({
-            id: fieldMapping.fieldId,
-            fieldName: formatDisplayName(fieldMapping.fieldId),
-            fieldType: getFieldTypeLabel(fieldMapping.fieldType),
-          }));
+    const fieldOptions = contentTypeFields
+      .filter(isWorkflowContentTypeFieldWithId)
+      .map((field) => ({
+        id: field.id,
+        fieldName: (field.name ?? '').trim() || formatDisplayName(field.id),
+        fieldDisplayType: displayType(field.type ?? '', field.linkType, field.items),
+        isAssetField: isAssetFieldForImageAssign(field),
+      }));
 
     return {
       id: entry.tempId ?? `${entry.contentTypeId}-${entryIndex}`,
@@ -481,10 +487,12 @@ export const MappingView = ({
     preview: string,
     currentLocations: EditLocationOption[],
     reassignRanges: TextExclusionRange[],
-    assignRanges: TextExclusionRange[]
+    assignRanges: TextExclusionRange[],
+    imageSourceRef: ImageSourceRef | null = null
   ) => {
     setPendingTextExclusionRanges(null);
     setPendingImageSourceRef(null);
+    setPendingImageReassignSourceRef(imageSourceRef);
     setPendingTextReassignRanges(reassignRanges);
     setPendingTextAssignRanges(assignRanges);
     setEditModalState({
@@ -564,7 +572,7 @@ export const MappingView = ({
 
   const handleAssignImage = (sourceRef: ImageSourceRef, label: string) => {
     if (isDisabled) return;
-    openAssignModal(label, getLocationsForSourceRef(sourceRef), [], []);
+    openAssignModal(label, getLocationsForSourceRef(sourceRef), [], [], sourceRef);
     setHoveredMappingKeys([]);
   };
 
@@ -616,6 +624,37 @@ export const MappingView = ({
       }
 
       if (!resolvedTargets.length) {
+        return;
+      }
+
+      if (pendingImageReassignSourceRef) {
+        if (locations.length === 0) {
+          onEntryBlockGraphChange(
+            appendImageToTargets(entryBlockGraph, pendingImageReassignSourceRef, resolvedTargets)
+          );
+          closeEditModal();
+          return;
+        }
+
+        const from =
+          locations.find((location) => location.id === selectedLocationId) ??
+          locations.find((location) => location.isSelected) ??
+          locations[0];
+
+        if (!from) {
+          closeEditModal();
+          return;
+        }
+
+        onEntryBlockGraphChange(
+          applyImageReassignToEntryBlockGraph(
+            entryBlockGraph,
+            from,
+            pendingImageReassignSourceRef,
+            resolvedTargets
+          )
+        );
+        closeEditModal();
         return;
       }
 
@@ -805,6 +844,7 @@ export const MappingView = ({
         onClose={closeEditModal}
         mode={editModalState.mode}
         viewModel={editModalState.viewModel}
+        isImageContent={Boolean(pendingImageReassignSourceRef)}
         title={editModalState.title}
         locationSectionDescription={editModalState.locationSectionDescription}
         primaryButtonLabel={editModalState.primaryButtonLabel}

@@ -10,6 +10,7 @@ import {
   FormControl,
   Flex,
   TextInput,
+  Select,
 } from '@contentful/f36-components';
 import { OrchestrationEapNote } from './OrchestrationEapNote';
 
@@ -191,7 +192,10 @@ export default class AppConfig extends React.Component<Props, State> {
     );
   }
 
-  onParameterChange = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
+  onParameterChange = (
+    key: string,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { value } = e.currentTarget;
 
     this.setState((state) => ({
@@ -240,18 +244,32 @@ export default class AppConfig extends React.Component<Props, State> {
                 return (
                   <FormControl key={key} id={key}>
                     <FormControl.Label>{def.name}</FormControl.Label>
-                    <TextInput
-                      name={key}
-                      width={def.type === 'Symbol' ? 'large' : 'medium'}
-                      type={def.type === 'Symbol' ? 'text' : 'number'}
-                      maxLength={255}
-                      isRequired={def.required}
-                      value={parameters[def.id]}
-                      onChange={this.onParameterChange.bind(this, def.id)}
-                    />
+                    {def.options ? (
+                      <Select
+                        name={key}
+                        isRequired={def.required}
+                        value={parameters[def.id] as string}
+                        onChange={this.onParameterChange.bind(this, def.id)}>
+                        {def.options.map((option) => (
+                          <Select.Option key={option} value={option}>
+                            {option}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    ) : (
+                      <TextInput
+                        name={key}
+                        width={def.type === 'Symbol' ? 'large' : 'medium'}
+                        type={def.type === 'Symbol' ? 'text' : 'number'}
+                        maxLength={255}
+                        isRequired={def.required}
+                        value={parameters[def.id]}
+                        onChange={this.onParameterChange.bind(this, def.id)}
+                      />
+                    )}
                     <Flex justifyContent="space-between">
                       <FormControl.HelpText>{def.description}</FormControl.HelpText>
-                      <FormControl.Counter />
+                      {def.options ? null : <FormControl.Counter />}
                     </Flex>
                   </FormControl>
                 );

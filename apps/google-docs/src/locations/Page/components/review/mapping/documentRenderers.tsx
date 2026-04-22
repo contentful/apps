@@ -146,11 +146,11 @@ interface BlockRendererProps {
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
   onAssignImage: (
-    sourceRef: { type: 'blockImage'; blockId: string; imageId: string },
+    sourceRef: { type: 'image'; blockId: string; imageId: string },
     label: string
   ) => void;
   onExcludeImage: (
-    sourceRef: { type: 'blockImage'; blockId: string; imageId: string },
+    sourceRef: { type: 'image'; blockId: string; imageId: string },
     label: string
   ) => void;
 }
@@ -224,7 +224,7 @@ export const BlockRenderer = ({
         if (!image) return null;
 
         const imageSourceRef = {
-          type: 'blockImage' as const,
+          type: 'image' as const,
           blockId: block.id,
           imageId,
         };

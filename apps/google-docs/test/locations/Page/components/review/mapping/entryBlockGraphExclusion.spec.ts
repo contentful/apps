@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { EditLocationOption, EntryBlockGraph, NormalizedDocument, SourceRef } from '@types';
 import {
+  applyImageReassignToEntryBlockGraph,
+  appendImageToTargets,
   applyTextAssignToEntryBlockGraph,
   applyTextExclusionToEntryBlockGraph,
   applyTextReassignToEntryBlockGraph,
@@ -424,5 +426,149 @@ describe('applyTextReassignToEntryBlockGraph', () => {
     expect(bRefs).toHaveLength(1);
     expect(aRefs[0]).toMatchObject({ start: 3, end: 7 });
     expect(bRefs[0]).toMatchObject({ start: 3, end: 7 });
+  });
+});
+
+describe('applyImageReassignToEntryBlockGraph', () => {
+  const imageRef: SourceRef = {
+    type: 'image',
+    blockId: 'block-1',
+    imageId: 'image-1',
+  };
+
+  const imageLocation: EditLocationOption = {
+    entryIndex: 0,
+    id: '0-article-body',
+    contentTypeId: 'article',
+    contentTypeName: 'Article',
+    entryName: 'A',
+    fieldId: 'body',
+    fieldName: 'Body',
+    fieldType: 'Text',
+    sourceRef: imageRef,
+  };
+
+  it('moves image source ref from current field to target field', () => {
+    const graph: EntryBlockGraph = {
+      entries: [
+        {
+          contentTypeId: 'article',
+          fieldMappings: [
+            { fieldId: 'body', fieldType: 'Text', sourceRefs: [imageRef], confidence: 1 },
+            { fieldId: 'gallery', fieldType: 'Array', sourceRefs: [], confidence: 1 },
+          ],
+        },
+      ],
+      excludedSourceRefs: [imageRef],
+    };
+
+    const next = applyImageReassignToEntryBlockGraph(graph, imageLocation, imageRef, [
+      { entryIndex: 0, fieldId: 'gallery', fieldType: 'Array' },
+    ]);
+
+    expect(next.entries[0]?.fieldMappings.find((fm) => fm.fieldId === 'body')?.sourceRefs).toEqual(
+      []
+    );
+    expect(
+      next.entries[0]?.fieldMappings.find((fm) => fm.fieldId === 'gallery')?.sourceRefs
+    ).toEqual([imageRef]);
+    expect(next.excludedSourceRefs).toEqual([]);
+  });
+
+  it('creates a destination field mapping when target field is missing', () => {
+    const graph: EntryBlockGraph = {
+      entries: [
+        {
+          contentTypeId: 'article',
+          fieldMappings: [
+            { fieldId: 'body', fieldType: 'Text', sourceRefs: [imageRef], confidence: 1 },
+          ],
+        },
+      ],
+      excludedSourceRefs: [],
+    };
+
+    const next = applyImageReassignToEntryBlockGraph(graph, imageLocation, imageRef, [
+      { entryIndex: 0, fieldId: 'heroImage', fieldType: 'Link' },
+    ]);
+
+    expect(next.entries[0]?.fieldMappings.find((fm) => fm.fieldId === 'body')?.sourceRefs).toEqual(
+      []
+    );
+    expect(
+      next.entries[0]?.fieldMappings.find((fm) => fm.fieldId === 'heroImage')?.sourceRefs
+    ).toEqual([imageRef]);
+  });
+
+  it('dedupes targets and does not duplicate existing image refs', () => {
+    const graph: EntryBlockGraph = {
+      entries: [
+        {
+          contentTypeId: 'article',
+          fieldMappings: [
+            { fieldId: 'body', fieldType: 'Text', sourceRefs: [imageRef], confidence: 1 },
+            { fieldId: 'gallery', fieldType: 'Array', sourceRefs: [imageRef], confidence: 1 },
+          ],
+        },
+      ],
+      excludedSourceRefs: [],
+    };
+
+    const next = applyImageReassignToEntryBlockGraph(graph, imageLocation, imageRef, [
+      { entryIndex: 0, fieldId: 'gallery', fieldType: 'Array' },
+      { entryIndex: 0, fieldId: 'gallery', fieldType: 'Array' },
+    ]);
+
+    expect(
+      next.entries[0]?.fieldMappings.find((fm) => fm.fieldId === 'gallery')?.sourceRefs
+    ).toEqual([imageRef]);
+  });
+
+  it('returns original graph when only same-source target is selected', () => {
+    const graph: EntryBlockGraph = {
+      entries: [
+        {
+          contentTypeId: 'article',
+          fieldMappings: [
+            { fieldId: 'body', fieldType: 'Text', sourceRefs: [imageRef], confidence: 1 },
+          ],
+        },
+      ],
+      excludedSourceRefs: [],
+    };
+
+    const next = applyImageReassignToEntryBlockGraph(graph, imageLocation, imageRef, [
+      { entryIndex: 0, fieldId: 'body', fieldType: 'Text' },
+    ]);
+
+    expect(next).toBe(graph);
+  });
+});
+
+describe('appendImageToTargets', () => {
+  it('adds excluded image to target field and clears exclusion', () => {
+    const imageRef: SourceRef = {
+      type: 'image',
+      blockId: 'block-1',
+      imageId: 'image-1',
+    };
+    const graph: EntryBlockGraph = {
+      entries: [
+        {
+          contentTypeId: 'article',
+          fieldMappings: [{ fieldId: 'body', fieldType: 'Text', sourceRefs: [], confidence: 1 }],
+        },
+      ],
+      excludedSourceRefs: [imageRef],
+    };
+
+    const next = appendImageToTargets(graph, imageRef, [
+      { entryIndex: 0, fieldId: 'heroImage', fieldType: 'Link' },
+    ]);
+
+    expect(
+      next.entries[0]?.fieldMappings.find((fm) => fm.fieldId === 'heroImage')?.sourceRefs
+    ).toEqual([imageRef]);
+    expect(next.excludedSourceRefs).toEqual([]);
   });
 });

@@ -10,6 +10,30 @@ vi.mock('@hooks/useReviewTextSelection', () => ({
   useReviewTextSelection: () => mockUseReviewTextSelection(),
 }));
 
+vi.mock(
+  '../../../../../../src/locations/Page/components/review/mapping/ReviewImageAssetCard',
+  () => ({
+    ReviewImageAssetCard: ({
+      onAssign,
+      onExclude,
+      isHighlighted,
+    }: {
+      onAssign: () => void;
+      onExclude: () => void;
+      isHighlighted: boolean;
+    }) => (
+      <div>
+        <button type="button" onClick={onAssign}>
+          {isHighlighted ? 'Reassign image' : 'Assign image'}
+        </button>
+        <button type="button" onClick={onExclude}>
+          Exclude image
+        </button>
+      </div>
+    ),
+  })
+);
+
 const blockTextSourceRef: SourceRef = {
   type: 'blockText',
   blockId: 'block-1',
@@ -103,6 +127,83 @@ const createPayload = (excludedSourceRefs: SourceRef[] = []): MappingReviewSuspe
   ],
 });
 
+const createImagePayload = (): MappingReviewSuspendPayload => ({
+  suspendStepId: 'mapping-review',
+  reason: 'Mapping review required before CMA payload generation continues',
+  documentId: 'doc-image',
+  documentTitle: 'Image mapping review',
+  normalizedDocument: {
+    documentId: 'doc-image',
+    title: 'Image mapping review',
+    designValues: [],
+    contentBlocks: [
+      {
+        id: 'image-block-1',
+        position: 1,
+        type: 'paragraph',
+        textRuns: [{ text: 'Image paragraph' }],
+        flattenedTextRuns: [{ text: 'Image paragraph', start: 0, end: 15 }],
+        designValueIds: [],
+        imageIds: ['img-1'],
+      },
+    ],
+    images: [{ id: 'img-1', url: 'https://example.com/image.png', title: 'Image one' }],
+    tables: [],
+    assets: [],
+  },
+  entryBlockGraph: {
+    entries: [
+      {
+        contentTypeId: 'article',
+        tempId: 'article-0',
+        fields: { title: { 'en-US': 'First entry' } },
+        fieldMappings: [
+          {
+            fieldId: 'body',
+            fieldType: 'Text',
+            sourceRefs: [{ type: 'image', blockId: 'image-block-1', imageId: 'img-1' }],
+            confidence: 0.9,
+          },
+        ],
+      },
+      {
+        contentTypeId: 'article',
+        tempId: 'article-1',
+        fields: { title: { 'en-US': 'Second entry' } },
+        fieldMappings: [
+          {
+            fieldId: 'body',
+            fieldType: 'Text',
+            sourceRefs: [],
+            confidence: 0.9,
+          },
+        ],
+      },
+    ],
+    excludedSourceRefs: [],
+  },
+  referenceGraph: {
+    edges: [],
+    creationOrder: [],
+    deferredFields: [],
+    hasCircularDependency: false,
+  },
+  contentTypes: [
+    {
+      sys: { id: 'article' },
+      name: 'Article',
+      displayField: 'title',
+      fields: [
+        {
+          id: 'body',
+          name: 'Body copy',
+          type: 'Text',
+        },
+      ],
+    },
+  ],
+});
+
 describe('MappingView', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -149,8 +250,8 @@ describe('MappingView', () => {
 
     expect(screen.getByRole('heading', { name: 'Assign content' })).toBeTruthy();
     expect(screen.getByText('"selected body text"')).toBeTruthy();
-    expect(screen.getByText('Article')).toBeTruthy();
-    expect(screen.getByText('Untitled')).toBeTruthy();
+    expect(screen.getAllByText('Article').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Untitled').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
     expect(screen.getByText('New location')).toBeTruthy();
     expect(screen.getByText('Article: Draft title from display field')).toBeTruthy();
@@ -237,12 +338,32 @@ describe('MappingView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Exclude' }));
 
     expect(screen.getByRole('heading', { name: 'Exclude content' })).toBeTruthy();
-    expect(screen.getByText('Article')).toBeTruthy();
+    expect(screen.getAllByText('Article').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
     expect(screen.queryByText('New location')).toBeNull();
     expect(
       screen.getAllByText((_, node) => node?.textContent?.includes('| Long text') ?? false).length
     ).toBeGreaterThan(0);
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
+  });
+
+  it('scopes image assignment destinations to currently selected entry', () => {
+    const payload = createImagePayload();
+    const onEntryBlockGraphChange = vi.fn();
+
+    render(
+      <MappingView
+        payload={payload}
+        entryBlockGraph={payload.entryBlockGraph}
+        onEntryBlockGraphChange={onEntryBlockGraphChange}
+        selectedEntryIndex={1}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Assign image' }));
+
+    expect(screen.getByRole('heading', { name: 'Assign content' })).toBeTruthy();
+    expect(screen.getByText('Article: Second entry')).toBeTruthy();
+    expect(screen.getAllByText(/Article: .* entry/)).not.toHaveLength(0);
   });
 });

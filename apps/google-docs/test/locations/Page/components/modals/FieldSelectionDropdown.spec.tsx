@@ -18,22 +18,22 @@ describe('FieldSelectionDropdown', () => {
           {
             id: 'name',
             fieldName: 'Name (Internal)',
-            fieldType: 'Symbol',
+            fieldDisplayType: 'Short text',
           },
           {
             id: 'marketo',
             fieldName: 'Marketo',
-            fieldType: 'Link',
+            fieldDisplayType: 'Media',
           },
           {
             id: 'headingSize',
             fieldName: 'Heading size',
-            fieldType: 'Integer',
+            fieldDisplayType: 'Integer',
           },
           {
             id: 'price',
             fieldName: 'Price',
-            fieldType: 'Number',
+            fieldDisplayType: 'Number',
           },
         ]}
         selectedFieldIds={[]}
@@ -84,17 +84,17 @@ describe('FieldSelectionDropdown', () => {
           {
             id: 'title',
             fieldName: 'Title',
-            fieldType: 'Symbol',
+            fieldDisplayType: 'Short text',
           },
           {
             id: 'headingSize',
             fieldName: 'Heading size',
-            fieldType: 'Integer',
+            fieldDisplayType: 'Integer',
           },
           {
             id: 'price',
             fieldName: 'Price',
-            fieldType: 'Number',
+            fieldDisplayType: 'Number',
           },
         ]}
         selectedFieldIds={[]}
@@ -113,5 +113,53 @@ describe('FieldSelectionDropdown', () => {
     expect(screen.getByDisplayValue('title')).not.toBeDisabled();
     expect(screen.getByDisplayValue('headingSize')).toBeDisabled();
     expect(screen.getByDisplayValue('price')).toBeDisabled();
+  });
+
+  it('shows link and array fields for text assignment but keeps them disabled', async () => {
+    render(
+      <FieldSelectionDropdown
+        selectedText="Sample selected content"
+        fieldMappings={[]}
+        fieldOptions={[
+          {
+            id: 'title',
+            fieldName: 'Title',
+            fieldDisplayType: 'Short text',
+          },
+          {
+            id: 'overrideTheme',
+            fieldName: 'Override Theme',
+            fieldDisplayType: 'Reference',
+          },
+          {
+            id: 'notes',
+            fieldName: 'Notes',
+            fieldDisplayType: 'Reference list',
+          },
+          {
+            id: 'heroImage',
+            fieldName: 'Hero image',
+            fieldDisplayType: 'Media',
+            isAssetField: true,
+          },
+        ]}
+        selectedFieldIds={[]}
+        onSelectedFieldIdsChange={vi.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle Multiselect' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Title')).toBeTruthy();
+      expect(screen.getByText('Override Theme')).toBeTruthy();
+      expect(screen.getByText('Notes')).toBeTruthy();
+      expect(screen.getByText('Hero image')).toBeTruthy();
+    });
+
+    expect(screen.getByDisplayValue('overrideTheme')).toBeDisabled();
+    expect(screen.getByDisplayValue('notes')).toBeDisabled();
+    expect(screen.getByDisplayValue('heroImage')).toBeDisabled();
+    expect(screen.getByText('(Short text)')).toBeTruthy();
   });
 });

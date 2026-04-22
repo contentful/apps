@@ -1,8 +1,8 @@
 import { Box, Card, Image, MenuItem } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import type { ImageSourceRef, NormalizedDocumentImage, SourceRef } from '@types';
+import type { ImageSourceRef, NormalizedDocumentImage } from '@types';
 import Splitter from '../../mainpage/Splitter';
-import { buildSourceRefKey, isImageSourceRefExcluded } from './sourceRefUtils';
+import { buildSourceRefKey } from './sourceRefUtils';
 
 export interface ReviewImageAssetCardProps {
   image: NormalizedDocumentImage;
@@ -35,6 +35,7 @@ export function ReviewImageAssetCard({
   onExclude,
 }: ReviewImageAssetCardProps): JSX.Element {
   const title = getNormalizedImageDisplayName(image);
+  const assignLabel = isHighlighted ? 'Reassign' : 'Assign';
 
   const imageHeight = size === 'small' ? '180px' : '280px';
 
@@ -62,10 +63,10 @@ export function ReviewImageAssetCard({
       <Card
         ariaLabel={title}
         actions={[
-          <MenuItem key="assigned" onClick={onAssign} isDisabled>
-            Assign
+          <MenuItem key="assigned" onClick={onAssign}>
+            {assignLabel}
           </MenuItem>,
-          <MenuItem key="exclude" onClick={onExclude} isDisabled>
+          <MenuItem key="exclude" onClick={onExclude} isDisabled={!isHighlighted}>
             Exclude
           </MenuItem>,
         ]}>
