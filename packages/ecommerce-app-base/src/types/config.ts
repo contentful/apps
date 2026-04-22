@@ -28,6 +28,12 @@ export type ParameterDefinition = {
   default?: unknown;
 
   /**
+   * Optional select options. When provided, the app config renders a dropdown
+   * instead of a free-text input.
+   */
+  options?: string[];
+
+  /**
    * Parameter type
    * - Symbol: Text
    * - List: List of texts

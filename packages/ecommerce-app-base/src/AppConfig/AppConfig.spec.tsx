@@ -37,7 +37,7 @@ describe('AppConfig', () => {
       [/Client Secret/, ''],
       [/^API Endpoint/, ''],
       [/Auth API Endpoint/, ''],
-      [/Commercetools data locale/, ''],
+      [/Commercetools data locale/, 'en'],
     ].forEach(([labelRe, expected]) => {
       const configInput = screen.getByLabelText(labelRe) as HTMLInputElement;
       expect(configInput.value).toEqual(expected);
@@ -138,6 +138,26 @@ describe('AppConfig', () => {
         },
       },
     });
+  });
+
+  it('renders select options for parameters with options and saves the selected value', async () => {
+    const sdk = makeSdkMock();
+    renderComponent(sdk);
+
+    const localeSelect = (await screen.findByLabelText(
+      /Commercetools data locale/
+    )) as HTMLSelectElement;
+
+    expect(localeSelect.tagName).toBe('SELECT');
+    expect(screen.getByRole('option', { name: 'en' })).toBeTruthy();
+    expect(screen.getByRole('option', { name: 'de' })).toBeTruthy();
+
+    fireEvent.change(localeSelect, { target: { value: 'de' } });
+
+    const onConfigure = sdk.app.onConfigure.mock.calls[0][0];
+    const configurationResult = onConfigure();
+
+    expect(configurationResult.parameters.locale).toBe('de');
   });
 
   it('does render EAP orchestration note if it is set to true', async () => {
