@@ -6,6 +6,7 @@ export interface MappingCardData {
   key: string;
   fieldName: string;
   fieldType: string;
+  displayLabel: string;
 }
 
 interface MappingCardProps {
@@ -61,9 +62,9 @@ export const MappingCard = ({
     <Text
       as="span"
       fontWeight="fontWeightDemiBold"
-      title={`${card.fieldName} (${card.fieldType})`}
+      title={`${card.displayLabel} (${card.fieldType})`}
       style={valueTextStyle}>
-      {card.fieldName}
+      {card.displayLabel}
 
       <Box as="span" style={{ color: tokens.gray600 }}>
         {' | '}
