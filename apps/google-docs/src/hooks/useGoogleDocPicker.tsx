@@ -52,6 +52,7 @@ export function useGoogleDocsPicker(
       // Create the document view - only show documents
       const docsView = new google.picker.DocsView(google.picker.ViewId.DOCS);
       docsView.setMimeTypes('application/vnd.google-apps.document');
+      docsView.setMode(google.picker.DocsViewMode.LIST);
       const pickerBuilder = new google.picker.PickerBuilder()
         .setOAuthToken(accessToken)
         .setDeveloperKey(GOOGLE_PICKER_API_KEY)
