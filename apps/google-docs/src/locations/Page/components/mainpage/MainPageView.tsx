@@ -42,7 +42,7 @@ export const MainPageView = ({
         <Card padding="large">
           {!isOAuthLoading && !isOAuthConnected && (
             <Note variant="warning" style={{ marginBottom: tokens.spacingM }}>
-              Please connect to Drive Integration before selecting your file.
+              Please connect to Google Drive before selecting your file.
             </Note>
           )}
           <Flex
