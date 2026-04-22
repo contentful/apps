@@ -48,7 +48,7 @@
   "scripts": {
     "build": "rimraf lib && tsc",
     "build:docs": "rimraf docs && typedoc",
-    "prepublishOnly": "npm run build && npm run build:docs",
+    "prepack": "npm run build && npm run build:docs",
     "test": "jest --watch",
     "test:ci": "jest"
   }

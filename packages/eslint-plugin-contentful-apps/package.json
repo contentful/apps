@@ -25,7 +25,7 @@
   "description": "Eslint plugin for Contentful App Framework Apps",
   "scripts": {
     "build": "rm -rf ./dist && tsup",
-    "prepublishOnly": "npm run build"
+    "prepack": "npm run build"
   },
   "tsup": {
     "entry": [
