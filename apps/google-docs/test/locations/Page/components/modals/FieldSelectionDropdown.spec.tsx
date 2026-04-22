@@ -16,7 +16,15 @@ describe('FieldSelectionDropdown', () => {
         fieldMappings={[
           {
             fieldId: 'name',
-            sourceRefs: [{ type: 'block' as const, blockId: 'block-1', start: 0, end: 5 }],
+            sourceRefs: [
+              {
+                type: 'blockText' as const,
+                blockId: 'block-1',
+                start: 0,
+                end: 5,
+                flattenedRuns: [],
+              },
+            ],
           },
         ]}
         fieldOptions={[
