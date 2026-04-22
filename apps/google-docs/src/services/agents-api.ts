@@ -79,12 +79,16 @@ export async function getWorkflowRun(
   }
 
   try {
-    return (await sdk.cma.agentRun.get({
+    console.log('[getWorkflowRun] calling sdk.cma.agentRun.get for run', runId);
+    const result = (await sdk.cma.agentRun.get({
       spaceId,
       environmentId,
       runId,
     })) as AgentRunData;
+    console.log('[getWorkflowRun] run status:', result?.sys?.status ?? result?.metadata?.status, 'full:', JSON.stringify(result));
+    return result;
   } catch (error: unknown) {
+    console.error('[getWorkflowRun] error:', error);
     const err = error as { code?: string };
     if (err?.code === 'NotFound') {
       return null;
@@ -121,19 +125,24 @@ export async function startAgentRun(
     runData = (await response.json()) as AgentRunData;
   } else {
     try {
+      console.log('[startAgentRun] calling sdk.cma.agent.generate for agent', WORKFLOW_AGENT_ID, 'space', spaceId, 'env', environmentId, 'threadId', payload.threadId);
       runData = (await sdk.cma.agent.generate(
         { agentId: WORKFLOW_AGENT_ID, spaceId, environmentId },
         payload
       )) as AgentRunData;
+      console.log('[startAgentRun] generate response:', JSON.stringify(runData));
     } catch (error) {
+      console.error('[startAgentRun] sdk.cma.agent.generate failed:', error);
       throw new Error(`Failed to start workflow agent run: ${error as Error}`);
     }
   }
 
   if (!runData.sys?.id) {
+    console.error('[startAgentRun] no run ID in response:', JSON.stringify(runData));
     throw new Error('Agent run started but no run ID was returned');
   }
 
+  console.log('[startAgentRun] run started with ID', runData.sys.id);
   return runData.sys.id;
 }
 
