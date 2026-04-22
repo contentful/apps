@@ -27,9 +27,9 @@ import {
   uniqueHighlights,
 } from './buildHighlights';
 import { buildListMarkers } from './buildListMarkers';
-import { formatDisplayName, getFieldTypeLabel } from './fieldFormatting';
+import { formatDisplayName, getFieldOptionTypeLabel, getFieldTypeLabel } from './fieldFormatting';
 import { EditModal } from './edit-modals/EditModal';
-import { isAssetFieldForImageAssign, isWorkflowContentTypeFieldWithId } from './edit-modals/utils';
+import { isAssetFieldForImageAssign, isWorkflowContentTypeFieldWithId } from './fieldFormatting';
 
 import { SelectionActionMenu } from './SelectionActionMenu';
 import { buildSourceRefKey } from './sourceRefUtils';
@@ -322,7 +322,7 @@ export const MappingView = ({
       .map((field) => ({
         id: field.id,
         fieldName: (field.name ?? '').trim() || formatDisplayName(field.id),
-        fieldType: getFieldTypeLabel(field.type ?? ''),
+        fieldType: getFieldOptionTypeLabel(field),
         isAssetField: isAssetFieldForImageAssign(field),
       }));
 

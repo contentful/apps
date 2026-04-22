@@ -114,4 +114,52 @@ describe('FieldSelectionDropdown', () => {
     expect(screen.getByDisplayValue('headingSize')).toBeDisabled();
     expect(screen.getByDisplayValue('price')).toBeDisabled();
   });
+
+  it('shows link and array fields for text assignment but keeps them disabled', async () => {
+    render(
+      <FieldSelectionDropdown
+        selectedText="Sample selected content"
+        fieldMappings={[]}
+        fieldOptions={[
+          {
+            id: 'title',
+            fieldName: 'Title',
+            fieldType: 'Short text',
+          },
+          {
+            id: 'overrideTheme',
+            fieldName: 'Override Theme',
+            fieldType: 'Media',
+          },
+          {
+            id: 'notes',
+            fieldName: 'Notes',
+            fieldType: 'List',
+          },
+          {
+            id: 'heroImage',
+            fieldName: 'Hero image',
+            fieldType: 'Media',
+            isAssetField: true,
+          },
+        ]}
+        selectedFieldIds={[]}
+        onSelectedFieldIdsChange={vi.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle Multiselect' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Title')).toBeTruthy();
+      expect(screen.getByText('Override Theme')).toBeTruthy();
+      expect(screen.getByText('Notes')).toBeTruthy();
+      expect(screen.getByText('Hero image')).toBeTruthy();
+    });
+
+    expect(screen.getByDisplayValue('overrideTheme')).toBeDisabled();
+    expect(screen.getByDisplayValue('notes')).toBeDisabled();
+    expect(screen.getByDisplayValue('heroImage')).toBeDisabled();
+    expect(screen.getByText('(Short text)')).toBeTruthy();
+  });
 });

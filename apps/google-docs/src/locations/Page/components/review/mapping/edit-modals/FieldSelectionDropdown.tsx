@@ -4,7 +4,7 @@ import { Multiselect } from '@contentful/f36-multiselect';
 import type { EditModalFieldMapping, EditModalFieldOption } from '@types';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
 import { getFieldTypeLabel } from '../fieldFormatting';
-import { isLinkOrArrayFieldType, isSelectableFieldType } from './utils';
+import { isSelectableFieldType } from './utils';
 
 interface FieldSelectionDropdownProps {
   selectedText: string;
@@ -35,20 +35,6 @@ export const FieldSelectionDropdown = ({
     [fieldOptions, selectedFieldIds]
   );
   const multiselectListRef = useMultiselectScrollReflow(selectedFieldIds);
-  const visibleFieldOptions = useMemo(
-    () =>
-      fieldOptions.filter((option) => {
-        if (!isImageContent) {
-          return true;
-        }
-
-        if (isLinkOrArrayFieldType(option.fieldType) && !option.isAssetField) {
-          return false;
-        }
-        return true;
-      }),
-    [isImageContent, fieldOptions]
-  );
 
   const filledFieldIds = useMemo(
     () => new Set(fieldMappings.map((fieldMapping) => fieldMapping.fieldId)),
@@ -94,7 +80,7 @@ export const FieldSelectionDropdown = ({
           listMaxHeight: 360,
           listRef: multiselectListRef,
         }}>
-        {visibleFieldOptions.map((option) => {
+        {fieldOptions.map((option) => {
           const fieldTypeDisplay = getFieldTypeLabel(option.fieldType);
           const isDisabled = isImageContent
             ? !option.isAssetField

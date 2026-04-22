@@ -56,6 +56,9 @@ export interface WorkflowContentTypeField {
   name?: string;
   type?: string;
   linkType?: string;
+  fieldControl?: {
+    widgetId?: string;
+  };
   items?: {
     type?: string;
     linkType?: string;
