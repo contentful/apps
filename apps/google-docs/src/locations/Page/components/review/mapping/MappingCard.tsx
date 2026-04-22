@@ -48,7 +48,7 @@ export const MappingCard = ({
   const fullValue = `${fieldName}${FIELD_TYPE_SEPARATOR}${fieldType}`;
   const truncatedValue = truncate(fullValue, MAX_VALUE_LENGTH);
   const separatorIndex = truncatedValue.indexOf(FIELD_TYPE_SEPARATOR);
-  const hasTypePart = separatorIndex >= 0;
+  const hasTypePart = separatorIndex !== -1;
   const namePart = hasTypePart ? fieldName : truncatedValue;
   const typePart = hasTypePart
     ? truncatedValue.slice(separatorIndex + FIELD_TYPE_SEPARATOR.length)
