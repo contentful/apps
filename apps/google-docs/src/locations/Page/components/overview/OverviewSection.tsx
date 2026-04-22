@@ -98,7 +98,7 @@ const OverviewSection = ({
               <LightbulbIcon size="small" />
               <Text fontWeight="fontWeightDemiBold">How to use this app</Text>
             </Flex>
-            <Paragraph marginBottom="none" fontColor="gray600">
+            <Paragraph marginBottom="none">
               Review your content and associated entries below. Highlight text to make adjustments.
               Create entries when you are complete.
             </Paragraph>
