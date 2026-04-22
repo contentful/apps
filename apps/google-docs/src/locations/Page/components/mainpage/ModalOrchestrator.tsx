@@ -181,9 +181,11 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         ...resumePayloadOverrides,
       };
 
+      console.log('[continueWorkflow] resuming run', activeRunId, 'with payload:', resumePayload);
       setFlowStep(FlowStep.LOADING);
 
       const workflowRun = await resumeWorkflow(activeRunId, resumePayload);
+      console.log('[continueWorkflow] resume result:', workflowRun);
       handleWorkflowResult(workflowRun);
     };
 
@@ -231,7 +233,8 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
       try {
         await continueWorkflow({ includeImages });
-      } catch {
+      } catch (error) {
+        console.error('[IncludeImages] continueWorkflow failed:', error);
         showWorkflowError();
       }
     };

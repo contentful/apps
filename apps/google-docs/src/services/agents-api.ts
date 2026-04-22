@@ -1,5 +1,5 @@
 import { PageAppSDK } from '@contentful/app-sdk';
-import { LOCAL_AGENTS_API_BASE_URL, WORKFLOW_AGENT_ID } from '../utils/constants/agent';
+import { LOCAL_AGENTS_API_BASE_URL, USE_LOCAL_AGENTS_API, WORKFLOW_AGENT_ID } from '../utils/constants/agent';
 import {
   AgentRunMessage,
   MappingReviewSuspendPayload,
@@ -12,6 +12,13 @@ const AGENTS_API_HEADERS = {
   'x-contentful-enable-alpha-feature': 'agents-api',
   'X-Contentful-App-Definition-Id': '653vTnuQw3j5onU1tUoH6t',
 };
+
+function getJsonHeaders(): HeadersInit {
+  return {
+    ...AGENTS_API_HEADERS,
+    'Content-Type': 'application/json',
+  };
+}
 
 export interface AgentGeneratePayload {
   messages: Array<{
@@ -46,20 +53,13 @@ export interface AgentRunData {
   error?: Record<string, unknown>;
 }
 
-function getJsonHeaders(): HeadersInit {
-  return {
-    ...AGENTS_API_HEADERS,
-    'Content-Type': 'application/json',
-  };
-}
-
 export async function getWorkflowRun(
   sdk: PageAppSDK,
   spaceId: string,
   environmentId: string,
   runId: string
 ): Promise<AgentRunData | null> {
-  if (LOCAL_AGENTS_API_BASE_URL) {
+  if (USE_LOCAL_AGENTS_API) {
     const response = await fetch(
       `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}`,
       {
@@ -79,12 +79,16 @@ export async function getWorkflowRun(
   }
 
   try {
-    return (await sdk.cma.agentRun.get({
+    console.log('[getWorkflowRun] calling sdk.cma.agentRun.get for run', runId);
+    const result = (await sdk.cma.agentRun.get({
       spaceId,
       environmentId,
       runId,
     })) as AgentRunData;
+    console.log('[getWorkflowRun] run status:', result?.sys?.status ?? result?.metadata?.status, 'full:', JSON.stringify(result));
+    return result;
   } catch (error: unknown) {
+    console.error('[getWorkflowRun] error:', error);
     const err = error as { code?: string };
     if (err?.code === 'NotFound') {
       return null;
@@ -102,7 +106,7 @@ export async function startAgentRun(
 ): Promise<string> {
   let runData: AgentRunData;
 
-  if (LOCAL_AGENTS_API_BASE_URL) {
+  if (USE_LOCAL_AGENTS_API) {
     const response = await fetch(
       `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${WORKFLOW_AGENT_ID}/generate`,
       {
@@ -121,19 +125,24 @@ export async function startAgentRun(
     runData = (await response.json()) as AgentRunData;
   } else {
     try {
+      console.log('[startAgentRun] calling sdk.cma.agent.generate for agent', WORKFLOW_AGENT_ID, 'space', spaceId, 'env', environmentId, 'threadId', payload.threadId);
       runData = (await sdk.cma.agent.generate(
         { agentId: WORKFLOW_AGENT_ID, spaceId, environmentId },
         payload
       )) as AgentRunData;
+      console.log('[startAgentRun] generate response:', JSON.stringify(runData));
     } catch (error) {
+      console.error('[startAgentRun] sdk.cma.agent.generate failed:', error);
       throw new Error(`Failed to start workflow agent run: ${error as Error}`);
     }
   }
 
   if (!runData.sys?.id) {
+    console.error('[startAgentRun] no run ID in response:', JSON.stringify(runData));
     throw new Error('Agent run started but no run ID was returned');
   }
 
+  console.log('[startAgentRun] run started with ID', runData.sys.id);
   return runData.sys.id;
 }
 
@@ -150,7 +159,7 @@ export async function resumeWorkflowRun(
   runId: string,
   resumePayload: ResumePayload
 ): Promise<void> {
-  if (LOCAL_AGENTS_API_BASE_URL) {
+  if (USE_LOCAL_AGENTS_API) {
     const response = await fetch(
       `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}/resume`,
       {
@@ -167,16 +176,15 @@ export async function resumeWorkflowRun(
     return;
   }
 
-  const agentRunApi = sdk.cma.agentRun as {
-    resume?: (
-      params: { spaceId: string; environmentId: string; runId: string },
-      body: { resumePayload: ResumePayload }
-    ) => Promise<unknown>;
-  };
-
-  if (!agentRunApi.resume) {
-    throw new Error('Agent run resume is not available in the current SDK.');
+  try {
+    console.log('[resumeWorkflowRun] calling sdk.cma.agentRun.resumeRun for run', runId, 'payload:', resumePayload);
+    await sdk.cma.agentRun.resumeRun(
+      { spaceId, environmentId, runId },
+      { resumePayload: resumePayload as Record<string, unknown> }
+    );
+    console.log('[resumeWorkflowRun] resumeRun succeeded');
+  } catch (error) {
+    console.error('[resumeWorkflowRun] resumeRun failed:', error);
+    throw error;
   }
-
-  await agentRunApi.resume({ spaceId, environmentId, runId }, { resumePayload });
 }

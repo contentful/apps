@@ -118,6 +118,7 @@ const getWorkflowRunResult = (
 
   switch (status) {
     case RunStatus.FAILED:
+      console.error('[getWorkflowRunResult] run FAILED. Full runData:', JSON.stringify(runData));
       throw new Error(getRunErrorMessage(runData));
 
     case RunStatus.PENDING_REVIEW: {
