@@ -135,6 +135,10 @@ function rangeIntersectsNode(range: Range, node: Node): boolean {
   }
 }
 
+function hasPositionalDisplayLabel(label: string): boolean {
+  return /\(\d+\/\d+\)$/.test(label);
+}
+
 export const MappingView = ({
   payload,
   entryBlockGraph,
@@ -333,6 +337,43 @@ export const MappingView = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allSegments, entryBlockGraph, payload.contentTypes, visibleHighlightsBySegment]);
 
+  const locationsByCardKey = useMemo(() => {
+    const byKey = new Map<string, EditLocationOption>();
+
+    allGroups.forEach((group) => {
+      group.mappingCards.forEach((card) => {
+        const sourceLocationByKey = new Map<string, EditLocationOption>();
+
+        card.mappingKeys.forEach((mappingKey) => {
+          const location = locationsByMappingKey.get(mappingKey);
+          if (!location) {
+            return;
+          }
+
+          sourceLocationByKey.set(buildSourceRefKey(location.sourceRef), location);
+        });
+
+        const sourceLocations = Array.from(sourceLocationByKey.values());
+        const firstLocation = sourceLocations[0];
+        if (!firstLocation) {
+          return;
+        }
+
+        byKey.set(card.key, {
+          ...firstLocation,
+          id: card.key,
+          displayLabel: hasPositionalDisplayLabel(card.displayLabel)
+            ? card.displayLabel
+            : undefined,
+          sourceRefs: sourceLocations.map((location) => location.sourceRef),
+          isSelected: false,
+        });
+      });
+    });
+
+    return byKey;
+  }, [allGroups, locationsByMappingKey]);
+
   const getNewLocationForEntry = (
     entry: EntryBlockGraph['entries'][number],
     entryIndex: number
@@ -427,8 +468,10 @@ export const MappingView = ({
         .forEach((key) => mappingKeys.add(key));
     }
 
-    const locations = Array.from(mappingKeys)
-      .map((key) => locationsByMappingKey.get(key))
+    const locations = allGroups
+      .flatMap((group) => group.mappingCards)
+      .filter((card) => card.mappingKeys.some((key) => mappingKeys.has(key)))
+      .map((card) => locationsByCardKey.get(card.key))
       .filter((location): location is EditLocationOption => Boolean(location));
 
     return locations.map((location, index) => ({
@@ -527,7 +570,9 @@ export const MappingView = ({
       },
       title: 'Exclude content',
       locationSectionDescription:
-        'This content is used in more than one place in the entry. Select which item to exclude.',
+        currentLocations.length > 1
+          ? 'This content is used in more than one place in the entry. Select which item to exclude.'
+          : '',
       primaryButtonLabel: 'Exclude content',
     });
   };

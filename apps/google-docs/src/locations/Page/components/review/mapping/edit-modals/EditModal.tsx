@@ -211,7 +211,7 @@ export const EditModal = ({
                                   fontSize="fontSizeS"
                                   fontWeight="fontWeightMedium"
                                   fontColor="gray900">
-                                  {location.fieldName}
+                                  {location.displayLabel ?? location.fieldName}
                                 </Text>{' '}
                                 <Text as="span" fontSize="fontSizeS" fontColor="gray700">
                                   | {location.fieldType}

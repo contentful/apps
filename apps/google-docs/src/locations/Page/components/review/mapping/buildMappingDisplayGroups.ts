@@ -1,3 +1,4 @@
+import { isTextSourceRef } from '@types';
 import type { MappingCardData } from './MappingCard';
 import type { Tab, DocSegment } from './buildDocument';
 import { type MappingHighlight, getMappingCardKey } from './buildHighlights';
@@ -28,6 +29,8 @@ interface DraftMappingDisplayGroup {
   segments: DocSegment[];
   mappingCards: DraftMappingCard[];
   mergeFieldIdentity: string | null;
+  startsAtBoundary: boolean;
+  endsAtBoundary: boolean;
 }
 
 export interface MappingDisplayGroupsResult {
@@ -80,6 +83,36 @@ function buildDraftMappingCards(
   }));
 }
 
+function getBlockBoundaryCoverage(
+  segment: Extract<DocSegment, { kind: 'block' }>,
+  highlights: MappingHighlight[],
+  fieldIdentity: string
+): { startsAtBoundary: boolean; endsAtBoundary: boolean } {
+  const blockStart = segment.block.flattenedTextRuns[0]?.start;
+  const blockEnd = segment.block.flattenedTextRuns[segment.block.flattenedTextRuns.length - 1]?.end;
+
+  if (!Number.isFinite(blockStart) || !Number.isFinite(blockEnd)) {
+    return { startsAtBoundary: false, endsAtBoundary: false };
+  }
+
+  const textHighlights = highlights.filter(
+    (
+      highlight
+    ): highlight is MappingHighlight & {
+      sourceRef: Extract<MappingHighlight['sourceRef'], { start: number; end: number }>;
+    } => getFieldIdentity(highlight) === fieldIdentity && isTextSourceRef(highlight.sourceRef)
+  );
+
+  if (!textHighlights.length) {
+    return { startsAtBoundary: false, endsAtBoundary: false };
+  }
+
+  return {
+    startsAtBoundary: textHighlights.some((highlight) => highlight.sourceRef.start <= blockStart),
+    endsAtBoundary: textHighlights.some((highlight) => highlight.sourceRef.end >= blockEnd),
+  };
+}
+
 function buildDraftGroupsForTab(
   tab: Tab,
   visibleHighlightsBySegment: Record<string, MappingHighlight[]>,
@@ -89,16 +122,22 @@ function buildDraftGroupsForTab(
   const groups: DraftMappingDisplayGroup[] = [];
 
   tab.segments.forEach((segment) => {
-    const mappingCards = buildDraftMappingCards(
-      segment,
-      visibleHighlightsBySegment[segment.id] ?? [],
-      resolveFieldTypeLabel
-    );
+    const highlights = visibleHighlightsBySegment[segment.id] ?? [];
+    const mappingCards = buildDraftMappingCards(segment, highlights, resolveFieldTypeLabel);
     const mergeFieldIdentity =
       segment.kind === 'block' && mappingCards.length === 1 ? mappingCards[0].fieldIdentity : null;
+    const { startsAtBoundary, endsAtBoundary } =
+      segment.kind === 'block' && mergeFieldIdentity
+        ? getBlockBoundaryCoverage(segment, highlights, mergeFieldIdentity)
+        : { startsAtBoundary: false, endsAtBoundary: false };
     const previousGroup = groups[groups.length - 1];
 
-    if (mergeFieldIdentity && previousGroup?.mergeFieldIdentity === mergeFieldIdentity) {
+    if (
+      mergeFieldIdentity &&
+      previousGroup?.mergeFieldIdentity === mergeFieldIdentity &&
+      previousGroup.endsAtBoundary &&
+      startsAtBoundary
+    ) {
       previousGroup.segments.push(segment);
       previousGroup.mappingCards[0] = {
         ...previousGroup.mappingCards[0],
@@ -107,6 +146,7 @@ function buildDraftGroupsForTab(
           ...mappingCards[0].mappingKeys,
         ]),
       };
+      previousGroup.endsAtBoundary = endsAtBoundary;
       return;
     }
 
@@ -118,6 +158,8 @@ function buildDraftGroupsForTab(
         key: `mapping-display-group-${nextGroupIndex.current}:${card.fieldIdentity}`,
       })),
       mergeFieldIdentity,
+      startsAtBoundary,
+      endsAtBoundary,
     });
     nextGroupIndex.current += 1;
   });

@@ -65,6 +65,18 @@ const createDetachedRange = (text: string, start: number, end: number) => {
   return createDomRange(textNode, start, end);
 };
 
+const createCrossBlockRange = (
+  startNode: Text,
+  startOffset: number,
+  endNode: Text,
+  endOffset: number
+) => {
+  const range = document.createRange();
+  range.setStart(startNode, startOffset);
+  range.setEnd(endNode, endOffset);
+  return range;
+};
+
 const createBlock = (
   id: string,
   position: number,
@@ -654,6 +666,100 @@ describe('MappingView', () => {
       screen.getAllByText((_, node) => node?.textContent?.includes('| Long text') ?? false).length
     ).toBeGreaterThan(0);
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
+  });
+
+  it('excludes grouped selections as one visible location and splits the remaining runs', () => {
+    const blocks = [
+      createBlock('block-1', 1, 'First body paragraph.'),
+      createBlock('block-2', 2, 'Second body paragraph.'),
+    ];
+    const payload = createPayload({
+      blocks,
+      fieldMappings: [
+        {
+          fieldId: 'body',
+          fieldType: 'Text',
+          sourceRefs: blocks.map((block) => createBlockTextSourceRef(block.id, block.text)),
+        },
+      ],
+    });
+
+    let currentGraph = payload.entryBlockGraph;
+    const onEntryBlockGraphChange = vi.fn(
+      (nextGraph: MappingReviewSuspendPayload['entryBlockGraph']) => {
+        currentGraph = nextGraph;
+      }
+    );
+
+    mockUseReviewTextSelection.mockReturnValueOnce({
+      selectionRectangle: null,
+      selectedText: '',
+      selectedRange: null,
+      clearSelection: mockClearSelection,
+    });
+
+    const { container, rerender } = render(
+      <MappingView
+        payload={payload}
+        entryBlockGraph={currentGraph}
+        onEntryBlockGraphChange={onEntryBlockGraphChange}
+        selectedEntryIndex={0}
+      />
+    );
+
+    const groupedTextSegments = container.querySelectorAll('[data-review-text-segment="true"]');
+    const selectedRange = createCrossBlockRange(
+      groupedTextSegments[0].firstChild as Text,
+      6,
+      groupedTextSegments[1].firstChild as Text,
+      6
+    );
+
+    mockUseReviewTextSelection.mockReturnValue({
+      selectionRectangle: { top: 100, left: 100, right: 220, bottom: 130 },
+      selectedText: selectedRange.toString(),
+      selectedRange,
+      clearSelection: mockClearSelection,
+    });
+
+    rerender(
+      <MappingView
+        payload={payload}
+        entryBlockGraph={currentGraph}
+        onEntryBlockGraphChange={onEntryBlockGraphChange}
+        selectedEntryIndex={0}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Exclude' }));
+
+    expect(screen.getByRole('heading', { name: 'Exclude content' })).toBeTruthy();
+    expect(document.querySelectorAll('button[aria-pressed]')).toHaveLength(1);
+    expect(
+      screen.queryByText(
+        'This content is used in more than one place in the entry. Select which item to exclude.'
+      )
+    ).toBeNull();
+
+    const confirmButton = screen.getAllByRole('button', { name: 'Exclude content' }).at(-1);
+    expect(confirmButton).toBeTruthy();
+    fireEvent.click(confirmButton as HTMLElement);
+
+    expect(onEntryBlockGraphChange).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <MappingView
+        payload={payload}
+        entryBlockGraph={currentGraph}
+        onEntryBlockGraphChange={onEntryBlockGraphChange}
+        selectedEntryIndex={0}
+      />
+    );
+
+    expect(screen.getByText('Body (1/2)')).toBeTruthy();
+    expect(screen.getByText('Body (2/2)')).toBeTruthy();
+    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(2);
+    expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(2);
   });
 
   it('scopes image assignment destinations to currently selected entry', () => {
