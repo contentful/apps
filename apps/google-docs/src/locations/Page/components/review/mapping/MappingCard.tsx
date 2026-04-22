@@ -23,6 +23,9 @@ const labelTextStyle = {
   lineHeight: tokens.lineHeightS,
 };
 
+const BASE_FIELD_NAME_MAX_LENGTH = 35;
+const MIN_FIELD_NAME_MAX_LENGTH = 10;
+
 const valueTextStyle = {
   fontSize: tokens.fontSizeS,
   lineHeight: tokens.lineHeightS,
@@ -38,7 +41,11 @@ export const MappingCard = ({
   onMouseEnter,
   onMouseLeave,
 }: MappingCardProps) => {
-  const fieldName = truncateLabel(card.fieldName, 30);
+  const maxLength = Math.max(
+    MIN_FIELD_NAME_MAX_LENGTH,
+    BASE_FIELD_NAME_MAX_LENGTH - card.fieldType.length
+  );
+  const fieldName = truncateLabel(card.fieldName, maxLength);
 
   return (
     <Box
