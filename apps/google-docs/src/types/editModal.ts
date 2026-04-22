@@ -17,6 +17,7 @@ export interface EditModalFieldOption {
   id: string;
   fieldName: string;
   fieldDisplayType: string;
+  fieldType?: string;
   isAssetField?: boolean;
 }
 
