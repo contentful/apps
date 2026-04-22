@@ -96,7 +96,7 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
       <Modal.Header title={title} onClose={onClose} />
       <Modal.Content>
         {step === 'reviewingContentTypes' ? (
-          <Flex justifyContent="center">
+          <Flex flexDirection="column" alignItems="center" gap="spacingM">
             <Flex
               flexDirection="row"
               alignItems="stretch"
@@ -122,6 +122,9 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
                 ))}
               </Flex>
             </Flex>
+            <Paragraph fontColor="gray500" marginBottom="none">
+              This can take up to 20 minutes
+            </Paragraph>
           </Flex>
         ) : (
           <>
