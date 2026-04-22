@@ -92,7 +92,7 @@ const OverviewSection = ({
   return (
     <>
       <Box padding="spacingL" className={overviewSectionBox}>
-        <Flex flexDirection="column" gap="spacingS">
+        <Flex flexDirection="column" gap="spacingM">
           <Flex flexDirection="column" gap="spacingXs">
             <Flex alignItems="center" gap="spacingXs">
               <LightbulbIcon size="small" />
@@ -106,10 +106,14 @@ const OverviewSection = ({
 
           <Splitter />
 
-          <Flex justifyContent="space-between" alignItems="center">
-            <Text fontWeight="fontWeightDemiBold" fontSize="fontSizeL">
-              Entries
-            </Text>
+          <Flex justifyContent="space-between" alignItems="center" paddingBottom="none">
+            <Flex flexDirection="column" gap="spacingXs">
+              <Text fontWeight="fontWeightDemiBold" fontSize="fontSizeL">
+                Entries
+              </Text>
+              <Text fontSize="fontSizeM">Click row to view content by entry below.</Text>
+            </Flex>
+
             <Button
               variant="primary"
               onClick={() => void handleCreateEntries()}
