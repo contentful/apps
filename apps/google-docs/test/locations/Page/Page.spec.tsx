@@ -42,7 +42,7 @@ vi.mock('../../../src/locations/Page/components/mainpage/OAuthConnector', () => 
 }));
 
 vi.mock('../../../src/locations/Page/components/review/mapping/MappingView', () => ({
-  MappingView: () => <div>Mock fixture review</div>,
+  MappingView: () => <div>Mock MappingView</div>,
 }));
 
 const { mockModalOrchestrator } = vi.hoisted(() => ({
@@ -132,7 +132,7 @@ describe('Page component', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Create from document "Document mapping review"')).toBeTruthy();
-      expect(screen.getByText('Mock fixture review')).toBeTruthy();
+      expect(screen.getByText('Mock MappingView')).toBeTruthy();
       expect(screen.queryByRole('heading', { name: 'Drive Integration' })).toBeNull();
     });
   });
