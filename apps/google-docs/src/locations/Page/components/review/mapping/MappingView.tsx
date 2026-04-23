@@ -1,4 +1,12 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefCallback } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type RefCallback,
+  type RefObject,
+} from 'react';
 import { Box, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import {
@@ -70,6 +78,7 @@ interface MappingViewProps {
   onEntryBlockGraphChange: (next: EntryBlockGraph) => void;
   selectedEntryIndex: number | null;
   isDisabled?: boolean;
+  occludingTopRef?: RefObject<HTMLElement | null>;
 }
 
 const EMPTY_NEW_LOCATION: EditModalNewLocation = {
@@ -145,6 +154,7 @@ export const MappingView = ({
   onEntryBlockGraphChange,
   selectedEntryIndex,
   isDisabled = false,
+  occludingTopRef,
 }: MappingViewProps): JSX.Element => {
   const selectedEntryRow = useMemo(() => {
     const rows = buildEntryListFromEntryBlockGraph(
@@ -209,7 +219,7 @@ export const MappingView = ({
   }, [selectedEntryIndex]);
 
   const { selectionRectangle, selectedText, selectedRange, clearSelection } =
-    useReviewTextSelection(textSelectionRootRef);
+    useReviewTextSelection(textSelectionRootRef, occludingTopRef);
 
   const highlightIndex = useMemo(
     () => buildMappingHighlightIndex(entryBlockGraph),
