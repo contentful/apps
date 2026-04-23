@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Flex, Heading, Layout } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { PageAppSDK } from '@contentful/app-sdk';
@@ -37,6 +37,7 @@ export const ReviewPage = ({
   const [createdEntries, setCreatedEntries] = useState<EntryProps[] | null>(null);
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const reviewHeaderRef = useRef<HTMLDivElement | null>(null);
   const [entryBlockGraph, setEntryBlockGraph] = useState<EntryBlockGraph>(() =>
     structuredClone(payload.entryBlockGraph)
   );
@@ -153,19 +154,21 @@ export const ReviewPage = ({
 
   return (
     <>
-      <Layout.Header title="Preview">
-        <Flex justifyContent="space-between" alignItems="center" marginTop="spacingS">
-          <Heading marginBottom="none">{title}</Heading>
-          <Button
-            variant="transparent"
-            size="small"
-            onClick={handleCancelOrExitReview}
-            aria-label={hasCreatedEntries ? 'Exit review' : 'Cancel review'}>
-            {hasCreatedEntries ? 'Exit' : 'Cancel'}
-          </Button>
-        </Flex>
-      </Layout.Header>
-      <Splitter marginTop="spacingS" />
+      <div ref={reviewHeaderRef}>
+        <Layout.Header title="Preview">
+          <Flex justifyContent="space-between" alignItems="center" marginTop="spacingS">
+            <Heading marginBottom="none">{title}</Heading>
+            <Button
+              variant="transparent"
+              size="small"
+              onClick={handleCancelOrExitReview}
+              aria-label={hasCreatedEntries ? 'Exit review' : 'Cancel review'}>
+              {hasCreatedEntries ? 'Exit' : 'Cancel'}
+            </Button>
+          </Flex>
+        </Layout.Header>
+        <Splitter marginTop="spacingS" />
+      </div>
       <Layout.Body>
         <Flex flexDirection="column" gap="spacingM" style={{ padding: tokens.spacingL }}>
           <OverviewSection
@@ -182,6 +185,7 @@ export const ReviewPage = ({
             onEntryBlockGraphChange={setEntryBlockGraph}
             selectedEntryIndex={selectedEntryIndex}
             isDisabled={isMappingDisabled}
+            occludingTopRef={reviewHeaderRef}
           />
         </Flex>
       </Layout.Body>
