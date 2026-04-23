@@ -29,7 +29,7 @@ export type ParameterDefinition = {
 
   /**
    * Optional select options. When provided, the app config renders a dropdown
-   * instead of a free-text input.
+   * instead of a free-text input and persists the selected string value.
    */
   options?: string[];
 

@@ -53,7 +53,6 @@ export const MappingCard = ({
   const typePart = hasTypePart
     ? truncatedValue.slice(separatorIndex + FIELD_TYPE_SEPARATOR.length)
     : null;
-
   return (
     <Box
       ref={wrapperRef}
