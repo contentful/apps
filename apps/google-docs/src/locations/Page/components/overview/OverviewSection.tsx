@@ -1,41 +1,29 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Box, Button, Flex, Note, Paragraph, Text } from '@contentful/f36-components';
 import { LightbulbIcon } from '@contentful/f36-icons';
-import { PageAppSDK } from '@contentful/app-sdk';
-import type { EntryProps } from 'contentful-management';
-import type { MappingReviewSuspendPayload, CompletedWorkflowPayload } from '@types';
-import {
-  buildEntryListFromEntryBlockGraph,
-  ContentTypeDisplayInfoMap,
-} from '../../../../utils/overviewEntryList';
-import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
+import type { MappingReviewSuspendPayload } from '@types';
+import { buildEntryListFromEntryBlockGraph } from '../../../../utils/overviewEntryList';
 import { OverviewEntryList } from './OverviewEntryList';
 import { overviewSectionBox, overviewSectionBoxScrollable } from './OverviewSection.styles';
-import { SummaryModal } from '../modals/SummaryModal';
-import { ErrorModal } from '../modals/ErrorModal';
 import Splitter from '../mainpage/Splitter';
 
 interface OverviewProps {
-  sdk: PageAppSDK;
   payload: MappingReviewSuspendPayload;
   selectedEntryIndex: number;
   onSelectEntryIndex: (index: number) => void;
-  onCreateEntries: () => Promise<CompletedWorkflowPayload | null>;
-  onIsCreatingChange: (isCreating: boolean) => void;
+  ctaLabel: string;
+  onCtaClick: () => void;
+  isCtaLoading?: boolean;
 }
 
 const OverviewSection = ({
-  sdk,
   payload,
   selectedEntryIndex,
   onSelectEntryIndex,
-  onCreateEntries,
-  onIsCreatingChange,
+  ctaLabel,
+  onCtaClick,
+  isCtaLoading = false,
 }: OverviewProps) => {
-  const [isCreating, setIsCreating] = useState(false);
-  const [summaryEntries, setSummaryEntries] = useState<EntryProps[] | null>(null);
-  const [createError, setCreateError] = useState<string | null>(null);
-
   const entryRows = useMemo(
     () =>
       buildEntryListFromEntryBlockGraph(
@@ -45,49 +33,6 @@ const OverviewSection = ({
       ),
     [payload.entryBlockGraph.entries, payload.contentTypes, payload.referenceGraph.edges]
   );
-
-  const contentTypeDisplayInfoMap = useMemo<ContentTypeDisplayInfoMap>(() => {
-    const map = new Map<string, { name: string; displayField?: string }>();
-    for (const ct of payload.contentTypes) {
-      map.set(ct.sys.id, {
-        name: ct.name ?? ct.sys.id,
-        displayField: ct.displayField,
-      });
-    }
-    return map;
-  }, [payload.contentTypes]);
-
-  const handleCreateEntries = async () => {
-    console.log('[create-entries] creating entries, calling onCreateEntries');
-    setIsCreating(true);
-    onIsCreatingChange(true);
-    let succeeded = false;
-
-    try {
-      const previewPayload = await onCreateEntries();
-
-      if (!previewPayload) {
-        return;
-      }
-      const result = await createEntriesFromPreviewPayload(sdk, previewPayload);
-
-      setSummaryEntries(result.createdEntries);
-      succeeded = true;
-    } catch (error) {
-      setCreateError(
-        error instanceof Error
-          ? error.message
-          : 'An unexpected error occurred while creating entries.'
-      );
-    } finally {
-      setIsCreating(false);
-      if (!succeeded) onIsCreatingChange(false);
-    }
-  };
-
-  const handleSummaryDone = () => {
-    setSummaryEntries(null);
-  };
 
   return (
     <>
@@ -116,9 +61,10 @@ const OverviewSection = ({
 
             <Button
               variant="primary"
-              onClick={() => void handleCreateEntries()}
-              isLoading={isCreating}>
-              Create entries
+              onClick={onCtaClick}
+              isLoading={isCtaLoading}
+              isDisabled={isCtaLoading}>
+              {ctaLabel}
             </Button>
           </Flex>
 
@@ -138,22 +84,6 @@ const OverviewSection = ({
           )}
         </Flex>
       </Box>
-
-      <SummaryModal
-        isOpen={summaryEntries !== null}
-        sdk={sdk}
-        entries={summaryEntries ?? []}
-        contentTypeDisplayInfoMap={contentTypeDisplayInfoMap}
-        defaultLocale={sdk.locales.default}
-        onDone={handleSummaryDone}
-      />
-
-      <ErrorModal
-        isOpen={createError !== null}
-        title="Failed to create entries"
-        message={createError ?? ''}
-        onClose={() => setCreateError(null)}
-      />
     </>
   );
 };

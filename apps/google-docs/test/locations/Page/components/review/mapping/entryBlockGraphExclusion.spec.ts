@@ -11,9 +11,9 @@ import {
   collectTextExclusionRangesFromSelection,
 } from '../../../../../../src/locations/Page/components/review/mapping/entryBlockGraphExclusion';
 
-const blockRef = (start: number, end: number, text: string): SourceRef => ({
+const blockRef = (start: number, end: number, text: string, blockId = 'block-1'): SourceRef => ({
   type: 'blockText',
-  blockId: 'block-1',
+  blockId,
   start,
   end,
   flattenedRuns: [{ text, start, end, styles: {} }],
@@ -88,6 +88,49 @@ describe('entryBlockGraphExclusion', () => {
       entryBlockGraph: EntryBlockGraph;
     };
     expect(parsed.entryBlockGraph.entries[0]?.fieldMappings[0]?.sourceRefs).toHaveLength(2);
+  });
+
+  it('applyTextExclusionToEntryBlockGraph excludes all source refs in a grouped location', () => {
+    const firstRef = blockRef(0, 20, 'abcdefghijklmnopqrst', 'block-1');
+    const secondRef = blockRef(0, 20, 'uvwxyzabcdefghijkl', 'block-2');
+    const graph: EntryBlockGraph = {
+      entries: [
+        {
+          contentTypeId: 'article',
+          fieldMappings: [
+            {
+              fieldId: 'body',
+              fieldType: 'Text',
+              sourceRefs: [firstRef, secondRef],
+              confidence: 1,
+            },
+          ],
+        },
+      ],
+      excludedSourceRefs: [],
+    };
+    const location: EditLocationOption = {
+      entryIndex: 0,
+      id: 'grouped-body',
+      contentTypeId: 'article',
+      contentTypeName: 'Article',
+      entryName: 'Article #1',
+      fieldId: 'body',
+      fieldName: 'Body',
+      fieldType: 'Text',
+      sourceRef: firstRef,
+      sourceRefs: [firstRef, secondRef],
+    };
+
+    const next = applyTextExclusionToEntryBlockGraph(graph, location, [
+      { scope: 'block', blockId: 'block-1', start: 10, end: 20 },
+      { scope: 'block', blockId: 'block-2', start: 0, end: 6 },
+    ]);
+
+    expect(next.entries[0]?.fieldMappings[0]?.sourceRefs).toEqual([
+      expect.objectContaining({ type: 'blockText', blockId: 'block-1', start: 0, end: 10 }),
+      expect.objectContaining({ type: 'blockText', blockId: 'block-2', start: 6, end: 20 }),
+    ]);
   });
 
   it('collectMappedExclusionPreviewText joins only intersecting mapped segment text', () => {
