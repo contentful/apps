@@ -181,7 +181,6 @@ export const MappingView = ({
   const textSelectionRootRef = useRef<HTMLDivElement | null>(null);
   const groupLayoutRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const cardWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
-
   const document = payload.normalizedDocument;
 
   const closeEditModal = () => {
@@ -388,6 +387,7 @@ export const MappingView = ({
       .map((field) => ({
         id: field.id,
         fieldName: (field.name ?? '').trim() || formatDisplayName(field.id),
+        fieldType: field.type,
         fieldDisplayType: displayType(field.type ?? '', field.linkType, field.items),
         isAssetField: isAssetFieldForImageAssign(field),
       }));
