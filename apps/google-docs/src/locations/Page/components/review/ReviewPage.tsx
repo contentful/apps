@@ -85,11 +85,22 @@ export const ReviewPage = ({
           sdk,
           result.googleDocPayload
         );
-        setCreatedEntries(entryCreationResult.createdEntries);
+        const { createdEntries: entries, errors } = entryCreationResult;
+
+        if (errors.length > 0) {
+          setCreateError(
+            errors[0]?.error ?? 'An unexpected error occurred while creating entries.'
+          );
+          return;
+        }
+
+        setCreatedEntries(entries);
         setIsSummaryModalOpen(true);
         return;
       }
 
+      // WorkflowRunResult is COMPLETED | PENDING_REVIEW; only PENDING_REVIEW reaches here.
+      console.warn('[ReviewPage] workflow re-suspended after resume; status:', result.status);
       setCreateError('The review workflow did not return a completed payload.');
     } catch (error) {
       console.error(error);
