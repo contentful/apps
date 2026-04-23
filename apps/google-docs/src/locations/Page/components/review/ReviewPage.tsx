@@ -125,7 +125,7 @@ export const ReviewPage = ({
     }
   }, [onCancelReview]);
 
-  const handlePrimaryAction = useCallback(() => {
+  const handleCreateOrViewEntries = useCallback(() => {
     if (hasCreatedEntries) {
       setIsSummaryModalOpen(true);
       return;
@@ -134,7 +134,7 @@ export const ReviewPage = ({
     void handleCreateEntries();
   }, [hasCreatedEntries, handleCreateEntries]);
 
-  const handleSecondaryAction = useCallback(() => {
+  const handleCancelOrExitReview = useCallback(() => {
     if (hasCreatedEntries) {
       onExitReview();
       return;
@@ -159,7 +159,7 @@ export const ReviewPage = ({
           <Button
             variant="transparent"
             size="small"
-            onClick={handleSecondaryAction}
+            onClick={handleCancelOrExitReview}
             aria-label={hasCreatedEntries ? 'Exit review' : 'Cancel review'}>
             {hasCreatedEntries ? 'Exit' : 'Cancel'}
           </Button>
@@ -172,9 +172,9 @@ export const ReviewPage = ({
             payload={reviewPayload}
             selectedEntryIndex={selectedEntryIndex}
             onSelectEntryIndex={setSelectedEntryIndex}
-            primaryActionLabel={hasCreatedEntries ? 'View entries' : 'Create entries'}
-            onPrimaryAction={handlePrimaryAction}
-            isPrimaryActionLoading={isCreatePending}
+            ctaLabel={hasCreatedEntries ? 'View entries' : 'Create entries'}
+            onCtaClick={handleCreateOrViewEntries}
+            isCtaLoading={isCreatePending}
           />
           <MappingView
             payload={reviewPayload}

@@ -11,18 +11,18 @@ interface OverviewProps {
   payload: MappingReviewSuspendPayload;
   selectedEntryIndex: number;
   onSelectEntryIndex: (index: number) => void;
-  primaryActionLabel: string;
-  onPrimaryAction: () => void;
-  isPrimaryActionLoading?: boolean;
+  ctaLabel: string;
+  onCtaClick: () => void;
+  isCtaLoading?: boolean;
 }
 
 const OverviewSection = ({
   payload,
   selectedEntryIndex,
   onSelectEntryIndex,
-  primaryActionLabel,
-  onPrimaryAction,
-  isPrimaryActionLoading = false,
+  ctaLabel,
+  onCtaClick,
+  isCtaLoading = false,
 }: OverviewProps) => {
   const entryRows = useMemo(
     () =>
@@ -61,10 +61,10 @@ const OverviewSection = ({
 
             <Button
               variant="primary"
-              onClick={onPrimaryAction}
-              isLoading={isPrimaryActionLoading}
-              isDisabled={isPrimaryActionLoading}>
-              {primaryActionLabel}
+              onClick={onCtaClick}
+              isLoading={isCtaLoading}
+              isDisabled={isCtaLoading}>
+              {ctaLabel}
             </Button>
           </Flex>
 
