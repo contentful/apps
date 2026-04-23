@@ -51,6 +51,22 @@ function buildDraftMappingCards(
   highlights: MappingHighlight[],
   resolveFieldTypeLabel: (highlight: MappingHighlight) => string
 ): DraftMappingCard[] {
+  if (segment.kind === 'table') {
+    return highlights.map((highlight) => {
+      const mappingKey = getMappingCardKey(segment.id, highlight);
+
+      return {
+        key: `${segment.id}:${mappingKey}`,
+        fieldIdentity: getFieldIdentity(highlight),
+        fieldName: formatDisplayName(highlight.fieldId),
+        fieldType: resolveFieldTypeLabel(highlight),
+        displayLabel: formatDisplayName(highlight.fieldId),
+        anchorId: getAnchorIdForSourceRef(highlight.sourceRef),
+        mappingKeys: [mappingKey],
+      };
+    });
+  }
+
   const byFieldIdentity = new Map<
     string,
     { firstHighlight: MappingHighlight; mappingKeys: string[] }
@@ -124,12 +140,14 @@ function buildDraftGroupsForTab(
   tab.segments.forEach((segment) => {
     const highlights = visibleHighlightsBySegment[segment.id] ?? [];
     const mappingCards = buildDraftMappingCards(segment, highlights, resolveFieldTypeLabel);
-    const mergeFieldIdentity =
-      segment.kind === 'block' && mappingCards.length === 1 ? mappingCards[0].fieldIdentity : null;
     const { startsAtBoundary, endsAtBoundary } =
-      segment.kind === 'block' && mergeFieldIdentity
-        ? getBlockBoundaryCoverage(segment, highlights, mergeFieldIdentity)
+      segment.kind === 'block' && mappingCards.length === 1
+        ? getBlockBoundaryCoverage(segment, highlights, mappingCards[0].fieldIdentity)
         : { startsAtBoundary: false, endsAtBoundary: false };
+    const mergeFieldIdentity =
+      segment.kind === 'block' && mappingCards.length === 1 && (startsAtBoundary || endsAtBoundary)
+        ? mappingCards[0].fieldIdentity
+        : null;
     const previousGroup = groups[groups.length - 1];
 
     if (
@@ -155,7 +173,7 @@ function buildDraftGroupsForTab(
       segments: [segment],
       mappingCards: mappingCards.map((card) => ({
         ...card,
-        key: `mapping-display-group-${nextGroupIndex.current}:${card.fieldIdentity}`,
+        key: `mapping-display-group-${nextGroupIndex.current}:${card.key}`,
       })),
       mergeFieldIdentity,
       startsAtBoundary,
@@ -200,7 +218,8 @@ export function buildMappingDisplayGroups(
   const finalizeGroup = (group: DraftMappingDisplayGroup): MappingDisplayGroup => ({
     id: group.id,
     segments: group.segments,
-    showGroupedSurface: group.mergeFieldIdentity !== null,
+    showGroupedSurface:
+      group.segments.length > 1 || (group.startsAtBoundary && group.endsAtBoundary),
     mappingCards: group.mappingCards.map((card) => {
       const nextPosition = (positionByFieldIdentity.get(card.fieldIdentity) ?? 0) + 1;
       positionByFieldIdentity.set(card.fieldIdentity, nextPosition);

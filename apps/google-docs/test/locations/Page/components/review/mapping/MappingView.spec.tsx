@@ -314,6 +314,27 @@ describe('MappingView', () => {
     ).toContain('Second body paragraph.');
   });
 
+  it('does not wrap a partially mapped single block in a grouped surface', () => {
+    const block = createBlock('block-1', 1, 'Partially mapped paragraph.');
+    const payload = createPayload({
+      blocks: [block],
+      fieldMappings: [
+        {
+          fieldId: 'body',
+          fieldType: 'Text',
+          sourceRefs: [createBlockTextSourceRef(block.id, block.text, 10, 22)],
+        },
+      ],
+    });
+
+    const { container } = render(
+      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+    );
+
+    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
+  });
+
   it('labels non-consecutive runs for the same field with positional suffixes', () => {
     const blocks = [
       createBlock('block-1', 1, 'First body paragraph.'),
@@ -380,6 +401,120 @@ describe('MappingView', () => {
     expect(screen.getByText('Summary')).toBeTruthy();
     expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(4);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(2);
+  });
+
+  it('keeps separate cards for table rows mapped to the same field', () => {
+    const firstRowText = 'slug-one';
+    const secondRowText = 'slug-two';
+    const payload = createPayload({
+      blocks: [],
+      tables: [
+        {
+          id: 'table-1',
+          position: 1,
+          headers: ['Field', 'Value'],
+          rows: [
+            {
+              id: 'row-1',
+              cells: [
+                {
+                  id: 'cell-1',
+                  parts: [
+                    {
+                      id: 'part-1',
+                      type: 'text',
+                      textRuns: [{ text: 'Slug A' }],
+                      flattenedTextRuns: [{ text: 'Slug A', start: 0, end: 6 }],
+                    },
+                  ],
+                },
+                {
+                  id: 'cell-2',
+                  parts: [
+                    {
+                      id: 'part-2',
+                      type: 'text',
+                      textRuns: [{ text: firstRowText }],
+                      flattenedTextRuns: [
+                        { text: firstRowText, start: 0, end: firstRowText.length },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              id: 'row-2',
+              cells: [
+                {
+                  id: 'cell-3',
+                  parts: [
+                    {
+                      id: 'part-3',
+                      type: 'text',
+                      textRuns: [{ text: 'Slug B' }],
+                      flattenedTextRuns: [{ text: 'Slug B', start: 0, end: 6 }],
+                    },
+                  ],
+                },
+                {
+                  id: 'cell-4',
+                  parts: [
+                    {
+                      id: 'part-4',
+                      type: 'text',
+                      textRuns: [{ text: secondRowText }],
+                      flattenedTextRuns: [
+                        { text: secondRowText, start: 0, end: secondRowText.length },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          designValueIds: [],
+          imageIds: [],
+        },
+      ],
+      fieldMappings: [
+        {
+          fieldId: 'body',
+          fieldType: 'Text',
+          sourceRefs: [
+            {
+              type: 'tableText',
+              tableId: 'table-1',
+              rowId: 'row-1',
+              cellId: 'cell-2',
+              partId: 'part-2',
+              start: 0,
+              end: firstRowText.length,
+              flattenedRuns: [{ text: firstRowText, start: 0, end: firstRowText.length }],
+            },
+            {
+              type: 'tableText',
+              tableId: 'table-1',
+              rowId: 'row-2',
+              cellId: 'cell-4',
+              partId: 'part-4',
+              start: 0,
+              end: secondRowText.length,
+              flattenedRuns: [{ text: secondRowText, start: 0, end: secondRowText.length }],
+            },
+          ],
+        },
+      ],
+    });
+
+    const { container } = render(
+      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+    );
+
+    expect(screen.getByText('Body (1/2)')).toBeTruthy();
+    expect(screen.getByText('Body (2/2)')).toBeTruthy();
+    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(2);
+    expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
   });
 
   it('keeps table mappings scoped to the mapped row instead of wrapping the whole table', () => {
@@ -759,7 +894,7 @@ describe('MappingView', () => {
     expect(screen.getByText('Body (1/2)')).toBeTruthy();
     expect(screen.getByText('Body (2/2)')).toBeTruthy();
     expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(2);
-    expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(2);
+    expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
   });
 
   it('scopes image assignment destinations to currently selected entry', () => {
