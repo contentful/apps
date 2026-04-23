@@ -77,15 +77,14 @@ const Page = () => {
     setMappingReviewState(null);
   };
 
-  const handleExitMappingReview = () => {
+  const resetFlowAndReturnToMainPage = () => {
     modalOrchestratorRef.current?.resetFlow();
     handleReturnToMainPage();
   };
 
   const handleCancelMappingReview = async () => {
     if (!mappingReviewState?.runId) {
-      modalOrchestratorRef.current?.resetFlow();
-      handleReturnToMainPage();
+      resetFlowAndReturnToMainPage();
       return;
     }
 
@@ -94,8 +93,7 @@ const Page = () => {
     } catch (error) {
       console.error(error);
     } finally {
-      modalOrchestratorRef.current?.resetFlow();
-      handleReturnToMainPage();
+      resetFlowAndReturnToMainPage();
     }
   };
 
@@ -108,7 +106,7 @@ const Page = () => {
             payload={mappingReviewState.payload}
             runId={mappingReviewState.runId}
             onCancelReview={handleCancelMappingReview}
-            onExitReview={handleExitMappingReview}
+            onExitReview={resetFlowAndReturnToMainPage}
           />
         ) : (
           <>
