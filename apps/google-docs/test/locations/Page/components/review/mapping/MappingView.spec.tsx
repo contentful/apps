@@ -712,9 +712,9 @@ describe('MappingView', () => {
     expect(screen.getByRole('heading', { name: 'Assign content' })).toBeTruthy();
     expect(screen.getByText('"Second"')).toBeTruthy();
     expect(screen.getAllByText('Article').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Untitled').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
     expect(screen.getByText('New location')).toBeTruthy();
+    expect(screen.getAllByText('Untitled').length).toBeGreaterThan(0);
     expect(
       screen.getAllByText((_, node) => node?.textContent?.includes('| Long text') ?? false).length
     ).toBeGreaterThan(0);
