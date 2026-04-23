@@ -714,6 +714,10 @@ describe('MappingView', () => {
     expect(screen.getAllByText('Article').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Untitled').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
+    expect(screen.getByText('New location')).toBeTruthy();
+    expect(
+      screen.getAllByText((_, node) => node?.textContent?.includes('| Long text') ?? false).length
+    ).toBeGreaterThan(0);
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
 
@@ -737,7 +741,7 @@ describe('MappingView', () => {
     expect(screen.getByText('"fresh body text"')).toBeTruthy();
     expect(screen.getByText('Current location')).toBeTruthy();
     expect(screen.getByText('New location')).toBeTruthy();
-    expect(screen.getByText('Article: Draft title from display field')).toBeTruthy();
+    expect(screen.getByText('Article: Untitled')).toBeTruthy();
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
 
@@ -913,7 +917,6 @@ describe('MappingView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Assign image' }));
 
     expect(screen.getByRole('heading', { name: 'Assign content' })).toBeTruthy();
-    expect(screen.getByText('Article: Second entry')).toBeTruthy();
-    expect(screen.getAllByText(/Article: .* entry/)).not.toHaveLength(0);
+    expect(screen.getAllByText('Untitled').length).toBeGreaterThan(0);
   });
 });

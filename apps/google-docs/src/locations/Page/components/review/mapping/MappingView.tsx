@@ -101,31 +101,6 @@ function findRowByEntryIndex(rows: EntryListRow[], index: number): EntryListRow 
   return null;
 }
 
-function getEntryName(contentTypeName: string | undefined, entryIndex: number): string {
-  const displayName = contentTypeName ?? 'Untitled';
-  return `${displayName} #${entryIndex + 1}`;
-}
-
-function getEntryReviewTitle(
-  entry: MappingReviewSuspendPayload['entryBlockGraph']['entries'][number],
-  displayField: string | undefined,
-  fallbackEntryName: string
-): string {
-  const localizedFieldValue = displayField ? entry.fields?.[displayField] : undefined;
-  if (localizedFieldValue) {
-    const populatedValue = Object.values(localizedFieldValue).find(
-      (candidate): candidate is string =>
-        typeof candidate === 'string' && candidate.trim().length > 0
-    );
-    if (populatedValue) {
-      return populatedValue.trim();
-    }
-  }
-
-  const mappedTitle = getEntryTitleFromFieldMappings(entry, displayField).trim();
-  return mappedTitle && mappedTitle !== 'Untitled' ? mappedTitle : fallbackEntryName;
-}
-
 /** `Range#intersectsNode` can throw when the range and node are in inconsistent trees. */
 function rangeIntersectsNode(range: Range, node: Node): boolean {
   try {
@@ -380,8 +355,7 @@ export const MappingView = ({
   ): EditModalNewLocation => {
     const contentType = payload.contentTypes.find((item) => item.sys.id === entry.contentTypeId);
     const contentTypeName = contentType?.name ?? entry.contentTypeId;
-    const fallbackEntryName = getEntryName(contentTypeName, entryIndex);
-    const entryTitle = getEntryReviewTitle(entry, contentType?.displayField, fallbackEntryName);
+    const entryTitle = getEntryTitleFromFieldMappings(entry, contentType?.displayField);
     const contentTypeFields = contentType?.fields ?? [];
     const fieldOptions = contentTypeFields
       .filter(isWorkflowContentTypeFieldWithId)
