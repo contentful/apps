@@ -84,6 +84,7 @@ const Page = () => {
 
   const handleCancelMappingReview = async () => {
     if (!mappingReviewState?.runId) {
+      modalOrchestratorRef.current?.resetFlow();
       handleReturnToMainPage();
       return;
     }
@@ -93,6 +94,7 @@ const Page = () => {
     } catch (error) {
       console.error(error);
     } finally {
+      modalOrchestratorRef.current?.resetFlow();
       handleReturnToMainPage();
     }
   };

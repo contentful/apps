@@ -198,5 +198,7 @@ describe('Page component', () => {
       expect(mockResumeWorkflow).toHaveBeenCalledWith('run-123', { cancelled: true });
       expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
     });
+
+    expect(mockResetFlow).toHaveBeenCalledTimes(1);
   });
 });
