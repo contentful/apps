@@ -14,7 +14,6 @@ interface OverviewProps {
   primaryActionLabel: string;
   onPrimaryAction: () => void;
   isPrimaryActionLoading?: boolean;
-  isPrimaryActionDisabled?: boolean;
 }
 
 const OverviewSection = ({
@@ -24,7 +23,6 @@ const OverviewSection = ({
   primaryActionLabel,
   onPrimaryAction,
   isPrimaryActionLoading = false,
-  isPrimaryActionDisabled = false,
 }: OverviewProps) => {
   const entryRows = useMemo(
     () =>
@@ -65,7 +63,7 @@ const OverviewSection = ({
               variant="primary"
               onClick={onPrimaryAction}
               isLoading={isPrimaryActionLoading}
-              isDisabled={isPrimaryActionDisabled}>
+              isDisabled={isPrimaryActionLoading}>
               {primaryActionLabel}
             </Button>
           </Flex>

@@ -175,7 +175,6 @@ export const ReviewPage = ({
             primaryActionLabel={hasCreatedEntries ? 'View entries' : 'Create entries'}
             onPrimaryAction={handlePrimaryAction}
             isPrimaryActionLoading={isCreatePending}
-            isPrimaryActionDisabled={isCreatePending}
           />
           <MappingView
             payload={reviewPayload}
