@@ -222,6 +222,45 @@ describe('ModalOrchestrator', () => {
     });
   });
 
+  it('clears stored progress when resetFlow is called', async () => {
+    const ref = createRef<ModalOrchestratorHandle>();
+    render(<ModalOrchestrator ref={ref} {...defaultProps} />);
+
+    await act(async () => {
+      ref.current?.startFlow();
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Pick document' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Select content type(s)' })).toBeTruthy();
+    });
+
+    await act(async () => {
+      ref.current?.resetFlow();
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByRole('heading', { name: 'Select content type(s)' })).toBeNull();
+    });
+
+    await act(async () => {
+      ref.current?.startFlow();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Pick document' })).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: 'Pick document' })).toBeNull();
+      expect(
+        screen.queryByRole('heading', { name: "You're about to lose your progress" })
+      ).toBeNull();
+    });
+  });
+
   it('resumes suspended workflow as cancelled when confirming discard', async () => {
     const ref = createRef<ModalOrchestratorHandle>();
     render(<ModalOrchestrator ref={ref} {...defaultProps} />);

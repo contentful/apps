@@ -24,6 +24,7 @@ import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
+  resetFlow: () => void;
 }
 
 enum FlowStep {
@@ -64,6 +65,11 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
     useImperativeHandle(ref, () => ({
       startFlow: () => setIsUploadModalOpen(true),
+      resetFlow: () => {
+        setIsConfirmCancelModalOpen(false);
+        setIsErrorPreviewModalOpen(false);
+        resetProgress();
+      },
     }));
 
     const resetDocumentScopeReview = () => {

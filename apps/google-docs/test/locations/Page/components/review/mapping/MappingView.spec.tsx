@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MappingReviewSuspendPayload, SourceRef } from '@types';
 import { MappingView } from '../../../../../../src/locations/Page/components/review/mapping/MappingView';
@@ -34,12 +34,18 @@ vi.mock(
   })
 );
 
-const blockTextSourceRef: SourceRef = {
-  type: 'blockText',
-  blockId: 'block-1',
-  start: 0,
-  end: 11,
-  flattenedRuns: [{ text: 'Hello world', start: 0, end: 11 }],
+type BlockDefinition = {
+  id: string;
+  position: number;
+  text: string;
+  type?: 'paragraph' | 'heading' | 'listItem';
+};
+
+type FieldMappingDefinition = {
+  fieldId: string;
+  fieldType: string;
+  sourceRefs: SourceRef[];
+  confidence?: number;
 };
 
 const mappingViewGraphProps = (payload: MappingReviewSuspendPayload) => ({
@@ -59,73 +65,132 @@ const createDetachedRange = (text: string, start: number, end: number) => {
   return createDomRange(textNode, start, end);
 };
 
-const createPayload = (excludedSourceRefs: SourceRef[] = []): MappingReviewSuspendPayload => ({
-  suspendStepId: 'mapping-review',
-  reason: 'Mapping review required before CMA payload generation continues',
-  documentId: 'doc-1',
-  documentTitle: 'Mapping review',
-  normalizedDocument: {
+const createCrossBlockRange = (
+  startNode: Text,
+  startOffset: number,
+  endNode: Text,
+  endOffset: number
+) => {
+  const range = document.createRange();
+  range.setStart(startNode, startOffset);
+  range.setEnd(endNode, endOffset);
+  return range;
+};
+
+const createBlock = (
+  id: string,
+  position: number,
+  text: string,
+  type: BlockDefinition['type'] = 'paragraph'
+): BlockDefinition => ({
+  id,
+  position,
+  text,
+  type,
+});
+
+const createBlockTextSourceRef = (
+  blockId: string,
+  text: string,
+  start = 0,
+  end = text.length
+): SourceRef => ({
+  type: 'blockText',
+  blockId,
+  start,
+  end,
+  flattenedRuns: [{ text: text.slice(start, end), start, end }],
+});
+
+const createPayload = ({
+  blocks = [createBlock('block-1', 1, 'Hello world')],
+  tables = [],
+  fieldMappings,
+  excludedSourceRefs = [],
+}: {
+  blocks?: BlockDefinition[];
+  tables?: MappingReviewSuspendPayload['normalizedDocument']['tables'];
+  fieldMappings?: FieldMappingDefinition[];
+  excludedSourceRefs?: SourceRef[];
+} = {}): MappingReviewSuspendPayload => {
+  const defaultFieldMappings = fieldMappings ?? [
+    {
+      fieldId: 'body',
+      fieldType: 'Text',
+      sourceRefs: [createBlockTextSourceRef(blocks[0].id, blocks[0].text)],
+      confidence: 0.9,
+    },
+  ];
+
+  return {
+    suspendStepId: 'mapping-review',
+    reason: 'Mapping review required before CMA payload generation continues',
     documentId: 'doc-1',
-    title: 'Mapping review',
-    designValues: [],
-    contentBlocks: [
-      {
-        id: 'block-1',
-        position: 1,
-        type: 'paragraph',
-        textRuns: [{ text: 'Hello world' }],
-        flattenedTextRuns: [{ text: 'Hello world', start: 0, end: 11 }],
+    documentTitle: 'Mapping review',
+    normalizedDocument: {
+      documentId: 'doc-1',
+      title: 'Mapping review',
+      designValues: [],
+      contentBlocks: blocks.map((block) => ({
+        id: block.id,
+        position: block.position,
+        type: block.type ?? 'paragraph',
+        textRuns: [{ text: block.text }],
+        flattenedTextRuns: [{ text: block.text, start: 0, end: block.text.length }],
         designValueIds: [],
         imageIds: [],
-      },
-    ],
-    images: [],
-    tables: [],
-    assets: [],
-  },
-  entryBlockGraph: {
-    entries: [
+      })),
+      images: [],
+      tables,
+      assets: [],
+    },
+    entryBlockGraph: {
+      entries: [
+        {
+          contentTypeId: 'article',
+          fields: { title: { 'en-US': 'Draft title from display field' } },
+          fieldMappings: defaultFieldMappings.map((fieldMapping) => ({
+            fieldId: fieldMapping.fieldId,
+            fieldType: fieldMapping.fieldType,
+            sourceRefs: fieldMapping.sourceRefs,
+            confidence: fieldMapping.confidence ?? 0.9,
+          })),
+        },
+      ],
+      excludedSourceRefs,
+    },
+    referenceGraph: {
+      edges: [],
+      creationOrder: [],
+      deferredFields: [],
+      hasCircularDependency: false,
+    },
+    contentTypes: [
       {
-        contentTypeId: 'article',
-        fields: { title: { 'en-US': 'Draft title from display field' } },
-        fieldMappings: [
+        sys: { id: 'article' },
+        name: 'Article',
+        displayField: 'title',
+        fields: [
           {
-            fieldId: 'body',
-            fieldType: 'Text',
-            sourceRefs: [blockTextSourceRef],
-            confidence: 0.9,
+            id: 'title',
+            name: 'Title',
+            type: 'Symbol',
+          },
+          {
+            id: 'body',
+            name: 'Body copy',
+            type: 'Text',
+          },
+          {
+            id: 'summary',
+            name: 'Summary',
+            type: 'Text',
           },
         ],
       },
     ],
-    excludedSourceRefs,
-  },
-  referenceGraph: {
-    edges: [],
-    creationOrder: [],
-    deferredFields: [],
-    hasCircularDependency: false,
-  },
-  contentTypes: [
-    {
-      sys: { id: 'article' },
-      name: 'Article',
-      displayField: 'title',
-      fields: [
-        {
-          id: 'title',
-          name: 'Title',
-          type: 'Symbol',
-        },
-        {
-          id: 'body',
-          name: 'Body copy',
-          type: 'Text',
-        },
-      ],
-    },
-  ],
-});
+  };
+};
 
 const createImagePayload = (): MappingReviewSuspendPayload => ({
   suspendStepId: 'mapping-review',
@@ -208,7 +273,6 @@ describe('MappingView', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.stubGlobal('CSS', {
-      // Keep this aligned with selector usage in MappingView (`#${CSS.escape(id)}`).
       escape: (value: string) => value.replaceAll(':', '\\:'),
     });
     mockUseReviewTextSelection.mockReturnValue({
@@ -219,7 +283,406 @@ describe('MappingView', () => {
     });
   });
 
-  it('opens assign modal from text selection menu and clears selection', () => {
+  it('groups adjacent blocks mapped to the same field into one card and one grouped surface', () => {
+    const blocks = [
+      createBlock('block-1', 1, 'First body paragraph.'),
+      createBlock('block-2', 2, 'Second body paragraph.'),
+    ];
+    const payload = createPayload({
+      blocks,
+      fieldMappings: [
+        {
+          fieldId: 'body',
+          fieldType: 'Text',
+          sourceRefs: blocks.map((block) => createBlockTextSourceRef(block.id, block.text)),
+        },
+      ],
+    });
+
+    const { container } = render(
+      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+    );
+
+    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(1);
+    expect(screen.getByText('Body')).toBeTruthy();
+    expect(
+      container.querySelector('[data-testid^="mapping-group-surface-"]')?.textContent
+    ).toContain('First body paragraph.');
+    expect(
+      container.querySelector('[data-testid^="mapping-group-surface-"]')?.textContent
+    ).toContain('Second body paragraph.');
+  });
+
+  it('does not wrap a partially mapped single block in a grouped surface', () => {
+    const block = createBlock('block-1', 1, 'Partially mapped paragraph.');
+    const payload = createPayload({
+      blocks: [block],
+      fieldMappings: [
+        {
+          fieldId: 'body',
+          fieldType: 'Text',
+          sourceRefs: [createBlockTextSourceRef(block.id, block.text, 10, 22)],
+        },
+      ],
+    });
+
+    const { container } = render(
+      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+    );
+
+    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
+  });
+
+  it('labels non-consecutive runs for the same field with positional suffixes', () => {
+    const blocks = [
+      createBlock('block-1', 1, 'First body paragraph.'),
+      createBlock('block-2', 2, 'Mapped title text'),
+      createBlock('block-3', 3, 'Second body paragraph.'),
+    ];
+    const payload = createPayload({
+      blocks,
+      fieldMappings: [
+        {
+          fieldId: 'body',
+          fieldType: 'Text',
+          sourceRefs: [
+            createBlockTextSourceRef(blocks[0].id, blocks[0].text),
+            createBlockTextSourceRef(blocks[2].id, blocks[2].text),
+          ],
+        },
+        {
+          fieldId: 'title',
+          fieldType: 'Symbol',
+          sourceRefs: [createBlockTextSourceRef(blocks[1].id, blocks[1].text)],
+        },
+      ],
+    });
+
+    render(
+      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+    );
+
+    expect(screen.getByText('Body (1/2)')).toBeTruthy();
+    expect(screen.getByText('Body (2/2)')).toBeTruthy();
+    expect(screen.getByText('Title')).toBeTruthy();
+  });
+
+  it('does not merge mixed-mapping blocks with same-field neighbors', () => {
+    const blocks = [
+      createBlock('block-1', 1, 'Intro paragraph.'),
+      createBlock('block-2', 2, 'Mixed paragraph.'),
+      createBlock('block-3', 3, 'Closing paragraph.'),
+    ];
+    const payload = createPayload({
+      blocks,
+      fieldMappings: [
+        {
+          fieldId: 'body',
+          fieldType: 'Text',
+          sourceRefs: blocks.map((block) => createBlockTextSourceRef(block.id, block.text)),
+        },
+        {
+          fieldId: 'summary',
+          fieldType: 'Text',
+          sourceRefs: [createBlockTextSourceRef(blocks[1].id, blocks[1].text)],
+        },
+      ],
+    });
+
+    const { container } = render(
+      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+    );
+
+    expect(screen.getByText('Body (1/3)')).toBeTruthy();
+    expect(screen.getByText('Body (2/3)')).toBeTruthy();
+    expect(screen.getByText('Body (3/3)')).toBeTruthy();
+    expect(screen.getByText('Summary')).toBeTruthy();
+    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(4);
+    expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(2);
+  });
+
+  it('keeps separate cards for table rows mapped to the same field', () => {
+    const firstRowText = 'slug-one';
+    const secondRowText = 'slug-two';
+    const payload = createPayload({
+      blocks: [],
+      tables: [
+        {
+          id: 'table-1',
+          position: 1,
+          headers: ['Field', 'Value'],
+          rows: [
+            {
+              id: 'row-1',
+              cells: [
+                {
+                  id: 'cell-1',
+                  parts: [
+                    {
+                      id: 'part-1',
+                      type: 'text',
+                      textRuns: [{ text: 'Slug A' }],
+                      flattenedTextRuns: [{ text: 'Slug A', start: 0, end: 6 }],
+                    },
+                  ],
+                },
+                {
+                  id: 'cell-2',
+                  parts: [
+                    {
+                      id: 'part-2',
+                      type: 'text',
+                      textRuns: [{ text: firstRowText }],
+                      flattenedTextRuns: [
+                        { text: firstRowText, start: 0, end: firstRowText.length },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              id: 'row-2',
+              cells: [
+                {
+                  id: 'cell-3',
+                  parts: [
+                    {
+                      id: 'part-3',
+                      type: 'text',
+                      textRuns: [{ text: 'Slug B' }],
+                      flattenedTextRuns: [{ text: 'Slug B', start: 0, end: 6 }],
+                    },
+                  ],
+                },
+                {
+                  id: 'cell-4',
+                  parts: [
+                    {
+                      id: 'part-4',
+                      type: 'text',
+                      textRuns: [{ text: secondRowText }],
+                      flattenedTextRuns: [
+                        { text: secondRowText, start: 0, end: secondRowText.length },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          designValueIds: [],
+          imageIds: [],
+        },
+      ],
+      fieldMappings: [
+        {
+          fieldId: 'body',
+          fieldType: 'Text',
+          sourceRefs: [
+            {
+              type: 'tableText',
+              tableId: 'table-1',
+              rowId: 'row-1',
+              cellId: 'cell-2',
+              partId: 'part-2',
+              start: 0,
+              end: firstRowText.length,
+              flattenedRuns: [{ text: firstRowText, start: 0, end: firstRowText.length }],
+            },
+            {
+              type: 'tableText',
+              tableId: 'table-1',
+              rowId: 'row-2',
+              cellId: 'cell-4',
+              partId: 'part-4',
+              start: 0,
+              end: secondRowText.length,
+              flattenedRuns: [{ text: secondRowText, start: 0, end: secondRowText.length }],
+            },
+          ],
+        },
+      ],
+    });
+
+    const { container } = render(
+      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+    );
+
+    expect(screen.getByText('Body (1/2)')).toBeTruthy();
+    expect(screen.getByText('Body (2/2)')).toBeTruthy();
+    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(2);
+    expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
+  });
+
+  it('keeps table mappings scoped to the mapped row instead of wrapping the whole table', () => {
+    const mappedText = 'Update to - drupal-migration-contentful-static-site';
+    const unmappedText = 'drupal migration (300)';
+    const payload = createPayload({
+      blocks: [],
+      tables: [
+        {
+          id: 'table-1',
+          position: 1,
+          headers: ['Field', 'Value'],
+          rows: [
+            {
+              id: 'row-1',
+              cells: [
+                {
+                  id: 'cell-1',
+                  parts: [
+                    {
+                      id: 'part-1',
+                      type: 'text',
+                      textRuns: [{ text: 'KW' }],
+                      flattenedTextRuns: [{ text: 'KW', start: 0, end: 2 }],
+                    },
+                  ],
+                },
+                {
+                  id: 'cell-2',
+                  parts: [
+                    {
+                      id: 'part-2',
+                      type: 'text',
+                      textRuns: [{ text: unmappedText }],
+                      flattenedTextRuns: [
+                        { text: unmappedText, start: 0, end: unmappedText.length },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              id: 'row-2',
+              cells: [
+                {
+                  id: 'cell-3',
+                  parts: [
+                    {
+                      id: 'part-3',
+                      type: 'text',
+                      textRuns: [{ text: 'Slug' }],
+                      flattenedTextRuns: [{ text: 'Slug', start: 0, end: 4 }],
+                    },
+                  ],
+                },
+                {
+                  id: 'cell-4',
+                  parts: [
+                    {
+                      id: 'part-4',
+                      type: 'text',
+                      textRuns: [{ text: mappedText }],
+                      flattenedTextRuns: [{ text: mappedText, start: 0, end: mappedText.length }],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          designValueIds: [],
+          imageIds: [],
+        },
+      ],
+      fieldMappings: [
+        {
+          fieldId: 'body',
+          fieldType: 'Text',
+          sourceRefs: [
+            {
+              type: 'tableText',
+              tableId: 'table-1',
+              rowId: 'row-2',
+              cellId: 'cell-4',
+              partId: 'part-4',
+              start: 0,
+              end: mappedText.length,
+              flattenedRuns: [{ text: mappedText, start: 0, end: mappedText.length }],
+            },
+          ],
+        },
+      ],
+    });
+
+    const { container } = render(
+      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+    );
+
+    expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
+    expect(
+      container.querySelector(
+        '[data-review-text-segment="true"][data-row-id="row-2"][data-is-mapped="true"]'
+      )
+    ).toBeTruthy();
+    expect(
+      container.querySelector(
+        '[data-review-text-segment="true"][data-row-id="row-1"][data-is-mapped="true"]'
+      )
+    ).toBeNull();
+  });
+
+  it('highlights all underlying grouped text when hovering a grouped rail card', () => {
+    const blocks = [
+      createBlock('block-1', 1, 'First body paragraph.'),
+      createBlock('block-2', 2, 'Second body paragraph.'),
+    ];
+    const payload = createPayload({
+      blocks,
+      fieldMappings: [
+        {
+          fieldId: 'body',
+          fieldType: 'Text',
+          sourceRefs: blocks.map((block) => createBlockTextSourceRef(block.id, block.text)),
+        },
+      ],
+    });
+
+    const { container } = render(
+      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+    );
+
+    const textSegments = Array.from(
+      container.querySelectorAll<HTMLElement>('[data-review-text-segment="true"]')
+    );
+    expect(textSegments).toHaveLength(2);
+    const initialBackgroundColor = textSegments[0].style.backgroundColor;
+    expect(textSegments[1].style.backgroundColor).toBe(initialBackgroundColor);
+
+    const mappingCard = container.querySelector<HTMLElement>('[data-testid^="mapping-card-"]');
+    expect(mappingCard).toBeTruthy();
+
+    fireEvent.mouseEnter(mappingCard as HTMLElement);
+
+    expect(textSegments[0].style.backgroundColor).not.toBe(initialBackgroundColor);
+    expect(textSegments[1].style.backgroundColor).toBe(textSegments[0].style.backgroundColor);
+    expect(
+      container
+        .querySelector('[data-testid^="mapping-group-surface-"]')
+        ?.getAttribute('data-hovered')
+    ).toBe('true');
+  });
+
+  it('opens assign modal from grouped-run text selection and clears selection', () => {
+    const blocks = [
+      createBlock('block-1', 1, 'First body paragraph.'),
+      createBlock('block-2', 2, 'Second body paragraph.'),
+    ];
+    const payload = createPayload({
+      blocks,
+      fieldMappings: [
+        {
+          fieldId: 'body',
+          fieldType: 'Text',
+          sourceRefs: blocks.map((block) => createBlockTextSourceRef(block.id, block.text)),
+        },
+      ],
+    });
+
     mockUseReviewTextSelection.mockReturnValueOnce({
       selectionRectangle: null,
       selectedText: '',
@@ -227,21 +690,19 @@ describe('MappingView', () => {
       clearSelection: mockClearSelection,
     });
 
-    const payload = createPayload();
     const { container, rerender } = render(
       <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
     );
-    const selectedRange = createDomRange(
-      container.querySelector('[data-review-text-segment="true"]')?.firstChild as Text,
-      0,
-      5
-    );
+    const groupedTextSegments = container.querySelectorAll('[data-review-text-segment="true"]');
+    const selectedRange = createDomRange(groupedTextSegments[1].firstChild as Text, 0, 6);
+
     mockUseReviewTextSelection.mockReturnValue({
       selectionRectangle: { top: 100, left: 100, right: 160, bottom: 120 },
-      selectedText: '  selected body text  ',
+      selectedText: 'Second',
       selectedRange,
       clearSelection: mockClearSelection,
     });
+
     rerender(
       <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
     );
@@ -249,15 +710,10 @@ describe('MappingView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Reassign' }));
 
     expect(screen.getByRole('heading', { name: 'Assign content' })).toBeTruthy();
-    expect(screen.getByText('"selected body text"')).toBeTruthy();
+    expect(screen.getByText('"Second"')).toBeTruthy();
     expect(screen.getAllByText('Article').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Untitled').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
-    expect(screen.getByText('New location')).toBeTruthy();
-    expect(screen.getByText('Article: Draft title from display field')).toBeTruthy();
-    expect(
-      screen.getAllByText((_, node) => node?.textContent?.includes('| Long text') ?? false).length
-    ).toBeGreaterThan(0);
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
 
@@ -345,6 +801,100 @@ describe('MappingView', () => {
       screen.getAllByText((_, node) => node?.textContent?.includes('| Long text') ?? false).length
     ).toBeGreaterThan(0);
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
+  });
+
+  it('excludes grouped selections as one visible location and splits the remaining runs', () => {
+    const blocks = [
+      createBlock('block-1', 1, 'First body paragraph.'),
+      createBlock('block-2', 2, 'Second body paragraph.'),
+    ];
+    const payload = createPayload({
+      blocks,
+      fieldMappings: [
+        {
+          fieldId: 'body',
+          fieldType: 'Text',
+          sourceRefs: blocks.map((block) => createBlockTextSourceRef(block.id, block.text)),
+        },
+      ],
+    });
+
+    let currentGraph = payload.entryBlockGraph;
+    const onEntryBlockGraphChange = vi.fn(
+      (nextGraph: MappingReviewSuspendPayload['entryBlockGraph']) => {
+        currentGraph = nextGraph;
+      }
+    );
+
+    mockUseReviewTextSelection.mockReturnValueOnce({
+      selectionRectangle: null,
+      selectedText: '',
+      selectedRange: null,
+      clearSelection: mockClearSelection,
+    });
+
+    const { container, rerender } = render(
+      <MappingView
+        payload={payload}
+        entryBlockGraph={currentGraph}
+        onEntryBlockGraphChange={onEntryBlockGraphChange}
+        selectedEntryIndex={0}
+      />
+    );
+
+    const groupedTextSegments = container.querySelectorAll('[data-review-text-segment="true"]');
+    const selectedRange = createCrossBlockRange(
+      groupedTextSegments[0].firstChild as Text,
+      6,
+      groupedTextSegments[1].firstChild as Text,
+      6
+    );
+
+    mockUseReviewTextSelection.mockReturnValue({
+      selectionRectangle: { top: 100, left: 100, right: 220, bottom: 130 },
+      selectedText: selectedRange.toString(),
+      selectedRange,
+      clearSelection: mockClearSelection,
+    });
+
+    rerender(
+      <MappingView
+        payload={payload}
+        entryBlockGraph={currentGraph}
+        onEntryBlockGraphChange={onEntryBlockGraphChange}
+        selectedEntryIndex={0}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Exclude' }));
+
+    expect(screen.getByRole('heading', { name: 'Exclude content' })).toBeTruthy();
+    expect(document.querySelectorAll('button[aria-pressed]')).toHaveLength(1);
+    expect(
+      screen.queryByText(
+        'This content is used in more than one place in the entry. Select which item to exclude.'
+      )
+    ).toBeNull();
+
+    const confirmButton = screen.getAllByRole('button', { name: 'Exclude content' }).at(-1);
+    expect(confirmButton).toBeTruthy();
+    fireEvent.click(confirmButton as HTMLElement);
+
+    expect(onEntryBlockGraphChange).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <MappingView
+        payload={payload}
+        entryBlockGraph={currentGraph}
+        onEntryBlockGraphChange={onEntryBlockGraphChange}
+        selectedEntryIndex={0}
+      />
+    );
+
+    expect(screen.getByText('Body (1/2)')).toBeTruthy();
+    expect(screen.getByText('Body (2/2)')).toBeTruthy();
+    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(2);
+    expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
   });
 
   it('scopes image assignment destinations to currently selected entry', () => {

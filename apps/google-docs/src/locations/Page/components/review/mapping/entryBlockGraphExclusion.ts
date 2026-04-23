@@ -519,6 +519,7 @@ export function applyTextExclusionToEntryBlockGraph(
   pendingRanges: TextExclusionRange[]
 ): EntryBlockGraph {
   if (!pendingRanges.length) return graph;
+  const locationSourceRefKeys = getLocationSourceRefKeys(location);
 
   const nextEntries = graph.entries.map((entry, idx) => {
     if (idx !== location.entryIndex) return entry;
@@ -529,7 +530,7 @@ export function applyTextExclusionToEntryBlockGraph(
         if (fm.fieldId !== location.fieldId) return fm;
 
         const nextRefs = fm.sourceRefs.flatMap((sr) => {
-          if (buildSourceRefKey(sr) !== buildSourceRefKey(location.sourceRef)) return [sr];
+          if (!locationSourceRefKeys.has(buildSourceRefKey(sr))) return [sr];
           if (!isTextSourceRef(sr)) return [sr];
 
           const cuts = rangesOverlappingTextSourceRef(sr, pendingRanges);
@@ -555,27 +556,12 @@ function cloneTextRangeSourceRef(ref: TextRangeSourceRef): TextRangeSourceRef {
   };
 }
 
-function textExclusionRangesForCuts(
-  sourceRef: TextRangeSourceRef,
-  cuts: [number, number][]
-): TextExclusionRange[] {
-  if (isTableTextSourceRef(sourceRef)) {
-    return cuts.map(([start, end]) => ({
-      scope: 'table' as const,
-      tableId: sourceRef.tableId,
-      rowId: sourceRef.rowId,
-      cellId: sourceRef.cellId,
-      partId: sourceRef.partId,
-      start,
-      end,
-    }));
-  }
-  return cuts.map(([start, end]) => ({
-    scope: 'block' as const,
-    blockId: sourceRef.blockId,
-    start,
-    end,
-  }));
+function getLocationSourceRefs(location: EditLocationOption): SourceRef[] {
+  return location.sourceRefs?.length ? location.sourceRefs : [location.sourceRef];
+}
+
+function getLocationSourceRefKeys(location: EditLocationOption): Set<string> {
+  return new Set(getLocationSourceRefs(location).map((sourceRef) => buildSourceRefKey(sourceRef)));
 }
 
 function appendTextRefsToFieldMapping(
@@ -625,9 +611,7 @@ export function applyTextReassignToEntryBlockGraph(
   pendingRanges: TextExclusionRange[],
   targets: ReadonlyArray<{ entryIndex: number; fieldId: string; fieldType: string }>
 ): EntryBlockGraph {
-  if (!isTextSourceRef(from.sourceRef) || !targets.length) return graph;
-
-  const fromKey = buildSourceRefKey(from.sourceRef);
+  if (!targets.length) return graph;
   const seen = new Set<string>();
   const dedupedTargets = targets.filter((t) => {
     if (t.entryIndex === from.entryIndex && t.fieldId === from.fieldId) return false;
@@ -640,19 +624,23 @@ export function applyTextReassignToEntryBlockGraph(
 
   const fromEntry = graph.entries[from.entryIndex];
   const fromFm = fromEntry?.fieldMappings.find((fm) => fm.fieldId === from.fieldId);
-  const fromSr = fromFm?.sourceRefs.find(
-    (sr) => buildSourceRefKey(sr) === fromKey && isTextSourceRef(sr)
-  ) as TextRangeSourceRef | undefined;
-  if (!fromSr) return graph;
+  const sourceRefKeys = getLocationSourceRefKeys(from);
+  const movedRefs =
+    fromFm?.sourceRefs.flatMap((sourceRef) => {
+      if (!sourceRefKeys.has(buildSourceRefKey(sourceRef)) || !isTextSourceRef(sourceRef)) {
+        return [];
+      }
 
-  const mergedCuts = mergeIntervals(rangesOverlappingTextSourceRef(fromSr, pendingRanges));
-  if (!mergedCuts.length) return graph;
+      const mergedCuts = mergeIntervals(rangesOverlappingTextSourceRef(sourceRef, pendingRanges));
+      if (!mergedCuts.length) {
+        return [];
+      }
 
-  const movedRefs = buildTextRefsFromSpans(fromSr, mergedCuts).filter((r) => r.start < r.end);
+      return buildTextRefsFromSpans(sourceRef, mergedCuts).filter((ref) => ref.start < ref.end);
+    }) ?? [];
   if (!movedRefs.length) return graph;
 
-  const exclusionRanges = textExclusionRangesForCuts(fromSr, mergedCuts);
-  let next = applyTextExclusionToEntryBlockGraph(graph, from, exclusionRanges);
+  let next = applyTextExclusionToEntryBlockGraph(graph, from, pendingRanges);
 
   for (const t of dedupedTargets) {
     next = appendTextRefsToFieldMapping(next, t.entryIndex, t.fieldId, t.fieldType, movedRefs);

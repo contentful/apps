@@ -6,6 +6,7 @@ export interface MappingCardData {
   key: string;
   fieldName: string;
   fieldType: string;
+  displayLabel: string;
 }
 
 interface MappingCardProps {
@@ -43,17 +44,15 @@ export const MappingCard = ({
   onMouseEnter,
   onMouseLeave,
 }: MappingCardProps) => {
-  const { fieldName, fieldType } = card;
-
-  const fullValue = `${fieldName}${FIELD_TYPE_SEPARATOR}${fieldType}`;
+  const { displayLabel, fieldType } = card;
+  const fullValue = `${displayLabel}${FIELD_TYPE_SEPARATOR}${fieldType}`;
   const truncatedValue = truncate(fullValue, MAX_VALUE_LENGTH);
   const separatorIndex = truncatedValue.indexOf(FIELD_TYPE_SEPARATOR);
   const hasTypePart = separatorIndex !== -1;
-  const namePart = hasTypePart ? fieldName : truncatedValue;
+  const labelPart = hasTypePart ? truncatedValue.slice(0, separatorIndex) : truncatedValue;
   const typePart = hasTypePart
     ? truncatedValue.slice(separatorIndex + FIELD_TYPE_SEPARATOR.length)
     : null;
-
   return (
     <Box
       ref={wrapperRef}
@@ -81,7 +80,7 @@ export const MappingCard = ({
           placement="top"
           isDisabled={truncatedValue === fullValue}>
           <Box as="span">
-            {namePart}
+            {labelPart}
             {typePart ? (
               <Box as="span" style={{ color: tokens.gray600 }}>
                 {FIELD_TYPE_SEPARATOR}
