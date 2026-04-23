@@ -77,6 +77,11 @@ const Page = () => {
     setMappingReviewState(null);
   };
 
+  const handleExitMappingReview = () => {
+    modalOrchestratorRef.current?.resetFlow();
+    handleReturnToMainPage();
+  };
+
   const handleCancelMappingReview = async () => {
     if (!mappingReviewState?.runId) {
       handleReturnToMainPage();
@@ -101,7 +106,7 @@ const Page = () => {
             payload={mappingReviewState.payload}
             runId={mappingReviewState.runId}
             onCancelReview={handleCancelMappingReview}
-            onReturnToMainPage={handleReturnToMainPage}
+            onExitReview={handleExitMappingReview}
           />
         ) : (
           <>
