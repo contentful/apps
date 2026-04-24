@@ -60,10 +60,11 @@ export const EditModal = ({
 
   const newLocationRowIdsKey = viewModel.newLocation.id;
 
-  // Reset field multiselect when the modal opens or when the set of destination rows changes.
+  // Reset both location and field selections when the modal opens or when the available locations/destination change.
   // Do not depend on `viewModel.newLocation` reference (it can churn without semantic change).
   useEffect(() => {
     if (!isOpen) return;
+    setSelectedLocationIds([]);
     setSelectedFieldIds(viewModel.newLocation.selectedFieldIds ?? []);
     setDestinationFieldState(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sync from props only on open / row-id set change, not array identity
@@ -86,6 +87,7 @@ export const EditModal = ({
   const previewQuotedText = (viewModel.contentPreview ?? viewModel.selectedText).trim();
   const selectedDestinationCount = selectedFieldIds.length;
   const isAssignMode = mode === 'assign';
+
   const isPrimaryDisabled = useMemo(
     () =>
       (hasCurrentLocations && selectedLocationIds.length === 0) || // no current location selected yet
