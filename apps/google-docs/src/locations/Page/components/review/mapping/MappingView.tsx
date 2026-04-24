@@ -521,9 +521,9 @@ export const MappingView = ({
         newLocation,
         isOpen: true,
       },
-      title: 'Assign content',
+      title: `${canExcludeSelectedText ? 'Reassign' : 'Assign'} content`,
       locationSectionDescription: '',
-      primaryButtonLabel: 'Move content',
+      primaryButtonLabel: `${canExcludeSelectedText ? 'Reassign' : 'Assign'} content`,
     });
   };
 
