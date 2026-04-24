@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { type ComponentProps, useEffect, useState, useRef } from 'react';
 import { Button, Flex, Text, Image } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { CheckCircleIcon } from '@contentful/f36-icons';
@@ -26,6 +26,10 @@ type CheckStatusResponse = {
   token: string;
   connected: boolean;
 };
+
+const ConnectedStatusIcon = ({ size }: Pick<ComponentProps<typeof CheckCircleIcon>, 'size'>) => (
+  <CheckCircleIcon size={size} color={tokens.colorPositive} />
+);
 
 export const OAuthConnector = ({
   onOAuthConnectedChange,
@@ -252,7 +256,7 @@ export const OAuthConnector = ({
         <Button
           variant={isOAuthConnected && isHoveringConnected ? 'negative' : 'secondary'}
           size="small"
-          endIcon={isOAuthConnected && !isHoveringConnected ? <CheckCircleIcon /> : undefined}
+          endIcon={isOAuthConnected && !isHoveringConnected ? <ConnectedStatusIcon /> : undefined}
           onClick={handleButtonClick}
           isLoading={loadingState !== OAuthLoadingState.IDLE}
           isDisabled={loadingState !== OAuthLoadingState.IDLE}>

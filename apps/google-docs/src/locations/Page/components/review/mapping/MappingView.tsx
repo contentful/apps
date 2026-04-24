@@ -29,7 +29,6 @@ import {
 import { buildListMarkers } from './buildListMarkers';
 import {
   displayType,
-  formatDisplayName,
   isAssetFieldForImageAssign,
   isWorkflowContentTypeFieldWithId,
 } from './fieldFormatting';
@@ -115,10 +114,6 @@ function rangeIntersectsNode(range: Range, node: Node): boolean {
   }
 }
 
-function hasPositionalDisplayLabel(label: string): boolean {
-  return /\(\d+\/\d+\)$/.test(label);
-}
-
 export const MappingView = ({
   payload,
   entryBlockGraph,
@@ -201,8 +196,8 @@ export const MappingView = ({
     useReviewTextSelection(textSelectionRootRef);
 
   const highlightIndex = useMemo(
-    () => buildMappingHighlightIndex(entryBlockGraph),
-    [entryBlockGraph]
+    () => buildMappingHighlightIndex(entryBlockGraph, payload.contentTypes),
+    [entryBlockGraph, payload.contentTypes]
   );
 
   const { tabs, allSegments } = useMemo(() => buildDocument(document), [document]);
@@ -246,10 +241,10 @@ export const MappingView = ({
       (item) => item.sys.id === graphEntry.contentTypeId
     );
     const contentTypeDisplayName = (contentType?.name ?? '').trim();
-    const contentTypeField = contentType?.fields.find((field) => field.id === fieldId);
-    const fieldDisplayName = (contentTypeField?.name ?? '').trim();
-    const fieldDisplayType = contentTypeField
-      ? displayType(contentTypeField.type ?? '', contentTypeField.linkType, contentTypeField.items)
+    const field = contentType?.fields.find((f) => f.id === fieldId);
+    const fieldDisplayName = (field?.name ?? '').trim() || fieldId;
+    const fieldDisplayType = field
+      ? displayType(field.type ?? '', field.linkType, field.items)
       : displayType(fieldType);
     const entryName = getEntryTitleFromFieldMappings(graphEntry, contentType?.displayField);
 
@@ -345,9 +340,7 @@ export const MappingView = ({
         byKey.set(card.key, {
           ...firstLocation,
           id: card.key,
-          displayLabel: hasPositionalDisplayLabel(card.displayLabel)
-            ? card.displayLabel
-            : undefined,
+          fieldName: card.fieldName,
           sourceRefs: sourceLocations.map((location) => location.sourceRef),
           mappingKeys: [...card.mappingKeys],
           isSelected: false,
@@ -371,7 +364,7 @@ export const MappingView = ({
 
       return {
         id: field.id,
-        fieldName: (field.name ?? '').trim() || formatDisplayName(field.id),
+        fieldName: (field.name ?? '').trim() || field.id,
         fieldType,
         fieldDisplayType: displayType(fieldType, field.linkType, field.items),
         isAssetField: isAssetFieldForImageAssign(field),
@@ -542,9 +535,9 @@ export const MappingView = ({
         newLocation,
         isOpen: true,
       },
-      title: 'Assign content',
+      title: `${canExcludeSelectedText ? 'Reassign' : 'Assign'} content`,
       locationSectionDescription: '',
-      primaryButtonLabel: 'Move content',
+      primaryButtonLabel: `${canExcludeSelectedText ? 'Reassign' : 'Assign'} content`,
     });
   };
 

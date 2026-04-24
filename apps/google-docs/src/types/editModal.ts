@@ -8,7 +8,6 @@ export interface EditLocationOption {
   entryName: string;
   fieldId: string;
   fieldName: string;
-  displayLabel?: string;
   fieldType: string;
   sourceRef: SourceRef;
   sourceRefs?: SourceRef[];

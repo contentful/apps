@@ -150,28 +150,39 @@ const getWorkflowRunResult = (
   }
 };
 
+const elapsedSec = (startMs: number) => `${((Date.now() - startMs) / 1000).toFixed(1)}s`;
+
 const pollAgentRun = async (
   sdk: PageAppSDK,
   spaceId: string,
   environmentId: string,
   runId: string
 ): Promise<WorkflowRunResult> => {
+  const startMs = Date.now();
+  console.log(`⏳ Polling run [${runId}]`);
+
   for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
     const runData = await getWorkflowRun(sdk, spaceId, environmentId, runId);
 
     if (!runData) {
+      console.log(`  #${attempt + 1} — not found yet (${elapsedSec(startMs)})`);
       await wait(POLL_INTERVAL_MS);
       continue;
     }
 
+    const status = getRunStatus(runData);
+    console.log(`  #${attempt + 1} — status: ${status} (${elapsedSec(startMs)})`);
+
     const workflowRun = getWorkflowRunResult(runData, runId);
     if (workflowRun) {
+      console.log(`✓ Run [${runId}] settled: ${status} in ${elapsedSec(startMs)}`);
       return workflowRun;
     }
 
     await wait(POLL_INTERVAL_MS);
   }
 
+  console.error(`✗ Run [${runId}] timed out after ${elapsedSec(startMs)}`);
   throw new Error('Workflow polling timeout');
 };
 
@@ -236,6 +247,7 @@ export const useWorkflowAgent = ({
         await resumeWorkflowRun(sdk, spaceId, environmentId, runId, resumePayload);
         return await pollAgentRun(sdk, spaceId, environmentId, runId);
       } catch (err) {
+        console.error(`✗ resumeWorkflow [${runId}] failed`, err);
         const error = err instanceof Error ? err : new Error('Workflow failed');
         throw error;
       } finally {
