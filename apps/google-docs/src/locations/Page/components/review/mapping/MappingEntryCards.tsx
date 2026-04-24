@@ -11,12 +11,12 @@ interface MappingEntryCardsProps {
   onSetHoveredMappingKeys: (keys: string[]) => void;
   setCardWrapperRef: (cardKey: string) => RefCallback<HTMLDivElement>;
   showContentTypeName?: boolean;
+  useStaticLayout?: boolean;
 }
 
 const railStyles: BoxProps['style'] = {
   flex: '0 0 280px',
   maxWidth: 280,
-  position: 'relative',
 };
 
 export const MappingEntryCards = ({
@@ -27,10 +27,21 @@ export const MappingEntryCards = ({
   onSetHoveredMappingKeys,
   setCardWrapperRef,
   showContentTypeName = false,
+  useStaticLayout = showContentTypeName,
 }: MappingEntryCardsProps): JSX.Element => {
   return (
     <Box data-testid={`mapping-rail-${groupId}`} style={railStyles}>
-      <Box style={{ position: 'relative', minHeight: '100%' }}>
+      <Box
+        style={
+          useStaticLayout
+            ? {
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 12,
+                paddingRight: 4,
+              }
+            : { position: 'relative', minHeight: '100%' }
+        }>
         {mappingCards.length > 0
           ? mappingCards.map((mappingCard) => (
               <MappingCard
@@ -39,6 +50,7 @@ export const MappingEntryCards = ({
                 top={cardOffsetsByGroup[groupId]?.[mappingCard.key] ?? 0}
                 wrapperRef={setCardWrapperRef(mappingCard.key)}
                 showContentTypeName={showContentTypeName}
+                useStaticLayout={useStaticLayout}
                 isHovered={mappingCard.mappingKeys.some((key) => hoveredMappingKeys.includes(key))}
                 onMouseEnter={() => onSetHoveredMappingKeys(mappingCard.mappingKeys)}
                 onMouseLeave={() => onSetHoveredMappingKeys([])}

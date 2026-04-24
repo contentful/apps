@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
-import { Box, Button, Flex, Note, Paragraph, Text, Tooltip } from '@contentful/f36-components';
-import { LightbulbIcon } from '@contentful/f36-icons';
+import { Box, Button, Flex, Note, Paragraph, Text } from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
+import { EyeIcon, LightbulbIcon, PencilSimpleIcon } from '@contentful/f36-icons';
 import type { MappingReviewSuspendPayload } from '@types';
 import { buildEntryListFromEntryBlockGraph } from '../../../../utils/overviewEntryList';
 import { OverviewEntryList } from './OverviewEntryList';
@@ -12,6 +13,7 @@ interface OverviewProps {
   selectedEntryIndex: number | null;
   onSelectEntryIndex: (index: number) => void;
   onViewAllMappings: () => void;
+  onEditMode: () => void;
   isViewingAllMappings: boolean;
   ctaLabel: string;
   onCtaClick: () => void;
@@ -23,6 +25,7 @@ const OverviewSection = ({
   selectedEntryIndex,
   onSelectEntryIndex,
   onViewAllMappings,
+  onEditMode,
   isViewingAllMappings,
   ctaLabel,
   onCtaClick,
@@ -37,6 +40,28 @@ const OverviewSection = ({
       ),
     [payload.entryBlockGraph.entries, payload.contentTypes, payload.referenceGraph.edges]
   );
+  const areModeButtonsDisabled = isCtaLoading || entryRows.length === 0;
+
+  const toggleButtonStyle = (isActive: boolean, isFirst: boolean, isLast: boolean) => ({
+    minHeight: '38px',
+    minWidth: '136px',
+    paddingInline: tokens.spacingM,
+    border: 'none',
+    borderInlineEnd: isLast ? 'none' : `1px solid ${tokens.gray200}`,
+    borderRadius: isFirst
+      ? `${tokens.borderRadiusMedium} 0 0 ${tokens.borderRadiusMedium}`
+      : isLast
+        ? `0 ${tokens.borderRadiusMedium} ${tokens.borderRadiusMedium} 0`
+        : 0,
+    backgroundColor: isActive ? tokens.colorWhite : 'transparent',
+    color: isActive ? tokens.gray900 : tokens.gray700,
+    boxShadow: isActive
+      ? `inset 0 0 0 1px ${tokens.gray200}, 0 1px 2px rgba(17, 24, 39, 0.06)`
+      : 'none',
+    fontWeight: isActive ? tokens.fontWeightDemiBold : tokens.fontWeightMedium,
+    justifyContent: 'center',
+    gap: tokens.spacing2Xs,
+  });
 
   return (
     <>
@@ -64,14 +89,39 @@ const OverviewSection = ({
             </Flex>
 
             <Flex alignItems="center" gap="spacingXs">
-              <Tooltip content="Read only" placement="top">
+              <Box
+                role="group"
+                aria-label="Review mode"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'stretch',
+                  border: `1px solid ${tokens.gray300}`,
+                  borderRadius: tokens.borderRadiusMedium,
+                  backgroundColor: tokens.gray100,
+                  overflow: 'hidden',
+                  boxShadow: '0 1px 2px rgba(17, 24, 39, 0.05)',
+                }}>
                 <Button
-                  variant="secondary"
+                  variant="transparent"
+                  startIcon={<EyeIcon />}
+                  size="small"
+                  aria-pressed={isViewingAllMappings}
                   onClick={onViewAllMappings}
-                  isDisabled={isCtaLoading || entryRows.length === 0 || isViewingAllMappings}>
-                  Review all
+                  isDisabled={areModeButtonsDisabled}
+                  style={toggleButtonStyle(isViewingAllMappings, true, false)}>
+                  View only
                 </Button>
-              </Tooltip>
+                <Button
+                  variant="transparent"
+                  startIcon={<PencilSimpleIcon />}
+                  size="small"
+                  aria-pressed={!isViewingAllMappings}
+                  onClick={onEditMode}
+                  isDisabled={areModeButtonsDisabled}
+                  style={toggleButtonStyle(!isViewingAllMappings, false, true)}>
+                  Edit mode
+                </Button>
+              </Box>
               <Button
                 variant="primary"
                 onClick={onCtaClick}

@@ -231,16 +231,24 @@ export const BlockRenderer = ({
 
   return (
     <Box
+      data-review-alignment-target={
+        readOnly && showReadOnlyOutline && hasVisibleTextMappings ? 'true' : undefined
+      }
+      onMouseEnter={
+        readOnly && blockMappingKeys.length > 0
+          ? () => onSetHoveredMappingKeys(blockMappingKeys)
+          : undefined
+      }
+      onMouseLeave={readOnly && blockMappingKeys.length > 0 ? () => onSetHoveredMappingKeys([]) : undefined}
       style={
         readOnly && showReadOnlyOutline && hasVisibleTextMappings
           ? {
-              border: `${isBlockHovered ? 2 : 1}px solid ${
-                isBlockHovered ? tokens.green600 : tokens.green500
-              }`,
+              border: `1px solid ${isBlockHovered ? tokens.green600 : tokens.green500}`,
               borderRadius: tokens.borderRadiusMedium,
               backgroundColor: 'transparent',
               padding: tokens.spacing2Xs,
-              transition: 'border-color 120ms ease, border-width 120ms ease',
+              boxShadow: isBlockHovered ? `inset 0 0 0 1px ${tokens.green600}` : undefined,
+              transition: 'border-color 120ms ease, box-shadow 120ms ease',
             }
           : undefined
       }>
@@ -459,18 +467,26 @@ const TablePartRenderer = ({
   return (
     <Box
       as="span"
+      data-review-alignment-target={
+        readOnly && showReadOnlyOutline && hasVisibleMappings ? 'true' : undefined
+      }
+      onMouseEnter={
+        readOnly && partMappingKeys.length > 0
+          ? () => onSetHoveredMappingKeys(partMappingKeys)
+          : undefined
+      }
+      onMouseLeave={readOnly && partMappingKeys.length > 0 ? () => onSetHoveredMappingKeys([]) : undefined}
       style={{
         whiteSpace: 'pre-wrap',
         display: 'inline-block',
         ...(readOnly && showReadOnlyOutline && hasVisibleMappings
           ? {
-              border: `${isPartHovered ? 2 : 1}px solid ${
-                isPartHovered ? tokens.green600 : tokens.green500
-              }`,
+              border: `1px solid ${isPartHovered ? tokens.green600 : tokens.green500}`,
               borderRadius: tokens.borderRadiusMedium,
               backgroundColor: 'transparent',
               padding: tokens.spacingXs,
-              transition: 'border-color 120ms ease, border-width 120ms ease',
+              boxShadow: isPartHovered ? `inset 0 0 0 1px ${tokens.green600}` : undefined,
+              transition: 'border-color 120ms ease, box-shadow 120ms ease',
             }
           : undefined),
       }}>

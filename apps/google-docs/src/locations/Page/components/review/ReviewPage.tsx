@@ -142,6 +142,10 @@ export const ReviewPage = ({
     setReviewMode('all');
   }, []);
 
+  const handleEditMode = useCallback(() => {
+    setReviewMode('single');
+  }, []);
+
   const handleSelectEntryIndex = useCallback((index: number) => {
     setSelectedEntryIndex(index);
     setReviewMode('single');
@@ -188,6 +192,7 @@ export const ReviewPage = ({
             selectedEntryIndex={reviewMode === 'all' ? null : selectedEntryIndex}
             onSelectEntryIndex={handleSelectEntryIndex}
             onViewAllMappings={handleViewAllMappings}
+            onEditMode={handleEditMode}
             isViewingAllMappings={reviewMode === 'all'}
             ctaLabel={hasCreatedEntries ? 'View entries' : 'Create entries'}
             onCtaClick={handleCreateOrViewEntries}

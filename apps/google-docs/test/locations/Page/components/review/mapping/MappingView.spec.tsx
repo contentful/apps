@@ -769,7 +769,7 @@ describe('MappingView', () => {
     );
 
     expect(screen.getByText('Currently viewing:')).toBeTruthy();
-    expect(screen.getByText('All entries')).toBeTruthy();
+    expect(screen.getByText('All entries (2)')).toBeTruthy();
     expect(screen.queryByTestId('review-selection-menu')).toBeNull();
     expect(screen.getAllByText('Content type:').length).toBeGreaterThan(0);
     expect(screen.getByText('Article')).toBeTruthy();
