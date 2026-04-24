@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Box, Button, Modal, Flex, Text } from '@contentful/f36-components';
+import { cx } from '@emotion/css';
 import { type EditModalContent } from '@types';
 
 import {
@@ -9,6 +10,7 @@ import {
   locationContent,
   locationList,
   modalContent,
+  modalContentWithDropdown,
   sectionCard,
 } from './EditModal.styles';
 import { FieldSelectionDropdown } from './FieldSelectionDropdown';
@@ -119,7 +121,7 @@ export const EditModal = ({
         <>
           <Modal.Header title={title} onClose={onClose} />
           <Modal.Content>
-            <Box className={modalContent}>
+            <Box className={cx(modalContent, isAssignMode && modalContentWithDropdown)}>
               <Box className={sectionCard}>
                 <Flex flexDirection="column" gap="spacingXs">
                   <Text as="p" fontWeight="fontWeightDemiBold">

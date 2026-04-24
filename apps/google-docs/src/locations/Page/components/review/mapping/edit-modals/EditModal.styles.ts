@@ -5,6 +5,9 @@ export const modalContent = css({
   display: 'flex',
   flexDirection: 'column',
   gap: tokens.spacingL,
+});
+
+export const modalContentWithDropdown = css({
   minHeight: '600px',
 });
 
