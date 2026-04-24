@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ErrorNote } from '../../../src/locations/Page/components/ErrorNote';
 import { condoAEntry1, condoAEntry2 } from '../../mocks/mockEntries';
-import { vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { condoAContentType } from '../../mocks/mockContentTypes';
 
 describe('ErrorNote', () => {

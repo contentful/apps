@@ -1,19 +1,14 @@
 import { PageAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
+import { normalizeAgentRichTextJson } from './richtext';
+import { EntryToCreate, AssetToCreate, CompletedWorkflowPayload } from '@types';
 import {
-  EntryToCreate,
-  AssetToCreate,
-  isReference,
-  isReferenceArray,
-} from '../../functions/agents/documentParserAgent/schema';
-import { MarkdownParser } from './richtext';
-
-/**
- * Service for creating entries in Contentful using the Contentful Management API
- *
- * This service takes the output from the Document Parser Agent (which extracts entries from documents)
- * and creates them in Contentful using the CMA client from the SDK.
- */
+  entryHasReferences,
+  separateReferenceFields,
+  resolveReferences,
+} from './referenceResolution';
+import { orderEntriesByCreationOrder } from '../utils/createEntries';
+import { mapFieldValuesToSpaceDefaultLocale } from '../utils/remapEntryLocales';
 
 export interface EntryCreationResult {
   createdEntries: EntryProps[];
@@ -24,66 +19,81 @@ export interface EntryCreationResult {
   }>;
 }
 
-/**
- * Creates an asset quickly without waiting for processing/publishing.
- * This is optimized for speed to avoid timeouts when processing many images.
- * The asset will be processed and published by Contentful in the background.
- */
-async function createAssetFromUrlFast(
+interface AssetFileInput {
+  fileName: string;
+  contentType: string;
+  upload?: string;
+  uploadFrom?: Record<string, unknown>;
+}
+
+async function createAssetFromUrl(
   cma: PageAppSDK['cma'] | ConfigAppSDK['cma'],
   spaceId: string,
   environmentId: string,
   url: string,
   defaultLocale: string,
-  metadata?: { title?: string; altText?: string; fileName?: string; contentType?: string }
+  metadata?: { title?: string; altText?: string; fileName?: string; contentType?: string },
+  oauthToken?: string
 ) {
-  // Validate inputs
-  if (!cma) {
-    throw new Error('CMA client is required');
-  }
-  if (!spaceId || spaceId.trim().length === 0) {
-    throw new Error('spaceId is required and must be a non-empty string');
-  }
-  if (!environmentId || environmentId.trim().length === 0) {
-    throw new Error('environmentId is required and must be a non-empty string');
-  }
-
-  // Use metadata if provided, otherwise extract from URL
   const fileName = metadata?.fileName || 'image.jpg';
   const contentType = metadata?.contentType || 'image/jpeg';
   const title = metadata?.title || metadata?.altText || 'Image';
 
-  // Create asset without waiting for processing/publishing
-  // Contentful will process and publish it in the background
+  let fileField: AssetFileInput;
+
+  if (oauthToken) {
+    // Google content URLs are signed (the ?key= param is the credential) so no
+    // Authorization header is needed or permitted cross-origin. Fetch the binary
+    // directly here in the browser so Contentful's servers don't have to reach an
+    // expiring signed URL, then upload the bytes via the CMA upload endpoint.
+    const imageResponse = await fetch(url);
+    if (!imageResponse.ok) {
+      throw new Error(`Failed to fetch image (HTTP ${imageResponse.status})`);
+    }
+    const arrayBuffer = await imageResponse.arrayBuffer();
+    const upload = await cma.upload.create({ spaceId, environmentId }, { file: arrayBuffer });
+    fileField = {
+      contentType,
+      fileName,
+      uploadFrom: { sys: { type: 'Link', linkType: 'Upload', id: upload.sys.id } },
+    };
+  } else {
+    fileField = { contentType, fileName, upload: url };
+  }
+
   const asset = await cma.asset.create(
     { spaceId, environmentId },
     {
       fields: {
         title: { [defaultLocale]: title },
-        file: {
-          [defaultLocale]: {
-            contentType,
-            fileName,
-            upload: url,
-          },
-        },
+        file: { [defaultLocale]: fileField },
       },
     }
   );
 
-  // Trigger processing in the background (don't wait for it)
-  cma.asset.processForAllLocales({ spaceId, environmentId }, asset).catch(() => {
-    // Silently fail - processing will be retried by Contentful
-  });
-
-  // Note: Assets are created as drafts. They can be published later if needed.
-  // Entries can reference draft assets without issues. Publishing is only required
-  // if assets need to be accessible via the Delivery API (public access).
+  await cma.asset.processForAllLocales({ spaceId, environmentId }, asset);
 
   return asset;
 }
 
-async function transformFieldsForContentType(
+function resolveAssetPlaceholder(value: unknown, urlToAssetId: Record<string, string>): unknown {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return value;
+  const v = value as Record<string, unknown>;
+  const sys = v.sys;
+  if (sys === null || typeof sys !== 'object' || Array.isArray(sys)) return value;
+  const s = sys as Record<string, unknown>;
+  if (s.type !== 'Link' || s.linkType !== 'Asset' || typeof s.id !== 'string') return value;
+  const resolvedId = urlToAssetId[s.id];
+  if (!resolvedId) {
+    // Placeholder not found — asset creation likely failed. Return undefined so
+    // the caller can omit this field rather than writing a dangling reference.
+    console.warn('[asset] unresolved asset placeholder:', s.id);
+    return undefined;
+  }
+  return { sys: { type: 'Link', linkType: 'Asset', id: resolvedId } };
+}
+
+function transformFieldsForContentType(
   fields: Record<string, Record<string, unknown>>,
   contentType: ContentTypeProps | undefined,
   urlToAssetId?: Record<string, string>
@@ -91,6 +101,7 @@ async function transformFieldsForContentType(
   if (!contentType) return fields;
 
   const fieldDefs = new Map(contentType.fields.map((f) => [f.id, f]));
+  const assetMap = urlToAssetId && Object.keys(urlToAssetId).length > 0 ? urlToAssetId : undefined;
   const transformed: Record<string, Record<string, unknown>> = {};
 
   for (const [fieldId, localizedValue] of Object.entries(fields)) {
@@ -103,29 +114,25 @@ async function transformFieldsForContentType(
     const perLocale: Record<string, unknown> = {};
     for (const [locale, value] of Object.entries(localizedValue)) {
       if (def.type === 'RichText') {
-        if (typeof value === 'string') {
-          const parser = new MarkdownParser(urlToAssetId);
-          const contentNodes = await parser.parseDocument(value);
-          perLocale[locale] = {
-            nodeType: 'document',
-            data: {},
-            content:
-              contentNodes && contentNodes.length
-                ? contentNodes
-                : [
-                    {
-                      nodeType: 'paragraph',
-                      data: {},
-                      content: [{ nodeType: 'text', value: '', marks: [], data: {} }],
-                    },
-                  ],
-          };
-        } else {
-          // Pass through if already Rich Text-shaped or unknown type
-          perLocale[locale] = value;
+        perLocale[locale] = normalizeAgentRichTextJson(value, assetMap);
+      } else if (assetMap && def.type === 'Link' && def.linkType === 'Asset') {
+        const resolved = resolveAssetPlaceholder(value, assetMap);
+        if (resolved !== undefined) {
+          perLocale[locale] = resolved;
+        }
+      } else if (
+        assetMap &&
+        def.type === 'Array' &&
+        def.items?.linkType === 'Asset' &&
+        Array.isArray(value)
+      ) {
+        const resolved = value
+          .map((item) => resolveAssetPlaceholder(item, assetMap))
+          .filter((item): item is NonNullable<typeof item> => item !== undefined);
+        if (resolved.length > 0) {
+          perLocale[locale] = resolved;
         }
       } else {
-        // Apply field validation rules before setting the value
         perLocale[locale] = value;
       }
     }
@@ -136,163 +143,13 @@ async function transformFieldsForContentType(
   return transformed;
 }
 
-/**
- * Creates a Contentful Link object for an entry reference
- */
-function createEntryLink(entryId: string): {
-  sys: { type: 'Link'; linkType: 'Entry'; id: string };
-} {
-  return {
-    sys: {
-      type: 'Link',
-      linkType: 'Entry',
-      id: entryId,
-    },
-  };
-}
-
-/**
- * Checks if a field value contains reference placeholders
- */
-function valueHasReferences(value: unknown): boolean {
-  if (isReference(value)) return true;
-  if (isReferenceArray(value)) return true;
-  return false;
-}
-
-/**
- * Checks if an entry has any reference fields
- */
-function entryHasReferences(entry: EntryToCreate): boolean {
-  for (const localizedValue of Object.values(entry.fields)) {
-    for (const value of Object.values(localizedValue)) {
-      if (valueHasReferences(value)) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-/**
- * Separates entry fields into non-reference fields and reference-only fields.
- * Used in the two-pass approach: first create with non-ref fields, then update with refs.
- */
-function separateReferenceFields(fields: Record<string, Record<string, unknown>>): {
-  nonRefFields: Record<string, Record<string, unknown>>;
-  refFields: Record<string, Record<string, unknown>>;
-} {
-  const nonRefFields: Record<string, Record<string, unknown>> = {};
-  const refFields: Record<string, Record<string, unknown>> = {};
-
-  for (const [fieldId, localizedValue] of Object.entries(fields)) {
-    const nonRefLocalized: Record<string, unknown> = {};
-    const refLocalized: Record<string, unknown> = {};
-
-    for (const [locale, value] of Object.entries(localizedValue)) {
-      if (valueHasReferences(value)) {
-        refLocalized[locale] = value;
-      } else {
-        nonRefLocalized[locale] = value;
-      }
-    }
-
-    if (Object.keys(nonRefLocalized).length > 0) {
-      nonRefFields[fieldId] = nonRefLocalized;
-    }
-    if (Object.keys(refLocalized).length > 0) {
-      refFields[fieldId] = refLocalized;
-    }
-  }
-
-  return { nonRefFields, refFields };
-}
-
-/**
- * Looks up a tempId in the map, with case-insensitive fallback.
- * AI can be inconsistent with casing (e.g., "author_1" vs "Author_1").
- */
-function lookupTempId(tempId: string, tempIdToEntryId: Map<string, string>): string | undefined {
-  // First try exact match
-  const exactMatch = tempIdToEntryId.get(tempId);
-  if (exactMatch) return exactMatch;
-
-  // Fallback: case-insensitive match
-  const lowerTempId = tempId.toLowerCase();
-  for (const [key, value] of tempIdToEntryId.entries()) {
-    if (key.toLowerCase() === lowerTempId) {
-      return value;
-    }
-  }
-
-  return undefined;
-}
-
-/**
- * Resolves reference placeholders in entry fields, replacing { __ref: "tempId" }
- * with actual Contentful Link objects { sys: { type: "Link", linkType: "Entry", id: "..." } }
- */
-function resolveReferences(
-  fields: Record<string, Record<string, unknown>>,
-  tempIdToEntryId: Map<string, string>
-): Record<string, Record<string, unknown>> {
-  const resolved: Record<string, Record<string, unknown>> = {};
-
-  for (const [fieldId, localizedValue] of Object.entries(fields)) {
-    const resolvedLocalized: Record<string, unknown> = {};
-
-    for (const [locale, value] of Object.entries(localizedValue)) {
-      if (isReference(value)) {
-        // Single reference
-        const entryId = lookupTempId(value.__ref, tempIdToEntryId);
-        if (entryId) {
-          resolvedLocalized[locale] = createEntryLink(entryId);
-        }
-        // Skip this field value if reference cannot be resolved
-      } else if (isReferenceArray(value)) {
-        // Array of references
-        const resolvedRefs = value
-          .map((ref) => {
-            const entryId = lookupTempId(ref.__ref, tempIdToEntryId);
-            if (entryId) {
-              return createEntryLink(entryId);
-            }
-            return null;
-          })
-          .filter((link) => link !== null);
-
-        if (resolvedRefs.length > 0) {
-          resolvedLocalized[locale] = resolvedRefs;
-        }
-      } else {
-        // Non-reference value, pass through
-        resolvedLocalized[locale] = value;
-      }
-    }
-
-    // Only include field if it has at least one locale value
-    if (Object.keys(resolvedLocalized).length > 0) {
-      resolved[fieldId] = resolvedLocalized;
-    }
-  }
-
-  return resolved;
-}
-
-/**
- * Creates assets from the agent output and builds URL mapping for RichText conversion
- *
- * The mapping supports multiple lookup keys to match how MarkdownParser searches for assets:
- * - normalizedUrl: Direct URL lookup
- * - compositeKey: `${normalizedUrl}::${altText || 'image'}` for matching with alt text
- * - drawingKey: `${normalizedUrl}::drawing` if alt text includes "drawing"
- */
 async function createAssetsFromAgentOutput(
   cma: PageAppSDK['cma'] | ConfigAppSDK['cma'],
   spaceId: string,
   environmentId: string,
   defaultLocale: string,
-  assets: AssetToCreate[]
+  assets: AssetToCreate[],
+  oauthToken?: string
 ): Promise<Record<string, string>> {
   const urlToAssetId: Record<string, string> = {};
 
@@ -302,7 +159,7 @@ async function createAssetsFromAgentOutput(
 
   const assetCreationPromises = assets.map(async (asset) => {
     try {
-      const createdAsset = await createAssetFromUrlFast(
+      const createdAsset = await createAssetFromUrl(
         cma,
         spaceId,
         environmentId,
@@ -313,7 +170,8 @@ async function createAssetsFromAgentOutput(
           altText: asset.altText,
           fileName: asset.fileName,
           contentType: asset.contentType,
-        }
+        },
+        oauthToken
       );
 
       const normalizedUrl = asset.url.replace(/\s+/g, '');
@@ -332,20 +190,29 @@ async function createAssetsFromAgentOutput(
 
   const results = await Promise.all(assetCreationPromises);
 
-  // Build mapping with multiple keys for MarkdownParser lookup
-  for (const result of results) {
+  for (let i = 0; i < results.length; i++) {
+    const result = results[i];
     if (!result) continue;
 
     const { normalizedUrl, altText, assetId } = result;
+    const rawUrl = assets[i]?.url;
+    const placeholderId = assets[i]?.placeholderId;
 
-    // Map normalized URL (primary lookup)
+    if (placeholderId) {
+      urlToAssetId[placeholderId] = assetId;
+    }
+
+    // Store both the raw URL and the whitespace-normalised form so the lookup
+    // in resolveAssetPlaceholder succeeds regardless of how the agent encoded
+    // the URL in the entry field.
+    if (rawUrl && rawUrl !== normalizedUrl) {
+      urlToAssetId[rawUrl] = assetId;
+    }
     urlToAssetId[normalizedUrl] = assetId;
 
-    // Map composite key: `${normalizedUrl}::${altText || 'image'}`
     const compositeKey = `${normalizedUrl}::${altText || 'image'}`;
     urlToAssetId[compositeKey] = assetId;
 
-    // Map drawing-specific key if applicable
     if (altText.toLowerCase().includes('drawing')) {
       urlToAssetId[`${normalizedUrl}::drawing`] = assetId;
     }
@@ -354,49 +221,54 @@ async function createAssetsFromAgentOutput(
   return urlToAssetId;
 }
 
+export async function createEntriesFromPreviewPayload(
+  sdk: PageAppSDK | ConfigAppSDK,
+  payload: CompletedWorkflowPayload,
+  oauthToken?: string
+): Promise<EntryCreationResult> {
+  const orderedEntries = orderEntriesByCreationOrder(
+    payload.entries,
+    payload.referenceGraph?.creationOrder
+  );
+  const entriesForSpaceLocale = mapFieldValuesToSpaceDefaultLocale(
+    orderedEntries,
+    sdk.locales.default
+  );
+  const contentTypeIds = [...new Set(entriesForSpaceLocale.map((e) => e.contentTypeId))];
+
+  return createEntriesFromPreview(
+    sdk,
+    entriesForSpaceLocale,
+    contentTypeIds,
+    payload.assets,
+    oauthToken
+  );
+}
+
 /**
- * Creates multiple entries in Contentful using a two-pass approach
- *
- * This function handles:
- * 1. ASSET CREATION: Create all assets from agent output first (assets are identified by the AI agent, not parsed from RichText)
- * 2. PASS 1: Create all entries WITHOUT reference fields (Contentful generates IDs)
- * 3. Build tempId -> realId mapping from created entries
- * 4. PASS 2: Update entries that have references with resolved reference fields
- * 5. Field transformation based on content type definitions
- *
- * The two-pass approach allows:
- * - Contentful to generate all entry IDs (no pre-generated UUIDs)
- * - Support for circular references (A -> B -> C -> A)
- * - tempIds remain ephemeral (only used during creation process)
- *
- * Assets are created from the agent's output array, not parsed algorithmically from RichText fields.
- * The AI agent identifies all images/drawings in the document and returns them in the assets array.
- *
- * @param sdk - Contentful SDK instance (PageAppSDK or ConfigAppSDK)
- * @param entries - Array of entries from Document Parser Agent output
- * @param contentTypeIds - Array of content type IDs to fetch and use
- * @param assets - Array of assets from Document Parser Agent output (optional, defaults to empty array)
- * @returns Promise resolving to creation results with entries and errors
+ * Creates entries in two passes: without reference fields, then patches references
+ * (including Rich Text entry links). Assets are created first; the resulting
+ * placeholder→id map is used to resolve asset references in RichText fields,
+ * standalone Media fields, and arrays of Media fields across both passes.
  */
 export async function createEntriesFromPreview(
   sdk: PageAppSDK | ConfigAppSDK,
   entries: EntryToCreate[],
   contentTypeIds: string[],
-  assets: AssetToCreate[] = []
+  assets: AssetToCreate[] = [],
+  oauthToken?: string
 ): Promise<EntryCreationResult> {
   const spaceId = sdk.ids.space;
   const environmentId = sdk.ids.environment;
   const cma = sdk.cma;
   const defaultLocale = sdk.locales.default;
 
-  // Fetch content types
   const contentTypesResponse = await cma.contentType.getMany({
     spaceId,
     environmentId,
+    query: { 'sys.id[in]': contentTypeIds.join(',') },
   });
-  const contentTypes = contentTypesResponse.items.filter((ct) =>
-    contentTypeIds.includes(ct.sys.id)
-  );
+  const contentTypes = contentTypesResponse.items;
 
   if (contentTypes.length === 0) {
     return {
@@ -412,8 +284,6 @@ export async function createEntriesFromPreview(
 
   // Map to track tempId -> actual Contentful entry ID (built during Pass 1)
   const tempIdToEntryId = new Map<string, string>();
-
-  // Track created entries and their original entry data (for Pass 2)
   const createdEntriesMap = new Map<string, { created: EntryProps; original: EntryToCreate }>();
 
   const createdEntries: EntryProps[] = [];
@@ -425,10 +295,13 @@ export async function createEntriesFromPreview(
     spaceId,
     environmentId,
     defaultLocale,
-    assets
+    assets,
+    oauthToken
   );
 
   // PASS 1: Create all entries WITHOUT reference fields
+
+  const assetMapForTransform = Object.keys(urlToAssetId).length > 0 ? urlToAssetId : undefined;
 
   for (const entry of entries) {
     try {
@@ -440,10 +313,9 @@ export async function createEntriesFromPreview(
       const transformedFields = await transformFieldsForContentType(
         nonRefFields,
         contentType,
-        Object.keys(urlToAssetId).length > 0 ? urlToAssetId : undefined
+        assetMapForTransform
       );
 
-      // Create the entry in Contentful (let Contentful generate the ID)
       const createdEntry = await cma.entry.create(
         { spaceId, environmentId, contentTypeId: entry.contentTypeId },
         { fields: transformedFields }
@@ -477,17 +349,14 @@ export async function createEntriesFromPreview(
     try {
       const contentType = contentTypes.find((ct) => ct.sys.id === original.contentTypeId);
 
-      // Extract only the reference fields
       const { refFields } = separateReferenceFields(original.fields);
 
       // Resolve references (now all IDs are known)
       const resolvedRefFields = resolveReferences(refFields, tempIdToEntryId);
-
-      // Transform fields for content type
       const transformedRefFields = await transformFieldsForContentType(
         resolvedRefFields,
         contentType,
-        undefined // No assets in reference fields
+        assetMapForTransform
       );
 
       // Merge with existing fields and update the entry
@@ -504,7 +373,6 @@ export async function createEntriesFromPreview(
         { ...latestEntry, fields: updatedFields }
       );
 
-      // Update the entry in our results
       const index = createdEntries.findIndex((e) => e.sys.id === entryId);
       if (index !== -1) {
         createdEntries[index] = updatedEntry;

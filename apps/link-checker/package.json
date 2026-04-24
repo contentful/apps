@@ -1,0 +1,53 @@
+{
+  "name": "contentful-link-checker",
+  "version": "0.1.0",
+  "private": true,
+  "overrides": {
+    "@tootallnate/once": ">=3.0.1",
+    "tar": ">=7.5.10"
+  },
+  "scripts": {
+    "start": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "tsc --noEmit",
+    "test": "vitest",
+    "test:ci": "vitest run",
+    "create-app-definition": "contentful-app-scripts create-app-definition",
+    "add-locations": "contentful-app-scripts add-locations",
+    "build:functions": "contentful-app-scripts build-functions --ci",
+    "build:all": "npm run build && npm run build:functions",
+    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
+    "deploy": "npm run build:all && contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 55HqLhaYLjQWU5zPfID6mX --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:prod-with-actions": "node scripts/release-prod-with-actions.js",
+    "deploy:test": "npm run build:all && contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 5Sr53r0O6UqTBrp0I9S3OV --token ${TEST_CMA_TOKEN}",
+    "upload": "node scripts/upload-with-env.js",
+    "upsert-actions": "node scripts/upsert-actions-with-env.js",
+    "build-and-upload": "npm run build:all && npm run upload && npm run upsert-actions"
+  },
+  "dependencies": {
+    "@contentful/app-sdk": "4.22.0",
+    "@contentful/f36-components": "4.45.0",
+    "@contentful/f36-multiselect": "^4.81.1",
+    "@contentful/f36-tokens": "4.0.2",
+    "@contentful/node-apps-toolkit": "^3.13.0",
+    "@contentful/react-apps-toolkit": "1.2.16",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@contentful/app-scripts": "^2.5.9",
+    "@vitejs/plugin-react": "^4.3.3",
+    "dotenv": "^17.2.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "14.0.0",
+    "@types/node": "^22.13.5",
+    "@types/react": "18.2.14",
+    "@types/react-dom": "18.2.6",
+    "eslint": "8.44.0",
+    "jsdom": "^26.0.0",
+    "typescript": "5.1.6",
+    "vite": "^5.4.10",
+    "vitest": "^3.0.9"
+  }
+}

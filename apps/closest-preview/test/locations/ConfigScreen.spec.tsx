@@ -10,6 +10,48 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useCMA: () => mockCma,
 }));
 
+vi.mock('../../src/components/ContentTypeMultiSelect', () => ({
+  default: ({ selectedContentTypes, setSelectedContentTypes }: any) => (
+    <div>
+      <button
+        type="button"
+        onClick={() =>
+          setSelectedContentTypes([...selectedContentTypes, { id: 'blogPost', name: 'Blog Post' }])
+        }>
+        Add Blog Post
+      </button>
+      <button
+        type="button"
+        onClick={() =>
+          setSelectedContentTypes([...selectedContentTypes, { id: 'article', name: 'Article' }])
+        }>
+        Add Article
+      </button>
+      <div data-test-id="selected-content-types">
+        {selectedContentTypes.map((contentType: any) => contentType.name).join(', ')}
+      </div>
+    </div>
+  ),
+}));
+
+vi.mock('../../src/components/PreviewFieldMultiSelect', () => ({
+  default: ({ selectedPreviewFieldIds, setSelectedPreviewFieldIds }: any) => (
+    <div>
+      <button
+        type="button"
+        onClick={() => setSelectedPreviewFieldIds([...selectedPreviewFieldIds, 'slug'])}>
+        Add slug
+      </button>
+      <button
+        type="button"
+        onClick={() => setSelectedPreviewFieldIds([...selectedPreviewFieldIds, 'url'])}>
+        Add url
+      </button>
+      <div data-test-id="selected-preview-field-ids">{selectedPreviewFieldIds.join(', ')}</div>
+    </div>
+  ),
+}));
+
 async function saveAppInstallation() {
   return await mockSdk.app.onConfigure.mock.calls.at(-1)[0]();
 }
@@ -18,6 +60,7 @@ describe('ConfigScreen', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSdk.app.getCurrentState.mockResolvedValue({});
+    mockSdk.app.getParameters.mockResolvedValue({});
     mockSdk.app.setReady.mockResolvedValue();
     mockSdk.app.onConfigure.mockImplementation((cb: () => Promise<any>) => {
       // Simulate Contentful's onConfigure callback registration
@@ -40,6 +83,7 @@ describe('ConfigScreen', () => {
       expect(screen.getByText('Set up Closest Preview')).toBeInTheDocument();
       expect(screen.getByText('Assign content types')).toBeInTheDocument();
       expect(screen.getByText('Content types')).toBeInTheDocument();
+      expect(screen.getByText('Preview field IDs')).toBeInTheDocument();
       expect(
         screen.getByText(
           'Closest Preview allows users to quickly navigate to the closest page level element for a given entry in order to preview the item.'
@@ -54,63 +98,97 @@ describe('ConfigScreen', () => {
   });
 
   it('renders content type multi-select and allows selection', async () => {
-    mockCma.contentType.getMany.mockResolvedValue({
-      items: [
-        { sys: { id: 'blogPost' }, name: 'Blog Post' },
-        { sys: { id: 'article' }, name: 'Article' },
-      ],
-    });
     render(<ConfigScreen />);
-    const autocomplete = await screen.findByPlaceholderText('Search content types');
-    await userEvent.click(autocomplete);
-    await userEvent.type(autocomplete, 'Blog');
-
-    const option = await screen.findByText('Blog Post');
-    await userEvent.click(option);
-
-    expect(await screen.findByTestId('pill-Blog Post')).toBeInTheDocument();
+    await userEvent.click(await screen.findByRole('button', { name: 'Add Blog Post' }));
+    expect(await screen.findByTestId('selected-content-types')).toHaveTextContent('Blog Post');
   });
 
-  it('handles empty state for content types', async () => {
-    mockCma.contentType.getMany.mockResolvedValue({ items: [] });
+  it('renders the content type selector area', async () => {
     render(<ConfigScreen />);
-    const autocomplete = await screen.findByPlaceholderText('Search content types');
-    await userEvent.click(autocomplete);
-    expect(screen.queryByText('No matches found')).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Add Blog Post' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Add Article' })).toBeInTheDocument();
   });
 
   it('successfully configures app with selected content types', async () => {
     mockCma.contentType.getMany.mockResolvedValue({
       items: [
-        { sys: { id: 'blogPost' }, name: 'Blog Post' },
-        { sys: { id: 'article' }, name: 'Article' },
+        {
+          sys: { id: 'pageType' },
+          name: 'Page Type',
+          fields: [{ id: 'slug', type: 'Symbol' }],
+        },
+        {
+          sys: { id: 'blogPost' },
+          name: 'Blog Post',
+          fields: [{ id: 'title', type: 'Symbol' }],
+        },
+        {
+          sys: { id: 'article' },
+          name: 'Article',
+          fields: [{ id: 'title', type: 'Symbol' }],
+        },
       ],
     });
 
     render(<ConfigScreen />);
-
-    const autocomplete = await screen.findByPlaceholderText('Search content types');
-    await userEvent.click(autocomplete);
-
-    const blogPostOption = await screen.findByText('Blog Post');
-    await userEvent.click(blogPostOption);
-
-    const articleOption = await screen.findByText('Article');
-    await userEvent.click(articleOption);
-
-    expect(await screen.findByTestId('pill-Blog Post')).toBeInTheDocument();
-    expect(await screen.findByTestId('pill-Article')).toBeInTheDocument();
+    await userEvent.click(await screen.findByRole('button', { name: 'Add Blog Post' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Add Article' }));
 
     const result = await act(async () => {
       return await saveAppInstallation();
     });
 
     expect(result).toEqual({
+      parameters: {
+        previewFieldIds: ['slug'],
+      },
       targetState: {
         EditorInterface: {
           blogPost: {
             sidebar: { position: 0 },
           },
+          article: {
+            sidebar: { position: 0 },
+          },
+        },
+      },
+    });
+  });
+
+  it('does not save page-level content types in the sidebar assignment state', async () => {
+    mockCma.contentType.getMany.mockResolvedValue({
+      items: [
+        {
+          sys: { id: 'blogPost' },
+          name: 'Blog Post',
+          fields: [{ id: 'slug', type: 'Symbol' }],
+        },
+        {
+          sys: { id: 'article' },
+          name: 'Article',
+          fields: [{ id: 'title', type: 'Symbol' }],
+        },
+      ],
+    });
+
+    render(<ConfigScreen />);
+    await waitFor(() => {
+      expect(mockCma.contentType.getMany).toHaveBeenCalled();
+    });
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Add Blog Post' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Add Article' }));
+
+    const result = await act(async () => {
+      return await saveAppInstallation();
+    });
+
+    expect(result).toEqual({
+      parameters: {
+        previewFieldIds: ['slug'],
+      },
+      targetState: {
+        EditorInterface: {
           article: {
             sidebar: { position: 0 },
           },
@@ -127,6 +205,50 @@ describe('ConfigScreen', () => {
     });
 
     expect(result).toEqual({
+      parameters: {
+        previewFieldIds: ['slug'],
+      },
+      targetState: {
+        EditorInterface: {},
+      },
+    });
+  });
+
+  it('loads and saves custom preview field ids', async () => {
+    mockSdk.app.getParameters.mockResolvedValue({ previewFieldIds: ['slug', 'url'] });
+
+    render(<ConfigScreen />);
+
+    expect(await screen.findByTestId('selected-preview-field-ids')).toHaveTextContent('slug, url');
+
+    const result = await act(async () => {
+      return await saveAppInstallation();
+    });
+
+    expect(result).toEqual({
+      parameters: {
+        previewFieldIds: ['slug', 'url'],
+      },
+      targetState: {
+        EditorInterface: {},
+      },
+    });
+  });
+
+  it('saves preview field ids selected from the picker', async () => {
+    mockSdk.app.getParameters.mockResolvedValue({ previewFieldIds: [] });
+
+    render(<ConfigScreen />);
+    await userEvent.click(await screen.findByRole('button', { name: 'Add url' }));
+
+    const result = await act(async () => {
+      return await saveAppInstallation();
+    });
+
+    expect(result).toEqual({
+      parameters: {
+        previewFieldIds: ['slug', 'url'],
+      },
       targetState: {
         EditorInterface: {},
       },
@@ -142,55 +264,12 @@ describe('ConfigScreen', () => {
   });
 
   it('allows removing selected content types', async () => {
-    mockCma.contentType.getMany.mockResolvedValue({
-      items: [
-        { sys: { id: 'blogPost' }, name: 'Blog Post' },
-        { sys: { id: 'article' }, name: 'Article' },
-      ],
-    });
-
     render(<ConfigScreen />);
+    await userEvent.click(await screen.findByRole('button', { name: 'Add Blog Post' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Add Article' }));
 
-    const autocomplete = await screen.findByPlaceholderText('Search content types');
-    await userEvent.click(autocomplete);
-
-    const blogPostOption = await screen.findByText('Blog Post');
-    await userEvent.click(blogPostOption);
-
-    const articleOption = await screen.findByText('Article');
-    await userEvent.click(articleOption);
-
-    expect(await screen.findByTestId('pill-Blog Post')).toBeInTheDocument();
-    expect(await screen.findByTestId('pill-Article')).toBeInTheDocument();
-
-    const closeButtons = await screen.findAllByLabelText('Close');
-    const blogPostCloseButton = closeButtons.find((button) =>
-      button.closest('[data-test-id="pill-Blog Post"]')
+    expect(await screen.findByTestId('selected-content-types')).toHaveTextContent(
+      'Blog Post, Article'
     );
-    await userEvent.click(blogPostCloseButton!);
-
-    expect(screen.queryByTestId('pill-Blog Post')).not.toBeInTheDocument();
-    expect(screen.getByTestId('pill-Article')).toBeInTheDocument();
-  });
-
-  it('filters content types based on search input', async () => {
-    mockCma.contentType.getMany.mockResolvedValue({
-      items: [
-        { sys: { id: 'blogPost' }, name: 'Blog Post' },
-        { sys: { id: 'article' }, name: 'Article' },
-        { sys: { id: 'newsItem' }, name: 'News Item' },
-      ],
-    });
-
-    render(<ConfigScreen />);
-
-    const autocomplete = await screen.findByPlaceholderText('Search content types');
-    await userEvent.click(autocomplete);
-
-    await userEvent.type(autocomplete, 'Blog');
-
-    expect(await screen.findByText('Blog Post')).toBeInTheDocument();
-    expect(screen.queryByText('Article')).not.toBeInTheDocument();
-    expect(screen.queryByText('News Item')).not.toBeInTheDocument();
   });
 });

@@ -1,0 +1,105 @@
+{
+  "functions": [
+    {
+      "id": "checkLink",
+      "name": "Check Link",
+      "description": "Checks a URL and returns its HTTP status (used by the Link Checker sidebar).",
+      "path": "functions/checkLink.js",
+      "entryFile": "functions/checkLink.ts",
+      "accepts": [
+        "appaction.call"
+      ],
+      "allowNetworks": []
+    },
+    {
+      "id": "checkEntryLinks",
+      "name": "Check Entry Field Links",
+      "description": "Checks links extracted from a specific entry field and returns a summary for automations.",
+      "path": "functions/checkEntryLinks.js",
+      "entryFile": "functions/checkEntryLinks.ts",
+      "accepts": [
+        "appaction.call"
+      ],
+      "allowNetworks": []
+    },
+    {
+      "id": "checkAllEntryLinks",
+      "name": "Check All Entry Links",
+      "description": "Checks links across supported fields on an entry and returns a summary for automations.",
+      "path": "functions/checkAllEntryLinks.js",
+      "entryFile": "functions/checkAllEntryLinks.ts",
+      "accepts": [
+        "appaction.call"
+      ],
+      "allowNetworks": []
+    }
+  ],
+  "actions": [
+    {
+      "id": "checkLink",
+      "name": "Check Link",
+      "description": "Checks a URL and returns its HTTP status (used by the Link Checker sidebar).",
+      "type": "function-invocation",
+      "functionId": "checkLink",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "url",
+          "name": "URL",
+          "type": "Symbol",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "checkEntryLinks",
+      "name": "Check Entry Field Links",
+      "description": "Checks links extracted from a specific entry field and returns a summary for automations.",
+      "type": "function-invocation",
+      "functionId": "checkEntryLinks",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "entryId",
+          "name": "Entry ID",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "fieldId",
+          "name": "Field ID",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "locale",
+          "name": "Locale",
+          "type": "Symbol",
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "checkAllEntryLinks",
+      "name": "Check All Entry Links",
+      "description": "Checks links across supported fields on an entry and returns a summary for automations.",
+      "type": "function-invocation",
+      "functionId": "checkAllEntryLinks",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "entryId",
+          "name": "Entry ID",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "locale",
+          "name": "Locale",
+          "type": "Symbol",
+          "required": false
+        }
+      ]
+    }
+  ]
+}

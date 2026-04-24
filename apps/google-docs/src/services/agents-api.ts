@@ -1,6 +1,16 @@
 import { PageAppSDK } from '@contentful/app-sdk';
-import { LOCAL_AGENTS_API_BASE_URL, WORKFLOW_AGENT_ID } from '../utils/constants/agent';
-import { AgentRunMessage, DocumentScopeResumePayload, RunStatus } from '../utils/types';
+import {
+  LOCAL_AGENTS_API_BASE_URL,
+  WORKFLOW_AGENT_ID,
+  USE_LOCAL_AGENTS_API,
+} from '../utils/constants/agent';
+import {
+  AgentRunMessage,
+  MappingReviewSuspendPayload,
+  ResumePayload,
+  RunStatus,
+  TabsImagesSuspendPayload,
+} from '@types';
 
 const AGENTS_API_HEADERS = {
   'x-contentful-enable-alpha-feature': 'agents-api',
@@ -17,7 +27,7 @@ export interface AgentGeneratePayload {
   }>;
   metadata: {
     documentId: string;
-    contentTypeIds: string;
+    contentTypeIds: string[];
     oauthToken: string;
   };
   threadId: string;
@@ -32,8 +42,8 @@ export interface AgentRunData {
     status?: RunStatus;
     workflowId?: string;
     workflowRunId?: string;
-    suspendPayload?: Record<string, unknown>;
-    previewPayload?: Record<string, unknown>;
+    suspendPayload?: TabsImagesSuspendPayload | MappingReviewSuspendPayload;
+    googleDocPayload?: Record<string, unknown>;
   };
   payload?: string;
   messages?: AgentRunMessage[];
@@ -53,7 +63,7 @@ export async function getWorkflowRun(
   environmentId: string,
   runId: string
 ): Promise<AgentRunData | null> {
-  if (LOCAL_AGENTS_API_BASE_URL) {
+  if (USE_LOCAL_AGENTS_API) {
     const response = await fetch(
       `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}`,
       {
@@ -96,7 +106,7 @@ export async function startAgentRun(
 ): Promise<string> {
   let runData: AgentRunData;
 
-  if (LOCAL_AGENTS_API_BASE_URL) {
+  if (USE_LOCAL_AGENTS_API) {
     const response = await fetch(
       `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${WORKFLOW_AGENT_ID}/generate`,
       {
@@ -131,14 +141,20 @@ export async function startAgentRun(
   return runData.sys.id;
 }
 
+/**
+ * Resumes a suspended agent run. For the Google Docs mapping-review step, the
+ * edited `entryBlockGraph` must live in `resumePayload` (see Network tab). After resume,
+ * mapping-review repopulates `metadata.suspendPayload` with the reviewed graph (the resume
+ * handler clears it first).
+ */
 export async function resumeWorkflowRun(
   sdk: PageAppSDK,
   spaceId: string,
   environmentId: string,
   runId: string,
-  resumePayload: DocumentScopeResumePayload
+  resumePayload: ResumePayload
 ): Promise<void> {
-  if (LOCAL_AGENTS_API_BASE_URL) {
+  if (USE_LOCAL_AGENTS_API) {
     const response = await fetch(
       `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}/resume`,
       {
@@ -155,16 +171,8 @@ export async function resumeWorkflowRun(
     return;
   }
 
-  const agentRunApi = sdk.cma.agentRun as {
-    resume?: (
-      params: { spaceId: string; environmentId: string; runId: string },
-      body: { resumePayload: DocumentScopeResumePayload }
-    ) => Promise<unknown>;
-  };
-
-  if (!agentRunApi.resume) {
-    throw new Error('Agent run resume is not available in the current SDK.');
-  }
-
-  await agentRunApi.resume({ spaceId, environmentId, runId }, { resumePayload });
+  await sdk.cma.agentRun.resumeRun(
+    { spaceId, environmentId, runId },
+    { resumePayload: resumePayload as Record<string, unknown> }
+  );
 }

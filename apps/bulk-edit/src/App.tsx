@@ -3,6 +3,7 @@ import { locations, AppExtensionSDK } from '@contentful/app-sdk';
 import Page from './locations/Page';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { i18n } from '@lingui/core';
+import './App.css';
 
 const ComponentLocationSettings = {
   [locations.LOCATION_PAGE]: Page,

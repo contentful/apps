@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table, Checkbox, Flex, Text } from '@contentful/f36-components';
 import { Tooltip } from '@contentful/f36-tooltip';
-import { QuestionIcon } from '@phosphor-icons/react';
+import { QuestionIcon } from '@contentful/f36-icons';
 import { ContentTypeField } from '../types';
 import { headerStyles } from './TableHeader.styles';
 import { truncate, isCheckboxAllowed } from '../utils/entryUtils';
@@ -48,6 +48,36 @@ const FocusedTooltip: React.FC<FocusedTooltipProps> = ({ content, isFocused, chi
       {children}
     </Tooltip>
   );
+};
+
+const getFieldTypeLabel = (field: ContentTypeField) => {
+  if (field.type === 'Link') {
+    return 'Reference';
+  }
+
+  if (field.type === 'Array' && field.items?.type === 'Link' && field.items?.linkType === 'Entry') {
+    return 'Multi-reference';
+  }
+
+  if (field.type === 'Array' && field.items?.type === 'Symbol') {
+    return 'List';
+  }
+
+  const typeLabels: Record<string, string> = {
+    Symbol: 'Short text',
+    Text: 'Long text',
+    Integer: 'Integer',
+    Number: 'Number',
+    Date: 'Date',
+    Boolean: 'Boolean',
+    Object: 'JSON',
+    RichText: 'Rich text',
+    Location: 'Location',
+    Asset: 'Asset',
+    ResourceLink: 'Resource',
+  };
+
+  return typeLabels[field.type] || field.type;
 };
 
 export const TableHeader: React.FC<TableHeaderProps> = ({
@@ -100,7 +130,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
             <FocusedTooltip
               content="Bulk editing is not supported for Status"
               isFocused={isStatusFocused}>
-              <QuestionIcon size={16} aria-label="Bulk editing not supported for Status" />
+              <QuestionIcon aria-label="Bulk editing not supported for Status" size="small" />
             </FocusedTooltip>
           </Flex>
         </Table.Cell>
@@ -127,7 +157,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
               tabIndex={-1}
               data-row={HEADERS_ROW}
               data-column={columnIndex}>
-              <Flex gap="spacingXs">
+              <Flex style={headerStyles.fieldHeaderContent}>
                 {isAllowed ? (
                   <>
                     <Checkbox
@@ -145,6 +175,9 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
                       fontColor="gray900">
                       {fieldName}
                     </Text>
+                    <Text fontSize="fontSizeXs" lineHeight="lineHeightS" fontColor="gray600">
+                      {getFieldTypeLabel(field)}
+                    </Text>
                   </>
                 ) : (
                   <>
@@ -155,12 +188,15 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
                       fontColor="gray500">
                       {fieldName}
                     </Text>
+                    <Text fontSize="fontSizeXs" lineHeight="lineHeightS" fontColor="gray500">
+                      {getFieldTypeLabel(field)}
+                    </Text>
                     <FocusedTooltip
                       content={`Bulk editing is not supported for the ${field.name} field type`}
                       isFocused={isFieldFocused}>
                       <QuestionIcon
-                        size={16}
                         aria-label={`Bulk editing not supported for ${field.name}`}
+                        size="small"
                       />
                     </FocusedTooltip>
                   </>

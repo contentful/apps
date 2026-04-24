@@ -11,7 +11,7 @@ import {
 import { PageAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
 import { css } from '@emotion/css';
-import { useMultiselectScrollReflow } from '../../../../../hooks/useMultiselectReflow';
+import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
 import { multiselect, pillsContainer } from './ContentTypePickerModal.styles';
 import { truncateLabel } from '../../../../../utils/utils';
 
@@ -155,7 +155,6 @@ export const ContentTypePickerModal = ({
             }}>
             {filteredContentTypes.map((ct) => (
               <Multiselect.Option
-                className={css({ padding: `0.25rem` })}
                 key={ct.sys.id}
                 value={ct.sys.id}
                 itemId={ct.sys.id}

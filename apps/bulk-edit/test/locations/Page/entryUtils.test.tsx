@@ -5,6 +5,7 @@ import {
   mapContentTypePropsToFields,
   processEntriesInBatches,
   getFieldDisplayValue,
+  isCheckboxAllowed,
 } from '../../../src/locations/Page/utils/entryUtils';
 import { ContentTypeField } from '../../../src/locations/Page/types';
 import { ContentTypeProps, EntryProps } from 'contentful-management';
@@ -220,6 +221,13 @@ describe('entryUtils', () => {
       expect(result).toBe('1 reference field');
     });
 
+    it('returns linked entry title for Link field with Entry reference when provided', () => {
+      const field = { id: 'testField', locale: 'en-US', type: 'Link' } as ContentTypeField;
+      const linkValue = { sys: { linkType: 'Entry', id: 'author-1' } };
+      const result = getFieldDisplayValue(field, linkValue, 50, { 'author-1': 'Jessie Xu' });
+      expect(result).toBe('Jessie Xu');
+    });
+
     it('returns "1 reference field" for Array field with single Entry reference', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Array' } as ContentTypeField;
       const arrayValue = [{ sys: { linkType: 'Entry' } }];
@@ -232,6 +240,19 @@ describe('entryUtils', () => {
       const arrayValue = [{ sys: { linkType: 'Entry' } }, { sys: { linkType: 'Entry' } }];
       const result = getFieldDisplayValue(field, arrayValue, 20);
       expect(result).toBe('2 reference fields');
+    });
+
+    it('returns linked entry titles for Array field with Entry references when provided', () => {
+      const field = { id: 'testField', locale: 'en-US', type: 'Array' } as ContentTypeField;
+      const arrayValue = [
+        { sys: { linkType: 'Entry', id: 'author-1' } },
+        { sys: { linkType: 'Entry', id: 'author-2' } },
+      ];
+      const result = getFieldDisplayValue(field, arrayValue, 50, {
+        'author-1': 'Jessie Xu',
+        'author-2': 'Sarah Tyler',
+      });
+      expect(result).toBe('Jessie Xu, Sarah Tyler');
     });
 
     it('returns "1 asset" for Array field with single Asset reference', () => {
@@ -678,6 +699,38 @@ describe('entryUtils', () => {
         ...expected,
         uniqueId: 'relatedEntries',
       });
+    });
+  });
+
+  describe('isCheckboxAllowed', () => {
+    it('allows single entry reference fields', () => {
+      const field = {
+        id: 'author',
+        uniqueId: 'author',
+        locale: 'en-US',
+        type: 'Link',
+        fieldControl: { fieldId: 'author', widgetId: 'entryLinkEditor' },
+        validations: [{ linkContentType: ['author'] }],
+      } as ContentTypeField;
+
+      expect(isCheckboxAllowed(field)).toBe(true);
+    });
+
+    it('allows multi-entry reference fields', () => {
+      const field = {
+        id: 'authors',
+        uniqueId: 'authors',
+        locale: 'en-US',
+        type: 'Array',
+        validations: [],
+        items: {
+          type: 'Link',
+          linkType: 'Entry',
+          validations: [{ linkContentType: ['author'] }],
+        },
+      } as ContentTypeField;
+
+      expect(isCheckboxAllowed(field)).toBe(true);
     });
   });
 });

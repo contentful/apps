@@ -1,6 +1,6 @@
 import React from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Page from '../../../src/locations/Page';
 import { mockSdk } from '../../mocks';
 import { getManyContentTypes, getManyEntries } from '../../mocks/mockCma';
@@ -8,6 +8,19 @@ import { condoAContentType } from '../../mocks/mockContentTypes';
 import { condoAEntry1, condoAEntry2 } from '../../mocks/mockEntries';
 import { Notification } from '@contentful/f36-components';
 import type { ContentTypeProps } from 'contentful-management';
+
+const originalConsoleError = console.error;
+const suppressReact18RenderWarning = () =>
+  vi.spyOn(console, 'error').mockImplementation((...args) => {
+    const message = args.find((arg) => typeof arg === 'string');
+    if (
+      typeof message === 'string' &&
+      message.includes('ReactDOM.render is no longer supported in React 18')
+    ) {
+      return;
+    }
+    originalConsoleError(...args);
+  });
 
 // Mock the field editors
 vi.mock('../../../src/locations/Page/components/FieldEditor', () => ({
@@ -37,7 +50,10 @@ vi.mock('@tanstack/react-virtual', () => ({
 }));
 
 describe('Page', () => {
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+
   beforeEach(() => {
+    consoleErrorSpy = suppressReact18RenderWarning();
     // Mock content type fetch
     mockSdk.cma.contentType.getMany = vi
       .fn()
@@ -53,13 +69,14 @@ describe('Page', () => {
   });
 
   afterEach(() => {
+    consoleErrorSpy.mockRestore();
     cleanup();
   });
 
   it('shows loading spinner during initial content type fetch', async () => {
     render(<Page />);
     await waitFor(() => {
-      expect(screen.queryByTitle('Loading…')).not.toBeInTheDocument();
+      expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
     });
   });
 
@@ -81,7 +98,10 @@ describe('Page', () => {
 });
 
 describe('Bulk edit functionality', () => {
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+
   beforeEach(() => {
+    consoleErrorSpy = suppressReact18RenderWarning();
     // Mock content type fetch
     mockSdk.cma.contentType.getMany = vi
       .fn()
@@ -99,6 +119,7 @@ describe('Bulk edit functionality', () => {
     mockSdk.cma.entry.update = vi.fn().mockImplementation(async (params, entry) => entry);
   });
   afterEach(() => {
+    consoleErrorSpy.mockRestore();
     cleanup();
   });
 
@@ -204,7 +225,10 @@ describe('Bulk edit notification', () => {
 });
 
 describe('Table display', () => {
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+
   beforeEach(() => {
+    consoleErrorSpy = suppressReact18RenderWarning();
     // Mock content type fetch
     mockSdk.cma.contentType.getMany = vi
       .fn()
@@ -220,6 +244,7 @@ describe('Table display', () => {
   });
 
   afterEach(() => {
+    consoleErrorSpy.mockRestore();
     cleanup();
   });
 
@@ -247,32 +272,66 @@ describe('Table display', () => {
 });
 
 describe('Reset filters functionality', () => {
-  it('hides reset filters button when no filters are active', async () => {
-    render(<Page />);
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
 
-    await waitFor(() => {
-      expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
-    });
+  beforeEach(() => {
+    consoleErrorSpy = suppressReact18RenderWarning();
+    // Mock content type fetch
+    mockSdk.cma.contentType.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyContentTypes([condoAContentType]));
 
-    expect(screen.queryByText('Reset filters')).not.toBeInTheDocument();
+    // Mock content type get for fields
+    mockSdk.cma.contentType.get = vi.fn().mockResolvedValue(condoAContentType);
+
+    // Mock entries fetch
+    mockSdk.cma.entry.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyEntries([condoAEntry1, condoAEntry2]));
   });
 
-  it('shows reset filters button when status filter is active', async () => {
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
+    cleanup();
+  });
+
+  it('disables reset filters button when no filters are active', async () => {
     render(<Page />);
 
     await waitFor(() => {
       expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
-      expect(screen.queryByText('Reset filters')).not.toBeInTheDocument();
     });
 
-    const statusFilter = screen.getByText('Filter by status');
-    fireEvent.click(statusFilter);
+    const resetButton = screen.getByRole('button', { name: /reset filters/i });
+    expect(resetButton).toBeDisabled();
+  });
 
-    const draftOption = screen.getByRole('checkbox', { name: 'Draft' });
-    fireEvent.click(draftOption);
+  it('enables reset filters button when status filter is active', async () => {
+    render(<Page />);
 
     await waitFor(() => {
-      expect(screen.getByText('Reset filters')).toBeInTheDocument();
+      expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
+    });
+
+    // Reset button should be disabled initially
+    const resetButton = screen.getByRole('button', { name: /reset filters/i });
+    expect(resetButton).toBeDisabled();
+
+    // Find the Status filter button (it's a button element containing "Status" text)
+    const statusButtons = screen.getAllByText('Status');
+    const statusFilter = statusButtons.find((el) => el.closest('button'));
+    expect(statusFilter).toBeTruthy();
+    fireEvent.click(statusFilter!);
+
+    // Select "Draft" from the menu
+    await waitFor(() => {
+      expect(screen.getByRole('menuitem', { name: 'Draft' })).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Draft' }));
+
+    // Reset button should now be enabled
+    await waitFor(() => {
+      expect(resetButton).not.toBeDisabled();
     });
   });
 
@@ -283,19 +342,161 @@ describe('Reset filters functionality', () => {
       expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
     });
 
-    const statusFilter = screen.getByText('Filter by status');
-    fireEvent.click(statusFilter);
+    // Find the Status filter button
+    const statusButtons = screen.getAllByText('Status');
+    const statusFilter = statusButtons.find((el) => el.closest('button'));
+    expect(statusFilter).toBeTruthy();
+    fireEvent.click(statusFilter!);
 
-    const draftOption = screen.getByRole('checkbox', { name: 'Draft' });
-    fireEvent.click(draftOption);
+    // Select "Draft" from the menu
+    await waitFor(() => {
+      expect(screen.getByRole('menuitem', { name: 'Draft' })).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Draft' }));
 
-    expect(await screen.findByText('Reset filters')).toBeInTheDocument();
+    // Wait for reset button to be enabled
+    const resetButton = screen.getByRole('button', { name: /reset filters/i });
+    await waitFor(() => {
+      expect(resetButton).not.toBeDisabled();
+    });
 
-    const resetButton = await screen.findByText('Reset filters');
+    // Click reset
     fireEvent.click(resetButton);
 
+    // Reset button should be disabled again
     await waitFor(() => {
-      expect(screen.queryByText('Reset filters')).not.toBeInTheDocument();
+      expect(resetButton).toBeDisabled();
     });
   });
+});
+
+describe('Client-side filtering regressions', () => {
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    consoleErrorSpy = suppressReact18RenderWarning();
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
+    cleanup();
+  });
+
+  it('filters numeric searches client-side for number fields', async () => {
+    const numericContentType = {
+      ...condoAContentType,
+      fields: [
+        ...condoAContentType.fields,
+        {
+          id: 'unitCount',
+          name: 'Unit Count',
+          required: false,
+          localized: false,
+          type: 'Integer',
+        },
+      ],
+    } as ContentTypeProps;
+
+    const numericEntries = [
+      {
+        ...condoAEntry1,
+        fields: {
+          ...condoAEntry1.fields,
+          unitCount: { 'en-US': 12 },
+        },
+      },
+      {
+        ...condoAEntry2,
+        fields: {
+          ...condoAEntry2.fields,
+          unitCount: { 'en-US': 34 },
+        },
+      },
+    ];
+
+    mockSdk.cma.contentType.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyContentTypes([numericContentType]));
+    mockSdk.cma.contentType.get = vi.fn().mockResolvedValue(numericContentType);
+    mockSdk.cma.entry.getMany = vi.fn().mockResolvedValue(getManyEntries(numericEntries));
+
+    render(<Page />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
+      expect(screen.getAllByText('Building one').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Building two').length).toBeGreaterThan(0);
+    });
+
+    fireEvent.change(screen.getByPlaceholderText('Search'), { target: { value: '34' } });
+
+    await waitFor(
+      () => {
+        expect(screen.queryAllByText('Building one')).toHaveLength(0);
+        expect(screen.getAllByText('Building two').length).toBeGreaterThan(0);
+      },
+      { timeout: 10000 }
+    );
+  }, 15000);
+
+  it('separates changed and published entries client-side after status selection', async () => {
+    const statusEntries = [
+      {
+        ...condoAEntry1,
+        fields: { displayName: { 'en-US': 'Published entry' } },
+        sys: {
+          ...condoAEntry1.sys,
+          version: 2,
+          publishedVersion: 1,
+        },
+      },
+      {
+        ...condoAEntry2,
+        fields: { displayName: { 'en-US': 'Changed entry' } },
+        sys: {
+          ...condoAEntry2.sys,
+          version: 3,
+          publishedVersion: 1,
+        },
+      },
+    ];
+
+    mockSdk.cma.contentType.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyContentTypes([condoAContentType]));
+    mockSdk.cma.contentType.get = vi.fn().mockResolvedValue(condoAContentType);
+    mockSdk.cma.entry.getMany = vi.fn().mockResolvedValue(getManyEntries(statusEntries));
+
+    render(<Page />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Published entry').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Changed entry').length).toBeGreaterThan(0);
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Filter by' }));
+    await waitFor(() => {
+      expect(screen.getByRole('menuitem', { name: 'Changed' })).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Changed' }));
+
+    await waitFor(() => {
+      expect(screen.queryAllByText('Published entry')).toHaveLength(0);
+      expect(screen.getAllByText('Changed entry').length).toBeGreaterThan(0);
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Filter by' }));
+    await waitFor(() => {
+      expect(screen.getByRole('menuitem', { name: 'Published' })).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Published' }));
+
+    await waitFor(
+      () => {
+        expect(screen.getAllByText('Published entry').length).toBeGreaterThan(0);
+        expect(screen.queryAllByText('Changed entry')).toHaveLength(0);
+      },
+      { timeout: 10000 }
+    );
+  }, 15000);
 });

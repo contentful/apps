@@ -41,6 +41,7 @@ interface TableRowProps {
   focusedCell: FocusPosition | null;
   focusRange: FocusRange | null;
   onCellFocus: (position: FocusPosition) => void;
+  referenceDisplayValues: Record<string, string>;
 }
 
 export const TableRow: React.FC<TableRowProps> = ({
@@ -57,6 +58,7 @@ export const TableRow: React.FC<TableRowProps> = ({
   focusedCell,
   focusRange,
   onCellFocus,
+  referenceDisplayValues,
 }) => {
   const status = getStatusFromEntry(entry);
   const statusColor = getStatusColor(status);
@@ -135,10 +137,12 @@ export const TableRow: React.FC<TableRowProps> = ({
                   aria-label={`Select ${truncate(field.name)} for ${displayValue}`}
                   tabIndex={-1}
                 />
-                {getFieldDisplayValue(field, fieldValue, 30)}
+                {getFieldDisplayValue(field, fieldValue, 30, referenceDisplayValues)}
               </Flex>
             ) : (
-              <Text fontColor="gray500">{getFieldDisplayValue(field, fieldValue, 30)}</Text>
+              <Text fontColor="gray500">
+                {getFieldDisplayValue(field, fieldValue, 30, referenceDisplayValues)}
+              </Text>
             )}
           </Table.Cell>
         );

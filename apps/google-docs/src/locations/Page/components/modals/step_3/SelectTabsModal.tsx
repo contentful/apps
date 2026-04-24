@@ -10,14 +10,9 @@ import {
   Multiselect,
   Radio,
 } from '@contentful/f36-components';
-import {
-  modalControls,
-  multiselect,
-  multiselectOption,
-  pillsContainer,
-} from './SelectTabsModal.styles';
-import { useMultiselectScrollReflow } from '../../../../../hooks/useMultiselectReflow';
-import { DocumentTabProps } from '../../../../../utils/types';
+import { modalControls, multiselect, pillsContainer } from './SelectTabsModal.styles';
+import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
+import { DocumentTabProps } from '@types';
 import { truncateLabel } from '../../../../../utils/utils';
 
 interface SelectTabsModalProps {
@@ -108,7 +103,6 @@ export const SelectTabsModal = ({
                       }}>
                       {availableTabs.map((tab) => (
                         <Multiselect.Option
-                          className={multiselectOption}
                           key={tab.tabId}
                           value={tab.tabId}
                           itemId={tab.tabId}
