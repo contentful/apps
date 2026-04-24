@@ -1,10 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { Box, Button, Modal, Note, Flex, Text } from '@contentful/f36-components';
-import {
-  EditModalDestinationStateKind,
-  createEditModalDestinationState,
-  type EditModalContent,
-} from '@types';
+import { Box, Button, Modal, Flex, Text } from '@contentful/f36-components';
+import { type EditModalContent } from '@types';
 
 import {
   locationButton,
@@ -101,37 +97,21 @@ export const EditModal = ({
   const previewQuotedText = (viewModel.contentPreview ?? viewModel.selectedText).trim();
   const selectedDestinationCount = selectedFieldIds.length;
   const isAssignMode = mode === 'assign';
-  const destinationState = useMemo(() => {
-    if (!isAssignMode) {
-      return createEditModalDestinationState(EditModalDestinationStateKind.Ready);
-    }
-
-    if (!hasNewLocation) {
-      return createEditModalDestinationState(EditModalDestinationStateKind.MissingEntry);
-    }
-
-    if (viewModel.newLocation.fieldOptions.length === 0) {
-      return createEditModalDestinationState(EditModalDestinationStateKind.NoFields);
-    }
-
-    if (destinationFieldState?.hasSelectableOptions === false) {
-      return createEditModalDestinationState(EditModalDestinationStateKind.NoCompatibleFields);
-    }
-
-    if (selectedDestinationCount === 0) {
-      return createEditModalDestinationState(EditModalDestinationStateKind.RequiresSelection);
-    }
-
-    return createEditModalDestinationState(EditModalDestinationStateKind.Ready);
-  }, [
-    isAssignMode,
-    destinationFieldState?.hasSelectableOptions,
-    hasNewLocation,
-    selectedDestinationCount,
-    viewModel.newLocation.fieldOptions.length,
-  ]);
-  const isPrimaryDisabled =
-    isAssignMode && destinationState.kind !== EditModalDestinationStateKind.Ready;
+  const isPrimaryDisabled = useMemo(
+    () =>
+      isAssignMode &&
+      (!hasNewLocation || // no destination entry available
+        viewModel.newLocation.fieldOptions.length === 0 || // destination entry has no fields
+        destinationFieldState?.hasSelectableOptions === false || // no fields compatible with this content type
+        selectedDestinationCount === 0), // user hasn't selected a destination field yet
+    [
+      isAssignMode,
+      hasNewLocation,
+      viewModel.newLocation.fieldOptions.length,
+      destinationFieldState?.hasSelectableOptions,
+      selectedDestinationCount,
+    ]
+  );
 
   return (
     <Modal isShown={isOpen} onClose={onClose} size="large" shouldCloseOnOverlayClick={false}>
@@ -253,16 +233,7 @@ export const EditModal = ({
                 </Box>
               )}
 
-              {isAssignMode && destinationState.kind !== EditModalDestinationStateKind.Ready ? (
-                <Note
-                  variant={
-                    destinationState.kind === EditModalDestinationStateKind.RequiresSelection
-                      ? 'warning'
-                      : 'neutral'
-                  }>
-                  {destinationState.message}
-                </Note>
-              ) : null}
+              {additionalContent}
             </Box>
           </Modal.Content>
           <Modal.Controls>
