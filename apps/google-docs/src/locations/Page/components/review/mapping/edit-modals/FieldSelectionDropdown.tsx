@@ -1,9 +1,10 @@
 import { useEffect, useId, useMemo } from 'react';
-import { Flex, Stack, Text } from '@contentful/f36-components';
+import { Badge, Flex, Stack, Text } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import type { EditModalFieldMapping, EditModalFieldOption } from '@types';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
 import { isSelectableFieldType } from './utils';
+import { optionRow } from './FieldSelectionDropdown.styles';
 
 interface FieldSelectionDropdownProps {
   selectedText: string;
@@ -81,8 +82,10 @@ export const FieldSelectionDropdown = ({
         currentSelection={currentSelection}
         placeholder={placeholder}
         popoverProps={{
-          listMaxHeight: 360,
+          listMaxHeight: 280,
           listRef: multiselectListRef,
+          placement: 'bottom',
+          isAutoalignmentEnabled: false,
         }}>
         {fieldOptions.map((option) => {
           const fieldTypeDisplay = option.fieldDisplayType;
@@ -97,20 +100,22 @@ export const FieldSelectionDropdown = ({
               itemId={option.id}
               isChecked={selectedFieldIds.includes(option.id)}
               isDisabled={isDisabled}
-              onSelectItem={handleSelectField}>
-              <Flex gap="spacingS">
-                <Flex gap="spacing2Xs">
-                  <Text as="div" fontColor="gray700" fontWeight="fontWeightDemiBold">
-                    {option.fieldName}
-                  </Text>
-                  <Text as="div" fontColor="gray700" fontWeight="fontWeightNormal">
-                    ({fieldTypeDisplay})
-                  </Text>
-                </Flex>
+              onSelectItem={handleSelectField}
+              className={optionRow}>
+              <Flex gap="spacing2Xs">
+                <Text as="div" fontColor="gray700" fontWeight="fontWeightDemiBold">
+                  {option.fieldName}
+                </Text>
                 <Text as="div" fontColor="gray700" fontWeight="fontWeightNormal">
-                  {isFilled ? 'Filled' : 'Empty'}
+                  ({fieldTypeDisplay})
                 </Text>
               </Flex>
+              <Badge
+                variant={isFilled ? 'positive' : 'secondary'}
+                size="small"
+                style={{ marginLeft: 'auto' }}>
+                {isFilled ? 'Filled' : 'Empty'}
+              </Badge>
             </Multiselect.Option>
           );
         })}

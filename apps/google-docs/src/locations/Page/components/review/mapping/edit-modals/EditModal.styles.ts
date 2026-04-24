@@ -5,6 +5,7 @@ export const modalContent = css({
   display: 'flex',
   flexDirection: 'column',
   gap: tokens.spacingL,
+  minHeight: '600px',
 });
 
 export const sectionCard = css({
