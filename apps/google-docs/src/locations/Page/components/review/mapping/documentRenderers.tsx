@@ -203,7 +203,9 @@ export const BlockRenderer = ({
       isTextSourceRef(highlight.sourceRef)
   );
   const hasVisibleTextMappings = visibleTextHighlights.length > 0;
-  const blockMappingKeys = visibleHighlights.map((highlight) => getMappingCardKey(segmentId, highlight));
+  const blockMappingKeys = visibleHighlights.map((highlight) =>
+    getMappingCardKey(segmentId, highlight)
+  );
   const isBlockHovered = isMappingHovered(blockMappingKeys, hoveredMappingKeys);
   const textSegments = buildTextSegments(block.flattenedTextRuns, segmentId, visibleHighlights);
   const listMarker = block.type === 'listItem' ? listMarkers[block.id] ?? null : null;
@@ -390,7 +392,9 @@ const TablePartRenderer = ({
   readOnly = false,
   showReadOnlyOutline = true,
 }: TablePartRendererProps) => {
-  const partMappingKeys = visibleHighlights.map((highlight) => getMappingCardKey(segmentId, highlight));
+  const partMappingKeys = visibleHighlights.map((highlight) =>
+    getMappingCardKey(segmentId, highlight)
+  );
   const hasVisibleMappings = partMappingKeys.length > 0;
   const isPartHovered = isMappingHovered(partMappingKeys, hoveredMappingKeys);
 
