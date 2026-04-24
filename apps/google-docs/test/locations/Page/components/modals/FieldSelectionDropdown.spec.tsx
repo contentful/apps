@@ -17,21 +17,25 @@ describe('FieldSelectionDropdown', () => {
         fieldOptions={[
           {
             id: 'name',
+            fieldType: 'Symbol',
             fieldName: 'Name (Internal)',
             fieldDisplayType: 'Short text',
           },
           {
             id: 'marketo',
+            fieldType: 'Asset',
             fieldName: 'Marketo',
             fieldDisplayType: 'Media',
           },
           {
             id: 'headingSize',
+            fieldType: 'Integer',
             fieldName: 'Heading size',
             fieldDisplayType: 'Integer',
           },
           {
             id: 'price',
+            fieldType: 'Number',
             fieldName: 'Price',
             fieldDisplayType: 'Number',
           },
@@ -83,16 +87,19 @@ describe('FieldSelectionDropdown', () => {
         fieldOptions={[
           {
             id: 'title',
+            fieldType: 'Symbol',
             fieldName: 'Title',
             fieldDisplayType: 'Short text',
           },
           {
             id: 'headingSize',
+            fieldType: 'Integer',
             fieldName: 'Heading size',
             fieldDisplayType: 'Integer',
           },
           {
             id: 'price',
+            fieldType: 'Number',
             fieldName: 'Price',
             fieldDisplayType: 'Number',
           },
@@ -123,21 +130,25 @@ describe('FieldSelectionDropdown', () => {
         fieldOptions={[
           {
             id: 'title',
+            fieldType: 'Symbol',
             fieldName: 'Title',
             fieldDisplayType: 'Short text',
           },
           {
             id: 'overrideTheme',
+            fieldType: 'Reference',
             fieldName: 'Override Theme',
             fieldDisplayType: 'Reference',
           },
           {
             id: 'notes',
+            fieldType: 'Reference list',
             fieldName: 'Notes',
             fieldDisplayType: 'Reference list',
           },
           {
             id: 'heroImage',
+            fieldType: 'Asset',
             fieldName: 'Hero image',
             fieldDisplayType: 'Media',
             isAssetField: true,
