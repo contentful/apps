@@ -1,9 +1,4 @@
-import {
-  isBlockSourceRef,
-  isTableImageSourceRef,
-  isTextSourceRef,
-  type SourceRef,
-} from '@types';
+import { isBlockSourceRef, isTableImageSourceRef, isTextSourceRef, type SourceRef } from '@types';
 
 const DEFAULT_CARD_GAP = 8;
 

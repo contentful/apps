@@ -20,6 +20,7 @@ interface ReviewDocumentBodyProps {
   readOnly?: boolean;
   showReadOnlyOutline?: boolean;
   preferImageReadOnlyHighlight?: boolean;
+  suppressInlineHighlights?: boolean;
 }
 
 export const NormalizedDocumentSection = ({
@@ -36,6 +37,7 @@ export const NormalizedDocumentSection = ({
   readOnly = false,
   showReadOnlyOutline = true,
   preferImageReadOnlyHighlight = false,
+  suppressInlineHighlights = false,
 }: ReviewDocumentBodyProps): JSX.Element => {
   return (
     <Box style={{ flex: 2 }}>
@@ -61,6 +63,7 @@ export const NormalizedDocumentSection = ({
               readOnly={readOnly}
               showReadOnlyOutline={showReadOnlyOutline}
               preferImageReadOnlyHighlight={preferImageReadOnlyHighlight}
+              suppressInlineHighlights={suppressInlineHighlights}
             />
           ) : (
             <BlockRenderer
@@ -78,6 +81,7 @@ export const NormalizedDocumentSection = ({
               readOnly={readOnly}
               showReadOnlyOutline={showReadOnlyOutline}
               preferImageReadOnlyHighlight={preferImageReadOnlyHighlight}
+              suppressInlineHighlights={suppressInlineHighlights}
             />
           )}
         </Box>

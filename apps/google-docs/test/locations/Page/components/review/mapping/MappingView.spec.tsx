@@ -808,16 +808,18 @@ describe('MappingView', () => {
 
     const mappingCard = container.querySelector<HTMLElement>('[data-testid^="mapping-card-"]');
     expect(mappingCard).toBeTruthy();
+    const groupedSurface = container.querySelector<HTMLElement>(
+      '[data-testid^="mapping-group-surface-"]'
+    );
+    expect(groupedSurface).toBeTruthy();
+    const initialBoxShadow = groupedSurface?.style.boxShadow ?? '';
 
     fireEvent.mouseEnter(mappingCard as HTMLElement);
 
-    expect(textSegments[0].style.backgroundColor).not.toBe(initialBackgroundColor);
+    expect(textSegments[0].style.backgroundColor).toBe(initialBackgroundColor);
     expect(textSegments[1].style.backgroundColor).toBe(textSegments[0].style.backgroundColor);
-    expect(
-      container
-        .querySelector('[data-testid^="mapping-group-surface-"]')
-        ?.getAttribute('data-hovered')
-    ).toBe('true');
+    expect(groupedSurface?.getAttribute('data-hovered')).toBe('true');
+    expect(groupedSurface?.style.boxShadow).not.toBe(initialBoxShadow);
   });
 
   it('opens assign modal from grouped-run text selection and clears selection', () => {
@@ -897,7 +899,8 @@ describe('MappingView', () => {
     expect(screen.getByText('"fresh body text"')).toBeTruthy();
     expect(screen.getByText('Current location')).toBeTruthy();
     expect(screen.getByText('New location')).toBeTruthy();
-    expect(screen.getByText('Article: Untitled')).toBeTruthy();
+    expect(screen.getByText('Article')).toBeTruthy();
+    expect(screen.getByText(/\(Untitled\)/)).toBeTruthy();
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
 

@@ -2,7 +2,6 @@ import { isBlockImageSourceRef, isTableImageSourceRef, isTextSourceRef } from '@
 import type { MappingCardData } from './MappingCard';
 import type { Tab, DocSegment } from './buildDocument';
 import { type MappingHighlight, getMappingCardKey } from './buildHighlights';
-import { formatDisplayName } from './fieldFormatting';
 import { getAnchorIdForSourceRef } from './resolveMappingCardOffsets';
 
 export interface RenderedMappingCard extends MappingCardData {
@@ -137,7 +136,9 @@ function buildDraftMappingCards(
         coverageEnd = Math.max(coverageEnd, highlight.sourceRef.end);
       }
 
-      return isOnlyGroupableSeparators(getTextSliceFromRuns(flattenedRuns, coverageEnd, expectedEnd));
+      return isOnlyGroupableSeparators(
+        getTextSliceFromRuns(flattenedRuns, coverageEnd, expectedEnd)
+      );
     };
 
     highlights.forEach((highlight) => {
@@ -147,9 +148,9 @@ function buildDraftMappingCards(
           key: `${segment.id}:${mappingKey}`,
           fieldIdentity: getFieldIdentity(highlight),
           contentTypeName: resolveContentTypeName(highlight),
-          fieldName: formatDisplayName(highlight.fieldId),
+          fieldName: highlight.fieldName,
           fieldType: resolveFieldTypeLabel(highlight),
-          displayLabel: formatDisplayName(highlight.fieldId),
+          displayLabel: highlight.fieldName,
           anchorId: getAnchorIdForSourceRef(highlight.sourceRef),
           mappingKeys: [mappingKey],
           entryLabel: resolveEntryLabel(highlight),
@@ -193,14 +194,15 @@ function buildDraftMappingCards(
 
           const uniqueFieldIdentities = new Set(partHighlights.map(getFieldIdentity));
           const canGroupPart =
-            part.type === 'text' &&
             uniqueFieldIdentities.size === 1 &&
-            hasFullPartTextCoverage(
-              partHighlights,
-              part.flattenedTextRuns[0]?.start ?? 0,
-              part.flattenedTextRuns,
-              part.flattenedTextRuns[part.flattenedTextRuns.length - 1]?.end ?? 0
-            );
+            (part.type === 'image' ||
+              (part.type === 'text' &&
+                hasFullPartTextCoverage(
+                  partHighlights,
+                  part.flattenedTextRuns[0]?.start ?? 0,
+                  part.flattenedTextRuns,
+                  part.flattenedTextRuns[part.flattenedTextRuns.length - 1]?.end ?? 0
+                )));
 
           if (!canGroupPart) {
             flushCurrentCard();
@@ -211,9 +213,9 @@ function buildDraftMappingCards(
                   key: `${segment.id}:${mappingKey}`,
                   fieldIdentity: getFieldIdentity(highlight),
                   contentTypeName: resolveContentTypeName(highlight),
-                  fieldName: formatDisplayName(highlight.fieldId),
+                  fieldName: highlight.fieldName,
                   fieldType: resolveFieldTypeLabel(highlight),
-                  displayLabel: formatDisplayName(highlight.fieldId),
+                  displayLabel: highlight.fieldName,
                   anchorId: getAnchorIdForSourceRef(highlight.sourceRef),
                   mappingKeys: [mappingKey],
                   entryLabel: resolveEntryLabel(highlight),
@@ -222,6 +224,23 @@ function buildDraftMappingCards(
                     isBlockImageSourceRef(highlight.sourceRef) ||
                     isTableImageSourceRef(highlight.sourceRef),
                 });
+              });
+            } else {
+              const firstHighlight = partHighlights[0];
+              cards.push({
+                key: `${segment.id}:${partKey}:${getFieldIdentity(firstHighlight)}`,
+                fieldIdentity: getFieldIdentity(firstHighlight),
+                contentTypeName: resolveContentTypeName(firstHighlight),
+                fieldName: firstHighlight.fieldName,
+                fieldType: resolveFieldTypeLabel(firstHighlight),
+                displayLabel: firstHighlight.fieldName,
+                anchorId: getAnchorIdForSourceRef(firstHighlight.sourceRef),
+                mappingKeys: uniqueStrings(
+                  partHighlights.map((highlight) => getMappingCardKey(segment.id, highlight))
+                ),
+                entryLabel: resolveEntryLabel(firstHighlight),
+                hasTextSourceRefs: true,
+                hasImageSourceRefs: false,
               });
             }
             return;
@@ -243,9 +262,9 @@ function buildDraftMappingCards(
             key: `${segment.id}:${getMappingCardKey(segment.id, firstHighlight)}`,
             fieldIdentity,
             contentTypeName: resolveContentTypeName(firstHighlight),
-            fieldName: formatDisplayName(firstHighlight.fieldId),
+            fieldName: firstHighlight.fieldName,
             fieldType: resolveFieldTypeLabel(firstHighlight),
-            displayLabel: formatDisplayName(firstHighlight.fieldId),
+            displayLabel: firstHighlight.fieldName,
             anchorId: getAnchorIdForSourceRef(firstHighlight.sourceRef),
             mappingKeys,
             entryLabel: resolveEntryLabel(firstHighlight),
@@ -302,9 +321,9 @@ function buildDraftMappingCards(
     key: `${segment.id}:${fieldIdentity}`,
     fieldIdentity,
     contentTypeName: resolveContentTypeName(value.firstHighlight),
-    fieldName: formatDisplayName(value.firstHighlight.fieldId),
+    fieldName: value.firstHighlight.fieldName,
     fieldType: resolveFieldTypeLabel(value.firstHighlight),
-    displayLabel: formatDisplayName(value.firstHighlight.fieldId),
+    displayLabel: value.firstHighlight.fieldName,
     anchorId: getAnchorIdForSourceRef(value.firstHighlight.sourceRef),
     mappingKeys: uniqueStrings(value.mappingKeys),
     entryLabel: resolveEntryLabel(value.firstHighlight),

@@ -43,7 +43,6 @@ import {
 import { buildListMarkers } from './buildListMarkers';
 import {
   displayType,
-  formatDisplayName,
   isAssetFieldForImageAssign,
   isWorkflowContentTypeFieldWithId,
 } from './fieldFormatting';
@@ -262,8 +261,8 @@ export const MappingView = ({
     useReviewTextSelection(textSelectionRootRef, occludingTopRef);
 
   const highlightIndex = useMemo(
-    () => buildMappingHighlightIndex(entryBlockGraph),
-    [entryBlockGraph]
+    () => buildMappingHighlightIndex(entryBlockGraph, payload.contentTypes),
+    [entryBlockGraph, payload.contentTypes]
   );
 
   const { tabs, allSegments } = useMemo(() => buildDocument(document), [document]);
@@ -433,9 +432,6 @@ export const MappingView = ({
         byKey.set(card.key, {
           ...firstLocation,
           id: card.key,
-          displayLabel: hasPositionalDisplayLabel(card.displayLabel)
-            ? card.displayLabel
-            : undefined,
           sourceRefs: sourceLocations.map((location) => location.sourceRef),
           mappingKeys: [...card.mappingKeys],
           isSelected: false,
@@ -1150,6 +1146,7 @@ export const MappingView = ({
                                   !showGroupedSurface && !prefersImageOnlyHighlight
                                 }
                                 preferImageReadOnlyHighlight={prefersImageOnlyHighlight}
+                                suppressInlineHighlights={showGroupedSurface}
                               />
                             ))}
                           </Flex>
@@ -1174,6 +1171,7 @@ export const MappingView = ({
                                 !showGroupedSurface && !prefersImageOnlyHighlight
                               }
                               preferImageReadOnlyHighlight={prefersImageOnlyHighlight}
+                              suppressInlineHighlights={showGroupedSurface}
                             />
                           ))}
                         </Flex>
@@ -1249,7 +1247,9 @@ export const MappingView = ({
                               isGroupHovered ? tokens.green600 : tokens.green500
                             }`,
                             borderRadius: tokens.borderRadiusMedium,
-                            backgroundColor: 'transparent',
+                            backgroundColor: isReadOnlyAllMappings
+                              ? 'transparent'
+                              : tokens.green100,
                             padding: tokens.spacing2Xs,
                             boxShadow: isGroupHovered
                               ? `inset 0 0 0 1px ${tokens.green600}`
@@ -1275,6 +1275,7 @@ export const MappingView = ({
                                   !showGroupedSurface && !prefersImageOnlyHighlight
                                 }
                                 preferImageReadOnlyHighlight={prefersImageOnlyHighlight}
+                                suppressInlineHighlights={showGroupedSurface}
                               />
                             ))}
                           </Flex>
@@ -1299,6 +1300,7 @@ export const MappingView = ({
                                 !showGroupedSurface && !prefersImageOnlyHighlight
                               }
                               preferImageReadOnlyHighlight={prefersImageOnlyHighlight}
+                              suppressInlineHighlights={showGroupedSurface}
                             />
                           ))}
                         </Flex>

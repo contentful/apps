@@ -84,13 +84,15 @@ function getHighlightStyle(highlighted: boolean, hovered: boolean, readOnly = fa
   if (!highlighted) return { border: 'transparent', background: 'transparent' };
   if (readOnly) {
     return {
-      border: 'transparent',
+      border: hovered ? tokens.green600 : tokens.green500,
       background: 'transparent',
+      boxShadow: hovered ? `inset 0 0 0 1px ${tokens.green600}` : undefined,
     };
   }
   return {
-    border: 'transparent',
-    background: hovered ? tokens.green300 : tokens.green200,
+    border: hovered ? tokens.green600 : tokens.green500,
+    background: tokens.green100,
+    boxShadow: hovered ? `inset 0 0 0 1px ${tokens.green600}` : undefined,
   };
 }
 
@@ -171,6 +173,10 @@ const TextSegmentSpan = ({
           segment.highlighted && highlightStyle.border !== 'transparent'
             ? `1px solid ${highlightStyle.border}`
             : undefined,
+        boxShadow:
+          segment.highlighted && highlightStyle.border !== 'transparent'
+            ? highlightStyle.boxShadow
+            : undefined,
         borderRadius: segment.highlighted ? tokens.borderRadiusSmall : undefined,
         paddingInline:
           segment.highlighted && highlightStyle.border !== 'transparent'
@@ -218,6 +224,7 @@ interface BlockRendererProps {
   readOnly?: boolean;
   showReadOnlyOutline?: boolean;
   preferImageReadOnlyHighlight?: boolean;
+  suppressInlineHighlights?: boolean;
 }
 
 export const BlockRenderer = ({
@@ -235,6 +242,7 @@ export const BlockRenderer = ({
   readOnly = false,
   showReadOnlyOutline = true,
   preferImageReadOnlyHighlight = false,
+  suppressInlineHighlights = false,
 }: BlockRendererProps) => {
   const visibleHighlights = filterByEntry(
     highlightIndex.blockHighlights[block.id] ?? [],
@@ -266,6 +274,9 @@ export const BlockRenderer = ({
           rangeEnd={seg.end}
           blockId={block.id}
           readOnly={readOnly}
+          suppressInlineHighlight={
+            suppressInlineHighlights || (readOnly && showReadOnlyOutline && hasVisibleTextMappings)
+          }
         />
       ))}
     </Text>
@@ -409,6 +420,7 @@ interface TableRendererProps {
   readOnly?: boolean;
   showReadOnlyOutline?: boolean;
   preferImageReadOnlyHighlight?: boolean;
+  suppressInlineHighlights?: boolean;
 }
 
 interface TablePartRendererProps {
@@ -453,6 +465,12 @@ const TablePartRenderer = ({
   );
   const hasVisibleMappings = partMappingKeys.length > 0;
   const isPartHovered = isMappingHovered(partMappingKeys, hoveredMappingKeys);
+  const showEditModeFullSurface =
+    !readOnly &&
+    suppressInlineHighlights &&
+    showReadOnlyOutline &&
+    part.type === 'text' &&
+    hasVisibleMappings;
 
   if (part.type === 'image') {
     const image = imageById[part.imageId];
@@ -516,9 +534,7 @@ const TablePartRenderer = ({
     <Box
       as="span"
       id={anchorId}
-      data-review-alignment-target={
-        readOnly && showReadOnlyOutline && hasVisibleMappings ? 'true' : undefined
-      }
+      data-review-alignment-target={showReadOnlyOutline && hasVisibleMappings ? 'true' : undefined}
       onMouseEnter={
         readOnly && partMappingKeys.length > 0
           ? () => onSetHoveredMappingKeys(partMappingKeys)
@@ -530,11 +546,11 @@ const TablePartRenderer = ({
       style={{
         whiteSpace: 'pre-wrap',
         display: 'inline-block',
-        ...(readOnly && showReadOnlyOutline && hasVisibleMappings
+        ...((readOnly && showReadOnlyOutline && hasVisibleMappings) || showEditModeFullSurface
           ? {
               border: `1px solid ${isPartHovered ? tokens.green600 : tokens.green500}`,
               borderRadius: tokens.borderRadiusMedium,
-              backgroundColor: 'transparent',
+              backgroundColor: readOnly ? 'transparent' : tokens.green100,
               padding: tokens.spacingXs,
               boxShadow: isPartHovered ? `inset 0 0 0 1px ${tokens.green600}` : undefined,
               transition: 'border-color 120ms ease, box-shadow 120ms ease',
@@ -556,7 +572,9 @@ const TablePartRenderer = ({
           cellId={cellId}
           partId={part.id}
           readOnly={readOnly}
-          suppressInlineHighlight={suppressInlineHighlights}
+          suppressInlineHighlight={
+            suppressInlineHighlights || (readOnly && showReadOnlyOutline && hasVisibleMappings)
+          }
         />
       ))}
     </Box>
@@ -577,6 +595,7 @@ export const TableRenderer = ({
   readOnly = false,
   showReadOnlyOutline = true,
   preferImageReadOnlyHighlight = false,
+  suppressInlineHighlights = false,
 }: TableRendererProps) => {
   const getVisiblePartHighlights = (partKey: string) =>
     filterByEntry(highlightIndex.tablePartHighlights[partKey] ?? [], selectedEntryIndex);
@@ -638,13 +657,13 @@ export const TableRenderer = ({
     part: NormalizedDocumentTablePart,
     highlights: MappingHighlight[]
   ) => {
-    if (part.type !== 'text') {
-      return null;
-    }
-
     const uniqueFieldIdentities = new Set(highlights.map(getFieldIdentity));
     if (uniqueFieldIdentities.size !== 1) {
       return null;
+    }
+
+    if (part.type === 'image') {
+      return Array.from(uniqueFieldIdentities)[0];
     }
 
     return hasFullPartTextCoverage(part, highlights) ? Array.from(uniqueFieldIdentities)[0] : null;
@@ -836,6 +855,11 @@ export const TableRenderer = ({
                               chunk.part.type === 'text'
                                 ? showReadOnlyOutline && chunk.hasFullPartCoverage
                                 : showReadOnlyOutline
+                            }
+                            suppressInlineHighlights={
+                              chunk.part.type === 'text' &&
+                              chunk.hasFullPartCoverage &&
+                              (suppressInlineHighlights || !readOnly)
                             }
                           />
                         </Box>
