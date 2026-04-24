@@ -454,9 +454,9 @@ export const MappingView = ({
       .map((card) => locationsByCardKey.get(card.key))
       .filter((location): location is EditLocationOption => Boolean(location));
 
-    return locations.map((location, index) => ({
+    return locations.map((location) => ({
       ...location,
-      isSelected: index === 0,
+      isSelected: false,
     }));
   };
 
