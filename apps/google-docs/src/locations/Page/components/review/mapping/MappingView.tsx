@@ -29,7 +29,6 @@ import {
 import { buildListMarkers } from './buildListMarkers';
 import {
   displayType,
-  formatDisplayName,
   isAssetFieldForImageAssign,
   isWorkflowContentTypeFieldWithId,
 } from './fieldFormatting';
@@ -262,11 +261,24 @@ export const MappingView = ({
   const visibleHighlightsBySegment = useMemo(
     () =>
       allSegments.reduce<Record<string, MappingHighlight[]>>((acc, segment) => {
-        acc[segment.id] = getVisibleHighlights(getHighlightsForSegment(segment));
+        acc[segment.id] = getVisibleHighlights(getHighlightsForSegment(segment)).map(
+          (highlight) => {
+            const graphEntry = entryBlockGraph.entries[highlight.entryIndex];
+            const contentType = payload.contentTypes.find(
+              (item) => item.sys.id === graphEntry?.contentTypeId
+            );
+            const field = contentType?.fields.find((item) => item.id === highlight.fieldId);
+
+            return {
+              ...highlight,
+              fieldName: (field?.name ?? '').trim() || highlight.fieldId,
+            };
+          }
+        );
         return acc;
       }, {}),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [allSegments, entryBlockGraph, selectedEntryIndex]
+    [allSegments, entryBlockGraph, payload.contentTypes, selectedEntryIndex]
   );
 
   const { groupsByTab, allGroups } = useMemo(
@@ -361,7 +373,7 @@ export const MappingView = ({
       .filter(isWorkflowContentTypeFieldWithId)
       .map((field) => ({
         id: field.id,
-        fieldName: (field.name ?? '').trim() || formatDisplayName(field.id),
+        fieldName: (field.name ?? '').trim() || field.id,
         fieldDisplayType: displayType(field.type ?? '', field.linkType, field.items),
         isAssetField: isAssetFieldForImageAssign(field),
       }));

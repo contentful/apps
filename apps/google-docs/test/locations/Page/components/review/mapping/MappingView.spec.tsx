@@ -305,7 +305,7 @@ describe('MappingView', () => {
 
     expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(1);
-    expect(screen.getByText('Body')).toBeTruthy();
+    expect(screen.getByText('Body copy')).toBeTruthy();
     expect(
       container.querySelector('[data-testid^="mapping-group-surface-"]')?.textContent
     ).toContain('First body paragraph.');
@@ -364,9 +364,43 @@ describe('MappingView', () => {
       <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
     );
 
-    expect(screen.getByText('Body (1/2)')).toBeTruthy();
-    expect(screen.getByText('Body (2/2)')).toBeTruthy();
+    expect(screen.getByText('Body copy (1/2)')).toBeTruthy();
+    expect(screen.getByText('Body copy (2/2)')).toBeTruthy();
     expect(screen.getByText('Title')).toBeTruthy();
+  });
+
+  it('shows the content type field name on mapping cards when it differs from the field id', () => {
+    const block = createBlock('block-1', 1, 'SEO description goes here.');
+    const payload = createPayload({
+      blocks: [block],
+      fieldMappings: [
+        {
+          fieldId: 'seoDescription',
+          fieldType: 'Text',
+          sourceRefs: [createBlockTextSourceRef(block.id, block.text)],
+        },
+      ],
+    });
+
+    payload.contentTypes[0].fields = [
+      {
+        id: 'title',
+        name: 'Title',
+        type: 'Symbol',
+      },
+      {
+        id: 'seoDescription',
+        name: 'SEO Description',
+        type: 'Text',
+      },
+    ];
+
+    render(
+      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+    );
+
+    expect(screen.getByText('SEO Description')).toBeTruthy();
+    expect(screen.queryByText('Seo Description')).toBeNull();
   });
 
   it('does not merge mixed-mapping blocks with same-field neighbors', () => {
@@ -395,9 +429,9 @@ describe('MappingView', () => {
       <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
     );
 
-    expect(screen.getByText('Body (1/3)')).toBeTruthy();
-    expect(screen.getByText('Body (2/3)')).toBeTruthy();
-    expect(screen.getByText('Body (3/3)')).toBeTruthy();
+    expect(screen.getByText('Body copy (1/3)')).toBeTruthy();
+    expect(screen.getByText('Body copy (2/3)')).toBeTruthy();
+    expect(screen.getByText('Body copy (3/3)')).toBeTruthy();
     expect(screen.getByText('Summary')).toBeTruthy();
     expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(4);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(2);
@@ -511,8 +545,8 @@ describe('MappingView', () => {
       <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
     );
 
-    expect(screen.getByText('Body (1/2)')).toBeTruthy();
-    expect(screen.getByText('Body (2/2)')).toBeTruthy();
+    expect(screen.getByText('Body copy (1/2)')).toBeTruthy();
+    expect(screen.getByText('Body copy (2/2)')).toBeTruthy();
     expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(2);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
   });
@@ -895,8 +929,8 @@ describe('MappingView', () => {
       />
     );
 
-    expect(screen.getByText('Body (1/2)')).toBeTruthy();
-    expect(screen.getByText('Body (2/2)')).toBeTruthy();
+    expect(screen.getByText('Body copy (1/2)')).toBeTruthy();
+    expect(screen.getByText('Body copy (2/2)')).toBeTruthy();
     expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(2);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
   });
