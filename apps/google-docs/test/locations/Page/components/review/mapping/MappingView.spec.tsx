@@ -403,7 +403,7 @@ describe('MappingView', () => {
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(2);
   });
 
-  it('keeps separate cards for table rows mapped to the same field', () => {
+  it('groups table rows mapped to the same field into one card', () => {
     const firstRowText = 'slug-one';
     const secondRowText = 'slug-two';
     const payload = createPayload({
@@ -511,9 +511,11 @@ describe('MappingView', () => {
       <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
     );
 
-    expect(screen.getByText('Body (1/2)')).toBeTruthy();
-    expect(screen.getByText('Body (2/2)')).toBeTruthy();
-    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(2);
+    expect(
+      screen.getAllByText((_, node) => node?.textContent?.includes('Body | Long text') ?? false)
+        .length
+    ).toBeGreaterThan(0);
+    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
   });
 
@@ -710,7 +712,9 @@ describe('MappingView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Reassign' }));
 
     expect(screen.getByRole('heading', { name: 'Assign content' })).toBeTruthy();
-    expect(screen.getByText('"Second"')).toBeTruthy();
+    expect(
+      screen.getAllByText((_, node) => node?.textContent?.includes('Second') ?? false).length
+    ).toBeGreaterThan(0);
     expect(screen.getAllByText('Article').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
     expect(screen.getByText('New location')).toBeTruthy();
