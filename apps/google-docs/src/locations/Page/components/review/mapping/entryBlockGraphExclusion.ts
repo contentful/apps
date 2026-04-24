@@ -1111,6 +1111,13 @@ export function fullSpanTextExclusionRangesForSourceRef(
   ];
 }
 
+export function fullSpanTextExclusionRangesForLocation(
+  location: EditLocationOption
+): TextExclusionRange[] {
+  const sourceRefs = location.sourceRefs?.length ? location.sourceRefs : [location.sourceRef];
+  return sourceRefs.flatMap((sourceRef) => fullSpanTextExclusionRangesForSourceRef(sourceRef));
+}
+
 /**
  * Removes the image ref from the chosen field mapping and records it in excludedSourceRefs for UI.
  */

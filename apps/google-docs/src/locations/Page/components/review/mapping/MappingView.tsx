@@ -55,7 +55,7 @@ import {
   selectionIncludesTableContent,
   collectTextAssignRangesFromSelection,
   collectTextExclusionRangesFromSelection,
-  fullSpanTextExclusionRangesForSourceRef,
+  fullSpanTextExclusionRangesForLocation,
   type TextExclusionRange,
 } from './entryBlockGraphExclusion';
 
@@ -769,14 +769,15 @@ export const MappingView = ({
           return;
         }
 
-        if (!isTextSourceRef(from.sourceRef)) {
+        const effectiveRanges = pendingTextReassignRanges.length
+          ? pendingTextReassignRanges
+          : fullSpanTextExclusionRangesForLocation(from);
+
+        if (!effectiveRanges.length) {
+          onEntryBlockGraphChange(nextGraph);
           closeEditModal();
           return;
         }
-
-        const effectiveRanges = pendingTextReassignRanges.length
-          ? pendingTextReassignRanges
-          : fullSpanTextExclusionRangesForSourceRef(from.sourceRef);
 
         onEntryBlockGraphChange(
           applyTextReassignToEntryBlockGraph(nextGraph, from, effectiveRanges, nonRichTextTargets)
