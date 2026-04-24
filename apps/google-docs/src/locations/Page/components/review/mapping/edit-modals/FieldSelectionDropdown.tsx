@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo } from 'react';
-import { Badge, Flex, Stack, Text } from '@contentful/f36-components';
+import { Badge, Flex, FormControl, Text } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import type { EditModalFieldMapping, EditModalFieldOption } from '@types';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
@@ -52,6 +52,16 @@ export const FieldSelectionDropdown = ({
     return fieldOptions.filter((option) => isSelectableFieldType(option, selectedText));
   }, [fieldOptions, isImageContent, selectedText]);
 
+  const hasUnsupportedFields = useMemo(
+    () =>
+      fieldOptions.some((option) =>
+        isImageContent
+          ? !option.isAssetField
+          : !isSelectableFieldType(option, selectedText) && !option.isAssetField
+      ),
+    [fieldOptions, isImageContent, selectedText]
+  );
+
   useEffect(() => {
     onSelectableStateChange?.({
       hasFieldOptions: fieldOptions.length > 0,
@@ -76,7 +86,7 @@ export const FieldSelectionDropdown = ({
     selectedOptions.length === 0 ? 'Select one or more' : `${selectedOptions.length} selected`;
 
   return (
-    <Stack flexDirection="column" alignItems="start">
+    <FormControl as="div">
       <Multiselect
         key={key}
         currentSelection={currentSelection}
@@ -120,6 +130,12 @@ export const FieldSelectionDropdown = ({
           );
         })}
       </Multiselect>
-    </Stack>
+      {hasUnsupportedFields && (
+        <FormControl.HelpText style={{ fontSize: '0.7rem' }}>
+          This app doesn&apos;t support edits for Reference, Boolean, Date &amp; time, Location or
+          JSON fields. Use the entry editor instead.
+        </FormControl.HelpText>
+      )}
+    </FormControl>
   );
 };
