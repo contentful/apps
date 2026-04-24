@@ -15,6 +15,7 @@ interface OverviewProps {
   onViewAllMappings: () => void;
   onEditMode: () => void;
   isViewingAllMappings: boolean;
+  canEditMappings?: boolean;
   ctaLabel: string;
   onCtaClick: () => void;
   isCtaLoading?: boolean;
@@ -27,6 +28,7 @@ const OverviewSection = ({
   onViewAllMappings,
   onEditMode,
   isViewingAllMappings,
+  canEditMappings = true,
   ctaLabel,
   onCtaClick,
   isCtaLoading = false,
@@ -107,20 +109,22 @@ const OverviewSection = ({
                   size="small"
                   aria-pressed={isViewingAllMappings}
                   onClick={onViewAllMappings}
-                  isDisabled={areModeButtonsDisabled}
-                  style={toggleButtonStyle(isViewingAllMappings, true, false)}>
+                  isDisabled={areModeButtonsDisabled || !canEditMappings}
+                  style={toggleButtonStyle(isViewingAllMappings, true, !canEditMappings)}>
                   View only
                 </Button>
-                <Button
-                  variant="transparent"
-                  startIcon={<PencilSimpleIcon />}
-                  size="small"
-                  aria-pressed={!isViewingAllMappings}
-                  onClick={onEditMode}
-                  isDisabled={areModeButtonsDisabled}
-                  style={toggleButtonStyle(!isViewingAllMappings, false, true)}>
-                  Edit mode
-                </Button>
+                {canEditMappings ? (
+                  <Button
+                    variant="transparent"
+                    startIcon={<PencilSimpleIcon />}
+                    size="small"
+                    aria-pressed={!isViewingAllMappings}
+                    onClick={onEditMode}
+                    isDisabled={areModeButtonsDisabled}
+                    style={toggleButtonStyle(!isViewingAllMappings, false, true)}>
+                    Edit mode
+                  </Button>
+                ) : null}
               </Box>
               <Button
                 variant="primary"

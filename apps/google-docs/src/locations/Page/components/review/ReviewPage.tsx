@@ -99,6 +99,7 @@ export const ReviewPage = ({
         }
 
         setCreatedEntries(entries);
+        setReviewMode('all');
         setIsSummaryModalOpen(true);
         return;
       }
@@ -194,6 +195,7 @@ export const ReviewPage = ({
             onViewAllMappings={handleViewAllMappings}
             onEditMode={handleEditMode}
             isViewingAllMappings={reviewMode === 'all'}
+            canEditMappings={!hasCreatedEntries}
             ctaLabel={hasCreatedEntries ? 'View entries' : 'Create entries'}
             onCtaClick={handleCreateOrViewEntries}
             isCtaLoading={isCreatePending}

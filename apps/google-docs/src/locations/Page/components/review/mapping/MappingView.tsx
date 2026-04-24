@@ -456,7 +456,7 @@ export const MappingView = ({
 
       return {
         id: field.id,
-        fieldName: (field.name ?? '').trim() || formatDisplayName(field.id),
+        fieldName: (field.name ?? '').trim() || field.id,
         fieldType,
         fieldDisplayType: displayType(fieldType, field.linkType, field.items),
         isAssetField: isAssetFieldForImageAssign(field),

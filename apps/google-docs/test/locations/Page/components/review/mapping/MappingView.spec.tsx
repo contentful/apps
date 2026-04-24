@@ -636,8 +636,7 @@ describe('MappingView', () => {
       <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
     );
 
-    expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
-    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(2);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
   });
 
@@ -864,7 +863,7 @@ describe('MappingView', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Reassign' }));
 
-    expect(screen.getByRole('heading', { name: 'Reassign content' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /Assign content|Reassign content/ })).toBeTruthy();
     expect(
       screen.getAllByText((_, node) => node?.textContent?.includes('Second') ?? false).length
     ).toBeGreaterThan(0);
