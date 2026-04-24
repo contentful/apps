@@ -293,33 +293,6 @@ export const MappingView = ({
     };
   };
 
-  const locationsByMappingKey = useMemo(() => {
-    const byKey = new Map<string, EditLocationOption>();
-
-    allSegments.forEach((segment) => {
-      const highlights = getVisibleHighlights(getHighlightsForSegment(segment));
-      highlights.forEach((highlight) => {
-        const mappingKey = getMappingCardKey(segment.id, highlight);
-        if (byKey.has(mappingKey)) {
-          return;
-        }
-        const nextLocation = buildLocationOption(
-          highlight.entryIndex,
-          highlight.fieldId,
-          highlight.fieldType,
-          highlight.sourceRef,
-          byKey.size === 0
-        );
-        if (nextLocation) {
-          byKey.set(mappingKey, nextLocation);
-        }
-      });
-    });
-
-    return byKey;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allSegments, entryBlockGraph, payload.contentTypes, selectedEntryIndex]);
-
   const getNewLocationForEntry = (
     entry: EntryBlockGraph['entries'][number],
     entryIndex: number
@@ -390,35 +363,63 @@ export const MappingView = ({
     return matches;
   };
 
-  const getLocationsForSelectedText = (): EditLocationOption[] => {
-    const root = textSelectionRootRef.current;
-    if (!root || !selectedRange) {
+  const getLocationsForTextRanges = (ranges: TextExclusionRange[]): EditLocationOption[] => {
+    if (!ranges.length) {
       return [];
     }
 
-    const selectedMappedSegments = root.querySelectorAll<HTMLElement>(
-      '[data-review-text-segment="true"][data-is-mapped="true"]'
-    );
-    const mappingKeys = new Set<string>();
+    const locations = new Map<string, EditLocationOption>();
 
-    for (const segment of selectedMappedSegments) {
-      if (!rangeIntersectsNode(selectedRange, segment)) {
-        continue;
+    const textRangeOverlapsSelection = (sourceRef: SourceRef): sourceRef is SourceRef => {
+      if (!isTextSourceRef(sourceRef)) {
+        return false;
       }
 
-      const serializedMappingKeys = segment.dataset.mappingKeys ?? '';
-      serializedMappingKeys
-        .split('|')
-        .map((key) => key.trim())
-        .filter(Boolean)
-        .forEach((key) => mappingKeys.add(key));
-    }
+      return ranges.some((range) => {
+        if (range.scope === 'block' && sourceRef.type === 'blockText') {
+          return (
+            range.blockId === sourceRef.blockId &&
+            range.start < sourceRef.end &&
+            range.end > sourceRef.start
+          );
+        }
 
-    const locations = Array.from(mappingKeys)
-      .map((key) => locationsByMappingKey.get(key))
-      .filter((location): location is EditLocationOption => Boolean(location));
+        if (
+          range.scope === 'table' &&
+          sourceRef.type === 'tableText' &&
+          range.tableId === sourceRef.tableId &&
+          range.rowId === sourceRef.rowId &&
+          range.cellId === sourceRef.cellId &&
+          range.partId === sourceRef.partId
+        ) {
+          return range.start < sourceRef.end && range.end > sourceRef.start;
+        }
 
-    return locations.map((location, index) => ({
+        return false;
+      });
+    };
+
+    entryBlockGraph.entries.forEach((entry, entryIndex) => {
+      entry.fieldMappings.forEach((fieldMapping) => {
+        const matchingSourceRef = fieldMapping.sourceRefs.find(textRangeOverlapsSelection);
+        if (!matchingSourceRef) {
+          return;
+        }
+
+        const nextLocation = buildLocationOption(
+          entryIndex,
+          fieldMapping.fieldId,
+          fieldMapping.fieldType,
+          matchingSourceRef,
+          locations.size === 0
+        );
+        if (nextLocation) {
+          locations.set(nextLocation.id, nextLocation);
+        }
+      });
+    });
+
+    return Array.from(locations.values()).map((location, index) => ({
       ...location,
       isSelected: index === 0,
     }));
@@ -543,7 +544,7 @@ export const MappingView = ({
     );
     openAssignModal(
       selectedText.trim(),
-      getLocationsForSelectedText(),
+      getLocationsForTextRanges(reassignRanges),
       reassignRanges,
       assignRanges
     );
@@ -563,7 +564,7 @@ export const MappingView = ({
       textSelectionRootRef.current,
       selectedRange
     ).trim();
-    openExcludeModal(trimmed, getLocationsForSelectedText(), {
+    openExcludeModal(trimmed, getLocationsForTextRanges(ranges), {
       contentPreview: mappedPreview || trimmed,
       previewSectionTitle: 'Text to exclude',
     });

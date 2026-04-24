@@ -127,6 +127,102 @@ const createPayload = (excludedSourceRefs: SourceRef[] = []): MappingReviewSuspe
   ],
 });
 
+const createMultiLocationPayload = (): MappingReviewSuspendPayload => ({
+  suspendStepId: 'mapping-review',
+  reason: 'Mapping review required before CMA payload generation continues',
+  documentId: 'doc-multi-location',
+  documentTitle: 'Mapping review',
+  normalizedDocument: {
+    documentId: 'doc-multi-location',
+    title: 'Mapping review',
+    designValues: [],
+    contentBlocks: [
+      {
+        id: 'block-1',
+        position: 1,
+        type: 'paragraph',
+        textRuns: [{ text: 'Hello world' }],
+        flattenedTextRuns: [{ text: 'Hello world', start: 0, end: 11 }],
+        designValueIds: [],
+        imageIds: [],
+      },
+    ],
+    images: [],
+    tables: [],
+    assets: [],
+  },
+  entryBlockGraph: {
+    entries: [
+      {
+        contentTypeId: 'article',
+        fields: { title: { 'en-US': 'Draft title from display field' } },
+        fieldMappings: [
+          {
+            fieldId: 'body',
+            fieldType: 'Text',
+            sourceRefs: [blockTextSourceRef],
+            confidence: 0.9,
+          },
+          {
+            fieldId: 'excerpt',
+            fieldType: 'Symbol',
+            sourceRefs: [blockTextSourceRef],
+            confidence: 0.9,
+          },
+        ],
+      },
+      {
+        contentTypeId: 'article',
+        fields: { title: { 'en-US': 'Child entry title' } },
+        fieldMappings: [
+          {
+            fieldId: 'summary',
+            fieldType: 'Text',
+            sourceRefs: [blockTextSourceRef],
+            confidence: 0.9,
+          },
+        ],
+      },
+    ],
+    excludedSourceRefs: [],
+  },
+  referenceGraph: {
+    edges: [{ from: '0', to: '1', fieldId: 'children' }],
+    creationOrder: ['0', '1'],
+    deferredFields: [],
+    hasCircularDependency: false,
+  },
+  contentTypes: [
+    {
+      sys: { id: 'article' },
+      name: 'Article',
+      displayField: 'title',
+      fields: [
+        {
+          id: 'title',
+          name: 'Title',
+          type: 'Symbol',
+        },
+        {
+          id: 'body',
+          name: 'Body copy',
+          type: 'Text',
+        },
+        {
+          id: 'excerpt',
+          name: 'Excerpt',
+          type: 'Symbol',
+        },
+        {
+          id: 'summary',
+          name: 'Summary',
+          type: 'Text',
+        },
+      ],
+    },
+  ],
+});
+
 const createImagePayload = (): MappingReviewSuspendPayload => ({
   suspendStepId: 'mapping-review',
   reason: 'Mapping review required before CMA payload generation continues',
@@ -345,6 +441,52 @@ describe('MappingView', () => {
       screen.getAllByText((_, node) => node?.textContent?.includes('| Long text') ?? false).length
     ).toBeGreaterThan(0);
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows all current locations when reassigning text mapped in multiple entry locations', () => {
+    mockUseReviewTextSelection.mockReturnValueOnce({
+      selectionRectangle: null,
+      selectedText: '',
+      selectedRange: null,
+      clearSelection: mockClearSelection,
+    });
+
+    const payload = createMultiLocationPayload();
+    const { container, rerender } = render(
+      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+    );
+    const selectedRange = createDomRange(
+      container.querySelector('[data-review-text-segment="true"]')?.firstChild as Text,
+      0,
+      5
+    );
+    mockUseReviewTextSelection.mockReturnValue({
+      selectionRectangle: { top: 100, left: 100, right: 160, bottom: 120 },
+      selectedText: 'selected body text',
+      selectedRange,
+      clearSelection: mockClearSelection,
+    });
+    rerender(
+      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reassign' }));
+
+    expect(screen.getByRole('heading', { name: 'Assign content' })).toBeTruthy();
+    expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Excerpt').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Summary').length).toBeGreaterThan(0);
+    expect(
+      screen
+        .getAllByRole('button')
+        .filter((element) => element.getAttribute('aria-pressed') !== null)
+    ).toHaveLength(3);
+    expect(
+      screen.getAllByText((_, node) => node?.textContent?.includes('| Long text') ?? false).length
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText((_, node) => node?.textContent?.includes('| Short text') ?? false).length
+    ).toBeGreaterThan(0);
   });
 
   it('scopes image assignment destinations to currently selected entry', () => {
