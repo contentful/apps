@@ -237,10 +237,10 @@ export const MappingView = ({
       (item) => item.sys.id === graphEntry.contentTypeId
     );
     const contentTypeDisplayName = (contentType?.name ?? '').trim();
-    const contentTypeField = contentType?.fields.find((field) => field.id === fieldId);
-    const fieldDisplayName = (contentTypeField?.name ?? '').trim();
-    const fieldDisplayType = contentTypeField
-      ? displayType(contentTypeField.type ?? '', contentTypeField.linkType, contentTypeField.items)
+    const field = contentType?.fields.find((field) => field.id === fieldId);
+    const fieldDisplayName = (field?.name ?? '').trim() || fieldId;
+    const fieldDisplayType = field
+      ? displayType(field.type ?? '', field.linkType, field.items)
       : displayType(fieldType);
     const entryName = getEntryTitleFromFieldMappings(graphEntry, contentType?.displayField);
 
