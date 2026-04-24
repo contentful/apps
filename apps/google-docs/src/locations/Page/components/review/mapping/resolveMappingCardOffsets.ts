@@ -1,11 +1,23 @@
-import { isBlockSourceRef, type SourceRef } from '@types';
+import {
+  isBlockSourceRef,
+  isTableImageSourceRef,
+  isTextSourceRef,
+  type SourceRef,
+} from '@types';
 
 const DEFAULT_CARD_GAP = 8;
 
-export const getAnchorIdForSourceRef = (sourceRef: SourceRef): string =>
-  isBlockSourceRef(sourceRef)
-    ? `block:${sourceRef.blockId}`
-    : `row:${sourceRef.tableId}:${sourceRef.rowId}`;
+export const getAnchorIdForSourceRef = (sourceRef: SourceRef): string => {
+  if (isBlockSourceRef(sourceRef)) {
+    return `block:${sourceRef.blockId}`;
+  }
+
+  if (isTextSourceRef(sourceRef) || isTableImageSourceRef(sourceRef)) {
+    return `part:${sourceRef.tableId}:${sourceRef.rowId}:${sourceRef.cellId}:${sourceRef.partId}`;
+  }
+
+  return '';
+};
 
 export function resolveMarkerOffsets(
   cards: Array<{ key: string; rawTop: number; height: number }>,

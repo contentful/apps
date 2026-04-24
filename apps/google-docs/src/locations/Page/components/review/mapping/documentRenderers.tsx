@@ -24,6 +24,7 @@ import type { MappingHighlight, MappingHighlightIndex } from './buildHighlights'
 import { getMappingCardKey } from './buildHighlights';
 import type { ListMarker } from './buildListMarkers';
 import { buildTextSegments, type TextSegment } from './buildTextSegments';
+import { getAnchorIdForSourceRef } from './resolveMappingCardOffsets';
 import { ReviewImageAssetCard } from './ReviewImageAssetCard';
 import { isImageSourceRefExcluded } from './sourceRefUtils';
 
@@ -48,6 +49,35 @@ function getFieldIdentity(highlight: MappingHighlight): string {
 
 function uniqueStrings(values: string[]): string[] {
   return Array.from(new Set(values));
+}
+
+const GROUPABLE_SEPARATOR_PATTERN = /^[\s/|,:;()[\]{}\-–—]+$/;
+
+function getTextSliceFromRuns(
+  flattenedRuns: Array<{ start: number; end: number; text: string }>,
+  from: number,
+  to: number
+): string {
+  if (to <= from) {
+    return '';
+  }
+
+  return flattenedRuns
+    .flatMap((run) => {
+      const overlapStart = Math.max(from, run.start);
+      const overlapEnd = Math.min(to, run.end);
+
+      if (overlapEnd <= overlapStart) {
+        return [];
+      }
+
+      return [run.text.slice(overlapStart - run.start, overlapEnd - run.start)];
+    })
+    .join('');
+}
+
+function isOnlyGroupableSeparators(value: string): boolean {
+  return value.length === 0 || GROUPABLE_SEPARATOR_PATTERN.test(value);
 }
 
 function getHighlightStyle(highlighted: boolean, hovered: boolean, readOnly = false) {
@@ -386,6 +416,7 @@ interface TablePartRendererProps {
   tableId: string;
   rowId: string;
   cellId: string;
+  anchorId?: string;
   part: NormalizedDocumentTablePart;
   visibleHighlights: MappingHighlight[];
   imageById: Record<string, NormalizedDocumentImage>;
@@ -404,6 +435,7 @@ const TablePartRenderer = ({
   tableId,
   rowId,
   cellId,
+  anchorId,
   part,
   visibleHighlights,
   imageById,
@@ -483,6 +515,7 @@ const TablePartRenderer = ({
   return (
     <Box
       as="span"
+      id={anchorId}
       data-review-alignment-target={
         readOnly && showReadOnlyOutline && hasVisibleMappings ? 'true' : undefined
       }
@@ -576,19 +609,29 @@ export const TableRenderer = ({
     );
     let coverageEnd = sortedHighlights[0].sourceRef.end;
 
-    if (sortedHighlights[0].sourceRef.start > partStart) {
+    if (
+      !isOnlyGroupableSeparators(
+        getTextSliceFromRuns(part.flattenedTextRuns, partStart, sortedHighlights[0].sourceRef.start)
+      )
+    ) {
       return false;
     }
 
     for (let index = 1; index < sortedHighlights.length; index += 1) {
       const highlight = sortedHighlights[index];
-      if (highlight.sourceRef.start > coverageEnd) {
+      if (
+        !isOnlyGroupableSeparators(
+          getTextSliceFromRuns(part.flattenedTextRuns, coverageEnd, highlight.sourceRef.start)
+        )
+      ) {
         return false;
       }
       coverageEnd = Math.max(coverageEnd, highlight.sourceRef.end);
     }
 
-    return coverageEnd >= partEnd;
+    return isOnlyGroupableSeparators(
+      getTextSliceFromRuns(part.flattenedTextRuns, coverageEnd, partEnd)
+    );
   };
 
   const getPartFieldIdentity = (
@@ -627,10 +670,13 @@ export const TableRenderer = ({
             {row.cells.map((cell) => {
               const partHighlightsByKey = cell.parts.map((part) => {
                 const partKey = [table.id, row.id, cell.id, part.id].join(':');
+                const highlights = getVisiblePartHighlights(partKey);
                 return {
                   part,
-                  highlights: getVisiblePartHighlights(partKey),
-                  fieldIdentity: getPartFieldIdentity(part, getVisiblePartHighlights(partKey)),
+                  highlights,
+                  fieldIdentity: getPartFieldIdentity(part, highlights),
+                  hasFullPartCoverage:
+                    part.type === 'text' ? hasFullPartTextCoverage(part, highlights) : false,
                 };
               });
 
@@ -646,6 +692,7 @@ export const TableRenderer = ({
                     id: string;
                     part: (typeof partHighlightsByKey)[number]['part'];
                     highlights: MappingHighlight[];
+                    hasFullPartCoverage: boolean;
                   };
 
               const chunks: CellChunk[] = [];
@@ -692,6 +739,7 @@ export const TableRenderer = ({
                   id: `${cell.id}:${partState.part.id}`,
                   part: partState.part,
                   highlights: partState.highlights,
+                  hasFullPartCoverage: partState.hasFullPartCoverage,
                 });
               });
 
@@ -709,10 +757,17 @@ export const TableRenderer = ({
                           chunk.mappingKeys,
                           hoveredMappingKeys
                         );
+                        const firstHighlight = chunk.parts.flatMap(
+                          (partState) => partState.highlights
+                        )[0];
+                        const chunkAnchorId = firstHighlight
+                          ? getAnchorIdForSourceRef(firstHighlight.sourceRef)
+                          : undefined;
 
                         return (
                           <Box
                             key={chunk.id}
+                            id={chunkAnchorId}
                             data-review-alignment-target={readOnly ? 'true' : undefined}
                             onMouseEnter={() => onSetHoveredMappingKeys(chunk.mappingKeys)}
                             onMouseLeave={() => onSetHoveredMappingKeys([])}
@@ -736,6 +791,7 @@ export const TableRenderer = ({
                                     tableId={table.id}
                                     rowId={row.id}
                                     cellId={cell.id}
+                                    anchorId={undefined}
                                     part={partState.part}
                                     visibleHighlights={partState.highlights}
                                     imageById={imageById}
@@ -762,6 +818,11 @@ export const TableRenderer = ({
                             tableId={table.id}
                             rowId={row.id}
                             cellId={cell.id}
+                            anchorId={
+                              chunk.highlights[0]
+                                ? getAnchorIdForSourceRef(chunk.highlights[0].sourceRef)
+                                : undefined
+                            }
                             part={chunk.part}
                             visibleHighlights={chunk.highlights}
                             imageById={imageById}
@@ -771,7 +832,11 @@ export const TableRenderer = ({
                             onAssignImage={onAssignImage}
                             onExcludeImage={onExcludeImage}
                             readOnly={readOnly}
-                            showReadOnlyOutline={showReadOnlyOutline}
+                            showReadOnlyOutline={
+                              chunk.part.type === 'text'
+                                ? showReadOnlyOutline && chunk.hasFullPartCoverage
+                                : showReadOnlyOutline
+                            }
                           />
                         </Box>
                       );
