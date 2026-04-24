@@ -59,7 +59,7 @@ export function ReviewImageAssetCard({
         maxWidth: '100%',
         verticalAlign: 'top',
         borderRadius: tokens.borderRadiusMedium,
-        border: `2px solid ${borderColor}`,
+        border: `1px solid ${borderColor}`,
         backgroundColor: isHighlighted ? tokens.green100 : tokens.gray100,
         transition: 'border-color 120ms ease',
         overflow: 'hidden',
