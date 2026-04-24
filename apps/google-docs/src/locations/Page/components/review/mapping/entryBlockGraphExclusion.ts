@@ -819,9 +819,9 @@ export function applyTextExclusionToEntryBlockGraph(
         .map((fm) => {
           if (fm.fieldId !== location.fieldId) return fm;
 
-        const nextRefs = fm.sourceRefs.flatMap((sr) => {
-          if (!locationSourceRefKeys.has(buildSourceRefKey(sr))) return [sr];
-          if (!isTextSourceRef(sr)) return [sr];
+          const nextRefs = fm.sourceRefs.flatMap((sr) => {
+            if (!locationSourceRefKeys.has(buildSourceRefKey(sr))) return [sr];
+            if (!isTextSourceRef(sr)) return [sr];
 
             const cuts = rangesOverlappingTextSourceRef(sr, pendingRanges);
             if (!cuts.length) return [sr];
