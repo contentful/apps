@@ -660,10 +660,10 @@ export const MappingView = ({
   };
 
   const handleEditModalConfirmPrimary = ({
-    selectedLocationId,
+    selectedLocationIds = [],
     selectedFieldIds = {},
   }: {
-    selectedLocationId: string | null;
+    selectedLocationIds?: string[];
     selectedFieldIds?: Record<string, string[]>;
   }) => {
     if (editModalState.mode === 'assign') {
@@ -714,7 +714,7 @@ export const MappingView = ({
         }
 
         const from =
-          locations.find((location) => location.id === selectedLocationId) ??
+          locations.find((location) => location.id === selectedLocationIds[0]) ??
           locations.find((location) => location.isSelected) ??
           locations[0];
 
@@ -737,7 +737,7 @@ export const MappingView = ({
 
       if (locations.length > 0) {
         const from =
-          locations.find((location) => location.id === selectedLocationId) ??
+          locations.find((location) => location.id === selectedLocationIds[0]) ??
           locations.find((location) => location.isSelected) ??
           locations[0];
 
@@ -850,50 +850,42 @@ export const MappingView = ({
     }
 
     const locations = editModalState.viewModel.currentLocations;
-    const selected =
-      locations.find((location) => location.id === selectedLocationId) ??
-      locations.find((location) => location.isSelected) ??
-      locations[0];
+    const selected = locations.filter((location) => selectedLocationIds.includes(location.id));
 
-    if (!selected) {
+    if (!selected.length) {
       closeEditModal();
       return;
     }
 
-    if (pendingImageSourceRef) {
-      onEntryBlockGraphChange(
-        applyImageExclusionToEntryBlockGraph(entryBlockGraph, selected, pendingImageSourceRef)
-      );
-    } else {
-      const selectedSourceRefKeys = new Set(
-        (selected.sourceRefs?.length ? selected.sourceRefs : [selected.sourceRef]).map(
-          (sourceRef) => buildSourceRefKey(sourceRef)
-        )
-      );
-      const matchingImageSourceRefs = pendingExcludeImageSourceRefs.filter((sourceRef) =>
-        selectedSourceRefKeys.has(buildSourceRefKey(sourceRef))
-      );
-
-      let nextGraph = entryBlockGraph;
-
-      if (pendingTextExclusionRanges?.length) {
-        nextGraph = applyTextExclusionToEntryBlockGraph(
-          nextGraph,
-          selected,
-          pendingTextExclusionRanges
+    let next = entryBlockGraph;
+    for (const location of selected) {
+      if (pendingImageSourceRef) {
+        next = applyImageExclusionToEntryBlockGraph(next, location, pendingImageSourceRef);
+      } else {
+        const selectedSourceRefKeys = new Set(
+          (location.sourceRefs?.length ? location.sourceRefs : [location.sourceRef]).map(
+            (sourceRef) => buildSourceRefKey(sourceRef)
+          )
         );
-      }
-
-      if (matchingImageSourceRefs.length) {
-        nextGraph = matchingImageSourceRefs.reduce(
-          (graph, sourceRef) => applyImageExclusionToEntryBlockGraph(graph, selected, sourceRef),
-          nextGraph
+        const matchingImageSourceRefs = pendingExcludeImageSourceRefs.filter((sourceRef) =>
+          selectedSourceRefKeys.has(buildSourceRefKey(sourceRef))
         );
-      }
 
-      if (nextGraph !== entryBlockGraph) {
-        onEntryBlockGraphChange(nextGraph);
+        if (pendingTextExclusionRanges?.length) {
+          next = applyTextExclusionToEntryBlockGraph(next, location, pendingTextExclusionRanges);
+        }
+
+        if (matchingImageSourceRefs.length) {
+          next = matchingImageSourceRefs.reduce(
+            (graph, sourceRef) => applyImageExclusionToEntryBlockGraph(graph, location, sourceRef),
+            next
+          );
+        }
       }
+    }
+
+    if (next !== entryBlockGraph) {
+      onEntryBlockGraphChange(next);
     }
 
     closeEditModal();

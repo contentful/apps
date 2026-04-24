@@ -26,7 +26,7 @@ interface EditModalProps {
   primaryButtonLabel: string;
   additionalContent?: ReactNode;
   onConfirmPrimary?: (details: {
-    selectedLocationId: string | null;
+    selectedLocationIds: string[];
     selectedFieldIds: Record<string, string[]>;
   }) => void;
 }
@@ -46,17 +46,8 @@ export const EditModal = ({
   const hasLocationSectionDescription = locationSectionDescription.trim().length > 0;
   const hasCurrentLocations = viewModel.currentLocations.length > 0;
   const hasNewLocation = viewModel.newLocation.id !== '';
-  const initialSelectedLocationId = useMemo(
-    () =>
-      viewModel.currentLocations.find((location) => location.isSelected)?.id ??
-      viewModel.currentLocations[0]?.id ??
-      null,
-    [viewModel.currentLocations]
-  );
 
-  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
-    initialSelectedLocationId
-  );
+  const [selectedLocationIds, setSelectedLocationIds] = useState<string[]>([]);
 
   const [selectedFieldIds, setSelectedFieldIds] = useState(
     () => viewModel.newLocation.selectedFieldIds ?? []
@@ -66,10 +57,6 @@ export const EditModal = ({
     hasFieldOptions: boolean;
     hasSelectableOptions: boolean;
   } | null>(null);
-
-  useEffect(() => {
-    setSelectedLocationId(initialSelectedLocationId);
-  }, [initialSelectedLocationId]);
 
   const newLocationRowIdsKey = viewModel.newLocation.id;
 
@@ -88,7 +75,7 @@ export const EditModal = ({
 
   const handlePrimaryAction = () => {
     onConfirmPrimary?.({
-      selectedLocationId,
+      selectedLocationIds,
       selectedFieldIds: {
         [viewModel.newLocation.id]: [...selectedFieldIds],
       },
@@ -101,12 +88,15 @@ export const EditModal = ({
   const isAssignMode = mode === 'assign';
   const isPrimaryDisabled = useMemo(
     () =>
-      isAssignMode &&
-      (!hasNewLocation || // no destination entry available
-        viewModel.newLocation.fieldOptions.length === 0 || // destination entry has no fields
-        destinationFieldState?.hasSelectableOptions === false || // no fields compatible with this content type
-        selectedDestinationCount === 0), // user hasn't selected a destination field yet
+      (hasCurrentLocations && selectedLocationIds.length === 0) || // no current location selected yet
+      (isAssignMode &&
+        (!hasNewLocation || // no destination entry available
+          viewModel.newLocation.fieldOptions.length === 0 || // destination entry has no fields
+          destinationFieldState?.hasSelectableOptions === false || // no fields compatible with this content type
+          selectedDestinationCount === 0)), // user hasn't selected a destination field yet
     [
+      hasCurrentLocations,
+      selectedLocationIds,
       isAssignMode,
       hasNewLocation,
       viewModel.newLocation.fieldOptions.length,
@@ -142,13 +132,19 @@ export const EditModal = ({
                   {hasCurrentLocations && (
                     <Box className={locationList}>
                       {viewModel.currentLocations.map((location) => {
-                        const isSelected = location.id === selectedLocationId;
+                        const isSelected = selectedLocationIds.includes(location.id);
                         return (
                           <Box
                             as="button"
                             type="button"
                             key={location.id}
-                            onClick={() => setSelectedLocationId(location.id)}
+                            onClick={() =>
+                              setSelectedLocationIds((prev) =>
+                                prev.includes(location.id)
+                                  ? prev.filter((id) => id !== location.id)
+                                  : [...prev, location.id]
+                              )
+                            }
                             aria-pressed={isSelected}
                             className={`${locationButton} ${
                               isSelected ? locationButtonSelected : locationButtonUnselected

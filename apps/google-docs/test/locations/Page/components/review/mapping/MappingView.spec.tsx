@@ -923,6 +923,10 @@ describe('MappingView', () => {
       )
     ).toBeNull();
 
+    const locationCard = document.querySelector('button[aria-pressed]') as HTMLElement;
+    expect(locationCard).toBeTruthy();
+    fireEvent.click(locationCard);
+
     const confirmButton = screen.getAllByRole('button', { name: 'Exclude content' }).at(-1);
     expect(confirmButton).toBeTruthy();
     fireEvent.click(confirmButton as HTMLElement);

@@ -8,7 +8,7 @@ export const modalContent = css({
 });
 
 export const modalContentWithDropdown = css({
-  minHeight: '600px',
+  minHeight: '500px',
 });
 
 export const sectionCard = css({
