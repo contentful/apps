@@ -86,7 +86,7 @@ export interface CompletedWorkflowPayload {
 
 export interface TabsImagesSuspendPayload {
   reason?: string;
-  suspendStepId: 'document-scope-selection';
+  suspendStepId: 'select-tabs-images-step';
   documentId?: string;
   title?: string;
   requiresImageSelection?: boolean;

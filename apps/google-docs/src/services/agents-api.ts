@@ -171,12 +171,8 @@ export async function resumeWorkflowRun(
     return;
   }
 
-  console.log(`▶ resumeWorkflowRun [${runId}]`, resumePayload);
-
   await sdk.cma.agentRun.resumeRun(
     { spaceId, environmentId, runId },
     { resumePayload: resumePayload as Record<string, unknown> }
   );
-
-  console.log(`✓ resumeWorkflowRun [${runId}] accepted`);
 }

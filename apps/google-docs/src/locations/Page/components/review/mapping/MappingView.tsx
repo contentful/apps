@@ -29,7 +29,6 @@ import {
 import { buildListMarkers } from './buildListMarkers';
 import {
   displayType,
-  formatDisplayName,
   isAssetFieldForImageAssign,
   isWorkflowContentTypeFieldWithId,
 } from './fieldFormatting';
@@ -101,31 +100,6 @@ function findRowByEntryIndex(rows: EntryListRow[], index: number): EntryListRow 
   return null;
 }
 
-function getEntryName(contentTypeName: string | undefined, entryIndex: number): string {
-  const displayName = contentTypeName ?? 'Untitled';
-  return `${displayName} #${entryIndex + 1}`;
-}
-
-function getEntryReviewTitle(
-  entry: MappingReviewSuspendPayload['entryBlockGraph']['entries'][number],
-  displayField: string | undefined,
-  fallbackEntryName: string
-): string {
-  const localizedFieldValue = displayField ? entry.fields?.[displayField] : undefined;
-  if (localizedFieldValue) {
-    const populatedValue = Object.values(localizedFieldValue).find(
-      (candidate): candidate is string =>
-        typeof candidate === 'string' && candidate.trim().length > 0
-    );
-    if (populatedValue) {
-      return populatedValue.trim();
-    }
-  }
-
-  const mappedTitle = getEntryTitleFromFieldMappings(entry, displayField).trim();
-  return mappedTitle && mappedTitle !== 'Untitled' ? mappedTitle : fallbackEntryName;
-}
-
 /** `Range#intersectsNode` can throw when the range and node are in inconsistent trees. */
 function rangeIntersectsNode(range: Range, node: Node): boolean {
   try {
@@ -133,10 +107,6 @@ function rangeIntersectsNode(range: Range, node: Node): boolean {
   } catch {
     return false;
   }
-}
-
-function hasPositionalDisplayLabel(label: string): boolean {
-  return /\(\d+\/\d+\)$/.test(label);
 }
 
 export const MappingView = ({
@@ -212,8 +182,8 @@ export const MappingView = ({
     useReviewTextSelection(textSelectionRootRef);
 
   const highlightIndex = useMemo(
-    () => buildMappingHighlightIndex(entryBlockGraph),
-    [entryBlockGraph]
+    () => buildMappingHighlightIndex(entryBlockGraph, payload.contentTypes),
+    [entryBlockGraph, payload.contentTypes]
   );
 
   const { tabs, allSegments } = useMemo(() => buildDocument(document), [document]);
@@ -263,10 +233,10 @@ export const MappingView = ({
       (item) => item.sys.id === graphEntry.contentTypeId
     );
     const contentTypeDisplayName = (contentType?.name ?? '').trim();
-    const contentTypeField = contentType?.fields.find((field) => field.id === fieldId);
-    const fieldDisplayName = (contentTypeField?.name ?? '').trim();
-    const fieldDisplayType = contentTypeField
-      ? displayType(contentTypeField.type ?? '', contentTypeField.linkType, contentTypeField.items)
+    const field = contentType?.fields.find((f) => f.id === fieldId);
+    const fieldDisplayName = (field?.name ?? '').trim() || fieldId;
+    const fieldDisplayType = field
+      ? displayType(field.type ?? '', field.linkType, field.items)
       : displayType(fieldType);
     const entryName = getEntryTitleFromFieldMappings(graphEntry, contentType?.displayField);
 
@@ -362,9 +332,7 @@ export const MappingView = ({
         byKey.set(card.key, {
           ...firstLocation,
           id: card.key,
-          displayLabel: hasPositionalDisplayLabel(card.displayLabel)
-            ? card.displayLabel
-            : undefined,
+          fieldName: card.fieldName,
           sourceRefs: sourceLocations.map((location) => location.sourceRef),
           isSelected: false,
         });
@@ -380,14 +348,13 @@ export const MappingView = ({
   ): EditModalNewLocation => {
     const contentType = payload.contentTypes.find((item) => item.sys.id === entry.contentTypeId);
     const contentTypeName = contentType?.name ?? entry.contentTypeId;
-    const fallbackEntryName = getEntryName(contentTypeName, entryIndex);
-    const entryTitle = getEntryReviewTitle(entry, contentType?.displayField, fallbackEntryName);
+    const entryTitle = getEntryTitleFromFieldMappings(entry, contentType?.displayField);
     const contentTypeFields = contentType?.fields ?? [];
     const fieldOptions = contentTypeFields
       .filter(isWorkflowContentTypeFieldWithId)
       .map((field) => ({
         id: field.id,
-        fieldName: (field.name ?? '').trim() || formatDisplayName(field.id),
+        fieldName: (field.name ?? '').trim() || field.id,
         fieldDisplayType: displayType(field.type ?? '', field.linkType, field.items),
         isAssetField: isAssetFieldForImageAssign(field),
       }));
@@ -547,9 +514,9 @@ export const MappingView = ({
         newLocation,
         isOpen: true,
       },
-      title: 'Assign content',
+      title: `${canExcludeSelectedText ? 'Reassign' : 'Assign'} content`,
       locationSectionDescription: '',
-      primaryButtonLabel: 'Move content',
+      primaryButtonLabel: `${canExcludeSelectedText ? 'Reassign' : 'Assign'} content`,
     });
   };
 

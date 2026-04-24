@@ -102,7 +102,7 @@ describe('ModalOrchestrator', () => {
       runId: 'run-123',
       messages: [],
       suspendPayload: {
-        suspendStepId: 'document-scope-selection',
+        suspendStepId: 'select-tabs-images-step',
         reason: 'Needs document scope review',
         documentId: 'mock-doc-id-123',
         requiresImageSelection: true,
@@ -354,7 +354,7 @@ describe('ModalOrchestrator', () => {
       runId: 'run-123',
       messages: [],
       suspendPayload: {
-        suspendStepId: 'document-scope-selection',
+        suspendStepId: 'select-tabs-images-step',
         reason: 'Needs document scope review',
         documentId: 'mock-doc-id-123',
         requiresImageSelection: true,

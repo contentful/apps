@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { EntryBlockGraph, SourceRef } from '@types';
+import type { EntryBlockGraph, SourceRef, WorkflowContentType } from '@types';
 import {
   buildMappingHighlightIndex,
   getMappingCardKey,
@@ -16,16 +16,32 @@ const blockTextRef = (start: number, end: number, text: string): SourceRef => ({
 });
 
 describe('buildHighlights', () => {
+  const contentTypes: WorkflowContentType[] = [
+    {
+      sys: { id: 'blogPost' },
+      name: 'Blog Post',
+      fields: [
+        {
+          id: 'heading',
+          name: 'Heading',
+          type: 'Symbol',
+        },
+      ],
+    },
+  ];
+
   it('uniqueHighlights keeps two disjoint sourceRefs for the same field', () => {
     const h1: MappingHighlight = {
       entryIndex: 0,
       fieldId: 'heading',
+      fieldName: 'heading',
       fieldType: 'Symbol',
       sourceRef: blockTextRef(0, 10, 'Show up fr'),
     };
     const h2: MappingHighlight = {
       entryIndex: 0,
       fieldId: 'heading',
+      fieldName: 'heading',
       fieldType: 'Symbol',
       sourceRef: blockTextRef(33, 58, 'terest…'),
     };
@@ -38,12 +54,14 @@ describe('buildHighlights', () => {
     const h1: MappingHighlight = {
       entryIndex: 0,
       fieldId: 'heading',
+      fieldName: 'heading',
       fieldType: 'Symbol',
       sourceRef: blockTextRef(0, 10, 'a'),
     };
     const h2: MappingHighlight = {
       entryIndex: 0,
       fieldId: 'heading',
+      fieldName: 'heading',
       fieldType: 'Symbol',
       sourceRef: blockTextRef(33, 58, 'b'),
     };
@@ -59,12 +77,14 @@ describe('buildHighlights', () => {
     const hPage: MappingHighlight = {
       entryIndex: 0,
       fieldId: 'pageName',
+      fieldName: 'pageName',
       fieldType: 'Symbol',
       sourceRef: shared,
     };
     const hBlog: MappingHighlight = {
       entryIndex: 1,
       fieldId: 'internalLabel',
+      fieldName: 'internalLabel',
       fieldType: 'Symbol',
       sourceRef: shared,
     };
@@ -90,8 +110,10 @@ describe('buildHighlights', () => {
       excludedSourceRefs: [],
     };
 
-    const idx = buildMappingHighlightIndex(graph);
+    const idx = buildMappingHighlightIndex(graph, contentTypes);
     const list = uniqueHighlights(idx.blockHighlights['block-4'] ?? []);
     expect(list).toHaveLength(2);
+    expect(list[0]?.fieldName).toBe('Heading');
+    expect(list[1]?.fieldName).toBe('Heading');
   });
 });
