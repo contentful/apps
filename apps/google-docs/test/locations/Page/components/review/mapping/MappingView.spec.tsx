@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MappingReviewSuspendPayload, SourceRef } from '@types';
 import { MappingView } from '../../../../../../src/locations/Page/components/review/mapping/MappingView';
 
@@ -271,6 +271,7 @@ const createImagePayload = (): MappingReviewSuspendPayload => ({
 
 describe('MappingView', () => {
   beforeEach(() => {
+    vi.useFakeTimers();
     vi.clearAllMocks();
     vi.stubGlobal('CSS', {
       escape: (value: string) => value.replaceAll(':', '\\:'),
@@ -281,6 +282,12 @@ describe('MappingView', () => {
       selectedRange: null,
       clearSelection: mockClearSelection,
     });
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.runAllTimers();
+    vi.useRealTimers();
   });
 
   it('groups adjacent blocks mapped to the same field into one card and one grouped surface', () => {

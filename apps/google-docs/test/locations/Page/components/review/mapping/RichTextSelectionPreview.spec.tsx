@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import type { NormalizedDocument, SourceRef } from '@types';
-import { RichTextSelectionPreview } from '../../../../../../src/locations/Page/components/review/mapping/RichTextSelectionPreview';
+import { RichTextSelectionPreview } from '../../../../../../src/locations/Page/components/review/mapping/edit-modals/RichTextSelectionPreview';
 
 const previewDocument: NormalizedDocument = {
   documentId: 'doc-preview',

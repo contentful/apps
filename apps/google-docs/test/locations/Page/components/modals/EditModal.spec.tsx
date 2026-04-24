@@ -140,6 +140,7 @@ describe('EditModal', () => {
               {
                 id: 'title',
                 fieldName: 'Title',
+                fieldType: 'Symbol',
                 fieldDisplayType: 'Short text',
               },
             ],

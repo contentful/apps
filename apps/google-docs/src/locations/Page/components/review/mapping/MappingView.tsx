@@ -14,7 +14,7 @@ import type {
   EditModalNewLocation,
   SourceRef,
 } from '@types';
-import { isTextSourceRef } from '@types';
+import { isBlockImageSourceRef, isTableImageSourceRef, isTextSourceRef } from '@types';
 import { FileTextIcon } from '@contentful/f36-icons';
 import { useReviewTextSelection } from '@hooks/useReviewTextSelection';
 import { getEntryTitleFromFieldMappings } from '../../../../../utils/getEntryTitle';
@@ -34,7 +34,7 @@ import {
   isWorkflowContentTypeFieldWithId,
 } from './fieldFormatting';
 import { EditModal } from './edit-modals/EditModal';
-import { RichTextSelectionPreview } from './RichTextSelectionPreview';
+import { RichTextSelectionPreview } from './edit-modals/RichTextSelectionPreview';
 
 import { SelectionActionMenu } from './SelectionActionMenu';
 import { buildSourceRefKey } from './sourceRefUtils';
@@ -154,6 +154,9 @@ export const MappingView = ({
   const [pendingImageSourceRef, setPendingImageSourceRef] = useState<ImageSourceRef | null>(null);
   const [pendingImageReassignSourceRef, setPendingImageReassignSourceRef] =
     useState<ImageSourceRef | null>(null);
+  const [pendingExcludeImageSourceRefs, setPendingExcludeImageSourceRefs] = useState<
+    ImageSourceRef[]
+  >([]);
   const [pendingTextReassignRanges, setPendingTextReassignRanges] = useState<TextExclusionRange[]>(
     []
   );
@@ -171,6 +174,7 @@ export const MappingView = ({
     setPendingTextExclusionRanges(null);
     setPendingImageSourceRef(null);
     setPendingImageReassignSourceRef(null);
+    setPendingExcludeImageSourceRefs([]);
     setPendingTextReassignRanges([]);
     setPendingTextAssignRanges([]);
     setPendingModalSelectionRange(null);
@@ -362,15 +366,17 @@ export const MappingView = ({
     const contentTypeName = contentType?.name ?? entry.contentTypeId;
     const entryTitle = getEntryTitleFromFieldMappings(entry, contentType?.displayField);
     const contentTypeFields = contentType?.fields ?? [];
-    const fieldOptions = contentTypeFields
-      .filter(isWorkflowContentTypeFieldWithId)
-      .map((field) => ({
+    const fieldOptions = contentTypeFields.filter(isWorkflowContentTypeFieldWithId).map((field) => {
+      const fieldType = typeof field.type === 'string' ? field.type : 'Text';
+
+      return {
         id: field.id,
         fieldName: (field.name ?? '').trim() || formatDisplayName(field.id),
-        fieldType: field.type,
-        fieldDisplayType: displayType(field.type ?? '', field.linkType, field.items),
+        fieldType,
+        fieldDisplayType: displayType(fieldType, field.linkType, field.items),
         isAssetField: isAssetFieldForImageAssign(field),
-      }));
+      };
+    });
 
     return {
       id: entry.tempId ?? `${entry.contentTypeId}-${entryIndex}`,
@@ -549,6 +555,12 @@ export const MappingView = ({
     selectionRange: Range | null = null,
     previewSourceRefs: SourceRef[] = []
   ) => {
+    setPendingExcludeImageSourceRefs(
+      previewSourceRefs.filter(
+        (sourceRef): sourceRef is ImageSourceRef =>
+          isBlockImageSourceRef(sourceRef) || isTableImageSourceRef(sourceRef)
+      )
+    );
     setPendingModalSelectionRange(selectionRange ? selectionRange.cloneRange() : null);
     setPendingPreviewSourceRefs(previewSourceRefs);
     setPendingPreviewHasTableContent(
@@ -743,7 +755,7 @@ export const MappingView = ({
         let nextGraph = entryBlockGraph;
 
         if (richTextTargets.length && pendingModalSelectionRange) {
-          const richTextRefs = collectRichTextSourceRefsFromSelection(
+          const mappedRichTextRefs = collectRichTextSourceRefsFromSelection(
             textSelectionRootRef.current,
             pendingModalSelectionRange,
             document,
@@ -752,6 +764,13 @@ export const MappingView = ({
               mappingKeys: new Set(from.mappingKeys ?? []),
             }
           );
+          const unmappedRichTextRefs = collectRichTextSourceRefsFromSelection(
+            textSelectionRootRef.current,
+            pendingModalSelectionRange,
+            document,
+            { mappedState: 'unmapped' }
+          );
+          const richTextRefs = [...mappedRichTextRefs, ...unmappedRichTextRefs];
 
           if (richTextRefs.length) {
             nextGraph = applyRichTextReassignToEntryBlockGraph(
@@ -851,10 +870,36 @@ export const MappingView = ({
       onEntryBlockGraphChange(
         applyImageExclusionToEntryBlockGraph(entryBlockGraph, selected, pendingImageSourceRef)
       );
-    } else if (pendingTextExclusionRanges?.length) {
-      onEntryBlockGraphChange(
-        applyTextExclusionToEntryBlockGraph(entryBlockGraph, selected, pendingTextExclusionRanges)
+    } else {
+      const selectedSourceRefKeys = new Set(
+        (selected.sourceRefs?.length ? selected.sourceRefs : [selected.sourceRef]).map(
+          (sourceRef) => buildSourceRefKey(sourceRef)
+        )
       );
+      const matchingImageSourceRefs = pendingExcludeImageSourceRefs.filter((sourceRef) =>
+        selectedSourceRefKeys.has(buildSourceRefKey(sourceRef))
+      );
+
+      let nextGraph = entryBlockGraph;
+
+      if (pendingTextExclusionRanges?.length) {
+        nextGraph = applyTextExclusionToEntryBlockGraph(
+          nextGraph,
+          selected,
+          pendingTextExclusionRanges
+        );
+      }
+
+      if (matchingImageSourceRefs.length) {
+        nextGraph = matchingImageSourceRefs.reduce(
+          (graph, sourceRef) => applyImageExclusionToEntryBlockGraph(graph, selected, sourceRef),
+          nextGraph
+        );
+      }
+
+      if (nextGraph !== entryBlockGraph) {
+        onEntryBlockGraphChange(nextGraph);
+      }
     }
 
     closeEditModal();
