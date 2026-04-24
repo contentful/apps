@@ -756,6 +756,7 @@ export const MappingView = ({
           if (richTextRefs.length) {
             nextGraph = applyRichTextReassignToEntryBlockGraph(
               nextGraph,
+              document,
               from,
               richTextRefs,
               richTextTargets
@@ -799,6 +800,7 @@ export const MappingView = ({
         if (richTextRefs.length) {
           nextGraph = applyRichTextAssignToEntryBlockGraph(
             nextGraph,
+            document,
             richTextRefs,
             richTextTargets
           );

@@ -7,7 +7,6 @@ import type {
   NormalizedDocumentContentBlock,
   NormalizedDocumentFlattenedRun,
   SourceRef,
-  TableImageSourceRef,
   TextRangeSourceRef,
 } from '@types';
 import {
@@ -18,6 +17,7 @@ import {
   isTextSourceRef,
 } from '@types';
 import { buildSourceRefKey } from './sourceRefUtils';
+import { normalizeRichTextSourceRefs } from './normalizeRichTextSourceRefs';
 
 export type TextExclusionRange =
   | { scope: 'block'; blockId: string; start: number; end: number }
@@ -900,6 +900,7 @@ function appendTextRefsToFieldMapping(
 
 function appendSourceRefsToFieldMapping(
   graph: EntryBlockGraph,
+  document: NormalizedDocument,
   entryIndex: number,
   fieldId: string,
   fieldType: string,
@@ -918,7 +919,12 @@ function appendSourceRefsToFieldMapping(
           ...entry,
           fieldMappings: [
             ...entry.fieldMappings,
-            { fieldId, fieldType, sourceRefs: refs.map(cloneSourceRef), confidence: 1 },
+            {
+              fieldId,
+              fieldType,
+              sourceRefs: normalizeRichTextSourceRefs(document, refs),
+              confidence: 1,
+            },
           ],
         };
       }
@@ -926,7 +932,15 @@ function appendSourceRefsToFieldMapping(
       return {
         ...entry,
         fieldMappings: entry.fieldMappings.map((fm, j) =>
-          j === fmIdx ? { ...fm, sourceRefs: [...fm.sourceRefs, ...refs.map(cloneSourceRef)] } : fm
+          j === fmIdx
+            ? {
+                ...fm,
+                sourceRefs: normalizeRichTextSourceRefs(document, [
+                  ...fm.sourceRefs,
+                  ...refs.map(cloneSourceRef),
+                ]),
+              }
+            : fm
         ),
       };
     }),
@@ -947,6 +961,7 @@ function removeSourceRefsFromFieldMapping(
 
 export function applyRichTextAssignToEntryBlockGraph(
   graph: EntryBlockGraph,
+  document: NormalizedDocument,
   refs: SourceRef[],
   targets: ReadonlyArray<TextAssignTarget>
 ): EntryBlockGraph {
@@ -964,6 +979,7 @@ export function applyRichTextAssignToEntryBlockGraph(
   for (const target of dedupedTargets) {
     next = appendSourceRefsToFieldMapping(
       next,
+      document,
       target.entryIndex,
       target.fieldId,
       target.fieldType,
@@ -976,6 +992,7 @@ export function applyRichTextAssignToEntryBlockGraph(
 
 export function applyRichTextReassignToEntryBlockGraph(
   graph: EntryBlockGraph,
+  document: NormalizedDocument,
   from: EditLocationOption,
   refs: SourceRef[],
   targets: ReadonlyArray<TextAssignTarget>
@@ -1037,7 +1054,7 @@ export function applyRichTextReassignToEntryBlockGraph(
     nextGraph = { ...nextGraph, entries: nextEntries };
   }
 
-  return applyRichTextAssignToEntryBlockGraph(nextGraph, refs, dedupedTargets);
+  return applyRichTextAssignToEntryBlockGraph(nextGraph, document, refs, dedupedTargets);
 }
 
 /**
