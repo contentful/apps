@@ -591,7 +591,10 @@ export const TableRenderer = ({
     return coverageEnd >= partEnd;
   };
 
-  const getPartFieldIdentity = (part: NormalizedDocumentTablePart, highlights: MappingHighlight[]) => {
+  const getPartFieldIdentity = (
+    part: NormalizedDocumentTablePart,
+    highlights: MappingHighlight[]
+  ) => {
     if (part.type !== 'text') {
       return null;
     }
@@ -661,7 +664,10 @@ export const TableRenderer = ({
                     getMappingCardKey(segmentId, highlight)
                   );
 
-                  if (currentGroup && currentGroup.parts[0]?.fieldIdentity === partState.fieldIdentity) {
+                  if (
+                    currentGroup &&
+                    currentGroup.parts[0]?.fieldIdentity === partState.fieldIdentity
+                  ) {
                     currentGroup.parts.push(partState);
                     currentGroup.mappingKeys = uniqueStrings([
                       ...currentGroup.mappingKeys,
@@ -711,7 +717,9 @@ export const TableRenderer = ({
                             onMouseEnter={() => onSetHoveredMappingKeys(chunk.mappingKeys)}
                             onMouseLeave={() => onSetHoveredMappingKeys([])}
                             style={{
-                              border: `1px solid ${isChunkHovered ? tokens.green600 : tokens.green500}`,
+                              border: `1px solid ${
+                                isChunkHovered ? tokens.green600 : tokens.green500
+                              }`,
                               borderRadius: tokens.borderRadiusMedium,
                               backgroundColor: readOnly ? 'transparent' : tokens.green100,
                               padding: tokens.spacingXs,
