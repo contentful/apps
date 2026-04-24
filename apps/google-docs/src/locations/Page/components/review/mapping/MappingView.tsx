@@ -634,7 +634,7 @@ export const MappingView = ({
       getLocationsForSelectedText(),
       {
         contentPreview: mappedPreview || trimmed,
-        previewSectionTitle: 'Text to exclude',
+        previewSectionTitle: 'Selected content',
       },
       selectionRange,
       previewSourceRefs
