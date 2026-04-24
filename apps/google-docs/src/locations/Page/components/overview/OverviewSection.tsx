@@ -1,41 +1,29 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Box, Button, Flex, Note, Paragraph, Text } from '@contentful/f36-components';
 import { LightbulbIcon } from '@contentful/f36-icons';
-import { PageAppSDK } from '@contentful/app-sdk';
-import type { EntryProps } from 'contentful-management';
-import type { MappingReviewSuspendPayload, CompletedWorkflowPayload } from '@types';
-import {
-  buildEntryListFromEntryBlockGraph,
-  ContentTypeDisplayInfoMap,
-} from '../../../../utils/overviewEntryList';
-import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
+import type { MappingReviewSuspendPayload } from '@types';
+import { buildEntryListFromEntryBlockGraph } from '../../../../utils/overviewEntryList';
 import { OverviewEntryList } from './OverviewEntryList';
 import { overviewSectionBox, overviewSectionBoxScrollable } from './OverviewSection.styles';
-import { SummaryModal } from '../modals/SummaryModal';
-import { ErrorModal } from '../modals/ErrorModal';
 import Splitter from '../mainpage/Splitter';
 
 interface OverviewProps {
-  sdk: PageAppSDK;
   payload: MappingReviewSuspendPayload;
   selectedEntryIndex: number;
   onSelectEntryIndex: (index: number) => void;
-  onCreateEntries: () => Promise<CompletedWorkflowPayload | null>;
-  onIsCreatingChange: (isCreating: boolean) => void;
+  ctaLabel: string;
+  onCtaClick: () => void;
+  isCtaLoading?: boolean;
 }
 
 const OverviewSection = ({
-  sdk,
   payload,
   selectedEntryIndex,
   onSelectEntryIndex,
-  onCreateEntries,
-  onIsCreatingChange,
+  ctaLabel,
+  onCtaClick,
+  isCtaLoading = false,
 }: OverviewProps) => {
-  const [isCreating, setIsCreating] = useState(false);
-  const [summaryEntries, setSummaryEntries] = useState<EntryProps[] | null>(null);
-  const [createError, setCreateError] = useState<string | null>(null);
-
   const entryRows = useMemo(
     () =>
       buildEntryListFromEntryBlockGraph(
@@ -46,59 +34,16 @@ const OverviewSection = ({
     [payload.entryBlockGraph.entries, payload.contentTypes, payload.referenceGraph.edges]
   );
 
-  const contentTypeDisplayInfoMap = useMemo<ContentTypeDisplayInfoMap>(() => {
-    const map = new Map<string, { name: string; displayField?: string }>();
-    for (const ct of payload.contentTypes) {
-      map.set(ct.sys.id, {
-        name: ct.name ?? ct.sys.id,
-        displayField: ct.displayField,
-      });
-    }
-    return map;
-  }, [payload.contentTypes]);
-
-  const handleCreateEntries = async () => {
-    console.log('[create-entries] creating entries, calling onCreateEntries');
-    setIsCreating(true);
-    onIsCreatingChange(true);
-    let succeeded = false;
-
-    try {
-      const previewPayload = await onCreateEntries();
-
-      if (!previewPayload) {
-        return;
-      }
-      const result = await createEntriesFromPreviewPayload(sdk, previewPayload);
-
-      setSummaryEntries(result.createdEntries);
-      succeeded = true;
-    } catch (error) {
-      setCreateError(
-        error instanceof Error
-          ? error.message
-          : 'An unexpected error occurred while creating entries.'
-      );
-    } finally {
-      setIsCreating(false);
-      if (!succeeded) onIsCreatingChange(false);
-    }
-  };
-
-  const handleSummaryDone = () => {
-    setSummaryEntries(null);
-  };
-
   return (
     <>
       <Box padding="spacingL" className={overviewSectionBox}>
-        <Flex flexDirection="column" gap="spacingS">
+        <Flex flexDirection="column" gap="spacingM">
           <Flex flexDirection="column" gap="spacingXs">
             <Flex alignItems="center" gap="spacingXs">
               <LightbulbIcon size="small" />
               <Text fontWeight="fontWeightDemiBold">How to use this app</Text>
             </Flex>
-            <Paragraph marginBottom="none" fontColor="gray600">
+            <Paragraph marginBottom="none">
               Review your content and associated entries below. Highlight text to make adjustments.
               Create entries when you are complete.
             </Paragraph>
@@ -106,15 +51,20 @@ const OverviewSection = ({
 
           <Splitter />
 
-          <Flex justifyContent="space-between" alignItems="center">
-            <Text fontWeight="fontWeightDemiBold" fontSize="fontSizeL">
-              Entries
-            </Text>
+          <Flex justifyContent="space-between" alignItems="center" paddingBottom="none">
+            <Flex flexDirection="column" gap="spacingXs">
+              <Text fontWeight="fontWeightDemiBold" fontSize="fontSizeL">
+                Entries
+              </Text>
+              <Text fontSize="fontSizeM">Click row to view content by entry below.</Text>
+            </Flex>
+
             <Button
               variant="primary"
-              onClick={() => void handleCreateEntries()}
-              isLoading={isCreating}>
-              Create entries
+              onClick={onCtaClick}
+              isLoading={isCtaLoading}
+              isDisabled={isCtaLoading}>
+              {ctaLabel}
             </Button>
           </Flex>
 
@@ -134,22 +84,6 @@ const OverviewSection = ({
           )}
         </Flex>
       </Box>
-
-      <SummaryModal
-        isOpen={summaryEntries !== null}
-        sdk={sdk}
-        entries={summaryEntries ?? []}
-        contentTypeDisplayInfoMap={contentTypeDisplayInfoMap}
-        defaultLocale={sdk.locales.default}
-        onDone={handleSummaryDone}
-      />
-
-      <ErrorModal
-        isOpen={createError !== null}
-        title="Failed to create entries"
-        message={createError ?? ''}
-        onClose={() => setCreateError(null)}
-      />
     </>
   );
 };

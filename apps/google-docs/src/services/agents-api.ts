@@ -1,5 +1,9 @@
 import { PageAppSDK } from '@contentful/app-sdk';
-import { LOCAL_AGENTS_API_BASE_URL, WORKFLOW_AGENT_ID } from '../utils/constants/agent';
+import {
+  LOCAL_AGENTS_API_BASE_URL,
+  WORKFLOW_AGENT_ID,
+  USE_LOCAL_AGENTS_API,
+} from '../utils/constants/agent';
 import {
   AgentRunMessage,
   MappingReviewSuspendPayload,
@@ -59,7 +63,7 @@ export async function getWorkflowRun(
   environmentId: string,
   runId: string
 ): Promise<AgentRunData | null> {
-  if (LOCAL_AGENTS_API_BASE_URL) {
+  if (USE_LOCAL_AGENTS_API) {
     const response = await fetch(
       `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}`,
       {
@@ -102,7 +106,7 @@ export async function startAgentRun(
 ): Promise<string> {
   let runData: AgentRunData;
 
-  if (LOCAL_AGENTS_API_BASE_URL) {
+  if (USE_LOCAL_AGENTS_API) {
     const response = await fetch(
       `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${WORKFLOW_AGENT_ID}/generate`,
       {
@@ -150,7 +154,7 @@ export async function resumeWorkflowRun(
   runId: string,
   resumePayload: ResumePayload
 ): Promise<void> {
-  if (LOCAL_AGENTS_API_BASE_URL) {
+  if (USE_LOCAL_AGENTS_API) {
     const response = await fetch(
       `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}/resume`,
       {
@@ -167,16 +171,8 @@ export async function resumeWorkflowRun(
     return;
   }
 
-  const agentRunApi = sdk.cma.agentRun as {
-    resume?: (
-      params: { spaceId: string; environmentId: string; runId: string },
-      body: { resumePayload: ResumePayload }
-    ) => Promise<unknown>;
-  };
-
-  if (!agentRunApi.resume) {
-    throw new Error('Agent run resume is not available in the current SDK.');
-  }
-
-  await agentRunApi.resume({ spaceId, environmentId, runId }, { resumePayload });
+  await sdk.cma.agentRun.resumeRun(
+    { spaceId, environmentId, runId },
+    { resumePayload: resumePayload as Record<string, unknown> }
+  );
 }
