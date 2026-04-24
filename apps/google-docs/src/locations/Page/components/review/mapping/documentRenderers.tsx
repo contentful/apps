@@ -239,7 +239,9 @@ export const BlockRenderer = ({
           ? () => onSetHoveredMappingKeys(blockMappingKeys)
           : undefined
       }
-      onMouseLeave={readOnly && blockMappingKeys.length > 0 ? () => onSetHoveredMappingKeys([]) : undefined}
+      onMouseLeave={
+        readOnly && blockMappingKeys.length > 0 ? () => onSetHoveredMappingKeys([]) : undefined
+      }
       style={
         readOnly && showReadOnlyOutline && hasVisibleTextMappings
           ? {
@@ -475,7 +477,9 @@ const TablePartRenderer = ({
           ? () => onSetHoveredMappingKeys(partMappingKeys)
           : undefined
       }
-      onMouseLeave={readOnly && partMappingKeys.length > 0 ? () => onSetHoveredMappingKeys([]) : undefined}
+      onMouseLeave={
+        readOnly && partMappingKeys.length > 0 ? () => onSetHoveredMappingKeys([]) : undefined
+      }
       style={{
         whiteSpace: 'pre-wrap',
         display: 'inline-block',

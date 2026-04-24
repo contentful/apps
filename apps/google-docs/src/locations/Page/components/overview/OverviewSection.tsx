@@ -51,8 +51,8 @@ const OverviewSection = ({
     borderRadius: isFirst
       ? `${tokens.borderRadiusMedium} 0 0 ${tokens.borderRadiusMedium}`
       : isLast
-        ? `0 ${tokens.borderRadiusMedium} ${tokens.borderRadiusMedium} 0`
-        : 0,
+      ? `0 ${tokens.borderRadiusMedium} ${tokens.borderRadiusMedium} 0`
+      : 0,
     backgroundColor: isActive ? tokens.colorWhite : 'transparent',
     color: isActive ? tokens.gray900 : tokens.gray700,
     boxShadow: isActive
