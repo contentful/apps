@@ -40,7 +40,13 @@ export function ReviewImageAssetCard({
   const imageHeight = size === 'small' ? '180px' : '280px';
 
   const borderColor =
-    isExcluded || !isHighlighted ? tokens.gray300 : hovered ? tokens.green600 : tokens.green500;
+    isExcluded && !isHighlighted
+      ? tokens.gray300
+      : !isHighlighted
+      ? tokens.gray300
+      : hovered
+      ? tokens.green600
+      : tokens.green500;
 
   return (
     <Box
@@ -48,7 +54,7 @@ export function ReviewImageAssetCard({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       style={{
-        opacity: isExcluded ? 0.55 : 1,
+        opacity: isExcluded && !isHighlighted ? 0.55 : 1,
         display: 'inline-block',
         maxWidth: '100%',
         verticalAlign: 'top',

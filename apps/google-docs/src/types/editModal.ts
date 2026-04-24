@@ -12,6 +12,7 @@ export interface EditLocationOption {
   fieldType: string;
   sourceRef: SourceRef;
   sourceRefs?: SourceRef[];
+  mappingKeys?: string[];
   isSelected?: boolean;
 }
 

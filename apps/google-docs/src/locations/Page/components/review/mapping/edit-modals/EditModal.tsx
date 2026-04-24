@@ -145,7 +145,7 @@ export const EditModal = ({
                   <Text as="p" fontWeight="fontWeightDemiBold">
                     {previewSectionTitle}
                   </Text>
-                  <Text as="p">"{previewQuotedText}"</Text>
+                  {additionalContent ?? <Text as="p">"{previewQuotedText}"</Text>}
                 </Flex>
               </Box>
 
@@ -263,8 +263,6 @@ export const EditModal = ({
                   {destinationState.message}
                 </Note>
               ) : null}
-
-              {additionalContent}
             </Box>
           </Modal.Content>
           <Modal.Controls>

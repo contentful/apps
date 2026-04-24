@@ -34,6 +34,7 @@ import {
   isWorkflowContentTypeFieldWithId,
 } from './fieldFormatting';
 import { EditModal } from './edit-modals/EditModal';
+import { RichTextSelectionPreview } from './RichTextSelectionPreview';
 
 import { SelectionActionMenu } from './SelectionActionMenu';
 import { buildSourceRefKey } from './sourceRefUtils';
@@ -44,10 +45,14 @@ import {
   applyImageExclusionToEntryBlockGraph,
   applyImageReassignToEntryBlockGraph,
   appendImageToTargets,
+  applyRichTextAssignToEntryBlockGraph,
+  applyRichTextReassignToEntryBlockGraph,
   applyTextAssignToEntryBlockGraph,
   applyTextExclusionToEntryBlockGraph,
   applyTextReassignToEntryBlockGraph,
+  collectRichTextSourceRefsFromSelection,
   collectMappedExclusionPreviewText,
+  selectionIncludesTableContent,
   collectTextAssignRangesFromSelection,
   collectTextExclusionRangesFromSelection,
   fullSpanTextExclusionRangesForSourceRef,
@@ -178,6 +183,9 @@ export const MappingView = ({
     []
   );
   const [pendingTextAssignRanges, setPendingTextAssignRanges] = useState<TextExclusionRange[]>([]);
+  const [pendingModalSelectionRange, setPendingModalSelectionRange] = useState<Range | null>(null);
+  const [pendingPreviewSourceRefs, setPendingPreviewSourceRefs] = useState<SourceRef[]>([]);
+  const [pendingPreviewHasTableContent, setPendingPreviewHasTableContent] = useState(false);
   const textSelectionRootRef = useRef<HTMLDivElement | null>(null);
   const groupLayoutRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const cardWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -190,6 +198,9 @@ export const MappingView = ({
     setPendingImageReassignSourceRef(null);
     setPendingTextReassignRanges([]);
     setPendingTextAssignRanges([]);
+    setPendingModalSelectionRange(null);
+    setPendingPreviewSourceRefs([]);
+    setPendingPreviewHasTableContent(false);
   };
 
   const previousSelectedEntryIndexRef = useRef<number | null | undefined>(undefined);
@@ -228,16 +239,10 @@ export const MappingView = ({
   const listMarkers = useMemo(() => buildListMarkers(allSegments), [allSegments]);
 
   const getVisibleHighlights = <T extends MappingHighlight>(highlights: T[]): T[] => {
-    const filtered = highlights.filter(
-      (highlight) =>
-        !entryBlockGraph.excludedSourceRefs.some(
-          (excluded) => buildSourceRefKey(excluded) === buildSourceRefKey(highlight.sourceRef)
-        )
-    );
     if (selectedEntryIndex === null) {
-      return filtered;
+      return highlights;
     }
-    return filtered.filter((item) => item.entryIndex === selectedEntryIndex);
+    return highlights.filter((item) => item.entryIndex === selectedEntryIndex);
   };
 
   const getHighlightsForSegment = (segment: DocSegment): MappingHighlight[] => {
@@ -365,6 +370,7 @@ export const MappingView = ({
             ? card.displayLabel
             : undefined,
           sourceRefs: sourceLocations.map((location) => location.sourceRef),
+          mappingKeys: [...card.mappingKeys],
           isSelected: false,
         });
       });
@@ -532,13 +538,22 @@ export const MappingView = ({
     currentLocations: EditLocationOption[],
     reassignRanges: TextExclusionRange[],
     assignRanges: TextExclusionRange[],
-    imageSourceRef: ImageSourceRef | null = null
+    imageSourceRef: ImageSourceRef | null = null,
+    selectionRange: Range | null = null,
+    previewSourceRefs: SourceRef[] = []
   ) => {
     setPendingTextExclusionRanges(null);
     setPendingImageSourceRef(null);
     setPendingImageReassignSourceRef(imageSourceRef);
     setPendingTextReassignRanges(reassignRanges);
     setPendingTextAssignRanges(assignRanges);
+    setPendingModalSelectionRange(selectionRange ? selectionRange.cloneRange() : null);
+    setPendingPreviewSourceRefs(previewSourceRefs);
+    setPendingPreviewHasTableContent(
+      selectionRange
+        ? selectionIncludesTableContent(textSelectionRootRef.current, selectionRange)
+        : false
+    );
     setEditModalState({
       mode: 'assign',
       viewModel: {
@@ -556,8 +571,17 @@ export const MappingView = ({
   const openExcludeModal = (
     selectedText: string,
     currentLocations: EditLocationOption[],
-    preview?: { contentPreview: string; previewSectionTitle: string }
+    preview?: { contentPreview: string; previewSectionTitle: string },
+    selectionRange: Range | null = null,
+    previewSourceRefs: SourceRef[] = []
   ) => {
+    setPendingModalSelectionRange(selectionRange ? selectionRange.cloneRange() : null);
+    setPendingPreviewSourceRefs(previewSourceRefs);
+    setPendingPreviewHasTableContent(
+      selectionRange
+        ? selectionIncludesTableContent(textSelectionRootRef.current, selectionRange)
+        : false
+    );
     setEditModalState({
       mode: 'exclude',
       viewModel: {
@@ -579,40 +603,62 @@ export const MappingView = ({
 
   const handleAssignFromSelection = () => {
     if (isDisabled || !selectedText.trim()) return;
+    const selectionRange = selectedRange ? selectedRange.cloneRange() : null;
     const reassignRanges = collectTextExclusionRangesFromSelection(
       textSelectionRootRef.current,
-      selectedRange
+      selectionRange
     );
     const assignRanges = collectTextAssignRangesFromSelection(
       textSelectionRootRef.current,
-      selectedRange
+      selectionRange
+    );
+    const previewSourceRefs = collectRichTextSourceRefsFromSelection(
+      textSelectionRootRef.current,
+      selectionRange,
+      document
     );
     openAssignModal(
       selectedText.trim(),
       getLocationsForSelectedText(),
       reassignRanges,
-      assignRanges
+      assignRanges,
+      null,
+      selectionRange,
+      previewSourceRefs
     );
     clearSelection();
   };
 
   const handleExcludeFromSelection = () => {
     if (isDisabled || !selectedText.trim()) return;
+    const selectionRange = selectedRange ? selectedRange.cloneRange() : null;
     const ranges = collectTextExclusionRangesFromSelection(
       textSelectionRootRef.current,
-      selectedRange
+      selectionRange
     );
     setPendingTextExclusionRanges(ranges.length ? ranges : null);
     setPendingImageSourceRef(null);
     const trimmed = selectedText.trim();
     const mappedPreview = collectMappedExclusionPreviewText(
       textSelectionRootRef.current,
-      selectedRange
+      selectionRange
     ).trim();
-    openExcludeModal(trimmed, getLocationsForSelectedText(), {
-      contentPreview: mappedPreview || trimmed,
-      previewSectionTitle: 'Text to exclude',
-    });
+    const previewSourceRefs = collectRichTextSourceRefsFromSelection(
+      textSelectionRootRef.current,
+      selectionRange,
+      document,
+      { mappedState: 'mapped' }
+    );
+    openExcludeModal(
+      trimmed,
+      getLocationsForSelectedText(),
+      {
+        contentPreview: mappedPreview || trimmed,
+        previewSectionTitle: 'Text to exclude',
+      },
+      selectionRange,
+      previewSourceRefs
+    );
     clearSelection();
   };
 
@@ -673,6 +719,11 @@ export const MappingView = ({
         return;
       }
 
+      const richTextTargets = resolvedTargets.filter((target) => target.fieldType === 'RichText');
+      const nonRichTextTargets = resolvedTargets.filter(
+        (target) => target.fieldType !== 'RichText'
+      );
+
       if (pendingImageReassignSourceRef) {
         if (locations.length === 0) {
           onEntryBlockGraphChange(
@@ -710,7 +761,41 @@ export const MappingView = ({
           locations.find((location) => location.isSelected) ??
           locations[0];
 
-        if (!from || !isTextSourceRef(from.sourceRef)) {
+        if (!from) {
+          closeEditModal();
+          return;
+        }
+
+        let nextGraph = entryBlockGraph;
+
+        if (richTextTargets.length && pendingModalSelectionRange) {
+          const richTextRefs = collectRichTextSourceRefsFromSelection(
+            textSelectionRootRef.current,
+            pendingModalSelectionRange,
+            document,
+            {
+              mappedState: 'mapped',
+              mappingKeys: new Set(from.mappingKeys ?? []),
+            }
+          );
+
+          if (richTextRefs.length) {
+            nextGraph = applyRichTextReassignToEntryBlockGraph(
+              nextGraph,
+              from,
+              richTextRefs,
+              richTextTargets
+            );
+          }
+        }
+
+        if (!nonRichTextTargets.length) {
+          onEntryBlockGraphChange(nextGraph);
+          closeEditModal();
+          return;
+        }
+
+        if (!isTextSourceRef(from.sourceRef)) {
           closeEditModal();
           return;
         }
@@ -720,28 +805,49 @@ export const MappingView = ({
           : fullSpanTextExclusionRangesForSourceRef(from.sourceRef);
 
         onEntryBlockGraphChange(
-          applyTextReassignToEntryBlockGraph(
-            entryBlockGraph,
-            from,
-            effectiveRanges,
-            resolvedTargets
-          )
+          applyTextReassignToEntryBlockGraph(nextGraph, from, effectiveRanges, nonRichTextTargets)
         );
         closeEditModal();
         return;
       }
 
+      let nextGraph = entryBlockGraph;
+
+      if (richTextTargets.length && pendingModalSelectionRange) {
+        const richTextRefs = collectRichTextSourceRefsFromSelection(
+          textSelectionRootRef.current,
+          pendingModalSelectionRange,
+          document,
+          { mappedState: 'unmapped' }
+        );
+
+        if (richTextRefs.length) {
+          nextGraph = applyRichTextAssignToEntryBlockGraph(
+            nextGraph,
+            richTextRefs,
+            richTextTargets
+          );
+        }
+      }
+
+      if (!nonRichTextTargets.length) {
+        onEntryBlockGraphChange(nextGraph);
+        closeEditModal();
+        return;
+      }
+
       if (!pendingTextAssignRanges.length) {
+        onEntryBlockGraphChange(nextGraph);
         closeEditModal();
         return;
       }
 
       onEntryBlockGraphChange(
         applyTextAssignToEntryBlockGraph(
-          entryBlockGraph,
+          nextGraph,
           document,
           pendingTextAssignRanges,
-          resolvedTargets
+          nonRichTextTargets
         )
       );
       closeEditModal();
@@ -936,6 +1042,15 @@ export const MappingView = ({
         title={editModalState.title}
         locationSectionDescription={editModalState.locationSectionDescription}
         primaryButtonLabel={editModalState.primaryButtonLabel}
+        additionalContent={
+          pendingPreviewSourceRefs.length || pendingPreviewHasTableContent ? (
+            <RichTextSelectionPreview
+              document={document}
+              sourceRefs={pendingPreviewSourceRefs}
+              showTablePlaceholder={pendingPreviewHasTableContent}
+            />
+          ) : undefined
+        }
         onConfirmPrimary={handleEditModalConfirmPrimary}
       />
     </>

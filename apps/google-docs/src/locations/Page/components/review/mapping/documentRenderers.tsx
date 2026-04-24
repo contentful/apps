@@ -235,7 +235,15 @@ export const BlockRenderer = ({
         const hovered = isMappingHovered(imageMappingKeys, hoveredMappingKeys);
 
         return (
-          <Box key={image.id} marginTop="spacingS">
+          <Box
+            key={image.id}
+            marginTop="spacingS"
+            data-review-image-segment="true"
+            data-is-mapped={highlighted ? 'true' : 'false'}
+            data-image-scope="block"
+            data-block-id={block.id}
+            data-image-id={imageId}
+            data-mapping-keys={imageMappingKeys.join('|')}>
             <ReviewImageAssetCard
               image={image}
               sourceRef={imageSourceRef}
@@ -351,7 +359,17 @@ const TablePartRenderer = ({
     const hovered = isMappingHovered(mappingKeys, hoveredMappingKeys);
 
     return (
-      <Box marginTop="spacing2Xs">
+      <Box
+        marginTop="spacing2Xs"
+        data-review-image-segment="true"
+        data-is-mapped={highlighted ? 'true' : 'false'}
+        data-image-scope="table"
+        data-table-id={tableId}
+        data-row-id={rowId}
+        data-cell-id={cellId}
+        data-part-id={part.id}
+        data-image-id={part.imageId}
+        data-mapping-keys={mappingKeys.join('|')}>
         <ReviewImageAssetCard
           image={image}
           sourceRef={imageSourceRef}

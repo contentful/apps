@@ -1,14 +1,22 @@
 import type {
   EditLocationOption,
+  FieldMapping,
   EntryBlockGraph,
   ImageSourceRef,
   NormalizedDocument,
   NormalizedDocumentContentBlock,
   NormalizedDocumentFlattenedRun,
   SourceRef,
+  TableImageSourceRef,
   TextRangeSourceRef,
 } from '@types';
-import { isTableSourceRef, isTableTextSourceRef, isTextSourceRef } from '@types';
+import {
+  isBlockImageSourceRef,
+  isTableImageSourceRef,
+  isTableSourceRef,
+  isTableTextSourceRef,
+  isTextSourceRef,
+} from '@types';
 import { buildSourceRefKey } from './sourceRefUtils';
 
 export type TextExclusionRange =
@@ -22,6 +30,15 @@ export type TextExclusionRange =
       start: number;
       end: number;
     };
+
+type RichTextSelectionOptions = {
+  mappingKeys?: ReadonlySet<string>;
+  mappedState?: 'mapped' | 'unmapped' | 'any';
+};
+
+type RichTextSelectionItem =
+  | { kind: 'text'; range: TextExclusionRange }
+  | { kind: 'image'; sourceRef: ImageSourceRef };
 
 function mergeIntervals(intervals: [number, number][]): [number, number][] {
   if (!intervals.length) return [];
@@ -136,6 +153,27 @@ function rangeIntersectsNodeSafe(range: Range, node: Node): boolean {
   } catch {
     return false;
   }
+}
+
+function elementMatchesMappingFilter(el: HTMLElement, options: RichTextSelectionOptions): boolean {
+  const mappedState = options.mappedState ?? 'any';
+  if (mappedState !== 'any') {
+    const isMapped = el.dataset.isMapped === 'true';
+    if (mappedState === 'mapped' ? !isMapped : isMapped) {
+      return false;
+    }
+  }
+
+  if (!options.mappingKeys?.size) {
+    return true;
+  }
+
+  const elementMappingKeys = (el.dataset.mappingKeys ?? '')
+    .split('|')
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  return elementMappingKeys.some((mappingKey) => options.mappingKeys?.has(mappingKey));
 }
 
 /**
@@ -253,6 +291,68 @@ function mergeTextExclusionRanges(ranges: TextExclusionRange[]): TextExclusionRa
     }
   }
   return out;
+}
+
+function appendMergedTextRange(
+  items: RichTextSelectionItem[],
+  range: TextExclusionRange
+): RichTextSelectionItem[] {
+  const previous = items[items.length - 1];
+  if (!previous || previous.kind !== 'text') {
+    return [...items, { kind: 'text', range }];
+  }
+
+  if (range.scope !== previous.range.scope) {
+    return [...items, { kind: 'text', range }];
+  }
+
+  if (
+    range.scope === 'block' &&
+    previous.range.scope === 'block' &&
+    range.blockId === previous.range.blockId &&
+    range.start <= previous.range.end
+  ) {
+    return [
+      ...items.slice(0, -1),
+      {
+        kind: 'text',
+        range: {
+          scope: 'block',
+          blockId: range.blockId,
+          start: Math.min(previous.range.start, range.start),
+          end: Math.max(previous.range.end, range.end),
+        },
+      },
+    ];
+  }
+
+  if (
+    range.scope === 'table' &&
+    previous.range.scope === 'table' &&
+    range.tableId === previous.range.tableId &&
+    range.rowId === previous.range.rowId &&
+    range.cellId === previous.range.cellId &&
+    range.partId === previous.range.partId &&
+    range.start <= previous.range.end
+  ) {
+    return [
+      ...items.slice(0, -1),
+      {
+        kind: 'text',
+        range: {
+          scope: 'table',
+          tableId: range.tableId,
+          rowId: range.rowId,
+          cellId: range.cellId,
+          partId: range.partId,
+          start: Math.min(previous.range.start, range.start),
+          end: Math.max(previous.range.end, range.end),
+        },
+      },
+    ];
+  }
+
+  return [...items, { kind: 'text', range }];
 }
 
 /**
@@ -391,6 +491,106 @@ export function collectTextAssignRangesFromSelection(
   return mergeTextExclusionRanges(raw);
 }
 
+function collectRichTextSelectionItems(
+  root: HTMLElement | null,
+  selectedRange: Range | null,
+  options: RichTextSelectionOptions = {}
+): RichTextSelectionItem[] {
+  if (!root || !selectedRange) return [];
+
+  const elements = root.querySelectorAll<HTMLElement>(
+    '[data-review-text-segment="true"], [data-review-image-segment="true"]'
+  );
+
+  let items: RichTextSelectionItem[] = [];
+
+  elements.forEach((el) => {
+    if (!rangeIntersectsNodeSafe(selectedRange, el) || !elementMatchesMappingFilter(el, options)) {
+      return;
+    }
+
+    if (el.dataset.reviewTextSegment === 'true') {
+      const scope = el.dataset.textScope;
+      const segStart = Number(el.dataset.rangeStart);
+      const segEnd = Number(el.dataset.rangeEnd);
+      if (!Number.isFinite(segStart) || !Number.isFinite(segEnd) || segStart >= segEnd) return;
+
+      const abs = getAbsoluteIntersectionForMappedSegment(el, selectedRange, segStart, segEnd);
+      if (!abs) return;
+      const [start, end] = abs;
+
+      if (scope === 'block' && el.dataset.blockId) {
+        items = appendMergedTextRange(items, {
+          scope: 'block',
+          blockId: el.dataset.blockId,
+          start,
+          end,
+        });
+        return;
+      }
+
+      if (
+        scope === 'table' &&
+        el.dataset.tableId &&
+        el.dataset.rowId &&
+        el.dataset.cellId &&
+        el.dataset.partId
+      ) {
+        items = appendMergedTextRange(items, {
+          scope: 'table',
+          tableId: el.dataset.tableId,
+          rowId: el.dataset.rowId,
+          cellId: el.dataset.cellId,
+          partId: el.dataset.partId,
+          start,
+          end,
+        });
+      }
+      return;
+    }
+
+    if (el.dataset.reviewImageSegment !== 'true') {
+      return;
+    }
+
+    const imageScope = el.dataset.imageScope;
+    if (imageScope === 'block' && el.dataset.blockId && el.dataset.imageId) {
+      items.push({
+        kind: 'image',
+        sourceRef: {
+          type: 'image',
+          blockId: el.dataset.blockId,
+          imageId: el.dataset.imageId,
+        },
+      });
+      return;
+    }
+
+    if (
+      imageScope === 'table' &&
+      el.dataset.tableId &&
+      el.dataset.rowId &&
+      el.dataset.cellId &&
+      el.dataset.partId &&
+      el.dataset.imageId
+    ) {
+      items.push({
+        kind: 'image',
+        sourceRef: {
+          type: 'tableImage',
+          tableId: el.dataset.tableId,
+          rowId: el.dataset.rowId,
+          cellId: el.dataset.cellId,
+          partId: el.dataset.partId,
+          imageId: el.dataset.imageId,
+        },
+      });
+    }
+  });
+
+  return items;
+}
+
 function findContentBlockById(
   document: NormalizedDocument,
   blockId: string
@@ -416,6 +616,95 @@ function findTableTextPart(
   const part = cell?.parts.find((p) => p.id === partId);
   if (!part || part.type !== 'text') return undefined;
   return part;
+}
+
+function buildRichTextTextSourceRef(
+  document: NormalizedDocument,
+  range: TextExclusionRange
+): TextRangeSourceRef | null {
+  if (range.scope === 'block') {
+    const block = findContentBlockById(document, range.blockId);
+    if (!block?.flattenedTextRuns?.length || block.type === 'image') return null;
+
+    const flattenedRuns = clipFlattenedRuns(block.flattenedTextRuns, range.start, range.end);
+    if (!flattenedRuns.length) return null;
+
+    const base = {
+      blockId: range.blockId,
+      start: range.start,
+      end: range.end,
+      flattenedRuns,
+    };
+
+    if (block.type === 'heading') {
+      return {
+        type: 'heading',
+        ...base,
+        ...(block.headingLevel !== undefined ? { headingLevel: block.headingLevel } : {}),
+      };
+    }
+
+    if (block.type === 'listItem') {
+      return {
+        type: 'listItem',
+        ...base,
+        ...(block.bullet !== undefined ? { bullet: block.bullet } : {}),
+      };
+    }
+
+    return {
+      type: 'paragraph',
+      ...base,
+    };
+  }
+
+  const part = findTableTextPart(document, range.tableId, range.rowId, range.cellId, range.partId);
+  if (!part?.flattenedTextRuns?.length) return null;
+
+  const flattenedRuns = clipFlattenedRuns(part.flattenedTextRuns, range.start, range.end);
+  if (!flattenedRuns.length) return null;
+
+  return {
+    type: 'tableText',
+    tableId: range.tableId,
+    rowId: range.rowId,
+    cellId: range.cellId,
+    partId: range.partId,
+    start: range.start,
+    end: range.end,
+    flattenedRuns,
+  };
+}
+
+export function collectRichTextSourceRefsFromSelection(
+  root: HTMLElement | null,
+  selectedRange: Range | null,
+  document: NormalizedDocument,
+  options: RichTextSelectionOptions = {}
+): SourceRef[] {
+  const items = collectRichTextSelectionItems(root, selectedRange, options);
+
+  return items.flatMap<SourceRef>((item) => {
+    if (item.kind === 'image') {
+      return [item.sourceRef];
+    }
+
+    const sourceRef = buildRichTextTextSourceRef(document, item.range);
+    return sourceRef ? [sourceRef] : [];
+  });
+}
+
+export function selectionIncludesTableContent(
+  root: HTMLElement | null,
+  selectedRange: Range | null
+): boolean {
+  if (!root || !selectedRange) return false;
+
+  const elements = root.querySelectorAll<HTMLElement>(
+    '[data-review-text-segment="true"][data-text-scope="table"], [data-review-image-segment="true"][data-image-scope="table"]'
+  );
+
+  return Array.from(elements).some((el) => rangeIntersectsNodeSafe(selectedRange, el));
 }
 
 /**
@@ -556,6 +845,14 @@ function cloneTextRangeSourceRef(ref: TextRangeSourceRef): TextRangeSourceRef {
   };
 }
 
+function cloneSourceRef(ref: SourceRef): SourceRef {
+  if (isTextSourceRef(ref)) {
+    return cloneTextRangeSourceRef(ref);
+  }
+
+  return { ...ref } as SourceRef;
+}
+
 function getLocationSourceRefs(location: EditLocationOption): SourceRef[] {
   return location.sourceRefs?.length ? location.sourceRefs : [location.sourceRef];
 }
@@ -599,6 +896,148 @@ function appendTextRefsToFieldMapping(
       };
     }),
   };
+}
+
+function appendSourceRefsToFieldMapping(
+  graph: EntryBlockGraph,
+  entryIndex: number,
+  fieldId: string,
+  fieldType: string,
+  refs: SourceRef[]
+): EntryBlockGraph {
+  if (!refs.length) return graph;
+
+  return {
+    ...graph,
+    entries: graph.entries.map((entry, idx) => {
+      if (idx !== entryIndex) return entry;
+
+      const fmIdx = entry.fieldMappings.findIndex((fm) => fm.fieldId === fieldId);
+      if (fmIdx === -1) {
+        return {
+          ...entry,
+          fieldMappings: [
+            ...entry.fieldMappings,
+            { fieldId, fieldType, sourceRefs: refs.map(cloneSourceRef), confidence: 1 },
+          ],
+        };
+      }
+
+      return {
+        ...entry,
+        fieldMappings: entry.fieldMappings.map((fm, j) =>
+          j === fmIdx ? { ...fm, sourceRefs: [...fm.sourceRefs, ...refs.map(cloneSourceRef)] } : fm
+        ),
+      };
+    }),
+  };
+}
+
+function removeSourceRefsFromFieldMapping(
+  fieldMapping: FieldMapping,
+  sourceRefKeys: Set<string>
+): FieldMapping {
+  return {
+    ...fieldMapping,
+    sourceRefs: fieldMapping.sourceRefs.filter(
+      (sourceRef) => !sourceRefKeys.has(buildSourceRefKey(sourceRef))
+    ),
+  };
+}
+
+export function applyRichTextAssignToEntryBlockGraph(
+  graph: EntryBlockGraph,
+  refs: SourceRef[],
+  targets: ReadonlyArray<TextAssignTarget>
+): EntryBlockGraph {
+  if (!refs.length || !targets.length) return graph;
+
+  const seen = new Set<string>();
+  const dedupedTargets = targets.filter((target) => {
+    const key = `${target.entryIndex}|${target.fieldId}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  let next = graph;
+  for (const target of dedupedTargets) {
+    next = appendSourceRefsToFieldMapping(
+      next,
+      target.entryIndex,
+      target.fieldId,
+      target.fieldType,
+      refs
+    );
+  }
+
+  return next;
+}
+
+export function applyRichTextReassignToEntryBlockGraph(
+  graph: EntryBlockGraph,
+  from: EditLocationOption,
+  refs: SourceRef[],
+  targets: ReadonlyArray<TextAssignTarget>
+): EntryBlockGraph {
+  if (!refs.length || !targets.length) return graph;
+
+  const seen = new Set<string>();
+  const dedupedTargets = targets.filter((target) => {
+    if (target.entryIndex === from.entryIndex && target.fieldId === from.fieldId) return false;
+    const key = `${target.entryIndex}|${target.fieldId}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  if (!dedupedTargets.length) return graph;
+
+  const textRanges = refs.flatMap<TextExclusionRange>((ref) => {
+    if (!isTextSourceRef(ref)) return [];
+    if (isTableTextSourceRef(ref)) {
+      return [
+        {
+          scope: 'table' as const,
+          tableId: ref.tableId,
+          rowId: ref.rowId,
+          cellId: ref.cellId,
+          partId: ref.partId,
+          start: ref.start,
+          end: ref.end,
+        },
+      ];
+    }
+
+    return [{ scope: 'block' as const, blockId: ref.blockId, start: ref.start, end: ref.end }];
+  });
+
+  let nextGraph =
+    textRanges.length > 0 ? applyTextExclusionToEntryBlockGraph(graph, from, textRanges) : graph;
+
+  const imageSourceRefKeys = new Set(
+    refs
+      .filter((ref) => isBlockImageSourceRef(ref) || isTableImageSourceRef(ref))
+      .map((sourceRef) => buildSourceRefKey(sourceRef))
+  );
+
+  if (imageSourceRefKeys.size > 0) {
+    const nextEntries = nextGraph.entries.map((entry, index) => {
+      if (index !== from.entryIndex) return entry;
+
+      return {
+        ...entry,
+        fieldMappings: entry.fieldMappings.map((fieldMapping) =>
+          fieldMapping.fieldId === from.fieldId
+            ? removeSourceRefsFromFieldMapping(fieldMapping, imageSourceRefKeys)
+            : fieldMapping
+        ),
+      };
+    });
+
+    nextGraph = { ...nextGraph, entries: nextEntries };
+  }
+
+  return applyRichTextAssignToEntryBlockGraph(nextGraph, refs, dedupedTargets);
 }
 
 /**
