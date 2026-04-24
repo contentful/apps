@@ -109,10 +109,6 @@ function rangeIntersectsNode(range: Range, node: Node): boolean {
   }
 }
 
-function hasPositionalDisplayLabel(label: string): boolean {
-  return /\(\d+\/\d+\)$/.test(label);
-}
-
 export const MappingView = ({
   payload,
   entryBlockGraph,
@@ -186,8 +182,8 @@ export const MappingView = ({
     useReviewTextSelection(textSelectionRootRef);
 
   const highlightIndex = useMemo(
-    () => buildMappingHighlightIndex(entryBlockGraph),
-    [entryBlockGraph]
+    () => buildMappingHighlightIndex(entryBlockGraph, payload.contentTypes),
+    [entryBlockGraph, payload.contentTypes]
   );
 
   const { tabs, allSegments } = useMemo(() => buildDocument(document), [document]);
@@ -261,24 +257,11 @@ export const MappingView = ({
   const visibleHighlightsBySegment = useMemo(
     () =>
       allSegments.reduce<Record<string, MappingHighlight[]>>((acc, segment) => {
-        acc[segment.id] = getVisibleHighlights(getHighlightsForSegment(segment)).map(
-          (highlight) => {
-            const graphEntry = entryBlockGraph.entries[highlight.entryIndex];
-            const contentType = payload.contentTypes.find(
-              (item) => item.sys.id === graphEntry?.contentTypeId
-            );
-            const field = contentType?.fields.find((item) => item.id === highlight.fieldId);
-
-            return {
-              ...highlight,
-              fieldName: (field?.name ?? '').trim() || highlight.fieldId,
-            };
-          }
-        );
+        acc[segment.id] = getVisibleHighlights(getHighlightsForSegment(segment));
         return acc;
       }, {}),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [allSegments, entryBlockGraph, payload.contentTypes, selectedEntryIndex]
+    [allSegments, entryBlockGraph, selectedEntryIndex]
   );
 
   const { groupsByTab, allGroups } = useMemo(

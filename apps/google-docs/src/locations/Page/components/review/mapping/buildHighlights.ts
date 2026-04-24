@@ -1,4 +1,4 @@
-import type { EntryBlockGraph, SourceRef } from '@types';
+import type { EntryBlockGraph, SourceRef, WorkflowContentType } from '@types';
 import { isBlockSourceRef, isTableSourceRef } from '@types';
 import { buildSourceRefKey } from './sourceRefUtils';
 
@@ -6,6 +6,7 @@ export interface MappingHighlight {
   entryIndex: number;
   fieldType: string;
   fieldId: string;
+  fieldName: string;
   sourceRef: SourceRef;
 }
 
@@ -16,18 +17,22 @@ export interface MappingHighlightIndex {
 }
 
 export function buildMappingHighlightIndex(
-  entryBlockGraph: EntryBlockGraph
+  entryBlockGraph: EntryBlockGraph,
+  contentTypes: WorkflowContentType[]
 ): MappingHighlightIndex {
   const blockHighlights: Record<string, MappingHighlight[]> = {};
   const tablePartHighlights: Record<string, MappingHighlight[]> = {};
   const tableHighlights: Record<string, MappingHighlight[]> = {};
 
   entryBlockGraph.entries.forEach((mappingEntry, entryIndex) => {
+    const contentType = contentTypes.find((item) => item.sys.id === mappingEntry.contentTypeId);
     mappingEntry.fieldMappings.forEach((fieldMapping) => {
       fieldMapping.sourceRefs.forEach((sourceRef) => {
+        const field = contentType?.fields.find((item) => item.id === fieldMapping.fieldId);
         const highlight: MappingHighlight = {
           entryIndex,
           fieldId: fieldMapping.fieldId,
+          fieldName: (field?.name ?? '').trim() || fieldMapping.fieldId,
           fieldType: fieldMapping.fieldType,
           sourceRef,
         };

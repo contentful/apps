@@ -45,11 +45,6 @@ function uniqueStrings(values: string[]): string[] {
   return Array.from(new Set(values));
 }
 
-function getFieldNameLabel(highlight: MappingHighlight): string {
-  const maybeFieldName = (highlight as MappingHighlight & { fieldName?: string }).fieldName;
-  return maybeFieldName && maybeFieldName.trim().length > 0 ? maybeFieldName : highlight.fieldId;
-}
-
 function buildDraftMappingCards(
   segment: DocSegment,
   highlights: MappingHighlight[],
@@ -58,7 +53,7 @@ function buildDraftMappingCards(
   if (segment.kind === 'table') {
     return highlights.map((highlight) => {
       const mappingKey = getMappingCardKey(segment.id, highlight);
-      const fieldName = getFieldNameLabel(highlight);
+      const fieldName = highlight.fieldName;
 
       return {
         key: `${segment.id}:${mappingKey}`,
@@ -93,7 +88,7 @@ function buildDraftMappingCards(
   });
 
   return Array.from(byFieldIdentity.entries()).map(([fieldIdentity, value]) => {
-    const fieldName = getFieldNameLabel(value.firstHighlight);
+    const fieldName = value.firstHighlight.fieldName;
 
     return {
       key: `${segment.id}:${fieldIdentity}`,
