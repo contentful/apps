@@ -237,7 +237,7 @@ export const MappingView = ({
       (item) => item.sys.id === graphEntry.contentTypeId
     );
     const contentTypeDisplayName = (contentType?.name ?? '').trim();
-    const field = contentType?.fields.find((field) => field.id === fieldId);
+    const field = contentType?.fields.find((f) => f.id === fieldId);
     const fieldDisplayName = (field?.name ?? '').trim() || fieldId;
     const fieldDisplayType = field
       ? displayType(field.type ?? '', field.linkType, field.items)
