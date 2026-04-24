@@ -6,7 +6,6 @@ export interface MappingCardData {
   key: string;
   fieldName: string;
   fieldType: string;
-  displayLabel: string;
 }
 
 interface MappingCardProps {
@@ -44,8 +43,8 @@ export const MappingCard = ({
   onMouseEnter,
   onMouseLeave,
 }: MappingCardProps) => {
-  const { displayLabel, fieldType } = card;
-  const fullValue = `${displayLabel}${FIELD_TYPE_SEPARATOR}${fieldType}`;
+  const { fieldName, fieldType } = card;
+  const fullValue = `${fieldName}${FIELD_TYPE_SEPARATOR}${fieldType}`;
   const truncatedValue = truncate(fullValue, MAX_VALUE_LENGTH);
   const separatorIndex = truncatedValue.indexOf(FIELD_TYPE_SEPARATOR);
   const hasTypePart = separatorIndex !== -1;

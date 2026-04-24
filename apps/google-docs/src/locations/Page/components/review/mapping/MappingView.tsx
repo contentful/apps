@@ -349,9 +349,7 @@ export const MappingView = ({
         byKey.set(card.key, {
           ...firstLocation,
           id: card.key,
-          displayLabel: hasPositionalDisplayLabel(card.displayLabel)
-            ? card.displayLabel
-            : undefined,
+          fieldName: card.fieldName,
           sourceRefs: sourceLocations.map((location) => location.sourceRef),
           isSelected: false,
         });

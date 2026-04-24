@@ -65,7 +65,6 @@ function buildDraftMappingCards(
         fieldIdentity: getFieldIdentity(highlight),
         fieldName,
         fieldType: resolveFieldTypeLabel(highlight),
-        displayLabel: fieldName,
         anchorId: getAnchorIdForSourceRef(highlight.sourceRef),
         mappingKeys: [mappingKey],
       };
@@ -101,7 +100,6 @@ function buildDraftMappingCards(
       fieldIdentity,
       fieldName,
       fieldType: resolveFieldTypeLabel(value.firstHighlight),
-      displayLabel: fieldName,
       anchorId: getAnchorIdForSourceRef(value.firstHighlight.sourceRef),
       mappingKeys: uniqueStrings(value.mappingKeys),
     };
@@ -236,7 +234,7 @@ export function buildMappingDisplayGroups(
 
       return {
         ...card,
-        displayLabel: total > 1 ? `${card.fieldName} (${nextPosition}/${total})` : card.fieldName,
+        fieldName: total > 1 ? `${card.fieldName} (${nextPosition}/${total})` : card.fieldName,
       };
     }),
   });
