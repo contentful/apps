@@ -10,6 +10,7 @@ interface MappingEntryCardsProps {
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
   setCardWrapperRef: (cardKey: string) => RefCallback<HTMLDivElement>;
+  showContentTypeName?: boolean;
 }
 
 const railStyles: BoxProps['style'] = {
@@ -25,6 +26,7 @@ export const MappingEntryCards = ({
   hoveredMappingKeys,
   onSetHoveredMappingKeys,
   setCardWrapperRef,
+  showContentTypeName = false,
 }: MappingEntryCardsProps): JSX.Element => {
   return (
     <Box data-testid={`mapping-rail-${groupId}`} style={railStyles}>
@@ -36,6 +38,7 @@ export const MappingEntryCards = ({
                 card={mappingCard}
                 top={cardOffsetsByGroup[groupId]?.[mappingCard.key] ?? 0}
                 wrapperRef={setCardWrapperRef(mappingCard.key)}
+                showContentTypeName={showContentTypeName}
                 isHovered={mappingCard.mappingKeys.some((key) => hoveredMappingKeys.includes(key))}
                 onMouseEnter={() => onSetHoveredMappingKeys(mappingCard.mappingKeys)}
                 onMouseLeave={() => onSetHoveredMappingKeys([])}

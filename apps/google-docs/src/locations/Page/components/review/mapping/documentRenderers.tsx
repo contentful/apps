@@ -17,8 +17,9 @@ import type {
   NormalizedDocumentTable,
   NormalizedDocumentTablePart,
   SourceRef,
+  TextSourceRef,
 } from '@types';
-import { isBlockImageSourceRef, isTableImageSourceRef } from '@types';
+import { isBlockImageSourceRef, isTableImageSourceRef, isTextSourceRef } from '@types';
 import type { MappingHighlight, MappingHighlightIndex } from './buildHighlights';
 import { getMappingCardKey } from './buildHighlights';
 import type { ListMarker } from './buildListMarkers';
@@ -41,10 +42,16 @@ function isMappingHovered(keys: string[], hoveredMappingKeys: string[]): boolean
   return keys.some((k) => hoveredMappingKeys.includes(k));
 }
 
-function getHighlightStyle(highlighted: boolean, hovered: boolean) {
-  if (!highlighted) return { border: tokens.gray300, background: 'transparent' };
+function getHighlightStyle(highlighted: boolean, hovered: boolean, readOnly = false) {
+  if (!highlighted) return { border: 'transparent', background: 'transparent' };
+  if (readOnly) {
+    return {
+      border: 'transparent',
+      background: 'transparent',
+    };
+  }
   return {
-    border: hovered ? tokens.green600 : tokens.green500,
+    border: 'transparent',
     background: hovered ? tokens.green300 : tokens.green200,
   };
 }
@@ -77,6 +84,7 @@ interface TextSegmentSpanProps {
   rowId?: string;
   cellId?: string;
   partId?: string;
+  readOnly?: boolean;
 }
 
 const TextSegmentSpan = ({
@@ -92,7 +100,9 @@ const TextSegmentSpan = ({
   rowId,
   cellId,
   partId,
+  readOnly = false,
 }: TextSegmentSpanProps) => {
+  const highlightStyle = getHighlightStyle(segment.highlighted, hovered, readOnly);
   const content = (
     <Box
       as="span"
@@ -114,10 +124,20 @@ const TextSegmentSpan = ({
       onMouseLeave={segment.highlighted ? () => onSetHoveredMappings([]) : undefined}
       style={{
         ...getTextSegmentStyle(segment.styles),
-        backgroundColor: getHighlightStyle(segment.highlighted, hovered).background,
+        backgroundColor: highlightStyle.background,
+        border:
+          segment.highlighted && highlightStyle.border !== 'transparent'
+            ? `1px solid ${highlightStyle.border}`
+            : undefined,
         borderRadius: segment.highlighted ? tokens.borderRadiusSmall : undefined,
+        paddingInline:
+          segment.highlighted && highlightStyle.border !== 'transparent'
+            ? tokens.spacing2Xs
+            : undefined,
+        paddingBlock:
+          segment.highlighted && highlightStyle.border !== 'transparent' ? '1px' : undefined,
         whiteSpace: 'pre-wrap',
-        transition: 'background-color 120ms ease',
+        transition: 'background-color 120ms ease, border-color 120ms ease',
       }}>
       {segment.text}
     </Box>
@@ -153,6 +173,9 @@ interface BlockRendererProps {
     sourceRef: { type: 'image'; blockId: string; imageId: string },
     label: string
   ) => void;
+  readOnly?: boolean;
+  showReadOnlyOutline?: boolean;
+  preferImageReadOnlyHighlight?: boolean;
 }
 
 export const BlockRenderer = ({
@@ -167,11 +190,21 @@ export const BlockRenderer = ({
   onSetHoveredMappingKeys,
   onAssignImage,
   onExcludeImage,
+  readOnly = false,
+  showReadOnlyOutline = true,
+  preferImageReadOnlyHighlight = false,
 }: BlockRendererProps) => {
   const visibleHighlights = filterByEntry(
     highlightIndex.blockHighlights[block.id] ?? [],
     selectedEntryIndex
   );
+  const visibleTextHighlights = visibleHighlights.filter(
+    (highlight): highlight is MappingHighlight & { sourceRef: TextSourceRef } =>
+      isTextSourceRef(highlight.sourceRef)
+  );
+  const hasVisibleTextMappings = visibleTextHighlights.length > 0;
+  const blockMappingKeys = visibleHighlights.map((highlight) => getMappingCardKey(segmentId, highlight));
+  const isBlockHovered = isMappingHovered(blockMappingKeys, hoveredMappingKeys);
   const textSegments = buildTextSegments(block.flattenedTextRuns, segmentId, visibleHighlights);
   const listMarker = block.type === 'listItem' ? listMarkers[block.id] ?? null : null;
 
@@ -188,13 +221,27 @@ export const BlockRenderer = ({
           rangeStart={seg.start}
           rangeEnd={seg.end}
           blockId={block.id}
+          readOnly={readOnly}
         />
       ))}
     </Text>
   );
 
   return (
-    <Box>
+    <Box
+      style={
+        readOnly && showReadOnlyOutline && hasVisibleTextMappings
+          ? {
+              border: `${isBlockHovered ? 2 : 1}px solid ${
+                isBlockHovered ? tokens.green600 : tokens.green500
+              }`,
+              borderRadius: tokens.borderRadiusMedium,
+              backgroundColor: 'transparent',
+              padding: tokens.spacing2Xs,
+              transition: 'border-color 120ms ease, border-width 120ms ease',
+            }
+          : undefined
+      }>
       {listMarker ? (
         <Flex
           data-testid={`list-item-${block.id}`}
@@ -250,6 +297,10 @@ export const BlockRenderer = ({
               isHighlighted={highlighted}
               hovered={hovered}
               isExcluded={isImageSourceRefExcluded(imageSourceRef, excludedSourceRefs)}
+              readOnly={readOnly}
+              showReadOnlyHighlightBorder={
+                readOnly && (preferImageReadOnlyHighlight || !hasVisibleTextMappings)
+              }
               onMouseEnter={
                 highlighted ? () => onSetHoveredMappingKeys(imageMappingKeys) : undefined
               }
@@ -301,6 +352,9 @@ interface TableRendererProps {
     },
     label: string
   ) => void;
+  readOnly?: boolean;
+  showReadOnlyOutline?: boolean;
+  preferImageReadOnlyHighlight?: boolean;
 }
 
 interface TablePartRendererProps {
@@ -316,6 +370,8 @@ interface TablePartRendererProps {
   onSetHoveredMappingKeys: (keys: string[]) => void;
   onAssignImage: TableRendererProps['onAssignImage'];
   onExcludeImage: TableRendererProps['onExcludeImage'];
+  readOnly?: boolean;
+  showReadOnlyOutline?: boolean;
 }
 
 const TablePartRenderer = ({
@@ -331,7 +387,13 @@ const TablePartRenderer = ({
   onSetHoveredMappingKeys,
   onAssignImage,
   onExcludeImage,
+  readOnly = false,
+  showReadOnlyOutline = true,
 }: TablePartRendererProps) => {
+  const partMappingKeys = visibleHighlights.map((highlight) => getMappingCardKey(segmentId, highlight));
+  const hasVisibleMappings = partMappingKeys.length > 0;
+  const isPartHovered = isMappingHovered(partMappingKeys, hoveredMappingKeys);
+
   if (part.type === 'image') {
     const image = imageById[part.imageId];
     if (!image) return null;
@@ -377,6 +439,8 @@ const TablePartRenderer = ({
           hovered={hovered}
           isExcluded={isImageSourceRefExcluded(imageSourceRef, excludedSourceRefs)}
           size="small"
+          readOnly={readOnly}
+          showReadOnlyHighlightBorder={readOnly}
           onMouseEnter={highlighted ? () => onSetHoveredMappingKeys(mappingKeys) : undefined}
           onMouseLeave={highlighted ? () => onSetHoveredMappingKeys([]) : undefined}
           onAssign={() => onAssignImage(imageSourceRef, image.title ?? image.altText ?? image.id)}
@@ -389,7 +453,23 @@ const TablePartRenderer = ({
   const textSegments = buildTextSegments(part.flattenedTextRuns, segmentId, visibleHighlights);
 
   return (
-    <Box as="span" style={{ whiteSpace: 'pre-wrap' }}>
+    <Box
+      as="span"
+      style={{
+        whiteSpace: 'pre-wrap',
+        display: 'inline-block',
+        ...(readOnly && showReadOnlyOutline && hasVisibleMappings
+          ? {
+              border: `${isPartHovered ? 2 : 1}px solid ${
+                isPartHovered ? tokens.green600 : tokens.green500
+              }`,
+              borderRadius: tokens.borderRadiusMedium,
+              backgroundColor: 'transparent',
+              padding: tokens.spacingXs,
+              transition: 'border-color 120ms ease, border-width 120ms ease',
+            }
+          : undefined),
+      }}>
       {textSegments.map((seg, index) => (
         <TextSegmentSpan
           key={`${part.id}-${index}`}
@@ -404,6 +484,7 @@ const TablePartRenderer = ({
           rowId={rowId}
           cellId={cellId}
           partId={part.id}
+          readOnly={readOnly}
         />
       ))}
     </Box>
@@ -421,6 +502,9 @@ export const TableRenderer = ({
   onSetHoveredMappingKeys,
   onAssignImage,
   onExcludeImage,
+  readOnly = false,
+  showReadOnlyOutline = true,
+  preferImageReadOnlyHighlight = false,
 }: TableRendererProps) => {
   const getVisiblePartHighlights = (partKey: string) =>
     filterByEntry(highlightIndex.tablePartHighlights[partKey] ?? [], selectedEntryIndex);
@@ -465,6 +549,8 @@ export const TableRenderer = ({
                           onSetHoveredMappingKeys={onSetHoveredMappingKeys}
                           onAssignImage={onAssignImage}
                           onExcludeImage={onExcludeImage}
+                          readOnly={readOnly}
+                          showReadOnlyOutline={showReadOnlyOutline}
                         />
                       </Box>
                     );

@@ -30,6 +30,7 @@ export const ReviewPage = ({
   onCancelReview,
   onExitReview,
 }: ReviewPageProps) => {
+  const [reviewMode, setReviewMode] = useState<'single' | 'all'>('all');
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
   const [selectedEntryIndex, setSelectedEntryIndex] = useState<number>(0);
   const [isCancelling, setIsCancelling] = useState(false);
@@ -46,6 +47,8 @@ export const ReviewPage = ({
   // alone or user edits would be wiped when the parent re-renders with a new object reference.
   useEffect(() => {
     setEntryBlockGraph(structuredClone(payload.entryBlockGraph));
+    setReviewMode('all');
+    setSelectedEntryIndex(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-init on run identity
   }, [runId, payload.documentId]);
 
@@ -135,6 +138,15 @@ export const ReviewPage = ({
     void handleCreateEntries();
   }, [hasCreatedEntries, handleCreateEntries]);
 
+  const handleViewAllMappings = useCallback(() => {
+    setReviewMode('all');
+  }, []);
+
+  const handleSelectEntryIndex = useCallback((index: number) => {
+    setSelectedEntryIndex(index);
+    setReviewMode('single');
+  }, []);
+
   const handleCancelOrExitReview = useCallback(() => {
     if (hasCreatedEntries) {
       onExitReview();
@@ -173,8 +185,10 @@ export const ReviewPage = ({
         <Flex flexDirection="column" gap="spacingM" style={{ padding: tokens.spacingL }}>
           <OverviewSection
             payload={reviewPayload}
-            selectedEntryIndex={selectedEntryIndex}
-            onSelectEntryIndex={setSelectedEntryIndex}
+            selectedEntryIndex={reviewMode === 'all' ? null : selectedEntryIndex}
+            onSelectEntryIndex={handleSelectEntryIndex}
+            onViewAllMappings={handleViewAllMappings}
+            isViewingAllMappings={reviewMode === 'all'}
             ctaLabel={hasCreatedEntries ? 'View entries' : 'Create entries'}
             onCtaClick={handleCreateOrViewEntries}
             isCtaLoading={isCreatePending}
@@ -183,9 +197,10 @@ export const ReviewPage = ({
             payload={reviewPayload}
             entryBlockGraph={entryBlockGraph}
             onEntryBlockGraphChange={setEntryBlockGraph}
-            selectedEntryIndex={selectedEntryIndex}
+            selectedEntryIndex={reviewMode === 'all' ? null : selectedEntryIndex}
             isDisabled={isMappingDisabled}
             occludingTopRef={reviewHeaderRef}
+            reviewMode={reviewMode}
           />
         </Flex>
       </Layout.Body>
