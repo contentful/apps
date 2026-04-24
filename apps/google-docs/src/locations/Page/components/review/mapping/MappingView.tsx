@@ -7,7 +7,7 @@ import {
   type RefCallback,
   type RefObject,
 } from 'react';
-import { Box, Flex, Text } from '@contentful/f36-components';
+import { Box, Flex, Note, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import {
   buildEntryListFromEntryBlockGraph,
@@ -79,6 +79,7 @@ interface MappingViewProps {
   selectedEntryIndex: number | null;
   isDisabled?: boolean;
   occludingTopRef?: RefObject<HTMLElement | null>;
+  reviewMode?: 'single' | 'all';
 }
 
 const EMPTY_NEW_LOCATION: EditModalNewLocation = {
@@ -155,8 +156,13 @@ export const MappingView = ({
   selectedEntryIndex,
   isDisabled = false,
   occludingTopRef,
+  reviewMode = 'single',
 }: MappingViewProps): JSX.Element => {
+  const isReadOnlyAllMappings = reviewMode === 'all';
   const selectedEntryRow = useMemo(() => {
+    if (isReadOnlyAllMappings) {
+      return null;
+    }
     const rows = buildEntryListFromEntryBlockGraph(
       payload.entryBlockGraph.entries,
       payload.contentTypes,
@@ -172,6 +178,7 @@ export const MappingView = ({
     payload.contentTypes,
     payload.referenceGraph.edges,
     selectedEntryIndex,
+    isReadOnlyAllMappings,
   ]);
   const [hoveredMappingKeys, setHoveredMappingKeys] = useState<string[]>([]);
   const [cardOffsetsByGroup, setCardOffsetsByGroup] = useState<
@@ -306,17 +313,29 @@ export const MappingView = ({
 
   const { groupsByTab, allGroups } = useMemo(
     () =>
-      buildMappingDisplayGroups(tabs, visibleHighlightsBySegment, (highlight) => {
-        const graphEntry = entryBlockGraph.entries[highlight.entryIndex];
-        const contentType = payload.contentTypes.find(
-          (item) => item.sys.id === graphEntry?.contentTypeId
-        );
-        const field = contentType?.fields.find((item) => item.id === highlight.fieldId);
+      buildMappingDisplayGroups(
+        tabs,
+        visibleHighlightsBySegment,
+        (highlight) => {
+          const graphEntry = entryBlockGraph.entries[highlight.entryIndex];
+          const contentType = payload.contentTypes.find(
+            (item) => item.sys.id === graphEntry?.contentTypeId
+          );
+          const field = contentType?.fields.find((item) => item.id === highlight.fieldId);
 
-        return field
-          ? displayType(field.type ?? '', field.linkType, field.items)
-          : displayType(highlight.fieldType);
-      }),
+          return field
+            ? displayType(field.type ?? '', field.linkType, field.items)
+            : displayType(highlight.fieldType);
+        },
+        (highlight) => {
+          const graphEntry = entryBlockGraph.entries[highlight.entryIndex];
+          const contentType = payload.contentTypes.find(
+            (item) => item.sys.id === graphEntry?.contentTypeId
+          );
+
+          return contentType?.name ?? graphEntry?.contentTypeId ?? 'Entry';
+        }
+      ),
     [tabs, visibleHighlightsBySegment, payload.contentTypes, entryBlockGraph.entries]
   );
 
@@ -535,7 +554,33 @@ export const MappingView = ({
     };
 
     measureOffsets();
-  }, [allGroups]);
+
+    if (typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const observer = new ResizeObserver(() => {
+      measureOffsets();
+    });
+
+    allGroups.forEach((group) => {
+      const groupNode = groupLayoutRefs.current[group.id];
+      if (groupNode) {
+        observer.observe(groupNode);
+      }
+
+      group.mappingCards.forEach((card) => {
+        const wrapperNode = cardWrapperRefs.current[card.key];
+        if (wrapperNode) {
+          observer.observe(wrapperNode);
+        }
+      });
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [allGroups, isReadOnlyAllMappings]);
 
   const openAssignModal = (
     preview: string,
@@ -588,7 +633,7 @@ export const MappingView = ({
   };
 
   const handleAssignFromSelection = () => {
-    if (isDisabled || !selectedText.trim()) return;
+    if (isDisabled || isReadOnlyAllMappings || !selectedText.trim()) return;
     const reassignRanges = collectTextExclusionRangesFromSelection(
       textSelectionRootRef.current,
       selectedRange
@@ -607,7 +652,7 @@ export const MappingView = ({
   };
 
   const handleExcludeFromSelection = () => {
-    if (isDisabled || !selectedText.trim()) return;
+    if (isDisabled || isReadOnlyAllMappings || !selectedText.trim()) return;
     const ranges = collectTextExclusionRangesFromSelection(
       textSelectionRootRef.current,
       selectedRange
@@ -627,13 +672,13 @@ export const MappingView = ({
   };
 
   const handleAssignImage = (sourceRef: ImageSourceRef, label: string) => {
-    if (isDisabled) return;
+    if (isDisabled || isReadOnlyAllMappings) return;
     openAssignModal(label, getLocationsForSourceRef(sourceRef), [], [], sourceRef);
     setHoveredMappingKeys([]);
   };
 
   const handleExcludeImage = (sourceRef: ImageSourceRef, label: string) => {
-    if (isDisabled) return;
+    if (isDisabled || isReadOnlyAllMappings) return;
     setPendingImageSourceRef(sourceRef);
     setPendingTextExclusionRanges(null);
     openExcludeModal(label, getLocationsForSourceRef(sourceRef), {
@@ -810,7 +855,7 @@ export const MappingView = ({
         flexDirection="column"
         gap="spacingS"
         style={{ marginTop: tokens.spacingM }}>
-        {selectedEntryRow && (
+        {(selectedEntryRow || isReadOnlyAllMappings) && (
           <Box
             style={{
               borderBottom: `1px solid ${tokens.gray200}`,
@@ -823,16 +868,31 @@ export const MappingView = ({
               marginBottom="spacing2Xs">
               Currently viewing:
             </Text>
-            <Text as="p" marginBottom="none">
-              <Text as="span" fontWeight="fontWeightDemiBold">
-                {selectedEntryRow.contentTypeName}
-              </Text>
-              {selectedEntryRow.entryTitle ? (
-                <Text as="span" fontColor="gray600">
-                  {' '}
-                  ({selectedEntryRow.entryTitle})
-                </Text>
-              ) : null}
+            <Text as="div" marginBottom="none">
+              {isReadOnlyAllMappings ? (
+                <>
+                  <Text as="span" fontWeight="fontWeightDemiBold">
+                    All entries
+                  </Text>
+                  <Box marginTop="spacingXs">
+                    <Note variant="neutral">
+                      Select an entry above to review and edit mappings for that entry.
+                    </Note>
+                  </Box>
+                </>
+              ) : (
+                <>
+                  <Text as="span" fontWeight="fontWeightDemiBold">
+                    {selectedEntryRow?.contentTypeName}
+                  </Text>
+                  {selectedEntryRow?.entryTitle ? (
+                    <Text as="span" fontColor="gray600">
+                      {' '}
+                      ({selectedEntryRow.entryTitle})
+                    </Text>
+                  ) : null}
+                </>
+              )}
             </Text>
           </Box>
         )}
@@ -850,6 +910,14 @@ export const MappingView = ({
                 const isGroupHovered = group.mappingCards.some((card) =>
                   card.mappingKeys.some((key) => hoveredMappingKeys.includes(key))
                 );
+                const mediaLikePattern = /media|image|asset/i;
+                const prefersImageOnlyHighlight =
+                  isReadOnlyAllMappings &&
+                  group.mappingCards.length === 1 &&
+                  (mediaLikePattern.test(group.mappingCards[0].fieldType) ||
+                    mediaLikePattern.test(group.mappingCards[0].fieldName) ||
+                    mediaLikePattern.test(group.mappingCards[0].displayLabel));
+                const showGroupedSurface = group.showGroupedSurface && !prefersImageOnlyHighlight;
 
                 return (
                   <Box key={group.id}>
@@ -859,7 +927,7 @@ export const MappingView = ({
                       data-testid={`display-group-layout-${group.id}`}
                       ref={setGroupLayoutRef(group.id)}>
                       <Box style={{ flex: 2 }}>
-                        {group.showGroupedSurface ? (
+                        {showGroupedSurface ? (
                           <Box
                             data-testid={`mapping-group-surface-${group.id}`}
                             data-hovered={isGroupHovered ? 'true' : 'false'}
@@ -868,7 +936,7 @@ export const MappingView = ({
                                 isGroupHovered ? tokens.green600 : tokens.green500
                               }`,
                               borderRadius: tokens.borderRadiusMedium,
-                              backgroundColor: tokens.green100,
+                              backgroundColor: 'transparent',
                               padding: tokens.spacing2Xs,
                               transition: 'border-color 120ms ease, border-width 120ms ease',
                             }}>
@@ -886,6 +954,9 @@ export const MappingView = ({
                                   onSetHoveredMappingKeys={setHoveredMappingKeys}
                                   onAssignImage={handleAssignImage}
                                   onExcludeImage={handleExcludeImage}
+                                  readOnly={isReadOnlyAllMappings}
+                                  showReadOnlyOutline={!showGroupedSurface && !prefersImageOnlyHighlight}
+                                  preferImageReadOnlyHighlight={prefersImageOnlyHighlight}
                                 />
                               ))}
                             </Flex>
@@ -905,6 +976,9 @@ export const MappingView = ({
                                 onSetHoveredMappingKeys={setHoveredMappingKeys}
                                 onAssignImage={handleAssignImage}
                                 onExcludeImage={handleExcludeImage}
+                                readOnly={isReadOnlyAllMappings}
+                                showReadOnlyOutline={!showGroupedSurface && !prefersImageOnlyHighlight}
+                                preferImageReadOnlyHighlight={prefersImageOnlyHighlight}
                               />
                             ))}
                           </Flex>
@@ -918,6 +992,7 @@ export const MappingView = ({
                         hoveredMappingKeys={hoveredMappingKeys}
                         onSetHoveredMappingKeys={setHoveredMappingKeys}
                         setCardWrapperRef={setCardWrapperRef}
+                        showContentTypeName={isReadOnlyAllMappings}
                       />
                     </Flex>
                   </Box>
@@ -928,7 +1003,7 @@ export const MappingView = ({
         ))}
       </Flex>
 
-      {selectionRectangle && !isDisabled ? (
+      {selectionRectangle && !isDisabled && !isReadOnlyAllMappings ? (
         <SelectionActionMenu
           anchorRectangle={selectionRectangle}
           onAssign={handleAssignFromSelection}

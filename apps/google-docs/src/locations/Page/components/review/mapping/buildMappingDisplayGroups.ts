@@ -49,7 +49,8 @@ function uniqueStrings(values: string[]): string[] {
 function buildDraftMappingCards(
   segment: DocSegment,
   highlights: MappingHighlight[],
-  resolveFieldTypeLabel: (highlight: MappingHighlight) => string
+  resolveFieldTypeLabel: (highlight: MappingHighlight) => string,
+  resolveContentTypeName: (highlight: MappingHighlight) => string
 ): DraftMappingCard[] {
   if (segment.kind === 'table') {
     return highlights.map((highlight) => {
@@ -58,6 +59,7 @@ function buildDraftMappingCards(
       return {
         key: `${segment.id}:${mappingKey}`,
         fieldIdentity: getFieldIdentity(highlight),
+        contentTypeName: resolveContentTypeName(highlight),
         fieldName: formatDisplayName(highlight.fieldId),
         fieldType: resolveFieldTypeLabel(highlight),
         displayLabel: formatDisplayName(highlight.fieldId),
@@ -91,6 +93,7 @@ function buildDraftMappingCards(
   return Array.from(byFieldIdentity.entries()).map(([fieldIdentity, value]) => ({
     key: `${segment.id}:${fieldIdentity}`,
     fieldIdentity,
+    contentTypeName: resolveContentTypeName(value.firstHighlight),
     fieldName: formatDisplayName(value.firstHighlight.fieldId),
     fieldType: resolveFieldTypeLabel(value.firstHighlight),
     displayLabel: formatDisplayName(value.firstHighlight.fieldId),
@@ -133,13 +136,19 @@ function buildDraftGroupsForTab(
   tab: Tab,
   visibleHighlightsBySegment: Record<string, MappingHighlight[]>,
   nextGroupIndex: { current: number },
-  resolveFieldTypeLabel: (highlight: MappingHighlight) => string
+  resolveFieldTypeLabel: (highlight: MappingHighlight) => string,
+  resolveContentTypeName: (highlight: MappingHighlight) => string
 ): DraftMappingDisplayGroup[] {
   const groups: DraftMappingDisplayGroup[] = [];
 
   tab.segments.forEach((segment) => {
     const highlights = visibleHighlightsBySegment[segment.id] ?? [];
-    const mappingCards = buildDraftMappingCards(segment, highlights, resolveFieldTypeLabel);
+    const mappingCards = buildDraftMappingCards(
+      segment,
+      highlights,
+      resolveFieldTypeLabel,
+      resolveContentTypeName
+    );
     const { startsAtBoundary, endsAtBoundary } =
       segment.kind === 'block' && mappingCards.length === 1
         ? getBlockBoundaryCoverage(segment, highlights, mappingCards[0].fieldIdentity)
@@ -188,7 +197,8 @@ function buildDraftGroupsForTab(
 export function buildMappingDisplayGroups(
   tabs: Tab[],
   visibleHighlightsBySegment: Record<string, MappingHighlight[]>,
-  resolveFieldTypeLabel: (highlight: MappingHighlight) => string
+  resolveFieldTypeLabel: (highlight: MappingHighlight) => string,
+  resolveContentTypeName: (highlight: MappingHighlight) => string
 ): MappingDisplayGroupsResult {
   const groupsByTabDraft: Record<string, DraftMappingDisplayGroup[]> = {};
   const nextGroupIndex = { current: 0 };
@@ -198,7 +208,8 @@ export function buildMappingDisplayGroups(
       tab,
       visibleHighlightsBySegment,
       nextGroupIndex,
-      resolveFieldTypeLabel
+      resolveFieldTypeLabel,
+      resolveContentTypeName
     );
   });
 

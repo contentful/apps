@@ -4,6 +4,7 @@ import tokens from '@contentful/f36-tokens';
 
 export interface MappingCardData {
   key: string;
+  contentTypeName: string;
   fieldName: string;
   fieldType: string;
   displayLabel: string;
@@ -13,6 +14,7 @@ interface MappingCardProps {
   card: MappingCardData;
   top: number;
   wrapperRef: Ref<HTMLDivElement>;
+  showContentTypeName?: boolean;
   isHovered?: boolean;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
@@ -40,11 +42,12 @@ export const MappingCard = ({
   card,
   top,
   wrapperRef,
+  showContentTypeName = false,
   isHovered = false,
   onMouseEnter,
   onMouseLeave,
 }: MappingCardProps) => {
-  const { displayLabel, fieldType } = card;
+  const { contentTypeName, displayLabel, fieldType } = card;
   const fullValue = `${displayLabel}${FIELD_TYPE_SEPARATOR}${fieldType}`;
   const truncatedValue = truncate(fullValue, MAX_VALUE_LENGTH);
   const separatorIndex = truncatedValue.indexOf(FIELD_TYPE_SEPARATOR);
@@ -71,6 +74,16 @@ export const MappingCard = ({
         backgroundColor: tokens.green100,
         transition: 'border-color 120ms ease, border-width 120ms ease',
       }}>
+      {showContentTypeName ? (
+        <Box marginBottom="spacing2Xs">
+          <Text as="span" fontColor="gray600" style={labelTextStyle} marginRight="spacingXs">
+            Content type:
+          </Text>
+          <Text as="span" fontWeight="fontWeightDemiBold" style={valueTextStyle}>
+            {contentTypeName}
+          </Text>
+        </Box>
+      ) : null}
       <Text as="span" fontColor="gray600" style={labelTextStyle} marginRight="spacingXs">
         Field:
       </Text>

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Box, Button, Flex, Note, Paragraph, Text } from '@contentful/f36-components';
+import { Box, Button, Flex, Note, Paragraph, Text, Tooltip } from '@contentful/f36-components';
 import { LightbulbIcon } from '@contentful/f36-icons';
 import type { MappingReviewSuspendPayload } from '@types';
 import { buildEntryListFromEntryBlockGraph } from '../../../../utils/overviewEntryList';
@@ -9,8 +9,10 @@ import Splitter from '../mainpage/Splitter';
 
 interface OverviewProps {
   payload: MappingReviewSuspendPayload;
-  selectedEntryIndex: number;
+  selectedEntryIndex: number | null;
   onSelectEntryIndex: (index: number) => void;
+  onViewAllMappings: () => void;
+  isViewingAllMappings: boolean;
   ctaLabel: string;
   onCtaClick: () => void;
   isCtaLoading?: boolean;
@@ -20,6 +22,8 @@ const OverviewSection = ({
   payload,
   selectedEntryIndex,
   onSelectEntryIndex,
+  onViewAllMappings,
+  isViewingAllMappings,
   ctaLabel,
   onCtaClick,
   isCtaLoading = false,
@@ -59,13 +63,23 @@ const OverviewSection = ({
               <Text fontSize="fontSizeM">Click row to view content by entry below.</Text>
             </Flex>
 
-            <Button
-              variant="primary"
-              onClick={onCtaClick}
-              isLoading={isCtaLoading}
-              isDisabled={isCtaLoading}>
-              {ctaLabel}
-            </Button>
+            <Flex alignItems="center" gap="spacingXs">
+              <Tooltip content="Read only" placement="top">
+                <Button
+                  variant="secondary"
+                  onClick={onViewAllMappings}
+                  isDisabled={isCtaLoading || entryRows.length === 0 || isViewingAllMappings}>
+                  Review all
+                </Button>
+              </Tooltip>
+              <Button
+                variant="primary"
+                onClick={onCtaClick}
+                isLoading={isCtaLoading}
+                isDisabled={isCtaLoading}>
+                {ctaLabel}
+              </Button>
+            </Flex>
           </Flex>
 
           {entryRows.length === 0 ? (
