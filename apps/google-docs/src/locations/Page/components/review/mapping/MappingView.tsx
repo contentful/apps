@@ -955,7 +955,9 @@ export const MappingView = ({
                                   onAssignImage={handleAssignImage}
                                   onExcludeImage={handleExcludeImage}
                                   readOnly={isReadOnlyAllMappings}
-                                  showReadOnlyOutline={!showGroupedSurface && !prefersImageOnlyHighlight}
+                                  showReadOnlyOutline={
+                                    !showGroupedSurface && !prefersImageOnlyHighlight
+                                  }
                                   preferImageReadOnlyHighlight={prefersImageOnlyHighlight}
                                 />
                               ))}
@@ -977,7 +979,9 @@ export const MappingView = ({
                                 onAssignImage={handleAssignImage}
                                 onExcludeImage={handleExcludeImage}
                                 readOnly={isReadOnlyAllMappings}
-                                showReadOnlyOutline={!showGroupedSurface && !prefersImageOnlyHighlight}
+                                showReadOnlyOutline={
+                                  !showGroupedSurface && !prefersImageOnlyHighlight
+                                }
                                 preferImageReadOnlyHighlight={prefersImageOnlyHighlight}
                               />
                             ))}
