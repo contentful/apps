@@ -123,7 +123,7 @@ const getWorkflowRunResult = (
     case RunStatus.PENDING_REVIEW: {
       const suspendPayload = getSuspendPayload(runData);
       if (!suspendPayload) {
-        throw new Error('Workflow paused for review, but suspend payload was missing.');
+        return null; // suspendPayload not flushed yet; poller will retry
       }
 
       return {
