@@ -1,30 +1,15 @@
-import { type ComponentProps, useEffect, useState, useRef } from 'react';
+import { useState } from 'react';
+import { type ComponentProps } from 'react';
 import { Button, Flex, Text, Image } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { CheckCircleIcon } from '@contentful/f36-icons';
-import { ConfigAppSDK } from '@contentful/app-sdk';
-import { useSDK } from '@contentful/react-apps-toolkit';
 import googleDriveLogo from '../../../../assets/drive-integration.svg';
-import { callAppActionWithResult } from '../../../../utils/appAction';
 
 type OAuthConnectorProps = {
-  onOAuthConnectedChange: (oauthConnectionStatus: boolean) => void;
   isOAuthConnected: boolean;
-  onOauthTokenChange: (token: string) => void;
-  oauthToken: string;
-  onLoadingStateChange?: (isLoading: boolean) => void;
-};
-
-enum OAuthLoadingState {
-  IDLE = 'idle',
-  CHECKING = 'checking',
-  CONNECTING = 'connecting',
-  DISCONNECTING = 'disconnecting',
-}
-
-type CheckStatusResponse = {
-  token: string;
-  connected: boolean;
+  isOAuthBusy: boolean;
+  onConnect: () => Promise<void>;
+  onDisconnect: () => Promise<void>;
 };
 
 const ConnectedStatusIcon = ({ size }: Pick<ComponentProps<typeof CheckCircleIcon>, 'size'>) => (
@@ -32,180 +17,35 @@ const ConnectedStatusIcon = ({ size }: Pick<ComponentProps<typeof CheckCircleIco
 );
 
 export const OAuthConnector = ({
-  onOAuthConnectedChange,
   isOAuthConnected,
-  onOauthTokenChange,
-  onLoadingStateChange,
+  isOAuthBusy,
+  onConnect,
+  onDisconnect,
 }: OAuthConnectorProps) => {
-  const sdk = useSDK<ConfigAppSDK>();
-  const [loadingState, setLoadingState] = useState<OAuthLoadingState>(OAuthLoadingState.CHECKING);
   const [isHoveringConnected, setIsHoveringConnected] = useState(false);
-  const popupWindowRef = useRef<Window | null>(null);
-  const checkWindowIntervalRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    onLoadingStateChange?.(loadingState === OAuthLoadingState.CHECKING);
-  }, [loadingState, onLoadingStateChange]);
-
-  // Check Google OAuth connection status with polling to handle race conditions
-  const checkGoogleOAuthStatus = async (
-    expectedStatus?: boolean,
-    maxRetries: number = 5
-  ): Promise<void> => {
-    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        const { connected, token } = await callAppActionWithResult<CheckStatusResponse>(
-          sdk,
-          'checkGdocOauthTokenStatus',
-          {}
-        );
-
-        // Assuming the response contains a connected field
-        const isConnected = connected === true;
-        onOauthTokenChange(token);
-
-        // If we have an expected status and it matches, or if we don't have an expected status, accept the result
-        if (expectedStatus === undefined || isConnected === expectedStatus) {
-          onOAuthConnectedChange(isConnected);
-          break;
-        } else {
-          // If this is the last attempt, accept the current result anyway
-          if (attempt === maxRetries) {
-            console.log(`Max retries reached. Accepting current status: ${isConnected}`);
-            onOAuthConnectedChange(isConnected);
-            break;
-          }
-
-          // Wait before retrying (exponential backoff: 500ms, 1000ms, 1500ms, etc.)
-          const waitTime = 500 * attempt;
-          await delay(waitTime);
-        }
-      } catch (error) {
-        console.error(`Failed to check Google OAuth status (attempt ${attempt}):`, error);
-
-        // If this is the last attempt, set status to false and give up
-        if (attempt === maxRetries) {
-          console.log('Max retries reached. Setting status to false due to errors.');
-          onOAuthConnectedChange(false);
-          break;
-        }
-
-        // Wait before retrying on error
-        const waitTime = 500 * attempt;
-        await delay(waitTime);
-      }
-    }
-
-    setLoadingState(OAuthLoadingState.IDLE);
-  };
-
-  const messageHandler = async (event: MessageEvent) => {
-    if (event.data.type === 'oauth:complete') {
-      try {
-        await callAppActionWithResult<void>(sdk, 'completeGdocOauth', {
-          code: event.data.code,
-          state: event.data.state,
-        });
-
-        // Check the updated status after OAuth completion - expect it to be connected
-        await checkGoogleOAuthStatus(true);
-      } catch (error) {
-        console.error('Unable to complete Google OAuth connection:', error);
-      } finally {
-        cleanup();
-        setLoadingState(OAuthLoadingState.IDLE);
-      }
-    }
-  };
-
-  const cleanup = () => {
-    // Clear the interval
-    if (checkWindowIntervalRef.current) {
-      window.clearInterval(checkWindowIntervalRef.current);
-      checkWindowIntervalRef.current = null;
-    }
-    // Remove the message event listener
-    window.removeEventListener('message', messageHandler);
-    // Close the popup if it's still open
-    if (popupWindowRef.current && !popupWindowRef.current.closed) {
-      popupWindowRef.current.close();
-    }
-    popupWindowRef.current = null;
-  };
-
-  const handleOAuth = async () => {
-    setLoadingState(OAuthLoadingState.CONNECTING);
-
-    window.removeEventListener('message', messageHandler);
-    window.addEventListener('message', messageHandler);
-
-    try {
-      const { authorizeUrl } = await callAppActionWithResult<{ authorizeUrl: string }>(
-        sdk,
-        'initiateGdocOauth',
-        {}
-      );
-
-      const separator = authorizeUrl.includes('?') ? '&' : '?';
-      const urlWithParams = `${authorizeUrl}${separator}access_type=offline&prompt=consent`;
-
-      popupWindowRef.current = window.open(urlWithParams, '_blank', 'height=700,width=450');
-    } catch (error) {
-      cleanup();
-      setLoadingState(OAuthLoadingState.IDLE);
-      sdk.notifier.error('Unable to connect to Google Drive Integration. Please try again.');
-    }
-  };
-
-  const handleDisconnect = async () => {
-    setLoadingState(OAuthLoadingState.DISCONNECTING);
-    try {
-      await callAppActionWithResult<void>(sdk, 'revokeGdocOauthToken', {});
-
-      // Check the updated status after disconnection - expect it to be disconnected
-      await checkGoogleOAuthStatus(false);
-
-      setIsHoveringConnected(false);
-    } catch (error) {
-      sdk.notifier.error('Unable to disconnect from Google Drive Integration. Please try again.');
-    } finally {
-      setLoadingState(OAuthLoadingState.IDLE);
-    }
-  };
 
   const getButtonText = () => {
-    switch (loadingState) {
-      case OAuthLoadingState.DISCONNECTING:
-        return 'Disconnecting';
-      case OAuthLoadingState.CHECKING:
-        return 'Checking';
-      case OAuthLoadingState.CONNECTING:
-        return 'Connecting';
-      case OAuthLoadingState.IDLE:
-        if (isOAuthConnected && isHoveringConnected) return 'Disconnect';
-        if (isOAuthConnected) return 'Connected';
-        return 'Connect';
+    if (isOAuthBusy) {
+      return isOAuthConnected && isHoveringConnected ? 'Disconnecting' : 'Connecting';
     }
+
+    if (isOAuthConnected && isHoveringConnected) return 'Disconnect';
+    if (isOAuthConnected) return 'Connected';
+    return 'Connect';
   };
 
-  const handleButtonClick = () => {
-    if (loadingState !== OAuthLoadingState.IDLE) return; // Don't allow clicks while in any loading state
+  const handleButtonClick = async () => {
+    if (isOAuthBusy) return;
 
     if (isOAuthConnected && isHoveringConnected) {
-      handleDisconnect();
-    } else if (!isOAuthConnected) {
-      handleOAuth();
+      await onDisconnect();
+      return;
+    }
+
+    if (!isOAuthConnected) {
+      await onConnect();
     }
   };
-
-  useEffect(() => {
-    const initializeApp = async () => {
-      await checkGoogleOAuthStatus();
-    };
-    initializeApp();
-  }, []);
 
   return (
     <Flex
@@ -257,9 +97,9 @@ export const OAuthConnector = ({
           variant={isOAuthConnected && isHoveringConnected ? 'negative' : 'secondary'}
           size="small"
           endIcon={isOAuthConnected && !isHoveringConnected ? <ConnectedStatusIcon /> : undefined}
-          onClick={handleButtonClick}
-          isLoading={loadingState !== OAuthLoadingState.IDLE}
-          isDisabled={loadingState !== OAuthLoadingState.IDLE}>
+          onClick={() => void handleButtonClick()}
+          isLoading={isOAuthBusy}
+          isDisabled={isOAuthBusy}>
           {getButtonText()}
         </Button>
       </Flex>

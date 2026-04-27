@@ -11,21 +11,21 @@ import { ReviewPage } from './components/review/ReviewPage';
 import { loadFixtureReviewPayload } from '../../fixtures/googleDocsReview/loadFixtureReviewPayload';
 import type { MappingReviewSuspendPayload } from '@types';
 import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
+import { useGoogleDriveOAuth } from '@hooks/useGoogleDriveOAuth';
 
 const enableMockReviewPayload = import.meta.env.VITE_ENABLE_MOCK_REVIEW_PAYLOAD === 'true';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
   const modalOrchestratorRef = useRef<ModalOrchestratorHandle>(null);
-  const [oauthToken, setOauthToken] = useState<string>('');
-  const [isOAuthConnected, setIsOAuthConnected] = useState(false);
-  const [isOAuthLoading, setIsOAuthLoading] = useState(true);
   const [mappingReviewState, setMappingReviewState] = useState<{
     payload: MappingReviewSuspendPayload;
     runId?: string;
   } | null>(null);
   const [fixtureReviewPayload, setFixtureReviewPayload] =
     useState<MappingReviewSuspendPayload | null>(null);
+  const { oauthToken, isOAuthConnected, isOAuthLoading, isOAuthBusy, startOAuth, disconnectOAuth } =
+    useGoogleDriveOAuth(sdk);
   const { resumeWorkflow } = useWorkflowAgent({
     sdk,
     documentId: '',
@@ -52,18 +52,6 @@ const Page = () => {
       isCancelled = true;
     };
   }, []);
-
-  const handleOauthTokenChange = (token: string) => {
-    setOauthToken(token);
-  };
-
-  const handleOAuthConnectedChange = (isConnected: boolean) => {
-    setIsOAuthConnected(isConnected);
-  };
-
-  const handleOAuthLoadingStateChange = (isLoading: boolean) => {
-    setIsOAuthLoading(isLoading);
-  };
 
   const handleSelectFile = () => {
     modalOrchestratorRef.current?.startFlow();
@@ -120,11 +108,10 @@ const Page = () => {
               oauthToken={oauthToken}
               isOAuthConnected={isOAuthConnected}
               isOAuthLoading={isOAuthLoading}
-              onOAuthConnectedChange={handleOAuthConnectedChange}
-              onOauthTokenChange={handleOauthTokenChange}
-              onLoadingStateChange={handleOAuthLoadingStateChange}
+              isOAuthBusy={isOAuthBusy}
+              onConnectGoogleDrive={startOAuth}
+              onDisconnectGoogleDrive={disconnectOAuth}
               onSelectFile={handleSelectFile}
-              sdk={sdk}
             />
           </>
         )}
@@ -134,6 +121,9 @@ const Page = () => {
         ref={modalOrchestratorRef}
         sdk={sdk}
         oauthToken={oauthToken}
+        isOAuthConnected={isOAuthConnected}
+        isOAuthBusy={isOAuthBusy}
+        onReconnectGoogleDrive={startOAuth}
         onMappingReviewReady={handleMappingReviewReady}
         onResetToMain={handleReturnToMainPage}
       />

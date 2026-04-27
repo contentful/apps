@@ -200,9 +200,11 @@ export const ReviewPage = ({
       />
       <ErrorModal
         isOpen={createError !== null}
-        title="Failed to create entries"
-        message={createError ?? ''}
         onClose={() => setCreateError(null)}
+        config={{
+          title: 'Failed to create entries',
+          message: createError ?? '',
+        }}
       />
     </>
   );

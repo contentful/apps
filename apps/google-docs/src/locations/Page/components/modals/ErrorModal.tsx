@@ -1,13 +1,34 @@
 import { Button, Modal, Paragraph } from '@contentful/f36-components';
 
-interface ErrorModalProps {
-  isOpen: boolean;
+export interface ErrorModalConfig {
   title: string;
   message: string;
-  onClose: () => void;
+  primaryActionLabel?: string;
+  onPrimaryAction?: () => void;
+  secondaryActionLabel?: string;
+  onSecondaryAction?: () => void;
+  isPrimaryActionLoading?: boolean;
 }
 
-export const ErrorModal: React.FC<ErrorModalProps> = ({ isOpen, title, message, onClose }) => {
+interface ErrorModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  config: ErrorModalConfig;
+}
+
+export const ErrorModal: React.FC<ErrorModalProps> = ({ isOpen, onClose, config }) => {
+  const {
+    title,
+    message,
+    primaryActionLabel = 'Close',
+    onPrimaryAction,
+    secondaryActionLabel,
+    onSecondaryAction,
+    isPrimaryActionLoading = false,
+  } = config;
+  const handlePrimaryAction = onPrimaryAction ?? onClose;
+  const handleSecondaryAction = onSecondaryAction ?? onClose;
+
   return (
     <Modal
       isShown={isOpen}
@@ -22,9 +43,19 @@ export const ErrorModal: React.FC<ErrorModalProps> = ({ isOpen, title, message, 
             <Paragraph>{message}</Paragraph>
           </Modal.Content>
           <Modal.Controls>
-            <Button onClick={onClose} variant="primary">
-              Close
-            </Button>
+            <>
+              {secondaryActionLabel ? (
+                <Button onClick={handleSecondaryAction} variant="secondary">
+                  {secondaryActionLabel}
+                </Button>
+              ) : null}
+              <Button
+                onClick={handlePrimaryAction}
+                variant="primary"
+                isLoading={isPrimaryActionLoading}>
+                {primaryActionLabel}
+              </Button>
+            </>
           </Modal.Controls>
         </>
       )}

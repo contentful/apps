@@ -2,28 +2,25 @@ import { ArrowRightIcon } from '@contentful/f36-icons';
 import { Button, Card, Flex, Heading, Layout, Note, Paragraph } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { OAuthConnector } from './OAuthConnector';
-import { PageAppSDK } from '@contentful/app-sdk';
 
 interface MainPageViewProps {
   oauthToken: string;
   isOAuthConnected: boolean;
   isOAuthLoading: boolean;
-  onOAuthConnectedChange: (isConnected: boolean) => void;
-  onOauthTokenChange: (token: string) => void;
-  onLoadingStateChange: (isLoading: boolean) => void;
+  isOAuthBusy: boolean;
+  onConnectGoogleDrive: () => Promise<void>;
+  onDisconnectGoogleDrive: () => Promise<void>;
   onSelectFile: () => void;
-  sdk: PageAppSDK;
 }
 
 export const MainPageView = ({
   oauthToken,
   isOAuthConnected,
   isOAuthLoading,
-  onOAuthConnectedChange,
-  onOauthTokenChange,
-  onLoadingStateChange,
+  isOAuthBusy,
+  onConnectGoogleDrive,
+  onDisconnectGoogleDrive,
   onSelectFile,
-  sdk,
 }: MainPageViewProps) => {
   return (
     <Layout.Body>
@@ -33,11 +30,10 @@ export const MainPageView = ({
         style={{ maxWidth: '900px', margin: `${tokens.spacingL} auto` }}>
         <Heading marginBottom="none">Google Drive Integration</Heading>
         <OAuthConnector
-          oauthToken={oauthToken}
-          onOAuthConnectedChange={onOAuthConnectedChange}
           isOAuthConnected={isOAuthConnected}
-          onOauthTokenChange={onOauthTokenChange}
-          onLoadingStateChange={onLoadingStateChange}
+          isOAuthBusy={isOAuthBusy}
+          onConnect={onConnectGoogleDrive}
+          onDisconnect={onDisconnectGoogleDrive}
         />
         <Card padding="large">
           {!isOAuthLoading && !isOAuthConnected && (

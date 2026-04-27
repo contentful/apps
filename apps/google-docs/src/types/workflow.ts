@@ -10,6 +10,27 @@ export enum RunStatus {
   DRAFT = 'DRAFT',
 }
 
+export enum WorkflowFailureReason {
+  GENERIC = 'generic',
+  GOOGLE_DRIVE_AUTH_EXPIRED = 'google-drive-auth-expired',
+}
+
+export interface WorkflowFailure {
+  code: WorkflowFailureReason;
+  message: string;
+  httpStatus?: number;
+}
+
+export class WorkflowRunError extends Error {
+  reason: WorkflowFailureReason;
+
+  constructor(message: string, reason: WorkflowFailureReason = WorkflowFailureReason.GENERIC) {
+    super(message);
+    this.name = 'WorkflowRunError';
+    this.reason = reason;
+  }
+}
+
 export interface AgentRunMessage {
   role: string;
   content?: {

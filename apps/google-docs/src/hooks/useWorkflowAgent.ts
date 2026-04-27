@@ -13,6 +13,8 @@ import {
   CompletedWorkflowPayload,
   WorkflowRunResult,
   RunStatus,
+  WorkflowFailureReason,
+  WorkflowRunError,
 } from '@types';
 import {
   AgentGeneratePayload,
@@ -22,6 +24,7 @@ import {
   startAgentRun,
 } from '../services/agents-api';
 import { validatePayloadShape } from '../utils/createEntries';
+import { ERROR_MESSAGES } from '@constants/messages';
 
 interface UseWorkflowParams {
   sdk: PageAppSDK;
@@ -96,17 +99,46 @@ const previewPayloadFromCompletedRun = (runData: AgentRunData): CompletedWorkflo
 };
 
 const getRunErrorMessage = (runData: AgentRunData): string => {
+  const workflowFailureMessage = runData.metadata?.workflowFailure?.message;
+  if (typeof workflowFailureMessage === 'string' && workflowFailureMessage.trim().length > 0) {
+    return workflowFailureMessage;
+  }
+
   const payload = getAgentPayload(runData);
   if (payload) {
     return payload;
   }
 
-  const errorMessage = runData.error?.message;
-  if (typeof errorMessage === 'string' && errorMessage.trim().length > 0) {
-    return errorMessage;
+  return 'Workflow failed';
+};
+
+const getBackendWorkflowFailureReason = (runData: AgentRunData): WorkflowFailureReason | null => {
+  const workflowFailure = runData.metadata?.workflowFailure;
+
+  if (!workflowFailure) {
+    return null;
   }
 
-  return 'Workflow failed';
+  if (workflowFailure.code === WorkflowFailureReason.GOOGLE_DRIVE_AUTH_EXPIRED) {
+    return WorkflowFailureReason.GOOGLE_DRIVE_AUTH_EXPIRED;
+  }
+
+  if (workflowFailure.code === WorkflowFailureReason.GENERIC) {
+    return WorkflowFailureReason.GENERIC;
+  }
+
+  return null;
+};
+
+const getWorkflowFailureMessage = (
+  runData: AgentRunData,
+  failureReason: WorkflowFailureReason
+): string => {
+  if (failureReason === WorkflowFailureReason.GOOGLE_DRIVE_AUTH_EXPIRED) {
+    return ERROR_MESSAGES.GOOGLE_DRIVE_AUTH_ERROR;
+  }
+
+  return getRunErrorMessage(runData);
 };
 
 const getSuspendPayload = (
@@ -123,8 +155,11 @@ const getWorkflowRunResult = (
   const status = getRunStatus(runData);
 
   switch (status) {
-    case RunStatus.FAILED:
-      throw new Error(getRunErrorMessage(runData));
+    case RunStatus.FAILED: {
+      const failureReason =
+        getBackendWorkflowFailureReason(runData) ?? WorkflowFailureReason.GENERIC;
+      throw new WorkflowRunError(getWorkflowFailureMessage(runData, failureReason), failureReason);
+    }
 
     case RunStatus.PENDING_REVIEW: {
       const suspendPayload = getSuspendPayload(runData);

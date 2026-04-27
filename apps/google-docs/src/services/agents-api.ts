@@ -10,6 +10,7 @@ import {
   ResumePayload,
   RunStatus,
   TabsImagesSuspendPayload,
+  WorkflowFailure,
 } from '@types';
 
 const AGENTS_API_HEADERS = {
@@ -43,6 +44,7 @@ export interface AgentRunData {
     workflowId?: string;
     workflowRunId?: string;
     suspendPayload?: TabsImagesSuspendPayload | MappingReviewSuspendPayload;
+    workflowFailure?: WorkflowFailure;
     googleDocPayload?: Record<string, unknown>;
   };
   payload?: string;
@@ -171,7 +173,14 @@ export async function resumeWorkflowRun(
     return;
   }
 
-  await sdk.cma.agentRun.resumeRun(
+  await (
+    sdk.cma.agentRun as typeof sdk.cma.agentRun & {
+      resumeRun: (
+        params: { spaceId: string; environmentId: string; runId: string },
+        body: { resumePayload: Record<string, unknown> }
+      ) => Promise<unknown>;
+    }
+  ).resumeRun(
     { spaceId, environmentId, runId },
     { resumePayload: resumePayload as Record<string, unknown> }
   );
