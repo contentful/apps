@@ -134,6 +134,8 @@ const Page = () => {
         ref={modalOrchestratorRef}
         sdk={sdk}
         oauthToken={oauthToken}
+        onOAuthConnectedChange={handleOAuthConnectedChange}
+        onOauthTokenChange={handleOauthTokenChange}
         onMappingReviewReady={handleMappingReviewReady}
         onResetToMain={handleReturnToMainPage}
       />

@@ -1,6 +1,6 @@
 import { forwardRef, useImperativeHandle, useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
-import { Modal } from '@contentful/f36-components';
+import { Button, Modal, Paragraph } from '@contentful/f36-components';
 import { ContentTypeProps } from 'contentful-management';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
 import { ErrorModal } from '../modals/ErrorModal';
@@ -12,6 +12,7 @@ import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 import {
   DocumentTabProps,
   MappingReviewSuspendPayload,
+  NeedsReauthSuspendPayload,
   CompletedWorkflowPayload,
   ResumePayload,
   TabsImagesSuspendPayload,
@@ -21,6 +22,7 @@ import {
 import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
 import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
 import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
+import { OAuthConnector } from './OAuthConnector';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
@@ -32,17 +34,30 @@ enum FlowStep {
   SELECT_TABS = 'selectTabs',
   INCLUDE_IMAGES = 'includeImages',
   LOADING = 'loading',
+  REAUTH = 'reauth',
 }
 
 interface ModalOrchestratorProps {
   sdk: PageAppSDK;
   oauthToken: string;
+  onOAuthConnectedChange: (isConnected: boolean) => void;
+  onOauthTokenChange: (token: string) => void;
   onMappingReviewReady: (payload: MappingReviewSuspendPayload, runId: string) => void;
   onResetToMain: () => void;
 }
 
 export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrchestratorProps>(
-  ({ sdk, oauthToken, onMappingReviewReady, onResetToMain }, ref) => {
+  (
+    {
+      sdk,
+      oauthToken,
+      onOAuthConnectedChange,
+      onOauthTokenChange,
+      onMappingReviewReady,
+      onResetToMain,
+    },
+    ref
+  ) => {
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
     const [isErrorPreviewModalOpen, setIsErrorPreviewModalOpen] = useState(false);
@@ -55,6 +70,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const [includeImages, setIncludeImages] = useState<boolean | null>(null);
     const [requiresImageSelection, setRequiresImageSelection] = useState(false);
     const [activeRunId, setActiveRunId] = useState<string | null>(null);
+    const [pendingReauthRunId, setPendingReauthRunId] = useState<string | null>(null);
     const { startWorkflow, resumeWorkflow } = useWorkflowAgent({
       sdk,
       documentId,
@@ -85,6 +101,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setSelectedContentTypes([]);
       resetDocumentScopeReview();
       setActiveRunId(null);
+      setPendingReauthRunId(null);
       setFlowStep(null);
       setIsUploadModalOpen(false);
     };
@@ -103,9 +120,10 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const handleConfirmCancel = async () => {
       setIsConfirmCancelModalOpen(false);
 
-      if (activeRunId) {
+      const runIdToCancel = activeRunId ?? pendingReauthRunId;
+      if (runIdToCancel) {
         try {
-          await resumeWorkflow(activeRunId, { cancelled: true });
+          await resumeWorkflow(runIdToCancel, { cancelled: true });
         } catch (error) {
           console.error(error);
         }
@@ -117,6 +135,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
     const showWorkflowError = () => {
       setFlowStep(null);
+      setPendingReauthRunId(null);
       setIsErrorPreviewModalOpen(true);
     };
 
@@ -157,17 +176,34 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setFlowStep(null);
     };
 
+    const showReauthPrompt = (suspendPayload: NeedsReauthSuspendPayload, runId: string) => {
+      setPendingReauthRunId(runId);
+      setActiveRunId(null);
+      setFlowStep(FlowStep.REAUTH);
+    };
+
     const handleWorkflowResult = (workflowRun: WorkflowRunResult) => {
       setActiveRunId(workflowRun.runId);
 
       if (workflowRun.status === RunStatus.PENDING_REVIEW) {
         if (workflowRun.suspendPayload.suspendStepId === 'mapping-review') {
           setFlowStep(null);
-          onMappingReviewReady(workflowRun.suspendPayload, workflowRun.runId);
+          onMappingReviewReady(
+            workflowRun.suspendPayload as MappingReviewSuspendPayload,
+            workflowRun.runId
+          );
           return;
         }
 
-        showDocumentScopeReview(workflowRun.suspendPayload);
+        if (workflowRun.suspendPayload.suspendStepId === 'needs-google-reauth') {
+          showReauthPrompt(
+            workflowRun.suspendPayload as NeedsReauthSuspendPayload,
+            workflowRun.runId
+          );
+          return;
+        }
+
+        showDocumentScopeReview(workflowRun.suspendPayload as TabsImagesSuspendPayload);
         return;
       }
 
@@ -191,6 +227,24 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
       const workflowRun = await resumeWorkflow(activeRunId, resumePayload);
       handleWorkflowResult(workflowRun);
+    };
+
+    // Called when the user successfully reconnects OAuth during a suspended run
+    const handleReauthTokenChange = async (newToken: string) => {
+      onOauthTokenChange(newToken);
+
+      if (!pendingReauthRunId || !newToken) return;
+
+      const runId = pendingReauthRunId;
+      setPendingReauthRunId(null);
+      setFlowStep(FlowStep.LOADING);
+
+      try {
+        const workflowRun = await resumeWorkflow(runId, { oauthToken: newToken });
+        handleWorkflowResult(workflowRun);
+      } catch {
+        showWorkflowError();
+      }
     };
 
     const startWorkflowWithDelayedLoading = async (contentTypeIds: string[]) => {
@@ -284,6 +338,24 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
               contentTypeCount={selectedContentTypes.length}
             />
           );
+        case FlowStep.REAUTH:
+          return (
+            <>
+              <Modal.Header title="Reconnect Google Drive" onClose={showDiscardConfirmation} />
+              <Modal.Content>
+                <Paragraph marginBottom="spacingM">
+                  Your Google Drive connection expired. Please reconnect to continue generating your
+                  preview — your progress has been saved.
+                </Paragraph>
+                <OAuthConnector
+                  oauthToken={oauthToken}
+                  isOAuthConnected={false}
+                  onOAuthConnectedChange={onOAuthConnectedChange}
+                  onOauthTokenChange={handleReauthTokenChange}
+                />
+              </Modal.Content>
+            </>
+          );
         default:
           return null;
       }
@@ -302,7 +374,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           onClose={showDiscardConfirmation}
           size={'large'}
           shouldCloseOnOverlayClick={false}
-          shouldCloseOnEscapePress={flowStep !== FlowStep.LOADING}>
+          shouldCloseOnEscapePress={flowStep !== FlowStep.LOADING && flowStep !== FlowStep.REAUTH}>
           {renderFlowStep}
         </Modal>
 
