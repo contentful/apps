@@ -545,12 +545,27 @@ export const MappingView = ({
         ? selectionIncludesTableContent(textSelectionRootRef.current, selectionRange)
         : false
     );
+
+    // Pre-check any destination fields that already contain one of the source refs
+    // being reassigned, so the user can see (and preserve) current mappings.
+    const currentSourceRefKeys = new Set(
+      currentLocations.flatMap((loc) =>
+        (loc.sourceRefs?.length ? loc.sourceRefs : [loc.sourceRef]).map(buildSourceRefKey)
+      )
+    );
+    const preCheckedFieldIds = newLocation.fieldMappings
+      .filter((fm) => fm.sourceRefs.some((sr) => currentSourceRefKeys.has(buildSourceRefKey(sr))))
+      .map((fm) => fm.fieldId);
+
     setEditModalState({
       mode: 'assign',
       viewModel: {
         selectedText: preview,
         currentLocations,
-        newLocation,
+        newLocation: {
+          ...newLocation,
+          selectedFieldIds: preCheckedFieldIds,
+        },
         isOpen: true,
       },
       title: `${canExcludeSelectedText ? 'Reassign' : 'Assign'} content`,
