@@ -611,7 +611,7 @@ export const MappingView = ({
             return { key: card.key, rawTop, height };
           });
 
-          nextOffsets['review-all'] = resolveMarkerOffsets(cards, { gap: 4 });
+          nextOffsets['review-all'] = resolveMarkerOffsets(cards, { gap: 8 });
         }
       }
       setCardOffsetsByGroup(nextOffsets);

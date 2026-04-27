@@ -20,14 +20,16 @@ export function resolveMarkerOffsets(
 ): Record<string, number> {
   const gap = options?.gap ?? DEFAULT_CARD_GAP;
 
-  const sortedCards = [...cards].sort((left, right) => left.rawTop - right.rawTop);
+  const sortedCards = [...cards].sort(
+    (left, right) => left.rawTop - right.rawTop || left.key.localeCompare(right.key)
+  );
   const offsets: Record<string, number> = {};
-  let previousBottom = 0;
+  let previousBottom = -gap;
 
   sortedCards.forEach((card) => {
-    const top = Math.max(0, card.rawTop, previousBottom);
+    const top = Math.max(0, card.rawTop, previousBottom + gap);
     offsets[card.key] = top;
-    previousBottom = top + card.height + gap;
+    previousBottom = top + card.height;
   });
 
   return offsets;
