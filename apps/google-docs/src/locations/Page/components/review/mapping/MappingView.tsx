@@ -7,7 +7,7 @@ import {
   type RefCallback,
   type RefObject,
 } from 'react';
-import { Box, Flex, Text } from '@contentful/f36-components';
+import { Box, Flex, Note, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import {
   buildEntryListFromEntryBlockGraph,
