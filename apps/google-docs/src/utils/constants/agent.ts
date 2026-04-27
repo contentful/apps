@@ -11,3 +11,7 @@ export const LOCAL_AGENTS_API_BASE_URL = 'http://localhost:4111';
 export const USE_LOCAL_AGENTS_API = false;
 
 export const CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS = 30000; // 30 seconds to wait for suspend payload
+
+// Agents-api writes PENDING_REVIEW status before the suspendPayload metadata flushes.
+// Allow this many consecutive PENDING_REVIEW polls with no suspendPayload before giving up.
+export const MAX_PENDING_REVIEW_MISSING_PAYLOAD_RETRIES = 5; // 5 × 10s = 50s max wait

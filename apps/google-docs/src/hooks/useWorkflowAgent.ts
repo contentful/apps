@@ -1,6 +1,11 @@
 import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
-import { POLL_INTERVAL_MS, MAX_POLL_ATTEMPTS, WORKFLOW_AGENT_ID } from '../utils/constants/agent';
+import {
+  POLL_INTERVAL_MS,
+  MAX_POLL_ATTEMPTS,
+  WORKFLOW_AGENT_ID,
+  MAX_PENDING_REVIEW_MISSING_PAYLOAD_RETRIES,
+} from '../utils/constants/agent';
 import {
   MappingReviewSuspendPayload,
   ResumePayload,
@@ -112,7 +117,8 @@ const getSuspendPayload = (
 
 const getWorkflowRunResult = (
   runData: AgentRunData,
-  threadId: string
+  threadId: string,
+  pendingReviewMissingPayloadCount: number
 ): WorkflowRunResult | null => {
   const status = getRunStatus(runData);
 
@@ -123,6 +129,9 @@ const getWorkflowRunResult = (
     case RunStatus.PENDING_REVIEW: {
       const suspendPayload = getSuspendPayload(runData);
       if (!suspendPayload) {
+        if (pendingReviewMissingPayloadCount < MAX_PENDING_REVIEW_MISSING_PAYLOAD_RETRIES) {
+          return null; // suspendPayload not flushed yet; poller will retry
+        }
         throw new Error('Workflow paused for review, but suspend payload was missing.');
       }
 
@@ -159,6 +168,7 @@ const pollAgentRun = async (
   runId: string
 ): Promise<WorkflowRunResult> => {
   const startMs = Date.now();
+  let pendingReviewMissingPayloadCount = 0;
   console.log(`⏳ Polling run [${runId}]`);
 
   for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
@@ -173,7 +183,13 @@ const pollAgentRun = async (
     const status = getRunStatus(runData);
     console.log(`  #${attempt + 1} — status: ${status} (${elapsedSec(startMs)})`);
 
-    const workflowRun = getWorkflowRunResult(runData, runId);
+    if (status === RunStatus.PENDING_REVIEW && !getSuspendPayload(runData)) {
+      pendingReviewMissingPayloadCount++;
+    } else {
+      pendingReviewMissingPayloadCount = 0;
+    }
+
+    const workflowRun = getWorkflowRunResult(runData, runId, pendingReviewMissingPayloadCount);
     if (workflowRun) {
       console.log(`✓ Run [${runId}] settled: ${status} in ${elapsedSec(startMs)}`);
       return workflowRun;
