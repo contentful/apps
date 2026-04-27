@@ -52,6 +52,7 @@ export const RichTextSelectionPreview = ({
                 padding: tokens.spacingS,
               }}>
               <Text as="p" fontSize="fontSizeS" fontColor="gray700" marginBottom="none">
+                <Text as="span">Image: </Text>
                 {title}
               </Text>
             </Box>
