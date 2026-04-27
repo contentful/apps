@@ -16,14 +16,14 @@ describe('Config Screen component', () => {
   describe('UI Content', () => {
     it('renders the heading', () => {
       const { getByText } = render(<ConfigScreen />);
-      expect(getByText('Drive Integration')).toBeTruthy();
+      expect(getByText('Google Drive Integration')).toBeTruthy();
     });
 
     it('renders the description paragraph', () => {
       const { getByText } = render(<ConfigScreen />);
       expect(
         getByText(
-          'Connect Drive Integration to Contentful to seamlessly sync content, eliminate copy-paste, reduce errors, and speed up your publishing workflow.'
+          'Connect Google Drive Integration to Contentful to seamlessly sync content, eliminate copy-paste, reduce errors, and speed up your publishing workflow.'
         )
       ).toBeTruthy();
     });

@@ -155,7 +155,7 @@ export const OAuthConnector = ({
     } catch (error) {
       cleanup();
       setLoadingState(OAuthLoadingState.IDLE);
-      sdk.notifier.error('Unable to connect to Drive Integration. Please try again.');
+      sdk.notifier.error('Unable to connect to Google Drive Integration. Please try again.');
     }
   };
 
@@ -169,7 +169,7 @@ export const OAuthConnector = ({
 
       setIsHoveringConnected(false);
     } catch (error) {
-      sdk.notifier.error('Unable to disconnect from Drive Integration. Please try again.');
+      sdk.notifier.error('Unable to disconnect from Google Drive Integration. Please try again.');
     } finally {
       setLoadingState(OAuthLoadingState.IDLE);
     }
@@ -227,10 +227,10 @@ export const OAuthConnector = ({
             borderRadius: tokens.borderRadiusMedium,
             backgroundColor: tokens.gray100,
           }}>
-          <Image src={googleDriveLogo} alt="Drive Integration" height="28px" width="32px" />
+          <Image src={googleDriveLogo} alt="Google Drive Integration" height="28px" width="32px" />
         </Flex>
         <Text fontSize="fontSizeL" fontWeight="fontWeightMedium" lineHeight="lineHeightL">
-          Drive Integration
+          Google Drive Integration
         </Text>
       </Flex>
       <Flex

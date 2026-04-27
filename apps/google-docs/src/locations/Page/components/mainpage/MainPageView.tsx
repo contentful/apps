@@ -31,7 +31,7 @@ export const MainPageView = ({
         flexDirection="column"
         gap="spacingXl"
         style={{ maxWidth: '900px', margin: `${tokens.spacingL} auto` }}>
-        <Heading marginBottom="none">Drive Integration</Heading>
+        <Heading marginBottom="none">Google Drive Integration</Heading>
         <OAuthConnector
           oauthToken={oauthToken}
           onOAuthConnectedChange={onOAuthConnectedChange}
