@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefCallback } from 'react';
-import { Box, Flex, Text } from '@contentful/f36-components';
+import { Box, Flex, Note, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import {
   buildEntryListFromEntryBlockGraph,
@@ -13,8 +13,14 @@ import type {
   EditLocationOption,
   EditModalNewLocation,
   SourceRef,
+  TableTextSourceRef,
 } from '@types';
-import { isBlockImageSourceRef, isTableImageSourceRef, isTextSourceRef } from '@types';
+import {
+  isBlockImageSourceRef,
+  isTableImageSourceRef,
+  isTableTextSourceRef,
+  isTextSourceRef,
+} from '@types';
 import { FileTextIcon } from '@contentful/f36-icons';
 import { useReviewTextSelection } from '@hooks/useReviewTextSelection';
 import { getEntryTitleFromFieldMappings } from '../../../../../utils/getEntryTitle';
@@ -1046,19 +1052,48 @@ export const MappingView = ({
         onClose={closeEditModal}
         mode={editModalState.mode}
         viewModel={editModalState.viewModel}
-        isImageContent={Boolean(pendingImageReassignSourceRef)}
+        isImageContent={Boolean(pendingImageReassignSourceRef) || Boolean(pendingImageSourceRef)}
         title={editModalState.title}
         locationSectionDescription={editModalState.locationSectionDescription}
         primaryButtonLabel={editModalState.primaryButtonLabel}
-        additionalContent={
-          pendingPreviewSourceRefs.length || pendingPreviewHasTableContent ? (
+        additionalContent={(() => {
+          if (!pendingPreviewSourceRefs.length && !pendingPreviewHasTableContent) return undefined;
+          const allTableText = pendingPreviewSourceRefs.every(isTableTextSourceRef);
+          if (allTableText) {
+            const first = pendingPreviewSourceRefs[0] as TableTextSourceRef;
+            const singleCell = pendingPreviewSourceRefs.every(
+              (ref) =>
+                isTableTextSourceRef(ref) &&
+                ref.tableId === first.tableId &&
+                ref.rowId === first.rowId &&
+                ref.cellId === first.cellId
+            );
+            if (singleCell) return undefined;
+            const table = document.tables.find((t) => t.id === first.tableId);
+            const totalParts =
+              table?.rows.flatMap((r) => r.cells.flatMap((c) => c.parts)).length ?? 0;
+            const coveredParts = new Set(
+              pendingPreviewSourceRefs
+                .filter(isTableTextSourceRef)
+                .map((ref) => `${ref.rowId}:${ref.cellId}:${ref.partId}`)
+            ).size;
+            if (totalParts > 0 && coveredParts < totalParts) {
+              return (
+                <Note variant="warning">
+                  Partial table selections are not supported for rich text fields. Select the entire
+                  table or just from a single cell instead.
+                </Note>
+              );
+            }
+          }
+          return (
             <RichTextSelectionPreview
               document={document}
               sourceRefs={pendingPreviewSourceRefs}
               showTablePlaceholder={pendingPreviewHasTableContent}
             />
-          ) : undefined
-        }
+          );
+        })()}
         onConfirmPrimary={handleEditModalConfirmPrimary}
       />
     </>

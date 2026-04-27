@@ -119,7 +119,15 @@ export const EditModal = ({
                   <Text as="p" fontWeight="fontWeightDemiBold">
                     {previewSectionTitle}
                   </Text>
-                  {additionalContent ?? <Text as="p">"{previewQuotedText}"</Text>}
+                  {additionalContent ??
+                    (isImageContent ? (
+                      <Text as="p">
+                        <Text as="span">IMAGE: </Text>
+                        {previewQuotedText}
+                      </Text>
+                    ) : (
+                      <Text as="p">"{previewQuotedText}"</Text>
+                    ))}
                 </Flex>
               </Box>
 
@@ -232,8 +240,6 @@ export const EditModal = ({
                   </Box>
                 </Box>
               )}
-
-              {additionalContent}
             </Box>
           </Modal.Content>
           <Modal.Controls>
