@@ -173,14 +173,7 @@ export async function resumeWorkflowRun(
     return;
   }
 
-  await (
-    sdk.cma.agentRun as typeof sdk.cma.agentRun & {
-      resumeRun: (
-        params: { spaceId: string; environmentId: string; runId: string },
-        body: { resumePayload: Record<string, unknown> }
-      ) => Promise<unknown>;
-    }
-  ).resumeRun(
+  await sdk.cma.agentRun.resumeRun(
     { spaceId, environmentId, runId },
     { resumePayload: resumePayload as Record<string, unknown> }
   );
