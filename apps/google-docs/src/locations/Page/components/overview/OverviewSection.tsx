@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Box, Button, ButtonGroup, Flex, Note, Paragraph, Text } from '@contentful/f36-components';
+import { Box, Button, Flex, Note, Paragraph, Text } from '@contentful/f36-components';
 import { EyeIcon, LightbulbIcon, PencilSimpleIcon } from '@contentful/f36-icons';
 import type { MappingReviewSuspendPayload } from '@types';
 import { buildEntryListFromEntryBlockGraph } from '../../../../utils/overviewEntryList';
@@ -64,26 +64,24 @@ const OverviewSection = ({
             </Flex>
 
             <Flex alignItems="center" gap="spacingS">
-              <ButtonGroup variant="spaced">
-                <Button
-                  size="small"
-                  variant="secondary"
-                  startIcon={<EyeIcon />}
-                  onClick={() => onReviewModeChange('view')}
-                  aria-pressed={reviewMode === 'view'}
-                  style={reviewMode === 'view' ? { fontWeight: 600 } : undefined}>
-                  View
-                </Button>
-                <Button
-                  size="small"
-                  variant="secondary"
-                  startIcon={<PencilSimpleIcon />}
-                  onClick={() => onReviewModeChange('edit')}
-                  aria-pressed={reviewMode === 'edit'}
-                  style={reviewMode === 'edit' ? { fontWeight: 600 } : undefined}>
-                  Edit
-                </Button>
-              </ButtonGroup>
+              <Button
+                size="small"
+                variant="secondary"
+                startIcon={<EyeIcon />}
+                onClick={() => onReviewModeChange('view')}
+                aria-pressed={reviewMode === 'view'}
+                style={reviewMode === 'view' ? { fontWeight: 600 } : undefined}>
+                View
+              </Button>
+              <Button
+                size="small"
+                variant="secondary"
+                startIcon={<PencilSimpleIcon />}
+                onClick={() => onReviewModeChange('edit')}
+                aria-pressed={reviewMode === 'edit'}
+                style={reviewMode === 'edit' ? { fontWeight: 600 } : undefined}>
+                Edit
+              </Button>
               <Button
                 variant="primary"
                 onClick={onCtaClick}
