@@ -14,8 +14,7 @@ export interface ReviewImageAssetCardProps {
   size?: 'small' | 'default';
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
-  onAssign: () => void;
-  onExclude: () => void;
+  onEdit: () => void;
 }
 
 export function getNormalizedImageDisplayName(image: NormalizedDocumentImage): string {
@@ -31,11 +30,9 @@ export function ReviewImageAssetCard({
   size = 'default',
   onMouseEnter,
   onMouseLeave,
-  onAssign,
-  onExclude,
+  onEdit,
 }: ReviewImageAssetCardProps): JSX.Element {
   const title = getNormalizedImageDisplayName(image);
-  const assignLabel = isHighlighted ? 'Reassign' : 'Assign';
 
   const imageHeight = size === 'small' ? '180px' : '280px';
 
@@ -69,11 +66,8 @@ export function ReviewImageAssetCard({
       <Card
         ariaLabel={title}
         actions={[
-          <MenuItem key="assigned" onClick={onAssign}>
-            {assignLabel}
-          </MenuItem>,
-          <MenuItem key="exclude" onClick={onExclude} isDisabled={!isHighlighted}>
-            Exclude
+          <MenuItem key="edit" onClick={onEdit}>
+            Edit content mapping
           </MenuItem>,
         ]}>
         <Splitter />
