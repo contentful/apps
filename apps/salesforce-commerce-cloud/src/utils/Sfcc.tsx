@@ -1,6 +1,7 @@
 import { BaseAppSDK, CMAClient } from '@contentful/app-sdk';
 
-const FUNCTION_ID = 'sfccApi';
+// Set via VITE_SFCC_APP_ACTION_ID env var — the sys.id of the sfccApi App Action
+const APP_ACTION_ID = import.meta.env.VITE_SFCC_APP_ACTION_ID as string;
 
 interface HaaParams {
   appActionId: string;
@@ -11,7 +12,7 @@ interface HaaParams {
 
 function toCallParams(ids: BaseAppSDK['ids']): HaaParams {
   return {
-    appActionId: FUNCTION_ID,
+    appActionId: APP_ACTION_ID,
     environmentId: ids.environment,
     spaceId: ids.space,
     appDefinitionId: ids.app!,
