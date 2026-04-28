@@ -1005,12 +1005,10 @@ export const MappingView = ({
             <Flex flexDirection="column" gap="spacingS">
               {(groupsByTab[tab.id] ?? []).map((group) => {
                 const activeHighlightIndex = isViewMode ? EMPTY_HIGHLIGHT_INDEX : highlightIndex;
-                const isGroupHovered =
-                  !isViewMode &&
-                  group.mappingCards.some((card) =>
-                    card.mappingKeys.some((key) => hoveredMappingKeys.includes(key))
-                  );
-                const showSurface = !isViewMode && group.showGroupedSurface;
+                const isGroupHovered = group.mappingCards.some((card) =>
+                  card.mappingKeys.some((key) => hoveredMappingKeys.includes(key))
+                );
+                const showSurface = group.showGroupedSurface;
 
                 return (
                   <Box key={group.id}>
@@ -1034,32 +1032,6 @@ export const MappingView = ({
                               transition: 'border-color 120ms ease, border-width 120ms ease',
                             }}>
                             <Flex flexDirection="column" gap="spacing2Xs">
-                              {group.segments.map((segment) => (
-                                <NormalizedDocumentSection
-                                  key={segment.id}
-                                  segment={segment}
-                                  highlightIndex={activeHighlightIndex}
-                                  imageById={imageById}
-                                  listMarkers={listMarkers}
-                                  excludedSourceRefs={entryBlockGraph.excludedSourceRefs}
-                                  selectedEntryIndex={selectedEntryIndex}
-                                  hoveredMappingKeys={hoveredMappingKeys}
-                                  onSetHoveredMappingKeys={setHoveredMappingKeys}
-                                  onAssignImage={handleAssignImage}
-                                  onExcludeImage={handleExcludeImage}
-                                />
-                              ))}
-                            </Flex>
-                          </Box>
-                        ) : isViewMode && (viewCardsByGroup[group.id]?.length ?? 0) > 0 ? (
-                          <Box
-                            data-testid={`view-group-surface-${group.id}`}
-                            style={{
-                              border: `1px solid ${tokens.gray300}`,
-                              borderRadius: tokens.borderRadiusMedium,
-                              padding: tokens.spacing2Xs,
-                            }}>
-                            <Flex flexDirection="column" gap="spacingS">
                               {group.segments.map((segment) => (
                                 <NormalizedDocumentSection
                                   key={segment.id}
