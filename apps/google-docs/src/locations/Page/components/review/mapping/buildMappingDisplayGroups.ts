@@ -2,7 +2,6 @@ import { isTextSourceRef } from '@types';
 import type { MappingCardData } from './MappingCard';
 import type { Tab, DocSegment } from './buildDocument';
 import { type MappingHighlight, getMappingCardKey } from './buildHighlights';
-import { formatDisplayName } from './fieldFormatting';
 import { getAnchorIdForSourceRef } from './resolveMappingCardOffsets';
 
 export interface RenderedMappingCard extends MappingCardData {
@@ -51,22 +50,6 @@ function buildDraftMappingCards(
   highlights: MappingHighlight[],
   resolveFieldTypeLabel: (highlight: MappingHighlight) => string
 ): DraftMappingCard[] {
-  if (segment.kind === 'table') {
-    return highlights.map((highlight) => {
-      const mappingKey = getMappingCardKey(segment.id, highlight);
-
-      return {
-        key: `${segment.id}:${mappingKey}`,
-        fieldIdentity: getFieldIdentity(highlight),
-        fieldName: formatDisplayName(highlight.fieldId),
-        fieldType: resolveFieldTypeLabel(highlight),
-        displayLabel: formatDisplayName(highlight.fieldId),
-        anchorId: getAnchorIdForSourceRef(highlight.sourceRef),
-        mappingKeys: [mappingKey],
-      };
-    });
-  }
-
   const byFieldIdentity = new Map<
     string,
     { firstHighlight: MappingHighlight; mappingKeys: string[] }
@@ -88,15 +71,18 @@ function buildDraftMappingCards(
     });
   });
 
-  return Array.from(byFieldIdentity.entries()).map(([fieldIdentity, value]) => ({
-    key: `${segment.id}:${fieldIdentity}`,
-    fieldIdentity,
-    fieldName: formatDisplayName(value.firstHighlight.fieldId),
-    fieldType: resolveFieldTypeLabel(value.firstHighlight),
-    displayLabel: formatDisplayName(value.firstHighlight.fieldId),
-    anchorId: getAnchorIdForSourceRef(value.firstHighlight.sourceRef),
-    mappingKeys: uniqueStrings(value.mappingKeys),
-  }));
+  return Array.from(byFieldIdentity.entries()).map(([fieldIdentity, value]) => {
+    const fieldName = value.firstHighlight.fieldName;
+
+    return {
+      key: `${segment.id}:${fieldIdentity}`,
+      fieldIdentity,
+      fieldName,
+      fieldType: resolveFieldTypeLabel(value.firstHighlight),
+      anchorId: getAnchorIdForSourceRef(value.firstHighlight.sourceRef),
+      mappingKeys: uniqueStrings(value.mappingKeys),
+    };
+  });
 }
 
 function getBlockBoundaryCoverage(
@@ -227,7 +213,7 @@ export function buildMappingDisplayGroups(
 
       return {
         ...card,
-        displayLabel: total > 1 ? `${card.fieldName} (${nextPosition}/${total})` : card.fieldName,
+        fieldName: total > 1 ? `${card.fieldName} (${nextPosition}/${total})` : card.fieldName,
       };
     }),
   });

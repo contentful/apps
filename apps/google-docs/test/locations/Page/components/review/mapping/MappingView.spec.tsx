@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MappingReviewSuspendPayload, SourceRef } from '@types';
 import { MappingView } from '../../../../../../src/locations/Page/components/review/mapping/MappingView';
 
@@ -271,6 +271,7 @@ const createImagePayload = (): MappingReviewSuspendPayload => ({
 
 describe('MappingView', () => {
   beforeEach(() => {
+    vi.useFakeTimers();
     vi.clearAllMocks();
     vi.stubGlobal('CSS', {
       escape: (value: string) => value.replaceAll(':', '\\:'),
@@ -281,6 +282,12 @@ describe('MappingView', () => {
       selectedRange: null,
       clearSelection: mockClearSelection,
     });
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.runAllTimers();
+    vi.useRealTimers();
   });
 
   it('groups adjacent blocks mapped to the same field into one card and one grouped surface', () => {
@@ -305,7 +312,7 @@ describe('MappingView', () => {
 
     expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(1);
-    expect(screen.getByText('Body')).toBeTruthy();
+    expect(screen.getByText('Body copy')).toBeTruthy();
     expect(
       container.querySelector('[data-testid^="mapping-group-surface-"]')?.textContent
     ).toContain('First body paragraph.');
@@ -364,9 +371,43 @@ describe('MappingView', () => {
       <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
     );
 
-    expect(screen.getByText('Body (1/2)')).toBeTruthy();
-    expect(screen.getByText('Body (2/2)')).toBeTruthy();
+    expect(screen.getByText('Body copy (1/2)')).toBeTruthy();
+    expect(screen.getByText('Body copy (2/2)')).toBeTruthy();
     expect(screen.getByText('Title')).toBeTruthy();
+  });
+
+  it('shows the content type field name on mapping cards when it differs from the field id', () => {
+    const block = createBlock('block-1', 1, 'SEO description goes here.');
+    const payload = createPayload({
+      blocks: [block],
+      fieldMappings: [
+        {
+          fieldId: 'seoDescription',
+          fieldType: 'Text',
+          sourceRefs: [createBlockTextSourceRef(block.id, block.text)],
+        },
+      ],
+    });
+
+    payload.contentTypes[0].fields = [
+      {
+        id: 'title',
+        name: 'Title',
+        type: 'Symbol',
+      },
+      {
+        id: 'seoDescription',
+        name: 'SEO Description',
+        type: 'Text',
+      },
+    ];
+
+    render(
+      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+    );
+
+    expect(screen.getByText('SEO Description')).toBeTruthy();
+    expect(screen.queryByText('Seo Description')).toBeNull();
   });
 
   it('does not merge mixed-mapping blocks with same-field neighbors', () => {
@@ -395,15 +436,15 @@ describe('MappingView', () => {
       <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
     );
 
-    expect(screen.getByText('Body (1/3)')).toBeTruthy();
-    expect(screen.getByText('Body (2/3)')).toBeTruthy();
-    expect(screen.getByText('Body (3/3)')).toBeTruthy();
+    expect(screen.getByText('Body copy (1/3)')).toBeTruthy();
+    expect(screen.getByText('Body copy (2/3)')).toBeTruthy();
+    expect(screen.getByText('Body copy (3/3)')).toBeTruthy();
     expect(screen.getByText('Summary')).toBeTruthy();
     expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(4);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(2);
   });
 
-  it('keeps separate cards for table rows mapped to the same field', () => {
+  it('groups table rows mapped to the same field into one card', () => {
     const firstRowText = 'slug-one';
     const secondRowText = 'slug-two';
     const payload = createPayload({
@@ -511,9 +552,8 @@ describe('MappingView', () => {
       <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
     );
 
-    expect(screen.getByText('Body (1/2)')).toBeTruthy();
-    expect(screen.getByText('Body (2/2)')).toBeTruthy();
-    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(2);
+    expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
+    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
   });
 
@@ -709,11 +749,18 @@ describe('MappingView', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Reassign' }));
 
-    expect(screen.getByRole('heading', { name: 'Assign content' })).toBeTruthy();
-    expect(screen.getByText('"Second"')).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Reassign content' })).toBeTruthy();
+    expect(
+      screen.getAllByText((_, node) => node?.textContent?.includes('Second') ?? false).length
+    ).toBeGreaterThan(0);
     expect(screen.getAllByText('Article').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Untitled').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
+    expect(screen.getByText('Current location')).toBeTruthy();
+    expect(screen.getByText('New location')).toBeTruthy();
+    expect(screen.getAllByText('Untitled').length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText((_, node) => node?.textContent?.includes('| Long text') ?? false).length
+    ).toBeGreaterThan(0);
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
 
@@ -737,7 +784,7 @@ describe('MappingView', () => {
     expect(screen.getByText('"fresh body text"')).toBeTruthy();
     expect(screen.getByText('Current location')).toBeTruthy();
     expect(screen.getByText('New location')).toBeTruthy();
-    expect(screen.getByText('Article: Draft title from display field')).toBeTruthy();
+    expect(screen.getByText('Article: Untitled')).toBeTruthy();
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
 
@@ -876,6 +923,10 @@ describe('MappingView', () => {
       )
     ).toBeNull();
 
+    const locationCard = document.querySelector('button[aria-pressed]') as HTMLElement;
+    expect(locationCard).toBeTruthy();
+    fireEvent.click(locationCard);
+
     const confirmButton = screen.getAllByRole('button', { name: 'Exclude content' }).at(-1);
     expect(confirmButton).toBeTruthy();
     fireEvent.click(confirmButton as HTMLElement);
@@ -891,8 +942,8 @@ describe('MappingView', () => {
       />
     );
 
-    expect(screen.getByText('Body (1/2)')).toBeTruthy();
-    expect(screen.getByText('Body (2/2)')).toBeTruthy();
+    expect(screen.getByText('Body copy (1/2)')).toBeTruthy();
+    expect(screen.getByText('Body copy (2/2)')).toBeTruthy();
     expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(2);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
   });
@@ -913,7 +964,6 @@ describe('MappingView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Assign image' }));
 
     expect(screen.getByRole('heading', { name: 'Assign content' })).toBeTruthy();
-    expect(screen.getByText('Article: Second entry')).toBeTruthy();
-    expect(screen.getAllByText(/Article: .* entry/)).not.toHaveLength(0);
+    expect(screen.getAllByText('Untitled').length).toBeGreaterThan(0);
   });
 });

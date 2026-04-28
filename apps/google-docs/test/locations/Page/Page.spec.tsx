@@ -128,7 +128,7 @@ describe('Page component', () => {
     render(<Page />);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
+      expect(screen.getByRole('heading', { name: 'Google Drive Integration' })).toBeTruthy();
       expect(screen.queryByText(/Create from document "Selected document"/)).toBeNull();
     });
   });
@@ -137,7 +137,7 @@ describe('Page component', () => {
     render(<Page />);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
+      expect(screen.getByRole('heading', { name: 'Google Drive Integration' })).toBeTruthy();
     });
 
     fireEvent.click(screen.getByRole('button', { name: 'Trigger Mapping Review Ready' }));
@@ -148,7 +148,7 @@ describe('Page component', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Trigger Reset To Main' }));
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
+      expect(screen.getByRole('heading', { name: 'Google Drive Integration' })).toBeTruthy();
       expect(screen.queryByText(/Create from document "Selected document"/)).toBeNull();
     });
   });
@@ -160,7 +160,7 @@ describe('Page component', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Mock review page for Document mapping review')).toBeTruthy();
-      expect(screen.queryByRole('heading', { name: 'Drive Integration' })).toBeNull();
+      expect(screen.queryByRole('heading', { name: 'Google Drive Integration' })).toBeNull();
     });
   });
 
@@ -176,7 +176,7 @@ describe('Page component', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Trigger review exit' }));
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
+      expect(screen.getByRole('heading', { name: 'Google Drive Integration' })).toBeTruthy();
     });
 
     expect(mockResumeWorkflow).not.toHaveBeenCalled();
@@ -196,7 +196,7 @@ describe('Page component', () => {
 
     await waitFor(() => {
       expect(mockResumeWorkflow).toHaveBeenCalledWith('run-123', { cancelled: true });
-      expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
+      expect(screen.getByRole('heading', { name: 'Google Drive Integration' })).toBeTruthy();
     });
 
     expect(mockResetFlow).toHaveBeenCalledTimes(1);

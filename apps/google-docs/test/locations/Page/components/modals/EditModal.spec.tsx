@@ -95,7 +95,7 @@ describe('EditModal', () => {
     });
   });
 
-  it('allows switching the selected location card', async () => {
+  it('allows selecting and toggling location cards', async () => {
     render(
       <EditModal
         isOpen={true}
@@ -113,10 +113,24 @@ describe('EditModal', () => {
       .filter((element) => element.getAttribute('aria-pressed') !== null);
     const [summaryCard, descriptionCard] = locationCards;
 
-    expect(summaryCard).toHaveAttribute('aria-pressed', 'true');
+    expect(summaryCard).toHaveAttribute('aria-pressed', 'false');
     expect(descriptionCard).toHaveAttribute('aria-pressed', 'false');
 
+    fireEvent.click(summaryCard);
+
+    await waitFor(() => {
+      expect(summaryCard).toHaveAttribute('aria-pressed', 'true');
+      expect(descriptionCard).toHaveAttribute('aria-pressed', 'false');
+    });
+
     fireEvent.click(descriptionCard);
+
+    await waitFor(() => {
+      expect(summaryCard).toHaveAttribute('aria-pressed', 'true');
+      expect(descriptionCard).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    fireEvent.click(summaryCard);
 
     await waitFor(() => {
       expect(summaryCard).toHaveAttribute('aria-pressed', 'false');
@@ -140,6 +154,7 @@ describe('EditModal', () => {
               {
                 id: 'title',
                 fieldName: 'Title',
+                fieldType: 'Symbol',
                 fieldDisplayType: 'Short text',
               },
             ],
@@ -159,7 +174,7 @@ describe('EditModal', () => {
     });
   });
 
-  it('does not show destination validation or disable submit in exclude mode', async () => {
+  it('does not show destination validation in exclude mode and enables submit once a location is selected', async () => {
     render(
       <EditModal
         isOpen={true}
@@ -172,10 +187,17 @@ describe('EditModal', () => {
       />
     );
 
+    expect(
+      screen.queryByText('No destination entry is available for the entry currently in view.')
+    ).toBeNull();
+    expect(screen.getByRole('button', { name: 'Exclude content' })).toBeDisabled();
+
+    const locationCards = screen
+      .getAllByRole('button')
+      .filter((el) => el.getAttribute('aria-pressed') !== null);
+    fireEvent.click(locationCards[0]);
+
     await waitFor(() => {
-      expect(
-        screen.queryByText('No destination entry is available for the entry currently in view.')
-      ).toBeNull();
       expect(screen.getByRole('button', { name: 'Exclude content' })).not.toBeDisabled();
     });
   });

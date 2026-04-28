@@ -1,10 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { Box, Button, Modal, Note, Flex, Text } from '@contentful/f36-components';
-import {
-  EditModalDestinationStateKind,
-  createEditModalDestinationState,
-  type EditModalContent,
-} from '@types';
+import { Box, Button, Modal, Flex, Text } from '@contentful/f36-components';
+import { cx } from '@emotion/css';
+import { type EditModalContent } from '@types';
 
 import {
   locationButton,
@@ -13,6 +10,7 @@ import {
   locationContent,
   locationList,
   modalContent,
+  modalContentWithDropdown,
   sectionCard,
 } from './EditModal.styles';
 import { FieldSelectionDropdown } from './FieldSelectionDropdown';
@@ -28,7 +26,7 @@ interface EditModalProps {
   primaryButtonLabel: string;
   additionalContent?: ReactNode;
   onConfirmPrimary?: (details: {
-    selectedLocationId: string | null;
+    selectedLocationIds: string[];
     selectedFieldIds: Record<string, string[]>;
   }) => void;
 }
@@ -48,17 +46,8 @@ export const EditModal = ({
   const hasLocationSectionDescription = locationSectionDescription.trim().length > 0;
   const hasCurrentLocations = viewModel.currentLocations.length > 0;
   const hasNewLocation = viewModel.newLocation.id !== '';
-  const initialSelectedLocationId = useMemo(
-    () =>
-      viewModel.currentLocations.find((location) => location.isSelected)?.id ??
-      viewModel.currentLocations[0]?.id ??
-      null,
-    [viewModel.currentLocations]
-  );
 
-  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
-    initialSelectedLocationId
-  );
+  const [selectedLocationIds, setSelectedLocationIds] = useState<string[]>([]);
 
   const [selectedFieldIds, setSelectedFieldIds] = useState(
     () => viewModel.newLocation.selectedFieldIds ?? []
@@ -69,16 +58,13 @@ export const EditModal = ({
     hasSelectableOptions: boolean;
   } | null>(null);
 
-  useEffect(() => {
-    setSelectedLocationId(initialSelectedLocationId);
-  }, [initialSelectedLocationId]);
-
   const newLocationRowIdsKey = viewModel.newLocation.id;
 
-  // Reset field multiselect when the modal opens or when the set of destination rows changes.
+  // Reset both location and field selections when the modal opens or when the available locations/destination change.
   // Do not depend on `viewModel.newLocation` reference (it can churn without semantic change).
   useEffect(() => {
     if (!isOpen) return;
+    setSelectedLocationIds([]);
     setSelectedFieldIds(viewModel.newLocation.selectedFieldIds ?? []);
     setDestinationFieldState(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sync from props only on open / row-id set change, not array identity
@@ -90,7 +76,7 @@ export const EditModal = ({
 
   const handlePrimaryAction = () => {
     onConfirmPrimary?.({
-      selectedLocationId,
+      selectedLocationIds,
       selectedFieldIds: {
         [viewModel.newLocation.id]: [...selectedFieldIds],
       },
@@ -101,37 +87,25 @@ export const EditModal = ({
   const previewQuotedText = (viewModel.contentPreview ?? viewModel.selectedText).trim();
   const selectedDestinationCount = selectedFieldIds.length;
   const isAssignMode = mode === 'assign';
-  const destinationState = useMemo(() => {
-    if (!isAssignMode) {
-      return createEditModalDestinationState(EditModalDestinationStateKind.Ready);
-    }
 
-    if (!hasNewLocation) {
-      return createEditModalDestinationState(EditModalDestinationStateKind.MissingEntry);
-    }
-
-    if (viewModel.newLocation.fieldOptions.length === 0) {
-      return createEditModalDestinationState(EditModalDestinationStateKind.NoFields);
-    }
-
-    if (destinationFieldState?.hasSelectableOptions === false) {
-      return createEditModalDestinationState(EditModalDestinationStateKind.NoCompatibleFields);
-    }
-
-    if (selectedDestinationCount === 0) {
-      return createEditModalDestinationState(EditModalDestinationStateKind.RequiresSelection);
-    }
-
-    return createEditModalDestinationState(EditModalDestinationStateKind.Ready);
-  }, [
-    isAssignMode,
-    destinationFieldState?.hasSelectableOptions,
-    hasNewLocation,
-    selectedDestinationCount,
-    viewModel.newLocation.fieldOptions.length,
-  ]);
-  const isPrimaryDisabled =
-    isAssignMode && destinationState.kind !== EditModalDestinationStateKind.Ready;
+  const isPrimaryDisabled = useMemo(
+    () =>
+      (hasCurrentLocations && selectedLocationIds.length === 0) || // no current location selected yet
+      (isAssignMode &&
+        (!hasNewLocation || // no destination entry available
+          viewModel.newLocation.fieldOptions.length === 0 || // destination entry has no fields
+          destinationFieldState?.hasSelectableOptions === false || // no fields compatible with this content type
+          selectedDestinationCount === 0)), // user hasn't selected a destination field yet
+    [
+      hasCurrentLocations,
+      selectedLocationIds,
+      isAssignMode,
+      hasNewLocation,
+      viewModel.newLocation.fieldOptions.length,
+      destinationFieldState?.hasSelectableOptions,
+      selectedDestinationCount,
+    ]
+  );
 
   return (
     <Modal isShown={isOpen} onClose={onClose} size="large" shouldCloseOnOverlayClick={false}>
@@ -139,13 +113,21 @@ export const EditModal = ({
         <>
           <Modal.Header title={title} onClose={onClose} />
           <Modal.Content>
-            <Box className={modalContent}>
+            <Box className={cx(modalContent, isAssignMode && modalContentWithDropdown)}>
               <Box className={sectionCard}>
                 <Flex flexDirection="column" gap="spacingXs">
                   <Text as="p" fontWeight="fontWeightDemiBold">
                     {previewSectionTitle}
                   </Text>
-                  <Text as="p">"{previewQuotedText}"</Text>
+                  {additionalContent ??
+                    (isImageContent ? (
+                      <Text as="p">
+                        <Text as="span">IMAGE: </Text>
+                        {previewQuotedText}
+                      </Text>
+                    ) : (
+                      <Text as="p">"{previewQuotedText}"</Text>
+                    ))}
                 </Flex>
               </Box>
 
@@ -160,13 +142,19 @@ export const EditModal = ({
                   {hasCurrentLocations && (
                     <Box className={locationList}>
                       {viewModel.currentLocations.map((location) => {
-                        const isSelected = location.id === selectedLocationId;
+                        const isSelected = selectedLocationIds.includes(location.id);
                         return (
                           <Box
                             as="button"
                             type="button"
                             key={location.id}
-                            onClick={() => setSelectedLocationId(location.id)}
+                            onClick={() =>
+                              setSelectedLocationIds((prev) =>
+                                prev.includes(location.id)
+                                  ? prev.filter((id) => id !== location.id)
+                                  : [...prev, location.id]
+                              )
+                            }
                             aria-pressed={isSelected}
                             className={`${locationButton} ${
                               isSelected ? locationButtonSelected : locationButtonUnselected
@@ -211,7 +199,7 @@ export const EditModal = ({
                                   fontSize="fontSizeS"
                                   fontWeight="fontWeightMedium"
                                   fontColor="gray900">
-                                  {location.displayLabel ?? location.fieldName}
+                                  {location.fieldName}
                                 </Text>{' '}
                                 <Text as="span" fontSize="fontSizeS" fontColor="gray700">
                                   | {location.fieldType}
@@ -252,19 +240,6 @@ export const EditModal = ({
                   </Box>
                 </Box>
               )}
-
-              {isAssignMode && destinationState.kind !== EditModalDestinationStateKind.Ready ? (
-                <Note
-                  variant={
-                    destinationState.kind === EditModalDestinationStateKind.RequiresSelection
-                      ? 'warning'
-                      : 'neutral'
-                  }>
-                  {destinationState.message}
-                </Note>
-              ) : null}
-
-              {additionalContent}
             </Box>
           </Modal.Content>
           <Modal.Controls>

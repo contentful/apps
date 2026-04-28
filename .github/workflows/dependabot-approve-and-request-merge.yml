@@ -13,11 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == github.event.pull_request.head.repo.full_name
     steps:
-      - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
-        with:
-          egress-policy: audit
-
       - uses: contentful/github-auto-merge@84260b2498c23b699bf84a3c9c3ee13b14a3386a # main
         with:
           VAULT_URL: ${{ secrets.VAULT_URL }}

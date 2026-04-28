@@ -4,6 +4,7 @@ import { FIELD_TYPE_LABELS } from '../fieldFormatting';
 const FIELD_TYPE_DISPLAY = {
   SHORT_TEXT: FIELD_TYPE_LABELS.Symbol,
   LONG_TEXT: FIELD_TYPE_LABELS.Text,
+  RICH_TEXT: FIELD_TYPE_LABELS.RichText,
   INTEGER: FIELD_TYPE_LABELS.Integer,
   DECIMAL: FIELD_TYPE_LABELS.Number,
 } as const;
@@ -32,6 +33,7 @@ export const isSelectableFieldType = (
   switch (normalizedFieldType) {
     case FIELD_TYPE_DISPLAY.SHORT_TEXT:
     case FIELD_TYPE_DISPLAY.LONG_TEXT:
+    case FIELD_TYPE_DISPLAY.RICH_TEXT:
       return true;
     case FIELD_TYPE_DISPLAY.INTEGER:
       return highlightedTextMatch === FIELD_TYPE_DISPLAY.INTEGER;

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { type ComponentProps, useEffect, useState, useRef } from 'react';
 import { Button, Flex, Text, Image } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { CheckCircleIcon } from '@contentful/f36-icons';
@@ -26,6 +26,10 @@ type CheckStatusResponse = {
   token: string;
   connected: boolean;
 };
+
+const ConnectedStatusIcon = ({ size }: Pick<ComponentProps<typeof CheckCircleIcon>, 'size'>) => (
+  <CheckCircleIcon size={size} color={tokens.colorPositive} />
+);
 
 export const OAuthConnector = ({
   onOAuthConnectedChange,
@@ -151,7 +155,7 @@ export const OAuthConnector = ({
     } catch (error) {
       cleanup();
       setLoadingState(OAuthLoadingState.IDLE);
-      sdk.notifier.error('Unable to connect to Drive Integration. Please try again.');
+      sdk.notifier.error('Unable to connect to Google Drive Integration. Please try again.');
     }
   };
 
@@ -165,7 +169,7 @@ export const OAuthConnector = ({
 
       setIsHoveringConnected(false);
     } catch (error) {
-      sdk.notifier.error('Unable to disconnect from Drive Integration. Please try again.');
+      sdk.notifier.error('Unable to disconnect from Google Drive Integration. Please try again.');
     } finally {
       setLoadingState(OAuthLoadingState.IDLE);
     }
@@ -223,10 +227,10 @@ export const OAuthConnector = ({
             borderRadius: tokens.borderRadiusMedium,
             backgroundColor: tokens.gray100,
           }}>
-          <Image src={googleDriveLogo} alt="Drive Integration" height="28px" width="32px" />
+          <Image src={googleDriveLogo} alt="Google Drive Integration" height="28px" width="32px" />
         </Flex>
         <Text fontSize="fontSizeL" fontWeight="fontWeightMedium" lineHeight="lineHeightL">
-          Drive Integration
+          Google Drive Integration
         </Text>
       </Flex>
       <Flex
@@ -252,7 +256,7 @@ export const OAuthConnector = ({
         <Button
           variant={isOAuthConnected && isHoveringConnected ? 'negative' : 'secondary'}
           size="small"
-          endIcon={isOAuthConnected && !isHoveringConnected ? <CheckCircleIcon /> : undefined}
+          endIcon={isOAuthConnected && !isHoveringConnected ? <ConnectedStatusIcon /> : undefined}
           onClick={handleButtonClick}
           isLoading={loadingState !== OAuthLoadingState.IDLE}
           isDisabled={loadingState !== OAuthLoadingState.IDLE}>
