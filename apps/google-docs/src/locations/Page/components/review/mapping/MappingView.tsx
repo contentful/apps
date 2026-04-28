@@ -15,12 +15,7 @@ import type {
   SourceRef,
   TableTextSourceRef,
 } from '@types';
-import {
-  isBlockImageSourceRef,
-  isTableImageSourceRef,
-  isTableTextSourceRef,
-  isTextSourceRef,
-} from '@types';
+import { isBlockImageSourceRef, isTableImageSourceRef, isTableTextSourceRef } from '@types';
 import { FileTextIcon } from '@contentful/f36-icons';
 import { useReviewTextSelection } from '@hooks/useReviewTextSelection';
 import { getEntryTitleFromFieldMappings } from '../../../../../utils/getEntryTitle';
@@ -50,19 +45,13 @@ import { buildMappingDisplayGroups } from './buildMappingDisplayGroups';
 import { ViewMappingRail, type ViewMappingCardEntry } from './ViewMappingRail';
 import {
   applyImageExclusionToEntryBlockGraph,
-  applyImageReassignToEntryBlockGraph,
-  appendImageToTargets,
   applyRichTextAssignToEntryBlockGraph,
-  applyRichTextReassignToEntryBlockGraph,
   applyTextAssignToEntryBlockGraph,
   applyTextExclusionToEntryBlockGraph,
-  applyTextReassignToEntryBlockGraph,
   collectRichTextSourceRefsFromSelection,
-  collectMappedExclusionPreviewText,
   selectionIncludesTableContent,
   collectTextAssignRangesFromSelection,
   collectTextExclusionRangesFromSelection,
-  fullSpanTextExclusionRangesForLocation,
   type TextExclusionRange,
 } from './entryBlockGraphExclusion';
 
@@ -383,6 +372,7 @@ export const MappingView = ({
         fieldId: fieldMapping.fieldId,
         sourceRefs: fieldMapping.sourceRefs,
       })),
+      initialFieldIds: [],
     };
   };
 
@@ -599,160 +589,58 @@ export const MappingView = ({
     setHoveredMappingKeys([]);
   };
 
-  const handleEditModalConfirmPrimary = ({
-    selectedLocationIds = [],
-    selectedFieldIds = {},
-  }: {
-    selectedLocationIds?: string[];
-    selectedFieldIds?: Record<string, string[]>;
-  }) => {
-    if (editModalState.mode === 'assign') {
-      const locations = editModalState.viewModel.currentLocations;
+  const handleEditModalConfirmPrimary = (selectedFieldIds: string[]) => {
+    const initialFieldIds = editModalState.viewModel.newLocation.initialFieldIds;
+    const addedFieldIds = selectedFieldIds.filter((id) => !initialFieldIds.includes(id));
+    const removedFieldIds = initialFieldIds.filter((id) => !selectedFieldIds.includes(id));
+    const currentLocations = editModalState.viewModel.currentLocations;
 
-      const newLocation = editModalState.viewModel.newLocation;
-      const resolvedTargets: { entryIndex: number; fieldId: string; fieldType: string }[] = [];
+    let next = entryBlockGraph;
 
-      if (newLocation && selectedEntryIndex !== null) {
-        const entry = entryBlockGraph.entries[selectedEntryIndex];
-        const fieldIds = selectedFieldIds[newLocation.id] ?? [];
-        const contentType = entry
-          ? payload.contentTypes.find((c) => c.sys.id === entry.contentTypeId)
-          : undefined;
+    for (const fieldId of removedFieldIds) {
+      const loc = currentLocations.find((l) => l.fieldId === fieldId);
+      if (!loc) continue;
 
-        for (const fieldId of fieldIds) {
-          const field = contentType?.fields?.find((f) => 'id' in f && f.id === fieldId);
-          const fieldType =
-            field && 'type' in field && typeof field.type === 'string' ? field.type : 'Text';
-          if (!fieldId.length) {
-            continue;
-          }
-
-          resolvedTargets.push({
-            entryIndex: selectedEntryIndex,
-            fieldId,
-            fieldType,
-          });
-        }
+      if (pendingTextExclusionRanges?.length) {
+        next = applyTextExclusionToEntryBlockGraph(next, loc, pendingTextExclusionRanges);
       }
 
-      if (!resolvedTargets.length) {
-        return;
-      }
-
-      const richTextTargets = resolvedTargets.filter((target) => target.fieldType === 'RichText');
-      const nonRichTextTargets = resolvedTargets.filter(
-        (target) => target.fieldType !== 'RichText'
+      const locSourceRefKeys = new Set(
+        (loc.sourceRefs?.length ? loc.sourceRefs : [loc.sourceRef]).map(buildSourceRefKey)
       );
-
-      if (pendingImageReassignSourceRef) {
-        if (locations.length === 0) {
-          onEntryBlockGraphChange(
-            appendImageToTargets(entryBlockGraph, pendingImageReassignSourceRef, resolvedTargets)
-          );
-          closeEditModal();
-          return;
-        }
-
-        const from =
-          locations.find((location) => location.id === selectedLocationIds[0]) ??
-          locations.find((location) => location.isSelected) ??
-          locations[0];
-
-        if (!from) {
-          closeEditModal();
-          return;
-        }
-
-        onEntryBlockGraphChange(
-          applyImageReassignToEntryBlockGraph(
-            entryBlockGraph,
-            from,
-            pendingImageReassignSourceRef,
-            resolvedTargets
-          )
-        );
-        closeEditModal();
-        return;
+      const matchingImages = pendingExcludeImageSourceRefs.filter((ref) =>
+        locSourceRefKeys.has(buildSourceRefKey(ref))
+      );
+      for (const imgRef of matchingImages) {
+        next = applyImageExclusionToEntryBlockGraph(next, loc, imgRef);
       }
+    }
 
-      if (locations.length > 0) {
-        const from =
-          locations.find((location) => location.id === selectedLocationIds[0]) ??
-          locations.find((location) => location.isSelected) ??
-          locations[0];
+    if (addedFieldIds.length && selectedEntryIndex !== null) {
+      const entry = entryBlockGraph.entries[selectedEntryIndex];
+      const contentType = entry
+        ? payload.contentTypes.find((c) => c.sys.id === entry.contentTypeId)
+        : undefined;
 
-        if (!from) {
-          closeEditModal();
-          return;
-        }
+      const resolvedTargets = addedFieldIds.flatMap((fieldId) => {
+        const field = contentType?.fields?.find((f) => 'id' in f && f.id === fieldId);
+        const fieldType =
+          field && 'type' in field && typeof field.type === 'string' ? field.type : 'Text';
+        return [{ entryIndex: selectedEntryIndex, fieldId, fieldType }];
+      });
 
-        let nextGraph = entryBlockGraph;
-
-        if (richTextTargets.length && pendingModalSelectionRange) {
-          const mappedRichTextRefs = collectRichTextSourceRefsFromSelection(
-            textSelectionRootRef.current,
-            pendingModalSelectionRange,
-            document,
-            {
-              mappedState: 'mapped',
-              mappingKeys: new Set(from.mappingKeys ?? []),
-            }
-          );
-          const unmappedRichTextRefs = collectRichTextSourceRefsFromSelection(
-            textSelectionRootRef.current,
-            pendingModalSelectionRange,
-            document,
-            { mappedState: 'unmapped' }
-          );
-          const richTextRefs = [...mappedRichTextRefs, ...unmappedRichTextRefs];
-
-          if (richTextRefs.length) {
-            nextGraph = applyRichTextReassignToEntryBlockGraph(
-              nextGraph,
-              document,
-              from,
-              richTextRefs,
-              richTextTargets
-            );
-          }
-        }
-
-        if (!nonRichTextTargets.length) {
-          onEntryBlockGraphChange(nextGraph);
-          closeEditModal();
-          return;
-        }
-
-        const effectiveRanges = pendingTextReassignRanges.length
-          ? pendingTextReassignRanges
-          : fullSpanTextExclusionRangesForLocation(from);
-
-        if (!effectiveRanges.length) {
-          onEntryBlockGraphChange(nextGraph);
-          closeEditModal();
-          return;
-        }
-
-        onEntryBlockGraphChange(
-          applyTextReassignToEntryBlockGraph(nextGraph, from, effectiveRanges, nonRichTextTargets)
-        );
-        closeEditModal();
-        return;
-      }
-
-      let nextGraph = entryBlockGraph;
+      const richTextTargets = resolvedTargets.filter((t) => t.fieldType === 'RichText');
+      const nonRichTextTargets = resolvedTargets.filter((t) => t.fieldType !== 'RichText');
 
       if (richTextTargets.length && pendingModalSelectionRange) {
         const richTextRefs = collectRichTextSourceRefsFromSelection(
           textSelectionRootRef.current,
           pendingModalSelectionRange,
-          document,
-          { mappedState: 'unmapped' }
+          document
         );
-
         if (richTextRefs.length) {
-          nextGraph = applyRichTextAssignToEntryBlockGraph(
-            nextGraph,
+          next = applyRichTextAssignToEntryBlockGraph(
+            next,
             document,
             richTextRefs,
             richTextTargets
@@ -760,74 +648,21 @@ export const MappingView = ({
         }
       }
 
-      if (!nonRichTextTargets.length) {
-        onEntryBlockGraphChange(nextGraph);
-        closeEditModal();
-        return;
-      }
-
-      if (!pendingTextAssignRanges.length) {
-        onEntryBlockGraphChange(nextGraph);
-        closeEditModal();
-        return;
-      }
-
-      onEntryBlockGraphChange(
-        applyTextAssignToEntryBlockGraph(
-          nextGraph,
+      const allRangesForAssign = [
+        ...(pendingTextExclusionRanges ?? []),
+        ...pendingTextAssignRanges,
+      ];
+      if (nonRichTextTargets.length && allRangesForAssign.length) {
+        next = applyTextAssignToEntryBlockGraph(
+          next,
           document,
-          pendingTextAssignRanges,
+          allRangesForAssign,
           nonRichTextTargets
-        )
-      );
-      closeEditModal();
-      return;
-    }
-
-    if (editModalState.mode !== 'exclude') {
-      closeEditModal();
-      return;
-    }
-
-    const locations = editModalState.viewModel.currentLocations;
-    const selected = locations.filter((location) => selectedLocationIds.includes(location.id));
-
-    if (!selected.length) {
-      closeEditModal();
-      return;
-    }
-
-    let next = entryBlockGraph;
-    for (const location of selected) {
-      if (pendingImageSourceRef) {
-        next = applyImageExclusionToEntryBlockGraph(next, location, pendingImageSourceRef);
-      } else {
-        const selectedSourceRefKeys = new Set(
-          (location.sourceRefs?.length ? location.sourceRefs : [location.sourceRef]).map(
-            (sourceRef) => buildSourceRefKey(sourceRef)
-          )
         );
-        const matchingImageSourceRefs = pendingExcludeImageSourceRefs.filter((sourceRef) =>
-          selectedSourceRefKeys.has(buildSourceRefKey(sourceRef))
-        );
-
-        if (pendingTextExclusionRanges?.length) {
-          next = applyTextExclusionToEntryBlockGraph(next, location, pendingTextExclusionRanges);
-        }
-
-        if (matchingImageSourceRefs.length) {
-          next = matchingImageSourceRefs.reduce(
-            (graph, sourceRef) => applyImageExclusionToEntryBlockGraph(graph, location, sourceRef),
-            next
-          );
-        }
       }
     }
 
-    if (next !== entryBlockGraph) {
-      onEntryBlockGraphChange(next);
-    }
-
+    if (next !== entryBlockGraph) onEntryBlockGraphChange(next);
     closeEditModal();
   };
 
