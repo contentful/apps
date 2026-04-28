@@ -230,7 +230,7 @@ export const MappingView = ({
   const listMarkers = useMemo(() => buildListMarkers(allSegments), [allSegments]);
 
   const getVisibleHighlights = <T extends MappingHighlight>(highlights: T[]): T[] => {
-    if (selectedEntryIndex === null) {
+    if (isViewMode || selectedEntryIndex === null) {
       return highlights;
     }
     return highlights.filter((item) => item.entryIndex === selectedEntryIndex);
