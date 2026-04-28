@@ -7,8 +7,8 @@
       "path": "functions/index.js",
       "entryFile": "functions/index.ts",
       "allowNetworks": [
-        "account.demandware.com",
-        "api.commercecloud.salesforce.com"
+        "*.demandware.com",
+        "*.salesforce.com"
       ],
       "accepts": ["appaction.call"]
     }
