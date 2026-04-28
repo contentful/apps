@@ -179,7 +179,11 @@ export const ReviewPage = ({
             reviewMode={reviewMode}
             onReviewModeChange={(mode) => {
               setReviewMode(mode);
-              if (mode === 'view') setSelectedEntryIndex(null);
+              if (mode === 'view') {
+                setSelectedEntryIndex(null);
+              } else if (mode === 'edit' && selectedEntryIndex === null) {
+                setSelectedEntryIndex(entryBlockGraph.entries.length > 0 ? 0 : null);
+              }
             }}
             ctaLabel={hasCreatedEntries ? 'View entries' : 'Create entries'}
             onCtaClick={handleCreateOrViewEntries}
