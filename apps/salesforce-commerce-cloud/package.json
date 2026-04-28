@@ -25,7 +25,7 @@
   },
   "scripts": {
     "start": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build && node_modules/.bin/esbuild functions/index.ts --bundle --platform=browser --format=esm --outfile=dist/functions/index.js --external:@contentful/node-apps-toolkit",
     "test": "vitest",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEFINITIONS_ORG_ID} --definition-id 1O8njPYTGO44VueSJNBrdZ --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEV_TESTING_ORG_ID} --definition-id 66J3nYAMa13A1O7E8MDDMu --token ${TEST_CMA_TOKEN}"

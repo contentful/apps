@@ -1,6 +1,6 @@
 import { BaseAppSDK, CMAClient } from '@contentful/app-sdk';
 
-const FUNCTION_ID = 'sfcc-api';
+const FUNCTION_ID = 'sfccApi';
 
 interface HaaParams {
   appActionId: string;

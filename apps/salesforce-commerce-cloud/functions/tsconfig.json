@@ -5,7 +5,7 @@
     "moduleResolution": "node16",
     "strict": true,
     "skipLibCheck": true,
-    "outDir": "../build/functions"
+    "outDir": "../dist/functions"
   },
   "include": ["./**/*.ts"]
 }
