@@ -8,7 +8,7 @@ export const MAX_POLL_ATTEMPTS = Math.floor(MAX_POLL_TIME_MS / POLL_INTERVAL_MS)
 
 export const LOCAL_AGENTS_API_BASE_URL = 'http://localhost:4111';
 
-export const USE_LOCAL_AGENTS_API = true;
+export const USE_LOCAL_AGENTS_API = false;
 
 export const CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS = 30000; // 30 seconds to wait for suspend payload
 

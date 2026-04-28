@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState, type RefObject } from 'react';
 import type { SelectionViewportRectangle } from '../locations/Page/components/review/mapping/selectionViewportRectangle';
 
 const SEGMENT_SURFACE_SELECTOR = '[data-review-segment-surface]';
-const SELECTION_MENU_HEADER_CLEARANCE_PX = 8;
 
 function elementFromNode(node: Node): Element | null {
   if (node.nodeType === Node.TEXT_NODE) {
@@ -26,58 +25,13 @@ function isSelectionInDocumentBody(range: Range, root: HTMLElement): boolean {
   return endpointInSurface(range.startContainer) && endpointInSurface(range.endContainer);
 }
 
-function intersectsViewport(
-  rect: DOMRect | Pick<SelectionViewportRectangle, 'top' | 'left' | 'bottom' | 'right'>
-): boolean {
-  return (
-    rect.bottom > 0 &&
-    rect.right > 0 &&
-    rect.top < window.innerHeight &&
-    rect.left < window.innerWidth
-  );
-}
-
-export function getSelectionViewportRectangle(
-  range: Range,
-  root: HTMLElement,
-  viewportTopInset = 0
-): SelectionViewportRectangle | null {
-  const rootRect = root.getBoundingClientRect();
-  const clientRects = Array.from(range.getClientRects()).filter(
-    (rect) => rect.width > 0 && rect.height > 0
-  );
-
-  const visibleRects = clientRects
-    .map((rect) => ({
-      top: Math.max(rect.top, rootRect.top, viewportTopInset, 0),
-      left: Math.max(rect.left, rootRect.left, 0),
-      bottom: Math.min(rect.bottom, rootRect.bottom, window.innerHeight),
-      right: Math.min(rect.right, rootRect.right, window.innerWidth),
-    }))
-    .filter((rect) => rect.bottom > rect.top && rect.right > rect.left)
-    .filter(intersectsViewport)
-    .sort((a, b) => {
-      if (a.top !== b.top) return a.top - b.top;
-      return a.left - b.left;
-    });
-
-  if (visibleRects.length > 0) {
-    return visibleRects[0];
-  }
-
-  const boundingRect = range.getBoundingClientRect();
-  if (
-    !intersectsViewport(boundingRect) ||
-    boundingRect.bottom <= Math.max(rootRect.top, viewportTopInset, 0)
-  ) {
-    return null;
-  }
-
+function getSelectionViewportRectangle(range: Range): SelectionViewportRectangle {
+  const rect = range.getBoundingClientRect();
   return {
-    top: boundingRect.top,
-    left: boundingRect.left,
-    bottom: boundingRect.bottom,
-    right: boundingRect.right,
+    top: rect.top,
+    left: rect.left,
+    bottom: rect.bottom,
+    right: rect.right,
   };
 }
 
@@ -98,7 +52,7 @@ function isValidReviewSelection(root: HTMLElement, sel: Selection): boolean {
 }
 
 export interface UseReviewTextSelectionResult {
-  /** Derived from the visible selection rect for the floating menu. */
+  /** Derived from {@link selectedRange} via `getBoundingClientRect()` for the floating menu. */
   selectionRectangle: SelectionViewportRectangle | null;
   selectedText: string;
   selectedRange: Range | null;
@@ -106,8 +60,7 @@ export interface UseReviewTextSelectionResult {
 }
 
 export function useReviewTextSelection(
-  rootRef: RefObject<HTMLElement | null>,
-  occludingTopRef?: RefObject<HTMLElement | null>
+  rootRef: RefObject<HTMLElement | null>
 ): UseReviewTextSelectionResult {
   const [selectedText, setSelectedText] = useState('');
   const [selectedRange, setSelectedRange] = useState<Range | null>(null);
@@ -137,15 +90,7 @@ export function useReviewTextSelection(
     setSelectedRange(null);
   }, []);
 
-  const selectionRectangle =
-    selectedRange && rootRef.current
-      ? getSelectionViewportRectangle(
-          selectedRange,
-          rootRef.current,
-          (occludingTopRef?.current?.getBoundingClientRect().bottom ?? 0) +
-            SELECTION_MENU_HEADER_CLEARANCE_PX
-        )
-      : null;
+  const selectionRectangle = selectedRange ? getSelectionViewportRectangle(selectedRange) : null;
 
   useEffect(() => {
     document.addEventListener('selectionchange', updateFromSelection);

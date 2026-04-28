@@ -37,7 +37,7 @@ export function buildTextSegments(
 
   const sortedBoundaries = [...boundaries].sort((a, b) => a - b);
 
-  const rawSegments = sortedBoundaries.flatMap((start, index) => {
+  return sortedBoundaries.flatMap((start, index) => {
     const end = sortedBoundaries[index + 1];
     if (end === undefined || start === end) return [];
 
@@ -55,27 +55,4 @@ export function buildTextSegments(
       { start, end, text, styles: run.styles, highlighted: mappingKeys.length > 0, mappingKeys },
     ];
   });
-
-  return rawSegments.reduce<TextSegment[]>((segments, segment) => {
-    const previousSegment = segments[segments.length - 1];
-    const sameStyles =
-      JSON.stringify(previousSegment?.styles ?? null) === JSON.stringify(segment.styles ?? null);
-    const sameMappings =
-      JSON.stringify(previousSegment?.mappingKeys ?? []) === JSON.stringify(segment.mappingKeys);
-
-    if (
-      previousSegment &&
-      previousSegment.end === segment.start &&
-      previousSegment.highlighted === segment.highlighted &&
-      sameMappings &&
-      sameStyles
-    ) {
-      previousSegment.end = segment.end;
-      previousSegment.text += segment.text;
-      return segments;
-    }
-
-    segments.push({ ...segment, mappingKeys: [...segment.mappingKeys] });
-    return segments;
-  }, []);
 }

@@ -269,90 +269,6 @@ const createImagePayload = (): MappingReviewSuspendPayload => ({
   ],
 });
 
-const createAllEntriesPayload = (): MappingReviewSuspendPayload => ({
-  suspendStepId: 'mapping-review',
-  reason: 'Mapping review required before CMA payload generation continues',
-  documentId: 'doc-all',
-  documentTitle: 'All entries review',
-  normalizedDocument: {
-    documentId: 'doc-all',
-    title: 'All entries review',
-    designValues: [],
-    contentBlocks: [
-      {
-        id: 'block-1',
-        position: 1,
-        type: 'paragraph',
-        textRuns: [{ text: 'Article body copy' }],
-        flattenedTextRuns: [{ text: 'Article body copy', start: 0, end: 17 }],
-        designValueIds: [],
-        imageIds: [],
-      },
-      {
-        id: 'block-2',
-        position: 2,
-        type: 'paragraph',
-        textRuns: [{ text: 'Product summary copy' }],
-        flattenedTextRuns: [{ text: 'Product summary copy', start: 0, end: 20 }],
-        designValueIds: [],
-        imageIds: [],
-      },
-    ],
-    images: [],
-    tables: [],
-    assets: [],
-  },
-  entryBlockGraph: {
-    entries: [
-      {
-        contentTypeId: 'article',
-        fields: { title: { 'en-US': 'Article title' } },
-        fieldMappings: [
-          {
-            fieldId: 'body',
-            fieldType: 'Text',
-            sourceRefs: [createBlockTextSourceRef('block-1', 'Article body copy')],
-            confidence: 0.9,
-          },
-        ],
-      },
-      {
-        contentTypeId: 'product',
-        fields: { title: { 'en-US': 'Product title' } },
-        fieldMappings: [
-          {
-            fieldId: 'summary',
-            fieldType: 'Text',
-            sourceRefs: [createBlockTextSourceRef('block-2', 'Product summary copy')],
-            confidence: 0.9,
-          },
-        ],
-      },
-    ],
-    excludedSourceRefs: [],
-  },
-  referenceGraph: {
-    edges: [],
-    creationOrder: [],
-    deferredFields: [],
-    hasCircularDependency: false,
-  },
-  contentTypes: [
-    {
-      sys: { id: 'article' },
-      name: 'Article',
-      displayField: 'title',
-      fields: [{ id: 'body', name: 'Body copy', type: 'Text' }],
-    },
-    {
-      sys: { id: 'product' },
-      name: 'Product',
-      displayField: 'title',
-      fields: [{ id: 'summary', name: 'Summary', type: 'Text' }],
-    },
-  ],
-});
-
 describe('MappingView', () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -636,7 +552,8 @@ describe('MappingView', () => {
       <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
     );
 
-    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(2);
+    expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
+    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
   });
 
@@ -749,35 +666,6 @@ describe('MappingView', () => {
     ).toBeNull();
   });
 
-  it('renders an all-entries read-only mapping view without selection actions', () => {
-    mockUseReviewTextSelection.mockReturnValue({
-      selectionRectangle: { top: 40, left: 60, bottom: 68, right: 160 },
-      selectedText: 'Article body copy',
-      selectedRange: createDetachedRange('Article body copy', 0, 7),
-      clearSelection: mockClearSelection,
-    });
-
-    const payload = createAllEntriesPayload();
-    const { container } = render(
-      <MappingView
-        payload={payload}
-        {...mappingViewGraphProps(payload)}
-        selectedEntryIndex={null}
-        reviewMode="all"
-      />
-    );
-
-    expect(screen.getByText('Currently viewing:')).toBeTruthy();
-    expect(screen.getByText('All entries (2)')).toBeTruthy();
-    expect(screen.queryByTestId('review-selection-menu')).toBeNull();
-    expect(screen.getAllByText('Content type:').length).toBeGreaterThan(0);
-    expect(screen.getByText('Article')).toBeTruthy();
-    expect(screen.getByText('Product')).toBeTruthy();
-    expect(
-      container.querySelector('[data-review-text-segment="true"][data-is-mapped="true"]')
-    ).toBeTruthy();
-  });
-
   it('highlights all underlying grouped text when hovering a grouped rail card', () => {
     const blocks = [
       createBlock('block-1', 1, 'First body paragraph.'),
@@ -807,18 +695,16 @@ describe('MappingView', () => {
 
     const mappingCard = container.querySelector<HTMLElement>('[data-testid^="mapping-card-"]');
     expect(mappingCard).toBeTruthy();
-    const groupedSurface = container.querySelector<HTMLElement>(
-      '[data-testid^="mapping-group-surface-"]'
-    );
-    expect(groupedSurface).toBeTruthy();
-    const initialBoxShadow = groupedSurface?.style.boxShadow ?? '';
 
     fireEvent.mouseEnter(mappingCard as HTMLElement);
 
-    expect(textSegments[0].style.backgroundColor).toBe(initialBackgroundColor);
+    expect(textSegments[0].style.backgroundColor).not.toBe(initialBackgroundColor);
     expect(textSegments[1].style.backgroundColor).toBe(textSegments[0].style.backgroundColor);
-    expect(groupedSurface?.getAttribute('data-hovered')).toBe('true');
-    expect(groupedSurface?.style.boxShadow).not.toBe(initialBoxShadow);
+    expect(
+      container
+        .querySelector('[data-testid^="mapping-group-surface-"]')
+        ?.getAttribute('data-hovered')
+    ).toBe('true');
   });
 
   it('opens assign modal from grouped-run text selection and clears selection', () => {
@@ -863,7 +749,7 @@ describe('MappingView', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Reassign' }));
 
-    expect(screen.getByRole('heading', { name: /Assign content|Reassign content/ })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Reassign content' })).toBeTruthy();
     expect(
       screen.getAllByText((_, node) => node?.textContent?.includes('Second') ?? false).length
     ).toBeGreaterThan(0);
@@ -898,8 +784,7 @@ describe('MappingView', () => {
     expect(screen.getByText('"fresh body text"')).toBeTruthy();
     expect(screen.getByText('Current location')).toBeTruthy();
     expect(screen.getByText('New location')).toBeTruthy();
-    expect(screen.getByText('Article')).toBeTruthy();
-    expect(screen.getByText(/\(Untitled\)/)).toBeTruthy();
+    expect(screen.getByText('Article: Untitled')).toBeTruthy();
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
 

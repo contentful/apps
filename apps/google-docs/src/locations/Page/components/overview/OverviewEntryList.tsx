@@ -12,13 +12,13 @@ import { truncateLabel } from '../../../../utils/utils';
 
 export interface OverviewEntryListProps {
   rows: OverviewEntryListRow[];
-  selectedEntryIndex: number | null;
+  selectedEntryIndex: number;
   onSelect: (entryIndex: number) => void;
 }
 
 interface OverviewEntryRowCardProps {
   row: OverviewEntryListRow;
-  selectedEntryIndex: number | null;
+  selectedEntryIndex: number;
   onSelect: (entryIndex: number) => void;
   showTreeLines: boolean;
   isLastRow?: boolean;

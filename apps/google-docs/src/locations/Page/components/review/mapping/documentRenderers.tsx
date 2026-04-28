@@ -17,14 +17,12 @@ import type {
   NormalizedDocumentTable,
   NormalizedDocumentTablePart,
   SourceRef,
-  TextSourceRef,
 } from '@types';
-import { isBlockImageSourceRef, isTableImageSourceRef, isTextSourceRef } from '@types';
+import { isBlockImageSourceRef, isTableImageSourceRef } from '@types';
 import type { MappingHighlight, MappingHighlightIndex } from './buildHighlights';
 import { getMappingCardKey } from './buildHighlights';
 import type { ListMarker } from './buildListMarkers';
 import { buildTextSegments, type TextSegment } from './buildTextSegments';
-import { getAnchorIdForSourceRef } from './resolveMappingCardOffsets';
 import { ReviewImageAssetCard } from './ReviewImageAssetCard';
 import { isImageSourceRefExcluded } from './sourceRefUtils';
 
@@ -43,56 +41,11 @@ function isMappingHovered(keys: string[], hoveredMappingKeys: string[]): boolean
   return keys.some((k) => hoveredMappingKeys.includes(k));
 }
 
-function getFieldIdentity(highlight: MappingHighlight): string {
-  return `${highlight.entryIndex}|${highlight.fieldId}|${highlight.fieldType}`;
-}
-
-function uniqueStrings(values: string[]): string[] {
-  return Array.from(new Set(values));
-}
-
-const GROUPABLE_SEPARATOR_PATTERN = /^[\s/|,:;()[\]{}\-–—]+$/;
-
-function getTextSliceFromRuns(
-  flattenedRuns: Array<{ start: number; end: number; text: string }>,
-  from: number,
-  to: number
-): string {
-  if (to <= from) {
-    return '';
-  }
-
-  return flattenedRuns
-    .flatMap((run) => {
-      const overlapStart = Math.max(from, run.start);
-      const overlapEnd = Math.min(to, run.end);
-
-      if (overlapEnd <= overlapStart) {
-        return [];
-      }
-
-      return [run.text.slice(overlapStart - run.start, overlapEnd - run.start)];
-    })
-    .join('');
-}
-
-function isOnlyGroupableSeparators(value: string): boolean {
-  return value.length === 0 || GROUPABLE_SEPARATOR_PATTERN.test(value);
-}
-
-function getHighlightStyle(highlighted: boolean, hovered: boolean, readOnly = false) {
-  if (!highlighted) return { border: 'transparent', background: 'transparent' };
-  if (readOnly) {
-    return {
-      border: hovered ? tokens.green600 : tokens.green500,
-      background: 'transparent',
-      boxShadow: hovered ? `inset 0 0 0 1px ${tokens.green600}` : undefined,
-    };
-  }
+function getHighlightStyle(highlighted: boolean, hovered: boolean) {
+  if (!highlighted) return { border: tokens.gray300, background: 'transparent' };
   return {
     border: hovered ? tokens.green600 : tokens.green500,
-    background: tokens.green100,
-    boxShadow: hovered ? `inset 0 0 0 1px ${tokens.green600}` : undefined,
+    background: hovered ? tokens.green300 : tokens.green200,
   };
 }
 
@@ -124,8 +77,6 @@ interface TextSegmentSpanProps {
   rowId?: string;
   cellId?: string;
   partId?: string;
-  readOnly?: boolean;
-  suppressInlineHighlight?: boolean;
 }
 
 const TextSegmentSpan = ({
@@ -141,12 +92,7 @@ const TextSegmentSpan = ({
   rowId,
   cellId,
   partId,
-  readOnly = false,
-  suppressInlineHighlight = false,
 }: TextSegmentSpanProps) => {
-  const highlightStyle = suppressInlineHighlight
-    ? { border: 'transparent', background: 'transparent' }
-    : getHighlightStyle(segment.highlighted, hovered, readOnly);
   const content = (
     <Box
       as="span"
@@ -168,24 +114,10 @@ const TextSegmentSpan = ({
       onMouseLeave={segment.highlighted ? () => onSetHoveredMappings([]) : undefined}
       style={{
         ...getTextSegmentStyle(segment.styles),
-        backgroundColor: highlightStyle.background,
-        border:
-          segment.highlighted && highlightStyle.border !== 'transparent'
-            ? `1px solid ${highlightStyle.border}`
-            : undefined,
-        boxShadow:
-          segment.highlighted && highlightStyle.border !== 'transparent'
-            ? highlightStyle.boxShadow
-            : undefined,
+        backgroundColor: getHighlightStyle(segment.highlighted, hovered).background,
         borderRadius: segment.highlighted ? tokens.borderRadiusSmall : undefined,
-        paddingInline:
-          segment.highlighted && highlightStyle.border !== 'transparent'
-            ? tokens.spacing2Xs
-            : undefined,
-        paddingBlock:
-          segment.highlighted && highlightStyle.border !== 'transparent' ? '1px' : undefined,
         whiteSpace: 'pre-wrap',
-        transition: 'background-color 120ms ease, border-color 120ms ease',
+        transition: 'background-color 120ms ease',
       }}>
       {segment.text}
     </Box>
@@ -221,10 +153,6 @@ interface BlockRendererProps {
     sourceRef: { type: 'image'; blockId: string; imageId: string },
     label: string
   ) => void;
-  readOnly?: boolean;
-  showReadOnlyOutline?: boolean;
-  preferImageReadOnlyHighlight?: boolean;
-  suppressInlineHighlights?: boolean;
 }
 
 export const BlockRenderer = ({
@@ -239,24 +167,11 @@ export const BlockRenderer = ({
   onSetHoveredMappingKeys,
   onAssignImage,
   onExcludeImage,
-  readOnly = false,
-  showReadOnlyOutline = true,
-  preferImageReadOnlyHighlight = false,
-  suppressInlineHighlights = false,
 }: BlockRendererProps) => {
   const visibleHighlights = filterByEntry(
     highlightIndex.blockHighlights[block.id] ?? [],
     selectedEntryIndex
   );
-  const visibleTextHighlights = visibleHighlights.filter(
-    (highlight): highlight is MappingHighlight & { sourceRef: TextSourceRef } =>
-      isTextSourceRef(highlight.sourceRef)
-  );
-  const hasVisibleTextMappings = visibleTextHighlights.length > 0;
-  const blockMappingKeys = visibleHighlights.map((highlight) =>
-    getMappingCardKey(segmentId, highlight)
-  );
-  const isBlockHovered = isMappingHovered(blockMappingKeys, hoveredMappingKeys);
   const textSegments = buildTextSegments(block.flattenedTextRuns, segmentId, visibleHighlights);
   const listMarker = block.type === 'listItem' ? listMarkers[block.id] ?? null : null;
 
@@ -273,40 +188,13 @@ export const BlockRenderer = ({
           rangeStart={seg.start}
           rangeEnd={seg.end}
           blockId={block.id}
-          readOnly={readOnly}
-          suppressInlineHighlight={
-            suppressInlineHighlights || (readOnly && showReadOnlyOutline && hasVisibleTextMappings)
-          }
         />
       ))}
     </Text>
   );
 
   return (
-    <Box
-      data-review-alignment-target={
-        readOnly && showReadOnlyOutline && hasVisibleTextMappings ? 'true' : undefined
-      }
-      onMouseEnter={
-        readOnly && blockMappingKeys.length > 0
-          ? () => onSetHoveredMappingKeys(blockMappingKeys)
-          : undefined
-      }
-      onMouseLeave={
-        readOnly && blockMappingKeys.length > 0 ? () => onSetHoveredMappingKeys([]) : undefined
-      }
-      style={
-        readOnly && showReadOnlyOutline && hasVisibleTextMappings
-          ? {
-              border: `1px solid ${isBlockHovered ? tokens.green600 : tokens.green500}`,
-              borderRadius: tokens.borderRadiusMedium,
-              backgroundColor: 'transparent',
-              padding: tokens.spacing2Xs,
-              boxShadow: isBlockHovered ? `inset 0 0 0 1px ${tokens.green600}` : undefined,
-              transition: 'border-color 120ms ease, box-shadow 120ms ease',
-            }
-          : undefined
-      }>
+    <Box>
       {listMarker ? (
         <Flex
           data-testid={`list-item-${block.id}`}
@@ -362,10 +250,6 @@ export const BlockRenderer = ({
               isHighlighted={highlighted}
               hovered={hovered}
               isExcluded={isImageSourceRefExcluded(imageSourceRef, excludedSourceRefs)}
-              readOnly={readOnly}
-              showReadOnlyHighlightBorder={
-                readOnly && (preferImageReadOnlyHighlight || !hasVisibleTextMappings)
-              }
               onMouseEnter={
                 highlighted ? () => onSetHoveredMappingKeys(imageMappingKeys) : undefined
               }
@@ -417,10 +301,6 @@ interface TableRendererProps {
     },
     label: string
   ) => void;
-  readOnly?: boolean;
-  showReadOnlyOutline?: boolean;
-  preferImageReadOnlyHighlight?: boolean;
-  suppressInlineHighlights?: boolean;
 }
 
 interface TablePartRendererProps {
@@ -428,7 +308,6 @@ interface TablePartRendererProps {
   tableId: string;
   rowId: string;
   cellId: string;
-  anchorId?: string;
   part: NormalizedDocumentTablePart;
   visibleHighlights: MappingHighlight[];
   imageById: Record<string, NormalizedDocumentImage>;
@@ -437,9 +316,6 @@ interface TablePartRendererProps {
   onSetHoveredMappingKeys: (keys: string[]) => void;
   onAssignImage: TableRendererProps['onAssignImage'];
   onExcludeImage: TableRendererProps['onExcludeImage'];
-  readOnly?: boolean;
-  showReadOnlyOutline?: boolean;
-  suppressInlineHighlights?: boolean;
 }
 
 const TablePartRenderer = ({
@@ -447,7 +323,6 @@ const TablePartRenderer = ({
   tableId,
   rowId,
   cellId,
-  anchorId,
   part,
   visibleHighlights,
   imageById,
@@ -456,22 +331,7 @@ const TablePartRenderer = ({
   onSetHoveredMappingKeys,
   onAssignImage,
   onExcludeImage,
-  readOnly = false,
-  showReadOnlyOutline = true,
-  suppressInlineHighlights = false,
 }: TablePartRendererProps) => {
-  const partMappingKeys = visibleHighlights.map((highlight) =>
-    getMappingCardKey(segmentId, highlight)
-  );
-  const hasVisibleMappings = partMappingKeys.length > 0;
-  const isPartHovered = isMappingHovered(partMappingKeys, hoveredMappingKeys);
-  const showEditModeFullSurface =
-    !readOnly &&
-    suppressInlineHighlights &&
-    showReadOnlyOutline &&
-    part.type === 'text' &&
-    hasVisibleMappings;
-
   if (part.type === 'image') {
     const image = imageById[part.imageId];
     if (!image) return null;
@@ -517,8 +377,6 @@ const TablePartRenderer = ({
           hovered={hovered}
           isExcluded={isImageSourceRefExcluded(imageSourceRef, excludedSourceRefs)}
           size="small"
-          readOnly={readOnly}
-          showReadOnlyHighlightBorder={readOnly}
           onMouseEnter={highlighted ? () => onSetHoveredMappingKeys(mappingKeys) : undefined}
           onMouseLeave={highlighted ? () => onSetHoveredMappingKeys([]) : undefined}
           onAssign={() => onAssignImage(imageSourceRef, image.title ?? image.altText ?? image.id)}
@@ -531,32 +389,7 @@ const TablePartRenderer = ({
   const textSegments = buildTextSegments(part.flattenedTextRuns, segmentId, visibleHighlights);
 
   return (
-    <Box
-      as="span"
-      id={anchorId}
-      data-review-alignment-target={showReadOnlyOutline && hasVisibleMappings ? 'true' : undefined}
-      onMouseEnter={
-        readOnly && partMappingKeys.length > 0
-          ? () => onSetHoveredMappingKeys(partMappingKeys)
-          : undefined
-      }
-      onMouseLeave={
-        readOnly && partMappingKeys.length > 0 ? () => onSetHoveredMappingKeys([]) : undefined
-      }
-      style={{
-        whiteSpace: 'pre-wrap',
-        display: 'inline-block',
-        ...((readOnly && showReadOnlyOutline && hasVisibleMappings) || showEditModeFullSurface
-          ? {
-              border: `1px solid ${isPartHovered ? tokens.green600 : tokens.green500}`,
-              borderRadius: tokens.borderRadiusMedium,
-              backgroundColor: readOnly ? 'transparent' : tokens.green100,
-              padding: tokens.spacingXs,
-              boxShadow: isPartHovered ? `inset 0 0 0 1px ${tokens.green600}` : undefined,
-              transition: 'border-color 120ms ease, box-shadow 120ms ease',
-            }
-          : undefined),
-      }}>
+    <Box as="span" style={{ whiteSpace: 'pre-wrap' }}>
       {textSegments.map((seg, index) => (
         <TextSegmentSpan
           key={`${part.id}-${index}`}
@@ -571,10 +404,6 @@ const TablePartRenderer = ({
           rowId={rowId}
           cellId={cellId}
           partId={part.id}
-          readOnly={readOnly}
-          suppressInlineHighlight={
-            suppressInlineHighlights || (readOnly && showReadOnlyOutline && hasVisibleMappings)
-          }
         />
       ))}
     </Box>
@@ -592,82 +421,9 @@ export const TableRenderer = ({
   onSetHoveredMappingKeys,
   onAssignImage,
   onExcludeImage,
-  readOnly = false,
-  showReadOnlyOutline = true,
-  preferImageReadOnlyHighlight = false,
-  suppressInlineHighlights = false,
 }: TableRendererProps) => {
   const getVisiblePartHighlights = (partKey: string) =>
     filterByEntry(highlightIndex.tablePartHighlights[partKey] ?? [], selectedEntryIndex);
-
-  const hasFullPartTextCoverage = (
-    part: Extract<NormalizedDocumentTablePart, { type: 'text' }>,
-    highlights: MappingHighlight[]
-  ) => {
-    const textHighlights = highlights.filter(
-      (
-        highlight
-      ): highlight is MappingHighlight & {
-        sourceRef: Extract<MappingHighlight['sourceRef'], { start: number; end: number }>;
-      } => isTextSourceRef(highlight.sourceRef)
-    );
-
-    if (!textHighlights.length || textHighlights.length !== highlights.length) {
-      return false;
-    }
-
-    const partStart = part.flattenedTextRuns[0]?.start;
-    const partEnd = part.flattenedTextRuns[part.flattenedTextRuns.length - 1]?.end;
-
-    if (!Number.isFinite(partStart) || !Number.isFinite(partEnd)) {
-      return false;
-    }
-
-    const sortedHighlights = [...textHighlights].sort(
-      (left, right) => left.sourceRef.start - right.sourceRef.start
-    );
-    let coverageEnd = sortedHighlights[0].sourceRef.end;
-
-    if (
-      !isOnlyGroupableSeparators(
-        getTextSliceFromRuns(part.flattenedTextRuns, partStart, sortedHighlights[0].sourceRef.start)
-      )
-    ) {
-      return false;
-    }
-
-    for (let index = 1; index < sortedHighlights.length; index += 1) {
-      const highlight = sortedHighlights[index];
-      if (
-        !isOnlyGroupableSeparators(
-          getTextSliceFromRuns(part.flattenedTextRuns, coverageEnd, highlight.sourceRef.start)
-        )
-      ) {
-        return false;
-      }
-      coverageEnd = Math.max(coverageEnd, highlight.sourceRef.end);
-    }
-
-    return isOnlyGroupableSeparators(
-      getTextSliceFromRuns(part.flattenedTextRuns, coverageEnd, partEnd)
-    );
-  };
-
-  const getPartFieldIdentity = (
-    part: NormalizedDocumentTablePart,
-    highlights: MappingHighlight[]
-  ) => {
-    const uniqueFieldIdentities = new Set(highlights.map(getFieldIdentity));
-    if (uniqueFieldIdentities.size !== 1) {
-      return null;
-    }
-
-    if (part.type === 'image') {
-      return Array.from(uniqueFieldIdentities)[0];
-    }
-
-    return hasFullPartTextCoverage(part, highlights) ? Array.from(uniqueFieldIdentities)[0] : null;
-  };
 
   return (
     <Table>
@@ -686,189 +442,36 @@ export const TableRenderer = ({
             key={row.id}
             id={`row:${table.id}:${row.id}`}
             data-testid={`table-row-${row.id}`}>
-            {row.cells.map((cell) => {
-              const partHighlightsByKey = cell.parts.map((part) => {
-                const partKey = [table.id, row.id, cell.id, part.id].join(':');
-                const highlights = getVisiblePartHighlights(partKey);
-                return {
-                  part,
-                  highlights,
-                  fieldIdentity: getPartFieldIdentity(part, highlights),
-                  hasFullPartCoverage:
-                    part.type === 'text' ? hasFullPartTextCoverage(part, highlights) : false,
-                };
-              });
-
-              type CellChunk =
-                | {
-                    kind: 'group';
-                    id: string;
-                    parts: Array<(typeof partHighlightsByKey)[number]>;
-                    mappingKeys: string[];
-                  }
-                | {
-                    kind: 'part';
-                    id: string;
-                    part: (typeof partHighlightsByKey)[number]['part'];
-                    highlights: MappingHighlight[];
-                    hasFullPartCoverage: boolean;
-                  };
-
-              const chunks: CellChunk[] = [];
-              let currentGroup: Extract<CellChunk, { kind: 'group' }> | null = null;
-
-              const flushCurrentGroup = () => {
-                if (currentGroup) {
-                  chunks.push(currentGroup);
-                  currentGroup = null;
-                }
-              };
-
-              partHighlightsByKey.forEach((partState) => {
-                if (partState.fieldIdentity) {
-                  const mappingKeys = partState.highlights.map((highlight) =>
-                    getMappingCardKey(segmentId, highlight)
-                  );
-
-                  if (
-                    currentGroup &&
-                    currentGroup.parts[0]?.fieldIdentity === partState.fieldIdentity
-                  ) {
-                    currentGroup.parts.push(partState);
-                    currentGroup.mappingKeys = uniqueStrings([
-                      ...currentGroup.mappingKeys,
-                      ...mappingKeys,
-                    ]);
-                    return;
-                  }
-
-                  flushCurrentGroup();
-                  currentGroup = {
-                    kind: 'group',
-                    id: `${cell.id}:${partState.part.id}:${partState.fieldIdentity}`,
-                    parts: [partState],
-                    mappingKeys,
-                  };
-                  return;
-                }
-
-                flushCurrentGroup();
-                chunks.push({
-                  kind: 'part',
-                  id: `${cell.id}:${partState.part.id}`,
-                  part: partState.part,
-                  highlights: partState.highlights,
-                  hasFullPartCoverage: partState.hasFullPartCoverage,
-                });
-              });
-
-              flushCurrentGroup();
-
-              return (
-                <TableCell
-                  key={cell.id}
-                  data-testid={`table-cell-${cell.id}`}
-                  style={{ backgroundColor: 'transparent', verticalAlign: 'top' }}>
-                  <Flex flexDirection="column" gap="spacing2Xs">
-                    {chunks.map((chunk) => {
-                      if (chunk.kind === 'group') {
-                        const isChunkHovered = isMappingHovered(
-                          chunk.mappingKeys,
-                          hoveredMappingKeys
-                        );
-                        const firstHighlight = chunk.parts.flatMap(
-                          (partState) => partState.highlights
-                        )[0];
-                        const chunkAnchorId = firstHighlight
-                          ? getAnchorIdForSourceRef(firstHighlight.sourceRef)
-                          : undefined;
-
-                        return (
-                          <Box
-                            key={chunk.id}
-                            id={chunkAnchorId}
-                            data-review-alignment-target={readOnly ? 'true' : undefined}
-                            onMouseEnter={() => onSetHoveredMappingKeys(chunk.mappingKeys)}
-                            onMouseLeave={() => onSetHoveredMappingKeys([])}
-                            style={{
-                              border: `1px solid ${
-                                isChunkHovered ? tokens.green600 : tokens.green500
-                              }`,
-                              borderRadius: tokens.borderRadiusMedium,
-                              backgroundColor: readOnly ? 'transparent' : tokens.green100,
-                              padding: tokens.spacingXs,
-                              boxShadow: isChunkHovered
-                                ? `inset 0 0 0 1px ${tokens.green600}`
-                                : undefined,
-                              transition: 'border-color 120ms ease, box-shadow 120ms ease',
-                            }}>
-                            <Flex flexDirection="column" gap="spacing2Xs">
-                              {chunk.parts.map((partState) => (
-                                <Box key={partState.part.id}>
-                                  <TablePartRenderer
-                                    segmentId={segmentId}
-                                    tableId={table.id}
-                                    rowId={row.id}
-                                    cellId={cell.id}
-                                    anchorId={undefined}
-                                    part={partState.part}
-                                    visibleHighlights={partState.highlights}
-                                    imageById={imageById}
-                                    excludedSourceRefs={excludedSourceRefs}
-                                    hoveredMappingKeys={hoveredMappingKeys}
-                                    onSetHoveredMappingKeys={onSetHoveredMappingKeys}
-                                    onAssignImage={onAssignImage}
-                                    onExcludeImage={onExcludeImage}
-                                    readOnly={readOnly}
-                                    showReadOnlyOutline={false}
-                                    suppressInlineHighlights
-                                  />
-                                </Box>
-                              ))}
-                            </Flex>
-                          </Box>
-                        );
-                      }
-
-                      return (
-                        <Box key={chunk.id}>
-                          <TablePartRenderer
-                            segmentId={segmentId}
-                            tableId={table.id}
-                            rowId={row.id}
-                            cellId={cell.id}
-                            anchorId={
-                              chunk.highlights[0]
-                                ? getAnchorIdForSourceRef(chunk.highlights[0].sourceRef)
-                                : undefined
-                            }
-                            part={chunk.part}
-                            visibleHighlights={chunk.highlights}
-                            imageById={imageById}
-                            excludedSourceRefs={excludedSourceRefs}
-                            hoveredMappingKeys={hoveredMappingKeys}
-                            onSetHoveredMappingKeys={onSetHoveredMappingKeys}
-                            onAssignImage={onAssignImage}
-                            onExcludeImage={onExcludeImage}
-                            readOnly={readOnly}
-                            showReadOnlyOutline={
-                              chunk.part.type === 'text'
-                                ? showReadOnlyOutline && chunk.hasFullPartCoverage
-                                : showReadOnlyOutline
-                            }
-                            suppressInlineHighlights={
-                              chunk.part.type === 'text' &&
-                              chunk.hasFullPartCoverage &&
-                              (suppressInlineHighlights || !readOnly)
-                            }
-                          />
-                        </Box>
-                      );
-                    })}
-                  </Flex>
-                </TableCell>
-              );
-            })}
+            {row.cells.map((cell) => (
+              <TableCell
+                key={cell.id}
+                data-testid={`table-cell-${cell.id}`}
+                style={{ backgroundColor: 'transparent', verticalAlign: 'top' }}>
+                <Flex flexDirection="column" gap="spacing2Xs">
+                  {cell.parts.map((part) => {
+                    const partKey = [table.id, row.id, cell.id, part.id].join(':');
+                    return (
+                      <Box key={part.id}>
+                        <TablePartRenderer
+                          segmentId={segmentId}
+                          tableId={table.id}
+                          rowId={row.id}
+                          cellId={cell.id}
+                          part={part}
+                          visibleHighlights={getVisiblePartHighlights(partKey)}
+                          imageById={imageById}
+                          excludedSourceRefs={excludedSourceRefs}
+                          hoveredMappingKeys={hoveredMappingKeys}
+                          onSetHoveredMappingKeys={onSetHoveredMappingKeys}
+                          onAssignImage={onAssignImage}
+                          onExcludeImage={onExcludeImage}
+                        />
+                      </Box>
+                    );
+                  })}
+                </Flex>
+              </TableCell>
+            ))}
           </TableRow>
         ))}
       </TableBody>

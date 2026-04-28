@@ -12,8 +12,6 @@ export interface ReviewImageAssetCardProps {
   hovered?: boolean;
   isExcluded: boolean;
   size?: 'small' | 'default';
-  readOnly?: boolean;
-  showReadOnlyHighlightBorder?: boolean;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   onAssign: () => void;
@@ -31,8 +29,6 @@ export function ReviewImageAssetCard({
   hovered = false,
   isExcluded,
   size = 'default',
-  readOnly = false,
-  showReadOnlyHighlightBorder = false,
   onMouseEnter,
   onMouseLeave,
   onAssign,
@@ -44,15 +40,16 @@ export function ReviewImageAssetCard({
   const imageHeight = size === 'small' ? '180px' : '280px';
 
   const borderColor =
-    isExcluded || !isHighlighted ? tokens.gray300 : hovered ? tokens.green600 : tokens.green500;
-  const showReadOnlyBorder =
-    !readOnly || isExcluded || !isHighlighted || showReadOnlyHighlightBorder;
+    isExcluded && !isHighlighted
+      ? tokens.gray300
+      : !isHighlighted
+      ? tokens.gray300
+      : hovered
+      ? tokens.green600
+      : tokens.green500;
 
   return (
     <Box
-      data-review-alignment-target={
-        readOnly && isHighlighted && showReadOnlyHighlightBorder ? 'true' : undefined
-      }
       data-testid={`review-image-asset-${buildSourceRefKey(sourceRef)}`}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
@@ -62,12 +59,8 @@ export function ReviewImageAssetCard({
         maxWidth: '100%',
         verticalAlign: 'top',
         borderRadius: tokens.borderRadiusMedium,
-        border: showReadOnlyBorder ? `2px solid ${borderColor}` : '2px solid transparent',
-        backgroundColor: isHighlighted
-          ? readOnly
-            ? 'transparent'
-            : tokens.green100
-          : tokens.gray100,
+        border: `1px solid ${borderColor}`,
+        backgroundColor: isHighlighted ? tokens.green100 : tokens.gray100,
         transition: 'border-color 120ms ease',
         overflow: 'hidden',
         boxSizing: 'border-box',
@@ -75,18 +68,14 @@ export function ReviewImageAssetCard({
       }}>
       <Card
         ariaLabel={title}
-        actions={
-          readOnly
-            ? undefined
-            : [
-                <MenuItem key="assigned" onClick={onAssign}>
-                  {assignLabel}
-                </MenuItem>,
-                <MenuItem key="exclude" onClick={onExclude} isDisabled={!isHighlighted}>
-                  Exclude
-                </MenuItem>,
-              ]
-        }>
+        actions={[
+          <MenuItem key="assigned" onClick={onAssign}>
+            {assignLabel}
+          </MenuItem>,
+          <MenuItem key="exclude" onClick={onExclude} isDisabled={!isHighlighted}>
+            Exclude
+          </MenuItem>,
+        ]}>
         <Splitter />
         <Box padding="spacingS">
           <Image
