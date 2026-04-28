@@ -145,11 +145,7 @@ interface BlockRendererProps {
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
-  onAssignImage: (
-    sourceRef: { type: 'image'; blockId: string; imageId: string },
-    label: string
-  ) => void;
-  onExcludeImage: (
+  onEditImage: (
     sourceRef: { type: 'image'; blockId: string; imageId: string },
     label: string
   ) => void;
@@ -165,8 +161,7 @@ export const BlockRenderer = ({
   selectedEntryIndex,
   hoveredMappingKeys,
   onSetHoveredMappingKeys,
-  onAssignImage,
-  onExcludeImage,
+  onEditImage,
 }: BlockRendererProps) => {
   const visibleHighlights = filterByEntry(
     highlightIndex.blockHighlights[block.id] ?? [],
@@ -254,12 +249,7 @@ export const BlockRenderer = ({
                 highlighted ? () => onSetHoveredMappingKeys(imageMappingKeys) : undefined
               }
               onMouseLeave={highlighted ? () => onSetHoveredMappingKeys([]) : undefined}
-              onAssign={() =>
-                onAssignImage(imageSourceRef, image.title ?? image.altText ?? image.id)
-              }
-              onExclude={() =>
-                onExcludeImage(imageSourceRef, image.title ?? image.altText ?? image.id)
-              }
+              onEdit={() => onEditImage(imageSourceRef, image.title ?? image.altText ?? image.id)}
             />
           </Box>
         );
@@ -279,18 +269,7 @@ interface TableRendererProps {
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
-  onAssignImage: (
-    sourceRef: {
-      type: 'tableImage';
-      tableId: string;
-      rowId: string;
-      cellId: string;
-      partId: string;
-      imageId: string;
-    },
-    label: string
-  ) => void;
-  onExcludeImage: (
+  onEditImage: (
     sourceRef: {
       type: 'tableImage';
       tableId: string;
@@ -314,8 +293,7 @@ interface TablePartRendererProps {
   excludedSourceRefs: SourceRef[];
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
-  onAssignImage: TableRendererProps['onAssignImage'];
-  onExcludeImage: TableRendererProps['onExcludeImage'];
+  onEditImage: TableRendererProps['onEditImage'];
 }
 
 const TablePartRenderer = ({
@@ -329,8 +307,7 @@ const TablePartRenderer = ({
   excludedSourceRefs,
   hoveredMappingKeys,
   onSetHoveredMappingKeys,
-  onAssignImage,
-  onExcludeImage,
+  onEditImage,
 }: TablePartRendererProps) => {
   if (part.type === 'image') {
     const image = imageById[part.imageId];
@@ -379,8 +356,7 @@ const TablePartRenderer = ({
           size="small"
           onMouseEnter={highlighted ? () => onSetHoveredMappingKeys(mappingKeys) : undefined}
           onMouseLeave={highlighted ? () => onSetHoveredMappingKeys([]) : undefined}
-          onAssign={() => onAssignImage(imageSourceRef, image.title ?? image.altText ?? image.id)}
-          onExclude={() => onExcludeImage(imageSourceRef, image.title ?? image.altText ?? image.id)}
+          onEdit={() => onEditImage(imageSourceRef, image.title ?? image.altText ?? image.id)}
         />
       </Box>
     );
@@ -419,8 +395,7 @@ export const TableRenderer = ({
   selectedEntryIndex,
   hoveredMappingKeys,
   onSetHoveredMappingKeys,
-  onAssignImage,
-  onExcludeImage,
+  onEditImage,
 }: TableRendererProps) => {
   const getVisiblePartHighlights = (partKey: string) =>
     filterByEntry(highlightIndex.tablePartHighlights[partKey] ?? [], selectedEntryIndex);
@@ -463,8 +438,7 @@ export const TableRenderer = ({
                           excludedSourceRefs={excludedSourceRefs}
                           hoveredMappingKeys={hoveredMappingKeys}
                           onSetHoveredMappingKeys={onSetHoveredMappingKeys}
-                          onAssignImage={onAssignImage}
-                          onExcludeImage={onExcludeImage}
+                          onEditImage={onEditImage}
                         />
                       </Box>
                     );

@@ -162,9 +162,6 @@ export const MappingView = ({
   const [pendingExcludeImageSourceRefs, setPendingExcludeImageSourceRefs] = useState<
     ImageSourceRef[]
   >([]);
-  const [pendingTextReassignRanges, setPendingTextReassignRanges] = useState<TextExclusionRange[]>(
-    []
-  );
   const [pendingTextAssignRanges, setPendingTextAssignRanges] = useState<TextExclusionRange[]>([]);
   const [pendingModalSelectionRange, setPendingModalSelectionRange] = useState<Range | null>(null);
   const [pendingPreviewSourceRefs, setPendingPreviewSourceRefs] = useState<SourceRef[]>([]);
@@ -178,7 +175,6 @@ export const MappingView = ({
     setEditModalState(EMPTY_EDIT_MODAL);
     setPendingTextExclusionRanges(null);
     setPendingExcludeImageSourceRefs([]);
-    setPendingTextReassignRanges([]);
     setPendingTextAssignRanges([]);
     setPendingModalSelectionRange(null);
     setPendingPreviewSourceRefs([]);
@@ -515,99 +511,10 @@ export const MappingView = ({
     measureOffsets();
   }, [allGroups]);
 
-  const openAssignModal = (
-    preview: string,
-    currentLocations: EditLocationOption[],
-    reassignRanges: TextExclusionRange[],
-    assignRanges: TextExclusionRange[],
-    imageSourceRef: ImageSourceRef | null = null,
-    selectionRange: Range | null = null,
-    previewSourceRefs: SourceRef[] = []
-  ) => {
-    setPendingTextExclusionRanges(null);
-    setPendingImageSourceRef(null);
-    setPendingImageReassignSourceRef(imageSourceRef);
-    setPendingTextReassignRanges(reassignRanges);
-    setPendingTextAssignRanges(assignRanges);
-    setPendingModalSelectionRange(selectionRange ? selectionRange.cloneRange() : null);
-    setPendingPreviewSourceRefs(previewSourceRefs);
-    setPendingPreviewHasTableContent(
-      selectionRange
-        ? selectionIncludesTableContent(textSelectionRootRef.current, selectionRange)
-        : false
-    );
-
-    // Pre-check any destination fields that already contain one of the source refs
-    // being reassigned, so the user can see (and preserve) current mappings.
-    const currentSourceRefKeys = new Set(
-      currentLocations.flatMap((loc) =>
-        (loc.sourceRefs?.length ? loc.sourceRefs : [loc.sourceRef]).map(buildSourceRefKey)
-      )
-    );
-    const preCheckedFieldIds = newLocation.fieldMappings
-      .filter((fm) => fm.sourceRefs.some((sr) => currentSourceRefKeys.has(buildSourceRefKey(sr))))
-      .map((fm) => fm.fieldId);
-
-    setEditModalState({
-      mode: 'assign',
-      viewModel: {
-        selectedText: preview,
-        currentLocations,
-        newLocation: {
-          ...newLocation,
-          selectedFieldIds: preCheckedFieldIds,
-        },
-        isOpen: true,
-      },
-      title: `${canExcludeSelectedText ? 'Reassign' : 'Assign'} content`,
-      locationSectionDescription: '',
-      primaryButtonLabel: `${canExcludeSelectedText ? 'Reassign' : 'Assign'} content`,
-    });
-  };
-
-  const openExcludeModal = (
-    selectedText: string,
-    currentLocations: EditLocationOption[],
-    preview?: { contentPreview: string; previewSectionTitle: string },
-    selectionRange: Range | null = null,
-    previewSourceRefs: SourceRef[] = []
-  ) => {
-    setPendingExcludeImageSourceRefs(
-      previewSourceRefs.filter(
-        (sourceRef): sourceRef is ImageSourceRef =>
-          isBlockImageSourceRef(sourceRef) || isTableImageSourceRef(sourceRef)
-      )
-    );
-    setPendingModalSelectionRange(selectionRange ? selectionRange.cloneRange() : null);
-    setPendingPreviewSourceRefs(previewSourceRefs);
-    setPendingPreviewHasTableContent(
-      selectionRange
-        ? selectionIncludesTableContent(textSelectionRootRef.current, selectionRange)
-        : false
-    );
-    setEditModalState({
-      mode: 'exclude',
-      viewModel: {
-        selectedText,
-        contentPreview: preview?.contentPreview,
-        previewSectionTitle: preview?.previewSectionTitle,
-        currentLocations,
-        newLocation: EMPTY_NEW_LOCATION,
-        isOpen: true,
-      },
-      title: 'Exclude content',
-      locationSectionDescription:
-        currentLocations.length > 1
-          ? 'This content is used in more than one place in the entry. Select which item to exclude.'
-          : '',
-      primaryButtonLabel: 'Exclude content',
-    });
-  };
-
-  const handleAssignFromSelection = () => {
+  const handleEditFromSelection = () => {
     if (isDisabled || !selectedText.trim()) return;
     const selectionRange = selectedRange ? selectedRange.cloneRange() : null;
-    const reassignRanges = collectTextExclusionRangesFromSelection(
+    const exclusionRanges = collectTextExclusionRangesFromSelection(
       textSelectionRootRef.current,
       selectionRange
     );
@@ -620,64 +527,74 @@ export const MappingView = ({
       selectionRange,
       document
     );
-    openAssignModal(
-      selectedText.trim(),
-      getLocationsForSelectedText(),
-      reassignRanges,
-      assignRanges,
-      null,
-      selectionRange,
-      previewSourceRefs
-    );
-    clearSelection();
-  };
+    const currentLocations = getLocationsForSelectedText();
 
-  const handleExcludeFromSelection = () => {
-    if (isDisabled || !selectedText.trim()) return;
-    const selectionRange = selectedRange ? selectedRange.cloneRange() : null;
-    const ranges = collectTextExclusionRangesFromSelection(
-      textSelectionRootRef.current,
-      selectionRange
+    const currentSourceRefKeys = new Set(
+      currentLocations.flatMap((loc) =>
+        (loc.sourceRefs?.length ? loc.sourceRefs : [loc.sourceRef]).map(buildSourceRefKey)
+      )
     );
-    setPendingTextExclusionRanges(ranges.length ? ranges : null);
-    setPendingImageSourceRef(null);
-    const trimmed = selectedText.trim();
-    const mappedPreview = collectMappedExclusionPreviewText(
-      textSelectionRootRef.current,
-      selectionRange
-    ).trim();
-    const previewSourceRefs = collectRichTextSourceRefsFromSelection(
-      textSelectionRootRef.current,
-      selectionRange,
-      document,
-      { mappedState: 'mapped' }
+    const initialFieldIds = newLocation.fieldMappings
+      .filter((fm) => fm.sourceRefs.some((sr) => currentSourceRefKeys.has(buildSourceRefKey(sr))))
+      .map((fm) => fm.fieldId);
+
+    setPendingTextExclusionRanges(exclusionRanges.length ? exclusionRanges : null);
+    setPendingTextAssignRanges(assignRanges);
+    setPendingModalSelectionRange(selectionRange);
+    setPendingPreviewSourceRefs(previewSourceRefs);
+    setPendingPreviewHasTableContent(
+      selectionIncludesTableContent(textSelectionRootRef.current, selectionRange)
     );
-    openExcludeModal(
-      trimmed,
-      getLocationsForSelectedText(),
-      {
-        contentPreview: mappedPreview || trimmed,
-        previewSectionTitle: 'Selected content',
+    setPendingExcludeImageSourceRefs(
+      previewSourceRefs.filter(
+        (ref): ref is ImageSourceRef => isBlockImageSourceRef(ref) || isTableImageSourceRef(ref)
+      )
+    );
+
+    setEditModalState({
+      viewModel: {
+        selectedText: selectedText.trim(),
+        isImageContent: false,
+        currentLocations,
+        newLocation: { ...newLocation, initialFieldIds },
+        isOpen: true,
       },
-      selectionRange,
-      previewSourceRefs
-    );
+      title: 'Edit content mapping',
+      primaryButtonLabel: 'Apply',
+    });
     clearSelection();
   };
 
-  const handleAssignImage = (sourceRef: ImageSourceRef, label: string) => {
+  const handleEditImage = (sourceRef: ImageSourceRef, label: string) => {
     if (isDisabled) return;
-    openAssignModal(label, getLocationsForSourceRef(sourceRef), [], [], sourceRef);
-    setHoveredMappingKeys([]);
-  };
+    const currentLocations = getLocationsForSourceRef(sourceRef);
 
-  const handleExcludeImage = (sourceRef: ImageSourceRef, label: string) => {
-    if (isDisabled) return;
-    setPendingImageSourceRef(sourceRef);
+    const currentSourceRefKeys = new Set(
+      currentLocations.flatMap((loc) =>
+        (loc.sourceRefs?.length ? loc.sourceRefs : [loc.sourceRef]).map(buildSourceRefKey)
+      )
+    );
+    const initialFieldIds = newLocation.fieldMappings
+      .filter((fm) => fm.sourceRefs.some((sr) => currentSourceRefKeys.has(buildSourceRefKey(sr))))
+      .map((fm) => fm.fieldId);
+
     setPendingTextExclusionRanges(null);
-    openExcludeModal(label, getLocationsForSourceRef(sourceRef), {
-      contentPreview: label,
-      previewSectionTitle: 'Image to exclude',
+    setPendingTextAssignRanges([]);
+    setPendingModalSelectionRange(null);
+    setPendingPreviewSourceRefs([]);
+    setPendingPreviewHasTableContent(false);
+    setPendingExcludeImageSourceRefs([sourceRef]);
+
+    setEditModalState({
+      viewModel: {
+        selectedText: label,
+        isImageContent: true,
+        currentLocations,
+        newLocation: { ...newLocation, initialFieldIds },
+        isOpen: true,
+      },
+      title: 'Edit content mapping',
+      primaryButtonLabel: 'Apply',
     });
     setHoveredMappingKeys([]);
   };
@@ -950,21 +867,6 @@ export const MappingView = ({
     return result;
   }, [allGroups, locationsByCardKey, entryBlockGraph.entries, payload.contentTypes]);
 
-  const canExcludeSelectedText = useMemo(() => {
-    const root = textSelectionRootRef.current;
-    if (!root || !selectedRange) {
-      return false;
-    }
-
-    const selectedSegments = root.querySelectorAll<HTMLElement>(
-      '[data-review-text-segment="true"]'
-    );
-
-    return Array.from(selectedSegments).some(
-      (segment) =>
-        rangeIntersectsNode(selectedRange, segment) && segment.dataset.isMapped === 'true'
-    );
-  }, [selectedRange]);
 
   return (
     <>
@@ -1058,10 +960,40 @@ export const MappingView = ({
                               padding: tokens.spacing2Xs,
                               transition: 'border-color 120ms ease, border-width 120ms ease',
                             }}>
-                            {segmentContent}
+                            <Flex flexDirection="column" gap="spacing2Xs">
+                              {group.segments.map((segment) => (
+                                <NormalizedDocumentSection
+                                  key={segment.id}
+                                  segment={segment}
+                                  highlightIndex={highlightIndex}
+                                  imageById={imageById}
+                                  listMarkers={listMarkers}
+                                  excludedSourceRefs={entryBlockGraph.excludedSourceRefs}
+                                  selectedEntryIndex={selectedEntryIndex}
+                                  hoveredMappingKeys={hoveredMappingKeys}
+                                  onSetHoveredMappingKeys={setHoveredMappingKeys}
+                                  onEditImage={handleEditImage}
+                                />
+                              ))}
+                            </Flex>
                           </Box>
                         ) : (
-                          segmentContent
+                          <Flex flexDirection="column" gap="spacingS">
+                            {group.segments.map((segment) => (
+                              <NormalizedDocumentSection
+                                key={segment.id}
+                                segment={segment}
+                                highlightIndex={highlightIndex}
+                                imageById={imageById}
+                                listMarkers={listMarkers}
+                                excludedSourceRefs={entryBlockGraph.excludedSourceRefs}
+                                selectedEntryIndex={selectedEntryIndex}
+                                hoveredMappingKeys={hoveredMappingKeys}
+                                onSetHoveredMappingKeys={setHoveredMappingKeys}
+                                onEditImage={handleEditImage}
+                              />
+                            ))}
+                          </Flex>
                         )}
                       </Box>
 
@@ -1090,10 +1022,7 @@ export const MappingView = ({
       </Flex>
 
       {selectionRectangle && !isDisabled && !isViewMode ? (
-        <EditMappingButton
-          anchorRectangle={selectionRectangle}
-          onEdit={handleAssignFromSelection}
-        />
+        <EditMappingButton anchorRectangle={selectionRectangle} onEdit={handleEditFromSelection} />
       ) : null}
 
       <EditModal

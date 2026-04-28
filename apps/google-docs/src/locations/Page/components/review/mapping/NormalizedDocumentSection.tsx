@@ -15,8 +15,7 @@ interface ReviewDocumentBodyProps {
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
-  onAssignImage: (sourceRef: ImageSourceRef, label: string) => void;
-  onExcludeImage: (sourceRef: ImageSourceRef, label: string) => void;
+  onEditImage: (sourceRef: ImageSourceRef, label: string) => void;
 }
 
 export const NormalizedDocumentSection = ({
@@ -28,8 +27,7 @@ export const NormalizedDocumentSection = ({
   selectedEntryIndex,
   hoveredMappingKeys,
   onSetHoveredMappingKeys,
-  onAssignImage,
-  onExcludeImage,
+  onEditImage,
 }: ReviewDocumentBodyProps): JSX.Element => {
   return (
     <Box style={{ flex: 2 }}>
@@ -50,8 +48,7 @@ export const NormalizedDocumentSection = ({
               selectedEntryIndex={selectedEntryIndex}
               hoveredMappingKeys={hoveredMappingKeys}
               onSetHoveredMappingKeys={onSetHoveredMappingKeys}
-              onAssignImage={onAssignImage}
-              onExcludeImage={onExcludeImage}
+              onEditImage={onEditImage}
             />
           ) : (
             <BlockRenderer
@@ -64,8 +61,7 @@ export const NormalizedDocumentSection = ({
               selectedEntryIndex={selectedEntryIndex}
               hoveredMappingKeys={hoveredMappingKeys}
               onSetHoveredMappingKeys={onSetHoveredMappingKeys}
-              onAssignImage={onAssignImage}
-              onExcludeImage={onExcludeImage}
+              onEditImage={onEditImage}
             />
           )}
         </Box>
