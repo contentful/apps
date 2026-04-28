@@ -109,7 +109,7 @@ const OverviewSection = ({
                   size="small"
                   aria-pressed={isViewingAllMappings}
                   onClick={onViewAllMappings}
-                  isDisabled={areModeButtonsDisabled || !canEditMappings}
+                  isDisabled={areModeButtonsDisabled}
                   style={toggleButtonStyle(isViewingAllMappings, true, !canEditMappings)}>
                   View only
                 </Button>

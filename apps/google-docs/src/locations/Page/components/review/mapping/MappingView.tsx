@@ -155,10 +155,6 @@ function rangeIntersectsNode(range: Range, node: Node): boolean {
   }
 }
 
-function hasPositionalDisplayLabel(label: string): boolean {
-  return /\(\d+\/\d+\)$/.test(label);
-}
-
 function getPreferredAlignmentTop(anchorNode: HTMLElement | null, containerTop: number): number {
   if (!anchorNode) {
     return 0;
