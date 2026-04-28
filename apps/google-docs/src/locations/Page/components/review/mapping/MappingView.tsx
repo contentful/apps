@@ -1008,7 +1008,28 @@ export const MappingView = ({
                 const isGroupHovered = group.mappingCards.some((card) =>
                   card.mappingKeys.some((key) => hoveredMappingKeys.includes(key))
                 );
-                const showSurface = group.showGroupedSurface;
+                const hasMappedCards = group.mappingCards.length > 0;
+                const showSurface = isViewMode ? hasMappedCards : group.showGroupedSurface;
+
+                const segmentContent = (
+                  <Flex flexDirection="column" gap="spacing2Xs">
+                    {group.segments.map((segment) => (
+                      <NormalizedDocumentSection
+                        key={segment.id}
+                        segment={segment}
+                        highlightIndex={activeHighlightIndex}
+                        imageById={imageById}
+                        listMarkers={listMarkers}
+                        excludedSourceRefs={entryBlockGraph.excludedSourceRefs}
+                        selectedEntryIndex={selectedEntryIndex}
+                        hoveredMappingKeys={hoveredMappingKeys}
+                        onSetHoveredMappingKeys={setHoveredMappingKeys}
+                        onAssignImage={handleAssignImage}
+                        onExcludeImage={handleExcludeImage}
+                      />
+                    ))}
+                  </Flex>
+                );
 
                 return (
                   <Box key={group.id}>
@@ -1027,46 +1048,14 @@ export const MappingView = ({
                                 isGroupHovered ? tokens.green600 : tokens.green500
                               }`,
                               borderRadius: tokens.borderRadiusMedium,
-                              backgroundColor: tokens.green100,
+                              backgroundColor: isViewMode ? undefined : tokens.green100,
                               padding: tokens.spacing2Xs,
                               transition: 'border-color 120ms ease, border-width 120ms ease',
                             }}>
-                            <Flex flexDirection="column" gap="spacing2Xs">
-                              {group.segments.map((segment) => (
-                                <NormalizedDocumentSection
-                                  key={segment.id}
-                                  segment={segment}
-                                  highlightIndex={activeHighlightIndex}
-                                  imageById={imageById}
-                                  listMarkers={listMarkers}
-                                  excludedSourceRefs={entryBlockGraph.excludedSourceRefs}
-                                  selectedEntryIndex={selectedEntryIndex}
-                                  hoveredMappingKeys={hoveredMappingKeys}
-                                  onSetHoveredMappingKeys={setHoveredMappingKeys}
-                                  onAssignImage={handleAssignImage}
-                                  onExcludeImage={handleExcludeImage}
-                                />
-                              ))}
-                            </Flex>
+                            {segmentContent}
                           </Box>
                         ) : (
-                          <Flex flexDirection="column" gap="spacingS">
-                            {group.segments.map((segment) => (
-                              <NormalizedDocumentSection
-                                key={segment.id}
-                                segment={segment}
-                                highlightIndex={activeHighlightIndex}
-                                imageById={imageById}
-                                listMarkers={listMarkers}
-                                excludedSourceRefs={entryBlockGraph.excludedSourceRefs}
-                                selectedEntryIndex={selectedEntryIndex}
-                                hoveredMappingKeys={hoveredMappingKeys}
-                                onSetHoveredMappingKeys={setHoveredMappingKeys}
-                                onAssignImage={handleAssignImage}
-                                onExcludeImage={handleExcludeImage}
-                              />
-                            ))}
-                          </Flex>
+                          segmentContent
                         )}
                       </Box>
 
