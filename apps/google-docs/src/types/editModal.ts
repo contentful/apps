@@ -33,7 +33,7 @@ export interface EditModalNewLocation {
   title: string;
   fieldOptions: EditModalFieldOption[];
   fieldMappings: EditModalFieldMapping[];
-  selectedFieldIds?: string[];
+  initialFieldIds: string[];
 }
 
 export interface EditModalContent {
@@ -43,6 +43,7 @@ export interface EditModalContent {
   /** Replaces the default "Selected content" heading for the preview card. */
   previewSectionTitle?: string;
   isOpen: boolean;
+  isImageContent: boolean;
   currentLocations: EditLocationOption[];
   newLocation: EditModalNewLocation;
 }

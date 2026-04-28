@@ -41,7 +41,7 @@ import {
 import { EditModal } from './edit-modals/EditModal';
 import { RichTextSelectionPreview } from './edit-modals/RichTextSelectionPreview';
 
-import { SelectionActionMenu } from './SelectionActionMenu';
+import { EditMappingButton } from './EditMappingButton';
 import { buildSourceRefKey } from './sourceRefUtils';
 import { MappingEntryCards } from './MappingEntryCards';
 import { NormalizedDocumentSection } from './NormalizedDocumentSection';
@@ -64,13 +64,9 @@ import {
   type TextExclusionRange,
 } from './entryBlockGraphExclusion';
 
-type EditModalMode = 'exclude' | 'assign' | null;
-
 interface EditModalState {
-  mode: EditModalMode;
   viewModel: EditModalContent;
   title: string;
-  locationSectionDescription: string;
   primaryButtonLabel: string;
 }
 
@@ -87,18 +83,18 @@ const EMPTY_NEW_LOCATION: EditModalNewLocation = {
   title: '',
   fieldOptions: [],
   fieldMappings: [],
+  initialFieldIds: [],
 };
 
 const EMPTY_EDIT_MODAL: EditModalState = {
-  mode: null,
   viewModel: {
     selectedText: '',
+    isImageContent: false,
     currentLocations: [],
     newLocation: EMPTY_NEW_LOCATION,
     isOpen: false,
   },
   title: '',
-  locationSectionDescription: '',
   primaryButtonLabel: '',
 };
 
@@ -152,9 +148,6 @@ export const MappingView = ({
   const [pendingTextExclusionRanges, setPendingTextExclusionRanges] = useState<
     TextExclusionRange[] | null
   >(null);
-  const [pendingImageSourceRef, setPendingImageSourceRef] = useState<ImageSourceRef | null>(null);
-  const [pendingImageReassignSourceRef, setPendingImageReassignSourceRef] =
-    useState<ImageSourceRef | null>(null);
   const [pendingExcludeImageSourceRefs, setPendingExcludeImageSourceRefs] = useState<
     ImageSourceRef[]
   >([]);
@@ -173,8 +166,6 @@ export const MappingView = ({
   const closeEditModal = () => {
     setEditModalState(EMPTY_EDIT_MODAL);
     setPendingTextExclusionRanges(null);
-    setPendingImageSourceRef(null);
-    setPendingImageReassignSourceRef(null);
     setPendingExcludeImageSourceRefs([]);
     setPendingTextReassignRanges([]);
     setPendingTextAssignRanges([]);
@@ -1054,22 +1045,17 @@ export const MappingView = ({
       </Flex>
 
       {selectionRectangle && !isDisabled ? (
-        <SelectionActionMenu
+        <EditMappingButton
           anchorRectangle={selectionRectangle}
-          onAssign={handleAssignFromSelection}
-          onExclude={handleExcludeFromSelection}
-          isMappedContent={canExcludeSelectedText}
+          onEdit={handleAssignFromSelection}
         />
       ) : null}
 
       <EditModal
         isOpen={editModalState.viewModel.isOpen}
         onClose={closeEditModal}
-        mode={editModalState.mode}
         viewModel={editModalState.viewModel}
-        isImageContent={Boolean(pendingImageReassignSourceRef) || Boolean(pendingImageSourceRef)}
         title={editModalState.title}
-        locationSectionDescription={editModalState.locationSectionDescription}
         primaryButtonLabel={editModalState.primaryButtonLabel}
         additionalContent={(() => {
           if (!pendingPreviewSourceRefs.length && !pendingPreviewHasTableContent) return undefined;
