@@ -60,6 +60,7 @@ export const useGoogleDriveOAuth = (sdk: PageAppSDK): UseGoogleDriveOAuthResult 
   const popupWindowRef = useRef<Window | null>(null);
   const popupClosePollRef = useRef<number | null>(null);
   const messageHandlerRef = useRef<((event: MessageEvent) => void) | null>(null);
+  const isCompletingOAuthRef = useRef(false);
 
   const cleanup = useCallback(() => {
     if (messageHandlerRef.current) {
@@ -119,6 +120,8 @@ export const useGoogleDriveOAuth = (sdk: PageAppSDK): UseGoogleDriveOAuthResult 
         return;
       }
 
+      isCompletingOAuthRef.current = true;
+
       try {
         await callAppActionWithResult<void>(sdk, 'completeGdocOauth', {
           code: event.data.code,
@@ -129,6 +132,7 @@ export const useGoogleDriveOAuth = (sdk: PageAppSDK): UseGoogleDriveOAuthResult 
       } catch (error) {
         console.error('Unable to complete Google OAuth connection:', error);
       } finally {
+        isCompletingOAuthRef.current = false;
         cleanup();
         setLoadingState(OAuthLoadingState.IDLE);
       }
@@ -167,6 +171,10 @@ export const useGoogleDriveOAuth = (sdk: PageAppSDK): UseGoogleDriveOAuthResult 
 
       popupClosePollRef.current = window.setInterval(() => {
         if (popupWindowRef.current?.closed) {
+          if (isCompletingOAuthRef.current) {
+            return;
+          }
+
           cleanup();
           setLoadingState(OAuthLoadingState.IDLE);
         }
@@ -214,6 +222,7 @@ export const useGoogleDriveOAuth = (sdk: PageAppSDK): UseGoogleDriveOAuthResult 
 
     return () => {
       isMounted = false;
+      isCompletingOAuthRef.current = false;
       cleanup();
     };
   }, [cleanup, refreshOAuthStatus]);
