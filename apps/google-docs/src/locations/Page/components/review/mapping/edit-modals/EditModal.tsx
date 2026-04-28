@@ -12,10 +12,7 @@ interface EditModalProps {
   title: string;
   primaryButtonLabel: string;
   additionalContent?: ReactNode;
-  onConfirmPrimary?: (details: {
-    selectedLocationIds: string[];
-    selectedFieldIds: Record<string, string[]>;
-  }) => void;
+  onConfirmPrimary?: (selectedFieldIds: string[]) => void;
 }
 
 export const EditModal = ({
@@ -54,12 +51,7 @@ export const EditModal = ({
   };
 
   const handlePrimaryAction = () => {
-    onConfirmPrimary?.({
-      selectedLocationIds: [],
-      selectedFieldIds: {
-        [viewModel.newLocation.id]: [...selectedFieldIds],
-      },
-    });
+    onConfirmPrimary?.([...selectedFieldIds]);
   };
 
   const previewSectionTitle = viewModel.previewSectionTitle ?? 'Selected content';
