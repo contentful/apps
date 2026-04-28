@@ -109,12 +109,21 @@ export interface MappingReviewSuspendPayload {
   contentTypes: WorkflowContentType[];
 }
 
+export interface NeedsReauthSuspendPayload {
+  reason?: string;
+  suspendStepId: 'needs-google-reauth';
+  documentId: string;
+}
+
 export type WorkflowRunResult =
   | {
       status: RunStatus.PENDING_REVIEW;
       runId: string;
       messages: AgentRunMessage[];
-      suspendPayload: TabsImagesSuspendPayload | MappingReviewSuspendPayload;
+      suspendPayload:
+        | TabsImagesSuspendPayload
+        | MappingReviewSuspendPayload
+        | NeedsReauthSuspendPayload;
     }
   | {
       status: RunStatus.COMPLETED;
@@ -129,4 +138,5 @@ export interface ResumePayload {
   editedNormalizedDocument?: NormalizedDocument;
   entryBlockGraph?: EntryBlockGraph;
   cancelled?: true;
+  oauthToken?: string;
 }

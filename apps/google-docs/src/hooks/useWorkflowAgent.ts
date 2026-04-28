@@ -8,6 +8,7 @@ import {
 } from '../utils/constants/agent';
 import {
   MappingReviewSuspendPayload,
+  NeedsReauthSuspendPayload,
   ResumePayload,
   TabsImagesSuspendPayload,
   CompletedWorkflowPayload,
@@ -111,7 +112,11 @@ const getRunErrorMessage = (runData: AgentRunData): string => {
 
 const getSuspendPayload = (
   runData: AgentRunData
-): TabsImagesSuspendPayload | MappingReviewSuspendPayload | undefined => {
+):
+  | TabsImagesSuspendPayload
+  | MappingReviewSuspendPayload
+  | NeedsReauthSuspendPayload
+  | undefined => {
   return runData.metadata?.suspendPayload;
 };
 
