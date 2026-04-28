@@ -9,7 +9,7 @@ import Splitter from '../mainpage/Splitter';
 
 interface OverviewProps {
   payload: MappingReviewSuspendPayload;
-  selectedEntryIndex: number;
+  selectedEntryIndex: number | null;
   onSelectEntryIndex: (index: number) => void;
   reviewMode: 'view' | 'edit';
   onReviewModeChange: (mode: 'view' | 'edit') => void;

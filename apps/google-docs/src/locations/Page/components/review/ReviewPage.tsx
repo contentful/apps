@@ -31,7 +31,7 @@ export const ReviewPage = ({
   onExitReview,
 }: ReviewPageProps) => {
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
-  const [selectedEntryIndex, setSelectedEntryIndex] = useState<number>(0);
+  const [selectedEntryIndex, setSelectedEntryIndex] = useState<number | null>(null);
   const [reviewMode, setReviewMode] = useState<'view' | 'edit'>('view');
   const [isCancelling, setIsCancelling] = useState(false);
   const [isCreatePending, setIsCreatePending] = useState(false);
@@ -177,7 +177,10 @@ export const ReviewPage = ({
               setReviewMode('edit');
             }}
             reviewMode={reviewMode}
-            onReviewModeChange={setReviewMode}
+            onReviewModeChange={(mode) => {
+              setReviewMode(mode);
+              if (mode === 'view') setSelectedEntryIndex(null);
+            }}
             ctaLabel={hasCreatedEntries ? 'View entries' : 'Create entries'}
             onCtaClick={handleCreateOrViewEntries}
             isCtaLoading={isCreatePending}
