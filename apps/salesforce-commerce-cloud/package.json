@@ -31,6 +31,7 @@
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEV_TESTING_ORG_ID} --definition-id 66J3nYAMa13A1O7E8MDDMu --token ${TEST_CMA_TOKEN}"
   },
   "devDependencies": {
+    "@contentful/node-apps-toolkit": "^3.16.1",
     "@testing-library/react": "12.1.5",
     "@types/node": "18.0.3",
     "@types/react": "17.0.47",

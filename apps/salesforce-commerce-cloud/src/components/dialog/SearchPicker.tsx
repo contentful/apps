@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 // Contentful Imports
 import { Modal } from '@contentful/f36-components';
-import { useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK, useCMA } from '@contentful/react-apps-toolkit';
 import { DialogAppSDK } from '@contentful/app-sdk';
 
 // Local Imports
@@ -10,7 +10,6 @@ import SfccClient from '../../utils/Sfcc';
 import SearchBar from './SearchBar';
 import ProductSearchResults from './ProductSearchResults';
 import CategorySearchResults from './CategorySearchResults';
-import { AppInstallationParameters } from '../../locations/ConfigScreen';
 import { DialogInvocationParameters } from '../../locations/Dialog';
 
 export const headerHeight = 114;
@@ -19,7 +18,7 @@ export const height = window.outerHeight - window.outerHeight * 0.3 - headerHeig
 
 const SearchPicker = () => {
   const sdk = useSDK<DialogAppSDK>();
-  const installParameters = sdk.parameters.installation as AppInstallationParameters;
+  const cma = useCMA();
   const { selectMultiple, fieldType, fieldValue, currentData } = sdk.parameters
     .invocation as DialogInvocationParameters;
 
@@ -85,7 +84,7 @@ const SearchPicker = () => {
 
   useEffect(() => {
     const timeOutId = setTimeout(() => {
-      const client = new SfccClient(installParameters);
+      const client = new SfccClient(cma, sdk.ids);
       const fetchResults =
         fieldType === 'product' ? client.searchProducts : client.searchCategories;
       if (query.length >= 3) {
@@ -101,7 +100,7 @@ const SearchPicker = () => {
       }
     }, 500);
     return () => clearTimeout(timeOutId);
-  }, [fieldType, query, installParameters]);
+  }, [fieldType, query]);
 
   const searchBarProps = {
     isLoading: queryIsFetching,

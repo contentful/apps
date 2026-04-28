@@ -1,193 +1,60 @@
-import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
-import { AppInstallationParameters } from '../locations/ConfigScreen';
+import { BaseAppSDK, CMAClient } from '@contentful/app-sdk';
 
-interface SFCCAdminToken {
-  access_token: string;
-  expires_in: number;
-  scope: string;
-  token_type: string;
+const FUNCTION_ID = 'sfcc-api';
+
+interface HaaParams {
+  appActionId: string;
+  environmentId: string;
+  spaceId: string;
+  appDefinitionId: string;
 }
 
-interface TokenProps {
-  tokenInfo: SFCCAdminToken;
-  expiry: Date;
+function toCallParams(ids: BaseAppSDK['ids']): HaaParams {
+  return {
+    appActionId: FUNCTION_ID,
+    environmentId: ids.environment,
+    spaceId: ids.space,
+    appDefinitionId: ids.app!,
+  };
+}
+
+async function callFunction<T>(
+  cma: CMAClient,
+  ids: BaseAppSDK['ids'],
+  body: Record<string, unknown>
+): Promise<T> {
+  const { response } = await cma.appActionCall.createWithResponse(toCallParams(ids) as any, {
+    parameters: body,
+  });
+  const json = JSON.parse(response.body) as
+    | { ok: true; data: T }
+    | { ok: false; error: { message: string } };
+  if (!json.ok) {
+    throw new Error(json.error.message);
+  }
+  return json.data;
 }
 
 class SfccClient {
-  protected client!: AxiosInstance;
-  protected parameters: AppInstallationParameters;
-  protected accessToken: TokenProps | undefined;
+  private cma: CMAClient;
+  private ids: BaseAppSDK['ids'];
 
-  constructor(parameters: AppInstallationParameters) {
-    this.parameters = parameters;
-
-    this.client = axios.create({
-      baseURL: `https://${parameters.shortCode}.api.commercecloud.salesforce.com`,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    this.client.interceptors.request.use(this.interceptor, (error) => Promise.reject(error));
+  constructor(cma: CMAClient, ids: BaseAppSDK['ids']) {
+    this.cma = cma;
+    this.ids = ids;
   }
 
-  private interceptor = (config: InternalAxiosRequestConfig) => {
-    return this.useAccessToken(config);
-  };
+  fetchProduct = (productId: string) =>
+    callFunction(this.cma, this.ids, { type: 'fetchProduct', productId });
 
-  private fetchAccessToken = async () => {
-    const authToken = window.btoa(`${this.parameters.clientId}:${this.parameters.clientSecret}`);
-    const tenantId = this.parameters.organizationId.split('_').slice(2).join('_');
-    const now = new Date();
+  searchProducts = (query?: string) =>
+    callFunction<unknown[]>(this.cma, this.ids, { type: 'searchProducts', query });
 
-    const { data } = await axios.post(
-      'https://account.demandware.com/dwsso/oauth2/access_token',
-      {
-        grant_type: 'client_credentials',
-        scope: `SALESFORCE_COMMERCE_API:${tenantId} sfcc.catalogs sfcc.products`,
-      },
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          Authorization: `Basic ${authToken}`,
-        },
-      }
-    );
+  searchCategories = (query?: string) =>
+    callFunction<unknown[]>(this.cma, this.ids, { type: 'searchCategories', query });
 
-    return {
-      tokenInfo: data,
-      expiry: new Date(now.getTime() + data.expires_in * 1000),
-    };
-  };
-
-  private useAccessToken = async (config: InternalAxiosRequestConfig) => {
-    const now = new Date();
-
-    const storageToken = localStorage.getItem('sfcc-token');
-
-    let accessToken;
-    if (!storageToken) {
-      accessToken = await this.fetchAccessToken();
-      localStorage.setItem('sfcc-token', JSON.stringify(accessToken));
-    } else {
-      accessToken = JSON.parse(storageToken) as TokenProps;
-      const expiry = new Date(accessToken.expiry);
-
-      if (now >= expiry) {
-        accessToken = await this.fetchAccessToken();
-        localStorage.setItem('sfcc-token', JSON.stringify(accessToken));
-      }
-    }
-
-    config.headers.set('Authorization', `Bearer ${accessToken.tokenInfo.access_token}`);
-    return config;
-  };
-
-  fetchProduct = async (productId: string) => {
-    const { data: product } = await this.client.get(
-      `/product/products/v1/organizations/${this.parameters.organizationId}/products/${productId}`,
-      {
-        params: { siteId: this.parameters.siteId },
-      }
-    );
-
-    return product;
-  };
-
-  searchProducts = async (query?: string) => {
-    const { organizationId } = this.parameters;
-
-    const data: any = {
-      query: {
-        boolQuery: {
-          must: [
-            {
-              termQuery: {
-                fields: ['type'],
-                operator: 'is',
-                values: ['master'],
-              },
-            },
-          ],
-        },
-      },
-      sorts: [
-        {
-          field: 'name',
-          sortOrder: 'asc',
-        },
-      ],
-    };
-
-    if (query?.length) {
-      data.query.boolQuery.must.push({
-        textQuery: {
-          fields: ['id', 'name'],
-          searchPhrase: query,
-        },
-      });
-    }
-
-    const { data: searchResults } = await this.client.post(
-      `/product/products/v1/organizations/${organizationId}/product-search`,
-      data,
-      {
-        params: { siteId: this.parameters.siteId },
-      }
-    );
-
-    return searchResults.hits?.length ? searchResults.hits : [];
-  };
-
-  public searchCategories = async (query?: string) => {
-    const { organizationId } = this.parameters;
-
-    const data: any = {
-      query: {
-        boolQuery: {
-          must: [
-            {
-              termQuery: {
-                fields: ['online'],
-                operator: 'is',
-                values: [true],
-              },
-            },
-          ],
-        },
-      },
-      sorts: [
-        {
-          field: 'name',
-          sortOrder: 'asc',
-        },
-      ],
-    };
-
-    if (query?.length) {
-      data.query.boolQuery.must.push({
-        textQuery: {
-          fields: ['id', 'name'],
-          searchPhrase: query,
-        },
-      });
-    }
-
-    const { data: searchResults } = await this.client.post(
-      `/product/catalogs/v1/organizations/${organizationId}/category-search`,
-      data
-    );
-
-    return searchResults.hits?.length ? searchResults.hits : [];
-  };
-
-  public fetchCategory = async (catalogId: string, categoryId: string) => {
-    const { data: category } = await this.client.get(
-      `/product/catalogs/v1/organizations/${this.parameters.organizationId}/catalogs/${catalogId}/categories/${categoryId}`
-    );
-
-    return category;
-  };
+  fetchCategory = (catalogId: string, categoryId: string) =>
+    callFunction(this.cma, this.ids, { type: 'fetchCategory', catalogId, categoryId });
 }
 
 export default SfccClient;

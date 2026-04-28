@@ -1,0 +1,16 @@
+{
+  "functions": [
+    {
+      "id": "sfcc-api",
+      "name": "Salesforce Commerce Cloud API",
+      "description": "Proxies SFCC product and category API calls server-side to avoid CORS restrictions.",
+      "path": "build/functions/index.js",
+      "entryFile": "functions/index.ts",
+      "allowNetworks": [
+        "account.demandware.com",
+        "*.api.commercecloud.salesforce.com"
+      ],
+      "accepts": ["appaction.call"]
+    }
+  ]
+}
