@@ -32,6 +32,7 @@ export const ReviewPage = ({
 }: ReviewPageProps) => {
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
   const [selectedEntryIndex, setSelectedEntryIndex] = useState<number>(0);
+  const [reviewMode, setReviewMode] = useState<'view' | 'edit'>('view');
   const [isCancelling, setIsCancelling] = useState(false);
   const [isCreatePending, setIsCreatePending] = useState(false);
   const [createdEntries, setCreatedEntries] = useState<EntryProps[] | null>(null);
@@ -171,7 +172,12 @@ export const ReviewPage = ({
           <OverviewSection
             payload={reviewPayload}
             selectedEntryIndex={selectedEntryIndex}
-            onSelectEntryIndex={setSelectedEntryIndex}
+            onSelectEntryIndex={(index) => {
+              setSelectedEntryIndex(index);
+              setReviewMode('edit');
+            }}
+            reviewMode={reviewMode}
+            onReviewModeChange={setReviewMode}
             ctaLabel={hasCreatedEntries ? 'View entries' : 'Create entries'}
             onCtaClick={handleCreateOrViewEntries}
             isCtaLoading={isCreatePending}
@@ -182,6 +188,7 @@ export const ReviewPage = ({
             onEntryBlockGraphChange={setEntryBlockGraph}
             selectedEntryIndex={selectedEntryIndex}
             isDisabled={isMappingDisabled}
+            mode={reviewMode}
           />
         </Flex>
       </Layout.Body>
