@@ -1,9 +1,6 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { AppInstallationParameters } from '../locations/ConfigScreen';
 
-// console.log(import.meta.env.VITE_PROXY_URL)
-const proxyUrl = import.meta.env.VITE_PROXY_URL || 'https://thawing-shore-22303.herokuapp.com/';
-
 interface SFCCAdminToken {
   access_token: string;
   expires_in: number;
@@ -25,7 +22,7 @@ class SfccClient {
     this.parameters = parameters;
 
     this.client = axios.create({
-      baseURL: proxyUrl,
+      baseURL: `https://${parameters.shortCode}.api.commercecloud.salesforce.com`,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -35,10 +32,6 @@ class SfccClient {
   }
 
   private interceptor = (config: InternalAxiosRequestConfig) => {
-    // Add basic proxy parameters to our URL
-    config.url = `/sfcc/${this.parameters.shortCode}` + config.url;
-
-    // Fetch access token and add to configuration
     return this.useAccessToken(config);
   };
 
