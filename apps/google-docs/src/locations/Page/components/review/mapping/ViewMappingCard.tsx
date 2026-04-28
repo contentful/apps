@@ -30,10 +30,10 @@ export const ViewMappingCard = ({ card }: ViewMappingCardProps) => (
   <Box
     data-testid={`view-mapping-card-${card.key}`}
     style={{
-      border: `1px solid ${tokens.gray300}`,
+      border: `1px solid ${tokens.green500}`,
       borderRadius: tokens.borderRadiusMedium,
       padding: tokens.spacing2Xs,
-      backgroundColor: tokens.colorWhite,
+      backgroundColor: tokens.green100,
     }}>
     <Text as="p" marginBottom="none" style={rowTextStyle}>
       <Text as="span" fontColor="gray600" marginRight="spacingXs" style={rowTextStyle}>
