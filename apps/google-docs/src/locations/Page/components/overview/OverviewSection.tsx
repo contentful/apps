@@ -67,16 +67,18 @@ const OverviewSection = ({
               <ButtonGroup variant="spaced">
                 <Button
                   size="small"
-                  variant={reviewMode === 'view' ? 'primary' : 'secondary'}
+                  variant="secondary"
                   onClick={() => onReviewModeChange('view')}
-                  aria-pressed={reviewMode === 'view'}>
+                  aria-pressed={reviewMode === 'view'}
+                  style={reviewMode === 'view' ? { fontWeight: 600 } : undefined}>
                   View
                 </Button>
                 <Button
                   size="small"
-                  variant={reviewMode === 'edit' ? 'primary' : 'secondary'}
+                  variant="secondary"
                   onClick={() => onReviewModeChange('edit')}
-                  aria-pressed={reviewMode === 'edit'}>
+                  aria-pressed={reviewMode === 'edit'}
+                  style={reviewMode === 'edit' ? { fontWeight: 600 } : undefined}>
                   Edit
                 </Button>
               </ButtonGroup>
