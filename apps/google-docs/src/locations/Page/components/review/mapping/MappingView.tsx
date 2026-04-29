@@ -809,51 +809,61 @@ export const MappingView = ({
                   const viewCards = viewCardsByGroup[group.id] ?? [];
                   return (
                     <Box key={group.id} data-testid={`display-group-layout-${group.id}`} ref={setGroupLayoutRef(group.id)}>
-                      <Flex flexDirection="column" gap="spacing2Xs">
-                        {viewCards.map((card) => {
-                          const isCardHovered = card.mappingKeys.some((k) => hoveredMappingKeys.includes(k));
-                          return (
-                            <Flex key={card.key} gap="spacingM" alignItems="stretch">
+                      <Flex gap="spacingM" alignItems="stretch">
+                        {/* Document content rendered once; per-card outlines overlaid absolutely */}
+                        <Box
+                          style={{ flex: 2, position: 'relative' }}
+                          onMouseEnter={() => {
+                            if (viewCards.length === 1) setHoveredMappingKeys(viewCards[0]!.mappingKeys);
+                          }}
+                          onMouseLeave={() => setHoveredMappingKeys([])}>
+                          <Flex flexDirection="column" gap="spacing2Xs" style={{ padding: tokens.spacing2Xs }}>
+                            {group.segments.map((segment) => (
+                              <NormalizedDocumentSection
+                                key={segment.id}
+                                segment={segment}
+                                highlightIndex={activeHighlightIndex}
+                                imageById={imageById}
+                                listMarkers={listMarkers}
+                                excludedSourceRefs={entryBlockGraph.excludedSourceRefs}
+                                selectedEntryIndex={selectedEntryIndex}
+                                hoveredMappingKeys={hoveredMappingKeys}
+                                onSetHoveredMappingKeys={setHoveredMappingKeys}
+                                onEditImage={handleEditImage}
+                              />
+                            ))}
+                          </Flex>
+                          {viewCards.map((card) => {
+                            const isCardHovered = card.mappingKeys.some((k) => hoveredMappingKeys.includes(k));
+                            return (
                               <Box
-                                style={{ flex: 2 }}
+                                key={card.key}
+                                style={{
+                                  position: 'absolute',
+                                  inset: 0,
+                                  border: `${isCardHovered ? 2 : 1}px solid ${isCardHovered ? tokens.green600 : tokens.green500}`,
+                                  borderRadius: tokens.borderRadiusMedium,
+                                  pointerEvents: 'none',
+                                  transition: 'border-color 120ms ease, border-width 120ms ease',
+                                }}
+                              />
+                            );
+                          })}
+                        </Box>
+                        <Flex flexDirection="column" gap="spacing2Xs" style={{ flex: '0 0 280px', maxWidth: 280 }}>
+                          {viewCards.map((card) => {
+                            const isCardHovered = card.mappingKeys.some((k) => hoveredMappingKeys.includes(k));
+                            return (
+                              <ViewMappingCard
+                                key={card.key}
+                                card={card}
+                                isHovered={isCardHovered}
                                 onMouseEnter={() => setHoveredMappingKeys(card.mappingKeys)}
-                                onMouseLeave={() => setHoveredMappingKeys([])}>
-                                <Box
-                                  style={{
-                                    border: `${isCardHovered ? 2 : 1}px solid ${isCardHovered ? tokens.green600 : tokens.green500}`,
-                                    borderRadius: tokens.borderRadiusMedium,
-                                    padding: tokens.spacing2Xs,
-                                    transition: 'border-color 120ms ease, border-width 120ms ease',
-                                  }}>
-                                  <Flex flexDirection="column" gap="spacing2Xs">
-                                    {group.segments.map((segment) => (
-                                      <NormalizedDocumentSection
-                                        key={segment.id}
-                                        segment={segment}
-                                        highlightIndex={activeHighlightIndex}
-                                        imageById={imageById}
-                                        listMarkers={listMarkers}
-                                        excludedSourceRefs={entryBlockGraph.excludedSourceRefs}
-                                        selectedEntryIndex={selectedEntryIndex}
-                                        hoveredMappingKeys={hoveredMappingKeys}
-                                        onSetHoveredMappingKeys={setHoveredMappingKeys}
-                                        onEditImage={handleEditImage}
-                                      />
-                                    ))}
-                                  </Flex>
-                                </Box>
-                              </Box>
-                              <Box style={{ flex: '0 0 280px', maxWidth: 280 }}>
-                                <ViewMappingCard
-                                  card={card}
-                                  isHovered={isCardHovered}
-                                  onMouseEnter={() => setHoveredMappingKeys(card.mappingKeys)}
-                                  onMouseLeave={() => setHoveredMappingKeys([])}
-                                />
-                              </Box>
-                            </Flex>
-                          );
-                        })}
+                                onMouseLeave={() => setHoveredMappingKeys([])}
+                              />
+                            );
+                          })}
+                        </Flex>
                       </Flex>
                     </Box>
                   );
