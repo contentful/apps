@@ -37,14 +37,11 @@ export function ReviewImageAssetCard({
 
   const imageHeight = size === 'small' ? '180px' : '280px';
 
-  const borderColor =
-    isExcluded && !isHighlighted
-      ? tokens.gray300
-      : !isHighlighted
-      ? tokens.gray300
-      : hovered
-      ? tokens.green600
-      : tokens.green500;
+  const backgroundColor = isHighlighted
+    ? hovered
+      ? tokens.green300
+      : tokens.green100
+    : tokens.gray100;
 
   return (
     <Box
@@ -57,9 +54,9 @@ export function ReviewImageAssetCard({
         maxWidth: '100%',
         verticalAlign: 'top',
         borderRadius: tokens.borderRadiusMedium,
-        border: `1px solid ${borderColor}`,
-        backgroundColor: isHighlighted ? tokens.green100 : tokens.gray100,
-        transition: 'border-color 120ms ease',
+        border: `1px solid ${isHighlighted ? 'transparent' : tokens.gray300}`,
+        backgroundColor,
+        transition: 'background-color 120ms ease',
         overflow: 'hidden',
         boxSizing: 'border-box',
         padding: tokens.spacingXs,
