@@ -260,9 +260,6 @@ export const BlockRenderer = ({
 
 // ─── TableRenderer ───────────────────────────────────────────────────────────
 
-import type { ViewMappingCardData } from './ViewMappingCard';
-import { ViewMappingCard } from './ViewMappingCard';
-
 interface TableRendererProps {
   segmentId: string;
   table: NormalizedDocumentTable;
@@ -275,8 +272,6 @@ interface TableRendererProps {
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
   isViewMode?: boolean;
-  /** Cards keyed by rowId for inline rendering in view mode. */
-  cardsByRowId?: Record<string, ViewMappingCardData[]>;
   onEditImage: (
     sourceRef: {
       type: 'tableImage';
@@ -405,7 +400,6 @@ export const TableRenderer = ({
   hoveredMappingKeys,
   onSetHoveredMappingKeys,
   isViewMode = false,
-  cardsByRowId,
   onEditImage,
 }: TableRendererProps) => {
   const borderIndex = fullHighlightIndex ?? highlightIndex;
@@ -426,8 +420,6 @@ export const TableRenderer = ({
     return keys;
   };
 
-  const hasCardColumn = isViewMode && cardsByRowId !== undefined;
-
   return (
     <Table>
       {table.headers.length > 0 && (
@@ -436,87 +428,63 @@ export const TableRenderer = ({
             {table.headers.map((header, headerIndex) => (
               <TableCell key={`${table.id}-header-${headerIndex}`}>{header}</TableCell>
             ))}
-            {hasCardColumn && <TableCell key="card-column-header" />}
           </TableRow>
         </TableHead>
       )}
       <TableBody>
-        {table.rows.map((row) => {
-          const rowCards = hasCardColumn ? (cardsByRowId[row.id] ?? []) : [];
-          return (
-            <TableRow
-              key={row.id}
-              id={`row:${table.id}:${row.id}`}
-              data-testid={`table-row-${row.id}`}>
-              {row.cells.map((cell) => {
-                const cellMappingKeys = isViewMode ? getCellMappingKeys(row.id, cell.id) : [];
-                const isCellMapped = cellMappingKeys.length > 0;
-                const isCellHovered = isCellMapped && cellMappingKeys.some((k) => hoveredMappingKeys.includes(k));
-                return (
-                  <TableCell
-                    key={cell.id}
-                    data-testid={`table-cell-${cell.id}`}
-                    onMouseEnter={isViewMode && isCellMapped ? () => onSetHoveredMappingKeys(cellMappingKeys) : undefined}
-                    onMouseLeave={isViewMode && isCellMapped ? () => onSetHoveredMappingKeys([]) : undefined}
-                    style={{
-                      backgroundColor: 'transparent',
-                      verticalAlign: 'top',
-                      ...(isViewMode && isCellMapped
-                        ? {
-                            border: `${isCellHovered ? 2 : 1}px solid ${isCellHovered ? tokens.green600 : tokens.green500}`,
-                            borderRadius: tokens.borderRadiusMedium,
-                            transition: 'border-color 120ms ease, border-width 120ms ease',
-                          }
-                        : {}),
-                    }}>
-                    <Flex flexDirection="column" gap="spacing2Xs">
-                      {cell.parts.map((part) => {
-                        const partKey = [table.id, row.id, cell.id, part.id].join(':');
-                        return (
-                          <Box key={part.id}>
-                            <TablePartRenderer
-                              segmentId={segmentId}
-                              tableId={table.id}
-                              rowId={row.id}
-                              cellId={cell.id}
-                              part={part}
-                              visibleHighlights={getVisiblePartHighlights(partKey)}
-                              imageById={imageById}
-                              excludedSourceRefs={excludedSourceRefs}
-                              hoveredMappingKeys={hoveredMappingKeys}
-                              onSetHoveredMappingKeys={onSetHoveredMappingKeys}
-                              onEditImage={onEditImage}
-                            />
-                          </Box>
-                        );
-                      })}
-                    </Flex>
-                  </TableCell>
-                );
-              })}
-              {hasCardColumn && (
+        {table.rows.map((row) => (
+          <TableRow
+            key={row.id}
+            id={`row:${table.id}:${row.id}`}
+            data-testid={`table-row-${row.id}`}>
+            {row.cells.map((cell) => {
+              const cellMappingKeys = isViewMode ? getCellMappingKeys(row.id, cell.id) : [];
+              const isCellMapped = cellMappingKeys.length > 0;
+              const isCellHovered = isCellMapped && cellMappingKeys.some((k) => hoveredMappingKeys.includes(k));
+              return (
                 <TableCell
-                  key="card-column"
-                  style={{ backgroundColor: 'transparent', verticalAlign: 'top', width: 280, minWidth: 280 }}>
+                  key={cell.id}
+                  data-testid={`table-cell-${cell.id}`}
+                  onMouseEnter={isViewMode && isCellMapped ? () => onSetHoveredMappingKeys(cellMappingKeys) : undefined}
+                  onMouseLeave={isViewMode && isCellMapped ? () => onSetHoveredMappingKeys([]) : undefined}
+                  style={{
+                    backgroundColor: 'transparent',
+                    verticalAlign: 'top',
+                    ...(isViewMode && isCellMapped
+                      ? {
+                          border: `${isCellHovered ? 2 : 1}px solid ${isCellHovered ? tokens.green600 : tokens.green500}`,
+                          borderRadius: tokens.borderRadiusMedium,
+                          transition: 'border-color 120ms ease, border-width 120ms ease',
+                        }
+                      : {}),
+                  }}>
                   <Flex flexDirection="column" gap="spacing2Xs">
-                    {rowCards.map((card) => {
-                      const isCardHovered = card.mappingKeys.some((k) => hoveredMappingKeys.includes(k));
+                    {cell.parts.map((part) => {
+                      const partKey = [table.id, row.id, cell.id, part.id].join(':');
                       return (
-                        <ViewMappingCard
-                          key={card.key}
-                          card={card}
-                          isHovered={isCardHovered}
-                          onMouseEnter={() => onSetHoveredMappingKeys(card.mappingKeys)}
-                          onMouseLeave={() => onSetHoveredMappingKeys([])}
-                        />
+                        <Box key={part.id}>
+                          <TablePartRenderer
+                            segmentId={segmentId}
+                            tableId={table.id}
+                            rowId={row.id}
+                            cellId={cell.id}
+                            part={part}
+                            visibleHighlights={getVisiblePartHighlights(partKey)}
+                            imageById={imageById}
+                            excludedSourceRefs={excludedSourceRefs}
+                            hoveredMappingKeys={hoveredMappingKeys}
+                            onSetHoveredMappingKeys={onSetHoveredMappingKeys}
+                            onEditImage={onEditImage}
+                          />
+                        </Box>
                       );
                     })}
                   </Flex>
                 </TableCell>
-              )}
-            </TableRow>
-          );
-        })}
+              );
+            })}
+          </TableRow>
+        ))}
       </TableBody>
     </Table>
   );

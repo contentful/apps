@@ -5,7 +5,6 @@ import type { MappingHighlightIndex } from './buildHighlights';
 import type { ListMarker } from './buildListMarkers';
 import type { DocSegment } from './buildDocument';
 import { BlockRenderer, TableRenderer } from './documentRenderers';
-import type { ViewMappingCardData } from './ViewMappingCard';
 
 interface ReviewDocumentBodyProps {
   segment: DocSegment;
@@ -19,8 +18,6 @@ interface ReviewDocumentBodyProps {
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
   isViewMode?: boolean;
-  /** Cards keyed by rowId, passed to TableRenderer for inline card column in view mode. */
-  cardsByRowId?: Record<string, ViewMappingCardData[]>;
   onEditImage: (sourceRef: ImageSourceRef, label: string) => void;
 }
 
@@ -35,7 +32,6 @@ export const NormalizedDocumentSection = ({
   hoveredMappingKeys,
   onSetHoveredMappingKeys,
   isViewMode = false,
-  cardsByRowId,
   onEditImage,
 }: ReviewDocumentBodyProps): JSX.Element => {
   return (
@@ -59,7 +55,6 @@ export const NormalizedDocumentSection = ({
               hoveredMappingKeys={hoveredMappingKeys}
               onSetHoveredMappingKeys={onSetHoveredMappingKeys}
               isViewMode={isViewMode}
-              cardsByRowId={cardsByRowId}
               onEditImage={onEditImage}
             />
           ) : (

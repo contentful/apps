@@ -8,8 +8,6 @@ export interface ViewMappingCardData {
   entryName: string;
   fieldName: string;
   fieldType: string;
-  /** Row ID this card is associated with, if it maps to a specific table row. */
-  rowId?: string;
 }
 
 interface ViewMappingCardProps {
