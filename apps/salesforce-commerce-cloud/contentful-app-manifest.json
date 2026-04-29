@@ -10,7 +10,51 @@
         "*.demandware.com",
         "*.salesforce.com"
       ],
-      "accepts": ["appaction.call"]
+      "accepts": [
+        "appaction.call"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "sfccApi",
+      "name": "SFCC API",
+      "description": "Invokes the sfccApi function to proxy SFCC product and category API calls.",
+      "type": "function-invocation",
+      "functionId": "sfccApi",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "type",
+          "name": "Action Type",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "query",
+          "name": "Query",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "productId",
+          "name": "Product ID",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "catalogId",
+          "name": "Catalog ID",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "categoryId",
+          "name": "Category ID",
+          "type": "Symbol",
+          "required": false
+        }
+      ]
     }
   ]
 }
