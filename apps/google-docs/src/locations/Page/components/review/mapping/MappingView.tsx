@@ -110,12 +110,6 @@ function rangeIntersectsNode(range: Range, node: Node): boolean {
   }
 }
 
-const EMPTY_HIGHLIGHT_INDEX: MappingHighlightIndex = {
-  blockHighlights: {},
-  tablePartHighlights: {},
-  tableHighlights: {},
-};
-
 export const MappingView = ({
   payload,
   entryBlockGraph,
@@ -746,6 +740,7 @@ export const MappingView = ({
           entryName,
           fieldName: card.fieldName,
           fieldType,
+          mappingKeys: card.mappingKeys,
         });
       });
 
@@ -799,7 +794,7 @@ export const MappingView = ({
 
             <Flex flexDirection="column" gap="spacingS">
               {(groupsByTab[tab.id] ?? []).map((group) => {
-                const activeHighlightIndex = isViewMode ? EMPTY_HIGHLIGHT_INDEX : highlightIndex;
+                const activeHighlightIndex = highlightIndex;
                 const isGroupHovered = group.mappingCards.some((card) =>
                   card.mappingKeys.some((key) => hoveredMappingKeys.includes(key))
                 );
@@ -948,15 +943,25 @@ export const MappingView = ({
                           </Flex>
                         )}
                       </Box>
-                      <MappingEntryCards
-                        groupId={group.id}
-                        mappingCards={group.mappingCards}
-                        cardOffsetsByGroup={cardOffsetsByGroup}
-                        cardHeightsByGroup={cardHeightsByGroup}
-                        hoveredMappingKeys={hoveredMappingKeys}
-                        onSetHoveredMappingKeys={setHoveredMappingKeys}
-                        setCardWrapperRef={setCardWrapperRef}
-                      />
+
+                      {isViewMode ? (
+                        <ViewMappingRail
+                          segmentId={group.id}
+                          cards={viewCardsByGroup[group.id] ?? []}
+                          hoveredMappingKeys={hoveredMappingKeys}
+                          onSetHoveredMappingKeys={setHoveredMappingKeys}
+                        />
+                      ) : (
+                        <MappingEntryCards
+                          groupId={group.id}
+                          mappingCards={group.mappingCards}
+                          cardOffsetsByGroup={cardOffsetsByGroup}
+                          cardHeightsByGroup={cardHeightsByGroup}
+                          hoveredMappingKeys={hoveredMappingKeys}
+                          onSetHoveredMappingKeys={setHoveredMappingKeys}
+                          setCardWrapperRef={setCardWrapperRef}
+                        />
+                      )}
                     </Flex>
                   </Box>
                 );
