@@ -821,7 +821,7 @@ export const MappingView = ({
                                 ? `1px solid ${tokens.green500}`
                                 : `${isGroupHovered ? 2 : 1}px solid ${isGroupHovered ? tokens.green600 : tokens.green500}`,
                               borderRadius: tokens.borderRadiusMedium,
-                              backgroundColor: tokens.green100,
+                              backgroundColor: isViewMode ? undefined : tokens.green100,
                               padding: tokens.spacing2Xs,
                               transition: isViewMode ? undefined : 'border-color 120ms ease, border-width 120ms ease',
                             }}>
