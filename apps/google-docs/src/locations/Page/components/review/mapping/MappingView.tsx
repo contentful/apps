@@ -739,6 +739,7 @@ export const MappingView = ({
           ? displayType(field.type ?? '', field.linkType, field.items)
           : location.fieldType;
 
+        const tableSourceRef = (location.sourceRefs ?? [location.sourceRef]).find(isTableTextSourceRef);
         cards.push({
           key: card.key,
           mappingKeys: card.mappingKeys,
@@ -746,6 +747,7 @@ export const MappingView = ({
           entryName,
           fieldName: card.fieldName,
           fieldType,
+          rowId: tableSourceRef?.rowId,
         });
       });
 
@@ -808,10 +810,21 @@ export const MappingView = ({
                 if (isViewMode) {
                   const viewCards = viewCardsByGroup[group.id] ?? [];
                   const isTableGroup = group.segments.every((s) => s.kind === 'table');
+
+                  // For table groups, build a rowId→cards map so TableRenderer can place
+                  // cards inline in the correct row for natural top-alignment.
+                  const cardsByRowId: Record<string, ViewMappingCardEntry[]> | undefined = isTableGroup
+                    ? viewCards.reduce<Record<string, ViewMappingCardEntry[]>>((acc, card) => {
+                        if (card.rowId) {
+                          acc[card.rowId] = [...(acc[card.rowId] ?? []), card];
+                        }
+                        return acc;
+                      }, {})
+                    : undefined;
+
                   return (
                     <Box key={group.id} data-testid={`display-group-layout-${group.id}`} ref={setGroupLayoutRef(group.id)}>
                       <Flex gap="spacingM" alignItems="flex-start">
-                        {/* Document content rendered once; per-card outlines overlaid absolutely for non-table groups */}
                         <Box
                           style={{ flex: 2, position: 'relative' }}
                           onMouseEnter={!isTableGroup && viewCards.length === 1 ? () => setHoveredMappingKeys(viewCards[0]!.mappingKeys) : undefined}
@@ -830,6 +843,7 @@ export const MappingView = ({
                                 hoveredMappingKeys={hoveredMappingKeys}
                                 onSetHoveredMappingKeys={setHoveredMappingKeys}
                                 isViewMode={true}
+                                cardsByRowId={cardsByRowId}
                                 onEditImage={handleEditImage}
                               />
                             ))}
@@ -851,20 +865,23 @@ export const MappingView = ({
                             );
                           })}
                         </Box>
-                        <Flex flexDirection="column" gap="spacing2Xs" style={{ flex: '0 0 280px', maxWidth: 280 }}>
-                          {viewCards.map((card) => {
-                            const isCardHovered = card.mappingKeys.some((k) => hoveredMappingKeys.includes(k));
-                            return (
-                              <ViewMappingCard
-                                key={card.key}
-                                card={card}
-                                isHovered={isCardHovered}
-                                onMouseEnter={() => setHoveredMappingKeys(card.mappingKeys)}
-                                onMouseLeave={() => setHoveredMappingKeys([])}
-                              />
-                            );
-                          })}
-                        </Flex>
+                        {/* Right-rail cards: only for non-table groups; table groups render cards inline */}
+                        {!isTableGroup && (
+                          <Flex flexDirection="column" gap="spacing2Xs" style={{ flex: '0 0 280px', maxWidth: 280 }}>
+                            {viewCards.map((card) => {
+                              const isCardHovered = card.mappingKeys.some((k) => hoveredMappingKeys.includes(k));
+                              return (
+                                <ViewMappingCard
+                                  key={card.key}
+                                  card={card}
+                                  isHovered={isCardHovered}
+                                  onMouseEnter={() => setHoveredMappingKeys(card.mappingKeys)}
+                                  onMouseLeave={() => setHoveredMappingKeys([])}
+                                />
+                              );
+                            })}
+                          </Flex>
+                        )}
                       </Flex>
                     </Box>
                   );
