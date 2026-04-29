@@ -159,6 +159,9 @@ export const MappingView = ({
   const [cardOffsetsByGroup, setCardOffsetsByGroup] = useState<
     Record<string, Record<string, number>>
   >({});
+  const [cardHeightsByGroup, setCardHeightsByGroup] = useState<
+    Record<string, Record<string, number>>
+  >({});
   const [editModalState, setEditModalState] = useState<EditModalState>(EMPTY_EDIT_MODAL);
   const [pendingTextExclusionRanges, setPendingTextExclusionRanges] = useState<
     TextExclusionRange[] | null
@@ -492,6 +495,7 @@ export const MappingView = ({
   useLayoutEffect(() => {
     const measureOffsets = () => {
       const nextOffsets: Record<string, Record<string, number>> = {};
+      const nextHeights: Record<string, Record<string, number>> = {};
 
       allGroups.forEach((group) => {
         const groupNode = groupLayoutRefs.current[group.id];
@@ -516,12 +520,21 @@ export const MappingView = ({
         });
 
         nextOffsets[group.id] = resolveMarkerOffsets(cards);
+        nextHeights[group.id] = Object.fromEntries(cards.map((c) => [c.key, c.height]));
       });
 
       setCardOffsetsByGroup(nextOffsets);
+      setCardHeightsByGroup(nextHeights);
     };
 
     measureOffsets();
+
+    const observer = new ResizeObserver(measureOffsets);
+    Object.values(cardWrapperRefs.current).forEach((node) => {
+      if (node) observer.observe(node);
+    });
+
+    return () => observer.disconnect();
   }, [allGroups]);
 
   const openAssignModal = (
@@ -1069,6 +1082,7 @@ export const MappingView = ({
                           groupId={group.id}
                           mappingCards={group.mappingCards}
                           cardOffsetsByGroup={cardOffsetsByGroup}
+                          cardHeightsByGroup={cardHeightsByGroup}
                           hoveredMappingKeys={hoveredMappingKeys}
                           onSetHoveredMappingKeys={setHoveredMappingKeys}
                           setCardWrapperRef={setCardWrapperRef}
