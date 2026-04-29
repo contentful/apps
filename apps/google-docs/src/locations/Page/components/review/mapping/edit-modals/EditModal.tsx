@@ -47,7 +47,9 @@ export const EditModal = ({
   const hasCurrentLocations = viewModel.currentLocations.length > 0;
   const hasNewLocation = viewModel.newLocation.id !== '';
 
-  const [selectedLocationIds, setSelectedLocationIds] = useState<string[]>([]);
+  const [selectedLocationIds, setSelectedLocationIds] = useState<string[]>(() =>
+    viewModel.currentLocations.map((l) => l.id)
+  );
 
   const [selectedFieldIds, setSelectedFieldIds] = useState(
     () => viewModel.newLocation.selectedFieldIds ?? []
@@ -64,7 +66,7 @@ export const EditModal = ({
   // Do not depend on `viewModel.newLocation` reference (it can churn without semantic change).
   useEffect(() => {
     if (!isOpen) return;
-    setSelectedLocationIds([]);
+    setSelectedLocationIds(viewModel.currentLocations.map((l) => l.id));
     setSelectedFieldIds(viewModel.newLocation.selectedFieldIds ?? []);
     setDestinationFieldState(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sync from props only on open / row-id set change, not array identity

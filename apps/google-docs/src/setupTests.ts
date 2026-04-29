@@ -5,6 +5,14 @@
 
 // Only configure if we're in a DOM environment (not Node.js)
 // This file is for frontend tests only - function tests use functions/vitest.config.mts
+if (typeof window !== 'undefined' && typeof ResizeObserver === 'undefined') {
+  window.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
+
 if (typeof window !== 'undefined') {
   try {
     // Import jest-dom and matchers only in browser/DOM environment
