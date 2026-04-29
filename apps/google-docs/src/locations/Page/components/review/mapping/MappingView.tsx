@@ -45,6 +45,7 @@ import { buildMappingDisplayGroups } from './buildMappingDisplayGroups';
 import { ViewMappingRail, type ViewMappingCardEntry } from './ViewMappingRail';
 import {
   applyImageExclusionToEntryBlockGraph,
+  appendImageToTargets,
   applyRichTextAssignToEntryBlockGraph,
   applyTextAssignToEntryBlockGraph,
   applyTextExclusionToEntryBlockGraph,
@@ -152,7 +153,6 @@ export const MappingView = ({
     ImageSourceRef[]
   >([]);
   const [pendingTextAssignRanges, setPendingTextAssignRanges] = useState<TextExclusionRange[]>([]);
-  const [pendingModalSelectionRange, setPendingModalSelectionRange] = useState<Range | null>(null);
   const [pendingPreviewSourceRefs, setPendingPreviewSourceRefs] = useState<SourceRef[]>([]);
   const [pendingPreviewHasTableContent, setPendingPreviewHasTableContent] = useState(false);
   const textSelectionRootRef = useRef<HTMLDivElement | null>(null);
@@ -165,7 +165,6 @@ export const MappingView = ({
     setPendingTextExclusionRanges(null);
     setPendingExcludeImageSourceRefs([]);
     setPendingTextAssignRanges([]);
-    setPendingModalSelectionRange(null);
     setPendingPreviewSourceRefs([]);
     setPendingPreviewHasTableContent(false);
   };
@@ -530,7 +529,6 @@ export const MappingView = ({
 
     setPendingTextExclusionRanges(exclusionRanges.length ? exclusionRanges : null);
     setPendingTextAssignRanges(assignRanges);
-    setPendingModalSelectionRange(selectionRange);
     setPendingPreviewSourceRefs(previewSourceRefs);
     setPendingPreviewHasTableContent(
       selectionIncludesTableContent(textSelectionRootRef.current, selectionRange)
@@ -570,7 +568,6 @@ export const MappingView = ({
 
     setPendingTextExclusionRanges(null);
     setPendingTextAssignRanges([]);
-    setPendingModalSelectionRange(null);
     setPendingPreviewSourceRefs([]);
     setPendingPreviewHasTableContent(false);
     setPendingExcludeImageSourceRefs([sourceRef]);
@@ -590,32 +587,56 @@ export const MappingView = ({
   };
 
   const handleEditModalConfirmPrimary = (selectedFieldIds: string[]) => {
-    const initialFieldIds = editModalState.viewModel.newLocation.initialFieldIds;
+    const {
+      isImageContent,
+      newLocation: modalNewLocation,
+      currentLocations,
+    } = editModalState.viewModel;
+    const initialFieldIds = modalNewLocation.initialFieldIds;
     const addedFieldIds = selectedFieldIds.filter((id) => !initialFieldIds.includes(id));
     const removedFieldIds = initialFieldIds.filter((id) => !selectedFieldIds.includes(id));
-    const currentLocations = editModalState.viewModel.currentLocations;
+    console.log('[confirm]', {
+      addedFieldIds,
+      removedFieldIds,
+      pendingPreviewSourceRefs,
+      pendingTextExclusionRanges,
+      pendingTextAssignRanges,
+    });
 
     let next = entryBlockGraph;
 
+    // ── REMOVALS ──────────────────────────────────────────────────────────────
     for (const fieldId of removedFieldIds) {
       const loc = currentLocations.find((l) => l.fieldId === fieldId);
       if (!loc) continue;
 
-      if (pendingTextExclusionRanges?.length) {
-        next = applyTextExclusionToEntryBlockGraph(next, loc, pendingTextExclusionRanges);
-      }
-
       const locSourceRefKeys = new Set(
         (loc.sourceRefs?.length ? loc.sourceRefs : [loc.sourceRef]).map(buildSourceRefKey)
       );
-      const matchingImages = pendingExcludeImageSourceRefs.filter((ref) =>
-        locSourceRefKeys.has(buildSourceRefKey(ref))
-      );
-      for (const imgRef of matchingImages) {
-        next = applyImageExclusionToEntryBlockGraph(next, loc, imgRef);
+
+      if (isImageContent) {
+        // Remove image ref from any field type (asset or rich text).
+        const matchingImages = pendingExcludeImageSourceRefs.filter((ref) =>
+          locSourceRefKeys.has(buildSourceRefKey(ref))
+        );
+        for (const imgRef of matchingImages) {
+          next = applyImageExclusionToEntryBlockGraph(next, loc, imgRef);
+        }
+      } else {
+        // Text removal: remove text ranges and any inline images in selection.
+        if (pendingTextExclusionRanges?.length) {
+          next = applyTextExclusionToEntryBlockGraph(next, loc, pendingTextExclusionRanges);
+        }
+        const matchingImages = pendingExcludeImageSourceRefs.filter((ref) =>
+          locSourceRefKeys.has(buildSourceRefKey(ref))
+        );
+        for (const imgRef of matchingImages) {
+          next = applyImageExclusionToEntryBlockGraph(next, loc, imgRef);
+        }
       }
     }
 
+    // ── ADDITIONS ─────────────────────────────────────────────────────────────
     if (addedFieldIds.length && selectedEntryIndex !== null) {
       const entry = entryBlockGraph.entries[selectedEntryIndex];
       const contentType = entry
@@ -629,36 +650,66 @@ export const MappingView = ({
         return [{ entryIndex: selectedEntryIndex, fieldId, fieldType }];
       });
 
-      const richTextTargets = resolvedTargets.filter((t) => t.fieldType === 'RichText');
-      const nonRichTextTargets = resolvedTargets.filter((t) => t.fieldType !== 'RichText');
+      if (isImageContent) {
+        // Image assignment: asset fields via appendImageToTargets,
+        // rich text fields via applyRichTextAssignToEntryBlockGraph.
+        const imageRef = pendingExcludeImageSourceRefs[0];
+        if (imageRef) {
+          const assetTargets = resolvedTargets.filter((t) => t.fieldType !== 'RichText');
+          const richTextTargets = resolvedTargets.filter((t) => t.fieldType === 'RichText');
 
-      if (richTextTargets.length && pendingModalSelectionRange) {
-        const richTextRefs = collectRichTextSourceRefsFromSelection(
-          textSelectionRootRef.current,
-          pendingModalSelectionRange,
-          document
-        );
-        if (richTextRefs.length) {
+          if (assetTargets.length) {
+            next = appendImageToTargets(next, imageRef, assetTargets);
+          }
+          if (richTextTargets.length) {
+            next = applyRichTextAssignToEntryBlockGraph(
+              next,
+              document,
+              [imageRef],
+              richTextTargets
+            );
+            // appendImageToTargets clears excludedSourceRefs automatically, but
+            // applyRichTextAssignToEntryBlockGraph does not — remove it explicitly.
+            const imageKey = buildSourceRefKey(imageRef);
+            next = {
+              ...next,
+              excludedSourceRefs: next.excludedSourceRefs.filter(
+                (r) => buildSourceRefKey(r) !== imageKey
+              ),
+            };
+          }
+        }
+      } else {
+        // Text assignment: rich text via DOM selection, non-rich-text via character ranges.
+        const richTextTargets = resolvedTargets.filter((t) => t.fieldType === 'RichText');
+        const nonRichTextTargets = resolvedTargets.filter((t) => t.fieldType !== 'RichText');
+
+        if (richTextTargets.length && pendingPreviewSourceRefs.length) {
+          console.log('[richText assign]', { richTextTargets, pendingPreviewSourceRefs });
           next = applyRichTextAssignToEntryBlockGraph(
             next,
             document,
-            richTextRefs,
+            pendingPreviewSourceRefs,
             richTextTargets
           );
+          console.log(
+            '[richText assign result fieldMappings]',
+            JSON.stringify(next.entries.map((e) => e.fieldMappings))
+          );
         }
-      }
 
-      const allRangesForAssign = [
-        ...(pendingTextExclusionRanges ?? []),
-        ...pendingTextAssignRanges,
-      ];
-      if (nonRichTextTargets.length && allRangesForAssign.length) {
-        next = applyTextAssignToEntryBlockGraph(
-          next,
-          document,
-          allRangesForAssign,
-          nonRichTextTargets
-        );
+        const allRangesForAssign = [
+          ...(pendingTextExclusionRanges ?? []),
+          ...pendingTextAssignRanges,
+        ];
+        if (nonRichTextTargets.length && allRangesForAssign.length) {
+          next = applyTextAssignToEntryBlockGraph(
+            next,
+            document,
+            allRangesForAssign,
+            nonRichTextTargets
+          );
+        }
       }
     }
 
@@ -869,7 +920,7 @@ export const MappingView = ({
         additionalContent={(() => {
           if (!pendingPreviewSourceRefs.length && !pendingPreviewHasTableContent) return undefined;
           const allTableText = pendingPreviewSourceRefs.every(isTableTextSourceRef);
-          if (allTableText) {
+          if (allTableText && pendingPreviewSourceRefs.length > 0) {
             const first = pendingPreviewSourceRefs[0] as TableTextSourceRef;
             const singleCell = pendingPreviewSourceRefs.every(
               (ref) =>
@@ -878,22 +929,23 @@ export const MappingView = ({
                 ref.rowId === first.rowId &&
                 ref.cellId === first.cellId
             );
-            if (singleCell) return undefined;
-            const table = document.tables.find((t) => t.id === first.tableId);
-            const totalParts =
-              table?.rows.flatMap((r) => r.cells.flatMap((c) => c.parts)).length ?? 0;
-            const coveredParts = new Set(
-              pendingPreviewSourceRefs
-                .filter(isTableTextSourceRef)
-                .map((ref) => `${ref.rowId}:${ref.cellId}:${ref.partId}`)
-            ).size;
-            if (totalParts > 0 && coveredParts < totalParts) {
-              return (
-                <Note variant="warning">
-                  Partial table selections are not supported for rich text fields. Select the entire
-                  table or just from a single cell instead.
-                </Note>
-              );
+            if (!singleCell) {
+              const table = document.tables.find((t) => t.id === first.tableId);
+              const totalParts =
+                table?.rows.flatMap((r) => r.cells.flatMap((c) => c.parts)).length ?? 0;
+              const coveredParts = new Set(
+                pendingPreviewSourceRefs
+                  .filter(isTableTextSourceRef)
+                  .map((ref) => `${ref.rowId}:${ref.cellId}:${ref.partId}`)
+              ).size;
+              if (totalParts > 0 && coveredParts < totalParts) {
+                return (
+                  <Note variant="warning">
+                    Partial table selections are not supported for rich text fields. Select the
+                    entire table or just from a single cell instead.
+                  </Note>
+                );
+              }
             }
           }
           return (

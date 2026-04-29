@@ -1,12 +1,7 @@
 import { Box, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import type { NormalizedDocument, SourceRef } from '@types';
-import {
-  isBlockImageSourceRef,
-  isTableImageSourceRef,
-  isTableTextSourceRef,
-  isTextSourceRef,
-} from '@types';
+import { isBlockImageSourceRef, isTableImageSourceRef, isTextSourceRef } from '@types';
 
 interface RichTextSelectionPreviewProps {
   document: NormalizedDocument;
@@ -57,10 +52,6 @@ export const RichTextSelectionPreview = ({
               </Text>
             </Box>
           );
-        }
-
-        if (isTableTextSourceRef(sourceRef)) {
-          return null;
         }
 
         const text = getTextPreview(sourceRef);
