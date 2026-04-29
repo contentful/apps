@@ -1,7 +1,7 @@
 import { type Ref } from 'react';
 import { Box } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import { FIELD_TYPE_SEPARATOR, truncateFieldPart } from './mappingCardTextUtils';
+import { FIELD_TYPE_SEPARATOR, truncateFieldValue } from './mappingCardTextUtils';
 import { TruncatedRow } from './TruncatedRow';
 
 export interface MappingCardData {
@@ -28,7 +28,7 @@ export const MappingCard = ({
   onMouseLeave,
 }: MappingCardProps) => {
   const { fieldName, fieldType } = card;
-  const { labelPart, typePart, fullValue, isTruncated } = truncateFieldPart(fieldName, fieldType);
+  const { labelPart, typePart, fullValue, isTruncated } = truncateFieldValue(fieldName, fieldType);
   return (
     <Box
       ref={wrapperRef}

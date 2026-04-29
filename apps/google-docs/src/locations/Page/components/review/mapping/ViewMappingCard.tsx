@@ -1,6 +1,6 @@
 import { Box } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import { FIELD_TYPE_SEPARATOR, truncateFieldPart } from './mappingCardTextUtils';
+import { FIELD_TYPE_SEPARATOR, truncateFieldValue } from './mappingCardTextUtils';
 import { TruncatedRow } from './TruncatedRow';
 
 const CONTENT_TYPE_MAX_LENGTH = 30;
@@ -18,7 +18,7 @@ interface ViewMappingCardProps {
 }
 
 export const ViewMappingCard = ({ card }: ViewMappingCardProps) => {
-  const { labelPart, typePart, fullValue, isTruncated } = truncateFieldPart(
+  const { labelPart, typePart, fullValue, isTruncated } = truncateFieldValue(
     card.fieldName,
     card.fieldType
   );
