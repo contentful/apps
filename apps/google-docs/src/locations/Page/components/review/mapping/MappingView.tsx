@@ -810,7 +810,7 @@ export const MappingView = ({
                   const isTableGroup = group.segments.every((s) => s.kind === 'table');
                   return (
                     <Box key={group.id} data-testid={`display-group-layout-${group.id}`} ref={setGroupLayoutRef(group.id)}>
-                      <Flex gap="spacingM" alignItems="stretch">
+                      <Flex gap="spacingM" alignItems="flex-start">
                         {/* Document content rendered once; per-card outlines overlaid absolutely for non-table groups */}
                         <Box
                           style={{ flex: 2, position: 'relative' }}
