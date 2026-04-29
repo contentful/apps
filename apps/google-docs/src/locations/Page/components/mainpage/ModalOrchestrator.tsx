@@ -292,7 +292,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       }
     };
 
-    const handleReconnectGoogleDrive = async () => {
+    const handleReconnectGoogleDrive = useCallback(async () => {
       setIsReconnectPending(true);
 
       try {
@@ -301,7 +301,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         console.error(error);
         setIsReconnectPending(false);
       }
-    };
+    }, [onReconnectGoogleDrive]);
 
     const errorModalConfig = useMemo<ErrorModalConfig>(() => {
       if (previewErrorState?.reason === WorkflowFailureReason.GOOGLE_DRIVE_AUTH_EXPIRED) {
