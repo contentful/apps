@@ -1,6 +1,6 @@
 import { Box, Text, Tooltip } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import { truncate } from './mappingCardText';
+import { truncate } from './mappingCardTextUtils';
 
 const valueContainerStyle = {
   whiteSpace: 'nowrap',

@@ -1,7 +1,7 @@
 import { type Ref } from 'react';
 import { Box } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import { FIELD_TYPE_SEPARATOR, truncateFieldPart } from './mappingCardText';
+import { FIELD_TYPE_SEPARATOR, truncateFieldPart } from './mappingCardTextUtils';
 import { TruncatedRow } from './TruncatedRow';
 
 export interface MappingCardData {
