@@ -42,7 +42,7 @@ import { buildSourceRefKey } from './sourceRefUtils';
 import { MappingEntryCards } from './MappingEntryCards';
 import { NormalizedDocumentSection } from './NormalizedDocumentSection';
 import { buildMappingDisplayGroups } from './buildMappingDisplayGroups';
-import { type ViewMappingCardEntry } from './ViewMappingRail';
+import { ViewMappingRail, type ViewMappingCardEntry } from './ViewMappingRail';
 import { ViewMappingCard } from './ViewMappingCard';
 import {
   applyImageExclusionToEntryBlockGraph,
@@ -740,7 +740,6 @@ export const MappingView = ({
           entryName,
           fieldName: card.fieldName,
           fieldType,
-          mappingKeys: card.mappingKeys,
         });
       });
 
