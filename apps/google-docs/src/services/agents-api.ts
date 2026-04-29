@@ -1,9 +1,5 @@
 import { PageAppSDK } from '@contentful/app-sdk';
-import {
-  LOCAL_AGENTS_API_BASE_URL,
-  WORKFLOW_AGENT_ID,
-  USE_LOCAL_AGENTS_API,
-} from '../utils/constants/agent';
+import { WORKFLOW_AGENT_ID } from '../utils/constants/agent';
 import {
   AgentRunMessage,
   MappingReviewSuspendPayload,
@@ -65,9 +61,10 @@ export async function getWorkflowRun(
   environmentId: string,
   runId: string
 ): Promise<AgentRunData | null> {
-  if (USE_LOCAL_AGENTS_API) {
+  const localAgentsApiBaseUrl = import.meta.env.VITE_LOCAL_AGENTS_API_BASE_URL?.trim();
+  if (localAgentsApiBaseUrl) {
     const response = await fetch(
-      `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}`,
+      `${localAgentsApiBaseUrl}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}`,
       {
         headers: AGENTS_API_HEADERS,
       }
@@ -107,10 +104,11 @@ export async function startAgentRun(
   payload: AgentGeneratePayload
 ): Promise<string> {
   let runData: AgentRunData;
+  const localAgentsApiBaseUrl = import.meta.env.VITE_LOCAL_AGENTS_API_BASE_URL?.trim();
 
-  if (USE_LOCAL_AGENTS_API) {
+  if (localAgentsApiBaseUrl) {
     const response = await fetch(
-      `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${WORKFLOW_AGENT_ID}/generate`,
+      `${localAgentsApiBaseUrl}/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${WORKFLOW_AGENT_ID}/generate`,
       {
         method: 'POST',
         headers: getJsonHeaders(),
@@ -156,9 +154,10 @@ export async function resumeWorkflowRun(
   runId: string,
   resumePayload: ResumePayload
 ): Promise<void> {
-  if (USE_LOCAL_AGENTS_API) {
+  const localAgentsApiBaseUrl = import.meta.env.VITE_LOCAL_AGENTS_API_BASE_URL?.trim();
+  if (localAgentsApiBaseUrl) {
     const response = await fetch(
-      `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}/resume`,
+      `${localAgentsApiBaseUrl}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}/resume`,
       {
         method: 'POST',
         headers: getJsonHeaders(),
