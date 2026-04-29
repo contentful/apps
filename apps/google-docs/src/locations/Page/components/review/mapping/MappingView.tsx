@@ -822,6 +822,7 @@ export const MappingView = ({
                                 key={segment.id}
                                 segment={segment}
                                 highlightIndex={activeHighlightIndex}
+                                fullHighlightIndex={highlightIndex}
                                 imageById={imageById}
                                 listMarkers={listMarkers}
                                 excludedSourceRefs={entryBlockGraph.excludedSourceRefs}

@@ -264,6 +264,8 @@ interface TableRendererProps {
   segmentId: string;
   table: NormalizedDocumentTable;
   highlightIndex: MappingHighlightIndex;
+  /** Full (unfiltered) highlight index for per-cell border computation in view mode. */
+  fullHighlightIndex?: MappingHighlightIndex;
   imageById: Record<string, NormalizedDocumentImage>;
   excludedSourceRefs: SourceRef[];
   selectedEntryIndex: number | null;
@@ -391,6 +393,7 @@ export const TableRenderer = ({
   segmentId,
   table,
   highlightIndex,
+  fullHighlightIndex,
   imageById,
   excludedSourceRefs,
   selectedEntryIndex,
@@ -399,6 +402,8 @@ export const TableRenderer = ({
   isViewMode = false,
   onEditImage,
 }: TableRendererProps) => {
+  const borderIndex = fullHighlightIndex ?? highlightIndex;
+
   const getVisiblePartHighlights = (partKey: string) =>
     filterByEntry(highlightIndex.tablePartHighlights[partKey] ?? [], selectedEntryIndex);
 
@@ -408,7 +413,7 @@ export const TableRenderer = ({
     const cell = row?.cells.find((c) => c.id === cellId);
     cell?.parts.forEach((part) => {
       const partKey = [table.id, rowId, cellId, part.id].join(':');
-      getVisiblePartHighlights(partKey).forEach((h) => {
+      filterByEntry(borderIndex.tablePartHighlights[partKey] ?? [], selectedEntryIndex).forEach((h) => {
         keys.push(getMappingCardKey(segmentId, h));
       });
     });
