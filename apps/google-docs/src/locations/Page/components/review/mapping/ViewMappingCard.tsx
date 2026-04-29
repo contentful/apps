@@ -3,6 +3,8 @@ import tokens from '@contentful/f36-tokens';
 import { FIELD_TYPE_SEPARATOR, truncateFieldPart } from './mappingCardText';
 import { TruncatedRow } from './TruncatedRow';
 
+const CONTENT_TYPE_MAX_LENGTH = 30;
+
 export interface ViewMappingCardData {
   key: string;
   contentTypeName: string;
@@ -30,7 +32,11 @@ export const ViewMappingCard = ({ card }: ViewMappingCardProps) => {
         padding: tokens.spacing2Xs,
         backgroundColor: tokens.green100,
       }}>
-      <TruncatedRow label="Content Type" value={card.contentTypeName} />
+      <TruncatedRow
+        label="Content Type"
+        value={card.contentTypeName}
+        maxLength={CONTENT_TYPE_MAX_LENGTH}
+      />
       <TruncatedRow label="Entry" value={card.entryName} />
       <TruncatedRow
         label="Field"

@@ -13,6 +13,7 @@ export interface TruncatedRowProps {
   secondaryValue?: string;
   tooltipValue?: string;
   isTruncated?: boolean;
+  maxLength?: number;
 }
 
 export const TruncatedRow = ({
@@ -21,8 +22,9 @@ export const TruncatedRow = ({
   secondaryValue,
   tooltipValue,
   isTruncated,
+  maxLength,
 }: TruncatedRowProps) => {
-  const truncated = truncate(value);
+  const truncated = maxLength === undefined ? truncate(value) : truncate(value, maxLength);
   const shouldShowTooltip = isTruncated ?? truncated !== value;
   const tooltipContentValue =
     tooltipValue ?? (secondaryValue ? `${value}${secondaryValue}` : value);
