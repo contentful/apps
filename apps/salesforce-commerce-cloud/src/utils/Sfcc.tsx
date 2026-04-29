@@ -1,7 +1,6 @@
 import { BaseAppSDK, CMAClient } from '@contentful/app-sdk';
 
-// Set via VITE_SFCC_APP_ACTION_ID env var — the sys.id of the sfccApi App Action
-const APP_ACTION_ID = import.meta.env.VITE_SFCC_APP_ACTION_ID as string;
+const APP_ACTION_ID = 'sfccApi';
 
 interface HaaParams {
   appActionId: string;
