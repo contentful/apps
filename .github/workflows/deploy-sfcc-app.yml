@@ -1,8 +1,7 @@
-# .github/workflows/deploy-sfcc-app.yml
 name: Deploy SFCC Contentful App
 
 on:
-  workflow_dispatch:  # allows manual trigger from GitHub UI
+  workflow_dispatch:
   push:
     branches:
       - master
