@@ -795,9 +795,6 @@ export const MappingView = ({
             <Flex flexDirection="column" gap="spacingS">
               {(groupsByTab[tab.id] ?? []).map((group) => {
                 const activeHighlightIndex = highlightIndex;
-                const isGroupHovered = group.mappingCards.some((card) =>
-                  card.mappingKeys.some((key) => hoveredMappingKeys.includes(key))
-                );
                 const showSurface = group.showGroupedSurface;
 
                 return (
@@ -811,15 +808,10 @@ export const MappingView = ({
                         {showSurface ? (
                           <Box
                             data-testid={`mapping-group-surface-${group.id}`}
-                            data-hovered={isGroupHovered ? 'true' : 'false'}
                             style={{
-                              border: `${isGroupHovered ? 2 : 1}px solid ${
-                                isGroupHovered ? tokens.green600 : tokens.green500
-                              }`,
                               borderRadius: tokens.borderRadiusMedium,
                               backgroundColor: tokens.green100,
                               padding: tokens.spacing2Xs,
-                              transition: 'border-color 120ms ease, border-width 120ms ease',
                             }}>
                             <Flex flexDirection="column" gap="spacing2Xs">
                               {group.segments.map((segment) => (
@@ -833,7 +825,6 @@ export const MappingView = ({
                                   selectedEntryIndex={selectedEntryIndex}
                                   hoveredMappingKeys={hoveredMappingKeys}
                                   onSetHoveredMappingKeys={setHoveredMappingKeys}
-                                  showSpanOutline={!showSurface}
                                   onEditImage={isViewMode ? undefined : handleEditImage}
                                 />
                               ))}
@@ -852,7 +843,6 @@ export const MappingView = ({
                                 selectedEntryIndex={selectedEntryIndex}
                                 hoveredMappingKeys={hoveredMappingKeys}
                                 onSetHoveredMappingKeys={setHoveredMappingKeys}
-                                showSpanOutline={!showSurface}
                                 onEditImage={isViewMode ? undefined : handleEditImage}
                               />
                             ))}

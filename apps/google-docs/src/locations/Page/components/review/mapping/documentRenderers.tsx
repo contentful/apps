@@ -45,7 +45,7 @@ function getHighlightStyle(highlighted: boolean, hovered: boolean) {
   if (!highlighted) return { border: tokens.gray300, background: 'transparent' };
   return {
     border: hovered ? tokens.green600 : tokens.green500,
-    background: hovered ? tokens.green200 : tokens.green100,
+    background: hovered ? tokens.green300 : tokens.green100,
   };
 }
 
@@ -68,7 +68,6 @@ interface TextSegmentSpanProps {
   id: string;
   segment: TextSegment;
   hovered: boolean;
-  showSpanOutline: boolean;
   onSetHoveredMappings: (keys: string[]) => void;
   textScope: 'block' | 'table';
   rangeStart: number;
@@ -84,7 +83,6 @@ const TextSegmentSpan = ({
   id,
   segment,
   hovered,
-  showSpanOutline,
   onSetHoveredMappings,
   textScope,
   rangeStart,
@@ -117,14 +115,10 @@ const TextSegmentSpan = ({
       style={{
         ...getTextSegmentStyle(segment.styles),
         backgroundColor: getHighlightStyle(segment.highlighted, hovered).background,
-        borderRadius: segment.highlighted ? tokens.borderRadiusSmall : undefined,
-        padding: segment.highlighted && showSpanOutline ? tokens.spacing2Xs : undefined,
-        outline:
-          segment.highlighted && showSpanOutline
-            ? `${hovered ? 2 : 1}px solid ${getHighlightStyle(segment.highlighted, hovered).border}`
-            : undefined,
+        // borderRadius: segment.highlighted ? tokens.borderRadiusSmall : undefined,
+        padding: segment.highlighted ? `${tokens.spacing2Xs} 0` : undefined,
         whiteSpace: 'pre-wrap',
-        transition: 'background-color 120ms ease, outline 120ms ease',
+        transition: 'background-color 120ms ease',
       }}>
       {segment.text}
     </Box>
@@ -151,7 +145,6 @@ interface BlockRendererProps {
   excludedSourceRefs: SourceRef[];
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
-  showSpanOutline: boolean;
   onSetHoveredMappingKeys: (keys: string[]) => void;
   onEditImage?: (
     sourceRef: { type: 'image'; blockId: string; imageId: string },
@@ -168,7 +161,6 @@ export const BlockRenderer = ({
   excludedSourceRefs,
   selectedEntryIndex,
   hoveredMappingKeys,
-  showSpanOutline,
   onSetHoveredMappingKeys,
   onEditImage,
 }: BlockRendererProps) => {
@@ -187,7 +179,6 @@ export const BlockRenderer = ({
           id={`${block.id}-${index}`}
           segment={seg}
           hovered={isMappingHovered(seg.mappingKeys, hoveredMappingKeys)}
-          showSpanOutline={showSpanOutline}
           onSetHoveredMappings={onSetHoveredMappingKeys}
           textScope="block"
           rangeStart={seg.start}
@@ -284,7 +275,6 @@ interface TableRendererProps {
   excludedSourceRefs: SourceRef[];
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
-  showSpanOutline: boolean;
   onSetHoveredMappingKeys: (keys: string[]) => void;
   onEditImage?: (
     sourceRef: {
@@ -309,7 +299,6 @@ interface TablePartRendererProps {
   imageById: Record<string, NormalizedDocumentImage>;
   excludedSourceRefs: SourceRef[];
   hoveredMappingKeys: string[];
-  showSpanOutline: boolean;
   onSetHoveredMappingKeys: (keys: string[]) => void;
   onEditImage?: TableRendererProps['onEditImage'];
 }
@@ -324,7 +313,6 @@ const TablePartRenderer = ({
   imageById,
   excludedSourceRefs,
   hoveredMappingKeys,
-  showSpanOutline,
   onSetHoveredMappingKeys,
   onEditImage,
 }: TablePartRendererProps) => {
@@ -395,7 +383,6 @@ const TablePartRenderer = ({
           id={`${part.id}-${index}`}
           segment={seg}
           hovered={isMappingHovered(seg.mappingKeys, hoveredMappingKeys)}
-          showSpanOutline={showSpanOutline}
           onSetHoveredMappings={onSetHoveredMappingKeys}
           textScope="table"
           rangeStart={seg.start}
@@ -419,7 +406,6 @@ export const TableRenderer = ({
   excludedSourceRefs,
   selectedEntryIndex,
   hoveredMappingKeys,
-  showSpanOutline,
   onSetHoveredMappingKeys,
   isViewMode = false,
   onEditImage,

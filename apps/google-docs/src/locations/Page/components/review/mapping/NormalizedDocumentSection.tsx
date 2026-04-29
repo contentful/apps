@@ -16,7 +16,6 @@ interface ReviewDocumentBodyProps {
   excludedSourceRefs: SourceRef[];
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
-  showSpanOutline: boolean;
   onSetHoveredMappingKeys: (keys: string[]) => void;
   onEditImage?: (sourceRef: ImageSourceRef, label: string) => void;
 }
@@ -30,7 +29,6 @@ export const NormalizedDocumentSection = ({
   excludedSourceRefs,
   selectedEntryIndex,
   hoveredMappingKeys,
-  showSpanOutline,
   onSetHoveredMappingKeys,
   isViewMode = false,
   onEditImage,
@@ -54,7 +52,6 @@ export const NormalizedDocumentSection = ({
               excludedSourceRefs={excludedSourceRefs}
               selectedEntryIndex={selectedEntryIndex}
               hoveredMappingKeys={hoveredMappingKeys}
-              showSpanOutline={showSpanOutline}
               onSetHoveredMappingKeys={onSetHoveredMappingKeys}
               isViewMode={isViewMode}
               onEditImage={onEditImage}
@@ -69,7 +66,6 @@ export const NormalizedDocumentSection = ({
               excludedSourceRefs={excludedSourceRefs}
               selectedEntryIndex={selectedEntryIndex}
               hoveredMappingKeys={hoveredMappingKeys}
-              showSpanOutline={showSpanOutline}
               onSetHoveredMappingKeys={onSetHoveredMappingKeys}
               onEditImage={onEditImage}
             />
