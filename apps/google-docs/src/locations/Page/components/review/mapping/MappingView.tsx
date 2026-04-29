@@ -16,7 +16,7 @@ import type {
   TableTextSourceRef,
 } from '@types';
 import { isBlockImageSourceRef, isTableImageSourceRef, isTableTextSourceRef } from '@types';
-import { FileTextIcon } from '@contentful/f36-icons';
+import { FileTextIcon, LightbulbIcon } from '@contentful/f36-icons';
 import { useReviewTextSelection } from '@hooks/useReviewTextSelection';
 import { getEntryTitleFromFieldMappings } from '../../../../../utils/getEntryTitle';
 import { resolveMarkerOffsets } from './resolveMappingCardOffsets';
@@ -758,30 +758,40 @@ export const MappingView = ({
         gap="spacingS"
         style={{ marginTop: tokens.spacingM }}>
         {selectedEntryRow && (
-          <Box
+          <Flex
+            gap="spacingM"
+            alignItems="flex-end"
             style={{
               borderBottom: `1px solid ${tokens.gray200}`,
               paddingBottom: tokens.spacingXs,
             }}>
-            <Text
-              as="p"
-              fontSize="fontSizeS"
-              fontWeight="fontWeightMedium"
-              marginBottom="spacing2Xs">
-              Currently viewing:
-            </Text>
-            <Text as="p" marginBottom="none">
-              <Text as="span" fontWeight="fontWeightDemiBold">
-                {selectedEntryRow.contentTypeName}
+            <Box style={{ flex: 2 }}>
+              <Text
+                as="p"
+                fontSize="fontSizeS"
+                fontWeight="fontWeightMedium"
+                marginBottom="spacing2Xs">
+                Currently viewing:
               </Text>
-              {selectedEntryRow.entryTitle ? (
-                <Text as="span" fontColor="gray600">
-                  {' '}
-                  ({selectedEntryRow.entryTitle})
+              <Text as="p" marginBottom="none">
+                <Text as="span" fontWeight="fontWeightDemiBold">
+                  {selectedEntryRow.contentTypeName}
                 </Text>
-              ) : null}
-            </Text>
-          </Box>
+                {selectedEntryRow.entryTitle ? (
+                  <Text as="span" fontColor="gray600">
+                    {' '}
+                    ({selectedEntryRow.entryTitle})
+                  </Text>
+                ) : null}
+              </Text>
+            </Box>
+            <Flex alignItems="center" gap="spacing2Xs" style={{ flex: '0 0 280px', maxWidth: 280 }}>
+              <LightbulbIcon size="tiny" style={{ color: tokens.gray600, flexShrink: 0 }} />
+              <Text as="span" fontSize="fontSizeS" fontColor="gray600">
+                Tip: hover over a card to highlight its content
+              </Text>
+            </Flex>
+          </Flex>
         )}
         {tabs.map((tab) => (
           <Box key={tab.id}>
