@@ -307,7 +307,12 @@ describe('MappingView', () => {
     });
 
     const { container } = render(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
 
     expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
@@ -335,7 +340,12 @@ describe('MappingView', () => {
     });
 
     const { container } = render(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
 
     expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
@@ -368,7 +378,12 @@ describe('MappingView', () => {
     });
 
     render(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
 
     expect(screen.getByText('Body copy (1/2)')).toBeTruthy();
@@ -433,7 +448,12 @@ describe('MappingView', () => {
     });
 
     const { container } = render(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
 
     expect(screen.getByText('Body copy (1/3)')).toBeTruthy();
@@ -549,7 +569,12 @@ describe('MappingView', () => {
     });
 
     const { container } = render(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
 
     expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
@@ -650,7 +675,12 @@ describe('MappingView', () => {
     });
 
     const { container } = render(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
 
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
@@ -683,7 +713,12 @@ describe('MappingView', () => {
     });
 
     const { container } = render(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
 
     const textSegments = Array.from(
@@ -731,7 +766,12 @@ describe('MappingView', () => {
     });
 
     const { container, rerender } = render(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
     const groupedTextSegments = container.querySelectorAll('[data-review-text-segment="true"]');
     const selectedRange = createDomRange(groupedTextSegments[1].firstChild as Text, 0, 6);
@@ -744,7 +784,12 @@ describe('MappingView', () => {
     });
 
     rerender(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Reassign' }));
@@ -775,7 +820,12 @@ describe('MappingView', () => {
 
     const payload = createPayload();
     render(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Assign' }));
@@ -803,6 +853,7 @@ describe('MappingView', () => {
         payload={payload}
         {...mappingViewGraphProps(payload)}
         selectedEntryIndex={null}
+        mode="edit"
       />
     );
 
@@ -821,7 +872,12 @@ describe('MappingView', () => {
 
     const payload = createPayload();
     const { container, rerender } = render(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
     const selectedRange = createDomRange(
       container.querySelector('[data-review-text-segment="true"]')?.firstChild as Text,
@@ -835,7 +891,12 @@ describe('MappingView', () => {
       clearSelection: mockClearSelection,
     });
     rerender(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Exclude' }));
@@ -886,6 +947,7 @@ describe('MappingView', () => {
         entryBlockGraph={currentGraph}
         onEntryBlockGraphChange={onEntryBlockGraphChange}
         selectedEntryIndex={0}
+        mode="edit"
       />
     );
 
@@ -910,6 +972,7 @@ describe('MappingView', () => {
         entryBlockGraph={currentGraph}
         onEntryBlockGraphChange={onEntryBlockGraphChange}
         selectedEntryIndex={0}
+        mode="edit"
       />
     );
 
@@ -923,9 +986,9 @@ describe('MappingView', () => {
       )
     ).toBeNull();
 
-    const locationCard = document.querySelector('button[aria-pressed]') as HTMLElement;
+    // Location is pre-selected — confirm button is already enabled
+    const locationCard = document.querySelector('button[aria-pressed="true"]') as HTMLElement;
     expect(locationCard).toBeTruthy();
-    fireEvent.click(locationCard);
 
     const confirmButton = screen.getAllByRole('button', { name: 'Exclude content' }).at(-1);
     expect(confirmButton).toBeTruthy();
@@ -939,6 +1002,7 @@ describe('MappingView', () => {
         entryBlockGraph={currentGraph}
         onEntryBlockGraphChange={onEntryBlockGraphChange}
         selectedEntryIndex={0}
+        mode="edit"
       />
     );
 
@@ -958,6 +1022,7 @@ describe('MappingView', () => {
         entryBlockGraph={payload.entryBlockGraph}
         onEntryBlockGraphChange={onEntryBlockGraphChange}
         selectedEntryIndex={1}
+        mode="edit"
       />
     );
 

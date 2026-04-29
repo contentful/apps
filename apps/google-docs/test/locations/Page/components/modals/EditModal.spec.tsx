@@ -113,28 +113,29 @@ describe('EditModal', () => {
       .filter((element) => element.getAttribute('aria-pressed') !== null);
     const [summaryCard, descriptionCard] = locationCards;
 
-    expect(summaryCard).toHaveAttribute('aria-pressed', 'false');
-    expect(descriptionCard).toHaveAttribute('aria-pressed', 'false');
-
-    fireEvent.click(summaryCard);
-
-    await waitFor(() => {
-      expect(summaryCard).toHaveAttribute('aria-pressed', 'true');
-      expect(descriptionCard).toHaveAttribute('aria-pressed', 'false');
-    });
-
-    fireEvent.click(descriptionCard);
-
-    await waitFor(() => {
-      expect(summaryCard).toHaveAttribute('aria-pressed', 'true');
-      expect(descriptionCard).toHaveAttribute('aria-pressed', 'true');
-    });
+    // All current locations start pre-selected
+    expect(summaryCard).toHaveAttribute('aria-pressed', 'true');
+    expect(descriptionCard).toHaveAttribute('aria-pressed', 'true');
 
     fireEvent.click(summaryCard);
 
     await waitFor(() => {
       expect(summaryCard).toHaveAttribute('aria-pressed', 'false');
       expect(descriptionCard).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    fireEvent.click(summaryCard);
+
+    await waitFor(() => {
+      expect(summaryCard).toHaveAttribute('aria-pressed', 'true');
+      expect(descriptionCard).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    fireEvent.click(descriptionCard);
+
+    await waitFor(() => {
+      expect(summaryCard).toHaveAttribute('aria-pressed', 'true');
+      expect(descriptionCard).toHaveAttribute('aria-pressed', 'false');
     });
   });
 
@@ -190,15 +191,18 @@ describe('EditModal', () => {
     expect(
       screen.queryByText('No destination entry is available for the entry currently in view.')
     ).toBeNull();
-    expect(screen.getByRole('button', { name: 'Exclude content' })).toBeDisabled();
+    // Button starts enabled because all current locations are pre-selected
+    expect(screen.getByRole('button', { name: 'Exclude content' })).not.toBeDisabled();
 
     const locationCards = screen
       .getAllByRole('button')
       .filter((el) => el.getAttribute('aria-pressed') !== null);
-    fireEvent.click(locationCards[0]);
+
+    // Deselect all locations — button should disable
+    locationCards.forEach((card) => fireEvent.click(card));
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Exclude content' })).not.toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Exclude content' })).toBeDisabled();
     });
   });
 
