@@ -6,11 +6,10 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, Flex, Text, IconButton, Box } from '@contentful/f36-components';
 import { WarningIcon, ExternalLinkIcon, CloseIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
-import { useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK, useCMA } from '@contentful/react-apps-toolkit';
 import { FieldAppSDK } from '@contentful/app-sdk';
 
 // Local Imports
-import { AppInstallationParameters } from '../../locations/ConfigScreen';
 import SfccClient from '../../utils/Sfcc';
 
 interface ItemProps {
@@ -29,8 +28,8 @@ interface ItemCardProps extends ItemProps {
 
 const ItemCard = (props: ItemCardProps) => {
   const sdk = useSDK<FieldAppSDK>();
-  const installParameters = sdk.parameters.installation as AppInstallationParameters;
-  const client = new SfccClient(installParameters);
+  const cma = useCMA();
+  const client = new SfccClient(cma, sdk.ids);
 
   const [itemId, catalogId] = props.id.split(':');
   const { isLoading, data: itemData } = useQuery({
