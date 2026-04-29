@@ -801,8 +801,7 @@ export const MappingView = ({
                 const isGroupHovered = group.mappingCards.some((card) =>
                   card.mappingKeys.some((key) => hoveredMappingKeys.includes(key))
                 );
-                const hasMappedCards = group.mappingCards.length > 0;
-                const showSurface = isViewMode ? hasMappedCards : group.showGroupedSurface;
+                const showSurface = !isViewMode && group.showGroupedSurface;
 
                 return (
                   <Box key={group.id}>
@@ -821,7 +820,7 @@ export const MappingView = ({
                                 isGroupHovered ? tokens.green600 : tokens.green500
                               }`,
                               borderRadius: tokens.borderRadiusMedium,
-                              backgroundColor: isViewMode ? undefined : tokens.green100,
+                              backgroundColor: tokens.green100,
                               padding: tokens.spacing2Xs,
                               transition: 'border-color 120ms ease, border-width 120ms ease',
                             }}>
@@ -830,7 +829,7 @@ export const MappingView = ({
                                 <NormalizedDocumentSection
                                   key={segment.id}
                                   segment={segment}
-                                  highlightIndex={highlightIndex}
+                                  highlightIndex={activeHighlightIndex}
                                   imageById={imageById}
                                   listMarkers={listMarkers}
                                   excludedSourceRefs={entryBlockGraph.excludedSourceRefs}
@@ -848,7 +847,7 @@ export const MappingView = ({
                               <NormalizedDocumentSection
                                 key={segment.id}
                                 segment={segment}
-                                highlightIndex={highlightIndex}
+                                highlightIndex={activeHighlightIndex}
                                 imageById={imageById}
                                 listMarkers={listMarkers}
                                 excludedSourceRefs={entryBlockGraph.excludedSourceRefs}
