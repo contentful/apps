@@ -68,6 +68,7 @@ interface TextSegmentSpanProps {
   id: string;
   segment: TextSegment;
   hovered: boolean;
+  showSpanOutline: boolean;
   onSetHoveredMappings: (keys: string[]) => void;
   textScope: 'block' | 'table';
   rangeStart: number;
@@ -83,6 +84,7 @@ const TextSegmentSpan = ({
   id,
   segment,
   hovered,
+  showSpanOutline,
   onSetHoveredMappings,
   textScope,
   rangeStart,
@@ -116,8 +118,13 @@ const TextSegmentSpan = ({
         ...getTextSegmentStyle(segment.styles),
         backgroundColor: getHighlightStyle(segment.highlighted, hovered).background,
         borderRadius: segment.highlighted ? tokens.borderRadiusSmall : undefined,
+        padding: segment.highlighted && showSpanOutline ? tokens.spacing2Xs : undefined,
+        outline:
+          segment.highlighted && showSpanOutline
+            ? `${hovered ? 2 : 1}px solid ${getHighlightStyle(segment.highlighted, hovered).border}`
+            : undefined,
         whiteSpace: 'pre-wrap',
-        transition: 'background-color 120ms ease',
+        transition: 'background-color 120ms ease, outline 120ms ease',
       }}>
       {segment.text}
     </Box>
@@ -144,6 +151,7 @@ interface BlockRendererProps {
   excludedSourceRefs: SourceRef[];
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
+  showSpanOutline: boolean;
   onSetHoveredMappingKeys: (keys: string[]) => void;
   onEditImage?: (
     sourceRef: { type: 'image'; blockId: string; imageId: string },
@@ -160,6 +168,7 @@ export const BlockRenderer = ({
   excludedSourceRefs,
   selectedEntryIndex,
   hoveredMappingKeys,
+  showSpanOutline,
   onSetHoveredMappingKeys,
   onEditImage,
 }: BlockRendererProps) => {
@@ -178,6 +187,7 @@ export const BlockRenderer = ({
           id={`${block.id}-${index}`}
           segment={seg}
           hovered={isMappingHovered(seg.mappingKeys, hoveredMappingKeys)}
+          showSpanOutline={showSpanOutline}
           onSetHoveredMappings={onSetHoveredMappingKeys}
           textScope="block"
           rangeStart={seg.start}
@@ -274,6 +284,7 @@ interface TableRendererProps {
   excludedSourceRefs: SourceRef[];
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
+  showSpanOutline: boolean;
   onSetHoveredMappingKeys: (keys: string[]) => void;
   onEditImage?: (
     sourceRef: {
@@ -298,6 +309,7 @@ interface TablePartRendererProps {
   imageById: Record<string, NormalizedDocumentImage>;
   excludedSourceRefs: SourceRef[];
   hoveredMappingKeys: string[];
+  showSpanOutline: boolean;
   onSetHoveredMappingKeys: (keys: string[]) => void;
   onEditImage?: TableRendererProps['onEditImage'];
 }
@@ -312,6 +324,7 @@ const TablePartRenderer = ({
   imageById,
   excludedSourceRefs,
   hoveredMappingKeys,
+  showSpanOutline,
   onSetHoveredMappingKeys,
   onEditImage,
 }: TablePartRendererProps) => {
@@ -382,6 +395,7 @@ const TablePartRenderer = ({
           id={`${part.id}-${index}`}
           segment={seg}
           hovered={isMappingHovered(seg.mappingKeys, hoveredMappingKeys)}
+          showSpanOutline={showSpanOutline}
           onSetHoveredMappings={onSetHoveredMappingKeys}
           textScope="table"
           rangeStart={seg.start}
@@ -405,6 +419,7 @@ export const TableRenderer = ({
   excludedSourceRefs,
   selectedEntryIndex,
   hoveredMappingKeys,
+  showSpanOutline,
   onSetHoveredMappingKeys,
   isViewMode = false,
   onEditImage,
@@ -446,61 +461,35 @@ export const TableRenderer = ({
             key={row.id}
             id={`row:${table.id}:${row.id}`}
             data-testid={`table-row-${row.id}`}>
-            {row.cells.map((cell) => {
-              const cellMappingKeys = isViewMode ? getCellMappingKeys(row.id, cell.id) : [];
-              const isCellMapped = cellMappingKeys.length > 0;
-              const isCellHovered =
-                isCellMapped && cellMappingKeys.some((k) => hoveredMappingKeys.includes(k));
-              return (
-                <TableCell
-                  key={cell.id}
-                  data-testid={`table-cell-${cell.id}`}
-                  onMouseEnter={
-                    isViewMode && isCellMapped
-                      ? () => onSetHoveredMappingKeys(cellMappingKeys)
-                      : undefined
-                  }
-                  onMouseLeave={
-                    isViewMode && isCellMapped ? () => onSetHoveredMappingKeys([]) : undefined
-                  }
-                  style={{
-                    backgroundColor: 'transparent',
-                    verticalAlign: 'top',
-                    ...(isViewMode && isCellMapped
-                      ? {
-                          border: `${isCellHovered ? 2 : 1}px solid ${
-                            isCellHovered ? tokens.green600 : tokens.green500
-                          }`,
-                          borderRadius: tokens.borderRadiusMedium,
-                          transition: 'border-color 120ms ease, border-width 120ms ease',
-                        }
-                      : {}),
-                  }}>
-                  <Flex flexDirection="column" gap="spacing2Xs">
-                    {cell.parts.map((part) => {
-                      const partKey = [table.id, row.id, cell.id, part.id].join(':');
-                      return (
-                        <Box key={part.id}>
-                          <TablePartRenderer
-                            segmentId={segmentId}
-                            tableId={table.id}
-                            rowId={row.id}
-                            cellId={cell.id}
-                            part={part}
-                            visibleHighlights={getVisiblePartHighlights(partKey)}
-                            imageById={imageById}
-                            excludedSourceRefs={excludedSourceRefs}
-                            hoveredMappingKeys={hoveredMappingKeys}
-                            onSetHoveredMappingKeys={onSetHoveredMappingKeys}
-                            onEditImage={onEditImage}
-                          />
-                        </Box>
-                      );
-                    })}
-                  </Flex>
-                </TableCell>
-              );
-            })}
+            {row.cells.map((cell) => (
+              <TableCell
+                key={cell.id}
+                data-testid={`table-cell-${cell.id}`}
+                style={{ backgroundColor: 'transparent', verticalAlign: 'top' }}>
+                <Flex flexDirection="column" gap="spacing2Xs">
+                  {cell.parts.map((part) => {
+                    const partKey = [table.id, row.id, cell.id, part.id].join(':');
+                    return (
+                      <Box key={part.id}>
+                        <TablePartRenderer
+                          segmentId={segmentId}
+                          tableId={table.id}
+                          rowId={row.id}
+                          cellId={cell.id}
+                          part={part}
+                          visibleHighlights={getVisiblePartHighlights(partKey)}
+                          imageById={imageById}
+                          excludedSourceRefs={excludedSourceRefs}
+                          hoveredMappingKeys={hoveredMappingKeys}
+                          onSetHoveredMappingKeys={onSetHoveredMappingKeys}
+                          onEditImage={onEditImage}
+                        />
+                      </Box>
+                    );
+                  })}
+                </Flex>
+              </TableCell>
+            ))}
           </TableRow>
         ))}
       </TableBody>
