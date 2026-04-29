@@ -115,7 +115,6 @@ const TextSegmentSpan = ({
       style={{
         ...getTextSegmentStyle(segment.styles),
         backgroundColor: getHighlightStyle(segment.highlighted, hovered).background,
-        // borderRadius: segment.highlighted ? tokens.borderRadiusSmall : undefined,
         padding: segment.highlighted ? `${tokens.spacing2Xs} 0` : undefined,
         whiteSpace: 'pre-wrap',
         transition: 'background-color 120ms ease',
@@ -407,7 +406,6 @@ export const TableRenderer = ({
   selectedEntryIndex,
   hoveredMappingKeys,
   onSetHoveredMappingKeys,
-  isViewMode = false,
   onEditImage,
 }: TableRendererProps) => {
   const borderIndex = fullHighlightIndex ?? highlightIndex;
