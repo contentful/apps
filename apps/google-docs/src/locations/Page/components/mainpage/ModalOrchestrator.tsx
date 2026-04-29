@@ -118,6 +118,11 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setIsConfirmCancelModalOpen(true);
     };
 
+    const handleFlowModalCloseRequest = () => {
+      if (flowStep === FlowStep.LOADING) return;
+      showDiscardConfirmation();
+    };
+
     const closePreviewErrorAndReset = useCallback(() => {
       setPreviewErrorState(null);
       setIsReconnectPending(false);
@@ -369,7 +374,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
             <LoadingModal
               step="reviewingContentTypes"
               title="Preparing your preview"
-              onClose={showDiscardConfirmation}
               contentTypeCount={selectedContentTypes.length}
             />
           );
@@ -388,7 +392,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
         <Modal
           isShown={flowStep !== null}
-          onClose={showDiscardConfirmation}
+          onClose={handleFlowModalCloseRequest}
           size={'large'}
           shouldCloseOnOverlayClick={false}
           shouldCloseOnEscapePress={flowStep !== FlowStep.LOADING}>

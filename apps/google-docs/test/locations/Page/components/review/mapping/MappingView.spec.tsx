@@ -14,20 +14,15 @@ vi.mock(
   '../../../../../../src/locations/Page/components/review/mapping/ReviewImageAssetCard',
   () => ({
     ReviewImageAssetCard: ({
-      onAssign,
-      onExclude,
+      onEdit,
       isHighlighted,
     }: {
-      onAssign: () => void;
-      onExclude: () => void;
+      onEdit: () => void;
       isHighlighted: boolean;
     }) => (
       <div>
-        <button type="button" onClick={onAssign}>
+        <button type="button" onClick={onEdit}>
           {isHighlighted ? 'Reassign image' : 'Assign image'}
-        </button>
-        <button type="button" onClick={onExclude}>
-          Exclude image
         </button>
       </div>
     ),
@@ -307,7 +302,12 @@ describe('MappingView', () => {
     });
 
     const { container } = render(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
 
     expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
@@ -335,7 +335,12 @@ describe('MappingView', () => {
     });
 
     const { container } = render(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
 
     expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
@@ -368,7 +373,12 @@ describe('MappingView', () => {
     });
 
     render(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
 
     expect(screen.getByText('Body copy (1/2)')).toBeTruthy();
@@ -403,7 +413,12 @@ describe('MappingView', () => {
     ];
 
     render(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
 
     expect(screen.getByText('SEO Description')).toBeTruthy();
@@ -433,7 +448,12 @@ describe('MappingView', () => {
     });
 
     const { container } = render(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
 
     expect(screen.getByText('Body copy (1/3)')).toBeTruthy();
@@ -549,7 +569,12 @@ describe('MappingView', () => {
     });
 
     const { container } = render(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
 
     expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
@@ -650,7 +675,12 @@ describe('MappingView', () => {
     });
 
     const { container } = render(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
 
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
@@ -683,7 +713,12 @@ describe('MappingView', () => {
     });
 
     const { container } = render(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
 
     const textSegments = Array.from(
@@ -731,7 +766,12 @@ describe('MappingView', () => {
     });
 
     const { container, rerender } = render(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
     const groupedTextSegments = container.querySelectorAll('[data-review-text-segment="true"]');
     const selectedRange = createDomRange(groupedTextSegments[1].firstChild as Text, 0, 6);
@@ -744,23 +784,21 @@ describe('MappingView', () => {
     });
 
     rerender(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Reassign' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit content mapping' }));
 
-    expect(screen.getByRole('heading', { name: 'Reassign content' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Edit content mapping' })).toBeTruthy();
     expect(
       screen.getAllByText((_, node) => node?.textContent?.includes('Second') ?? false).length
     ).toBeGreaterThan(0);
-    expect(screen.getAllByText('Article').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
-    expect(screen.getByText('Current location')).toBeTruthy();
-    expect(screen.getByText('New location')).toBeTruthy();
-    expect(screen.getAllByText('Untitled').length).toBeGreaterThan(0);
-    expect(
-      screen.getAllByText((_, node) => node?.textContent?.includes('| Long text') ?? false).length
-    ).toBeGreaterThan(0);
+    expect(screen.getByText('Assign to fields')).toBeTruthy();
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
 
@@ -775,20 +813,24 @@ describe('MappingView', () => {
 
     const payload = createPayload();
     render(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Assign' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit content mapping' }));
 
-    expect(screen.getByRole('heading', { name: 'Assign content' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Edit content mapping' })).toBeTruthy();
     expect(screen.getByText('"fresh body text"')).toBeTruthy();
-    expect(screen.getByText('Current location')).toBeTruthy();
-    expect(screen.getByText('New location')).toBeTruthy();
+    expect(screen.getByText('Assign to fields')).toBeTruthy();
     expect(screen.getByText('Article: Untitled')).toBeTruthy();
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
 
-  it('disables exclude when selected text has no mapped segments', () => {
+  it('shows edit mapping button when text is selected', () => {
     const selectedRange = createDetachedRange('plain text', 0, 5);
     mockUseReviewTextSelection.mockReturnValue({
       selectionRectangle: { top: 100, left: 100, right: 160, bottom: 120 },
@@ -802,16 +844,15 @@ describe('MappingView', () => {
       <MappingView
         payload={payload}
         {...mappingViewGraphProps(payload)}
-        selectedEntryIndex={null}
+        selectedEntryIndex={0}
+        mode="edit"
       />
     );
 
-    expect(screen.getByRole('button', { name: 'Assign' })).toBeTruthy();
-    const excludeButton = screen.getByRole('button', { name: 'Exclude' }) as HTMLButtonElement;
-    expect(excludeButton.disabled).toBe(true);
+    expect(screen.getByRole('button', { name: 'Edit content mapping' })).toBeTruthy();
   });
 
-  it('opens exclude modal with current locations for mapped text', () => {
+  it('opens edit modal with current field pre-selected for mapped text', () => {
     mockUseReviewTextSelection.mockReturnValueOnce({
       selectionRectangle: null,
       selectedText: '',
@@ -821,7 +862,12 @@ describe('MappingView', () => {
 
     const payload = createPayload();
     const { container, rerender } = render(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
     const selectedRange = createDomRange(
       container.querySelector('[data-review-text-segment="true"]')?.firstChild as Text,
@@ -835,22 +881,23 @@ describe('MappingView', () => {
       clearSelection: mockClearSelection,
     });
     rerender(
-      <MappingView payload={payload} {...mappingViewGraphProps(payload)} selectedEntryIndex={0} />
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Exclude' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit content mapping' }));
 
-    expect(screen.getByRole('heading', { name: 'Exclude content' })).toBeTruthy();
-    expect(screen.getAllByText('Article').length).toBeGreaterThan(0);
+    expect(screen.getByRole('heading', { name: 'Edit content mapping' })).toBeTruthy();
+    expect(screen.getByText('Assign to fields')).toBeTruthy();
     expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
-    expect(screen.queryByText('New location')).toBeNull();
-    expect(
-      screen.getAllByText((_, node) => node?.textContent?.includes('| Long text') ?? false).length
-    ).toBeGreaterThan(0);
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
 
-  it('excludes grouped selections as one visible location and splits the remaining runs', () => {
+  it('opens edit modal with field pre-selected for grouped-run selection', () => {
     const blocks = [
       createBlock('block-1', 1, 'First body paragraph.'),
       createBlock('block-2', 2, 'Second body paragraph.'),
@@ -886,6 +933,7 @@ describe('MappingView', () => {
         entryBlockGraph={currentGraph}
         onEntryBlockGraphChange={onEntryBlockGraphChange}
         selectedEntryIndex={0}
+        mode="edit"
       />
     );
 
@@ -910,42 +958,16 @@ describe('MappingView', () => {
         entryBlockGraph={currentGraph}
         onEntryBlockGraphChange={onEntryBlockGraphChange}
         selectedEntryIndex={0}
+        mode="edit"
       />
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Exclude' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit content mapping' }));
 
-    expect(screen.getByRole('heading', { name: 'Exclude content' })).toBeTruthy();
-    expect(document.querySelectorAll('button[aria-pressed]')).toHaveLength(1);
-    expect(
-      screen.queryByText(
-        'This content is used in more than one place in the entry. Select which item to exclude.'
-      )
-    ).toBeNull();
-
-    const locationCard = document.querySelector('button[aria-pressed]') as HTMLElement;
-    expect(locationCard).toBeTruthy();
-    fireEvent.click(locationCard);
-
-    const confirmButton = screen.getAllByRole('button', { name: 'Exclude content' }).at(-1);
-    expect(confirmButton).toBeTruthy();
-    fireEvent.click(confirmButton as HTMLElement);
-
-    expect(onEntryBlockGraphChange).toHaveBeenCalledTimes(1);
-
-    rerender(
-      <MappingView
-        payload={payload}
-        entryBlockGraph={currentGraph}
-        onEntryBlockGraphChange={onEntryBlockGraphChange}
-        selectedEntryIndex={0}
-      />
-    );
-
-    expect(screen.getByText('Body copy (1/2)')).toBeTruthy();
-    expect(screen.getByText('Body copy (2/2)')).toBeTruthy();
-    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(2);
-    expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
+    expect(screen.getByRole('heading', { name: 'Edit content mapping' })).toBeTruthy();
+    expect(screen.getByText('Assign to fields')).toBeTruthy();
+    expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
+    expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
 
   it('scopes image assignment destinations to currently selected entry', () => {
@@ -963,7 +985,7 @@ describe('MappingView', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Assign image' }));
 
-    expect(screen.getByRole('heading', { name: 'Assign content' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Edit content mapping' })).toBeTruthy();
     expect(screen.getAllByText('Untitled').length).toBeGreaterThan(0);
   });
 });

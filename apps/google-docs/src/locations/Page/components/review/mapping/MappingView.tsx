@@ -15,12 +15,7 @@ import type {
   SourceRef,
   TableTextSourceRef,
 } from '@types';
-import {
-  isBlockImageSourceRef,
-  isTableImageSourceRef,
-  isTableTextSourceRef,
-  isTextSourceRef,
-} from '@types';
+import { isBlockImageSourceRef, isTableImageSourceRef, isTableTextSourceRef } from '@types';
 import { FileTextIcon } from '@contentful/f36-icons';
 import { useReviewTextSelection } from '@hooks/useReviewTextSelection';
 import { getEntryTitleFromFieldMappings } from '../../../../../utils/getEntryTitle';
@@ -30,6 +25,7 @@ import {
   buildMappingHighlightIndex,
   getMappingCardKey,
   type MappingHighlight,
+  type MappingHighlightIndex,
   uniqueHighlights,
 } from './buildHighlights';
 import { buildListMarkers } from './buildListMarkers';
@@ -41,36 +37,28 @@ import {
 import { EditModal } from './edit-modals/EditModal';
 import { RichTextSelectionPreview } from './edit-modals/RichTextSelectionPreview';
 
-import { SelectionActionMenu } from './SelectionActionMenu';
+import { EditMappingButton } from './EditMappingButton';
 import { buildSourceRefKey } from './sourceRefUtils';
 import { MappingEntryCards } from './MappingEntryCards';
 import { NormalizedDocumentSection } from './NormalizedDocumentSection';
 import { buildMappingDisplayGroups } from './buildMappingDisplayGroups';
+import { ViewMappingRail, type ViewMappingCardEntry } from './ViewMappingRail';
 import {
   applyImageExclusionToEntryBlockGraph,
-  applyImageReassignToEntryBlockGraph,
   appendImageToTargets,
   applyRichTextAssignToEntryBlockGraph,
-  applyRichTextReassignToEntryBlockGraph,
   applyTextAssignToEntryBlockGraph,
   applyTextExclusionToEntryBlockGraph,
-  applyTextReassignToEntryBlockGraph,
   collectRichTextSourceRefsFromSelection,
-  collectMappedExclusionPreviewText,
   selectionIncludesTableContent,
   collectTextAssignRangesFromSelection,
   collectTextExclusionRangesFromSelection,
-  fullSpanTextExclusionRangesForLocation,
   type TextExclusionRange,
 } from './entryBlockGraphExclusion';
 
-type EditModalMode = 'exclude' | 'assign' | null;
-
 interface EditModalState {
-  mode: EditModalMode;
   viewModel: EditModalContent;
   title: string;
-  locationSectionDescription: string;
   primaryButtonLabel: string;
 }
 
@@ -80,6 +68,7 @@ interface MappingViewProps {
   onEntryBlockGraphChange: (next: EntryBlockGraph) => void;
   selectedEntryIndex: number | null;
   isDisabled?: boolean;
+  mode?: 'view' | 'edit';
 }
 
 const EMPTY_NEW_LOCATION: EditModalNewLocation = {
@@ -87,18 +76,18 @@ const EMPTY_NEW_LOCATION: EditModalNewLocation = {
   title: '',
   fieldOptions: [],
   fieldMappings: [],
+  initialFieldIds: [],
 };
 
 const EMPTY_EDIT_MODAL: EditModalState = {
-  mode: null,
   viewModel: {
     selectedText: '',
+    isImageContent: false,
     currentLocations: [],
     newLocation: EMPTY_NEW_LOCATION,
     isOpen: false,
   },
   title: '',
-  locationSectionDescription: '',
   primaryButtonLabel: '',
 };
 
@@ -120,13 +109,21 @@ function rangeIntersectsNode(range: Range, node: Node): boolean {
   }
 }
 
+const EMPTY_HIGHLIGHT_INDEX: MappingHighlightIndex = {
+  blockHighlights: {},
+  tablePartHighlights: {},
+  tableHighlights: {},
+};
+
 export const MappingView = ({
   payload,
   entryBlockGraph,
   onEntryBlockGraphChange,
   selectedEntryIndex,
   isDisabled = false,
+  mode = 'view',
 }: MappingViewProps): JSX.Element => {
+  const isViewMode = mode === 'view';
   const selectedEntryRow = useMemo(() => {
     const rows = buildEntryListFromEntryBlockGraph(
       payload.entryBlockGraph.entries,
@@ -148,21 +145,17 @@ export const MappingView = ({
   const [cardOffsetsByGroup, setCardOffsetsByGroup] = useState<
     Record<string, Record<string, number>>
   >({});
+  const [cardHeightsByGroup, setCardHeightsByGroup] = useState<
+    Record<string, Record<string, number>>
+  >({});
   const [editModalState, setEditModalState] = useState<EditModalState>(EMPTY_EDIT_MODAL);
   const [pendingTextExclusionRanges, setPendingTextExclusionRanges] = useState<
     TextExclusionRange[] | null
   >(null);
-  const [pendingImageSourceRef, setPendingImageSourceRef] = useState<ImageSourceRef | null>(null);
-  const [pendingImageReassignSourceRef, setPendingImageReassignSourceRef] =
-    useState<ImageSourceRef | null>(null);
   const [pendingExcludeImageSourceRefs, setPendingExcludeImageSourceRefs] = useState<
     ImageSourceRef[]
   >([]);
-  const [pendingTextReassignRanges, setPendingTextReassignRanges] = useState<TextExclusionRange[]>(
-    []
-  );
   const [pendingTextAssignRanges, setPendingTextAssignRanges] = useState<TextExclusionRange[]>([]);
-  const [pendingModalSelectionRange, setPendingModalSelectionRange] = useState<Range | null>(null);
   const [pendingPreviewSourceRefs, setPendingPreviewSourceRefs] = useState<SourceRef[]>([]);
   const [pendingPreviewHasTableContent, setPendingPreviewHasTableContent] = useState(false);
   const textSelectionRootRef = useRef<HTMLDivElement | null>(null);
@@ -173,12 +166,8 @@ export const MappingView = ({
   const closeEditModal = () => {
     setEditModalState(EMPTY_EDIT_MODAL);
     setPendingTextExclusionRanges(null);
-    setPendingImageSourceRef(null);
-    setPendingImageReassignSourceRef(null);
     setPendingExcludeImageSourceRefs([]);
-    setPendingTextReassignRanges([]);
     setPendingTextAssignRanges([]);
-    setPendingModalSelectionRange(null);
     setPendingPreviewSourceRefs([]);
     setPendingPreviewHasTableContent(false);
   };
@@ -219,7 +208,7 @@ export const MappingView = ({
   const listMarkers = useMemo(() => buildListMarkers(allSegments), [allSegments]);
 
   const getVisibleHighlights = <T extends MappingHighlight>(highlights: T[]): T[] => {
-    if (selectedEntryIndex === null) {
+    if (isViewMode || selectedEntryIndex === null) {
       return highlights;
     }
     return highlights.filter((item) => item.entryIndex === selectedEntryIndex);
@@ -385,6 +374,7 @@ export const MappingView = ({
         fieldId: fieldMapping.fieldId,
         sourceRefs: fieldMapping.sourceRefs,
       })),
+      initialFieldIds: [],
     };
   };
 
@@ -481,6 +471,7 @@ export const MappingView = ({
   useLayoutEffect(() => {
     const measureOffsets = () => {
       const nextOffsets: Record<string, Record<string, number>> = {};
+      const nextHeights: Record<string, Record<string, number>> = {};
 
       allGroups.forEach((group) => {
         const groupNode = groupLayoutRefs.current[group.id];
@@ -505,92 +496,27 @@ export const MappingView = ({
         });
 
         nextOffsets[group.id] = resolveMarkerOffsets(cards);
+        nextHeights[group.id] = Object.fromEntries(cards.map((c) => [c.key, c.height]));
       });
 
       setCardOffsetsByGroup(nextOffsets);
+      setCardHeightsByGroup(nextHeights);
     };
 
     measureOffsets();
+
+    const observer = new ResizeObserver(measureOffsets);
+    Object.values(cardWrapperRefs.current).forEach((node) => {
+      if (node) observer.observe(node);
+    });
+
+    return () => observer.disconnect();
   }, [allGroups]);
 
-  const openAssignModal = (
-    preview: string,
-    currentLocations: EditLocationOption[],
-    reassignRanges: TextExclusionRange[],
-    assignRanges: TextExclusionRange[],
-    imageSourceRef: ImageSourceRef | null = null,
-    selectionRange: Range | null = null,
-    previewSourceRefs: SourceRef[] = []
-  ) => {
-    setPendingTextExclusionRanges(null);
-    setPendingImageSourceRef(null);
-    setPendingImageReassignSourceRef(imageSourceRef);
-    setPendingTextReassignRanges(reassignRanges);
-    setPendingTextAssignRanges(assignRanges);
-    setPendingModalSelectionRange(selectionRange ? selectionRange.cloneRange() : null);
-    setPendingPreviewSourceRefs(previewSourceRefs);
-    setPendingPreviewHasTableContent(
-      selectionRange
-        ? selectionIncludesTableContent(textSelectionRootRef.current, selectionRange)
-        : false
-    );
-    setEditModalState({
-      mode: 'assign',
-      viewModel: {
-        selectedText: preview,
-        currentLocations,
-        newLocation,
-        isOpen: true,
-      },
-      title: `${canExcludeSelectedText ? 'Reassign' : 'Assign'} content`,
-      locationSectionDescription: '',
-      primaryButtonLabel: `${canExcludeSelectedText ? 'Reassign' : 'Assign'} content`,
-    });
-  };
-
-  const openExcludeModal = (
-    selectedText: string,
-    currentLocations: EditLocationOption[],
-    preview?: { contentPreview: string; previewSectionTitle: string },
-    selectionRange: Range | null = null,
-    previewSourceRefs: SourceRef[] = []
-  ) => {
-    setPendingExcludeImageSourceRefs(
-      previewSourceRefs.filter(
-        (sourceRef): sourceRef is ImageSourceRef =>
-          isBlockImageSourceRef(sourceRef) || isTableImageSourceRef(sourceRef)
-      )
-    );
-    setPendingModalSelectionRange(selectionRange ? selectionRange.cloneRange() : null);
-    setPendingPreviewSourceRefs(previewSourceRefs);
-    setPendingPreviewHasTableContent(
-      selectionRange
-        ? selectionIncludesTableContent(textSelectionRootRef.current, selectionRange)
-        : false
-    );
-    setEditModalState({
-      mode: 'exclude',
-      viewModel: {
-        selectedText,
-        contentPreview: preview?.contentPreview,
-        previewSectionTitle: preview?.previewSectionTitle,
-        currentLocations,
-        newLocation: EMPTY_NEW_LOCATION,
-        isOpen: true,
-      },
-      title: 'Exclude content',
-      locationSectionDescription:
-        currentLocations.length > 1
-          ? 'This content is used in more than one place in the entry. Select which item to exclude.'
-          : '',
-      primaryButtonLabel: 'Exclude content',
-    });
-  };
-
-  const handleAssignFromSelection = () => {
+  const handleEditFromSelection = () => {
     if (isDisabled || !selectedText.trim()) return;
     const selectionRange = selectedRange ? selectedRange.cloneRange() : null;
-    const reassignRanges = collectTextExclusionRangesFromSelection(
+    const exclusionRanges = collectTextExclusionRangesFromSelection(
       textSelectionRootRef.current,
       selectionRange
     );
@@ -603,315 +529,229 @@ export const MappingView = ({
       selectionRange,
       document
     );
-    openAssignModal(
-      selectedText.trim(),
-      getLocationsForSelectedText(),
-      reassignRanges,
-      assignRanges,
-      null,
-      selectionRange,
-      previewSourceRefs
-    );
-    clearSelection();
-  };
+    const currentLocations = getLocationsForSelectedText();
 
-  const handleExcludeFromSelection = () => {
-    if (isDisabled || !selectedText.trim()) return;
-    const selectionRange = selectedRange ? selectedRange.cloneRange() : null;
-    const ranges = collectTextExclusionRangesFromSelection(
-      textSelectionRootRef.current,
-      selectionRange
+    const currentSourceRefKeys = new Set(
+      currentLocations.flatMap((loc) =>
+        (loc.sourceRefs?.length ? loc.sourceRefs : [loc.sourceRef]).map(buildSourceRefKey)
+      )
     );
-    setPendingTextExclusionRanges(ranges.length ? ranges : null);
-    setPendingImageSourceRef(null);
-    const trimmed = selectedText.trim();
-    const mappedPreview = collectMappedExclusionPreviewText(
-      textSelectionRootRef.current,
-      selectionRange
-    ).trim();
-    const previewSourceRefs = collectRichTextSourceRefsFromSelection(
-      textSelectionRootRef.current,
-      selectionRange,
-      document,
-      { mappedState: 'mapped' }
+    const initialFieldIds = newLocation.fieldMappings
+      .filter((fm) => fm.sourceRefs.some((sr) => currentSourceRefKeys.has(buildSourceRefKey(sr))))
+      .map((fm) => fm.fieldId);
+
+    setPendingTextExclusionRanges(exclusionRanges.length ? exclusionRanges : null);
+    setPendingTextAssignRanges(assignRanges);
+    setPendingPreviewSourceRefs(previewSourceRefs);
+    setPendingPreviewHasTableContent(
+      selectionIncludesTableContent(textSelectionRootRef.current, selectionRange)
     );
-    openExcludeModal(
-      trimmed,
-      getLocationsForSelectedText(),
-      {
-        contentPreview: mappedPreview || trimmed,
-        previewSectionTitle: 'Selected content',
+    setPendingExcludeImageSourceRefs(
+      previewSourceRefs.filter(
+        (ref): ref is ImageSourceRef => isBlockImageSourceRef(ref) || isTableImageSourceRef(ref)
+      )
+    );
+
+    setEditModalState({
+      viewModel: {
+        selectedText: selectedText.trim(),
+        isImageContent: false,
+        currentLocations,
+        newLocation: { ...newLocation, initialFieldIds },
+        isOpen: true,
       },
-      selectionRange,
-      previewSourceRefs
-    );
+      title: 'Edit content mapping',
+      primaryButtonLabel: 'Apply',
+    });
     clearSelection();
   };
 
-  const handleAssignImage = (sourceRef: ImageSourceRef, label: string) => {
+  const handleEditImage = (sourceRef: ImageSourceRef, label: string) => {
     if (isDisabled) return;
-    openAssignModal(label, getLocationsForSourceRef(sourceRef), [], [], sourceRef);
-    setHoveredMappingKeys([]);
-  };
+    const currentLocations = getLocationsForSourceRef(sourceRef);
 
-  const handleExcludeImage = (sourceRef: ImageSourceRef, label: string) => {
-    if (isDisabled) return;
-    setPendingImageSourceRef(sourceRef);
+    const currentSourceRefKeys = new Set(
+      currentLocations.flatMap((loc) =>
+        (loc.sourceRefs?.length ? loc.sourceRefs : [loc.sourceRef]).map(buildSourceRefKey)
+      )
+    );
+    const initialFieldIds = newLocation.fieldMappings
+      .filter((fm) => fm.sourceRefs.some((sr) => currentSourceRefKeys.has(buildSourceRefKey(sr))))
+      .map((fm) => fm.fieldId);
+
     setPendingTextExclusionRanges(null);
-    openExcludeModal(label, getLocationsForSourceRef(sourceRef), {
-      contentPreview: label,
-      previewSectionTitle: 'Image to exclude',
+    setPendingTextAssignRanges([]);
+    setPendingPreviewSourceRefs([]);
+    setPendingPreviewHasTableContent(false);
+    setPendingExcludeImageSourceRefs([sourceRef]);
+
+    setEditModalState({
+      viewModel: {
+        selectedText: label,
+        isImageContent: true,
+        currentLocations,
+        newLocation: { ...newLocation, initialFieldIds },
+        isOpen: true,
+      },
+      title: 'Edit content mapping',
+      primaryButtonLabel: 'Apply',
     });
     setHoveredMappingKeys([]);
   };
 
-  const handleEditModalConfirmPrimary = ({
-    selectedLocationIds = [],
-    selectedFieldIds = {},
-  }: {
-    selectedLocationIds?: string[];
-    selectedFieldIds?: Record<string, string[]>;
-  }) => {
-    if (editModalState.mode === 'assign') {
-      const locations = editModalState.viewModel.currentLocations;
+  const handleEditModalConfirmPrimary = (selectedFieldIds: string[]) => {
+    const {
+      isImageContent,
+      newLocation: modalNewLocation,
+      currentLocations,
+    } = editModalState.viewModel;
+    const initialFieldIds = modalNewLocation.initialFieldIds;
+    const addedFieldIds = selectedFieldIds.filter((id) => !initialFieldIds.includes(id));
+    const removedFieldIds = initialFieldIds.filter((id) => !selectedFieldIds.includes(id));
+    let next = entryBlockGraph;
 
-      const newLocation = editModalState.viewModel.newLocation;
-      const resolvedTargets: { entryIndex: number; fieldId: string; fieldType: string }[] = [];
+    // ── REMOVALS ──────────────────────────────────────────────────────────────
+    for (const fieldId of removedFieldIds) {
+      const loc = currentLocations.find((l) => l.fieldId === fieldId);
+      if (!loc) continue;
 
-      if (newLocation && selectedEntryIndex !== null) {
-        const entry = entryBlockGraph.entries[selectedEntryIndex];
-        const fieldIds = selectedFieldIds[newLocation.id] ?? [];
-        const contentType = entry
-          ? payload.contentTypes.find((c) => c.sys.id === entry.contentTypeId)
-          : undefined;
-
-        for (const fieldId of fieldIds) {
-          const field = contentType?.fields?.find((f) => 'id' in f && f.id === fieldId);
-          const fieldType =
-            field && 'type' in field && typeof field.type === 'string' ? field.type : 'Text';
-          if (!fieldId.length) {
-            continue;
-          }
-
-          resolvedTargets.push({
-            entryIndex: selectedEntryIndex,
-            fieldId,
-            fieldType,
-          });
-        }
-      }
-
-      if (!resolvedTargets.length) {
-        return;
-      }
-
-      const richTextTargets = resolvedTargets.filter((target) => target.fieldType === 'RichText');
-      const nonRichTextTargets = resolvedTargets.filter(
-        (target) => target.fieldType !== 'RichText'
+      const locSourceRefKeys = new Set(
+        (loc.sourceRefs?.length ? loc.sourceRefs : [loc.sourceRef]).map(buildSourceRefKey)
       );
 
-      if (pendingImageReassignSourceRef) {
-        if (locations.length === 0) {
-          onEntryBlockGraphChange(
-            appendImageToTargets(entryBlockGraph, pendingImageReassignSourceRef, resolvedTargets)
-          );
-          closeEditModal();
-          return;
-        }
-
-        const from =
-          locations.find((location) => location.id === selectedLocationIds[0]) ??
-          locations.find((location) => location.isSelected) ??
-          locations[0];
-
-        if (!from) {
-          closeEditModal();
-          return;
-        }
-
-        onEntryBlockGraphChange(
-          applyImageReassignToEntryBlockGraph(
-            entryBlockGraph,
-            from,
-            pendingImageReassignSourceRef,
-            resolvedTargets
-          )
+      if (isImageContent) {
+        // Remove image ref from any field type (asset or rich text).
+        const matchingImages = pendingExcludeImageSourceRefs.filter((ref) =>
+          locSourceRefKeys.has(buildSourceRefKey(ref))
         );
-        closeEditModal();
-        return;
-      }
-
-      if (locations.length > 0) {
-        const from =
-          locations.find((location) => location.id === selectedLocationIds[0]) ??
-          locations.find((location) => location.isSelected) ??
-          locations[0];
-
-        if (!from) {
-          closeEditModal();
-          return;
+        for (const imgRef of matchingImages) {
+          next = applyImageExclusionToEntryBlockGraph(next, loc, imgRef);
         }
+      } else {
+        // Text removal: remove text ranges and any inline images in selection.
+        if (pendingTextExclusionRanges?.length) {
+          next = applyTextExclusionToEntryBlockGraph(next, loc, pendingTextExclusionRanges);
+        }
+        const matchingImages = pendingExcludeImageSourceRefs.filter((ref) =>
+          locSourceRefKeys.has(buildSourceRefKey(ref))
+        );
+        for (const imgRef of matchingImages) {
+          next = applyImageExclusionToEntryBlockGraph(next, loc, imgRef);
+        }
+      }
+    }
 
-        let nextGraph = entryBlockGraph;
+    // ── ADDITIONS ─────────────────────────────────────────────────────────────
+    if (addedFieldIds.length && selectedEntryIndex !== null) {
+      const entry = entryBlockGraph.entries[selectedEntryIndex];
+      const contentType = entry
+        ? payload.contentTypes.find((c) => c.sys.id === entry.contentTypeId)
+        : undefined;
 
-        if (richTextTargets.length && pendingModalSelectionRange) {
-          const mappedRichTextRefs = collectRichTextSourceRefsFromSelection(
-            textSelectionRootRef.current,
-            pendingModalSelectionRange,
-            document,
-            {
-              mappedState: 'mapped',
-              mappingKeys: new Set(from.mappingKeys ?? []),
-            }
-          );
-          const unmappedRichTextRefs = collectRichTextSourceRefsFromSelection(
-            textSelectionRootRef.current,
-            pendingModalSelectionRange,
-            document,
-            { mappedState: 'unmapped' }
-          );
-          const richTextRefs = [...mappedRichTextRefs, ...unmappedRichTextRefs];
+      const resolvedTargets = addedFieldIds.flatMap((fieldId) => {
+        const field = contentType?.fields?.find((f) => 'id' in f && f.id === fieldId);
+        const fieldType =
+          field && 'type' in field && typeof field.type === 'string' ? field.type : 'Text';
+        return [{ entryIndex: selectedEntryIndex, fieldId, fieldType }];
+      });
 
-          if (richTextRefs.length) {
-            nextGraph = applyRichTextReassignToEntryBlockGraph(
-              nextGraph,
+      if (isImageContent) {
+        // Image assignment: asset fields via appendImageToTargets,
+        // rich text fields via applyRichTextAssignToEntryBlockGraph.
+        const imageRef = pendingExcludeImageSourceRefs[0];
+        if (imageRef) {
+          const assetTargets = resolvedTargets.filter((t) => t.fieldType !== 'RichText');
+          const richTextTargets = resolvedTargets.filter((t) => t.fieldType === 'RichText');
+
+          if (assetTargets.length) {
+            next = appendImageToTargets(next, imageRef, assetTargets);
+          }
+          if (richTextTargets.length) {
+            next = applyRichTextAssignToEntryBlockGraph(
+              next,
               document,
-              from,
-              richTextRefs,
+              [imageRef],
               richTextTargets
             );
+            // appendImageToTargets clears excludedSourceRefs automatically, but
+            // applyRichTextAssignToEntryBlockGraph does not — remove it explicitly.
+            const imageKey = buildSourceRefKey(imageRef);
+            next = {
+              ...next,
+              excludedSourceRefs: next.excludedSourceRefs.filter(
+                (r) => buildSourceRefKey(r) !== imageKey
+              ),
+            };
           }
         }
+      } else {
+        // Text assignment: rich text via DOM selection, non-rich-text via character ranges.
+        const richTextTargets = resolvedTargets.filter((t) => t.fieldType === 'RichText');
+        const nonRichTextTargets = resolvedTargets.filter((t) => t.fieldType !== 'RichText');
 
-        if (!nonRichTextTargets.length) {
-          onEntryBlockGraphChange(nextGraph);
-          closeEditModal();
-          return;
-        }
-
-        const effectiveRanges = pendingTextReassignRanges.length
-          ? pendingTextReassignRanges
-          : fullSpanTextExclusionRangesForLocation(from);
-
-        if (!effectiveRanges.length) {
-          onEntryBlockGraphChange(nextGraph);
-          closeEditModal();
-          return;
-        }
-
-        onEntryBlockGraphChange(
-          applyTextReassignToEntryBlockGraph(nextGraph, from, effectiveRanges, nonRichTextTargets)
-        );
-        closeEditModal();
-        return;
-      }
-
-      let nextGraph = entryBlockGraph;
-
-      if (richTextTargets.length && pendingModalSelectionRange) {
-        const richTextRefs = collectRichTextSourceRefsFromSelection(
-          textSelectionRootRef.current,
-          pendingModalSelectionRange,
-          document,
-          { mappedState: 'unmapped' }
-        );
-
-        if (richTextRefs.length) {
-          nextGraph = applyRichTextAssignToEntryBlockGraph(
-            nextGraph,
+        if (richTextTargets.length && pendingPreviewSourceRefs.length) {
+          next = applyRichTextAssignToEntryBlockGraph(
+            next,
             document,
-            richTextRefs,
+            pendingPreviewSourceRefs,
             richTextTargets
           );
         }
-      }
 
-      if (!nonRichTextTargets.length) {
-        onEntryBlockGraphChange(nextGraph);
-        closeEditModal();
-        return;
-      }
-
-      if (!pendingTextAssignRanges.length) {
-        onEntryBlockGraphChange(nextGraph);
-        closeEditModal();
-        return;
-      }
-
-      onEntryBlockGraphChange(
-        applyTextAssignToEntryBlockGraph(
-          nextGraph,
-          document,
-          pendingTextAssignRanges,
-          nonRichTextTargets
-        )
-      );
-      closeEditModal();
-      return;
-    }
-
-    if (editModalState.mode !== 'exclude') {
-      closeEditModal();
-      return;
-    }
-
-    const locations = editModalState.viewModel.currentLocations;
-    const selected = locations.filter((location) => selectedLocationIds.includes(location.id));
-
-    if (!selected.length) {
-      closeEditModal();
-      return;
-    }
-
-    let next = entryBlockGraph;
-    for (const location of selected) {
-      if (pendingImageSourceRef) {
-        next = applyImageExclusionToEntryBlockGraph(next, location, pendingImageSourceRef);
-      } else {
-        const selectedSourceRefKeys = new Set(
-          (location.sourceRefs?.length ? location.sourceRefs : [location.sourceRef]).map(
-            (sourceRef) => buildSourceRefKey(sourceRef)
-          )
-        );
-        const matchingImageSourceRefs = pendingExcludeImageSourceRefs.filter((sourceRef) =>
-          selectedSourceRefKeys.has(buildSourceRefKey(sourceRef))
-        );
-
-        if (pendingTextExclusionRanges?.length) {
-          next = applyTextExclusionToEntryBlockGraph(next, location, pendingTextExclusionRanges);
-        }
-
-        if (matchingImageSourceRefs.length) {
-          next = matchingImageSourceRefs.reduce(
-            (graph, sourceRef) => applyImageExclusionToEntryBlockGraph(graph, location, sourceRef),
-            next
+        const allRangesForAssign = [
+          ...(pendingTextExclusionRanges ?? []),
+          ...pendingTextAssignRanges,
+        ];
+        if (nonRichTextTargets.length && allRangesForAssign.length) {
+          next = applyTextAssignToEntryBlockGraph(
+            next,
+            document,
+            allRangesForAssign,
+            nonRichTextTargets
           );
         }
       }
     }
 
-    if (next !== entryBlockGraph) {
-      onEntryBlockGraphChange(next);
-    }
-
+    if (next !== entryBlockGraph) onEntryBlockGraphChange(next);
     closeEditModal();
   };
 
-  const canExcludeSelectedText = useMemo(() => {
-    const root = textSelectionRootRef.current;
-    if (!root || !selectedRange) {
-      return false;
-    }
+  const viewCardsByGroup = useMemo((): Record<string, ViewMappingCardEntry[]> => {
+    const result: Record<string, ViewMappingCardEntry[]> = {};
 
-    const selectedSegments = root.querySelectorAll<HTMLElement>(
-      '[data-review-text-segment="true"]'
-    );
+    allGroups.forEach((group) => {
+      const cards: ViewMappingCardEntry[] = [];
 
-    return Array.from(selectedSegments).some(
-      (segment) =>
-        rangeIntersectsNode(selectedRange, segment) && segment.dataset.isMapped === 'true'
-    );
-  }, [selectedRange]);
+      group.mappingCards.forEach((card) => {
+        const location = locationsByCardKey.get(card.key);
+        if (!location) return;
+
+        const graphEntry = entryBlockGraph.entries[location.entryIndex];
+        const contentType = payload.contentTypes.find(
+          (ct) => ct.sys.id === graphEntry?.contentTypeId
+        );
+        const contentTypeName = (contentType?.name ?? graphEntry?.contentTypeId ?? '').trim();
+        const entryName = getEntryTitleFromFieldMappings(graphEntry, contentType?.displayField);
+        const field = contentType?.fields.find((f) => f.id === location.fieldId);
+        const fieldType = field
+          ? displayType(field.type ?? '', field.linkType, field.items)
+          : location.fieldType;
+
+        cards.push({
+          key: card.key,
+          contentTypeName,
+          entryName,
+          fieldName: card.fieldName,
+          fieldType,
+        });
+      });
+
+      result[group.id] = cards;
+    });
+
+    return result;
+  }, [allGroups, locationsByCardKey, entryBlockGraph.entries, payload.contentTypes]);
 
   return (
     <>
@@ -957,9 +797,12 @@ export const MappingView = ({
 
             <Flex flexDirection="column" gap="spacingS">
               {(groupsByTab[tab.id] ?? []).map((group) => {
+                const activeHighlightIndex = isViewMode ? EMPTY_HIGHLIGHT_INDEX : highlightIndex;
                 const isGroupHovered = group.mappingCards.some((card) =>
                   card.mappingKeys.some((key) => hoveredMappingKeys.includes(key))
                 );
+                const hasMappedCards = group.mappingCards.length > 0;
+                const showSurface = isViewMode ? hasMappedCards : group.showGroupedSurface;
 
                 return (
                   <Box key={group.id}>
@@ -969,7 +812,7 @@ export const MappingView = ({
                       data-testid={`display-group-layout-${group.id}`}
                       ref={setGroupLayoutRef(group.id)}>
                       <Box style={{ flex: 2 }}>
-                        {group.showGroupedSurface ? (
+                        {showSurface ? (
                           <Box
                             data-testid={`mapping-group-surface-${group.id}`}
                             data-hovered={isGroupHovered ? 'true' : 'false'}
@@ -978,7 +821,7 @@ export const MappingView = ({
                                 isGroupHovered ? tokens.green600 : tokens.green500
                               }`,
                               borderRadius: tokens.borderRadiusMedium,
-                              backgroundColor: tokens.green100,
+                              backgroundColor: isViewMode ? undefined : tokens.green100,
                               padding: tokens.spacing2Xs,
                               transition: 'border-color 120ms ease, border-width 120ms ease',
                             }}>
@@ -994,8 +837,7 @@ export const MappingView = ({
                                   selectedEntryIndex={selectedEntryIndex}
                                   hoveredMappingKeys={hoveredMappingKeys}
                                   onSetHoveredMappingKeys={setHoveredMappingKeys}
-                                  onAssignImage={handleAssignImage}
-                                  onExcludeImage={handleExcludeImage}
+                                  onEditImage={handleEditImage}
                                 />
                               ))}
                             </Flex>
@@ -1013,22 +855,29 @@ export const MappingView = ({
                                 selectedEntryIndex={selectedEntryIndex}
                                 hoveredMappingKeys={hoveredMappingKeys}
                                 onSetHoveredMappingKeys={setHoveredMappingKeys}
-                                onAssignImage={handleAssignImage}
-                                onExcludeImage={handleExcludeImage}
+                                onEditImage={handleEditImage}
                               />
                             ))}
                           </Flex>
                         )}
                       </Box>
 
-                      <MappingEntryCards
-                        groupId={group.id}
-                        mappingCards={group.mappingCards}
-                        cardOffsetsByGroup={cardOffsetsByGroup}
-                        hoveredMappingKeys={hoveredMappingKeys}
-                        onSetHoveredMappingKeys={setHoveredMappingKeys}
-                        setCardWrapperRef={setCardWrapperRef}
-                      />
+                      {isViewMode ? (
+                        <ViewMappingRail
+                          segmentId={group.id}
+                          cards={viewCardsByGroup[group.id] ?? []}
+                        />
+                      ) : (
+                        <MappingEntryCards
+                          groupId={group.id}
+                          mappingCards={group.mappingCards}
+                          cardOffsetsByGroup={cardOffsetsByGroup}
+                          cardHeightsByGroup={cardHeightsByGroup}
+                          hoveredMappingKeys={hoveredMappingKeys}
+                          onSetHoveredMappingKeys={setHoveredMappingKeys}
+                          setCardWrapperRef={setCardWrapperRef}
+                        />
+                      )}
                     </Flex>
                   </Box>
                 );
@@ -1038,28 +887,20 @@ export const MappingView = ({
         ))}
       </Flex>
 
-      {selectionRectangle && !isDisabled ? (
-        <SelectionActionMenu
-          anchorRectangle={selectionRectangle}
-          onAssign={handleAssignFromSelection}
-          onExclude={handleExcludeFromSelection}
-          isMappedContent={canExcludeSelectedText}
-        />
+      {selectionRectangle && !isDisabled && !isViewMode ? (
+        <EditMappingButton anchorRectangle={selectionRectangle} onEdit={handleEditFromSelection} />
       ) : null}
 
       <EditModal
         isOpen={editModalState.viewModel.isOpen}
         onClose={closeEditModal}
-        mode={editModalState.mode}
         viewModel={editModalState.viewModel}
-        isImageContent={Boolean(pendingImageReassignSourceRef) || Boolean(pendingImageSourceRef)}
         title={editModalState.title}
-        locationSectionDescription={editModalState.locationSectionDescription}
         primaryButtonLabel={editModalState.primaryButtonLabel}
         additionalContent={(() => {
           if (!pendingPreviewSourceRefs.length && !pendingPreviewHasTableContent) return undefined;
           const allTableText = pendingPreviewSourceRefs.every(isTableTextSourceRef);
-          if (allTableText) {
+          if (allTableText && pendingPreviewSourceRefs.length > 0) {
             const first = pendingPreviewSourceRefs[0] as TableTextSourceRef;
             const singleCell = pendingPreviewSourceRefs.every(
               (ref) =>
@@ -1068,22 +909,23 @@ export const MappingView = ({
                 ref.rowId === first.rowId &&
                 ref.cellId === first.cellId
             );
-            if (singleCell) return undefined;
-            const table = document.tables.find((t) => t.id === first.tableId);
-            const totalParts =
-              table?.rows.flatMap((r) => r.cells.flatMap((c) => c.parts)).length ?? 0;
-            const coveredParts = new Set(
-              pendingPreviewSourceRefs
-                .filter(isTableTextSourceRef)
-                .map((ref) => `${ref.rowId}:${ref.cellId}:${ref.partId}`)
-            ).size;
-            if (totalParts > 0 && coveredParts < totalParts) {
-              return (
-                <Note variant="warning">
-                  Partial table selections are not supported for rich text fields. Select the entire
-                  table or just from a single cell instead.
-                </Note>
-              );
+            if (!singleCell) {
+              const table = document.tables.find((t) => t.id === first.tableId);
+              const totalParts =
+                table?.rows.flatMap((r) => r.cells.flatMap((c) => c.parts)).length ?? 0;
+              const coveredParts = new Set(
+                pendingPreviewSourceRefs
+                  .filter(isTableTextSourceRef)
+                  .map((ref) => `${ref.rowId}:${ref.cellId}:${ref.partId}`)
+              ).size;
+              if (totalParts > 0 && coveredParts < totalParts) {
+                return (
+                  <Note variant="warning">
+                    Partial table selections are not supported for rich text fields. Select the
+                    entire table or just from a single cell instead.
+                  </Note>
+                );
+              }
             }
           }
           return (

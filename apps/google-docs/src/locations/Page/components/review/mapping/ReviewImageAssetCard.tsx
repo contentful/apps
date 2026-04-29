@@ -1,4 +1,5 @@
-import { Box, Card, Image, MenuItem } from '@contentful/f36-components';
+import { Box, Card, Flex, Image, MenuItem, Text } from '@contentful/f36-components';
+import { PencilSimpleIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import type { ImageSourceRef, NormalizedDocumentImage } from '@types';
 import Splitter from '../../mainpage/Splitter';
@@ -14,8 +15,7 @@ export interface ReviewImageAssetCardProps {
   size?: 'small' | 'default';
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
-  onAssign: () => void;
-  onExclude: () => void;
+  onEdit: () => void;
 }
 
 export function getNormalizedImageDisplayName(image: NormalizedDocumentImage): string {
@@ -31,11 +31,9 @@ export function ReviewImageAssetCard({
   size = 'default',
   onMouseEnter,
   onMouseLeave,
-  onAssign,
-  onExclude,
+  onEdit,
 }: ReviewImageAssetCardProps): JSX.Element {
   const title = getNormalizedImageDisplayName(image);
-  const assignLabel = isHighlighted ? 'Reassign' : 'Assign';
 
   const imageHeight = size === 'small' ? '180px' : '280px';
 
@@ -69,11 +67,11 @@ export function ReviewImageAssetCard({
       <Card
         ariaLabel={title}
         actions={[
-          <MenuItem key="assigned" onClick={onAssign}>
-            {assignLabel}
-          </MenuItem>,
-          <MenuItem key="exclude" onClick={onExclude} isDisabled={!isHighlighted}>
-            Exclude
+          <MenuItem key="edit" onClick={onEdit}>
+            <Flex alignItems="center" gap="spacing2Xs">
+              <PencilSimpleIcon size="tiny" />
+              <Text>Edit content mapping</Text>
+            </Flex>
           </MenuItem>,
         ]}>
         <Splitter />

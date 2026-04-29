@@ -45,9 +45,12 @@ export const FieldSelectionDropdown = ({
       ),
     [fieldMappings]
   );
+  const isSelectableForImage = (option: EditModalFieldOption) =>
+    option.isAssetField === true || option.fieldType === 'RichText';
+
   const selectableOptions = useMemo(() => {
     if (isImageContent) {
-      return fieldOptions.filter((option) => option.isAssetField === true);
+      return fieldOptions.filter(isSelectableForImage);
     }
     return fieldOptions.filter((option) => isSelectableFieldType(option, selectedText));
   }, [fieldOptions, isImageContent, selectedText]);
@@ -56,7 +59,7 @@ export const FieldSelectionDropdown = ({
     () =>
       fieldOptions.some((option) =>
         isImageContent
-          ? !option.isAssetField
+          ? !isSelectableForImage(option)
           : !isSelectableFieldType(option, selectedText) && !option.isAssetField
       ),
     [fieldOptions, isImageContent, selectedText]
@@ -100,7 +103,7 @@ export const FieldSelectionDropdown = ({
         {fieldOptions.map((option) => {
           const fieldTypeDisplay = option.fieldDisplayType;
           const isDisabled = isImageContent
-            ? !option.isAssetField
+            ? !isSelectableForImage(option)
             : !isSelectableFieldType(option, selectedText);
           const isFilled = filledFieldIds.has(option.id);
           return (
@@ -109,7 +112,7 @@ export const FieldSelectionDropdown = ({
               value={option.id}
               itemId={option.id}
               isChecked={selectedFieldIds.includes(option.id)}
-              isDisabled={isDisabled}
+              isDisabled={isDisabled && !selectedFieldIds.includes(option.id)}
               onSelectItem={handleSelectField}
               className={optionRow}>
               <Flex gap="spacing2Xs">
