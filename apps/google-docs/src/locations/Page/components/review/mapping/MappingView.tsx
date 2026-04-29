@@ -42,7 +42,8 @@ import { buildSourceRefKey } from './sourceRefUtils';
 import { MappingEntryCards } from './MappingEntryCards';
 import { NormalizedDocumentSection } from './NormalizedDocumentSection';
 import { buildMappingDisplayGroups } from './buildMappingDisplayGroups';
-import { ViewMappingRail, type ViewMappingCardEntry } from './ViewMappingRail';
+import { type ViewMappingCardEntry } from './ViewMappingRail';
+import { ViewMappingCard } from './ViewMappingCard';
 import {
   applyImageExclusionToEntryBlockGraph,
   appendImageToTargets,
@@ -740,6 +741,7 @@ export const MappingView = ({
 
         cards.push({
           key: card.key,
+          mappingKeys: card.mappingKeys,
           contentTypeName,
           entryName,
           fieldName: card.fieldName,
@@ -801,8 +803,61 @@ export const MappingView = ({
                 const isGroupHovered = group.mappingCards.some((card) =>
                   card.mappingKeys.some((key) => hoveredMappingKeys.includes(key))
                 );
-                const hasMappedCards = group.mappingCards.length > 0;
-                const showSurface = isViewMode ? hasMappedCards : group.showGroupedSurface;
+                const showSurface = group.showGroupedSurface;
+
+                if (isViewMode) {
+                  const viewCards = viewCardsByGroup[group.id] ?? [];
+                  return (
+                    <Box key={group.id} data-testid={`display-group-layout-${group.id}`} ref={setGroupLayoutRef(group.id)}>
+                      <Flex flexDirection="column" gap="spacing2Xs">
+                        {viewCards.map((card) => {
+                          const isCardHovered = card.mappingKeys.some((k) => hoveredMappingKeys.includes(k));
+                          return (
+                            <Flex key={card.key} gap="spacingM" alignItems="stretch">
+                              <Box
+                                style={{ flex: 2 }}
+                                onMouseEnter={() => setHoveredMappingKeys(card.mappingKeys)}
+                                onMouseLeave={() => setHoveredMappingKeys([])}>
+                                <Box
+                                  style={{
+                                    border: `${isCardHovered ? 2 : 1}px solid ${isCardHovered ? tokens.green600 : tokens.green500}`,
+                                    borderRadius: tokens.borderRadiusMedium,
+                                    padding: tokens.spacing2Xs,
+                                    transition: 'border-color 120ms ease, border-width 120ms ease',
+                                  }}>
+                                  <Flex flexDirection="column" gap="spacing2Xs">
+                                    {group.segments.map((segment) => (
+                                      <NormalizedDocumentSection
+                                        key={segment.id}
+                                        segment={segment}
+                                        highlightIndex={activeHighlightIndex}
+                                        imageById={imageById}
+                                        listMarkers={listMarkers}
+                                        excludedSourceRefs={entryBlockGraph.excludedSourceRefs}
+                                        selectedEntryIndex={selectedEntryIndex}
+                                        hoveredMappingKeys={hoveredMappingKeys}
+                                        onSetHoveredMappingKeys={setHoveredMappingKeys}
+                                        onEditImage={handleEditImage}
+                                      />
+                                    ))}
+                                  </Flex>
+                                </Box>
+                              </Box>
+                              <Box style={{ flex: '0 0 280px', maxWidth: 280 }}>
+                                <ViewMappingCard
+                                  card={card}
+                                  isHovered={isCardHovered}
+                                  onMouseEnter={() => setHoveredMappingKeys(card.mappingKeys)}
+                                  onMouseLeave={() => setHoveredMappingKeys([])}
+                                />
+                              </Box>
+                            </Flex>
+                          );
+                        })}
+                      </Flex>
+                    </Box>
+                  );
+                }
 
                 return (
                   <Box key={group.id}>
@@ -817,13 +872,11 @@ export const MappingView = ({
                             data-testid={`mapping-group-surface-${group.id}`}
                             data-hovered={isGroupHovered ? 'true' : 'false'}
                             style={{
-                              border: isViewMode
-                                ? `1px solid ${tokens.green500}`
-                                : `${isGroupHovered ? 2 : 1}px solid ${isGroupHovered ? tokens.green600 : tokens.green500}`,
+                              border: `${isGroupHovered ? 2 : 1}px solid ${isGroupHovered ? tokens.green600 : tokens.green500}`,
                               borderRadius: tokens.borderRadiusMedium,
-                              backgroundColor: isViewMode ? undefined : tokens.green100,
+                              backgroundColor: tokens.green100,
                               padding: tokens.spacing2Xs,
-                              transition: isViewMode ? undefined : 'border-color 120ms ease, border-width 120ms ease',
+                              transition: 'border-color 120ms ease, border-width 120ms ease',
                             }}>
                             <Flex flexDirection="column" gap="spacing2Xs">
                               {group.segments.map((segment) => (
@@ -861,23 +914,15 @@ export const MappingView = ({
                           </Flex>
                         )}
                       </Box>
-
-                      {isViewMode ? (
-                        <ViewMappingRail
-                          segmentId={group.id}
-                          cards={viewCardsByGroup[group.id] ?? []}
-                        />
-                      ) : (
-                        <MappingEntryCards
-                          groupId={group.id}
-                          mappingCards={group.mappingCards}
-                          cardOffsetsByGroup={cardOffsetsByGroup}
-                          cardHeightsByGroup={cardHeightsByGroup}
-                          hoveredMappingKeys={hoveredMappingKeys}
-                          onSetHoveredMappingKeys={setHoveredMappingKeys}
-                          setCardWrapperRef={setCardWrapperRef}
-                        />
-                      )}
+                      <MappingEntryCards
+                        groupId={group.id}
+                        mappingCards={group.mappingCards}
+                        cardOffsetsByGroup={cardOffsetsByGroup}
+                        cardHeightsByGroup={cardHeightsByGroup}
+                        hoveredMappingKeys={hoveredMappingKeys}
+                        onSetHoveredMappingKeys={setHoveredMappingKeys}
+                        setCardWrapperRef={setCardWrapperRef}
+                      />
                     </Flex>
                   </Box>
                 );

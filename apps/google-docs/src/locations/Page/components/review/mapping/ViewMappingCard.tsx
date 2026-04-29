@@ -3,6 +3,7 @@ import tokens from '@contentful/f36-tokens';
 
 export interface ViewMappingCardData {
   key: string;
+  mappingKeys: string[];
   contentTypeName: string;
   entryName: string;
   fieldName: string;
@@ -11,6 +12,9 @@ export interface ViewMappingCardData {
 
 interface ViewMappingCardProps {
   card: ViewMappingCardData;
+  isHovered: boolean;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
 }
 
 const rowTextStyle = {
@@ -26,14 +30,18 @@ const truncatedValueStyle = {
   textOverflow: 'ellipsis',
 } as const;
 
-export const ViewMappingCard = ({ card }: ViewMappingCardProps) => (
+export const ViewMappingCard = ({ card, isHovered, onMouseEnter, onMouseLeave }: ViewMappingCardProps) => (
   <Box
     data-testid={`view-mapping-card-${card.key}`}
+    onMouseEnter={onMouseEnter}
+    onMouseLeave={onMouseLeave}
     style={{
-      border: `1px solid ${tokens.green500}`,
+      border: `${isHovered ? 2 : 1}px solid ${isHovered ? tokens.green600 : tokens.green500}`,
       borderRadius: tokens.borderRadiusMedium,
       padding: tokens.spacing2Xs,
       backgroundColor: tokens.green100,
+      transition: 'border-color 120ms ease, border-width 120ms ease',
+      cursor: 'default',
     }}>
     <Text as="p" marginBottom="none" style={rowTextStyle}>
       <Text as="span" fontColor="gray600" marginRight="spacingXs" style={rowTextStyle}>
