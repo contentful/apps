@@ -1,5 +1,14 @@
 import { ArrowRightIcon } from '@contentful/f36-icons';
-import { Button, Card, Flex, Heading, Layout, Note, Paragraph } from '@contentful/f36-components';
+import {
+  Button,
+  Card,
+  Flex,
+  Grid,
+  Heading,
+  Layout,
+  Note,
+  Paragraph,
+} from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { OAuthConnector } from './OAuthConnector';
 
@@ -36,36 +45,40 @@ export const MainPageView = ({
           onDisconnect={onDisconnectGoogleDrive}
         />
         <Card padding="large">
-          {!isOAuthLoading && !isOAuthConnected && (
-            <Note variant="warning" style={{ marginBottom: tokens.spacingM }}>
-              Please connect to Google Drive before selecting your file.
-            </Note>
-          )}
           <Flex
-            flexDirection="row"
-            alignItems="center"
+            flexDirection="column"
+            alignItems="flex-start"
             justifyContent="space-between"
-            flexWrap="wrap"
-            gap="spacingL">
-            <Flex flexDirection="column" alignItems="flex-start">
-              <Heading marginBottom="spacingS">Select your file</Heading>
-              <Paragraph>
-                Create entries using existing content types from a Google Drive file.
-                <br />
-                Get started by selecting the file you would like to use.
-              </Paragraph>
-            </Flex>
-
-            <Flex flexDirection="row" alignItems="center" gap="spacingS">
-              <Button
-                variant="primary"
-                size="medium"
-                isDisabled={!oauthToken}
-                onClick={onSelectFile}
-                endIcon={<ArrowRightIcon />}>
-                Select your file
-              </Button>
-            </Flex>
+            gap="spacingS"
+            style={{ width: '100%' }}>
+            <Heading marginBottom="spacingS">Select your file</Heading>
+            <Grid columns="3fr 2fr" style={{ width: '100%' }}>
+              <Grid.Item>
+                <Paragraph>
+                  Create entries using existing content types from a Google Drive file.
+                  <br />
+                  Get started by selecting the file you would like to use.
+                </Paragraph>
+              </Grid.Item>
+              <Grid.Item justifySelf="end">
+                <Button
+                  variant="primary"
+                  isDisabled={!oauthToken}
+                  onClick={onSelectFile}
+                  endIcon={<ArrowRightIcon />}>
+                  Select
+                </Button>
+              </Grid.Item>
+            </Grid>
+            <Note variant="neutral">
+              This app only creates new entries. Any existing entries that need to be referenced
+              must be assigned after the draft entries are created.
+            </Note>
+            {!isOAuthLoading && !isOAuthConnected && (
+              <Note variant="warning" style={{ width: '100%' }}>
+                Please connect to Google Drive before selecting your file.
+              </Note>
+            )}
           </Flex>
         </Card>
       </Flex>
