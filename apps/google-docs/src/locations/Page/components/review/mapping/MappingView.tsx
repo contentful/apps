@@ -932,7 +932,7 @@ export const MappingView = ({
             <RichTextSelectionPreview
               document={document}
               sourceRefs={pendingPreviewSourceRefs}
-              showTablePlaceholder={pendingPreviewHasTableContent}
+              selectionIncludesTableContent={pendingPreviewHasTableContent}
             />
           );
         })()}

@@ -1,12 +1,22 @@
 import { Box, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import type { NormalizedDocument, SourceRef } from '@types';
-import { isBlockImageSourceRef, isTableImageSourceRef, isTextSourceRef } from '@types';
+import type {
+  NormalizedDocument,
+  SourceRef,
+  TableImageSourceRef,
+  TableTextSourceRef,
+} from '@types';
+import {
+  isBlockImageSourceRef,
+  isTableImageSourceRef,
+  isTableTextSourceRef,
+  isTextSourceRef,
+} from '@types';
 
 interface RichTextSelectionPreviewProps {
   document: NormalizedDocument;
   sourceRefs: SourceRef[];
-  showTablePlaceholder?: boolean;
+  selectionIncludesTableContent?: boolean;
 }
 
 function getTextPreview(sourceRef: SourceRef): string {
@@ -25,11 +35,37 @@ function getImageForSourceRef(document: NormalizedDocument, sourceRef: SourceRef
   return document.images?.find((image) => image.id === sourceRef.imageId);
 }
 
+function isTableCellSourceRef(
+  sourceRef: SourceRef
+): sourceRef is TableTextSourceRef | TableImageSourceRef {
+  return isTableTextSourceRef(sourceRef) || isTableImageSourceRef(sourceRef);
+}
+
+function isSingleTableCellSelection(sourceRefs: SourceRef[]): boolean {
+  const tableCellSourceRefs = sourceRefs.filter(isTableCellSourceRef);
+
+  if (!tableCellSourceRefs.length) {
+    return false;
+  }
+
+  const [first] = tableCellSourceRefs;
+
+  return tableCellSourceRefs.every(
+    (sourceRef) =>
+      sourceRef.tableId === first.tableId &&
+      sourceRef.rowId === first.rowId &&
+      sourceRef.cellId === first.cellId
+  );
+}
+
 export const RichTextSelectionPreview = ({
   document,
   sourceRefs,
-  showTablePlaceholder = false,
+  selectionIncludesTableContent = false,
 }: RichTextSelectionPreviewProps): JSX.Element => {
+  const shouldShowTablePlaceholder =
+    selectionIncludesTableContent && !isSingleTableCellSelection(sourceRefs);
+
   return (
     <Flex flexDirection="column" gap="spacingXs">
       {sourceRefs.map((sourceRef, index) => {
@@ -54,6 +90,10 @@ export const RichTextSelectionPreview = ({
           );
         }
 
+        if (shouldShowTablePlaceholder && isTableTextSourceRef(sourceRef)) {
+          return null;
+        }
+
         const text = getTextPreview(sourceRef);
         if (!text.trim().length) {
           return null;
@@ -69,7 +109,7 @@ export const RichTextSelectionPreview = ({
           </Text>
         );
       })}
-      {showTablePlaceholder ? (
+      {shouldShowTablePlaceholder ? (
         <Box
           style={{
             border: `1px dashed ${tokens.gray400}`,
