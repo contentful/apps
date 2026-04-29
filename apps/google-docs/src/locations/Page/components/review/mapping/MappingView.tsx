@@ -807,16 +807,15 @@ export const MappingView = ({
 
                 if (isViewMode) {
                   const viewCards = viewCardsByGroup[group.id] ?? [];
+                  const isTableGroup = group.segments.every((s) => s.kind === 'table');
                   return (
                     <Box key={group.id} data-testid={`display-group-layout-${group.id}`} ref={setGroupLayoutRef(group.id)}>
                       <Flex gap="spacingM" alignItems="stretch">
-                        {/* Document content rendered once; per-card outlines overlaid absolutely */}
+                        {/* Document content rendered once; per-card outlines overlaid absolutely for non-table groups */}
                         <Box
                           style={{ flex: 2, position: 'relative' }}
-                          onMouseEnter={() => {
-                            if (viewCards.length === 1) setHoveredMappingKeys(viewCards[0]!.mappingKeys);
-                          }}
-                          onMouseLeave={() => setHoveredMappingKeys([])}>
+                          onMouseEnter={!isTableGroup && viewCards.length === 1 ? () => setHoveredMappingKeys(viewCards[0]!.mappingKeys) : undefined}
+                          onMouseLeave={!isTableGroup ? () => setHoveredMappingKeys([]) : undefined}>
                           <Flex flexDirection="column" gap="spacing2Xs" style={{ padding: tokens.spacing2Xs }}>
                             {group.segments.map((segment) => (
                               <NormalizedDocumentSection
@@ -829,11 +828,12 @@ export const MappingView = ({
                                 selectedEntryIndex={selectedEntryIndex}
                                 hoveredMappingKeys={hoveredMappingKeys}
                                 onSetHoveredMappingKeys={setHoveredMappingKeys}
+                                isViewMode={true}
                                 onEditImage={handleEditImage}
                               />
                             ))}
                           </Flex>
-                          {viewCards.map((card) => {
+                          {!isTableGroup && viewCards.map((card) => {
                             const isCardHovered = card.mappingKeys.some((k) => hoveredMappingKeys.includes(k));
                             return (
                               <Box
