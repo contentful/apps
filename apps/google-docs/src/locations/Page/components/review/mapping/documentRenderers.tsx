@@ -145,7 +145,7 @@ interface BlockRendererProps {
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
-  onEditImage: (
+  onEditImage?: (
     sourceRef: { type: 'image'; blockId: string; imageId: string },
     label: string
   ) => void;
@@ -249,7 +249,11 @@ export const BlockRenderer = ({
                 highlighted ? () => onSetHoveredMappingKeys(imageMappingKeys) : undefined
               }
               onMouseLeave={highlighted ? () => onSetHoveredMappingKeys([]) : undefined}
-              onEdit={() => onEditImage(imageSourceRef, image.title ?? image.altText ?? image.id)}
+              onEdit={
+                onEditImage
+                  ? () => onEditImage(imageSourceRef, image.title ?? image.altText ?? image.id)
+                  : undefined
+              }
             />
           </Box>
         );
@@ -271,8 +275,7 @@ interface TableRendererProps {
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
-  isViewMode?: boolean;
-  onEditImage: (
+  onEditImage?: (
     sourceRef: {
       type: 'tableImage';
       tableId: string;
@@ -296,7 +299,7 @@ interface TablePartRendererProps {
   excludedSourceRefs: SourceRef[];
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
-  onEditImage: TableRendererProps['onEditImage'];
+  onEditImage?: TableRendererProps['onEditImage'];
 }
 
 const TablePartRenderer = ({
@@ -359,7 +362,11 @@ const TablePartRenderer = ({
           size="small"
           onMouseEnter={highlighted ? () => onSetHoveredMappingKeys(mappingKeys) : undefined}
           onMouseLeave={highlighted ? () => onSetHoveredMappingKeys([]) : undefined}
-          onEdit={() => onEditImage(imageSourceRef, image.title ?? image.altText ?? image.id)}
+          onEdit={
+            onEditImage
+              ? () => onEditImage(imageSourceRef, image.title ?? image.altText ?? image.id)
+              : undefined
+          }
         />
       </Box>
     );

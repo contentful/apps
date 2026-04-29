@@ -919,7 +919,7 @@ export const MappingView = ({
                                   selectedEntryIndex={selectedEntryIndex}
                                   hoveredMappingKeys={hoveredMappingKeys}
                                   onSetHoveredMappingKeys={setHoveredMappingKeys}
-                                  onEditImage={handleEditImage}
+                                  onEditImage={isViewMode ? undefined : handleEditImage}
                                 />
                               ))}
                             </Flex>
@@ -937,7 +937,7 @@ export const MappingView = ({
                                 selectedEntryIndex={selectedEntryIndex}
                                 hoveredMappingKeys={hoveredMappingKeys}
                                 onSetHoveredMappingKeys={setHoveredMappingKeys}
-                                onEditImage={handleEditImage}
+                                onEditImage={isViewMode ? undefined : handleEditImage}
                               />
                             ))}
                           </Flex>

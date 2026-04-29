@@ -15,7 +15,7 @@ export interface ReviewImageAssetCardProps {
   size?: 'small' | 'default';
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
-  onEdit: () => void;
+  onEdit?: () => void;
 }
 
 export function getNormalizedImageDisplayName(image: NormalizedDocumentImage): string {
@@ -66,14 +66,18 @@ export function ReviewImageAssetCard({
       }}>
       <Card
         ariaLabel={title}
-        actions={[
-          <MenuItem key="edit" onClick={onEdit}>
-            <Flex alignItems="center" gap="spacing2Xs">
-              <PencilSimpleIcon size="tiny" />
-              <Text>Edit content mapping</Text>
-            </Flex>
-          </MenuItem>,
-        ]}>
+        actions={
+          onEdit
+            ? [
+                <MenuItem key="edit" onClick={onEdit}>
+                  <Flex alignItems="center" gap="spacing2Xs">
+                    <PencilSimpleIcon size="tiny" />
+                    <Text>Edit content mapping</Text>
+                  </Flex>
+                </MenuItem>,
+              ]
+            : undefined
+        }>
         <Splitter />
         <Box padding="spacingS">
           <Image

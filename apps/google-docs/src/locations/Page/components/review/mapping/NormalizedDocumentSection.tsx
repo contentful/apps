@@ -17,8 +17,7 @@ interface ReviewDocumentBodyProps {
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
-  isViewMode?: boolean;
-  onEditImage: (sourceRef: ImageSourceRef, label: string) => void;
+  onEditImage?: (sourceRef: ImageSourceRef, label: string) => void;
 }
 
 export const NormalizedDocumentSection = ({
