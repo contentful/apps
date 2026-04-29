@@ -41,6 +41,7 @@ import { buildSourceRefKey } from './sourceRefUtils';
 import { MappingEntryCards } from './MappingEntryCards';
 import { NormalizedDocumentSection } from './NormalizedDocumentSection';
 import { buildMappingDisplayGroups } from './buildMappingDisplayGroups';
+import { ViewMappingRail, type ViewMappingCardEntry } from './ViewMappingRail';
 import {
   applyImageExclusionToEntryBlockGraph,
   applyRichTextAssignToEntryBlockGraph,
@@ -65,6 +66,7 @@ interface MappingViewProps {
   onEntryBlockGraphChange: (next: EntryBlockGraph) => void;
   selectedEntryIndex: number | null;
   isDisabled?: boolean;
+  mode?: 'view' | 'edit';
 }
 
 const EMPTY_NEW_LOCATION: EditModalNewLocation = {
@@ -111,7 +113,9 @@ export const MappingView = ({
   onEntryBlockGraphChange,
   selectedEntryIndex,
   isDisabled = false,
+  mode = 'view',
 }: MappingViewProps): JSX.Element => {
+  const isViewMode = mode === 'view';
   const selectedEntryRow = useMemo(() => {
     const rows = buildEntryListFromEntryBlockGraph(
       payload.entryBlockGraph.entries,
@@ -131,6 +135,9 @@ export const MappingView = ({
   ]);
   const [hoveredMappingKeys, setHoveredMappingKeys] = useState<string[]>([]);
   const [cardOffsetsByGroup, setCardOffsetsByGroup] = useState<
+    Record<string, Record<string, number>>
+  >({});
+  const [cardHeightsByGroup, setCardHeightsByGroup] = useState<
     Record<string, Record<string, number>>
   >({});
   const [editModalState, setEditModalState] = useState<EditModalState>(EMPTY_EDIT_MODAL);
@@ -195,7 +202,7 @@ export const MappingView = ({
   const listMarkers = useMemo(() => buildListMarkers(allSegments), [allSegments]);
 
   const getVisibleHighlights = <T extends MappingHighlight>(highlights: T[]): T[] => {
-    if (selectedEntryIndex === null) {
+    if (isViewMode || selectedEntryIndex === null) {
       return highlights;
     }
     return highlights.filter((item) => item.entryIndex === selectedEntryIndex);
@@ -458,6 +465,7 @@ export const MappingView = ({
   useLayoutEffect(() => {
     const measureOffsets = () => {
       const nextOffsets: Record<string, Record<string, number>> = {};
+      const nextHeights: Record<string, Record<string, number>> = {};
 
       allGroups.forEach((group) => {
         const groupNode = groupLayoutRefs.current[group.id];
@@ -482,12 +490,21 @@ export const MappingView = ({
         });
 
         nextOffsets[group.id] = resolveMarkerOffsets(cards);
+        nextHeights[group.id] = Object.fromEntries(cards.map((c) => [c.key, c.height]));
       });
 
       setCardOffsetsByGroup(nextOffsets);
+      setCardHeightsByGroup(nextHeights);
     };
 
     measureOffsets();
+
+    const observer = new ResizeObserver(measureOffsets);
+    Object.values(cardWrapperRefs.current).forEach((node) => {
+      if (node) observer.observe(node);
+    });
+
+    return () => observer.disconnect();
   }, [allGroups]);
 
   const handleEditFromSelection = () => {
@@ -655,6 +672,42 @@ export const MappingView = ({
     closeEditModal();
   };
 
+  const viewCardsByGroup = useMemo((): Record<string, ViewMappingCardEntry[]> => {
+    const result: Record<string, ViewMappingCardEntry[]> = {};
+
+    allGroups.forEach((group) => {
+      const cards: ViewMappingCardEntry[] = [];
+
+      group.mappingCards.forEach((card) => {
+        const location = locationsByCardKey.get(card.key);
+        if (!location) return;
+
+        const graphEntry = entryBlockGraph.entries[location.entryIndex];
+        const contentType = payload.contentTypes.find(
+          (ct) => ct.sys.id === graphEntry?.contentTypeId
+        );
+        const contentTypeName = (contentType?.name ?? graphEntry?.contentTypeId ?? '').trim();
+        const entryName = getEntryTitleFromFieldMappings(graphEntry, contentType?.displayField);
+        const field = contentType?.fields.find((f) => f.id === location.fieldId);
+        const fieldType = field
+          ? displayType(field.type ?? '', field.linkType, field.items)
+          : location.fieldType;
+
+        cards.push({
+          key: card.key,
+          contentTypeName,
+          entryName,
+          fieldName: card.fieldName,
+          fieldType,
+        });
+      });
+
+      result[group.id] = cards;
+    });
+
+    return result;
+  }, [allGroups, locationsByCardKey, entryBlockGraph.entries, payload.contentTypes]);
+
   return (
     <>
       <Flex
@@ -702,6 +755,8 @@ export const MappingView = ({
                 const isGroupHovered = group.mappingCards.some((card) =>
                   card.mappingKeys.some((key) => hoveredMappingKeys.includes(key))
                 );
+                const hasMappedCards = group.mappingCards.length > 0;
+                const showSurface = isViewMode ? hasMappedCards : group.showGroupedSurface;
 
                 return (
                   <Box key={group.id}>
@@ -711,7 +766,7 @@ export const MappingView = ({
                       data-testid={`display-group-layout-${group.id}`}
                       ref={setGroupLayoutRef(group.id)}>
                       <Box style={{ flex: 2 }}>
-                        {group.showGroupedSurface ? (
+                        {showSurface ? (
                           <Box
                             data-testid={`mapping-group-surface-${group.id}`}
                             data-hovered={isGroupHovered ? 'true' : 'false'}
@@ -720,7 +775,7 @@ export const MappingView = ({
                                 isGroupHovered ? tokens.green600 : tokens.green500
                               }`,
                               borderRadius: tokens.borderRadiusMedium,
-                              backgroundColor: tokens.green100,
+                              backgroundColor: isViewMode ? undefined : tokens.green100,
                               padding: tokens.spacing2Xs,
                               transition: 'border-color 120ms ease, border-width 120ms ease',
                             }}>
@@ -761,14 +816,22 @@ export const MappingView = ({
                         )}
                       </Box>
 
-                      <MappingEntryCards
-                        groupId={group.id}
-                        mappingCards={group.mappingCards}
-                        cardOffsetsByGroup={cardOffsetsByGroup}
-                        hoveredMappingKeys={hoveredMappingKeys}
-                        onSetHoveredMappingKeys={setHoveredMappingKeys}
-                        setCardWrapperRef={setCardWrapperRef}
-                      />
+                      {isViewMode ? (
+                        <ViewMappingRail
+                          segmentId={group.id}
+                          cards={viewCardsByGroup[group.id] ?? []}
+                        />
+                      ) : (
+                        <MappingEntryCards
+                          groupId={group.id}
+                          mappingCards={group.mappingCards}
+                          cardOffsetsByGroup={cardOffsetsByGroup}
+                          cardHeightsByGroup={cardHeightsByGroup}
+                          hoveredMappingKeys={hoveredMappingKeys}
+                          onSetHoveredMappingKeys={setHoveredMappingKeys}
+                          setCardWrapperRef={setCardWrapperRef}
+                        />
+                      )}
                     </Flex>
                   </Box>
                 );
@@ -778,7 +841,7 @@ export const MappingView = ({
         ))}
       </Flex>
 
-      {selectionRectangle && !isDisabled ? (
+      {selectionRectangle && !isDisabled && !isViewMode ? (
         <EditMappingButton anchorRectangle={selectionRectangle} onEdit={handleEditFromSelection} />
       ) : null}
 
