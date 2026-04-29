@@ -323,7 +323,13 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         onPrimaryAction: closePreviewErrorAndReset,
         isPrimaryActionLoading: false,
       };
-    }, [closePreviewErrorAndReset, isOAuthBusy, isReconnectPending, previewErrorState]);
+    }, [
+      closePreviewErrorAndReset,
+      handleReconnectGoogleDrive,
+      isOAuthBusy,
+      isReconnectPending,
+      previewErrorState,
+    ]);
 
     const renderFlowStep = () => {
       switch (flowStep) {
