@@ -30,7 +30,12 @@ const truncatedValueStyle = {
   textOverflow: 'ellipsis',
 } as const;
 
-export const ViewMappingCard = ({ card, isHovered, onMouseEnter, onMouseLeave }: ViewMappingCardProps) => (
+export const ViewMappingCard = ({
+  card,
+  isHovered,
+  onMouseEnter,
+  onMouseLeave,
+}: ViewMappingCardProps) => (
   <Box
     data-testid={`view-mapping-card-${card.key}`}
     onMouseEnter={onMouseEnter}

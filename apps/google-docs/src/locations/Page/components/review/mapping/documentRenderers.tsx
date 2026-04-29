@@ -413,9 +413,11 @@ export const TableRenderer = ({
     const cell = row?.cells.find((c) => c.id === cellId);
     cell?.parts.forEach((part) => {
       const partKey = [table.id, rowId, cellId, part.id].join(':');
-      filterByEntry(borderIndex.tablePartHighlights[partKey] ?? [], selectedEntryIndex).forEach((h) => {
-        keys.push(getMappingCardKey(segmentId, h));
-      });
+      filterByEntry(borderIndex.tablePartHighlights[partKey] ?? [], selectedEntryIndex).forEach(
+        (h) => {
+          keys.push(getMappingCardKey(segmentId, h));
+        }
+      );
     });
     return keys;
   };
@@ -440,19 +442,28 @@ export const TableRenderer = ({
             {row.cells.map((cell) => {
               const cellMappingKeys = isViewMode ? getCellMappingKeys(row.id, cell.id) : [];
               const isCellMapped = cellMappingKeys.length > 0;
-              const isCellHovered = isCellMapped && cellMappingKeys.some((k) => hoveredMappingKeys.includes(k));
+              const isCellHovered =
+                isCellMapped && cellMappingKeys.some((k) => hoveredMappingKeys.includes(k));
               return (
                 <TableCell
                   key={cell.id}
                   data-testid={`table-cell-${cell.id}`}
-                  onMouseEnter={isViewMode && isCellMapped ? () => onSetHoveredMappingKeys(cellMappingKeys) : undefined}
-                  onMouseLeave={isViewMode && isCellMapped ? () => onSetHoveredMappingKeys([]) : undefined}
+                  onMouseEnter={
+                    isViewMode && isCellMapped
+                      ? () => onSetHoveredMappingKeys(cellMappingKeys)
+                      : undefined
+                  }
+                  onMouseLeave={
+                    isViewMode && isCellMapped ? () => onSetHoveredMappingKeys([]) : undefined
+                  }
                   style={{
                     backgroundColor: 'transparent',
                     verticalAlign: 'top',
                     ...(isViewMode && isCellMapped
                       ? {
-                          border: `${isCellHovered ? 2 : 1}px solid ${isCellHovered ? tokens.green600 : tokens.green500}`,
+                          border: `${isCellHovered ? 2 : 1}px solid ${
+                            isCellHovered ? tokens.green600 : tokens.green500
+                          }`,
                           borderRadius: tokens.borderRadiusMedium,
                           transition: 'border-color 120ms ease, border-width 120ms ease',
                         }

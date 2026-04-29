@@ -809,13 +809,25 @@ export const MappingView = ({
                   const viewCards = viewCardsByGroup[group.id] ?? [];
                   const isTableGroup = group.segments.every((s) => s.kind === 'table');
                   return (
-                    <Box key={group.id} data-testid={`display-group-layout-${group.id}`} ref={setGroupLayoutRef(group.id)}>
+                    <Box
+                      key={group.id}
+                      data-testid={`display-group-layout-${group.id}`}
+                      ref={setGroupLayoutRef(group.id)}>
                       <Flex gap="spacingM" alignItems="flex-start">
                         <Box
                           style={{ flex: 2, position: 'relative' }}
-                          onMouseEnter={!isTableGroup && viewCards.length === 1 ? () => setHoveredMappingKeys(viewCards[0]!.mappingKeys) : undefined}
-                          onMouseLeave={!isTableGroup ? () => setHoveredMappingKeys([]) : undefined}>
-                          <Flex flexDirection="column" gap="spacing2Xs" style={{ padding: tokens.spacing2Xs }}>
+                          onMouseEnter={
+                            !isTableGroup && viewCards.length === 1
+                              ? () => setHoveredMappingKeys(viewCards[0]!.mappingKeys)
+                              : undefined
+                          }
+                          onMouseLeave={
+                            !isTableGroup ? () => setHoveredMappingKeys([]) : undefined
+                          }>
+                          <Flex
+                            flexDirection="column"
+                            gap="spacing2Xs"
+                            style={{ padding: tokens.spacing2Xs }}>
                             {group.segments.map((segment) => (
                               <NormalizedDocumentSection
                                 key={segment.id}
@@ -833,26 +845,36 @@ export const MappingView = ({
                               />
                             ))}
                           </Flex>
-                          {!isTableGroup && viewCards.map((card) => {
-                            const isCardHovered = card.mappingKeys.some((k) => hoveredMappingKeys.includes(k));
-                            return (
-                              <Box
-                                key={card.key}
-                                style={{
-                                  position: 'absolute',
-                                  inset: 0,
-                                  border: `${isCardHovered ? 2 : 1}px solid ${isCardHovered ? tokens.green600 : tokens.green500}`,
-                                  borderRadius: tokens.borderRadiusMedium,
-                                  pointerEvents: 'none',
-                                  transition: 'border-color 120ms ease, border-width 120ms ease',
-                                }}
-                              />
-                            );
-                          })}
+                          {!isTableGroup &&
+                            viewCards.map((card) => {
+                              const isCardHovered = card.mappingKeys.some((k) =>
+                                hoveredMappingKeys.includes(k)
+                              );
+                              return (
+                                <Box
+                                  key={card.key}
+                                  style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    border: `${isCardHovered ? 2 : 1}px solid ${
+                                      isCardHovered ? tokens.green600 : tokens.green500
+                                    }`,
+                                    borderRadius: tokens.borderRadiusMedium,
+                                    pointerEvents: 'none',
+                                    transition: 'border-color 120ms ease, border-width 120ms ease',
+                                  }}
+                                />
+                              );
+                            })}
                         </Box>
-                        <Flex flexDirection="column" gap="spacing2Xs" style={{ flex: '0 0 280px', maxWidth: 280 }}>
+                        <Flex
+                          flexDirection="column"
+                          gap="spacing2Xs"
+                          style={{ flex: '0 0 280px', maxWidth: 280 }}>
                           {viewCards.map((card) => {
-                            const isCardHovered = card.mappingKeys.some((k) => hoveredMappingKeys.includes(k));
+                            const isCardHovered = card.mappingKeys.some((k) =>
+                              hoveredMappingKeys.includes(k)
+                            );
                             return (
                               <ViewMappingCard
                                 key={card.key}
@@ -882,7 +904,9 @@ export const MappingView = ({
                             data-testid={`mapping-group-surface-${group.id}`}
                             data-hovered={isGroupHovered ? 'true' : 'false'}
                             style={{
-                              border: `${isGroupHovered ? 2 : 1}px solid ${isGroupHovered ? tokens.green600 : tokens.green500}`,
+                              border: `${isGroupHovered ? 2 : 1}px solid ${
+                                isGroupHovered ? tokens.green600 : tokens.green500
+                              }`,
                               borderRadius: tokens.borderRadiusMedium,
                               backgroundColor: tokens.green100,
                               padding: tokens.spacing2Xs,

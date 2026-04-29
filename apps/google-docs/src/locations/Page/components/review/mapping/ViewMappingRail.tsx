@@ -16,7 +16,12 @@ const railStyles: BoxProps['style'] = {
   maxWidth: 280,
 };
 
-export const ViewMappingRail = ({ segmentId, cards, hoveredMappingKeys, onSetHoveredMappingKeys }: ViewMappingRailProps): JSX.Element => (
+export const ViewMappingRail = ({
+  segmentId,
+  cards,
+  hoveredMappingKeys,
+  onSetHoveredMappingKeys,
+}: ViewMappingRailProps): JSX.Element => (
   <Box data-testid={`view-mapping-rail-${segmentId}`} style={railStyles}>
     <Flex flexDirection="column" gap="spacing2Xs">
       {cards.map((card) => (
