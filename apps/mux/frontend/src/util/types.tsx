@@ -1,6 +1,6 @@
 import { FieldExtensionSDK } from '@contentful/app-sdk';
 import { ModalData } from '../components/AssetConfiguration/MuxAssetConfigurationModal';
-import ApiClient from './apiClient';
+import { MuxApiService } from './muxApi';
 
 export interface AppProps {
   sdk: FieldExtensionSDK;
@@ -138,6 +138,7 @@ export interface BaseTrack {
   passthrough?: string;
   name?: string;
   language_code?: string;
+  error?: { messages: string[] };
 }
 
 export interface AudioTrack extends BaseTrack {
@@ -161,11 +162,10 @@ export interface CaptionTrack extends BaseTrack {
 export type Track = AudioTrack | CaptionTrack;
 
 export interface AddByURLConfig {
-  apiClient: ApiClient;
+  muxApi: MuxApiService;
   sdk: FieldExtensionSDK;
   remoteURL: string;
   options: ModalData;
-  responseCheck: (res: Response) => boolean | Promise<boolean>;
   setAssetError: (msg: string) => void;
   pollForAssetDetails: () => Promise<void>;
 }
