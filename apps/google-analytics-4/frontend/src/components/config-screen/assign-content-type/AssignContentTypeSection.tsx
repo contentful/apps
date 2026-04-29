@@ -26,9 +26,11 @@ import AssignContentTypeCard from 'components/config-screen/assign-content-type/
 import { sortAndFormatAllContentTypes } from 'helpers/contentTypeHelpers/contentTypeHelpers';
 import {
   createDefaultRule,
+  getDuplicateRuleIds,
   getUniqueContentTypeIds,
   normalizeContentTypeRules,
 } from 'helpers/contentTypeRules/contentTypeRules';
+import { getUnknownPatternTokens } from 'utils/contentTypeMatching';
 interface Props {
   mergeSdkParameters: Function;
   onIsValidContentTypeAssignment: Function;
@@ -36,6 +38,7 @@ interface Props {
   currentEditorInterface: Partial<EditorInterface>;
   originalContentTypes: ContentTypes;
   originalContentTypeRules: ContentTypeRules;
+  showPatternValidation: boolean;
 }
 
 const AssignContentTypeSection = (props: Props) => {
@@ -46,6 +49,7 @@ const AssignContentTypeSection = (props: Props) => {
     currentEditorInterface,
     originalContentTypes,
     originalContentTypeRules,
+    showPatternValidation,
   } = props;
 
   const [forceTrailingSlash, setForceTrailingSlash] = useState<boolean>(false);
@@ -92,7 +96,21 @@ const AssignContentTypeSection = (props: Props) => {
       .map((rule) => rule.id)
   );
 
-  const isContentTypeAssignmentValid = rulesMissingPattern.size === 0;
+  const rulesWithUnknownPatternTokens = new Map(
+    contentTypeRules
+      .map((rule) => [
+        rule.id,
+        getUnknownPatternTokens(rule.pathPattern, rule.additionalFieldIds),
+      ] as const)
+      .filter(([, unknownTokens]) => unknownTokens.length > 0)
+  );
+
+  const duplicateRuleIds = getDuplicateRuleIds(contentTypeRules);
+
+  const isContentTypeAssignmentValid =
+    rulesMissingPattern.size === 0 &&
+    rulesWithUnknownPatternTokens.size === 0 &&
+    duplicateRuleIds.size === 0;
 
   useEffect(() => {
     onIsValidContentTypeAssignment(isContentTypeAssignmentValid);
@@ -245,6 +263,9 @@ const AssignContentTypeSection = (props: Props) => {
               currentEditorInterface={currentEditorInterface}
               originalContentTypeRules={originalContentTypeRules}
               rulesMissingPattern={rulesMissingPattern}
+              rulesWithUnknownPatternTokens={rulesWithUnknownPatternTokens}
+              duplicateRuleIds={duplicateRuleIds}
+              showPatternValidation={showPatternValidation}
             />
           )}
           {contentTypeRules.length < Object.keys(allContentTypes).length * 5 && (

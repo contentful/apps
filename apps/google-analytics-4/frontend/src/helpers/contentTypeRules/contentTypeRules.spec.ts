@@ -2,6 +2,25 @@ import { describe, expect, it } from 'vitest';
 import { normalizeContentTypeRules } from './contentTypeRules';
 
 describe('contentTypeRules normalization', () => {
+  it('preserves an explicitly disabled advanced rule even when advanced values are present', () => {
+    const [rule] = normalizeContentTypeRules([
+      {
+        id: 'saved-rule',
+        contentTypeId: 'searchPage',
+        slugField: 'slug',
+        urlPrefix: '',
+        enableAdvancedMatching: false,
+        pathPattern: '/search/{slug}?category={category}',
+        additionalFieldIds: ['category'],
+        matchDimension: 'pagePathPlusQueryString',
+        matchType: 'EXACT',
+      },
+    ]);
+
+    expect(rule.enableAdvancedMatching).toBe(false);
+    expect(rule.pathPattern).toBe('/search/{slug}?category={category}');
+  });
+
   it('marks legacy advanced-looking content type rules as advanced', () => {
     const [rule] = normalizeContentTypeRules([
       {
@@ -9,7 +28,6 @@ describe('contentTypeRules normalization', () => {
         contentTypeId: 'searchPage',
         slugField: 'slug',
         urlPrefix: '',
-        enableAdvancedMatching: false,
         pathPattern: '/search/{slug}?category={category}',
         additionalFieldIds: ['category'],
         matchDimension: 'pagePathPlusQueryString',

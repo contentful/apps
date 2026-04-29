@@ -20,6 +20,9 @@ interface AssignContentTypeCardProps {
   currentEditorInterface: Partial<EditorInterface>;
   originalContentTypeRules: ContentTypeRules;
   rulesMissingPattern: Set<string>;
+  rulesWithUnknownPatternTokens: Map<string, string[]>;
+  duplicateRuleIds: Set<string>;
+  showPatternValidation: boolean;
 }
 
 interface HeaderLabelProps {
@@ -65,6 +68,9 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
     currentEditorInterface,
     originalContentTypeRules,
     rulesMissingPattern,
+    rulesWithUnknownPatternTokens,
+    duplicateRuleIds,
+    showPatternValidation,
   } = props;
 
   return (
@@ -76,7 +82,7 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
         />
         <HeaderLabel
           label="Slug field"
-          helpText='The field on your content type where the page path is stored. If you select a short text list field, the elements in the array will be joined by a forward slash. Example: This field would typically have short slug text like "a-blog-post-i-wrote" that appears in the URL for the page.'
+          helpText='This field provides the value used by {slug} in advanced patterns. For example, if you choose Title here, {slug} will use the Title field value. If you select a short text list field, the elements in the array will be joined by a forward slash.'
         />
         <HeaderLabel
           label="URL prefix"
@@ -104,7 +110,17 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
             onRemoveContentType={onRemoveContentType}
             currentEditorInterface={currentEditorInterface}
             originalContentTypeRules={originalContentTypeRules}
-            isMissingPattern={rulesMissingPattern.has(contentTypeRule.id)}
+            isMissingPattern={
+              showPatternValidation && rulesMissingPattern.has(contentTypeRule.id)
+            }
+            unknownPatternTokens={
+              showPatternValidation
+                ? (rulesWithUnknownPatternTokens.get(contentTypeRule.id) ?? [])
+                : []
+            }
+            isDuplicateConfiguration={
+              showPatternValidation && duplicateRuleIds.has(contentTypeRule.id)
+            }
             focus={index + 1 === contentTypeRules.length}
           />
         );

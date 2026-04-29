@@ -55,7 +55,8 @@ export const normalizeContentTypeRules = (
 
         return {
           ...normalizedRule,
-          enableAdvancedMatching: hasAdvancedMatchingConfigured(normalizedRule),
+          enableAdvancedMatching:
+            rule.enableAdvancedMatching ?? hasAdvancedMatchingConfigured(normalizedRule),
         };
       })(),
       id: rule.id || createRuleId(),
@@ -71,3 +72,49 @@ export const getUniqueContentTypeIds = (contentTypeRules: ContentTypeRules) =>
       contentTypeRules.map((rule) => rule.contentTypeId).filter((contentTypeId) => contentTypeId)
     )
   );
+
+const getRuleValidationSignature = (rule: ContentTypeRule) => {
+  if (!rule.contentTypeId || !rule.slugField) {
+    return null;
+  }
+
+  if (rule.enableAdvancedMatching) {
+    return JSON.stringify({
+      contentTypeId: rule.contentTypeId,
+      slugField: rule.slugField,
+      enableAdvancedMatching: true,
+      pathPattern: rule.pathPattern?.trim() ?? '',
+      additionalFieldIds: [...(rule.additionalFieldIds ?? [])].sort(),
+      matchDimension: rule.matchDimension ?? 'unifiedPagePathScreen',
+      matchType: rule.matchType ?? 'EXACT',
+    });
+  }
+
+  return JSON.stringify({
+    contentTypeId: rule.contentTypeId,
+    slugField: rule.slugField,
+    enableAdvancedMatching: false,
+    urlPrefix: rule.urlPrefix?.trim() ?? '',
+  });
+};
+
+export const getDuplicateRuleIds = (contentTypeRules: ContentTypeRules) => {
+  const signatureToRuleIds = new Map<string, string[]>();
+
+  contentTypeRules.forEach((rule) => {
+    const signature = getRuleValidationSignature(rule);
+
+    if (!signature) {
+      return;
+    }
+
+    const existingRuleIds = signatureToRuleIds.get(signature) ?? [];
+    signatureToRuleIds.set(signature, [...existingRuleIds, rule.id]);
+  });
+
+  return new Set(
+    Array.from(signatureToRuleIds.values())
+      .filter((ruleIds) => ruleIds.length > 1)
+      .flat()
+  );
+};

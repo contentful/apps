@@ -43,6 +43,9 @@ describe('Assign Content Type Card for Config Screen', () => {
         currentEditorInterface={{}}
         originalContentTypeRules={[]}
         rulesMissingPattern={new Set()}
+        rulesWithUnknownPatternTokens={new Map()}
+        duplicateRuleIds={new Set()}
+        showPatternValidation={false}
       />
     );
 
@@ -65,9 +68,34 @@ describe('Assign Content Type Card for Config Screen', () => {
         currentEditorInterface={{}}
         originalContentTypeRules={[]}
         rulesMissingPattern={new Set()}
+        rulesWithUnknownPatternTokens={new Map()}
+        duplicateRuleIds={new Set()}
+        showPatternValidation={false}
       />
     );
 
     expect(screen.getAllByTestId('contentTypeRow').length).toBe(1);
+  });
+
+  it('explains that the selected slug field provides the value for {slug}', async () => {
+    render(
+      <AssignContentTypeCard
+        allContentTypes={allContentTypes}
+        allContentTypeEntries={allContentTypeEntries}
+        contentTypeRules={contentTypeRules}
+        onContentTypeChange={() => {}}
+        onContentTypeFieldChange={() => {}}
+        onContentTypeRuleChange={() => {}}
+        onRemoveContentType={() => {}}
+        currentEditorInterface={{}}
+        originalContentTypeRules={[]}
+        rulesMissingPattern={new Set()}
+        rulesWithUnknownPatternTokens={new Map()}
+        duplicateRuleIds={new Set()}
+        showPatternValidation={false}
+      />
+    );
+
+    expect(screen.getByText('Slug field')).toBeVisible();
   });
 });

@@ -21,6 +21,7 @@ describe('Assign Content Type Section for Config Screen', () => {
         currentEditorInterface={{}}
         originalContentTypes={{}}
         originalContentTypeRules={[]}
+        showPatternValidation={false}
       />
     );
 
@@ -52,12 +53,100 @@ describe('Assign Content Type Section for Config Screen', () => {
         currentEditorInterface={{}}
         originalContentTypes={{}}
         originalContentTypeRules={[]}
+        showPatternValidation={true}
       />
     );
 
     expect(
-      await screen.findByText('Add a pattern for this advanced rule before saving.')
+      await screen.findByText(
+        'Pattern is required. Enter a value for the Pattern field before saving.'
+      )
     ).toBeVisible();
+
+    await waitFor(() => expect(onIsValidContentTypeAssignment).toHaveBeenLastCalledWith(false));
+  });
+
+  it('marks advanced rules with unknown pattern variables as invalid', async () => {
+    const onIsValidContentTypeAssignment = vi.fn();
+
+    render(
+      <AssignContentTypeSection
+        mergeSdkParameters={() => {}}
+        onIsValidContentTypeAssignment={onIsValidContentTypeAssignment}
+        parameters={{
+          contentTypeRules: [
+            {
+              id: 'rule-1',
+              contentTypeId: 'searchPage',
+              slugField: 'slug',
+              urlPrefix: '',
+              enableAdvancedMatching: true,
+              pathPattern: '/search/{sectoinSlug}/{slug}',
+              additionalFieldIds: ['sectionSlug'],
+              matchDimension: 'unifiedPagePathScreen',
+              matchType: 'EXACT',
+            },
+          ],
+        }}
+        currentEditorInterface={{}}
+        originalContentTypes={{}}
+        originalContentTypeRules={[]}
+        showPatternValidation={true}
+      />
+    );
+
+    expect(
+      await screen.findByText(
+        'Pattern contains an unknown variable: {sectoinSlug}. Use {slug} and the variables shown in Additional page properties.'
+      )
+    ).toBeVisible();
+
+    await waitFor(() => expect(onIsValidContentTypeAssignment).toHaveBeenLastCalledWith(false));
+  });
+
+  it('marks exact duplicate rules as invalid', async () => {
+    const onIsValidContentTypeAssignment = vi.fn();
+
+    render(
+      <AssignContentTypeSection
+        mergeSdkParameters={() => {}}
+        onIsValidContentTypeAssignment={onIsValidContentTypeAssignment}
+        parameters={{
+          contentTypeRules: [
+            {
+              id: 'rule-1',
+              contentTypeId: 'blogPost',
+              slugField: 'slug',
+              urlPrefix: '/blog/',
+              enableAdvancedMatching: false,
+              pathPattern: '',
+              matchDimension: 'unifiedPagePathScreen',
+              matchType: 'EXACT',
+            },
+            {
+              id: 'rule-2',
+              contentTypeId: 'blogPost',
+              slugField: 'slug',
+              urlPrefix: '/blog/',
+              enableAdvancedMatching: false,
+              pathPattern: '',
+              matchDimension: 'unifiedPagePathScreen',
+              matchType: 'EXACT',
+            },
+          ],
+        }}
+        currentEditorInterface={{}}
+        originalContentTypes={{}}
+        originalContentTypeRules={[]}
+        showPatternValidation={true}
+      />
+    );
+
+    expect(
+      await screen.findAllByText(
+        'This rule duplicates another configuration. Remove one of them or change one of the values before saving.'
+      )
+    ).toHaveLength(2);
 
     await waitFor(() => expect(onIsValidContentTypeAssignment).toHaveBeenLastCalledWith(false));
   });
@@ -85,6 +174,7 @@ describe('Assign Content Type Section for Config Screen', () => {
         currentEditorInterface={{}}
         originalContentTypes={{}}
         originalContentTypeRules={[]}
+        showPatternValidation={false}
       />
     );
 
