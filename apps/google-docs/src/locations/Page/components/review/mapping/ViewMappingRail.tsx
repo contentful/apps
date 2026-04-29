@@ -28,7 +28,7 @@ export const ViewMappingRail = ({
         <ViewMappingCard
           key={card.key}
           card={card}
-          isHovered={card.mappingKeys.some((k) => hoveredMappingKeys.includes(k))}
+          isHovered={card.mappingKeys.some((key) => hoveredMappingKeys.includes(key))}
           onMouseEnter={() => onSetHoveredMappingKeys(card.mappingKeys)}
           onMouseLeave={() => onSetHoveredMappingKeys([])}
         />

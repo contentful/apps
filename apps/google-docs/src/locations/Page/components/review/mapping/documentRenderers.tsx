@@ -45,7 +45,7 @@ function getHighlightStyle(highlighted: boolean, hovered: boolean) {
   if (!highlighted) return { border: tokens.gray300, background: 'transparent' };
   return {
     border: hovered ? tokens.green600 : tokens.green500,
-    background: hovered ? tokens.green300 : tokens.green200,
+    background: hovered ? tokens.green300 : tokens.green100,
   };
 }
 
@@ -115,7 +115,7 @@ const TextSegmentSpan = ({
       style={{
         ...getTextSegmentStyle(segment.styles),
         backgroundColor: getHighlightStyle(segment.highlighted, hovered).background,
-        borderRadius: segment.highlighted ? tokens.borderRadiusSmall : undefined,
+        padding: segment.highlighted ? `${tokens.spacing2Xs} 0` : undefined,
         whiteSpace: 'pre-wrap',
         transition: 'background-color 120ms ease',
       }}>
@@ -145,7 +145,7 @@ interface BlockRendererProps {
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
-  onEditImage: (
+  onEditImage?: (
     sourceRef: { type: 'image'; blockId: string; imageId: string },
     label: string
   ) => void;
@@ -249,7 +249,11 @@ export const BlockRenderer = ({
                 highlighted ? () => onSetHoveredMappingKeys(imageMappingKeys) : undefined
               }
               onMouseLeave={highlighted ? () => onSetHoveredMappingKeys([]) : undefined}
-              onEdit={() => onEditImage(imageSourceRef, image.title ?? image.altText ?? image.id)}
+              onEdit={
+                onEditImage
+                  ? () => onEditImage(imageSourceRef, image.title ?? image.altText ?? image.id)
+                  : undefined
+              }
             />
           </Box>
         );
@@ -271,8 +275,7 @@ interface TableRendererProps {
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
-  isViewMode?: boolean;
-  onEditImage: (
+  onEditImage?: (
     sourceRef: {
       type: 'tableImage';
       tableId: string;
@@ -296,7 +299,7 @@ interface TablePartRendererProps {
   excludedSourceRefs: SourceRef[];
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
-  onEditImage: TableRendererProps['onEditImage'];
+  onEditImage?: TableRendererProps['onEditImage'];
 }
 
 const TablePartRenderer = ({
@@ -359,7 +362,11 @@ const TablePartRenderer = ({
           size="small"
           onMouseEnter={highlighted ? () => onSetHoveredMappingKeys(mappingKeys) : undefined}
           onMouseLeave={highlighted ? () => onSetHoveredMappingKeys([]) : undefined}
-          onEdit={() => onEditImage(imageSourceRef, image.title ?? image.altText ?? image.id)}
+          onEdit={
+            onEditImage
+              ? () => onEditImage(imageSourceRef, image.title ?? image.altText ?? image.id)
+              : undefined
+          }
         />
       </Box>
     );
@@ -399,7 +406,6 @@ export const TableRenderer = ({
   selectedEntryIndex,
   hoveredMappingKeys,
   onSetHoveredMappingKeys,
-  isViewMode = false,
   onEditImage,
 }: TableRendererProps) => {
   const borderIndex = fullHighlightIndex ?? highlightIndex;
@@ -439,61 +445,35 @@ export const TableRenderer = ({
             key={row.id}
             id={`row:${table.id}:${row.id}`}
             data-testid={`table-row-${row.id}`}>
-            {row.cells.map((cell) => {
-              const cellMappingKeys = isViewMode ? getCellMappingKeys(row.id, cell.id) : [];
-              const isCellMapped = cellMappingKeys.length > 0;
-              const isCellHovered =
-                isCellMapped && cellMappingKeys.some((k) => hoveredMappingKeys.includes(k));
-              return (
-                <TableCell
-                  key={cell.id}
-                  data-testid={`table-cell-${cell.id}`}
-                  onMouseEnter={
-                    isViewMode && isCellMapped
-                      ? () => onSetHoveredMappingKeys(cellMappingKeys)
-                      : undefined
-                  }
-                  onMouseLeave={
-                    isViewMode && isCellMapped ? () => onSetHoveredMappingKeys([]) : undefined
-                  }
-                  style={{
-                    backgroundColor: 'transparent',
-                    verticalAlign: 'top',
-                    ...(isViewMode && isCellMapped
-                      ? {
-                          border: `${isCellHovered ? 2 : 1}px solid ${
-                            isCellHovered ? tokens.green600 : tokens.green500
-                          }`,
-                          borderRadius: tokens.borderRadiusMedium,
-                          transition: 'border-color 120ms ease, border-width 120ms ease',
-                        }
-                      : {}),
-                  }}>
-                  <Flex flexDirection="column" gap="spacing2Xs">
-                    {cell.parts.map((part) => {
-                      const partKey = [table.id, row.id, cell.id, part.id].join(':');
-                      return (
-                        <Box key={part.id}>
-                          <TablePartRenderer
-                            segmentId={segmentId}
-                            tableId={table.id}
-                            rowId={row.id}
-                            cellId={cell.id}
-                            part={part}
-                            visibleHighlights={getVisiblePartHighlights(partKey)}
-                            imageById={imageById}
-                            excludedSourceRefs={excludedSourceRefs}
-                            hoveredMappingKeys={hoveredMappingKeys}
-                            onSetHoveredMappingKeys={onSetHoveredMappingKeys}
-                            onEditImage={onEditImage}
-                          />
-                        </Box>
-                      );
-                    })}
-                  </Flex>
-                </TableCell>
-              );
-            })}
+            {row.cells.map((cell) => (
+              <TableCell
+                key={cell.id}
+                data-testid={`table-cell-${cell.id}`}
+                style={{ backgroundColor: 'transparent', verticalAlign: 'top' }}>
+                <Flex flexDirection="column" gap="spacing2Xs">
+                  {cell.parts.map((part) => {
+                    const partKey = [table.id, row.id, cell.id, part.id].join(':');
+                    return (
+                      <Box key={part.id}>
+                        <TablePartRenderer
+                          segmentId={segmentId}
+                          tableId={table.id}
+                          rowId={row.id}
+                          cellId={cell.id}
+                          part={part}
+                          visibleHighlights={getVisiblePartHighlights(partKey)}
+                          imageById={imageById}
+                          excludedSourceRefs={excludedSourceRefs}
+                          hoveredMappingKeys={hoveredMappingKeys}
+                          onSetHoveredMappingKeys={onSetHoveredMappingKeys}
+                          onEditImage={onEditImage}
+                        />
+                      </Box>
+                    );
+                  })}
+                </Flex>
+              </TableCell>
+            ))}
           </TableRow>
         ))}
       </TableBody>

@@ -41,7 +41,7 @@ export const MappingCard = ({
         insetInlineStart: 0,
         insetInlineEnd: 0,
         top,
-        border: `${isHovered ? 2 : 1}px solid ${isHovered ? tokens.green600 : tokens.green500}`,
+        border: `${isHovered ? 2 : 1}px solid`,
         borderRadius: tokens.borderRadiusMedium,
         padding: tokens.spacing2Xs,
         backgroundColor: tokens.green100,
