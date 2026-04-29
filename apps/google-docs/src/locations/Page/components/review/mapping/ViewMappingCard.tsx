@@ -7,6 +7,7 @@ const CONTENT_TYPE_MAX_LENGTH = 30;
 
 export interface ViewMappingCardData {
   key: string;
+  mappingKeys: string[];
   contentTypeName: string;
   entryName: string;
   fieldName: string;
@@ -15,9 +16,17 @@ export interface ViewMappingCardData {
 
 interface ViewMappingCardProps {
   card: ViewMappingCardData;
+  isHovered: boolean;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
 }
 
-export const ViewMappingCard = ({ card }: ViewMappingCardProps) => {
+export const ViewMappingCard = ({
+  card,
+  isHovered,
+  onMouseEnter,
+  onMouseLeave,
+}: ViewMappingCardProps) => {
   const { labelPart, typePart, fullValue, isTruncated } = truncateFieldValue(
     card.fieldName,
     card.fieldType
@@ -26,11 +35,15 @@ export const ViewMappingCard = ({ card }: ViewMappingCardProps) => {
   return (
     <Box
       data-testid={`view-mapping-card-${card.key}`}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       style={{
-        border: `1px solid ${tokens.green500}`,
+        border: `${isHovered ? 2 : 1}px solid ${isHovered ? tokens.green600 : tokens.green500}`,
         borderRadius: tokens.borderRadiusMedium,
         padding: tokens.spacing2Xs,
         backgroundColor: tokens.green100,
+        transition: 'border-color 120ms ease, border-width 120ms ease',
+        cursor: 'default',
       }}>
       <TruncatedRow
         label="Content Type"

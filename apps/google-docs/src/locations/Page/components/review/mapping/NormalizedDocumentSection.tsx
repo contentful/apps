@@ -9,24 +9,29 @@ import { BlockRenderer, TableRenderer } from './documentRenderers';
 interface ReviewDocumentBodyProps {
   segment: DocSegment;
   highlightIndex: MappingHighlightIndex;
+  /** Full (unfiltered) highlight index used for cell border computation in view mode. Defaults to highlightIndex. */
+  fullHighlightIndex?: MappingHighlightIndex;
   imageById: Record<string, NormalizedDocumentImage>;
   listMarkers: Record<string, ListMarker>;
   excludedSourceRefs: SourceRef[];
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
   onSetHoveredMappingKeys: (keys: string[]) => void;
+  isViewMode?: boolean;
   onEditImage: (sourceRef: ImageSourceRef, label: string) => void;
 }
 
 export const NormalizedDocumentSection = ({
   segment,
   highlightIndex,
+  fullHighlightIndex,
   imageById,
   listMarkers,
   excludedSourceRefs,
   selectedEntryIndex,
   hoveredMappingKeys,
   onSetHoveredMappingKeys,
+  isViewMode = false,
   onEditImage,
 }: ReviewDocumentBodyProps): JSX.Element => {
   return (
@@ -43,11 +48,13 @@ export const NormalizedDocumentSection = ({
               segmentId={segment.id}
               table={segment.table}
               highlightIndex={highlightIndex}
+              fullHighlightIndex={fullHighlightIndex ?? highlightIndex}
               imageById={imageById}
               excludedSourceRefs={excludedSourceRefs}
               selectedEntryIndex={selectedEntryIndex}
               hoveredMappingKeys={hoveredMappingKeys}
               onSetHoveredMappingKeys={onSetHoveredMappingKeys}
+              isViewMode={isViewMode}
               onEditImage={onEditImage}
             />
           ) : (

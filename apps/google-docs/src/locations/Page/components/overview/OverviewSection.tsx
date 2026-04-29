@@ -1,10 +1,17 @@
 import { useMemo } from 'react';
 import { Box, Button, Flex, Note, Paragraph, Text } from '@contentful/f36-components';
 import { EyeIcon, LightbulbIcon, PencilSimpleIcon } from '@contentful/f36-icons';
+import { cx } from '@emotion/css';
 import type { MappingReviewSuspendPayload } from '@types';
 import { buildEntryListFromEntryBlockGraph } from '../../../../utils/overviewEntryList';
 import { OverviewEntryList } from './OverviewEntryList';
-import { overviewSectionBox, overviewSectionBoxScrollable } from './OverviewSection.styles';
+import {
+  modeToggleButton,
+  modeToggleButtonActive,
+  modeToggleWrapper,
+  overviewSectionBox,
+  overviewSectionBoxScrollable,
+} from './OverviewSection.styles';
 import Splitter from '../mainpage/Splitter';
 
 interface OverviewProps {
@@ -64,24 +71,24 @@ const OverviewSection = ({
             </Flex>
 
             <Flex alignItems="center" gap="spacingS">
-              <Button
-                size="small"
-                variant="secondary"
-                startIcon={<EyeIcon />}
-                onClick={() => onReviewModeChange('view')}
-                aria-pressed={reviewMode === 'view'}
-                style={reviewMode === 'view' ? { fontWeight: 600 } : undefined}>
-                View
-              </Button>
-              <Button
-                size="small"
-                variant="secondary"
-                startIcon={<PencilSimpleIcon />}
-                onClick={() => onReviewModeChange('edit')}
-                aria-pressed={reviewMode === 'edit'}
-                style={reviewMode === 'edit' ? { fontWeight: 600 } : undefined}>
-                Edit
-              </Button>
+              <div className={modeToggleWrapper} role="group" aria-label="Review mode">
+                <button
+                  type="button"
+                  className={cx(modeToggleButton, reviewMode === 'view' && modeToggleButtonActive)}
+                  onClick={() => onReviewModeChange('view')}
+                  aria-pressed={reviewMode === 'view'}>
+                  <EyeIcon size="small" />
+                  View only
+                </button>
+                <button
+                  type="button"
+                  className={cx(modeToggleButton, reviewMode === 'edit' && modeToggleButtonActive)}
+                  onClick={() => onReviewModeChange('edit')}
+                  aria-pressed={reviewMode === 'edit'}>
+                  <PencilSimpleIcon size="small" />
+                  Edit mode
+                </button>
+              </div>
               <Button
                 variant="primary"
                 onClick={onCtaClick}

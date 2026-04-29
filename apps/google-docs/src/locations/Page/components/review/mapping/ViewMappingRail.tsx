@@ -7,6 +7,8 @@ export type ViewMappingCardEntry = ViewMappingCardData;
 interface ViewMappingRailProps {
   segmentId: string;
   cards: ViewMappingCardEntry[];
+  hoveredMappingKeys: string[];
+  onSetHoveredMappingKeys: (keys: string[]) => void;
 }
 
 const railStyles: BoxProps['style'] = {
@@ -14,11 +16,22 @@ const railStyles: BoxProps['style'] = {
   maxWidth: 280,
 };
 
-export const ViewMappingRail = ({ segmentId, cards }: ViewMappingRailProps): JSX.Element => (
+export const ViewMappingRail = ({
+  segmentId,
+  cards,
+  hoveredMappingKeys,
+  onSetHoveredMappingKeys,
+}: ViewMappingRailProps): JSX.Element => (
   <Box data-testid={`view-mapping-rail-${segmentId}`} style={railStyles}>
     <Flex flexDirection="column" gap="spacing2Xs">
       {cards.map((card) => (
-        <ViewMappingCard key={card.key} card={card} />
+        <ViewMappingCard
+          key={card.key}
+          card={card}
+          isHovered={card.mappingKeys.some((k) => hoveredMappingKeys.includes(k))}
+          onMouseEnter={() => onSetHoveredMappingKeys(card.mappingKeys)}
+          onMouseLeave={() => onSetHoveredMappingKeys([])}
+        />
       ))}
     </Flex>
   </Box>
