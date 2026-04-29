@@ -1,4 +1,5 @@
-import { Box, Card, Image, MenuItem } from '@contentful/f36-components';
+import { Box, Card, Flex, Image, MenuItem, Text } from '@contentful/f36-components';
+import { PencilSimpleIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import type { ImageSourceRef, NormalizedDocumentImage } from '@types';
 import Splitter from '../../mainpage/Splitter';
@@ -67,7 +68,10 @@ export function ReviewImageAssetCard({
         ariaLabel={title}
         actions={[
           <MenuItem key="edit" onClick={onEdit}>
-            Edit content mapping
+            <Flex alignItems="center" gap="spacing2Xs">
+              <PencilSimpleIcon size="tiny" />
+              <Text>Edit content mapping</Text>
+            </Flex>
           </MenuItem>,
         ]}>
         <Splitter />
