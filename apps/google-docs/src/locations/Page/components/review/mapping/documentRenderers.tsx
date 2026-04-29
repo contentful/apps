@@ -45,7 +45,7 @@ function getHighlightStyle(highlighted: boolean, hovered: boolean) {
   if (!highlighted) return { border: tokens.gray300, background: 'transparent' };
   return {
     border: hovered ? tokens.green600 : tokens.green500,
-    background: hovered ? tokens.green300 : tokens.green200,
+    background: hovered ? tokens.green200 : tokens.green100,
   };
 }
 
