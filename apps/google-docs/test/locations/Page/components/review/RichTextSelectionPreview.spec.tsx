@@ -22,7 +22,7 @@ const previewDocument: NormalizedDocument = {
 };
 
 describe('RichTextSelectionPreview', () => {
-  it('renders text plus compact image and table placeholders without raw table cell text', () => {
+  it('renders text plus compact image and table placeholders without raw multi-cell table text', () => {
     const sourceRefs: SourceRef[] = [
       {
         type: 'paragraph',
@@ -46,13 +46,23 @@ describe('RichTextSelectionPreview', () => {
         end: 6,
         flattenedRuns: [{ text: 'Cell A', start: 0, end: 6, styles: {} }],
       },
+      {
+        type: 'tableText',
+        tableId: 'table-1',
+        rowId: 'row-1',
+        cellId: 'cell-2',
+        partId: 'part-2',
+        start: 0,
+        end: 6,
+        flattenedRuns: [{ text: 'Cell B', start: 0, end: 6, styles: {} }],
+      },
     ];
 
     render(
       <RichTextSelectionPreview
         document={previewDocument}
         sourceRefs={sourceRefs}
-        showTablePlaceholder
+        selectionIncludesTableContent
       />
     );
 
@@ -60,5 +70,66 @@ describe('RichTextSelectionPreview', () => {
     expect(screen.getByText('Duck diagram')).toBeTruthy();
     expect(screen.getByText('Table content')).toBeTruthy();
     expect(screen.queryByText('Cell A')).toBeNull();
+    expect(screen.queryByText('Cell B')).toBeNull();
+  });
+
+  it('renders selected table cell text without the table placeholder', () => {
+    const sourceRefs: SourceRef[] = [
+      {
+        type: 'tableText',
+        tableId: 'table-1',
+        rowId: 'row-1',
+        cellId: 'cell-1',
+        partId: 'part-1',
+        start: 0,
+        end: 6,
+        flattenedRuns: [{ text: 'Cell A', start: 0, end: 6, styles: {} }],
+      },
+    ];
+
+    render(
+      <RichTextSelectionPreview
+        document={previewDocument}
+        sourceRefs={sourceRefs}
+        selectionIncludesTableContent
+      />
+    );
+
+    expect(screen.getByText('Cell A')).toBeTruthy();
+    expect(screen.queryByText('Table content')).toBeNull();
+  });
+
+  it('renders selected content block and table cell text without the table placeholder', () => {
+    const sourceRefs: SourceRef[] = [
+      {
+        type: 'paragraph',
+        blockId: 'paragraph-1',
+        start: 0,
+        end: 15,
+        flattenedRuns: [{ text: 'Intro paragraph', start: 0, end: 15, styles: {} }],
+      },
+      {
+        type: 'tableText',
+        tableId: 'table-1',
+        rowId: 'row-1',
+        cellId: 'cell-1',
+        partId: 'part-1',
+        start: 0,
+        end: 6,
+        flattenedRuns: [{ text: 'Cell A', start: 0, end: 6, styles: {} }],
+      },
+    ];
+
+    render(
+      <RichTextSelectionPreview
+        document={previewDocument}
+        sourceRefs={sourceRefs}
+        selectionIncludesTableContent
+      />
+    );
+
+    expect(screen.getByText('Intro paragraph')).toBeTruthy();
+    expect(screen.getByText('Cell A')).toBeTruthy();
+    expect(screen.queryByText('Table content')).toBeNull();
   });
 });
