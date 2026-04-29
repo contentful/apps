@@ -595,14 +595,6 @@ export const MappingView = ({
     const initialFieldIds = modalNewLocation.initialFieldIds;
     const addedFieldIds = selectedFieldIds.filter((id) => !initialFieldIds.includes(id));
     const removedFieldIds = initialFieldIds.filter((id) => !selectedFieldIds.includes(id));
-    console.log('[confirm]', {
-      addedFieldIds,
-      removedFieldIds,
-      pendingPreviewSourceRefs,
-      pendingTextExclusionRanges,
-      pendingTextAssignRanges,
-    });
-
     let next = entryBlockGraph;
 
     // ── REMOVALS ──────────────────────────────────────────────────────────────
@@ -685,16 +677,11 @@ export const MappingView = ({
         const nonRichTextTargets = resolvedTargets.filter((t) => t.fieldType !== 'RichText');
 
         if (richTextTargets.length && pendingPreviewSourceRefs.length) {
-          console.log('[richText assign]', { richTextTargets, pendingPreviewSourceRefs });
           next = applyRichTextAssignToEntryBlockGraph(
             next,
             document,
             pendingPreviewSourceRefs,
             richTextTargets
-          );
-          console.log(
-            '[richText assign result fieldMappings]',
-            JSON.stringify(next.entries.map((e) => e.fieldMappings))
           );
         }
 
