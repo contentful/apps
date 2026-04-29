@@ -756,7 +756,7 @@ export const MappingView = ({
         flexDirection="column"
         gap="spacingS"
         style={{ marginTop: tokens.spacingM }}>
-        {(isViewMode || selectedEntryRow) && (
+        {selectedEntryRow && (
           <Flex
             gap="spacingM"
             alignItems="flex-end"
@@ -773,23 +773,15 @@ export const MappingView = ({
                 Currently viewing:
               </Text>
               <Text as="p" marginBottom="none">
-                {isViewMode ? (
-                  <Text as="span" fontWeight="fontWeightDemiBold">
-                    All entries
+                <Text as="span" fontWeight="fontWeightDemiBold">
+                  {selectedEntryRow.contentTypeName}
+                </Text>
+                {selectedEntryRow.entryTitle ? (
+                  <Text as="span" fontColor="gray600">
+                    {' '}
+                    ({selectedEntryRow.entryTitle})
                   </Text>
-                ) : (
-                  <>
-                    <Text as="span" fontWeight="fontWeightDemiBold">
-                      {selectedEntryRow!.contentTypeName}
-                    </Text>
-                    {selectedEntryRow!.entryTitle ? (
-                      <Text as="span" fontColor="gray600">
-                        {' '}
-                        ({selectedEntryRow!.entryTitle})
-                      </Text>
-                    ) : null}
-                  </>
-                )}
+                ) : null}
               </Text>
             </Box>
             <Flex alignItems="center" gap="spacing2Xs" style={{ flex: '0 0 280px', maxWidth: 280 }}>
