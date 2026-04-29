@@ -801,7 +801,8 @@ export const MappingView = ({
                 const isGroupHovered = group.mappingCards.some((card) =>
                   card.mappingKeys.some((key) => hoveredMappingKeys.includes(key))
                 );
-                const showSurface = !isViewMode && group.showGroupedSurface;
+                const hasMappedCards = group.mappingCards.length > 0;
+                const showSurface = isViewMode ? hasMappedCards : group.showGroupedSurface;
 
                 return (
                   <Box key={group.id}>
@@ -816,13 +817,13 @@ export const MappingView = ({
                             data-testid={`mapping-group-surface-${group.id}`}
                             data-hovered={isGroupHovered ? 'true' : 'false'}
                             style={{
-                              border: `${isGroupHovered ? 2 : 1}px solid ${
-                                isGroupHovered ? tokens.green600 : tokens.green500
-                              }`,
+                              border: isViewMode
+                                ? `1px solid ${tokens.green500}`
+                                : `${isGroupHovered ? 2 : 1}px solid ${isGroupHovered ? tokens.green600 : tokens.green500}`,
                               borderRadius: tokens.borderRadiusMedium,
                               backgroundColor: tokens.green100,
                               padding: tokens.spacing2Xs,
-                              transition: 'border-color 120ms ease, border-width 120ms ease',
+                              transition: isViewMode ? undefined : 'border-color 120ms ease, border-width 120ms ease',
                             }}>
                             <Flex flexDirection="column" gap="spacing2Xs">
                               {group.segments.map((segment) => (
