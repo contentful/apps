@@ -1,5 +1,9 @@
 import { mockProductPreview, mockBaseSite, mockApiEndpoint } from '../__mocks__';
-import { productTransformer, baseSiteTransformer, productDetailsTransformer } from './dataTransformers';
+import {
+  productTransformer,
+  baseSiteTransformer,
+  productDetailsTransformer,
+} from './dataTransformers';
 
 describe('dataTransformers', () => {
   describe('productTransformer', () => {
@@ -27,10 +31,7 @@ describe('dataTransformers', () => {
         name: 'Product',
         images: [{ url: '/media/image.jpg' }],
       };
-      const product = productTransformer(
-        { apiEndpoint: mockApiEndpoint },
-        skuIdsToSkusMap
-      )(item);
+      const product = productTransformer({ apiEndpoint: mockApiEndpoint }, skuIdsToSkusMap)(item);
       expect(product.image).toBe(`${mockApiEndpoint}/media/image.jpg`);
     });
 
@@ -43,10 +44,7 @@ describe('dataTransformers', () => {
         name: 'Product',
         images: [{ url: absoluteUrl }],
       };
-      const product = productTransformer(
-        { apiEndpoint: mockApiEndpoint },
-        skuIdsToSkusMap
-      )(item);
+      const product = productTransformer({ apiEndpoint: mockApiEndpoint }, skuIdsToSkusMap)(item);
       expect(product.image).toBe(absoluteUrl);
     });
 
@@ -59,10 +57,7 @@ describe('dataTransformers', () => {
         name: 'Product',
         images: [{ url: absoluteUrl }],
       };
-      const product = productTransformer(
-        { apiEndpoint: mockApiEndpoint },
-        skuIdsToSkusMap
-      )(item);
+      const product = productTransformer({ apiEndpoint: mockApiEndpoint }, skuIdsToSkusMap)(item);
       expect(product.image).toBe(absoluteUrl);
     });
 
@@ -74,10 +69,7 @@ describe('dataTransformers', () => {
         name: 'Product',
         images: [{ url: '' }],
       };
-      const product = productTransformer(
-        { apiEndpoint: mockApiEndpoint },
-        skuIdsToSkusMap
-      )(item);
+      const product = productTransformer({ apiEndpoint: mockApiEndpoint }, skuIdsToSkusMap)(item);
       expect(product.image).toBe('');
     });
   });
@@ -90,9 +82,7 @@ describe('dataTransformers', () => {
         name: 'Product Details',
         images: [{ url: '/media/detail-image.jpg' }],
       };
-      const product = productDetailsTransformer(
-        { apiEndpoint: mockApiEndpoint }
-      )(item);
+      const product = productDetailsTransformer({ apiEndpoint: mockApiEndpoint })(item);
       expect(product.image).toBe(`${mockApiEndpoint}/media/detail-image.jpg`);
     });
 
@@ -104,9 +94,7 @@ describe('dataTransformers', () => {
         name: 'Product Details',
         images: [{ url: absoluteUrl }],
       };
-      const product = productDetailsTransformer(
-        { apiEndpoint: mockApiEndpoint }
-      )(item);
+      const product = productDetailsTransformer({ apiEndpoint: mockApiEndpoint })(item);
       expect(product.image).toBe(absoluteUrl);
     });
 
@@ -118,9 +106,7 @@ describe('dataTransformers', () => {
         name: 'Product Details',
         images: [{ url: absoluteUrl }],
       };
-      const product = productDetailsTransformer(
-        { apiEndpoint: mockApiEndpoint }
-      )(item);
+      const product = productDetailsTransformer({ apiEndpoint: mockApiEndpoint })(item);
       expect(product.image).toBe(absoluteUrl);
     });
 
@@ -131,9 +117,7 @@ describe('dataTransformers', () => {
         name: 'Product Details',
         images: [{ url: '' }],
       };
-      const product = productDetailsTransformer(
-        { apiEndpoint: mockApiEndpoint }
-      )(item);
+      const product = productDetailsTransformer({ apiEndpoint: mockApiEndpoint })(item);
       expect(product.image).toBe('');
     });
   });
