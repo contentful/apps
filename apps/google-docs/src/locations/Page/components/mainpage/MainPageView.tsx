@@ -63,6 +63,7 @@ export const MainPageView = ({
               <Grid.Item justifySelf="end">
                 <Button
                   variant="primary"
+                  size="small"
                   isDisabled={!oauthToken}
                   onClick={onSelectFile}
                   endIcon={<ArrowRightIcon />}>
