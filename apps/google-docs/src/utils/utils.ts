@@ -1,3 +1,4 @@
+import type { NormalizedDocumentTabBlock } from '@types';
 import type { MappingReviewSuspendPayload, CompletedWorkflowPayload } from '../types/workflow';
 
 export const truncateLabel = (label: string, maxLength: number = 10): string => {
@@ -14,4 +15,12 @@ export const isPreviewPayload = (
   payload: CompletedWorkflowPayload | MappingReviewSuspendPayload
 ): payload is CompletedWorkflowPayload => {
   return 'entries' in payload && 'referenceGraph' in payload;
+};
+
+export const getTabDisplayName = (tab: NormalizedDocumentTabBlock, tabCount: number): string => {
+  if (tabCount === 1) {
+    return '';
+  }
+
+  return tab.name;
 };

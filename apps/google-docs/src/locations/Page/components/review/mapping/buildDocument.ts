@@ -4,6 +4,7 @@ import {
   NormalizedDocumentTabBlock,
 } from '@types';
 import { NormalizedDocumentTable } from '@types';
+import { getTabDisplayName } from '../../../../../utils/utils';
 
 export type DocSegment =
   | { kind: 'block'; id: string; position: number; block: NormalizedDocumentContentBlock }
@@ -24,6 +25,9 @@ interface Document {
 
 export const buildDocument = (normalizedDocument: NormalizedDocument): Document => {
   const allItems: SortableItem[] = [];
+  const tabBlocks = normalizedDocument.contentBlocks.filter(
+    (block): block is NormalizedDocumentTabBlock => block.type === 'tab'
+  );
 
   normalizedDocument.contentBlocks.forEach((block) => {
     if (block.type === 'tab') {
@@ -44,7 +48,11 @@ export const buildDocument = (normalizedDocument: NormalizedDocument): Document 
 
   allItems.forEach((item) => {
     if (item.kind === 'tab') {
-      currentTab = { id: item.tab.id, name: item.tab.name, segments: [] };
+      currentTab = {
+        id: item.tab.id,
+        name: getTabDisplayName(item.tab, tabBlocks.length),
+        segments: [],
+      };
       tabs.push(currentTab);
       return;
     }
