@@ -321,6 +321,52 @@ describe('MappingView', () => {
     ).toContain('Second body paragraph.');
   });
 
+  it('does not show the default single-tab label for documents without tabs', () => {
+    const payload = createPayload();
+    payload.normalizedDocument.contentBlocks = [
+      { id: 'tab-1', position: 0, type: 'tab', name: 'Tab 1' },
+      ...payload.normalizedDocument.contentBlocks,
+    ];
+
+    render(
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
+    );
+
+    expect(screen.queryByText('Tab 1')).toBeNull();
+    expect(screen.getByText('Hello world')).toBeTruthy();
+  });
+
+  it('shows tab headings when the document contains multiple tabs', () => {
+    const blocks = [
+      createBlock('block-1', 1, 'First tab content'),
+      createBlock('block-2', 3, 'Second tab content'),
+    ];
+    const payload = createPayload({ blocks });
+    payload.normalizedDocument.contentBlocks = [
+      { id: 'tab-1', position: 0, type: 'tab', name: 'Tab 1' },
+      payload.normalizedDocument.contentBlocks[0],
+      { id: 'tab-2', position: 2, type: 'tab', name: 'Appendix' },
+      payload.normalizedDocument.contentBlocks[1],
+    ];
+
+    render(
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
+    );
+
+    expect(screen.getByText('Tab 1')).toBeTruthy();
+    expect(screen.getByText('Appendix')).toBeTruthy();
+  });
+
   it('does not wrap a partially mapped single block in a grouped surface', () => {
     const block = createBlock('block-1', 1, 'Partially mapped paragraph.');
     const payload = createPayload({
@@ -735,11 +781,7 @@ describe('MappingView', () => {
 
     expect(textSegments[0].style.backgroundColor).not.toBe(initialBackgroundColor);
     expect(textSegments[1].style.backgroundColor).toBe(textSegments[0].style.backgroundColor);
-    expect(
-      container
-        .querySelector('[data-testid^="mapping-group-surface-"]')
-        ?.getAttribute('data-hovered')
-    ).toBe('true');
+    expect(mappingCard?.getAttribute('data-hovered')).toBe('true');
   });
 
   it('opens assign modal from grouped-run text selection and clears selection', () => {
@@ -972,6 +1014,19 @@ describe('MappingView', () => {
 
   it('scopes image assignment destinations to currently selected entry', () => {
     const payload = createImagePayload();
+    payload.entryBlockGraph.entries[1].contentTypeId = 'selectedArticle';
+    payload.contentTypes.push({
+      sys: { id: 'selectedArticle' },
+      name: 'Selected Article',
+      displayField: 'title',
+      fields: [
+        {
+          id: 'body',
+          name: 'Body copy',
+          type: 'Text',
+        },
+      ],
+    });
     const onEntryBlockGraphChange = vi.fn();
 
     render(
@@ -980,12 +1035,13 @@ describe('MappingView', () => {
         entryBlockGraph={payload.entryBlockGraph}
         onEntryBlockGraphChange={onEntryBlockGraphChange}
         selectedEntryIndex={1}
+        mode="edit"
       />
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Assign image' }));
 
     expect(screen.getByRole('heading', { name: 'Edit content mapping' })).toBeTruthy();
-    expect(screen.getAllByText('Untitled').length).toBeGreaterThan(0);
+    expect(screen.getByText('Selected Article: Untitled')).toBeTruthy();
   });
 });
