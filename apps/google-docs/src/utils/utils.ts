@@ -1,8 +1,6 @@
 import type { NormalizedDocumentTabBlock } from '@types';
 import type { MappingReviewSuspendPayload, CompletedWorkflowPayload } from '../types/workflow';
 
-const DEFAULT_UNTABBED_DOCUMENT_TAB_NAME = 'tab 1';
-
 export const truncateLabel = (label: string, maxLength: number = 10): string => {
   if (label.length <= maxLength) return label;
 
@@ -20,9 +18,7 @@ export const isPreviewPayload = (
 };
 
 export const getTabDisplayName = (tab: NormalizedDocumentTabBlock, tabCount: number): string => {
-  const tabName = tab.name.trim();
-
-  if (tabCount === 1 && tabName.toLowerCase() === DEFAULT_UNTABBED_DOCUMENT_TAB_NAME) {
+  if (tabCount === 1) {
     return '';
   }
 

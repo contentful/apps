@@ -321,10 +321,10 @@ describe('MappingView', () => {
     ).toContain('Second body paragraph.');
   });
 
-  it('does not show the default single-tab label for documents without tabs', () => {
+  it('does not show the tab heading when the document only contains one tab', () => {
     const payload = createPayload();
     payload.normalizedDocument.contentBlocks = [
-      { id: 'tab-1', position: 0, type: 'tab', name: 'Tab 1' },
+      { id: 'tab-1', position: 0, type: 'tab', name: 'Draft' },
       ...payload.normalizedDocument.contentBlocks,
     ];
 
@@ -337,7 +337,7 @@ describe('MappingView', () => {
       />
     );
 
-    expect(screen.queryByText('Tab 1')).toBeNull();
+    expect(screen.queryByText('Draft')).toBeNull();
     expect(screen.getByText('Hello world')).toBeTruthy();
   });
 
