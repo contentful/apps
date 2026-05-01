@@ -268,7 +268,7 @@ const AssignContentTypeRow = (props: Props) => {
                   ))}
               </Select>
             ) : (
-              <></>
+              <Box className={styles.hiddenColumnSpacer} />
             )}
           </Box>
           <Box className={styles.urlPrefixItem}>
@@ -284,7 +284,7 @@ const AssignContentTypeRow = (props: Props) => {
                 value={urlPrefix}
               />
             ) : (
-              <></>
+              <Box className={styles.hiddenColumnSpacer} />
             )}
           </Box>
           <Box className={styles.toggleItem}>
