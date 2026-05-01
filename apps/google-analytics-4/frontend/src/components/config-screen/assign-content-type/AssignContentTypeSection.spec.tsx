@@ -81,7 +81,7 @@ describe('Assign Content Type Section for Config Screen', () => {
               slugField: 'slug',
               urlPrefix: '',
               enableAdvancedMatching: true,
-              pathPattern: '/search/{sectoinSlug}/{slug}',
+              pathPattern: '/search/{sectoinSlug}/{sectionSlug}',
               additionalFieldIds: ['sectionSlug'],
               matchDimension: 'unifiedPagePathScreen',
               matchType: 'EXACT',
@@ -97,7 +97,7 @@ describe('Assign Content Type Section for Config Screen', () => {
 
     expect(
       await screen.findByText(
-        'Pattern contains an unknown variable: {sectoinSlug}. Use {slug} and the variables shown in Additional page properties.'
+        'Pattern contains an unknown variable: {sectoinSlug}. Use the variables shown in Entry fields used to build URL pattern.'
       )
     ).toBeVisible();
 

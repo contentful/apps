@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ContentEntitySys, SidebarExtensionSDK } from '@contentful/app-sdk';
 import { AppInstallationParameters, ContentTypeRule } from 'types';
+import { getPatternTokens } from 'utils/contentTypeMatching';
 import { getReportSlug } from 'utils/getReportSlug';
 
 interface ResolvedSidebarRule extends ContentTypeRule {
@@ -32,7 +33,11 @@ export const useSidebarRules = (slugFieldRules: ContentTypeRule[]) => {
       Array.from(
         new Set(
           slugFieldRules
-            .flatMap((rule) => [rule.slugField, ...(rule.additionalFieldIds || [])])
+            .flatMap((rule) => [
+              rule.slugField,
+              ...(rule.additionalFieldIds || []),
+              ...(rule.enableAdvancedMatching ? getPatternTokens(rule.pathPattern) : []),
+            ])
             .filter((fieldId) => fieldId)
         )
       ),
@@ -91,21 +96,39 @@ export const useSidebarRules = (slugFieldRules: ContentTypeRule[]) => {
       slugFieldRules.map((rule) => {
         const slugFieldValue = debouncedFieldValues[rule.slugField] ?? '';
         const slugFieldIsConfigured = Boolean(rule.slugField);
-        const contentTypeHasSlugField = rule.slugField in entryFields;
+        const contentTypeHasSlugField = !rule.slugField || rule.slugField in entryFields;
         const additionalFieldIds = rule.additionalFieldIds || [];
+        const patternTokens = rule.enableAdvancedMatching ? getPatternTokens(rule.pathPattern) : [];
+        const requiredFieldIds = new Set(additionalFieldIds);
+
+        if (!rule.enableAdvancedMatching && rule.slugField) {
+          requiredFieldIds.add(rule.slugField);
+        }
+
         const contentTypeHasAllFields =
-          contentTypeHasSlugField && additionalFieldIds.every((fieldId) => fieldId in entryFields);
-        const tokenValues = {
-          slug: slugFieldValue,
-          ...Object.fromEntries(
-            additionalFieldIds.map((fieldId) => [fieldId, debouncedFieldValues[fieldId] ?? ''])
-          ),
-        };
-        const isValidRule =
-          slugFieldIsConfigured &&
-          contentTypeHasAllFields &&
-          Object.values(tokenValues).every((value) => Boolean(value)) &&
-          isPublished;
+          contentTypeHasSlugField &&
+          Array.from(requiredFieldIds).every((fieldId) => fieldId in entryFields);
+        const tokenValues = Object.fromEntries(
+          Array.from(requiredFieldIds).map((fieldId) => [
+            fieldId,
+            debouncedFieldValues[fieldId] ?? '',
+          ])
+        ) as Record<string, string | object>;
+
+        if (rule.slugField && !('slug' in tokenValues)) {
+          tokenValues.slug = slugFieldValue;
+        }
+
+        const requiredTokenValues = rule.enableAdvancedMatching
+          ? patternTokens.map((token) => tokenValues[token as keyof typeof tokenValues] ?? '')
+          : [slugFieldValue];
+        const hasAllRequiredTokenValues = requiredTokenValues.every((value) => Boolean(value));
+        const isValidRule = rule.enableAdvancedMatching
+          ? contentTypeHasAllFields && hasAllRequiredTokenValues && isPublished
+          : slugFieldIsConfigured &&
+            contentTypeHasAllFields &&
+            hasAllRequiredTokenValues &&
+            isPublished;
 
         return {
           ...rule,

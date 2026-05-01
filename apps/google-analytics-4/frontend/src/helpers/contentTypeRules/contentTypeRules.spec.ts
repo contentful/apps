@@ -52,4 +52,22 @@ describe('contentTypeRules normalization', () => {
 
     expect(rule.enableAdvancedMatching).toBe(true);
   });
+
+  it('infers regex matching from advanced patterns during normalization', () => {
+    const [rule] = normalizeContentTypeRules([
+      {
+        id: 'regex-rule',
+        contentTypeId: 'comparePage',
+        slugField: '',
+        urlPrefix: '',
+        enableAdvancedMatching: true,
+        pathPattern: '/shop/products/{slug}/compare/.*',
+        additionalFieldIds: ['slug'],
+        matchDimension: 'unifiedPagePathScreen',
+        matchType: 'EXACT',
+      },
+    ]);
+
+    expect(rule.matchType).toBe('PARTIAL_REGEXP');
+  });
 });

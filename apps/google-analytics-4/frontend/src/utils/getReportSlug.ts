@@ -28,16 +28,14 @@ const applyTrailingSlash = (path: string, forceTrailingSlash: boolean) => {
 export const buildDefaultPathPattern = (
   urlPrefix = '',
   additionalFieldIds: string[] = [],
-  matchDimension: ContentTypeValue['matchDimension'] = 'unifiedPagePathScreen'
+  matchDimension: ContentTypeValue['matchDimension'] = 'unifiedPagePathScreen',
+  primaryToken = SLUG_TOKEN
 ) => {
+  const pathTokens = primaryToken ? [...additionalFieldIds.map((fieldId) => `{${fieldId}}`), primaryToken] : additionalFieldIds.map((fieldId) => `{${fieldId}}`);
   const basePath =
     matchDimension === 'pagePathPlusQueryString'
-      ? `/${pathJoin(urlPrefix, SLUG_TOKEN)}`
-      : `/${pathJoin(
-          urlPrefix,
-          ...additionalFieldIds.map((fieldId) => `{${fieldId}}`),
-          SLUG_TOKEN
-        )}`;
+      ? `/${pathJoin(urlPrefix, primaryToken)}`
+      : `/${pathJoin(urlPrefix, ...pathTokens)}`;
 
   if (matchDimension !== 'pagePathPlusQueryString' || additionalFieldIds.length === 0) {
     return basePath;

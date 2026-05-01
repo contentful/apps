@@ -1,6 +1,7 @@
-import { ContentTypeValue } from 'types';
+import { ContentTypeValue, GAStringMatchType } from 'types';
 
 const TOKEN_REGEX = /\{([^}]+)\}/g;
+const REGEX_INDICATORS = [/\.\*/, /\(/, /\[/, /\|/, /\+/, /\^/, /\$/];
 
 export const hasAdvancedMatchingConfigured = (contentTypeValue: ContentTypeValue) =>
   Boolean(
@@ -13,11 +14,20 @@ export const hasAdvancedMatchingConfigured = (contentTypeValue: ContentTypeValue
 export const getPatternTokens = (pathPattern = '') =>
   Array.from(pathPattern.matchAll(TOKEN_REGEX), ([, token]) => token);
 
+export const inferMatchTypeFromPattern = (pathPattern = ''): GAStringMatchType => {
+  const normalizedPattern = pathPattern.replace(TOKEN_REGEX, '');
+
+  return REGEX_INDICATORS.some((pattern) => pattern.test(normalizedPattern))
+    ? 'PARTIAL_REGEXP'
+    : 'EXACT';
+};
+
 export const getUnknownPatternTokens = (
   pathPattern = '',
-  additionalFieldIds: string[] = []
+  additionalFieldIds: string[] = [],
+  _slugField = ''
 ) => {
-  const allowedTokens = new Set(['slug', ...additionalFieldIds]);
+  const allowedTokens = new Set([...additionalFieldIds]);
 
   return getPatternTokens(pathPattern).filter((token) => !allowedTokens.has(token));
 };

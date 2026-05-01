@@ -79,4 +79,8 @@ describe('getReportSlug', () => {
       '/search/{slug}?category={category}'
     );
   });
+
+  it('builds a default advanced pattern without {slug} when no slug token is provided', () => {
+    expect(buildDefaultPathPattern('', ['title'], 'unifiedPagePathScreen', '')).toBe('/{title}');
+  });
 });

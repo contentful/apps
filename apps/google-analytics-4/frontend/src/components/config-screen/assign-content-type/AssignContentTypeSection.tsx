@@ -100,7 +100,7 @@ const AssignContentTypeSection = (props: Props) => {
     contentTypeRules
       .map((rule) => [
         rule.id,
-        getUnknownPatternTokens(rule.pathPattern, rule.additionalFieldIds),
+        getUnknownPatternTokens(rule.pathPattern, rule.additionalFieldIds, rule.slugField),
       ] as const)
       .filter(([, unknownTokens]) => unknownTokens.length > 0)
   );

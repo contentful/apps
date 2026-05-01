@@ -23,6 +23,7 @@ import {
 } from 'types';
 import ContentTypeWarning from 'components/config-screen/assign-content-type/ContentTypeWarning';
 import { buildDefaultPathPattern } from 'utils/getReportSlug';
+import { getPatternTokens, inferMatchTypeFromPattern } from 'utils/contentTypeMatching';
 
 interface Props {
   contentTypeRule: ContentTypeRule;
@@ -75,7 +76,6 @@ const AssignContentTypeRow = (props: Props) => {
       pathPattern = '',
       additionalFieldIds = [],
       matchDimension = 'unifiedPagePathScreen',
-      matchType = 'EXACT',
     },
   ] = [contentTypeRule.id, contentTypeRule];
 
@@ -141,24 +141,39 @@ const AssignContentTypeRow = (props: Props) => {
     return value;
   };
 
-  const selectableAdditionalFields =
+  const contentTypeFields =
     contentTypeId && allContentTypes[contentTypeId]?.fields
-      ? allContentTypes[contentTypeId].fields.filter((field) => field.id !== slugField)
+      ? allContentTypes[contentTypeId].fields
       : [];
+  const requiresSlugField = !enableAdvancedMatching;
 
   const getGeneratedPattern = (
     selectedFieldIds = additionalFieldIds,
     selectedMatchDimension = matchDimension
-  ) => buildDefaultPathPattern(urlPrefix, selectedFieldIds, selectedMatchDimension);
+  ) => buildDefaultPathPattern('', selectedFieldIds, selectedMatchDimension, '');
 
-  const suggestedPattern = getGeneratedPattern();
+  const getNextAutoPattern = (
+    currentPattern: string,
+    nextSelectedFieldIds = additionalFieldIds,
+    nextMatchDimension = matchDimension
+  ) => {
+    const currentGeneratedPattern = getGeneratedPattern(additionalFieldIds, matchDimension);
+    const nextGeneratedPattern = getGeneratedPattern(nextSelectedFieldIds, nextMatchDimension);
+    const shouldUpdatePattern =
+      !currentPattern.trim() || currentPattern === currentGeneratedPattern;
+
+    return shouldUpdatePattern ? nextGeneratedPattern : currentPattern;
+  };
+
   const hasInvalidPattern = isMissingPattern || unknownPatternTokens.length > 0;
+  const availableVariableHint =
+    'Use the variables shown in Entry fields used to build URL pattern.';
   const unknownPatternMessage =
     unknownPatternTokens.length === 1
-      ? `Pattern contains an unknown variable: {${unknownPatternTokens[0]}}. Use {slug} and the variables shown in Additional page properties.`
+      ? `Pattern contains an unknown variable: {${unknownPatternTokens[0]}}. ${availableVariableHint}`
       : `Pattern contains unknown variables: ${unknownPatternTokens
           .map((token) => `{${token}}`)
-          .join(', ')}. Use {slug} and the variables shown in Additional page properties.`;
+          .join(', ')}. ${availableVariableHint}`;
 
   return (
     <Stack
@@ -174,6 +189,7 @@ const AssignContentTypeRow = (props: Props) => {
       <ContentTypeWarning
         contentTypeId={contentTypeId}
         slugField={slugField}
+        requiresSlugField={requiresSlugField}
         isSaved={isSaved}
         isInSidebar={isInSidebar}
         isContentTypeInOptions={isContentTypeInOptions}
@@ -202,25 +218,29 @@ const AssignContentTypeRow = (props: Props) => {
             </Select>
           </Box>
           <Box className={styles.contentTypeItem}>
-            <Select
-              id={`slugField-${index}`}
-              name={`slugField-${index}`}
-              testId="slugFieldSelect"
-              isDisabled={!contentTypeId || !isContentTypeInOptions}
-              onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-                onContentTypeFieldChange(ruleId, 'slugField', event.target.value)
-              }
-              value={validateSelectedOption(contentTypeId, slugField)}>
-              <Select.Option value="" isDisabled>
-                Select slug field
-              </Select.Option>
-              {contentTypeId &&
-                allContentTypes[contentTypeId]?.fields?.map((field) => (
-                  <Select.Option key={`${contentTypeId}.${field.id}`} value={field.id}>
-                    {field.name}
-                  </Select.Option>
-                ))}
-            </Select>
+            {!showAdvancedMatching ? (
+              <Select
+                id={`slugField-${index}`}
+                name={`slugField-${index}`}
+                testId="slugFieldSelect"
+                isDisabled={!contentTypeId || !isContentTypeInOptions}
+                onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+                  onContentTypeFieldChange(ruleId, 'slugField', event.target.value)
+                }
+                value={validateSelectedOption(contentTypeId, slugField)}>
+                <Select.Option value="" isDisabled>
+                  Select slug field
+                </Select.Option>
+                {contentTypeId &&
+                  allContentTypes[contentTypeId]?.fields?.map((field) => (
+                    <Select.Option key={`${contentTypeId}.${field.id}`} value={field.id}>
+                      {field.name}
+                    </Select.Option>
+                  ))}
+              </Select>
+            ) : (
+              <></>
+            )}
           </Box>
           <Box className={styles.urlPrefixItem}>
             {!showAdvancedMatching ? (
@@ -235,7 +255,7 @@ const AssignContentTypeRow = (props: Props) => {
                 value={urlPrefix}
               />
             ) : (
-              <Text fontColor="gray500">Configured below</Text>
+              <></>
             )}
           </Box>
           <Box className={styles.toggleItem}>
@@ -280,40 +300,40 @@ const AssignContentTypeRow = (props: Props) => {
       {showAdvancedMatching && (
         <Box className={styles.advancedMatchingPanel} testId="advancedMatchingPanel">
           <Text fontColor="gray600" className={styles.advancedMatchingIntro}>
-            Build a custom URL pattern for query strings, extra path segments, or variable prefixes.
+            Build a custom URL pattern for the URL that uses the entry being edited.
           </Text>
           <Box className={styles.advancedMatchingFields}>
             <Flex className={styles.advancedMatchingTopRow}>
               <Box className={styles.stackedField}>
                 <FormControl marginBottom="none">
-                  <FormControl.Label>Additional page properties</FormControl.Label>
+                  <FormControl.Label>Entry fields used to build URL pattern</FormControl.Label>
                   <Stack spacing="spacing2Xs" flexDirection="column" alignItems="flex-start">
-                    {selectableAdditionalFields.length ? (
-                      selectableAdditionalFields.map((field) => (
-                        <Checkbox
-                          key={`${contentTypeId}.${field.id}`}
-                          testId={`additionalFieldOption-${field.id}`}
-                          isChecked={additionalFieldIds.includes(field.id)}
-                          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                            const checked = event.target.checked;
-                            const nextSelectedFields = checked
-                              ? [...additionalFieldIds, field.id]
-                              : additionalFieldIds.filter(
-                                  (selectedFieldId) => selectedFieldId !== field.id
-                                );
-                            onContentTypeFieldChange(
-                              ruleId,
-                              'additionalFieldIds',
-                              nextSelectedFields
-                            );
-                          }}>
-                          <Flex alignItems="center" gap="spacing2Xs">
-                            <Text as="span">{field.name}</Text>
-                            <Text as="span" fontColor="gray600">
-                              {`{${field.id}}`}
-                            </Text>
-                          </Flex>
-                        </Checkbox>
+                    {contentTypeFields.length ? (
+                      contentTypeFields.map((field) => (
+                        <Flex key={`${contentTypeId}.${field.id}`} alignItems="center">
+                          <Checkbox
+                            testId={`additionalFieldOption-${field.id}`}
+                            isChecked={additionalFieldIds.includes(field.id)}
+                            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                              const checked = event.target.checked;
+                              const nextSelectedFields = checked
+                                ? [...additionalFieldIds, field.id]
+                                : additionalFieldIds.filter(
+                                    (selectedFieldId) => selectedFieldId !== field.id
+                                  );
+                              const nextPattern = getNextAutoPattern(
+                                pathPattern,
+                                nextSelectedFields
+                              );
+                              onContentTypeRuleChange(ruleId, {
+                                additionalFieldIds: nextSelectedFields,
+                                pathPattern: nextPattern,
+                                matchType: inferMatchTypeFromPattern(nextPattern),
+                              });
+                            }}>
+                            {field.name} {`{${field.id}}`}
+                          </Checkbox>
+                        </Flex>
                       ))
                     ) : (
                       <Text fontColor="gray500">
@@ -322,8 +342,7 @@ const AssignContentTypeRow = (props: Props) => {
                     )}
                   </Stack>
                   <FormControl.HelpText>
-                    Select extra fields to include in the URL. Use the variable shown next to each
-                    field in the pattern.
+                    Select the entry fields you want to use in the pattern.
                   </FormControl.HelpText>
                 </FormControl>
               </Box>
@@ -334,7 +353,7 @@ const AssignContentTypeRow = (props: Props) => {
                       Pattern
                       <Tooltip
                         placement="top"
-                        content="Start with the suggested pattern shown in the field. Use {slug} for the value from the selected slug field. Enter your own pattern if you need a different URL structure or want to use variables from the left.">
+                        content="Use the variables from the entry fields list to build the URL pattern.">
                         <Flex marginLeft="spacing2Xs" className={styles.tooltipIcon}>
                           <HelpCircleIcon />
                         </Flex>
@@ -347,10 +366,13 @@ const AssignContentTypeRow = (props: Props) => {
                     testId="pathPatternInput"
                     isDisabled={!contentTypeId || !isContentTypeInOptions}
                     isInvalid={hasInvalidPattern}
-                    placeholder={suggestedPattern}
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                      onContentTypeFieldChange(ruleId, 'pathPattern', event.target.value)
-                    }
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                      const nextPattern = event.target.value;
+                      onContentTypeRuleChange(ruleId, {
+                        pathPattern: nextPattern,
+                        matchType: inferMatchTypeFromPattern(nextPattern),
+                      });
+                    }}
                     value={pathPattern}
                   />
                   {isMissingPattern && (
@@ -359,7 +381,9 @@ const AssignContentTypeRow = (props: Props) => {
                     </FormControl.ValidationMessage>
                   )}
                   {!isMissingPattern && unknownPatternTokens.length > 0 && (
-                    <FormControl.ValidationMessage>{unknownPatternMessage}</FormControl.ValidationMessage>
+                    <FormControl.ValidationMessage>
+                      {unknownPatternMessage}
+                    </FormControl.ValidationMessage>
                   )}
                 </FormControl>
               </Box>
@@ -384,9 +408,20 @@ const AssignContentTypeRow = (props: Props) => {
                     name={`matchDimension-${index}`}
                     testId="matchDimensionSelect"
                     isDisabled={!contentTypeId || !isContentTypeInOptions}
-                    onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-                      onContentTypeFieldChange(ruleId, 'matchDimension', event.target.value)
-                    }
+                    onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
+                      const nextMatchDimension = event.target.value;
+                      const nextPattern = getNextAutoPattern(
+                        pathPattern,
+                        additionalFieldIds,
+                        nextMatchDimension
+                      );
+
+                      onContentTypeRuleChange(ruleId, {
+                        matchDimension: nextMatchDimension,
+                        pathPattern: nextPattern,
+                        matchType: inferMatchTypeFromPattern(nextPattern),
+                      });
+                    }}
                     value={matchDimension}>
                     <Select.Option value="unifiedPagePathScreen">Page path</Select.Option>
                     <Select.Option value="pagePathPlusQueryString">
@@ -396,32 +431,10 @@ const AssignContentTypeRow = (props: Props) => {
                 </FormControl>
               </Box>
               <Box className={styles.compactField}>
-                <FormControl>
-                  <FormControl.Label>
-                    <Flex alignItems="center">
-                      Matching mode
-                      <Tooltip
-                        placement="top"
-                        content="Use Literal for one exact URL pattern. Use Regex match when part of the URL can vary. Regex match uses regular expression syntax, so use .* when you want wildcard-style matching.">
-                        <Flex marginLeft="spacing2Xs" className={styles.tooltipIcon}>
-                          <HelpCircleIcon />
-                        </Flex>
-                      </Tooltip>
-                    </Flex>
-                  </FormControl.Label>
-                  <Select
-                    id={`matchType-${index}`}
-                    name={`matchType-${index}`}
-                    testId="matchTypeSelect"
-                    isDisabled={!contentTypeId || !isContentTypeInOptions}
-                    onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-                      onContentTypeFieldChange(ruleId, 'matchType', event.target.value)
-                    }
-                    value={matchType}>
-                    <Select.Option value="EXACT">Literal</Select.Option>
-                    <Select.Option value="PARTIAL_REGEXP">Regex match</Select.Option>
-                  </Select>
-                </FormControl>
+                <Text fontColor="gray600">
+                  Use <code>.*</code> when part of the URL can vary. Example:{' '}
+                  <code>/shop/products/{'{slug}'}/compare/.*</code>
+                </Text>
               </Box>
             </Flex>
           </Box>

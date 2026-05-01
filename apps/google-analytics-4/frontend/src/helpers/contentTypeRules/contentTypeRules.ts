@@ -1,5 +1,8 @@
 import { ContentTypeRule, ContentTypeRules, ContentTypes, ContentTypeValue } from 'types';
-import { hasAdvancedMatchingConfigured } from 'utils/contentTypeMatching';
+import {
+  hasAdvancedMatchingConfigured,
+  inferMatchTypeFromPattern,
+} from 'utils/contentTypeMatching';
 
 const createRuleId = () =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -30,7 +33,10 @@ export const createRuleFromContentType = (
   enableAdvancedMatching: hasAdvancedMatchingConfigured(value),
   pathPattern: value.pathPattern || '',
   matchDimension: value.matchDimension || 'unifiedPagePathScreen',
-  matchType: value.matchType || 'EXACT',
+  matchType:
+    hasAdvancedMatchingConfigured(value) && value.pathPattern
+      ? inferMatchTypeFromPattern(value.pathPattern)
+      : value.matchType || 'EXACT',
 });
 
 export const migrateContentTypesToRules = (contentTypes?: ContentTypes): ContentTypeRules => {
@@ -55,6 +61,10 @@ export const normalizeContentTypeRules = (
 
         return {
           ...normalizedRule,
+          matchType:
+            normalizedRule.enableAdvancedMatching && normalizedRule.pathPattern
+              ? inferMatchTypeFromPattern(normalizedRule.pathPattern)
+              : normalizedRule.matchType ?? 'EXACT',
           enableAdvancedMatching:
             rule.enableAdvancedMatching ?? hasAdvancedMatchingConfigured(normalizedRule),
         };
@@ -74,20 +84,24 @@ export const getUniqueContentTypeIds = (contentTypeRules: ContentTypeRules) =>
   );
 
 const getRuleValidationSignature = (rule: ContentTypeRule) => {
-  if (!rule.contentTypeId || !rule.slugField) {
+  if (!rule.contentTypeId) {
     return null;
   }
 
   if (rule.enableAdvancedMatching) {
     return JSON.stringify({
       contentTypeId: rule.contentTypeId,
-      slugField: rule.slugField,
+      slugField: rule.slugField || '',
       enableAdvancedMatching: true,
       pathPattern: rule.pathPattern?.trim() ?? '',
       additionalFieldIds: [...(rule.additionalFieldIds ?? [])].sort(),
       matchDimension: rule.matchDimension ?? 'unifiedPagePathScreen',
-      matchType: rule.matchType ?? 'EXACT',
+      matchType: inferMatchTypeFromPattern(rule.pathPattern ?? ''),
     });
+  }
+
+  if (!rule.slugField) {
+    return null;
   }
 
   return JSON.stringify({
