@@ -242,7 +242,7 @@ describe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    expect(screen.getByText('Add an entry fields used to build URL pattern')).toBeVisible();
+    expect(screen.getByText('Add an entry fields used to build the URL pattern')).toBeVisible();
     expect(
       screen.getByText(/Select the entry fields you want to use in the pattern\./)
     ).toBeVisible();

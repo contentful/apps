@@ -336,7 +336,7 @@ const AssignContentTypeRow = (props: Props) => {
               <Box className={styles.stackedField}>
                 <FormControl marginBottom="none">
                   <FormControl.Label>
-                    Add an entry fields used to build URL pattern
+                    Add an entry fields used to build the URL pattern
                   </FormControl.Label>
                   <Stack spacing="spacing2Xs" flexDirection="column" alignItems="flex-start">
                     {contentTypeFields.length ? (
