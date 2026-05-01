@@ -242,12 +242,12 @@ describe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    expect(screen.getByText('Entry fields used to build URL pattern')).toBeVisible();
+    expect(screen.getByText('Add an entry fields used to build URL pattern')).toBeVisible();
     expect(
       screen.getByText(/Select the entry fields you want to use in the pattern\./)
     ).toBeVisible();
     expect(screen.getByText(/sectionSlug/)).toBeVisible();
-    expect(screen.getByText(/shop\/products/)).toBeVisible();
+    expect(screen.getByText(/Use \.\* when part of the URL can vary\./)).toBeVisible();
   });
 
   it('lists all content type fields as advanced pattern variables', () => {
@@ -495,6 +495,33 @@ describe('Assign Content Type Card for Config Screen', () => {
     });
   });
 
+  it('appends a newly selected field variable to the end of the existing pattern', async () => {
+    const user = userEvent.setup();
+    render(
+      <AssignContentTypeRow
+        contentTypeRule={{
+          ...contentTypeRules[1],
+          contentTypeId: 'category',
+          slugField: 'title',
+          urlPrefix: '',
+          enableAdvancedMatching: true,
+          pathPattern: '/news/{title}',
+          matchDimension: 'unifiedPagePathScreen',
+          additionalFieldIds: ['title'],
+        }}
+        {...props}
+      />
+    );
+
+    await user.click(screen.getByTestId('additionalFieldOption-sectionSlug'));
+
+    expect(onContentTypeRuleChange).toHaveBeenCalledWith('rule-category', {
+      additionalFieldIds: ['title', 'sectionSlug'],
+      pathPattern: '/news/{title}/{sectionSlug}',
+      matchType: 'EXACT',
+    });
+  });
+
   it('does not overwrite a custom pattern when selected query-string fields change', async () => {
     const user = userEvent.setup();
     render(
@@ -517,7 +544,7 @@ describe('Assign Content Type Card for Config Screen', () => {
 
     expect(onContentTypeRuleChange).toHaveBeenCalledWith('rule-category', {
       additionalFieldIds: ['sectionSlug'],
-      pathPattern: '/search?category={slug}',
+      pathPattern: '/search?category={slug}&sectionSlug={sectionSlug}',
       matchType: 'EXACT',
     });
   });

@@ -152,6 +152,35 @@ const AssignContentTypeRow = (props: Props) => {
     selectedMatchDimension = matchDimension
   ) => buildDefaultPathPattern('', selectedFieldIds, selectedMatchDimension, '');
 
+  const appendFieldVariableToPattern = (
+    currentPattern: string,
+    fieldId: string,
+    selectedMatchDimension = matchDimension
+  ) => {
+    const trimmedPattern = currentPattern.trim();
+    const fieldVariable = `{${fieldId}}`;
+
+    if (!trimmedPattern) {
+      return getGeneratedPattern([fieldId], selectedMatchDimension);
+    }
+
+    if (trimmedPattern.includes(fieldVariable)) {
+      return currentPattern;
+    }
+
+    if (selectedMatchDimension === 'pagePathPlusQueryString') {
+      if (trimmedPattern.includes('?')) {
+        return `${currentPattern}&${fieldId}=${fieldVariable}`;
+      }
+
+      return `${currentPattern}?${fieldId}=${fieldVariable}`;
+    }
+
+    const separator = trimmedPattern.endsWith('/') || trimmedPattern.endsWith('?') ? '' : '/';
+
+    return `${currentPattern}${separator}${fieldVariable}`;
+  };
+
   const getNextAutoPattern = (
     currentPattern: string,
     nextSelectedFieldIds = additionalFieldIds,
@@ -306,7 +335,9 @@ const AssignContentTypeRow = (props: Props) => {
             <Flex className={styles.advancedMatchingTopRow}>
               <Box className={styles.stackedField}>
                 <FormControl marginBottom="none">
-                  <FormControl.Label>Entry fields used to build URL pattern</FormControl.Label>
+                  <FormControl.Label>
+                    Add an entry fields used to build URL pattern
+                  </FormControl.Label>
                   <Stack spacing="spacing2Xs" flexDirection="column" alignItems="flex-start">
                     {contentTypeFields.length ? (
                       contentTypeFields.map((field) => (
@@ -321,10 +352,13 @@ const AssignContentTypeRow = (props: Props) => {
                                 : additionalFieldIds.filter(
                                     (selectedFieldId) => selectedFieldId !== field.id
                                   );
-                              const nextPattern = getNextAutoPattern(
-                                pathPattern,
-                                nextSelectedFields
-                              );
+                              const nextPattern = checked
+                                ? appendFieldVariableToPattern(
+                                    pathPattern,
+                                    field.id,
+                                    matchDimension
+                                  )
+                                : getNextAutoPattern(pathPattern, nextSelectedFields);
                               onContentTypeRuleChange(ruleId, {
                                 additionalFieldIds: nextSelectedFields,
                                 pathPattern: nextPattern,
@@ -385,6 +419,10 @@ const AssignContentTypeRow = (props: Props) => {
                       {unknownPatternMessage}
                     </FormControl.ValidationMessage>
                   )}
+                  <FormControl.HelpText>
+                    Use .* when part of the URL can vary. Example: /shop/products/{'{slug}'}
+                    /compare/.*
+                  </FormControl.HelpText>
                 </FormControl>
               </Box>
             </Flex>
@@ -431,10 +469,7 @@ const AssignContentTypeRow = (props: Props) => {
                 </FormControl>
               </Box>
               <Box className={styles.compactField}>
-                <Text fontColor="gray600">
-                  Use <code>.*</code> when part of the URL can vary. Example:{' '}
-                  <code>/shop/products/{'{slug}'}/compare/.*</code>
-                </Text>
+                <Box />
               </Box>
             </Flex>
           </Box>
