@@ -91,7 +91,7 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
         <HeaderLabel
           label="Advanced"
           className={styles.toggleItem}
-          helpText="Use advanced matching when the URL needs more than a fixed prefix plus the selected slug field, like query strings or custom path patterns."
+          helpText="Use advanced matching when you want to build the URL pattern from entry fields, query strings, or custom path structures."
         />
         <Box className={styles.removeItem}></Box>
       </Flex>
