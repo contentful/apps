@@ -28,7 +28,7 @@ describe('Assign Content Type Section for Config Screen', () => {
     expect(screen.getByText('Content type configuration')).toBeVisible();
     expect(
       screen.getByText(
-        'Configure the content types whose entries should show Google Analytics data in the editor sidebar. For each content type, define how the app should match the entry to a page path: use a slug field and optional prefix for standard paths, or enable advanced matching to build a custom path pattern with entry field values and wildcards.'
+        'Configure the content types whose entries should show Google Analytics data in the editor sidebar. For each content type, define how the app should match the entry to a page path: use a slug field and optional prefix for standard paths, or enable advanced matching to build a custom path pattern with entry field values, a locale, and wildcards.'
       )
     ).toBeVisible();
     expect(screen.getByText('Append a trailing slash to all page paths')).toBeVisible();

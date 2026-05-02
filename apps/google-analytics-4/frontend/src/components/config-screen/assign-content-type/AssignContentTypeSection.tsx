@@ -241,7 +241,7 @@ const AssignContentTypeSection = (props: Props) => {
           Configure the content types whose entries should show Google Analytics data in the editor
           sidebar. For each content type, define how the app should match the entry to a page path:
           use a slug field and optional prefix for standard paths, or enable advanced matching to
-          build a custom path pattern with entry field values and wildcards.
+          build a custom path pattern with entry field values, a locale, and wildcards.
         </Paragraph>
         <Paragraph>
           <TextLink
