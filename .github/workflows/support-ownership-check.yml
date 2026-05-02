@@ -1,0 +1,22 @@
+---
+name: Support ownership check
+
+on:
+  pull_request:
+    branches: [master, main]
+    paths:
+      - 'apps/**'
+      - 'SUPPORT_OWNERSHIP.md'
+      - '.github/workflows/support-ownership-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: All apps listed in SUPPORT_OWNERSHIP.md
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify support ownership manifest
+        run: node scripts/check-support-ownership.mjs
