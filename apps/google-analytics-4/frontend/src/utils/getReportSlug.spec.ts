@@ -41,6 +41,25 @@ describe('getReportSlug', () => {
     expect(reportSlug).toBe('/north-america/denver/luxury-homes/');
   });
 
+  it('supports integer field tokens in advanced patterns', () => {
+    const reportSlug = getReportSlug(
+      {
+        slugField: 'slug',
+        urlPrefix: '',
+        enableAdvancedMatching: true,
+        additionalFieldIds: ['articleId'],
+        pathPattern: '/article?articleId={articleId}',
+      },
+      {
+        slug: 'article-title',
+        articleId: 360054483454,
+      },
+      true
+    );
+
+    expect(reportSlug).toBe('/article?articleId=360054483454');
+  });
+
   it('does not append a trailing slash after query string patterns', () => {
     const reportSlug = getReportSlug(
       {

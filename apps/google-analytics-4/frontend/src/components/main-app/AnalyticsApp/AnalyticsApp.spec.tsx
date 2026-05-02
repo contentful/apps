@@ -5,6 +5,7 @@ import { mockSdk, mockCma, validServiceKeyId } from '../../../../test/mocks';
 import runReportResponseHasViews from '../../../../../lambda/public/sampleData/runReportResponseHasViews.json';
 import runReportResponseNoView from '../../../../../lambda/public/sampleData/runReportResponseNoViews.json';
 import {
+  ANALYTICS_DATA_LOAD_ERROR_MSG,
   EMPTY_DATA_MSG,
   getContentTypeSpecificMsg,
 } from 'components/main-app/constants/noteMessages';
@@ -105,11 +106,14 @@ describe('AnalyticsApp with correct content types configured', () => {
 
     const dropdowns = await findAllByTestId(SELECT_TEST_ID);
     const warningNote = getByTestId(NOTE_TEST_ID);
-    const noteText = getByText('api error');
+    const noteText = getByText(
+      ANALYTICS_DATA_LOAD_ERROR_MSG.replace('contact support.', '').trim()
+    );
 
     expect(dropdowns).toHaveLength(2);
     expect(warningNote).toBeVisible();
     expect(noteText).toBeVisible();
+    expect(screen.queryByText('api error')).toBeNull();
   });
 
   it('renders nothing when it has no response', async () => {

@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { AllContentTypes, AllContentTypeEntries, ContentTypeRules } from '../../../types';
 import AssignContentTypeCard from 'components/config-screen/assign-content-type/AssignContentTypeCard';
 
@@ -44,6 +45,7 @@ describe('Assign Content Type Card for Config Screen', () => {
         originalContentTypeRules={[]}
         rulesMissingPattern={new Set()}
         rulesWithUnknownPatternTokens={new Map()}
+        rulesWithMissingSelectedPatternTokens={new Map()}
         duplicateRuleIds={new Set()}
         showPatternValidation={false}
       />
@@ -52,6 +54,7 @@ describe('Assign Content Type Card for Config Screen', () => {
     expect(screen.getByText('Content type')).toBeVisible();
     expect(screen.getByText('Slug field')).toBeVisible();
     expect(screen.getByText('URL prefix')).toBeVisible();
+    expect(screen.getAllByText('Advanced')[0]).toBeVisible();
     expect(screen.queryByText('Path pattern')).not.toBeInTheDocument();
   });
 
@@ -69,6 +72,7 @@ describe('Assign Content Type Card for Config Screen', () => {
         originalContentTypeRules={[]}
         rulesMissingPattern={new Set()}
         rulesWithUnknownPatternTokens={new Map()}
+        rulesWithMissingSelectedPatternTokens={new Map()}
         duplicateRuleIds={new Set()}
         showPatternValidation={false}
       />
@@ -77,7 +81,8 @@ describe('Assign Content Type Card for Config Screen', () => {
     expect(screen.getAllByTestId('contentTypeRow').length).toBe(1);
   });
 
-  it('explains that the selected slug field provides the value for {slug}', async () => {
+  it('uses updated tooltip copy for slug field and advanced matching', async () => {
+    const user = userEvent.setup();
     render(
       <AssignContentTypeCard
         allContentTypes={allContentTypes}
@@ -91,11 +96,32 @@ describe('Assign Content Type Card for Config Screen', () => {
         originalContentTypeRules={[]}
         rulesMissingPattern={new Set()}
         rulesWithUnknownPatternTokens={new Map()}
+        rulesWithMissingSelectedPatternTokens={new Map()}
         duplicateRuleIds={new Set()}
         showPatternValidation={false}
       />
     );
 
-    expect(screen.getByText('Slug field')).toBeVisible();
+    const slugTooltipTrigger = screen
+      .getByText('Slug field')
+      .closest('label')
+      ?.querySelector('[aria-describedby]') as HTMLElement;
+    await user.hover(slugTooltipTrigger);
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'For standard paths, choose the short text field where the entry stores its page path. Use advanced matching to build a custom page path.'
+    );
+
+    await user.unhover(slugTooltipTrigger);
+
+    const advancedTooltipTrigger = screen
+      .getAllByText('Advanced')[0]
+      .closest('label')
+      ?.querySelector('[aria-describedby]') as HTMLElement;
+    await user.hover(advancedTooltipTrigger);
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'Enable advanced matching to build a custom path pattern from entry fields, locale, and/or wildcards.'
+    );
   });
 });

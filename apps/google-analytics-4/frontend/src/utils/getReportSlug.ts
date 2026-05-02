@@ -5,7 +5,7 @@ import { pathJoin } from 'utils/pathJoin';
 const SLUG_TOKEN = '{slug}';
 const TOKEN_REGEX = /\{([^}]+)\}/g;
 
-type FieldValueMap = Record<string, string | object | undefined>;
+type FieldValueMap = Record<string, string | number | object | undefined>;
 
 const getPatternValue = (token: string, fieldValues: FieldValueMap) => {
   const normalizedFieldValue = token === 'slug' ? fieldValues.slug : fieldValues[token];
@@ -48,7 +48,7 @@ export const buildDefaultPathPattern = (
 
 export const getReportSlug = (
   contentTypeValue: ContentTypeValue,
-  slugFieldValue: string | object,
+  slugFieldValue: string | number | object,
   forceTrailingSlash: boolean
 ) => {
   const { pathPattern, urlPrefix } = contentTypeValue;

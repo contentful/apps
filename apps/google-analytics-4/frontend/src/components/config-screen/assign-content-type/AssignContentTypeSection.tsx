@@ -30,7 +30,11 @@ import {
   getUniqueContentTypeIds,
   normalizeContentTypeRules,
 } from 'helpers/contentTypeRules/contentTypeRules';
-import { getUnknownPatternTokens } from 'utils/contentTypeMatching';
+import {
+  getMissingSelectedPatternTokens,
+  getUnknownPatternTokens,
+} from 'utils/contentTypeMatching';
+
 interface Props {
   mergeSdkParameters: Function;
   onIsValidContentTypeAssignment: Function;
@@ -98,6 +102,7 @@ const AssignContentTypeSection = (props: Props) => {
 
   const rulesWithUnknownPatternTokens = new Map(
     contentTypeRules
+      .filter((rule) => rule.enableAdvancedMatching)
       .map((rule) => [
         rule.id,
         getUnknownPatternTokens(rule.pathPattern, rule.additionalFieldIds, rule.slugField),
@@ -105,11 +110,22 @@ const AssignContentTypeSection = (props: Props) => {
       .filter(([, unknownTokens]) => unknownTokens.length > 0)
   );
 
+  const rulesWithMissingSelectedPatternTokens = new Map(
+    contentTypeRules
+      .filter((rule) => rule.enableAdvancedMatching)
+      .map((rule) => [
+        rule.id,
+        getMissingSelectedPatternTokens(rule.pathPattern, rule.additionalFieldIds),
+      ] as const)
+      .filter(([, missingTokens]) => missingTokens.length > 0)
+  );
+
   const duplicateRuleIds = getDuplicateRuleIds(contentTypeRules);
 
   const isContentTypeAssignmentValid =
     rulesMissingPattern.size === 0 &&
     rulesWithUnknownPatternTokens.size === 0 &&
+    rulesWithMissingSelectedPatternTokens.size === 0 &&
     duplicateRuleIds.size === 0;
 
   useEffect(() => {
@@ -222,12 +238,10 @@ const AssignContentTypeSection = (props: Props) => {
       <Box>
         <Subheading marginBottom="spacingXs">Content type configuration</Subheading>
         <Paragraph>
-          Configure content types below that are connected to pages on your website where you're
-          tracking Google Analytics data. You'll need to specify the "slug" field used to generate
-          the page path in your website's URL, and optionally a "prefix" if one exists in front of
-          the URL page path. Additionally, you can check the box below to append a trailing slash to
-          all URLs if needed. The app will automatically be added to the sidebar of associated
-          content types on save of the configuration.
+          Configure the content types whose entries should show Google Analytics data in the editor
+          sidebar. For each content type, define how the app should match the entry to a page path:
+          use a slug field and optional prefix for standard paths, or enable advanced matching to
+          build a custom path pattern with entry field values and wildcards.
         </Paragraph>
         <Paragraph>
           <TextLink
@@ -243,10 +257,10 @@ const AssignContentTypeSection = (props: Props) => {
           id="use-trailing-slash"
           isChecked={forceTrailingSlash}
           onChange={trailingSlashHandler}>
-          Use trailing slash for all page paths
+          Append a trailing slash to all page paths
         </Checkbox>
         <Paragraph marginTop="spacing2Xs" marginBottom="none">
-          Applies to standard configurations only. Advanced patterns are used exactly as written.
+          Trailing slash applies to standard configurations only. Advanced patterns are used exactly as written.
         </Paragraph>
       </Box>
       {!loadingContentTypes && !loadingAllContentTypes ? (
@@ -264,6 +278,7 @@ const AssignContentTypeSection = (props: Props) => {
               originalContentTypeRules={originalContentTypeRules}
               rulesMissingPattern={rulesMissingPattern}
               rulesWithUnknownPatternTokens={rulesWithUnknownPatternTokens}
+              rulesWithMissingSelectedPatternTokens={rulesWithMissingSelectedPatternTokens}
               duplicateRuleIds={duplicateRuleIds}
               showPatternValidation={showPatternValidation}
             />

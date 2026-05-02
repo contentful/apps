@@ -38,7 +38,7 @@ const Sidebar = () => {
     const result = await sdk.dialogs.openCurrentApp({
       title: 'Custom date range',
       width: 'medium',
-      minHeight: '560px',
+      minHeight: '280px',
       shouldCloseOnOverlayClick: true,
       shouldCloseOnEscapePress: true,
       parameters: {

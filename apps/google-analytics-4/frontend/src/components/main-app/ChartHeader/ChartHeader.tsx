@@ -6,9 +6,8 @@ import {
   Flex,
   Paragraph,
   Select,
-  Text,
 } from '@contentful/f36-components';
-import { AnalyticsMetricType, DateRangeType, StartEndDates } from 'types';
+import { AnalyticsMetricType, DateRangeType, LocaleOption, StartEndDates } from 'types';
 import { DATE_RANGE_SELECT_OPTIONS, DateRange } from 'helpers/DateRangeHelpers/DateRangeHelpers';
 import { styles } from './ChartHeader.styles';
 
@@ -21,6 +20,9 @@ interface Props {
   startEndDates: StartEndDates;
   selectedDateRange?: DateRangeType;
   selectedMetric?: AnalyticsMetricType;
+  localeOptions?: LocaleOption[];
+  selectedLocale?: string;
+  handleLocaleChange?: (locale: string) => void;
 }
 
 const getMetricDisplayString = (_metricName: string) => {
@@ -30,7 +32,7 @@ const getMetricDisplayString = (_metricName: string) => {
     case 'activeUsers':
       return 'Unique Views';
     default:
-      return 'Undetermined metric';
+      return 'Total Views';
   }
 };
 
@@ -41,9 +43,11 @@ const ChartHeader = (props: Props) => {
     handleChange,
     handleMetricChange,
     handleCustomRangeRequest,
-    startEndDates,
     selectedDateRange,
     selectedMetric = 'screenPageViews',
+    localeOptions = [],
+    selectedLocale = '',
+    handleLocaleChange,
   } = props;
   const [dateSelection, setDateSelection] = useState<DateRangeType>('lastWeek');
   const [metricSelection, setMetricSelection] = useState<AnalyticsMetricType>(selectedMetric);
@@ -63,6 +67,10 @@ const ChartHeader = (props: Props) => {
     const nextMetric = event.target.value as AnalyticsMetricType;
     setMetricSelection(nextMetric);
     handleMetricChange(nextMetric);
+  };
+
+  const handleLocaleSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    handleLocaleChange?.(event.target.value);
   };
 
   useEffect(() => {
@@ -86,6 +94,21 @@ const ChartHeader = (props: Props) => {
         <Paragraph marginBottom="none">{getMetricDisplayString(metricName)}</Paragraph>
       </Box>
       <Flex flexDirection="column" className={styles.controls}>
+        {localeOptions.length > 0 && handleLocaleChange && (
+          <Select
+            className={styles.root}
+            id="locale"
+            name="locale"
+            aria-label="Locale"
+            value={selectedLocale}
+            onChange={handleLocaleSelect}>
+            {localeOptions.map((option) => (
+              <Select.Option key={option.code} value={option.code}>
+                {option.label}
+              </Select.Option>
+            ))}
+          </Select>
+        )}
         <Select
           className={styles.root}
           id="metric"
@@ -113,9 +136,6 @@ const ChartHeader = (props: Props) => {
               ? styles.customRangeRowVisible
               : styles.customRangeRowHidden
           }`}>
-          <Text fontColor="gray700" className={styles.customRangeSummary}>
-            {startEndDates.start} to {startEndDates.end}
-          </Text>
           <Button
             size="small"
             variant="secondary"

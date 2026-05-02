@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { mockSdk } from '../../../../test/mocks';
 import runReportResponseHasViews from '../../../../../lambda/public/sampleData/runReportResponseHasViews.json';
 import runReportResponseNoView from '../../../../../lambda/public/sampleData/runReportResponseNoViews.json';
-import { EMPTY_DATA_MSG } from '../constants/noteMessages';
+import { ANALYTICS_DATA_LOAD_ERROR_MSG, EMPTY_DATA_MSG } from '../constants/noteMessages';
 import { vi } from 'vitest';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
@@ -27,9 +27,10 @@ describe('ChartContent component', () => {
       <ChartContent pageViewData={runReportResponseHasViews} error={new Error('api error')} />
     );
 
-    const noteText = getByText('api error');
+    const noteText = getByText(ANALYTICS_DATA_LOAD_ERROR_MSG.replace('contact support.', '').trim());
 
     expect(noteText).toBeVisible();
+    expect(screen.queryByText('api error')).toBeNull();
   });
 
   it('mounts with warning message if empty data', () => {

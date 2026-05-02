@@ -61,7 +61,7 @@ describe('contentTypeRules normalization', () => {
         slugField: '',
         urlPrefix: '',
         enableAdvancedMatching: true,
-        pathPattern: '/shop/products/{slug}/compare/.*',
+        pathPattern: '/shop/products/{slug}/compare/*',
         additionalFieldIds: ['slug'],
         matchDimension: 'unifiedPagePathScreen',
         matchType: 'EXACT',

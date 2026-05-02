@@ -21,6 +21,7 @@ interface AssignContentTypeCardProps {
   originalContentTypeRules: ContentTypeRules;
   rulesMissingPattern: Set<string>;
   rulesWithUnknownPatternTokens: Map<string, string[]>;
+  rulesWithMissingSelectedPatternTokens: Map<string, string[]>;
   duplicateRuleIds: Set<string>;
   showPatternValidation: boolean;
 }
@@ -69,6 +70,7 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
     originalContentTypeRules,
     rulesMissingPattern,
     rulesWithUnknownPatternTokens,
+    rulesWithMissingSelectedPatternTokens,
     duplicateRuleIds,
     showPatternValidation,
   } = props;
@@ -82,7 +84,7 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
         />
         <HeaderLabel
           label="Slug field"
-          helpText='This field provides the value used by {slug} in advanced patterns. For example, if you choose Title here, {slug} will use the Title field value. If you select a short text list field, the elements in the array will be joined by a forward slash.'
+          helpText='For standard paths, choose the short text field where the entry stores its page path. Use advanced matching to build a custom page path.'
         />
         <HeaderLabel
           label="URL prefix"
@@ -91,7 +93,7 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
         <HeaderLabel
           label="Advanced"
           className={styles.toggleItem}
-          helpText="Use advanced matching when you want to build the URL pattern from entry fields, query strings, or custom path structures."
+          helpText="Enable advanced matching to build a custom path pattern from entry fields, locale, and/or wildcards."
         />
         <Box className={styles.removeItem}></Box>
       </Flex>
@@ -116,6 +118,11 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
             unknownPatternTokens={
               showPatternValidation
                 ? (rulesWithUnknownPatternTokens.get(contentTypeRule.id) ?? [])
+                : []
+            }
+            missingSelectedPatternTokens={
+              showPatternValidation
+                ? (rulesWithMissingSelectedPatternTokens.get(contentTypeRule.id) ?? [])
                 : []
             }
             isDuplicateConfiguration={
