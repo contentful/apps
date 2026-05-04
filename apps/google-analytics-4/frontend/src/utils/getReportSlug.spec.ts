@@ -18,7 +18,7 @@ describe('getReportSlug', () => {
       true
     );
 
-    expect(reportSlug).toBe('/guides/market-insights/');
+    expect(reportSlug).toBe('/guides/market-insights');
   });
 
   it('supports deeper composed paths with multiple selected properties', () => {
@@ -38,7 +38,54 @@ describe('getReportSlug', () => {
       true
     );
 
-    expect(reportSlug).toBe('/north-america/denver/luxury-homes/');
+    expect(reportSlug).toBe('/north-america/denver/luxury-homes');
+  });
+
+  it('preserves an authored trailing slash in advanced patterns', () => {
+    const reportSlug = getReportSlug(
+      {
+        slugField: 'slug',
+        urlPrefix: '',
+        enableAdvancedMatching: true,
+        pathPattern: '/interviews/{slug}/',
+      },
+      {
+        slug: 'my-post',
+      },
+      false
+    );
+
+    expect(reportSlug).toBe('/interviews/my-post/');
+  });
+
+  it('does not apply the global trailing slash setting to advanced wildcard patterns', () => {
+    const reportSlug = getReportSlug(
+      {
+        slugField: 'slug',
+        urlPrefix: '',
+        enableAdvancedMatching: true,
+        pathPattern: '/shop/products/{slug}/compare/*',
+      },
+      {
+        slug: 'example-product',
+      },
+      true
+    );
+
+    expect(reportSlug).toBe('/shop/products/example-product/compare/*');
+  });
+
+  it('applies the global trailing slash setting to standard patterns', () => {
+    const reportSlug = getReportSlug(
+      {
+        slugField: 'slug',
+        urlPrefix: '/blog/',
+      },
+      'my-post',
+      true
+    );
+
+    expect(reportSlug).toBe('/blog/my-post/');
   });
 
   it('supports integer field tokens in advanced patterns', () => {

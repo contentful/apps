@@ -17,6 +17,10 @@ const normalizePattern = (pathPattern: string, fieldValues: FieldValueMap) => {
   return pathPattern.replace(TOKEN_REGEX, (_match, token) => getPatternValue(token, fieldValues));
 };
 
+const ensureLeadingSlash = (path: string) => {
+  return path.startsWith('/') ? path : `/${path}`;
+};
+
 const applyTrailingSlash = (path: string, forceTrailingSlash: boolean) => {
   if (!forceTrailingSlash || path.includes('?')) {
     return path;
@@ -31,7 +35,9 @@ export const buildDefaultPathPattern = (
   matchDimension: ContentTypeValue['matchDimension'] = 'unifiedPagePathScreen',
   primaryToken = SLUG_TOKEN
 ) => {
-  const pathTokens = primaryToken ? [...additionalFieldIds.map((fieldId) => `{${fieldId}}`), primaryToken] : additionalFieldIds.map((fieldId) => `{${fieldId}}`);
+  const pathTokens = primaryToken
+    ? [...additionalFieldIds.map((fieldId) => `{${fieldId}}`), primaryToken]
+    : additionalFieldIds.map((fieldId) => `{${fieldId}}`);
   const basePath =
     matchDimension === 'pagePathPlusQueryString'
       ? `/${pathJoin(urlPrefix, primaryToken)}`
@@ -52,16 +58,20 @@ export const getReportSlug = (
   forceTrailingSlash: boolean
 ) => {
   const { pathPattern, urlPrefix } = contentTypeValue;
+  const hasAdvancedPattern =
+    hasAdvancedMatchingConfigured(contentTypeValue) && Boolean(pathPattern?.trim());
   const fieldValues =
     typeof slugFieldValue === 'object' && !Array.isArray(slugFieldValue)
       ? ({ slug: '', ...slugFieldValue } as FieldValueMap)
       : ({ slug: slugFieldValue } as FieldValueMap);
-  const basePath =
-    hasAdvancedMatchingConfigured(contentTypeValue) && pathPattern?.trim()
-      ? normalizePattern(pathPattern, fieldValues)
-      : pathJoin(urlPrefix || '', fieldValues.slug || '');
 
-  return `/${applyTrailingSlash(pathJoin(basePath), forceTrailingSlash)}`;
+  if (hasAdvancedPattern) {
+    return ensureLeadingSlash(normalizePattern(pathPattern!, fieldValues).trim());
+  }
+
+  const basePath = pathJoin(urlPrefix || '', fieldValues.slug || '');
+
+  return `/${applyTrailingSlash(basePath, forceTrailingSlash)}`;
 };
 
 export const pathPatternPreview = (pathPattern: string, additionalFieldIds: string[] = []) => {
