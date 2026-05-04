@@ -126,8 +126,8 @@ const Page = () => {
                   <Heading marginBottom="none">Google Drive Integration</Heading>
                   <Note variant="warning">{ERROR_MESSAGES.AI_ACCESS_DENIED}</Note>
                   <Paragraph>
-                    Contact your Contentful administrator to re-enable AI features for this space
-                    or organization.
+                    Contact your Contentful administrator to re-enable AI features for this space or
+                    organization.
                   </Paragraph>
                 </Flex>
               </Layout.Body>
