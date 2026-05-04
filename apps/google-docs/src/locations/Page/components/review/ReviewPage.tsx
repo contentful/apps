@@ -8,6 +8,11 @@ import { RunStatus } from '@types';
 import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
 import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
 import type { ContentTypeDisplayInfoMap } from '../../../../utils/overviewEntryList';
+import {
+  countSelectedEntries,
+  filterEntryBlockGraphBySelection,
+  getAllEntrySelectionKeys,
+} from '../../../../utils/selectEntryBlockGraph';
 import Splitter from '../mainpage/Splitter';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
 import { ErrorModal } from '../modals/ErrorModal';
@@ -41,11 +46,16 @@ export const ReviewPage = ({
   const [entryBlockGraph, setEntryBlockGraph] = useState<EntryBlockGraph>(() =>
     structuredClone(payload.entryBlockGraph)
   );
+  const [selectedEntryKeys, setSelectedEntryKeys] = useState<Set<string>>(() =>
+    getAllEntrySelectionKeys(payload.entryBlockGraph.entries)
+  );
 
   // Reset local graph when starting a different run; do not depend on payload.entryBlockGraph
   // alone or user edits would be wiped when the parent re-renders with a new object reference.
   useEffect(() => {
-    setEntryBlockGraph(structuredClone(payload.entryBlockGraph));
+    const nextEntryBlockGraph = structuredClone(payload.entryBlockGraph);
+    setEntryBlockGraph(nextEntryBlockGraph);
+    setSelectedEntryKeys(getAllEntrySelectionKeys(nextEntryBlockGraph.entries));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-init on run identity
   }, [runId, payload.documentId]);
 
@@ -65,8 +75,25 @@ export const ReviewPage = ({
   }, [payload.contentTypes]);
   const hasCreatedEntries = createdEntries !== null;
   const isMappingDisabled = isCreatePending || hasCreatedEntries;
+  const selectedEntryCount = useMemo(
+    () => countSelectedEntries(entryBlockGraph.entries, selectedEntryKeys),
+    [entryBlockGraph.entries, selectedEntryKeys]
+  );
+  const hasSelectedEntries = selectedEntryCount > 0;
 
   const { resumeWorkflow } = useWorkflowAgent({ sdk, documentId: '', oauthToken: '' });
+
+  const handleToggleEntrySelection = useCallback((entryKey: string, isSelected: boolean) => {
+    setSelectedEntryKeys((previous) => {
+      const next = new Set(previous);
+      if (isSelected) {
+        next.add(entryKey);
+      } else {
+        next.delete(entryKey);
+      }
+      return next;
+    });
+  }, []);
 
   const handleCreateEntries = useCallback(async (): Promise<void> => {
     if (!runId) {
@@ -74,11 +101,19 @@ export const ReviewPage = ({
       return;
     }
 
+    if (!hasSelectedEntries) {
+      return;
+    }
+
     setIsCreatePending(true);
 
     try {
-      const result = await resumeWorkflow(runId, {
+      const selectedEntryBlockGraph = filterEntryBlockGraphBySelection(
         entryBlockGraph,
+        selectedEntryKeys
+      );
+      const result = await resumeWorkflow(runId, {
+        entryBlockGraph: selectedEntryBlockGraph,
       });
 
       if (result.status === RunStatus.COMPLETED && 'googleDocPayload' in result) {
@@ -113,7 +148,15 @@ export const ReviewPage = ({
     } finally {
       setIsCreatePending(false);
     }
-  }, [runId, resumeWorkflow, entryBlockGraph, sdk, onExitReview]);
+  }, [
+    runId,
+    hasSelectedEntries,
+    entryBlockGraph,
+    selectedEntryKeys,
+    resumeWorkflow,
+    sdk,
+    onExitReview,
+  ]);
 
   const handleConfirmCancel = useCallback(async () => {
     setIsCancelling(true);
@@ -172,10 +215,12 @@ export const ReviewPage = ({
           <OverviewSection
             payload={reviewPayload}
             selectedEntryIndex={selectedEntryIndex}
+            selectedEntryKeys={selectedEntryKeys}
             onSelectEntryIndex={(index) => {
               setSelectedEntryIndex(index);
               setReviewMode('edit');
             }}
+            onToggleEntrySelection={handleToggleEntrySelection}
             reviewMode={reviewMode}
             onReviewModeChange={(mode) => {
               setReviewMode(mode);
@@ -188,6 +233,9 @@ export const ReviewPage = ({
             ctaLabel={hasCreatedEntries ? 'View entries' : 'Create entries'}
             onCtaClick={handleCreateOrViewEntries}
             isCtaLoading={isCreatePending}
+            isCtaDisabled={!hasCreatedEntries && !hasSelectedEntries}
+            selectedEntryCount={selectedEntryCount}
+            areEntrySelectionsDisabled={isMappingDisabled}
           />
           <MappingView
             payload={reviewPayload}

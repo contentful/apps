@@ -48,6 +48,13 @@ export interface AgentRunData {
   error?: Record<string, unknown>;
 }
 
+interface AgentRunResumeClient {
+  resumeRun(
+    params: { spaceId: string; environmentId: string; runId: string },
+    payload: { resumePayload: Record<string, unknown> }
+  ): Promise<unknown>;
+}
+
 function getJsonHeaders(): HeadersInit {
   return {
     ...AGENTS_API_HEADERS,
@@ -172,7 +179,9 @@ export async function resumeWorkflowRun(
     return;
   }
 
-  await sdk.cma.agentRun.resumeRun(
+  const agentRunClient = sdk.cma.agentRun as typeof sdk.cma.agentRun & AgentRunResumeClient;
+
+  await agentRunClient.resumeRun(
     { spaceId, environmentId, runId },
     { resumePayload: resumePayload as Record<string, unknown> }
   );

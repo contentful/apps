@@ -17,24 +17,39 @@ import Splitter from '../mainpage/Splitter';
 interface OverviewProps {
   payload: MappingReviewSuspendPayload;
   selectedEntryIndex: number | null;
+  selectedEntryKeys: ReadonlySet<string>;
   onSelectEntryIndex: (index: number) => void;
+  onToggleEntrySelection: (entryKey: string, isSelected: boolean) => void;
   reviewMode: 'view' | 'edit';
   onReviewModeChange: (mode: 'view' | 'edit') => void;
   ctaLabel: string;
   onCtaClick: () => void;
   isCtaLoading?: boolean;
+  isCtaDisabled?: boolean;
+  selectedEntryCount: number;
+  areEntrySelectionsDisabled?: boolean;
 }
 
 const OverviewSection = ({
   payload,
   selectedEntryIndex,
+  selectedEntryKeys,
   onSelectEntryIndex,
+  onToggleEntrySelection,
   reviewMode,
   onReviewModeChange,
   ctaLabel,
   onCtaClick,
   isCtaLoading = false,
+  isCtaDisabled = false,
+  selectedEntryCount,
+  areEntrySelectionsDisabled = false,
 }: OverviewProps) => {
+  const totalEntryCount = payload.entryBlockGraph.entries.length;
+  const entrySelectionCountLabel =
+    totalEntryCount === 1
+      ? `${selectedEntryCount} of 1 entry selected`
+      : `${selectedEntryCount} of ${totalEntryCount} entries selected`;
   const entryRows = useMemo(
     () =>
       buildEntryListFromEntryBlockGraph(
@@ -93,11 +108,14 @@ const OverviewSection = ({
                 variant="primary"
                 onClick={onCtaClick}
                 isLoading={isCtaLoading}
-                isDisabled={isCtaLoading}>
+                isDisabled={isCtaLoading || isCtaDisabled}>
                 {ctaLabel}
               </Button>
             </Flex>
           </Flex>
+          <Text fontSize="fontSizeS" fontColor="gray600">
+            {entrySelectionCountLabel}
+          </Text>
 
           {entryRows.length === 0 ? (
             <Note variant="neutral">
@@ -109,7 +127,10 @@ const OverviewSection = ({
               <OverviewEntryList
                 rows={entryRows}
                 selectedEntryIndex={selectedEntryIndex}
+                selectedEntryKeys={selectedEntryKeys}
                 onSelect={onSelectEntryIndex}
+                onToggleEntrySelection={onToggleEntrySelection}
+                areEntrySelectionsDisabled={areEntrySelectionsDisabled}
               />
             </Box>
           )}
