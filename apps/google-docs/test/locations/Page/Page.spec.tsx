@@ -37,14 +37,7 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 vi.mock('../../../src/locations/Page/components/mainpage/OAuthConnector', () => ({
-  OAuthConnector: ({ onAiAccessDenied }: { onAiAccessDenied?: () => void }) => (
-    <>
-      <div>Mock OAuth Connector</div>
-      <button onClick={() => onAiAccessDenied?.()} type="button">
-        Trigger AI Access Denied
-      </button>
-    </>
-  ),
+  OAuthConnector: () => <div>Mock OAuth Connector</div>,
 }));
 
 const { mockModalOrchestrator, mockResumeWorkflow, mockResetFlow } = vi.hoisted(() => ({
@@ -213,15 +206,13 @@ describe('Page component', () => {
     expect(mockResetFlow).toHaveBeenCalledTimes(1);
   });
 
-  it('renders a blocked state when AI access is denied from the OAuth flow', async () => {
+  it('renders a blocked state when AI access is denied from the workflow modal', async () => {
     render(<Page />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Trigger AI Access Denied' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Trigger Modal AI Access Denied' }));
 
     await waitFor(() => {
-      expect(
-        screen.getByText('AI features are currently disabled for this space or organization.')
-      ).toBeTruthy();
+      expect(screen.getByText(/AI features are currently disabled/)).toBeTruthy();
     });
   });
 });

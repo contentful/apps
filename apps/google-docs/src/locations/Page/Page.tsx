@@ -13,6 +13,7 @@ import type { MappingReviewSuspendPayload } from '@types';
 import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
 import { useGoogleDriveOAuth } from '@hooks/useGoogleDriveOAuth';
 import { ERROR_MESSAGES } from '@constants/messages';
+import { isAiAccessDeniedError } from '../../utils/aiAccess';
 
 const enableMockReviewPayload = import.meta.env.VITE_ENABLE_MOCK_REVIEW_PAYLOAD === 'true';
 
@@ -98,6 +99,27 @@ const Page = () => {
     }
   };
 
+  const handleConnectGoogleDrive = async () => {
+    handleAiAccessRestored();
+    try {
+      await startOAuth();
+    } catch (error) {
+      if (isAiAccessDeniedError(error)) {
+        handleAiAccessDenied();
+      }
+    }
+  };
+
+  const handleDisconnectGoogleDrive = async () => {
+    try {
+      await disconnectOAuth();
+    } catch (error) {
+      if (isAiAccessDeniedError(error)) {
+        handleAiAccessDenied();
+      }
+    }
+  };
+
   if (isAiAccessDenied) {
     return (
       <Layout withBoxShadow={true} offsetTop={10}>
@@ -108,10 +130,6 @@ const Page = () => {
             style={{ maxWidth: '900px', margin: '24px auto' }}>
             <Heading marginBottom="none">Google Drive Integration</Heading>
             <Note variant="warning">{ERROR_MESSAGES.AI_ACCESS_DENIED}</Note>
-            <Paragraph>
-              Contact your Contentful administrator to re-enable AI features for this space or
-              organization.
-            </Paragraph>
           </Flex>
         </Layout.Body>
       </Layout>
@@ -142,14 +160,8 @@ const Page = () => {
               isOAuthConnected={isOAuthConnected}
               isOAuthLoading={isOAuthLoading}
               isOAuthBusy={isOAuthBusy}
-              onConnectGoogleDrive={async () => {
-                handleAiAccessRestored();
-                await startOAuth();
-              }}
-              onDisconnectGoogleDrive={async () => {
-                await disconnectOAuth();
-              }}
-              onAiAccessDenied={handleAiAccessDenied}
+              onConnectGoogleDrive={handleConnectGoogleDrive}
+              onDisconnectGoogleDrive={handleDisconnectGoogleDrive}
               onSelectFile={handleSelectFile}
             />
           </>
