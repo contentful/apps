@@ -30,5 +30,5 @@ Standard Vite app.
 
 ## Never / Always
 
-- **Never** use `useAutoResizer()` in the Home location.
+- **Never** use `useAutoResizer()` in the Home location — `LOCATION_HOME` manages its own sizing at the platform level; calling `useAutoResizer()` here has no effect and may cause layout conflicts.
 - **Always** sanitize or limit the markdown rendered in the Home location — arbitrary HTML in markdown could be a security risk if not handled by the markdown renderer.

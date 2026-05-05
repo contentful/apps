@@ -24,7 +24,7 @@ apps/mux/
 - **Video upload flow**: Mux uses a direct upload URL pattern — the App Action creates a Mux upload URL, the frontend uploads the video directly to Mux's servers (not through Contentful), and App Actions listen for Mux's webhook to update the asset status.
 - **Mux webhooks**: App Actions process Mux's `video.asset.ready` and `video.asset.errored` webhooks. If webhook processing is broken, uploaded videos will be stuck in a "processing" state.
 - **Mux API credentials** (token ID + secret) are in installation parameters — never log them.
-- **`functions/`**: check the `serverless.yml` in this directory — it may define Lambda functions for webhook handling in addition to (or instead of) App Actions.
+- **`functions/`**: a standalone Vite package (`mux-functions 0.1.0`) with its own `package.json` and `vite.config.mts`. It is not a serverless Lambda — it is a separate build target. Bootstrap and build it independently when making changes to function logic.
 - `contentful-app-manifest.json` defines the App Action event signatures — update it when adding new App Actions.
 - **Asset stored as JSON**: Mux asset data (playback ID, asset ID, status) is stored as a JSON object in a Contentful JSON field — the schema is defined in the frontend's type definitions.
 

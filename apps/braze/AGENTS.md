@@ -47,4 +47,3 @@ src/
 ## Never / Always
 
 - **Never** send raw Contentful Document nodes to Braze — always render to HTML first.
-- **Always** use `useAutoResizer()` in Sidebar and Dialog locations.

@@ -12,7 +12,6 @@ Standard Vite app.
 |----------|------|---------|
 | `LOCATION_APP_CONFIG` | `src/locations/ConfigScreen.tsx` | Configure Google OAuth credentials and mappings |
 | `LOCATION_PAGE` | `src/locations/Page/` | Main import UI — browse/select Google Docs |
-| `LOCATION_DIALOG` | `src/locations/LocalhostWarning.tsx` | Warning shown in local dev when OAuth redirect won't work |
 
 ## Key Dependencies
 
@@ -28,7 +27,7 @@ Standard Vite app.
 ```
 src/
 ├── App.tsx
-├── locations/         # ConfigScreen, Page, LocalhostWarning
+├── locations/         # ConfigScreen, Page (+ LocalhostWarning.tsx — dev-only component, not an sdk location)
 ├── hooks/
 ├── services/          # Google Docs API client and doc conversion logic
 ├── fixtures/          # Test fixtures for doc conversion
