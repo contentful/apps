@@ -775,7 +775,7 @@ export const MappingView = ({
               <Text as="p" marginBottom="none">
                 {isViewMode ? (
                   <Text as="span" fontWeight="fontWeightDemiBold">
-                    All entries
+                    All entries ({entryBlockGraph.entries.length})
                   </Text>
                 ) : (
                   <>
