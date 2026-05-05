@@ -49,6 +49,23 @@ export interface AgentRunData {
   error?: Record<string, unknown>;
 }
 
+type AgentRunResumeParams = {
+  spaceId: string;
+  environmentId: string;
+  runId: string;
+};
+
+type AgentRunResumeApi = {
+  resumeRun?: (
+    params: AgentRunResumeParams,
+    body: { resumePayload: Record<string, unknown> }
+  ) => Promise<unknown>;
+  resume?: (
+    params: AgentRunResumeParams,
+    body: { resumePayload: ResumePayload }
+  ) => Promise<unknown>;
+};
+
 function getJsonHeaders(): HeadersInit {
   return {
     ...AGENTS_API_HEADERS,
@@ -185,16 +202,7 @@ export async function resumeWorkflowRun(
     return;
   }
 
-  const agentRunApi = sdk.cma.agentRun as {
-    resumeRun?: (
-      params: { spaceId: string; environmentId: string; runId: string },
-      body: { resumePayload: Record<string, unknown> }
-    ) => Promise<unknown>;
-    resume?: (
-      params: { spaceId: string; environmentId: string; runId: string },
-      body: { resumePayload: ResumePayload }
-    ) => Promise<unknown>;
-  };
+  const agentRunApi = sdk.cma.agentRun as AgentRunResumeApi;
 
   if (agentRunApi.resumeRun) {
     try {
