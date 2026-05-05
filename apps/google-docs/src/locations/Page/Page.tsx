@@ -98,6 +98,26 @@ const Page = () => {
     }
   };
 
+  if (isAiAccessDenied) {
+    return (
+      <Layout withBoxShadow={true} offsetTop={10}>
+        <Layout.Body>
+          <Flex
+            flexDirection="column"
+            gap="spacingM"
+            style={{ maxWidth: '900px', margin: '24px auto' }}>
+            <Heading marginBottom="none">Google Drive Integration</Heading>
+            <Note variant="warning">{ERROR_MESSAGES.AI_ACCESS_DENIED}</Note>
+            <Paragraph>
+              Contact your Contentful administrator to re-enable AI features for this space or
+              organization.
+            </Paragraph>
+          </Flex>
+        </Layout.Body>
+      </Layout>
+    );
+  }
+
   return (
     <>
       <Layout withBoxShadow={true} offsetTop={10}>
@@ -117,37 +137,21 @@ const Page = () => {
                 Mock from fixture
               </Button>
             ) : null}
-            {isAiAccessDenied ? (
-              <Layout.Body>
-                <Flex
-                  flexDirection="column"
-                  gap="spacingM"
-                  style={{ maxWidth: '900px', margin: '24px auto' }}>
-                  <Heading marginBottom="none">Google Drive Integration</Heading>
-                  <Note variant="warning">{ERROR_MESSAGES.AI_ACCESS_DENIED}</Note>
-                  <Paragraph>
-                    Contact your Contentful administrator to re-enable AI features for this space or
-                    organization.
-                  </Paragraph>
-                </Flex>
-              </Layout.Body>
-            ) : (
-              <MainPageView
-                oauthToken={oauthToken}
-                isOAuthConnected={isOAuthConnected}
-                isOAuthLoading={isOAuthLoading}
-                isOAuthBusy={isOAuthBusy}
-                onConnectGoogleDrive={async () => {
-                  handleAiAccessRestored();
-                  await startOAuth();
-                }}
-                onDisconnectGoogleDrive={async () => {
-                  await disconnectOAuth();
-                }}
-                onAiAccessDenied={handleAiAccessDenied}
-                onSelectFile={handleSelectFile}
-              />
-            )}
+            <MainPageView
+              oauthToken={oauthToken}
+              isOAuthConnected={isOAuthConnected}
+              isOAuthLoading={isOAuthLoading}
+              isOAuthBusy={isOAuthBusy}
+              onConnectGoogleDrive={async () => {
+                handleAiAccessRestored();
+                await startOAuth();
+              }}
+              onDisconnectGoogleDrive={async () => {
+                await disconnectOAuth();
+              }}
+              onAiAccessDenied={handleAiAccessDenied}
+              onSelectFile={handleSelectFile}
+            />
           </>
         )}
       </Layout>
