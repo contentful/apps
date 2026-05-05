@@ -73,6 +73,10 @@ describe('Page component', () => {
 
   it('renders scanned links in the page table', async () => {
     render(<Page />);
+    fireEvent.click(screen.getByRole('button', { name: 'Find links' }));
+
+    await screen.findByText('https://example.invalid/not-found');
+
     fireEvent.click(screen.getByRole('button', { name: 'Run scan' }));
 
     await screen.findByText('https://example.invalid/not-found');
@@ -135,9 +139,12 @@ describe('Page component', () => {
     };
 
     render(<Page />);
-    fireEvent.click(screen.getByRole('button', { name: 'Run scan' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Find links' }));
 
     await screen.findByText('/help');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Run scan' }));
+
     await screen.findByText(/not on allow list/i);
     expect(screen.getByText(/resolves to https:\/\/contentful.com\/help/i)).toBeInTheDocument();
     expect(mockSdk.cma.appActionCall.createWithResponse).not.toHaveBeenCalled();
@@ -172,7 +179,7 @@ describe('Page component', () => {
     };
 
     render(<Page />);
-    fireEvent.click(screen.getByRole('button', { name: 'Run scan' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Find links' }));
 
     await screen.findByText(
       /do not contain any supported Symbol, Text, Rich Text, or matching list fields/i
@@ -241,6 +248,10 @@ describe('Page component', () => {
     };
 
     render(<Page />);
+    fireEvent.click(screen.getByRole('button', { name: 'Find links' }));
+
+    await screen.findByText('https://contentful.com.evil.test/path');
+
     fireEvent.click(screen.getByRole('button', { name: 'Run scan' }));
 
     await screen.findByText(/not on allow list/i);
@@ -312,9 +323,12 @@ describe('Page component', () => {
     };
 
     render(<Page />);
-    fireEvent.click(screen.getByRole('button', { name: 'Run scan' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Find links' }));
 
     await screen.findByRole('link', { name: 'https://www.example.com/help' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Run scan' }));
+
     expect(screen.getByRole('link', { name: 'https://www.example.com/help' })).toHaveAttribute(
       'href',
       'https://www.example.com/help'
