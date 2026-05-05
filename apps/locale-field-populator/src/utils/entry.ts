@@ -98,69 +98,67 @@ export async function updateEntries(
   };
 }
 
-export const fetchEntries = async (
+export const fetchEntryAndContentType = async (
   cma: CMAClient,
   entryId: string,
   contentTypeId: string
 ): Promise<{
   entry: EntryProps;
   contentType: ContentTypeProps;
-  referencedEntriesData: ReferencedEntryData[];
 }> => {
-  const [mainEntry, mainEntryContentType] = await Promise.all([
+  const [entry, contentType] = await Promise.all([
     cma.entry.get({ entryId }),
     cma.contentType.get({ contentTypeId }),
   ]);
+  return { entry, contentType };
+};
 
-  const referencesToProcess: { referenceEntryId: string; field: ContentTypeField }[] =
-    collectReferences(mainEntry, mainEntryContentType);
+export const fetchReferencesForLocale = async (
+  cma: CMAClient,
+  entry: EntryProps,
+  contentType: ContentTypeProps,
+  sourceLocale: string
+): Promise<ReferencedEntryData[]> => {
+  const entryId = entry.sys.id;
+  const referencesToProcess = collectReferences(entry, contentType, sourceLocale);
 
   const entryMap = await fetchReferenceEntries(cma, referencesToProcess, entryId);
 
-  const contentTypeMap = await fetchContentTypes(
-    cma,
-    entryMap,
-    contentTypeId,
-    mainEntryContentType
-  );
+  const contentTypeMap = await fetchContentTypes(cma, entryMap, contentType.sys.id, contentType);
 
-  const referencedEntriesData: ReferencedEntryData[] = referencesToProcess.flatMap(
-    ({ referenceEntryId, field }) => {
-      if (referenceEntryId === entryId) {
-        return {
-          entry: mainEntry,
-          contentType: mainEntryContentType,
-          fieldId: field.id,
-          fieldName: field.name,
-          isSelfReference: true,
-        };
-      }
-
-      const referenceEntry = entryMap[referenceEntryId];
-      if (!referenceEntry) {
-        return [];
-      }
-
-      const referenceContentType = contentTypeMap[referenceEntry.sys.contentType.sys.id];
-
+  return referencesToProcess.flatMap(({ referenceEntryId, field }) => {
+    if (referenceEntryId === entryId) {
       return {
-        entry: referenceEntry,
-        contentType: referenceContentType,
+        entry,
+        contentType,
         fieldId: field.id,
         fieldName: field.name,
-        isSelfReference: false,
+        isSelfReference: true,
       };
     }
-  );
 
-  return {
-    entry: mainEntry,
-    contentType: mainEntryContentType,
-    referencedEntriesData,
-  };
+    const referenceEntry = entryMap[referenceEntryId];
+    if (!referenceEntry) {
+      return [];
+    }
+
+    const referenceContentType = contentTypeMap[referenceEntry.sys.contentType.sys.id];
+
+    return {
+      entry: referenceEntry,
+      contentType: referenceContentType,
+      fieldId: field.id,
+      fieldName: field.name,
+      isSelfReference: false,
+    };
+  });
 };
 
-const collectReferences = (mainEntry: EntryProps, mainEntryContentType: ContentTypeProps) => {
+const collectReferences = (
+  mainEntry: EntryProps,
+  mainEntryContentType: ContentTypeProps,
+  sourceLocale: string
+) => {
   const referenceFields = mainEntryContentType.fields.filter(
     (field) => isEntryField(field) || isEntryArrayField(field)
   );
@@ -180,7 +178,12 @@ const collectReferences = (mainEntry: EntryProps, mainEntryContentType: ContentT
     const fieldValues = mainEntry.fields[field.id];
     if (!fieldValues) continue;
 
-    const value = Object.values(fieldValues)[0];
+    let value = fieldValues[sourceLocale];
+    // Non-localized reference fields store under a single key (the default locale)
+    if (value === undefined && Object.keys(fieldValues).length === 1) {
+      value = Object.values(fieldValues)[0];
+    }
+    if (value === undefined) continue;
 
     if (isLinkValue(value) && value.sys.linkType === 'Entry') {
       processReference(value, field);
