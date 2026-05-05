@@ -1,7 +1,7 @@
 # Agent Guide — iterable
 
 ## What This App Does
-Integrates Contentful with Iterable (marketing automation platform). Lets editors link Contentful entries to Iterable campaigns and push content updates to Iterable from the Entry Sidebar.
+Integrates Contentful with Iterable (marketing automation platform). Generates campaign-ready links from entry data, so editors can copy and share them from the Entry Sidebar. 
 
 ## Archetype
 Standard Vite app.
