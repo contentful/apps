@@ -78,6 +78,7 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
   ModalOrchestrator: require('react').forwardRef(
     (
       props: {
+        onAiAccessDenied: () => void;
         onMappingReviewReady: (payload: MappingReviewSuspendPayload, runId: string) => void;
         onResetToMain: () => void;
         oauthToken: string;
@@ -107,6 +108,9 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
           </button>
           <button onClick={props.onResetToMain} type="button">
             Trigger Reset To Main
+          </button>
+          <button onClick={props.onAiAccessDenied} type="button">
+            Trigger Modal AI Access Denied
           </button>
         </>
       );
@@ -200,5 +204,15 @@ describe('Page component', () => {
     });
 
     expect(mockResetFlow).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders a blocked state when AI access is denied from the workflow modal', async () => {
+    render(<Page />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Trigger Modal AI Access Denied' }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/AI features are currently disabled/)).toBeTruthy();
+    });
   });
 });

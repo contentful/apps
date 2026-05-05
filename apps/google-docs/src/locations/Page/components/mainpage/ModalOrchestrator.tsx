@@ -23,6 +23,7 @@ import {
 import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
 import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
 import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
+import { isAiAccessDeniedError } from '../../../../utils/aiAccess';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
@@ -42,6 +43,7 @@ interface ModalOrchestratorProps {
   isOAuthConnected?: boolean;
   isOAuthBusy?: boolean;
   onReconnectGoogleDrive?: () => Promise<void>;
+  onAiAccessDenied?: () => void;
   onMappingReviewReady: (payload: MappingReviewSuspendPayload, runId: string) => void;
   onResetToMain: () => void;
 }
@@ -62,6 +64,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       onReconnectGoogleDrive = async () => undefined,
       onMappingReviewReady,
       onResetToMain,
+      onAiAccessDenied,
     },
     ref
   ) => {
@@ -175,6 +178,17 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       closePreviewErrorAndReset();
     }, [closePreviewErrorAndReset, isOAuthBusy, isOAuthConnected, isReconnectPending]);
 
+    const handleWorkflowError = (error: unknown) => {
+      if (isAiAccessDeniedError(error)) {
+        resetProgress();
+        onResetToMain();
+        onAiAccessDenied?.();
+        return;
+      }
+
+      showWorkflowError(error);
+    };
+
     const handleUploadModalCloseRequest = (docId?: string) => {
       if (docId) {
         setDocumentId(docId);
@@ -268,7 +282,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       try {
         handleWorkflowResult(await startWorkflowWithDelayedLoading(contentTypeIds));
       } catch (error) {
-        showWorkflowError(error);
+        handleWorkflowError(error);
       }
     };
 
@@ -283,7 +297,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       try {
         await continueWorkflow({ selectedTabIds: selectedTabs.map((tab) => tab.tabId) });
       } catch (error) {
-        showWorkflowError(error);
+        handleWorkflowError(error);
       }
     };
 
@@ -293,7 +307,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       try {
         await continueWorkflow({ includeImages });
       } catch (error) {
-        showWorkflowError(error);
+        handleWorkflowError(error);
       }
     };
 
@@ -303,10 +317,10 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       try {
         await onReconnectGoogleDrive();
       } catch (error) {
-        console.error(error);
+        handleWorkflowError(error);
         setIsReconnectPending(false);
       }
-    }, [onReconnectGoogleDrive]);
+    }, [handleWorkflowError, onReconnectGoogleDrive]);
 
     const errorModalConfig = useMemo<ErrorModalConfig>(() => {
       if (previewErrorState?.reason === WorkflowFailureReason.GOOGLE_DRIVE_AUTH_EXPIRED) {
