@@ -186,7 +186,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
-      showWorkflowError();
+      showWorkflowError(error);
     };
 
     const handleUploadModalCloseRequest = (docId?: string) => {
@@ -317,10 +317,10 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       try {
         await onReconnectGoogleDrive();
       } catch (error) {
-        console.error(error);
+        handleWorkflowError(error);
         setIsReconnectPending(false);
       }
-    }, [onReconnectGoogleDrive]);
+    }, [handleWorkflowError, onReconnectGoogleDrive]);
 
     const errorModalConfig = useMemo<ErrorModalConfig>(() => {
       if (previewErrorState?.reason === WorkflowFailureReason.GOOGLE_DRIVE_AUTH_EXPIRED) {
