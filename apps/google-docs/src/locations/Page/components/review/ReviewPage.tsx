@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Flex, Heading, Layout } from '@contentful/f36-components';
+import { EyeIcon, PencilSimpleIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { PageAppSDK } from '@contentful/app-sdk';
+import { cx } from '@emotion/css';
 import type { EntryProps } from 'contentful-management';
 import type { EntryBlockGraph, MappingReviewSuspendPayload } from '@types';
 import { RunStatus } from '@types';
@@ -14,6 +16,13 @@ import { ErrorModal } from '../modals/ErrorModal';
 import { SummaryModal } from '../modals/SummaryModal';
 import OverviewSection from '../overview/OverviewSection';
 import { MappingView } from './mapping/MappingView';
+import {
+  cancelReviewButton,
+  modeToggleButton,
+  modeToggleButtonActive,
+  modeToggleWrapper,
+  reviewHeaderActions,
+} from './ReviewPage.styles';
 
 interface ReviewPageProps {
   sdk: PageAppSDK;
@@ -152,18 +161,48 @@ export const ReviewPage = ({
     payload.normalizedDocument.title ?? payload.documentTitle ?? 'Selected document';
   const title = `Create from document "${documentTitle}"`;
 
+  const handleReviewModeChange = (mode: 'view' | 'edit') => {
+    setReviewMode(mode);
+    if (mode === 'view') {
+      setSelectedEntryIndex(null);
+    } else if (mode === 'edit' && selectedEntryIndex === null) {
+      setSelectedEntryIndex(entryBlockGraph.entries.length > 0 ? 0 : null);
+    }
+  };
+
   return (
     <>
       <Layout.Header title="Preview">
         <Flex justifyContent="space-between" alignItems="center" marginTop="spacingS">
           <Heading marginBottom="none">{title}</Heading>
-          <Button
-            variant="transparent"
-            size="small"
-            onClick={handleCancelOrExitReview}
-            aria-label={hasCreatedEntries ? 'Exit review' : 'Cancel review'}>
-            {hasCreatedEntries ? 'Exit' : 'Cancel'}
-          </Button>
+          <Flex className={reviewHeaderActions}>
+            <div className={modeToggleWrapper} role="group" aria-label="Review mode">
+              <button
+                type="button"
+                className={cx(modeToggleButton, reviewMode === 'view' && modeToggleButtonActive)}
+                onClick={() => handleReviewModeChange('view')}
+                aria-pressed={reviewMode === 'view'}>
+                <EyeIcon size="small" />
+                View only
+              </button>
+              <button
+                type="button"
+                className={cx(modeToggleButton, reviewMode === 'edit' && modeToggleButtonActive)}
+                onClick={() => handleReviewModeChange('edit')}
+                aria-pressed={reviewMode === 'edit'}>
+                <PencilSimpleIcon size="small" />
+                Edit mode
+              </button>
+            </div>
+            <Button
+              variant="secondary"
+              size="small"
+              className={cancelReviewButton}
+              onClick={handleCancelOrExitReview}
+              aria-label={hasCreatedEntries ? 'Exit review' : 'Cancel review'}>
+              {hasCreatedEntries ? 'Exit' : 'Cancel'}
+            </Button>
+          </Flex>
         </Flex>
       </Layout.Header>
       <Splitter marginTop="spacingS" />
@@ -175,15 +214,6 @@ export const ReviewPage = ({
             onSelectEntryIndex={(index) => {
               setSelectedEntryIndex(index);
               setReviewMode('edit');
-            }}
-            reviewMode={reviewMode}
-            onReviewModeChange={(mode) => {
-              setReviewMode(mode);
-              if (mode === 'view') {
-                setSelectedEntryIndex(null);
-              } else if (mode === 'edit' && selectedEntryIndex === null) {
-                setSelectedEntryIndex(entryBlockGraph.entries.length > 0 ? 0 : null);
-              }
             }}
             ctaLabel={hasCreatedEntries ? 'View entries' : 'Create entries'}
             onCtaClick={handleCreateOrViewEntries}
