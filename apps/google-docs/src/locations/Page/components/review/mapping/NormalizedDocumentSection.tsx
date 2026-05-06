@@ -16,6 +16,7 @@ interface ReviewDocumentBodyProps {
   excludedSourceRefs: SourceRef[];
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
+  isViewMode: boolean;
   onSetHoveredMappingKeys: (keys: string[]) => void;
   onEditImage?: (sourceRef: ImageSourceRef, label: string) => void;
 }
@@ -29,6 +30,7 @@ export const NormalizedDocumentSection = ({
   excludedSourceRefs,
   selectedEntryIndex,
   hoveredMappingKeys,
+  isViewMode,
   onSetHoveredMappingKeys,
   onEditImage,
 }: ReviewDocumentBodyProps): JSX.Element => {
@@ -51,6 +53,7 @@ export const NormalizedDocumentSection = ({
               excludedSourceRefs={excludedSourceRefs}
               selectedEntryIndex={selectedEntryIndex}
               hoveredMappingKeys={hoveredMappingKeys}
+              isViewMode={isViewMode}
               onSetHoveredMappingKeys={onSetHoveredMappingKeys}
               onEditImage={onEditImage}
             />
@@ -64,6 +67,7 @@ export const NormalizedDocumentSection = ({
               excludedSourceRefs={excludedSourceRefs}
               selectedEntryIndex={selectedEntryIndex}
               hoveredMappingKeys={hoveredMappingKeys}
+              isViewMode={isViewMode}
               onSetHoveredMappingKeys={onSetHoveredMappingKeys}
               onEditImage={onEditImage}
             />
