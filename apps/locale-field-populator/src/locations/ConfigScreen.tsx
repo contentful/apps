@@ -1,12 +1,15 @@
 import { ConfigAppSDK, AppState } from '@contentful/app-sdk';
-import { Flex, Heading, Paragraph, FormControl } from '@contentful/f36-components';
+import { Flex, Heading, Paragraph, FormControl, Select } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
 import { ContentTypeProps } from 'contentful-management';
 import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
+import { MAX_REFERENCE_DEPTH } from '../utils/entry';
 import { styles } from './ConfigScreen.styles';
 
-export type AppInstallationParameters = Record<string, unknown>;
+export interface AppInstallationParameters {
+  maxReferenceDepth?: number;
+}
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
@@ -134,6 +137,35 @@ const ConfigScreen = () => {
               onSelectionChange={setSelectedContentTypes}
               isDisabled={allContentTypes.length === 0}
             />
+          </FormControl>
+        </Flex>
+        <Flex flexDirection="column" alignItems="flex-start" marginTop="spacing2Xl">
+          <Heading as="h3" marginBottom="spacingXs">
+            Reference depth
+          </Heading>
+          <Paragraph marginBottom="spacingL">
+            Control how many levels of nested references are included when populating locales. A
+            depth of 1 includes only direct references. Higher values traverse deeper into the
+            content graph.
+          </Paragraph>
+          <FormControl id="maxReferenceDepth">
+            <FormControl.Label>Maximum reference depth</FormControl.Label>
+            <Select
+              id="maxReferenceDepth"
+              name="maxReferenceDepth"
+              value={String(parameters.maxReferenceDepth ?? MAX_REFERENCE_DEPTH)}
+              onChange={(e) =>
+                setParameters({ ...parameters, maxReferenceDepth: Number(e.target.value) })
+              }>
+              <Select.Option value="0">None (main entry only)</Select.Option>
+              <Select.Option value="1">1 (direct references)</Select.Option>
+              <Select.Option value="2">2</Select.Option>
+              <Select.Option value="3">3 (default)</Select.Option>
+              <Select.Option value="5">5</Select.Option>
+            </Select>
+            <FormControl.HelpText>
+              Higher depths may increase loading time for entries with many references.
+            </FormControl.HelpText>
           </FormControl>
         </Flex>
       </Flex>

@@ -11,9 +11,11 @@ import { SimplifiedLocale, mapLocaleNamesToSimplifiedLocales } from '../utils/lo
 import {
   fetchEntryAndContentType,
   fetchReferencesForLocale,
+  MAX_REFERENCE_DEPTH,
   updateEntries,
   UpdateResult,
 } from '../utils/entry';
+import { AppInstallationParameters } from './ConfigScreen';
 import { styles } from './Dialog.styles';
 
 type DialogStep = 'locale-selection' | 'preview' | 'confirmation';
@@ -26,6 +28,8 @@ interface InvocationParameters {
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
   const invocationParams = sdk.parameters.invocation as unknown as InvocationParameters;
+  const installParams = sdk.parameters.installation as unknown as AppInstallationParameters;
+  const maxDepth = installParams?.maxReferenceDepth ?? MAX_REFERENCE_DEPTH;
 
   const [currentStep, setCurrentStep] = useState<DialogStep>('locale-selection');
 
@@ -86,7 +90,8 @@ const Dialog = () => {
         sdk.cma,
         entry,
         contentType,
-        selectedSourceLocale
+        selectedSourceLocale,
+        maxDepth
       );
       setReferencedEntries(references);
       setCurrentStep('preview');

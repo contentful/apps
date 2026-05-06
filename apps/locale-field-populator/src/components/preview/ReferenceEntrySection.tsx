@@ -4,7 +4,7 @@ import { ContentTypeProps, EntryProps } from 'contentful-management';
 import { useMemo } from 'react';
 import { isEntryArrayField, isEntryField } from '../../utils/fieldTypes';
 import PreviewFieldRow from './PreviewFieldRow';
-import { styles } from './ReferenceEntrySection.styles';
+import { depthIndent, styles } from './ReferenceEntrySection.styles';
 import { ArrowSquareOutIcon } from '@contentful/f36-icons';
 
 interface ReferenceEntrySectionProps {
@@ -19,6 +19,7 @@ interface ReferenceEntrySectionProps {
   isSelfReference: boolean;
   baseUrl: string;
   isDisabled?: boolean;
+  depth?: number;
 }
 
 const getEntryTitle = (
@@ -49,6 +50,7 @@ const ReferenceEntrySection = ({
   isSelfReference,
   baseUrl,
   isDisabled = false,
+  depth = 1,
 }: ReferenceEntrySectionProps) => {
   const localizedFields = useMemo(() => {
     return (contentType.fields as ContentTypeField[]).filter(
@@ -72,7 +74,7 @@ const ReferenceEntrySection = ({
 
   if (isSelfReference) {
     return (
-      <Box marginTop="spacingM" className={styles.accordionContainer}>
+      <Box marginTop="spacingM" className={`${styles.accordionContainer} ${depthIndent(depth)}`}>
         <Accordion>
           <Accordion.Item
             title={
@@ -94,7 +96,7 @@ const ReferenceEntrySection = ({
 
   if (fieldCount === 0) {
     return (
-      <Box className={styles.accordionContainer}>
+      <Box className={`${styles.accordionContainer} ${depthIndent(depth)}`}>
         <Accordion>
           <Accordion.Item
             title={
@@ -114,7 +116,7 @@ const ReferenceEntrySection = ({
   }
 
   return (
-    <Box className={styles.accordionContainer}>
+    <Box className={`${styles.accordionContainer} ${depthIndent(depth)}`}>
       <Accordion>
         <Accordion.Item
           title={
