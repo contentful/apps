@@ -12,6 +12,8 @@ export interface ReviewImageAssetCardProps {
   /** When the mapping rail highlights this image (same as plain `img` hover). */
   hovered?: boolean;
   isExcluded: boolean;
+  /** When true, render a green border without a green fill for highlighted mappings. */
+  isViewMode?: boolean;
   size?: 'small' | 'default';
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
@@ -28,6 +30,7 @@ export function ReviewImageAssetCard({
   isHighlighted,
   hovered = false,
   isExcluded,
+  isViewMode = false,
   size = 'default',
   onMouseEnter,
   onMouseLeave,
@@ -37,11 +40,21 @@ export function ReviewImageAssetCard({
 
   const imageHeight = size === 'small' ? '180px' : '280px';
 
-  const backgroundColor = isHighlighted
+  // View mode: highlighted images use a green border with no fill; unmapped images are unchanged.
+  // Edit mode (default): highlighted images use a green fill with transparent border.
+  const backgroundColor = isViewMode
+    ? tokens.gray100
+    : isHighlighted
     ? hovered
       ? tokens.green300
       : tokens.green100
     : tokens.gray100;
+
+  const border = isViewMode
+    ? isHighlighted
+      ? `${hovered ? 2 : 1}px solid ${hovered ? tokens.green600 : tokens.green500}`
+      : `1px solid ${tokens.gray300}`
+    : `1px solid ${isHighlighted ? 'transparent' : tokens.gray300}`;
 
   return (
     <Box
@@ -54,9 +67,9 @@ export function ReviewImageAssetCard({
         maxWidth: '100%',
         verticalAlign: 'top',
         borderRadius: tokens.borderRadiusMedium,
-        border: `1px solid ${isHighlighted ? 'transparent' : tokens.gray300}`,
+        border,
         backgroundColor,
-        transition: 'background-color 120ms ease',
+        transition: 'background-color 120ms ease, border-color 120ms ease',
         overflow: 'hidden',
         boxSizing: 'border-box',
         padding: tokens.spacingXs,

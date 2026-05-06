@@ -812,7 +812,34 @@ export const MappingView = ({
             <Flex flexDirection="column" gap="spacingS">
               {(groupsByTab[tab.id] ?? []).map((group) => {
                 const activeHighlightIndex = highlightIndex;
-                const showSurface = group.showGroupedSurface;
+                const firstSegment = group.segments[0];
+                const isTableOnlyGroup =
+                  isViewMode &&
+                  group.segments.length === 1 &&
+                  firstSegment !== undefined &&
+                  firstSegment.kind === 'table';
+                const showSurface = isViewMode
+                  ? group.mappingCards.length > 0 && !isTableOnlyGroup
+                  : group.showGroupedSurface;
+                const isGroupSurfaceHovered =
+                  isViewMode &&
+                  group.mappingCards.some((card) =>
+                    card.mappingKeys.some((key) => hoveredMappingKeys.includes(key))
+                  );
+                const surfaceStyle = isViewMode
+                  ? {
+                      borderRadius: tokens.borderRadiusMedium,
+                      border: `${isGroupSurfaceHovered ? 2 : 1}px solid ${
+                        isGroupSurfaceHovered ? tokens.green600 : tokens.green500
+                      }`,
+                      padding: tokens.spacing2Xs,
+                      transition: 'border-color 120ms ease, border-width 120ms ease',
+                    }
+                  : {
+                      borderRadius: tokens.borderRadiusMedium,
+                      backgroundColor: tokens.green100,
+                      padding: tokens.spacing2Xs,
+                    };
 
                 return (
                   <Box key={group.id}>
@@ -825,11 +852,7 @@ export const MappingView = ({
                         {showSurface ? (
                           <Box
                             data-testid={`mapping-group-surface-${group.id}`}
-                            style={{
-                              borderRadius: tokens.borderRadiusMedium,
-                              backgroundColor: tokens.green100,
-                              padding: tokens.spacing2Xs,
-                            }}>
+                            style={surfaceStyle}>
                             <Flex flexDirection="column" gap="spacing2Xs">
                               {group.segments.map((segment) => (
                                 <NormalizedDocumentSection
@@ -841,6 +864,7 @@ export const MappingView = ({
                                   excludedSourceRefs={entryBlockGraph.excludedSourceRefs}
                                   selectedEntryIndex={selectedEntryIndex}
                                   hoveredMappingKeys={hoveredMappingKeys}
+                                  isViewMode={isViewMode}
                                   onSetHoveredMappingKeys={setHoveredMappingKeys}
                                   onEditImage={isViewMode ? undefined : handleEditImage}
                                 />
@@ -859,6 +883,7 @@ export const MappingView = ({
                                 excludedSourceRefs={entryBlockGraph.excludedSourceRefs}
                                 selectedEntryIndex={selectedEntryIndex}
                                 hoveredMappingKeys={hoveredMappingKeys}
+                                isViewMode={isViewMode}
                                 onSetHoveredMappingKeys={setHoveredMappingKeys}
                                 onEditImage={isViewMode ? undefined : handleEditImage}
                               />

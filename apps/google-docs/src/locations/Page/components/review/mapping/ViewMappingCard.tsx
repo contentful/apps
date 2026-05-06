@@ -41,7 +41,7 @@ export const ViewMappingCard = ({
         border: `${isHovered ? 2 : 1}px solid ${isHovered ? tokens.green600 : tokens.green500}`,
         borderRadius: tokens.borderRadiusMedium,
         padding: tokens.spacing2Xs,
-        backgroundColor: tokens.green100,
+        backgroundColor: 'transparent',
         transition: 'border-color 120ms ease, border-width 120ms ease',
         cursor: 'default',
       }}>
