@@ -6,6 +6,7 @@ import {
   Flex,
   FormControl,
   List,
+  Note,
   Paragraph,
   Select,
   Subheading,
@@ -20,6 +21,7 @@ import {
   setAllEntryFieldsAdopted,
   setFieldAdopted,
 } from '../../utils/adoptedFields';
+import { MAX_TOTAL_ENTRIES } from '../../utils/entry';
 import { isEntryArrayField, isEntryField } from '../../utils/fieldTypes';
 import { SimplifiedLocale } from '../../utils/locales';
 import PreviewBox from '../preview/PreviewBox';
@@ -234,6 +236,12 @@ const PreviewStepComponent = ({
 
         {/* Referenced entries (all depths, rendered in traversal order) */}
         <Flex flexDirection="column" gap="spacingS" marginTop="spacingM">
+          {referencedEntries.length >= MAX_TOTAL_ENTRIES && (
+            <Note variant="warning">
+              Some referenced entries were not included. Try reducing the reference depth to see all
+              entries.
+            </Note>
+          )}
           {referencedEntries.map((referenceData) => (
             <ReferenceEntrySection
               key={`${referenceData.depth}-${referenceData.fieldId}-${referenceData.entry.sys.id}`}

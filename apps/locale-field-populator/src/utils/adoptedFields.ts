@@ -9,7 +9,6 @@ export interface ReferencedEntryData {
   fieldName: string;
   isSelfReference: boolean;
   depth: number;
-  parentEntryId: string;
 }
 
 export function hasAnyAdoptedFields(adoptedFieldsMap: AdoptedFieldsMap): boolean {

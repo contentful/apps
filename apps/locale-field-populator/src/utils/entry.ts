@@ -114,7 +114,7 @@ export const fetchEntryAndContentType = async (
 };
 
 export const MAX_REFERENCE_DEPTH = 3;
-const MAX_TOTAL_ENTRIES = 50;
+export const MAX_TOTAL_ENTRIES = 50;
 
 export const fetchReferencesForLocale = async (
   cma: CMAClient,
@@ -138,8 +138,7 @@ export const fetchReferencesForLocale = async (
     maxDepth,
     visited,
     allReferences,
-    contentTypeCache,
-    entry.sys.id
+    contentTypeCache
   );
 
   return allReferences;
@@ -154,9 +153,9 @@ const collectReferencesRecursive = async (
   maxDepth: number,
   visited: Set<string>,
   results: ReferencedEntryData[],
-  contentTypeCache: Record<string, ContentTypeProps>,
-  parentEntryId: string
+  contentTypeCache: Record<string, ContentTypeProps>
 ): Promise<void> => {
+  if (currentDepth > maxDepth) return;
   if (results.length >= MAX_TOTAL_ENTRIES) return;
 
   const referencesToProcess = collectReferences(parentEntry, parentContentType, sourceLocale);
@@ -206,7 +205,6 @@ const collectReferencesRecursive = async (
           fieldName: field.name,
           isSelfReference: true,
           depth: currentDepth,
-          parentEntryId,
         });
       }
       continue;
@@ -227,7 +225,6 @@ const collectReferencesRecursive = async (
       fieldName: field.name,
       isSelfReference: false,
       depth: currentDepth,
-      parentEntryId,
     });
 
     if (currentDepth < maxDepth) {
@@ -246,8 +243,7 @@ const collectReferencesRecursive = async (
       maxDepth,
       visited,
       results,
-      contentTypeCache,
-      refEntry.sys.id
+      contentTypeCache
     );
   }
 };
