@@ -25,6 +25,11 @@ import type { ListMarker } from './buildListMarkers';
 import { buildTextSegments, type TextSegment } from './buildTextSegments';
 import { ReviewImageAssetCard } from './ReviewImageAssetCard';
 import { isImageSourceRefExcluded } from './sourceRefUtils';
+import {
+  tableCellChromeMapped,
+  tableCellChromeMappedHovered,
+  tableCellChromeUnmapped,
+} from './documentRenderers.styles';
 
 // ─── Shared helpers ─────────────────────────────────────────────────────────
 
@@ -45,21 +50,12 @@ function getTextSegmentHighlightCss(
   highlighted: boolean,
   hovered: boolean,
   isViewMode: boolean
-): { background: string; padding: string | undefined; boxShadow: string | undefined } {
-  if (!highlighted) {
-    return { background: 'transparent', padding: undefined, boxShadow: undefined };
-  }
-  if (isViewMode) {
-    return {
-      background: 'transparent',
-      padding: undefined,
-      boxShadow: undefined,
-    };
-  }
+): Pick<CSSProperties, 'backgroundColor' | 'padding' | 'boxShadow'> {
+  if (!highlighted || isViewMode) return {};
+
   return {
-    background: hovered ? tokens.green300 : tokens.green100,
+    backgroundColor: hovered ? tokens.green300 : tokens.green100,
     padding: `${tokens.spacing2Xs} 0`,
-    boxShadow: undefined,
   };
 }
 
@@ -131,9 +127,7 @@ const TextSegmentSpan = ({
       onMouseLeave={segment.highlighted ? () => onSetHoveredMappings([]) : undefined}
       style={{
         ...getTextSegmentStyle(segment.styles),
-        backgroundColor: highlightCss.background,
-        padding: highlightCss.padding,
-        boxShadow: highlightCss.boxShadow,
+        ...highlightCss,
         whiteSpace: 'pre-wrap',
         transition: 'background-color 120ms ease',
       }}>
@@ -456,18 +450,6 @@ export const TableRenderer = ({
     return Array.from(new Set(keys));
   };
 
-  const hasAnyMappedCellInTable =
-    isViewMode &&
-    table.rows.some((r) => r.cells.some((c) => getCellMappingKeys(r.id, c.id).length > 0));
-
-  const tableCellChromeSizing: CSSProperties = {
-    display: 'inline-block',
-    width: 'fit-content',
-    maxWidth: '100%',
-    verticalAlign: 'top',
-    boxSizing: 'border-box',
-  };
-
   return (
     <Table>
       {table.headers.length > 0 && (
@@ -520,26 +502,9 @@ export const TableRenderer = ({
               const viewModeChrome = hasCellMapping ? (
                 <Box
                   data-testid={`table-cell-mapping-surface-${cell.id}`}
-                  style={{
-                    ...tableCellChromeSizing,
-                    borderRadius: tokens.borderRadiusMedium,
-                    border: `${isCellSurfaceHovered ? 2 : 1}px solid ${
-                      isCellSurfaceHovered ? tokens.green600 : tokens.green500
-                    }`,
-                    padding: tokens.spacing2Xs,
-                    transition: 'border-color 120ms ease, border-width 120ms ease',
-                  }}>
-                  {cellBody}
-                </Box>
-              ) : hasAnyMappedCellInTable ? (
-                <Box
-                  data-testid={`table-cell-chrome-${cell.id}`}
-                  style={{
-                    ...tableCellChromeSizing,
-                    borderRadius: tokens.borderRadiusMedium,
-                    border: `1px solid ${tokens.gray300}`,
-                    padding: tokens.spacing2Xs,
-                  }}>
+                  className={
+                    isCellSurfaceHovered ? tableCellChromeMappedHovered : tableCellChromeMapped
+                  }>
                   {cellBody}
                 </Box>
               ) : (
