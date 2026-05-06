@@ -127,6 +127,59 @@ Prettier runs automatically on staged files via `lint-staged` (triggered by the 
 
 ---
 
+## Architectural Decision Records (ADRs)
+
+When you make a non-obvious architectural decision — choosing between two viable approaches, accepting a known trade-off, or picking a pattern that future contributors might question — document it as an ADR.
+
+**When to write an ADR:**
+- Choosing an auth strategy (OAuth vs API key, etc.)
+- Selecting a data storage location (installation parameters vs CMA entry vs external DB)
+- Picking an integration pattern (App Functions vs Lambda vs webhook vs direct browser call)
+- Adding a framework or library that isn't standard across the repo (React Router, Formik, etc.)
+- Accepting a known limitation with a reason (e.g., "we use polling because webhooks require external infra")
+
+**When not to write an ADR:**
+- Standard Contentful app patterns already documented in `AGENTS.md` or `ARCHITECTURE.md`
+- Routine dependency choices where there is only one real option
+- Implementation details (naming, file structure, component decomposition)
+
+**Format and location:**
+
+```
+apps/<app-name>/docs/ADRs/NNNN-short-title.md
+```
+
+Use the template below. The most important part is **Context** — explain what alternatives existed and why they were ruled out. A decision without that reasoning is just a fact; the ADR's value is the reasoning.
+
+```markdown
+# ADR-NNNN: [Title]
+
+**Date:** YYYY-MM-DD
+**Status:** Proposed | Accepted | Deprecated | Superseded
+**Deciders:** [names]
+
+## Context
+What problem are we solving? What alternatives did we consider and why were they ruled out?
+
+## Decision
+What are we doing?
+
+## Consequences
+
+### Positive
+-
+
+### Negative
+-
+
+### Neutral
+-
+```
+
+See `apps/klaviyo/docs/ADRs/` for worked examples covering auth, API proxy, storage, event handling, navigation, and data conversion patterns.
+
+---
+
 ## Adding a New App
 
 1. Use `create-contentful-app` to scaffold:
@@ -137,6 +190,7 @@ Prettier runs automatically on staged files via `lint-staged` (triggered by the 
 2. Ensure `package.json` has a `name`, `build`, `test:ci`, `lint`, and `deploy` script.
 3. Add an `AGENTS.md` to the app root (see any existing app for the template).
 4. Bootstrap from root: `SINCE=master npm run bootstrap`
+5. If the app involves non-obvious architectural choices, add ADRs under `apps/<app-name>/docs/ADRs/` before opening a PR.
 
 ---
 
