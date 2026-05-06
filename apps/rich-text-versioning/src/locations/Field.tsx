@@ -2,7 +2,7 @@ import { FieldAppSDK } from '@contentful/app-sdk';
 import { Button, Tooltip } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { RichTextEditor } from '@contentful/field-editor-rich-text';
 import { Document } from '@contentful/rich-text-types';
 import { EntrySys } from '@contentful/app-sdk/dist/types/utils';
@@ -96,12 +96,28 @@ const Field = () => {
     });
   };
 
+  const patchedSdk = useMemo(() => {
+    if (!(sdk.dialogs as unknown as Record<string, unknown>).selectSingleResourceEntity) {
+      return {
+        ...sdk,
+        dialogs: {
+          ...sdk.dialogs,
+          selectSingleResourceEntity: async () => {
+            sdk.notifier.warning('Cross-space entry embedding is not supported in this app.');
+            return null;
+          },
+        },
+      };
+    }
+    return sdk;
+  }, [sdk]);
+
   const isDisabled = !fieldValue || !entrySys || !isChanged(entrySys);
 
   return (
     <>
       <div className={styles.richTextEditorContainer}>
-        <RichTextEditor sdk={sdk} isInitiallyDisabled={false} />
+        <RichTextEditor sdk={patchedSdk as FieldAppSDK} isInitiallyDisabled={false} />
       </div>
       <Tooltip
         placement="top"
