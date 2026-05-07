@@ -12,7 +12,6 @@ import {
 
 const AGENTS_API_HEADERS = {
   'x-contentful-enable-alpha-feature': 'agents-api',
-  'X-Contentful-App-Definition-Id': '653vTnuQw3j5onU1tUoH6t',
 };
 
 export interface AgentGeneratePayload {
