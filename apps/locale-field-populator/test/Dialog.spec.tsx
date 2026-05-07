@@ -245,6 +245,99 @@ describe('Dialog component', () => {
     expect(mockCma.entry.update).toHaveBeenCalled();
   });
 
+  it('resolves references from the selected source locale, not an arbitrary one', async () => {
+    const user = userEvent.setup();
+
+    mockSdk.locales.names = {
+      'en-US': 'English (United States)',
+      'en-GB': 'English (United Kingdom)',
+    };
+
+    const mainEntry = {
+      sys: {
+        id: 'test-entry',
+        type: 'Entry',
+        contentType: { sys: { id: 'test-content-type' } },
+      },
+      fields: {
+        title: { 'en-US': 'English Title', 'en-GB': 'GB Title' },
+        linkedEntry: {
+          'en-US': { sys: { type: 'Link', linkType: 'Entry', id: 'ref-en' } },
+          'en-GB': { sys: { type: 'Link', linkType: 'Entry', id: 'ref-gb' } },
+        },
+      },
+    };
+
+    const mainContentType = {
+      sys: { id: 'test-content-type', type: 'ContentType' },
+      name: 'Test Content Type',
+      displayField: 'title',
+      fields: [
+        { id: 'title', name: 'Title', type: 'Symbol', localized: true },
+        {
+          id: 'linkedEntry',
+          name: 'Linked Entry',
+          type: 'Link',
+          linkType: 'Entry',
+          localized: true,
+        },
+      ],
+    };
+
+    const refEntryEn = {
+      sys: { id: 'ref-en', type: 'Entry', contentType: { sys: { id: 'ref-ct' } } },
+      fields: { name: { 'en-US': 'English Ref' } },
+    };
+
+    const refContentType = {
+      sys: { id: 'ref-ct', type: 'ContentType' },
+      name: 'Ref CT',
+      displayField: 'name',
+      fields: [{ id: 'name', name: 'Name', type: 'Symbol', localized: true }],
+    };
+
+    mockCma.entry.get.mockResolvedValue(mainEntry);
+    mockCma.contentType.get.mockResolvedValue(mainContentType);
+    mockCma.entry.getMany.mockResolvedValue({ items: [refEntryEn] });
+    mockCma.contentType.getMany.mockResolvedValue({ items: [refContentType] });
+    mockCma.entry.update.mockImplementation((_params: any, entry: any) => Promise.resolve(entry));
+
+    await act(async () => {
+      render(<Dialog />);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Next')).toBeInTheDocument();
+    });
+
+    const sourceSelect = screen.getByTestId('source-locale-select');
+    await user.selectOptions(sourceSelect, 'en-US');
+
+    const targetTrigger = await screen.findByText('Select one or more');
+    await user.click(targetTrigger);
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('checkbox', { name: 'English (United Kingdom)' })
+      ).toBeInTheDocument();
+    });
+
+    const targetCheckbox = screen.getByRole('checkbox', { name: 'English (United Kingdom)' });
+    await user.click(targetCheckbox);
+
+    const nextButton = screen.getByText('Next');
+    await user.click(nextButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Back')).toBeInTheDocument();
+    });
+
+    // Should have fetched ref-en (source locale), not ref-gb
+    expect(mockCma.entry.getMany).toHaveBeenCalledWith(
+      expect.objectContaining({ query: { 'sys.id[in]': 'ref-en' } })
+    );
+  });
+
   it('completes the full flow with a reference field and updates both main and referenced entry', async () => {
     const user = userEvent.setup();
     const referencedEntryId = 'referenced-entry-id';

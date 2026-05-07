@@ -129,7 +129,7 @@ function StatusBadge({ result }: { result: PageLinkResult }) {
     return <Badge variant="negative">{result.reason ?? result.statusCode ?? 'Invalid'}</Badge>;
   }
 
-  return <Badge variant="warning">{result.reason ?? "Couldn't validate"}</Badge>;
+  return <Badge variant="warning">{result.reason ?? 'Not scanned'}</Badge>;
 }
 
 function sortResults(results: PageLinkResult[]) {
@@ -159,6 +159,7 @@ export default function Page() {
   const [configuredContentTypes, setConfiguredContentTypes] = useState<
     Array<{ id: string; name: string }>
   >([]);
+  const [hasFoundLinks, setHasFoundLinks] = useState(false);
   const [hasStartedScan, setHasStartedScan] = useState(false);
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | LinkStatus>('all');
@@ -178,14 +179,30 @@ export default function Page() {
   const baseUrl = (installation.baseUrl || '').trim().replace(/\/$/, '') || null;
   const allowedPatterns = explicitAllowedPatterns;
 
-  const loadAuditResults = useCallback(async () => {
+  const [pendingChecks, setPendingChecks] = useState<
+    Array<{
+      entryId: string;
+      entryTitle: string;
+      entryUrl: string;
+      contentTypeId: string;
+      contentTypeName: string;
+      extractedUrl: ExtractedUrl;
+      resolvedUrl?: string;
+      urlToCheck: string;
+    }>
+  >([]);
+
+  const findLinks = useCallback(async () => {
     setError(null);
     setScanNotice(null);
     setLoading(true);
     setScanning(false);
     setProgress(null);
     setResults([]);
+    setPendingChecks([]);
     setScanStats({ entriesScanned: 0, linksFound: 0 });
+    setHasFoundLinks(false);
+    setHasStartedScan(false);
 
     try {
       const currentState = await (
@@ -260,96 +277,8 @@ export default function Page() {
         return;
       }
 
-      const appDefinitionId = sdk.ids.app;
-
-      if (!appDefinitionId) {
-        setResults([]);
-        setLoading(false);
-        setError('The page view could not determine the current app definition.');
-        return;
-      }
-
-      let resolvedActionId: string | null = null;
-      if (sdk.cma?.appAction?.getMany) {
-        try {
-          const { items } = await sdk.cma.appAction.getMany({
-            organizationId: sdk.ids.organization,
-            appDefinitionId,
-          });
-
-          const matchingAction = items?.find((action: any) => {
-            const functionId = action.function?.sys?.id;
-            const actionAppDefinitionId =
-              action.sys?.appDefinition?.sys?.id ?? action.sys?.appDefinition?.id;
-            return (
-              functionId === CHECK_LINK_FUNCTION_ID && actionAppDefinitionId === appDefinitionId
-            );
-          });
-
-          if (matchingAction?.sys?.id) {
-            resolvedActionId = matchingAction.sys.id;
-          }
-        } catch {
-          // Fall back to the manifest action id below if the lookup request fails.
-        }
-      }
-
-      // Fall back to the manifest action id when the SDK lookup does not return an item.
-      resolvedActionId ||= CHECK_LINK_FUNCTION_ID;
-
-      if (!resolvedActionId || !sdk.cma?.appActionCall?.createWithResponse) {
-        setResults([]);
-        setLoading(false);
-        setError('The page view could not find the configured App Action for link checking.');
-        return;
-      }
-
-      const actionId = resolvedActionId;
       const resultMap = new Map<string, PageLinkResult>();
-      const pendingChecks: Array<{
-        entryId: string;
-        entryTitle: string;
-        entryUrl: string;
-        contentTypeId: string;
-        contentTypeName: string;
-        extractedUrl: ExtractedUrl;
-        resolvedUrl?: string;
-        urlToCheck: string;
-      }> = [];
-      const requestCache = new Map<string, Promise<{ status?: number; error?: string }>>();
-
-      const runRequest = (urlToCheck: string) => {
-        const existing = requestCache.get(urlToCheck);
-        if (existing) return existing;
-
-        const request: Promise<{ status?: number; error?: string }> = sdk.cma.appActionCall
-          .createWithResponse(
-            {
-              spaceId: sdk.ids.space,
-              environmentId: sdk.ids.environment,
-              appDefinitionId,
-              appActionId: actionId,
-            },
-            { parameters: { url: urlToCheck } }
-          )
-          .then((response) => {
-            const body = (response as { response?: { body?: string } })?.response?.body;
-            if (!body) return {};
-            try {
-              return JSON.parse(body) as { status?: number; error?: string };
-            } catch {
-              return { error: 'Invalid response body' };
-            }
-          })
-          .catch((requestError: unknown) => {
-            return {
-              error: requestError instanceof Error ? requestError.message : 'Request failed',
-            };
-          });
-
-        requestCache.set(urlToCheck, request);
-        return request;
-      };
+      const checksToQueue: typeof pendingChecks = [];
 
       let skip = 0;
       let hasLoadedFirstBatch = false;
@@ -411,7 +340,7 @@ export default function Page() {
                   baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`
                 ).href;
 
-                pendingChecks.push({
+                checksToQueue.push({
                   entryId: entry.sys.id,
                   entryTitle,
                   entryUrl,
@@ -434,8 +363,7 @@ export default function Page() {
                   locale: extractedUrl.locale,
                   url: extractedUrl.url,
                   resolvedUrl,
-                  status: 'checking',
-                  reason: 'Checking',
+                  status: 'unchecked',
                 });
               } catch {
                 resultMap.set(resultId, {
@@ -457,7 +385,7 @@ export default function Page() {
               continue;
             }
 
-            pendingChecks.push({
+            checksToQueue.push({
               entryId: entry.sys.id,
               entryTitle,
               entryUrl,
@@ -478,8 +406,7 @@ export default function Page() {
               fieldName: extractedUrl.fieldName,
               locale: extractedUrl.locale,
               url: extractedUrl.url,
-              status: 'checking',
-              reason: 'Checking',
+              status: 'unchecked',
             });
           }
         }
@@ -503,15 +430,97 @@ export default function Page() {
         setLoading(false);
       }
 
-      if (pendingChecks.length === 0) {
-        setScanning(false);
-        setProgress(null);
-        return;
+      setPendingChecks(checksToQueue);
+      setHasFoundLinks(true);
+    } catch (loadError) {
+      console.error('Failed to find links in Link Checker page audit:', loadError);
+      setLoading(false);
+      setError('The page view could not finish finding links for this space.');
+    }
+  }, [sdk, baseUrl, installation.selectedContentTypeIds]);
+
+  const runScan = useCallback(async () => {
+    if (pendingChecks.length === 0) return;
+
+    const appDefinitionId = sdk.ids.app;
+
+    if (!appDefinitionId) {
+      setError('The page view could not determine the current app definition.');
+      return;
+    }
+
+    let resolvedActionId: string | null = null;
+    if (sdk.cma?.appAction?.getMany) {
+      try {
+        const { items } = await sdk.cma.appAction.getMany({
+          organizationId: sdk.ids.organization,
+          appDefinitionId,
+        });
+
+        const matchingAction = items?.find((action: any) => {
+          const functionId = action.function?.sys?.id;
+          const actionAppDefinitionId =
+            action.sys?.appDefinition?.sys?.id ?? action.sys?.appDefinition?.id;
+          return functionId === CHECK_LINK_FUNCTION_ID && actionAppDefinitionId === appDefinitionId;
+        });
+
+        if (matchingAction?.sys?.id) {
+          resolvedActionId = matchingAction.sys.id;
+        }
+      } catch {
+        // Fall back to the manifest action id below if the lookup request fails.
       }
+    }
 
-      setScanning(true);
-      setProgress({ checked: 0, total: pendingChecks.length });
+    resolvedActionId ||= CHECK_LINK_FUNCTION_ID;
 
+    if (!resolvedActionId || !sdk.cma?.appActionCall?.createWithResponse) {
+      setError('The page view could not find the configured App Action for link checking.');
+      return;
+    }
+
+    const actionId = resolvedActionId;
+    const resultMap = new Map(results.map((r) => [r.id, r]));
+    const requestCache = new Map<string, Promise<{ status?: number; error?: string }>>();
+
+    const runRequest = (urlToCheck: string) => {
+      const existing = requestCache.get(urlToCheck);
+      if (existing) return existing;
+
+      const request: Promise<{ status?: number; error?: string }> = sdk.cma.appActionCall
+        .createWithResponse(
+          {
+            spaceId: sdk.ids.space,
+            environmentId: sdk.ids.environment,
+            appDefinitionId,
+            appActionId: actionId,
+          },
+          { parameters: { url: urlToCheck } }
+        )
+        .then((response) => {
+          const body = (response as { response?: { body?: string } })?.response?.body;
+          if (!body) return {};
+          try {
+            return JSON.parse(body) as { status?: number; error?: string };
+          } catch {
+            return { error: 'Invalid response body' };
+          }
+        })
+        .catch((requestError: unknown) => {
+          return {
+            error: requestError instanceof Error ? requestError.message : 'Request failed',
+          };
+        });
+
+      requestCache.set(urlToCheck, request);
+      return request;
+    };
+
+    setScanning(true);
+    setProgress({ checked: 0, total: pendingChecks.length });
+    setHasStartedScan(true);
+
+    try {
       const queue = [...pendingChecks];
       let checkedCount = 0;
 
@@ -590,14 +599,13 @@ export default function Page() {
       await Promise.all(workers);
       setScanning(false);
       setProgress(null);
-    } catch (loadError) {
-      console.error('Failed to load Link Checker page audit:', loadError);
-      setLoading(false);
+    } catch (scanError) {
+      console.error('Failed to run Link Checker scan:', scanError);
       setScanning(false);
       setProgress(null);
       setError('The page view could not finish scanning links for this space.');
     }
-  }, [sdk, allowedPatterns, forbiddenPatterns, baseUrl, installation.selectedContentTypeIds]);
+  }, [sdk, pendingChecks, results, allowedPatterns, forbiddenPatterns]);
 
   const contentTypeOptions = useMemo(() => {
     return configuredContentTypes;
@@ -644,11 +652,14 @@ export default function Page() {
     );
   }, [results]);
 
-  const refreshResults = async () => {
-    setHasStartedScan(true);
+  const handleFindLinks = async () => {
     setRefreshing(true);
-    await loadAuditResults();
+    await findLinks();
     setRefreshing(false);
+  };
+
+  const handleRunScan = async () => {
+    await runScan();
   };
 
   return (
@@ -665,17 +676,27 @@ export default function Page() {
           <Box>
             <Heading>Link Checker</Heading>
             <Paragraph marginTop="spacingXs" marginBottom="none">
-              Search and filter links across the space, then jump straight to the entry that needs
-              an update.
+              Find links across the space, then optionally scan them for broken URLs.
             </Paragraph>
           </Box>
-          <Button
-            variant="secondary"
-            onClick={refreshResults}
-            isLoading={refreshing || loading}
-            isDisabled={!loading && !hasAssignedContentTypes && hasStartedScan}>
-            {hasStartedScan ? 'Refresh links' : 'Run scan'}
-          </Button>
+          <Flex gap="spacingS" flexShrink={0}>
+            <Button
+              variant="secondary"
+              onClick={handleFindLinks}
+              isLoading={refreshing || loading}
+              isDisabled={!hasAssignedContentTypes}>
+              {hasFoundLinks ? 'Refresh links' : 'Find links'}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleRunScan}
+              isLoading={scanning}
+              isDisabled={
+                !hasFoundLinks || pendingChecks.length === 0 || scanning || hasStartedScan
+              }>
+              Run scan
+            </Button>
+          </Flex>
         </Flex>
 
         {!baseUrl && (
@@ -702,32 +723,33 @@ export default function Page() {
         )}
 
         <>
-          {!hasStartedScan && (
+          {!hasFoundLinks && !loading && (
             <Box marginTop="spacingL" marginBottom="spacingL">
               {hasAssignedContentTypes ? (
-                <Note variant="primary" title="Run a scan when you are ready">
-                  Scan only the content types assigned to Link Checker and populate the table batch
-                  by batch.
+                <Note variant="primary" title="Find links when you are ready">
+                  Extract links from the content types assigned to Link Checker. You can browse the
+                  results or run a full scan to check each link's status.
                 </Note>
               ) : (
                 <Note variant="warning" title="Assign content types first">
                   The page audit only scans content types selected in the app configuration. Assign
-                  at least one content type there, then come back here to run a scan.
+                  at least one content type there, then come back here to find links.
                 </Note>
               )}
             </Box>
           )}
 
-          {loading && hasStartedScan && results.length === 0 && (
+          {loading && results.length === 0 && (
             <Box marginTop="spacingL" marginBottom="spacingL">
-              <Note variant="primary" title="Loading first results">
+              <Note variant="primary" title="Finding links">
                 Loading entries and extracting links. The table will appear as soon as the first
                 batch is ready.
               </Note>
             </Box>
           )}
           <Flex gap="spacingS" flexWrap="wrap" marginTop="spacingL" marginBottom="spacingL">
-            <Badge variant="primary">{counts.checking} checking</Badge>
+            {counts.checking > 0 && <Badge variant="primary">{counts.checking} checking</Badge>}
+            {counts.unchecked > 0 && <Badge variant="warning">{counts.unchecked} unchecked</Badge>}
             <Badge variant="negative">{counts.invalid} invalid</Badge>
             <Badge variant="positive">{counts.valid} valid</Badge>
             <Badge variant="secondary">{results.length} total</Badge>
@@ -758,6 +780,7 @@ export default function Page() {
                 value={statusFilter}
                 onChange={(event) => setStatusFilter(event.target.value as 'all' | LinkStatus)}>
                 <Option value="all">All statuses</Option>
+                <Option value="unchecked">Unchecked</Option>
                 <Option value="checking">Checking</Option>
                 <Option value="invalid">Invalid</Option>
                 <Option value="valid">Valid</Option>
@@ -781,12 +804,12 @@ export default function Page() {
 
           {filteredResults.length === 0 ? (
             <Note variant="neutral">
-              {!hasStartedScan
-                ? 'No scan has been run yet.'
+              {!hasFoundLinks && !loading
+                ? 'Click "Find links" to extract links from your content.'
                 : !hasAssignedContentTypes
                 ? 'No content types are assigned to Link Checker in the app configuration.'
                 : loading
-                ? `Preparing the first batch of links. ${scanStats.entriesScanned} entries scanned so far.`
+                ? `Finding links. ${scanStats.entriesScanned} entries scanned so far.`
                 : 'No links match the current filters.'}
             </Note>
           ) : (

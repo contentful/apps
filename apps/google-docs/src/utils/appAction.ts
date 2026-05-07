@@ -1,5 +1,5 @@
 import { PageAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
-import { ERROR_MESSAGES } from './constants/messages';
+import { normalizeAiAccessError } from './aiAccess';
 
 /**
  * Call a specified app action and return the result if there are no errors or processing states. The function is written such that processing and failure states are considered
@@ -38,7 +38,7 @@ export async function callAppActionWithResult<T>(
 
   if (response.sys.status === 'failed') {
     console.error(`App action "${actionName}" failed`, response.sys.error);
-    throw new Error('App action failed');
+    throw normalizeAiAccessError(response.sys.error);
   } else if (response.sys.status === 'processing') {
     throw new Error(
       `Incomplete request, app action: ${actionName} is in the state of "Processing"`

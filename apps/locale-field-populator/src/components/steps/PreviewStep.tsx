@@ -6,6 +6,7 @@ import {
   Flex,
   FormControl,
   List,
+  Note,
   Paragraph,
   Select,
   Subheading,
@@ -20,6 +21,7 @@ import {
   setAllEntryFieldsAdopted,
   setFieldAdopted,
 } from '../../utils/adoptedFields';
+import { MAX_TOTAL_ENTRIES } from '../../utils/entry';
 import { isEntryArrayField, isEntryField } from '../../utils/fieldTypes';
 import { SimplifiedLocale } from '../../utils/locales';
 import PreviewBox from '../preview/PreviewBox';
@@ -205,33 +207,11 @@ const PreviewStepComponent = ({
           </Flex>
         </Flex>
 
-        {/* Field rows */}
+        {/* Main entry field rows */}
         <Flex flexDirection="column" gap="spacingS">
           {contentType.fields.map((field) => {
             if (isEntryField(field) || isEntryArrayField(field)) {
-              const fieldReferences = referencedEntries.filter(
-                (referenceData) => referenceData.fieldId === field.id
-              );
-              return fieldReferences.map((referenceData) => (
-                <ReferenceEntrySection
-                  key={`${referenceData.fieldId}-${referenceData.entry.sys.id}`}
-                  entry={referenceData.entry}
-                  contentType={referenceData.contentType}
-                  fieldName={referenceData.fieldName}
-                  sourceLocale={sourceLocale}
-                  targetLocale={selectedTargetLocale}
-                  adoptedFields={adoptedFields[referenceData.entry.sys.id] || {}}
-                  onAdoptedFieldChange={(fieldId, adopted) =>
-                    handleFieldAdopted(referenceData.entry.sys.id, fieldId, adopted)
-                  }
-                  onAdoptAllChange={(adopted) =>
-                    handleAdoptAll(referenceData.entry.sys.id, referenceData.contentType, adopted)
-                  }
-                  isSelfReference={referenceData.isSelfReference}
-                  isDisabled={isDisabled}
-                  baseUrl={baseUrl}
-                />
-              ));
+              return null;
             }
 
             if (field.localized) {
@@ -250,9 +230,39 @@ const PreviewStepComponent = ({
               );
             }
 
-            // Non-localized, non-reference fields are not displayed
             return null;
           })}
+        </Flex>
+
+        {/* Referenced entries (all depths, rendered in traversal order) */}
+        <Flex flexDirection="column" gap="spacingS" marginTop="spacingM">
+          {referencedEntries.length >= MAX_TOTAL_ENTRIES && (
+            <Note variant="warning">
+              Some referenced entries were not included. Try reducing the reference depth to see all
+              entries.
+            </Note>
+          )}
+          {referencedEntries.map((referenceData) => (
+            <ReferenceEntrySection
+              key={`${referenceData.depth}-${referenceData.fieldId}-${referenceData.entry.sys.id}`}
+              entry={referenceData.entry}
+              contentType={referenceData.contentType}
+              fieldName={referenceData.fieldName}
+              sourceLocale={sourceLocale}
+              targetLocale={selectedTargetLocale}
+              adoptedFields={adoptedFields[referenceData.entry.sys.id] || {}}
+              onAdoptedFieldChange={(fieldId, adopted) =>
+                handleFieldAdopted(referenceData.entry.sys.id, fieldId, adopted)
+              }
+              onAdoptAllChange={(adopted) =>
+                handleAdoptAll(referenceData.entry.sys.id, referenceData.contentType, adopted)
+              }
+              isSelfReference={referenceData.isSelfReference}
+              isDisabled={isDisabled}
+              baseUrl={baseUrl}
+              depth={referenceData.depth}
+            />
+          ))}
         </Flex>
       </Box>
     </Flex>

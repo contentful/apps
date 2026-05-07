@@ -98,69 +98,161 @@ export async function updateEntries(
   };
 }
 
-export const fetchEntries = async (
+export const fetchEntryAndContentType = async (
   cma: CMAClient,
   entryId: string,
   contentTypeId: string
 ): Promise<{
   entry: EntryProps;
   contentType: ContentTypeProps;
-  referencedEntriesData: ReferencedEntryData[];
 }> => {
-  const [mainEntry, mainEntryContentType] = await Promise.all([
+  const [entry, contentType] = await Promise.all([
     cma.entry.get({ entryId }),
     cma.contentType.get({ contentTypeId }),
   ]);
+  return { entry, contentType };
+};
 
-  const referencesToProcess: { referenceEntryId: string; field: ContentTypeField }[] =
-    collectReferences(mainEntry, mainEntryContentType);
+export const MAX_REFERENCE_DEPTH = 3;
+export const MAX_TOTAL_ENTRIES = 50;
 
-  const entryMap = await fetchReferenceEntries(cma, referencesToProcess, entryId);
+export const fetchReferencesForLocale = async (
+  cma: CMAClient,
+  entry: EntryProps,
+  contentType: ContentTypeProps,
+  sourceLocale: string,
+  maxDepth: number = MAX_REFERENCE_DEPTH
+): Promise<ReferencedEntryData[]> => {
+  const visited = new Set<string>([entry.sys.id]);
+  const allReferences: ReferencedEntryData[] = [];
+  const contentTypeCache: Record<string, ContentTypeProps> = {
+    [contentType.sys.id]: contentType,
+  };
 
-  const contentTypeMap = await fetchContentTypes(
+  await collectReferencesRecursive(
     cma,
-    entryMap,
-    contentTypeId,
-    mainEntryContentType
+    entry,
+    contentType,
+    sourceLocale,
+    1,
+    maxDepth,
+    visited,
+    allReferences,
+    contentTypeCache
   );
 
-  const referencedEntriesData: ReferencedEntryData[] = referencesToProcess.flatMap(
-    ({ referenceEntryId, field }) => {
-      if (referenceEntryId === entryId) {
-        return {
-          entry: mainEntry,
-          contentType: mainEntryContentType,
+  return allReferences;
+};
+
+const collectReferencesRecursive = async (
+  cma: CMAClient,
+  parentEntry: EntryProps,
+  parentContentType: ContentTypeProps,
+  sourceLocale: string,
+  currentDepth: number,
+  maxDepth: number,
+  visited: Set<string>,
+  results: ReferencedEntryData[],
+  contentTypeCache: Record<string, ContentTypeProps>
+): Promise<void> => {
+  if (currentDepth > maxDepth) return;
+  if (results.length >= MAX_TOTAL_ENTRIES) return;
+
+  const referencesToProcess = collectReferences(parentEntry, parentContentType, sourceLocale);
+  if (referencesToProcess.length === 0) return;
+
+  const unvisitedIds = [
+    ...new Set(referencesToProcess.map((r) => r.referenceEntryId).filter((id) => !visited.has(id))),
+  ];
+
+  const entryMap: Record<string, EntryProps> = {};
+  if (unvisitedIds.length > 0) {
+    const entriesResponse = await cma.entry.getMany({
+      query: { 'sys.id[in]': unvisitedIds.join(',') },
+    });
+    for (const fetchedEntry of entriesResponse.items) {
+      entryMap[fetchedEntry.sys.id] = fetchedEntry;
+    }
+  }
+
+  const newContentTypeIds = [
+    ...new Set(
+      Object.values(entryMap)
+        .map((e) => e.sys.contentType.sys.id)
+        .filter((id) => !contentTypeCache[id])
+    ),
+  ];
+  if (newContentTypeIds.length > 0) {
+    const ctResponse = await cma.contentType.getMany({
+      query: { 'sys.id[in]': newContentTypeIds.join(',') },
+    });
+    for (const ct of ctResponse.items) {
+      contentTypeCache[ct.sys.id] = ct;
+    }
+  }
+
+  const entriesToRecurse: { entry: EntryProps; contentType: ContentTypeProps }[] = [];
+
+  for (const { referenceEntryId, field } of referencesToProcess) {
+    if (results.length >= MAX_TOTAL_ENTRIES) break;
+
+    if (visited.has(referenceEntryId)) {
+      if (referenceEntryId === parentEntry.sys.id) {
+        results.push({
+          entry: parentEntry,
+          contentType: parentContentType,
           fieldId: field.id,
           fieldName: field.name,
           isSelfReference: true,
-        };
+          depth: currentDepth,
+        });
       }
-
-      const referenceEntry = entryMap[referenceEntryId];
-      if (!referenceEntry) {
-        return [];
-      }
-
-      const referenceContentType = contentTypeMap[referenceEntry.sys.contentType.sys.id];
-
-      return {
-        entry: referenceEntry,
-        contentType: referenceContentType,
-        fieldId: field.id,
-        fieldName: field.name,
-        isSelfReference: false,
-      };
+      continue;
     }
-  );
 
-  return {
-    entry: mainEntry,
-    contentType: mainEntryContentType,
-    referencedEntriesData,
-  };
+    visited.add(referenceEntryId);
+
+    const referenceEntry = entryMap[referenceEntryId];
+    if (!referenceEntry) continue;
+
+    const referenceContentType = contentTypeCache[referenceEntry.sys.contentType.sys.id];
+    if (!referenceContentType) continue;
+
+    results.push({
+      entry: referenceEntry,
+      contentType: referenceContentType,
+      fieldId: field.id,
+      fieldName: field.name,
+      isSelfReference: false,
+      depth: currentDepth,
+    });
+
+    if (currentDepth < maxDepth) {
+      entriesToRecurse.push({ entry: referenceEntry, contentType: referenceContentType });
+    }
+  }
+
+  for (const { entry: refEntry, contentType: refCt } of entriesToRecurse) {
+    if (results.length >= MAX_TOTAL_ENTRIES) break;
+    await collectReferencesRecursive(
+      cma,
+      refEntry,
+      refCt,
+      sourceLocale,
+      currentDepth + 1,
+      maxDepth,
+      visited,
+      results,
+      contentTypeCache
+    );
+  }
 };
 
-const collectReferences = (mainEntry: EntryProps, mainEntryContentType: ContentTypeProps) => {
+const collectReferences = (
+  mainEntry: EntryProps,
+  mainEntryContentType: ContentTypeProps,
+  sourceLocale: string
+) => {
   const referenceFields = mainEntryContentType.fields.filter(
     (field) => isEntryField(field) || isEntryArrayField(field)
   );
@@ -180,7 +272,12 @@ const collectReferences = (mainEntry: EntryProps, mainEntryContentType: ContentT
     const fieldValues = mainEntry.fields[field.id];
     if (!fieldValues) continue;
 
-    const value = Object.values(fieldValues)[0];
+    let value = fieldValues[sourceLocale];
+    // Non-localized reference fields store under a single key (the default locale)
+    if (value === undefined && Object.keys(fieldValues).length === 1) {
+      value = Object.values(fieldValues)[0];
+    }
+    if (value === undefined) continue;
 
     if (isLinkValue(value) && value.sys.linkType === 'Entry') {
       processReference(value, field);
@@ -194,57 +291,4 @@ const collectReferences = (mainEntry: EntryProps, mainEntryContentType: ContentT
   }
 
   return referencesToProcess;
-};
-
-const fetchReferenceEntries = async (
-  cma: CMAClient,
-  referencesToProcess: { referenceEntryId: string; field: ContentTypeField }[],
-  entryId: string
-): Promise<Record<string, EntryProps>> => {
-  const uniqueEntryIds = [
-    ...new Set(
-      referencesToProcess
-        .map((reference) => reference.referenceEntryId)
-        .filter((id) => id !== entryId)
-    ),
-  ];
-
-  const entryMap: Record<string, EntryProps> = {};
-
-  if (uniqueEntryIds.length > 0) {
-    const entriesResponse = await cma.entry.getMany({
-      query: { 'sys.id[in]': uniqueEntryIds.join(',') },
-    });
-    for (const fetchedEntry of entriesResponse.items) {
-      entryMap[fetchedEntry.sys.id] = fetchedEntry;
-    }
-  }
-
-  return entryMap;
-};
-
-const fetchContentTypes = async (
-  cma: CMAClient,
-  entryMap: Record<string, EntryProps>,
-  contentTypeId: string,
-  mainEntryContentType: ContentTypeProps
-): Promise<Record<string, ContentTypeProps>> => {
-  const contentTypeMap: Record<string, ContentTypeProps> = {
-    [contentTypeId]: mainEntryContentType,
-  };
-
-  const uniqueContentTypeIds = [
-    ...new Set(Object.values(entryMap).map((e) => e.sys.contentType.sys.id)),
-  ].filter((id) => !contentTypeMap[id]);
-
-  if (uniqueContentTypeIds.length > 0) {
-    const contentTypesResponse = await cma.contentType.getMany({
-      query: { 'sys.id[in]': uniqueContentTypeIds.join(',') },
-    });
-    for (const ct of contentTypesResponse.items) {
-      contentTypeMap[ct.sys.id] = ct;
-    }
-  }
-
-  return contentTypeMap;
 };

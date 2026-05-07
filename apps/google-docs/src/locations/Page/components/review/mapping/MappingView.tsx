@@ -15,7 +15,12 @@ import type {
   SourceRef,
   TableTextSourceRef,
 } from '@types';
-import { isBlockImageSourceRef, isTableImageSourceRef, isTableTextSourceRef } from '@types';
+import {
+  isBlockImageSourceRef,
+  isTableImageSourceRef,
+  isTableTextSourceRef,
+  isTextSourceRef,
+} from '@types';
 import { FileTextIcon, LightbulbIcon } from '@contentful/f36-icons';
 import { useReviewTextSelection } from '@hooks/useReviewTextSelection';
 import { getEntryTitleFromFieldMappings } from '../../../../../utils/getEntryTitle';
@@ -38,10 +43,15 @@ import { EditModal } from './edit-modals/EditModal';
 import { RichTextSelectionPreview } from './edit-modals/RichTextSelectionPreview';
 
 import { EditMappingButton } from './EditMappingButton';
+import {
+  mappingGroupSurfaceEdit,
+  mappingGroupSurfaceView,
+  mappingGroupSurfaceViewHovered,
+} from './MappingView.styles';
 import { buildSourceRefKey } from './sourceRefUtils';
 import { MappingEntryCards } from './MappingEntryCards';
 import { NormalizedDocumentSection } from './NormalizedDocumentSection';
-import { buildMappingDisplayGroups } from './buildMappingDisplayGroups';
+import { buildMappingDisplayGroups, type MappingDisplayGroup } from './buildMappingDisplayGroups';
 import { ViewMappingRail, type ViewMappingCardEntry } from './ViewMappingRail';
 import { ViewMappingCard } from './ViewMappingCard';
 import {
@@ -108,6 +118,25 @@ function rangeIntersectsNode(range: Range, node: Node): boolean {
   } catch {
     return false;
   }
+}
+
+function getViewModeGroupSurfaceFlags(
+  isViewMode: boolean,
+  group: MappingDisplayGroup,
+  visibleHighlightsBySegment: Record<string, MappingHighlight[]>
+): { isTableOnlyGroup: boolean; isImageOnlyGroup: boolean } {
+  if (!isViewMode || group.segments.length !== 1) {
+    return { isTableOnlyGroup: false, isImageOnlyGroup: false };
+  }
+
+  const onlySegment = group.segments[0];
+
+  const isTableOnlyGroup = onlySegment?.kind === 'table';
+  const isImageOnlyGroup =
+    onlySegment?.kind === 'block' &&
+    (visibleHighlightsBySegment[onlySegment.id] ?? []).every((h) => !isTextSourceRef(h.sourceRef));
+
+  return { isTableOnlyGroup, isImageOnlyGroup };
 }
 
 export const MappingView = ({
@@ -775,7 +804,7 @@ export const MappingView = ({
               <Text as="p" marginBottom="none">
                 {isViewMode ? (
                   <Text as="span" fontWeight="fontWeightDemiBold">
-                    All entries
+                    All entries ({entryBlockGraph.entries.length})
                   </Text>
                 ) : (
                   <>
@@ -811,8 +840,27 @@ export const MappingView = ({
 
             <Flex flexDirection="column" gap="spacingS">
               {(groupsByTab[tab.id] ?? []).map((group) => {
-                const activeHighlightIndex = highlightIndex;
-                const showSurface = group.showGroupedSurface;
+                const { isTableOnlyGroup, isImageOnlyGroup } = getViewModeGroupSurfaceFlags(
+                  isViewMode,
+                  group,
+                  visibleHighlightsBySegment
+                );
+
+                const showSurface = isViewMode
+                  ? group.mappingCards.length > 0 && !isTableOnlyGroup && !isImageOnlyGroup
+                  : group.showGroupedSurface;
+
+                const isGroupSurfaceHovered =
+                  isViewMode &&
+                  group.mappingCards.some((card) =>
+                    card.mappingKeys.some((key) => hoveredMappingKeys.includes(key))
+                  );
+
+                const surfaceClassName = isViewMode
+                  ? isGroupSurfaceHovered
+                    ? mappingGroupSurfaceViewHovered
+                    : mappingGroupSurfaceView
+                  : mappingGroupSurfaceEdit;
 
                 return (
                   <Box key={group.id}>
@@ -825,22 +873,19 @@ export const MappingView = ({
                         {showSurface ? (
                           <Box
                             data-testid={`mapping-group-surface-${group.id}`}
-                            style={{
-                              borderRadius: tokens.borderRadiusMedium,
-                              backgroundColor: tokens.green100,
-                              padding: tokens.spacing2Xs,
-                            }}>
+                            className={surfaceClassName}>
                             <Flex flexDirection="column" gap="spacing2Xs">
                               {group.segments.map((segment) => (
                                 <NormalizedDocumentSection
                                   key={segment.id}
                                   segment={segment}
-                                  highlightIndex={activeHighlightIndex}
+                                  highlightIndex={highlightIndex}
                                   imageById={imageById}
                                   listMarkers={listMarkers}
                                   excludedSourceRefs={entryBlockGraph.excludedSourceRefs}
                                   selectedEntryIndex={selectedEntryIndex}
                                   hoveredMappingKeys={hoveredMappingKeys}
+                                  isViewMode={isViewMode}
                                   onSetHoveredMappingKeys={setHoveredMappingKeys}
                                   onEditImage={isViewMode ? undefined : handleEditImage}
                                 />
@@ -853,12 +898,13 @@ export const MappingView = ({
                               <NormalizedDocumentSection
                                 key={segment.id}
                                 segment={segment}
-                                highlightIndex={activeHighlightIndex}
+                                highlightIndex={highlightIndex}
                                 imageById={imageById}
                                 listMarkers={listMarkers}
                                 excludedSourceRefs={entryBlockGraph.excludedSourceRefs}
                                 selectedEntryIndex={selectedEntryIndex}
                                 hoveredMappingKeys={hoveredMappingKeys}
+                                isViewMode={isViewMode}
                                 onSetHoveredMappingKeys={setHoveredMappingKeys}
                                 onEditImage={isViewMode ? undefined : handleEditImage}
                               />
