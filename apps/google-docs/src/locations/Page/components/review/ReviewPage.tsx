@@ -92,7 +92,7 @@ export const ReviewPage = ({
 
   const { resumeWorkflow } = useWorkflowAgent({ sdk, documentId: '', oauthToken: '' });
 
-  const handleToggleEntrySelection = useCallback((entryKey: string, isSelected: boolean) => {
+  const handleToggleEntrySelection = (entryKey: string, isSelected: boolean) => {
     setSelectedEntryKeys((previous) => {
       const next = new Set(previous);
       if (isSelected) {
@@ -102,7 +102,7 @@ export const ReviewPage = ({
       }
       return next;
     });
-  }, []);
+  };
 
   const handleCreateEntries = useCallback(async (): Promise<void> => {
     if (!runId) {
@@ -264,7 +264,6 @@ export const ReviewPage = ({
             onCtaClick={handleCreateOrViewEntries}
             isCtaLoading={isCreatePending}
             isCtaDisabled={!hasCreatedEntries && !hasSelectedEntries}
-            selectedEntryCount={selectedEntryCount}
             areEntrySelectionsDisabled={isMappingDisabled}
           />
           <MappingView

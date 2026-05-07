@@ -154,13 +154,13 @@ describe('ReviewPage entry selection', () => {
 
     expect(firstCheckbox).toBeChecked();
     expect(secondCheckbox).toBeChecked();
-    expect(screen.getByText('2 of 2 entries selected')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Create selected entries' })).toBeEnabled();
     expect(screen.getByText('selected-index:none')).toBeTruthy();
 
     fireEvent.click(secondCheckbox);
 
     expect(secondCheckbox).not.toBeChecked();
-    expect(screen.getByText('1 of 2 entries selected')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Create selected entries' })).toBeEnabled();
     expect(screen.getByText('selected-index:none')).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: /Article \(First title\)/ }));
@@ -174,7 +174,6 @@ describe('ReviewPage entry selection', () => {
     fireEvent.click(screen.getByRole('checkbox', { name: 'Create entry Article (Second title)' }));
 
     expect(screen.getByRole('button', { name: 'Create selected entries' })).toBeDisabled();
-    expect(screen.getByText('0 of 2 entries selected')).toBeTruthy();
   });
 
   it('resumes the workflow with only selected entries and pruned sourceEntryIds', async () => {

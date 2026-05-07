@@ -17,7 +17,6 @@ interface OverviewProps {
   onCtaClick: () => void;
   isCtaLoading?: boolean;
   isCtaDisabled?: boolean;
-  selectedEntryCount: number;
   areEntrySelectionsDisabled?: boolean;
 }
 
@@ -31,14 +30,8 @@ const OverviewSection = ({
   onCtaClick,
   isCtaLoading = false,
   isCtaDisabled = false,
-  selectedEntryCount,
   areEntrySelectionsDisabled = false,
 }: OverviewProps) => {
-  const totalEntryCount = payload.entryBlockGraph.entries.length;
-  const entrySelectionCountLabel =
-    totalEntryCount === 1
-      ? `${selectedEntryCount} of 1 entry selected`
-      : `${selectedEntryCount} of ${totalEntryCount} entries selected`;
   const entryRows = useMemo(
     () =>
       buildEntryListFromEntryBlockGraph(
@@ -60,7 +53,7 @@ const OverviewSection = ({
             </Flex>
             <Paragraph marginBottom="none">
               Review your content and associated entries below. Highlight text to make adjustments.
-              Create entries when you are complete.
+              Select which entries you’d like to create.
             </Paragraph>
           </Flex>
 
@@ -71,7 +64,6 @@ const OverviewSection = ({
               <Text fontWeight="fontWeightDemiBold" fontSize="fontSizeL">
                 Entries
               </Text>
-              <Text fontSize="fontSizeM">Click row to view content by entry below.</Text>
             </Flex>
 
             <Flex alignItems="center" gap="spacingS">
@@ -84,9 +76,6 @@ const OverviewSection = ({
               </Button>
             </Flex>
           </Flex>
-          <Text fontSize="fontSizeS" fontColor="gray600">
-            {entrySelectionCountLabel}
-          </Text>
 
           {entryRows.length === 0 ? (
             <Note variant="neutral">
