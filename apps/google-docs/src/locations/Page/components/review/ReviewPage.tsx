@@ -230,7 +230,7 @@ export const ReviewPage = ({
                 setSelectedEntryIndex(entryBlockGraph.entries.length > 0 ? 0 : null);
               }
             }}
-            ctaLabel={hasCreatedEntries ? 'View entries' : 'Create entries'}
+            ctaLabel={hasCreatedEntries ? 'View entries' : 'Create selected entries'}
             onCtaClick={handleCreateOrViewEntries}
             isCtaLoading={isCreatePending}
             isCtaDisabled={!hasCreatedEntries && !hasSelectedEntries}

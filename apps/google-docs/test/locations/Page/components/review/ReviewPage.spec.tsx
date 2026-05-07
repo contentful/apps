@@ -173,7 +173,7 @@ describe('ReviewPage entry selection', () => {
     fireEvent.click(screen.getByRole('checkbox', { name: 'Create entry Article (First title)' }));
     fireEvent.click(screen.getByRole('checkbox', { name: 'Create entry Article (Second title)' }));
 
-    expect(screen.getByRole('button', { name: 'Create entries' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Create selected entries' })).toBeDisabled();
     expect(screen.getByText('0 of 2 entries selected')).toBeTruthy();
   });
 
@@ -181,7 +181,7 @@ describe('ReviewPage entry selection', () => {
     renderReviewPage();
 
     fireEvent.click(screen.getByRole('checkbox', { name: 'Create entry Article (Second title)' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Create entries' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Create selected entries' }));
 
     await waitFor(() => expect(mockResumeWorkflow).toHaveBeenCalledTimes(1));
 

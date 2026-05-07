@@ -48,42 +48,51 @@ function OverviewEntryRowCard({
 
   const rowContent = (
     <>
-      <Flex alignItems="center" gap="spacingXs">
-        <Checkbox
-          aria-label={`Create entry ${row.contentTypeName || 'Untitled'}${
-            row.entryTitle ? ` (${truncateLabel(row.entryTitle, 150)})` : ''
-          }`}
-          isChecked={isEntrySelectedForCreation}
-          isDisabled={areEntrySelectionsDisabled}
-          onChange={(event) => onToggleEntrySelection(row.id, event.target.checked)}
-        />
-        <Card
-          as="button"
-          type="button"
-          onClick={() => {
-            if (!isSelected) onSelect(row.entryIndex);
-          }}
-          style={{
-            border: `2px solid ${isSelected ? tokens.blue500 : tokens.gray300}`,
-            backgroundColor: tokens.colorWhite,
-            cursor: isSelected ? 'default' : 'pointer',
-            textAlign: 'left',
-            width: '100%',
-            padding: `${tokens.spacingXs} ${tokens.spacingS}`,
-          }}>
-          <Paragraph marginBottom="none">
-            <Text as="span" fontWeight="fontWeightDemiBold">
-              {row.contentTypeName || 'Untitled'}
-            </Text>
-            {row.contentTypeName && row.entryTitle ? (
-              <Text as="span" fontColor="gray600">
-                {' '}
-                ({truncateLabel(row.entryTitle, 150)})
+      <Card
+        style={{
+          border: `2px solid ${isSelected ? tokens.blue500 : tokens.gray300}`,
+          backgroundColor: tokens.colorWhite,
+          width: '100%',
+          padding: `${tokens.spacingXs} ${tokens.spacingS}`,
+        }}>
+        <Flex alignItems="center" gap="spacingXs">
+          <Checkbox
+            aria-label={`Create entry ${row.contentTypeName || 'Untitled'}${
+              row.entryTitle ? ` (${truncateLabel(row.entryTitle, 150)})` : ''
+            }`}
+            isChecked={isEntrySelectedForCreation}
+            isDisabled={areEntrySelectionsDisabled}
+            onChange={(event) => onToggleEntrySelection(row.id, event.target.checked)}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              if (!isSelected) onSelect(row.entryIndex);
+            }}
+            style={{
+              appearance: 'none',
+              background: 'transparent',
+              border: 0,
+              cursor: isSelected ? 'default' : 'pointer',
+              flex: 1,
+              font: 'inherit',
+              padding: 0,
+              textAlign: 'left',
+            }}>
+            <Paragraph marginBottom="none">
+              <Text as="span" fontWeight="fontWeightDemiBold">
+                {row.contentTypeName || 'Untitled'}
               </Text>
-            ) : null}
-          </Paragraph>
-        </Card>
-      </Flex>
+              {row.contentTypeName && row.entryTitle ? (
+                <Text as="span" fontColor="gray600">
+                  {' '}
+                  ({truncateLabel(row.entryTitle, 150)})
+                </Text>
+              ) : null}
+            </Paragraph>
+          </button>
+        </Flex>
+      </Card>
       {row.children.length > 0 ? (
         <Box className={treeChildrenList}>
           {row.children.map((child, index) => (
