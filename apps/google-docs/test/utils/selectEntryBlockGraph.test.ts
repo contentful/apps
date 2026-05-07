@@ -49,18 +49,41 @@ describe('selectEntryBlockGraph utilities', () => {
     excludedSourceRefs: [],
   };
 
-  it('uses temp ids and index fallback keys for initial selection', () => {
-    expect([...getAllEntrySelectionKeys(graph.entries)]).toEqual(['page-1', 'hero-1', '2']);
+  it('uses namespaced temp ids and index fallback keys for initial selection', () => {
+    expect([...getAllEntrySelectionKeys(graph.entries)]).toEqual([
+      'temp:page-1',
+      'temp:hero-1',
+      'index:2',
+    ]);
   });
 
   it('counts selected entries against the current graph entries', () => {
-    expect(countSelectedEntries(graph.entries, new Set(['page-1', '2', 'missing']))).toBe(2);
+    expect(
+      countSelectedEntries(graph.entries, new Set(['temp:page-1', 'index:2', 'missing']))
+    ).toBe(2);
   });
 
   it('filters entries and prunes references to unselected temp ids', () => {
-    const selectedGraph = filterEntryBlockGraphBySelection(graph, new Set(['page-1', '2']));
+    const selectedGraph = filterEntryBlockGraphBySelection(
+      graph,
+      new Set(['temp:page-1', 'index:2'])
+    );
 
     expect(selectedGraph.entries.map((entry) => entry.contentTypeId)).toEqual(['page', 'quote']);
     expect(selectedGraph.entries[0].fieldMappings[0].sourceEntryIds).toEqual([]);
+  });
+
+  it('does not collide numeric temp ids with index fallback keys', () => {
+    const entries: EntryBlockGraph['entries'] = [
+      { tempId: '1', contentTypeId: 'numeric', fieldMappings: [] },
+      {
+        contentTypeId: 'fallback',
+        fieldMappings: [],
+      },
+    ];
+
+    expect([...getAllEntrySelectionKeys(entries)]).toEqual(['temp:1', 'index:1']);
+    expect(countSelectedEntries(entries, new Set(['temp:1']))).toBe(1);
+    expect(countSelectedEntries(entries, new Set(['index:1']))).toBe(1);
   });
 });

@@ -1,7 +1,7 @@
 import type { EntryBlockGraph, EntryBlockGraphEntry } from '../types/entryBlockGraph';
 
 export function getEntrySelectionKey(entry: EntryBlockGraphEntry, index: number): string {
-  return entry.tempId ?? String(index);
+  return entry.tempId !== undefined ? `temp:${entry.tempId}` : `index:${index}`;
 }
 
 export function getAllEntrySelectionKeys(entries: EntryBlockGraphEntry[]): Set<string> {

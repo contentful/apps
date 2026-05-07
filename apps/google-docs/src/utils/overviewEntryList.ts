@@ -6,6 +6,7 @@ import { type ContentTypeDisplayInfo } from '../services/contentTypeService';
 import { orderEntriesByCreationOrder } from './createEntries';
 import { getEntryDisplayTitle } from './getEntryDisplayTitle';
 import { getEntryTitleFromFieldMappings } from './getEntryTitle';
+import { getEntrySelectionKey } from './selectEntryBlockGraph';
 
 export interface EntryListRow {
   id: string;
@@ -221,7 +222,7 @@ export function buildEntryListFromEntryBlockGraph(
   }
 
   const makeRow = (entry: EntryBlockGraphEntry, index: number): EntryListRow => {
-    const id = entry.tempId ?? String(index);
+    const id = getEntrySelectionKey(entry, index);
     const childTempIds = entry.tempId ? childrenByParent.get(entry.tempId) ?? [] : [];
     const childRows = childTempIds
       .map((childId) => {
