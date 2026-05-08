@@ -45,4 +45,30 @@ describe('handle date range helper', () => {
     expect(endDay).toBe(today.getDate());
     expect(startDay).toBe(yesterday.getDate());
   });
+
+  it('formats dates correctly for quarter range', () => {
+    const { startTime, endTime } = getDateRangeTime('lastQuarter');
+    const { startDay, endDay } = getParsedDateRangeDate('lastQuarter');
+
+    expect(Math.round((endTime - startTime) / DAY_IN_MS)).toBe(
+      RANGE_OPTIONS.lastQuarter.startDaysAgo
+    );
+    const today = new Date();
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - RANGE_OPTIONS.lastQuarter.startDaysAgo);
+    expect(endDay).toBe(today.getDate());
+    expect(startDay).toBe(ninetyDaysAgo.getDate());
+  });
+
+  it('formats dates correctly for year range', () => {
+    const { startTime, endTime } = getDateRangeTime('lastYear');
+    const { startDay, endDay } = getParsedDateRangeDate('lastYear');
+
+    expect(Math.round((endTime - startTime) / DAY_IN_MS)).toBe(RANGE_OPTIONS.lastYear.startDaysAgo);
+    const today = new Date();
+    const oneYearAgo = new Date();
+    oneYearAgo.setDate(oneYearAgo.getDate() - RANGE_OPTIONS.lastYear.startDaysAgo);
+    expect(endDay).toBe(today.getDate());
+    expect(startDay).toBe(oneYearAgo.getDate());
+  });
 });

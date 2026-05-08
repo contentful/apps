@@ -1,10 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import {
-  AllContentTypes,
-  AllContentTypeEntries,
-  ContentTypes,
-  ContentTypeEntries,
-} from '../../../types';
+import { AllContentTypes, AllContentTypeEntries, ContentTypeRules } from '../../../types';
 import AssignContentTypeCard from 'components/config-screen/assign-content-type/AssignContentTypeCard';
 
 const allContentTypes: AllContentTypes = {
@@ -22,14 +17,17 @@ const allContentTypes: AllContentTypes = {
 
 const allContentTypeEntries: AllContentTypeEntries = Object.entries(allContentTypes);
 
-const contentTypes: ContentTypes = {
-  course: {
+const contentTypeRules: ContentTypeRules = [
+  {
+    id: 'rule-course',
+    contentTypeId: 'course',
     slugField: 'slug',
     urlPrefix: '/about',
+    enableAdvancedMatching: false,
+    matchDimension: 'unifiedPagePathScreen',
+    matchType: 'EXACT',
   },
-};
-
-const contentTypeEntries: ContentTypeEntries = Object.entries(contentTypes);
+];
 
 describe('Assign Content Type Card for Config Screen', () => {
   it('can render the field labels when there is a saved content type entry', () => {
@@ -37,19 +35,21 @@ describe('Assign Content Type Card for Config Screen', () => {
       <AssignContentTypeCard
         allContentTypes={allContentTypes}
         allContentTypeEntries={allContentTypeEntries}
-        contentTypes={contentTypes}
-        contentTypeEntries={contentTypeEntries}
+        contentTypeRules={contentTypeRules}
         onContentTypeChange={() => {}}
         onContentTypeFieldChange={() => {}}
+        onContentTypeRuleChange={() => {}}
         onRemoveContentType={() => {}}
         currentEditorInterface={{}}
-        originalContentTypes={{}}
+        originalContentTypeRules={[]}
+        rulesMissingPattern={new Set()}
       />
     );
 
     expect(screen.getByText('Content type')).toBeVisible();
     expect(screen.getByText('Slug field')).toBeVisible();
     expect(screen.getByText('URL prefix')).toBeVisible();
+    expect(screen.queryByText('Path pattern')).not.toBeInTheDocument();
   });
 
   it('can render the correct number of saved content types', () => {
@@ -57,13 +57,14 @@ describe('Assign Content Type Card for Config Screen', () => {
       <AssignContentTypeCard
         allContentTypes={allContentTypes}
         allContentTypeEntries={allContentTypeEntries}
-        contentTypes={contentTypes}
-        contentTypeEntries={contentTypeEntries}
+        contentTypeRules={contentTypeRules}
         onContentTypeChange={() => {}}
         onContentTypeFieldChange={() => {}}
+        onContentTypeRuleChange={() => {}}
         onRemoveContentType={() => {}}
         currentEditorInterface={{}}
-        originalContentTypes={{}}
+        originalContentTypeRules={[]}
+        rulesMissingPattern={new Set()}
       />
     );
 
