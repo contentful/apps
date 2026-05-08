@@ -6,6 +6,16 @@ import { MappingView } from '../../../../../../src/locations/Page/components/rev
 const mockUseReviewTextSelection = vi.fn();
 const mockClearSelection = vi.fn();
 
+// @contentful/f36-icons imports from @phosphor-icons/react which is CJS-only and fails
+// named-export resolution in vitest's ESM context. Mock the icons used in MappingView
+// with simple stub components so the icon import chain does not break test setup.
+vi.mock('@contentful/f36-icons', () => ({
+  FileTextIcon: () => null,
+  LightbulbIcon: () => null,
+  EyeIcon: () => null,
+  PencilSimpleIcon: () => null,
+}));
+
 vi.mock('@hooks/useReviewTextSelection', () => ({
   useReviewTextSelection: () => mockUseReviewTextSelection(),
 }));
@@ -1043,5 +1053,228 @@ describe('MappingView', () => {
 
     expect(screen.getByRole('heading', { name: 'Edit content mapping' })).toBeTruthy();
     expect(screen.getByText('Selected Article: Untitled')).toBeTruthy();
+  });
+
+  describe('getVisibleHighlights — highlight visibility filtering by mode', () => {
+    /**
+     * Creates a two-entry payload where entry 0 maps block-1 and entry 1 maps block-2.
+     * Each entry maps a distinct block, so the two segments produce different highlight
+     * entryIndex values (0 and 1 respectively).
+     */
+    const createTwoEntryPayload = (): MappingReviewSuspendPayload => {
+      const block1 = createBlock('block-1', 1, 'Entry zero content');
+      const block2 = createBlock('block-2', 2, 'Entry one content');
+
+      return {
+        suspendStepId: 'mapping-review',
+        reason: 'Mapping review required',
+        documentId: 'doc-two-entries',
+        documentTitle: 'Two entry document',
+        normalizedDocument: {
+          documentId: 'doc-two-entries',
+          title: 'Two entry document',
+          designValues: [],
+          contentBlocks: [
+            {
+              id: block1.id,
+              position: block1.position,
+              type: 'paragraph',
+              textRuns: [{ text: block1.text }],
+              flattenedTextRuns: [{ text: block1.text, start: 0, end: block1.text.length }],
+              designValueIds: [],
+              imageIds: [],
+            },
+            {
+              id: block2.id,
+              position: block2.position,
+              type: 'paragraph',
+              textRuns: [{ text: block2.text }],
+              flattenedTextRuns: [{ text: block2.text, start: 0, end: block2.text.length }],
+              designValueIds: [],
+              imageIds: [],
+            },
+          ],
+          images: [],
+          tables: [],
+          assets: [],
+        },
+        entryBlockGraph: {
+          entries: [
+            {
+              contentTypeId: 'article',
+              tempId: 'article-0',
+              fields: { title: { 'en-US': 'Entry 0 title' } },
+              fieldMappings: [
+                {
+                  fieldId: 'body',
+                  fieldType: 'Text',
+                  sourceRefs: [createBlockTextSourceRef(block1.id, block1.text)],
+                  confidence: 0.9,
+                },
+              ],
+            },
+            {
+              contentTypeId: 'article',
+              tempId: 'article-1',
+              fields: { title: { 'en-US': 'Entry 1 title' } },
+              fieldMappings: [
+                {
+                  fieldId: 'body',
+                  fieldType: 'Text',
+                  sourceRefs: [createBlockTextSourceRef(block2.id, block2.text)],
+                  confidence: 0.9,
+                },
+              ],
+            },
+          ],
+          excludedSourceRefs: [],
+        },
+        referenceGraph: {
+          edges: [],
+          creationOrder: [],
+          deferredFields: [],
+          hasCircularDependency: false,
+        },
+        contentTypes: [
+          {
+            sys: { id: 'article' },
+            name: 'Article',
+            displayField: 'title',
+            fields: [
+              { id: 'title', name: 'Title', type: 'Symbol' },
+              { id: 'body', name: 'Body copy', type: 'Text' },
+            ],
+          },
+        ],
+      };
+    };
+
+    it('shows highlights for both entries when mode is view', () => {
+      const payload = createTwoEntryPayload();
+
+      const { container } = render(
+        <MappingView
+          payload={payload}
+          {...mappingViewGraphProps(payload)}
+          selectedEntryIndex={0}
+          mode="view"
+        />
+      );
+
+      // In view mode, the ViewMappingRail renders one card per highlight across all entries.
+      // Both block-1 (entry 0) and block-2 (entry 1) should produce a card in the rail.
+      const viewCards = container.querySelectorAll('[data-testid^="view-mapping-card-"]');
+      expect(viewCards.length).toBeGreaterThanOrEqual(2);
+
+      // The text content for both entries must appear in the document
+      expect(screen.getByText('Entry zero content')).toBeTruthy();
+      expect(screen.getByText('Entry one content')).toBeTruthy();
+    });
+
+    it('shows only entry-0 highlights when mode is edit and selectedEntryIndex is 0', () => {
+      const payload = createTwoEntryPayload();
+
+      const { container } = render(
+        <MappingView
+          payload={payload}
+          {...mappingViewGraphProps(payload)}
+          selectedEntryIndex={0}
+          mode="edit"
+        />
+      );
+
+      // Only block-1 (entry 0) should be highlighted as a mapped segment
+      const mappedSegments = container.querySelectorAll(
+        '[data-review-text-segment="true"][data-is-mapped="true"]'
+      );
+      expect(mappedSegments).toHaveLength(1);
+      expect(mappedSegments[0]?.textContent).toContain('Entry zero content');
+    });
+
+    it('shows only entry-1 highlights when mode is edit and selectedEntryIndex is 1', () => {
+      const payload = createTwoEntryPayload();
+
+      const { container } = render(
+        <MappingView
+          payload={payload}
+          {...mappingViewGraphProps(payload)}
+          selectedEntryIndex={1}
+          mode="edit"
+        />
+      );
+
+      // Only block-2 (entry 1) should be highlighted as a mapped segment
+      const mappedSegments = container.querySelectorAll(
+        '[data-review-text-segment="true"][data-is-mapped="true"]'
+      );
+      expect(mappedSegments).toHaveLength(1);
+      expect(mappedSegments[0]?.textContent).toContain('Entry one content');
+    });
+  });
+
+  describe('getViewModeGroupSurfaceFlags — surface wrapper suppression in view mode', () => {
+    it('does not render the surface wrapper for a group with a single table-type segment in view mode', () => {
+      const tableText = 'Table cell value';
+      const payload = createPayload({
+        blocks: [],
+        tables: [
+          {
+            id: 'table-1',
+            position: 1,
+            headers: ['Field', 'Value'],
+            rows: [
+              {
+                id: 'row-1',
+                cells: [
+                  {
+                    id: 'cell-1',
+                    parts: [
+                      {
+                        id: 'part-1',
+                        type: 'text',
+                        textRuns: [{ text: tableText }],
+                        flattenedTextRuns: [{ text: tableText, start: 0, end: tableText.length }],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+            designValueIds: [],
+            imageIds: [],
+          },
+        ],
+        fieldMappings: [
+          {
+            fieldId: 'body',
+            fieldType: 'Text',
+            sourceRefs: [
+              {
+                type: 'tableText',
+                tableId: 'table-1',
+                rowId: 'row-1',
+                cellId: 'cell-1',
+                partId: 'part-1',
+                start: 0,
+                end: tableText.length,
+                flattenedRuns: [{ text: tableText, start: 0, end: tableText.length }],
+              } as SourceRef,
+            ],
+          },
+        ],
+      });
+
+      const { container } = render(
+        <MappingView
+          payload={payload}
+          {...mappingViewGraphProps(payload)}
+          selectedEntryIndex={0}
+          mode="view"
+        />
+      );
+
+      // isTableOnlyGroup=true means showSurface=false in view mode, so no surface wrapper
+      expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
+    });
   });
 });
