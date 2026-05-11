@@ -1,6 +1,7 @@
 import { ContentTypeField } from '@contentful/app-sdk';
 import {
   Box,
+  Button,
   Caption,
   Checkbox,
   Flex,
@@ -21,7 +22,6 @@ import {
   setAllEntryFieldsAdopted,
   setFieldAdopted,
 } from '../../utils/adoptedFields';
-import { MAX_TOTAL_ENTRIES } from '../../utils/entry';
 import { isEntryArrayField, isEntryField } from '../../utils/fieldTypes';
 import { SimplifiedLocale } from '../../utils/locales';
 import PreviewBox from '../preview/PreviewBox';
@@ -89,9 +89,11 @@ const PreviewStepComponent = ({
   baseUrl,
   isDisabled = false,
 }: PreviewStepProps) => {
+  const ENTRIES_PAGE_SIZE = 50;
   const [selectedTargetLocale, setSelectedTargetLocale] = useState<string>(
     targetLocales[0]?.code || ''
   );
+  const [visibleCount, setVisibleCount] = useState(ENTRIES_PAGE_SIZE);
 
   useEffect(() => {
     if (Object.keys(adoptedFields).length === 0) {
@@ -113,6 +115,19 @@ const PreviewStepComponent = ({
   const allFieldsAdopted = useMemo(() => {
     return localizedFields.every((field) => adoptedFields[entry.sys.id]?.[field.id] === true);
   }, [localizedFields, adoptedFields]);
+
+  const totalReferencedFields = useMemo(() => {
+    return referencedEntries.reduce((count, ref) => {
+      if (ref.isSelfReference) return count;
+      const fields = ref.contentType.fields.filter(
+        (f) => f.localized && !isEntryField(f) && !isEntryArrayField(f)
+      );
+      return count + fields.length;
+    }, 0);
+  }, [referencedEntries]);
+
+  const visibleEntries = referencedEntries.slice(0, visibleCount);
+  const hasMore = visibleCount < referencedEntries.length;
 
   const handleAdoptAll = (entryId: string, contentType: ContentTypeProps, adopted: boolean) => {
     const fieldIds = contentType.fields
@@ -236,13 +251,14 @@ const PreviewStepComponent = ({
 
         {/* Referenced entries (all depths, rendered in traversal order) */}
         <Flex flexDirection="column" gap="spacingS" marginTop="spacingM">
-          {referencedEntries.length >= MAX_TOTAL_ENTRIES && (
-            <Note variant="warning">
-              Some referenced entries were not included. Try reducing the reference depth to see all
-              entries.
+          {referencedEntries.length > 0 && (
+            <Note variant="neutral">
+              {referencedEntries.length} referenced{' '}
+              {referencedEntries.length === 1 ? 'entry' : 'entries'} with {totalReferencedFields}{' '}
+              localizable fields
             </Note>
           )}
-          {referencedEntries.map((referenceData) => (
+          {visibleEntries.map((referenceData) => (
             <ReferenceEntrySection
               key={`${referenceData.depth}-${referenceData.fieldId}-${referenceData.entry.sys.id}`}
               entry={referenceData.entry}
@@ -263,6 +279,14 @@ const PreviewStepComponent = ({
               depth={referenceData.depth}
             />
           ))}
+          {hasMore && (
+            <Button
+              variant="secondary"
+              onClick={() => setVisibleCount((prev) => prev + ENTRIES_PAGE_SIZE)}>
+              Show {Math.min(ENTRIES_PAGE_SIZE, referencedEntries.length - visibleCount)} more
+              entries
+            </Button>
+          )}
         </Flex>
       </Box>
     </Flex>

@@ -334,7 +334,7 @@ describe('Dialog component', () => {
 
     // Should have fetched ref-en (source locale), not ref-gb
     expect(mockCma.entry.getMany).toHaveBeenCalledWith(
-      expect.objectContaining({ query: { 'sys.id[in]': 'ref-en' } })
+      expect.objectContaining({ query: { 'sys.id[in]': 'ref-en', limit: 100 } })
     );
   });
 

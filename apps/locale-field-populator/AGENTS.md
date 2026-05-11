@@ -38,10 +38,15 @@ src/
 
 - **Rich-text fields**: copying rich-text between locales requires deep-cloning the Document node, not just assigning the reference. Shared references between locales will cause unexpected mutations.
 - **Field validation**: target locale fields may have different validation rules than the source locale. The copy operation should check for validation failures and surface them before writing.
-- **`sdk.entry.fields[fieldId].setValue(value, localeCode)`**: the locale parameter is required — omitting it writes to the default locale regardless of which locale was selected.
-- Locale data is copied at the time of the operation — it does not create a sync relationship between locales.
+- **`sdk.entry.fields[fieldId].setValue(value, localeCode)`**: the locale parameter is required -- omitting it writes to the default locale regardless of which locale was selected.
+- Locale data is copied at the time of the operation -- it does not create a sync relationship between locales.
+- **Nested reference traversal termination**: `collectReferencesRecursive` in `src/utils/entry.ts` relies on the `visited` Set plus the configurable `maxDepth` to terminate. There is intentionally no total-entry cap -- customers regularly need to process hundreds of entries. Do not re-introduce a hard cap; if you think recursion is unbounded, reverify those two mechanisms first.
+- **CMA `sys.id[in]` filter limit (~100 IDs)**: any `entry.getMany` / `contentType.getMany` call that passes a comma-separated `sys.id[in]` value must chunk the IDs (current chunk size: `BATCH_SIZE = 100`). Passing more in a single request will fail or silently truncate.
+- **CMA write rate limits (~10 req/s)**: `updateEntries` runs writes through `chunkArray(..., UPDATE_CONCURRENCY)` with `UPDATE_CONCURRENCY = 5`. Do not collapse this back into an unbounded `Promise.all` -- at scale (200+ entries) it will exceed the per-second limit even with the SDK's automatic 429 retry.
+- **Preview pagination is UI-only**: `PreviewStep` renders referenced entries in pages (`ENTRIES_PAGE_SIZE`, "Show more" button), but `adoptedFields` and the Confirm-time `updateEntries` call cover ALL referenced entries regardless of what is currently mounted. Do not change `handleConfirm` to operate on the visible slice.
 
 ## Never / Always
 
-- **Never** assign rich-text Document nodes by reference across locales — always deep-clone.
+- **Never** assign rich-text Document nodes by reference across locales -- always deep-clone.
+- **Never** unbatch CMA reads or writes that go through `chunkArray` -- the chunking is load-bearing for both API limits and rate limits.
 - **Always** confirm with the user before overwriting existing locale values (the Dialog handles this).
