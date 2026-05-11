@@ -61,26 +61,29 @@ export async function updateEntries(
     Object.values(entryAdoptedFields).some((adopted) => adopted)
   );
 
-  const results = await Promise.all(
-    entriesToUpdate.map(([entryId, entryAdoptedFields]) =>
-      updateSingleEntry(cma, entryId, sourceLocale, targetLocales, entryAdoptedFields)
-    )
-  );
-
   let totalFieldsUpdated = 0;
   let entriesUpdated = 0;
   const errors: string[] = [];
 
-  results.forEach((result, index) => {
-    if (result.success) {
-      totalFieldsUpdated += result.fieldsUpdated;
-      if (result.fieldsUpdated > 0) {
-        entriesUpdated++;
+  const batches = chunkArray(entriesToUpdate, UPDATE_CONCURRENCY);
+  for (const batch of batches) {
+    const results = await Promise.all(
+      batch.map(([entryId, entryAdoptedFields]) =>
+        updateSingleEntry(cma, entryId, sourceLocale, targetLocales, entryAdoptedFields)
+      )
+    );
+
+    results.forEach((result, index) => {
+      if (result.success) {
+        totalFieldsUpdated += result.fieldsUpdated;
+        if (result.fieldsUpdated > 0) {
+          entriesUpdated++;
+        }
+      } else if (result.error) {
+        errors.push(`Entry ${batch[index][0]}: ${result.error}`);
       }
-    } else if (result.error) {
-      errors.push(`Entry ${entriesToUpdate[index][0]}: ${result.error}`);
-    }
-  });
+    });
+  }
 
   if (errors.length > 0) {
     return {
@@ -114,7 +117,17 @@ export const fetchEntryAndContentType = async (
 };
 
 export const MAX_REFERENCE_DEPTH = 3;
-export const MAX_TOTAL_ENTRIES = 50;
+
+const BATCH_SIZE = 100;
+const UPDATE_CONCURRENCY = 5;
+
+function chunkArray<T>(array: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size));
+  }
+  return chunks;
+}
 
 export const fetchReferencesForLocale = async (
   cma: CMAClient,
@@ -156,7 +169,6 @@ const collectReferencesRecursive = async (
   contentTypeCache: Record<string, ContentTypeProps>
 ): Promise<void> => {
   if (currentDepth > maxDepth) return;
-  if (results.length >= MAX_TOTAL_ENTRIES) return;
 
   const referencesToProcess = collectReferences(parentEntry, parentContentType, sourceLocale);
   if (referencesToProcess.length === 0) return;
@@ -167,11 +179,14 @@ const collectReferencesRecursive = async (
 
   const entryMap: Record<string, EntryProps> = {};
   if (unvisitedIds.length > 0) {
-    const entriesResponse = await cma.entry.getMany({
-      query: { 'sys.id[in]': unvisitedIds.join(',') },
-    });
-    for (const fetchedEntry of entriesResponse.items) {
-      entryMap[fetchedEntry.sys.id] = fetchedEntry;
+    const idChunks = chunkArray(unvisitedIds, BATCH_SIZE);
+    for (const chunk of idChunks) {
+      const entriesResponse = await cma.entry.getMany({
+        query: { 'sys.id[in]': chunk.join(','), limit: BATCH_SIZE },
+      });
+      for (const fetchedEntry of entriesResponse.items) {
+        entryMap[fetchedEntry.sys.id] = fetchedEntry;
+      }
     }
   }
 
@@ -183,19 +198,20 @@ const collectReferencesRecursive = async (
     ),
   ];
   if (newContentTypeIds.length > 0) {
-    const ctResponse = await cma.contentType.getMany({
-      query: { 'sys.id[in]': newContentTypeIds.join(',') },
-    });
-    for (const ct of ctResponse.items) {
-      contentTypeCache[ct.sys.id] = ct;
+    const ctChunks = chunkArray(newContentTypeIds, BATCH_SIZE);
+    for (const chunk of ctChunks) {
+      const ctResponse = await cma.contentType.getMany({
+        query: { 'sys.id[in]': chunk.join(','), limit: BATCH_SIZE },
+      });
+      for (const ct of ctResponse.items) {
+        contentTypeCache[ct.sys.id] = ct;
+      }
     }
   }
 
   const entriesToRecurse: { entry: EntryProps; contentType: ContentTypeProps }[] = [];
 
   for (const { referenceEntryId, field } of referencesToProcess) {
-    if (results.length >= MAX_TOTAL_ENTRIES) break;
-
     if (visited.has(referenceEntryId)) {
       if (referenceEntryId === parentEntry.sys.id) {
         results.push({
@@ -233,7 +249,6 @@ const collectReferencesRecursive = async (
   }
 
   for (const { entry: refEntry, contentType: refCt } of entriesToRecurse) {
-    if (results.length >= MAX_TOTAL_ENTRIES) break;
     await collectReferencesRecursive(
       cma,
       refEntry,
