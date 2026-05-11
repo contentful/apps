@@ -116,7 +116,9 @@ export const fetchEntryAndContentType = async (
   return { entry, contentType };
 };
 
-export const MAX_REFERENCE_DEPTH = 3;
+export const MAX_REFERENCE_DEPTH = 5;
+export const MIN_REFERENCE_DEPTH_OPTION = 0;
+export const MAX_REFERENCE_DEPTH_OPTION = 10;
 
 const BATCH_SIZE = 100;
 const UPDATE_CONCURRENCY = 5;
