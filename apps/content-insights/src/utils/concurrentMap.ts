@@ -5,12 +5,18 @@ export async function concurrentMap<T, R>(
 ): Promise<R[]> {
   const results: R[] = new Array(items.length);
   let nextIndex = 0;
+  let aborted = false;
 
   const runners = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
-    while (true) {
+    while (!aborted) {
       const i = nextIndex++;
       if (i >= items.length) return;
-      results[i] = await worker(items[i], i);
+      try {
+        results[i] = await worker(items[i], i);
+      } catch (err) {
+        aborted = true;
+        throw err;
+      }
     }
   });
 
