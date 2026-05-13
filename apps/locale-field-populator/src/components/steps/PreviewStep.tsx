@@ -47,8 +47,12 @@ function initializeAdoptedFields(
   for (const referenceEntryData of referencedEntries) {
     const referenceEntryId = referenceEntryData.entry.sys.id;
 
-    if (referenceEntryData.isSelfReference || initialAdoptedFields[referenceEntryId]) {
-      // Self reference or already adopted, skip it
+    if (
+      referenceEntryData.isSelfReference ||
+      referenceEntryData.isAlreadyIncluded ||
+      initialAdoptedFields[referenceEntryId]
+    ) {
+      // Self reference, duplicate occurrence, or already adopted -- skip it.
       continue;
     }
 
@@ -118,13 +122,18 @@ const PreviewStepComponent = ({
 
   const totalReferencedFields = useMemo(() => {
     return referencedEntries.reduce((count, ref) => {
-      if (ref.isSelfReference) return count;
+      if (ref.isSelfReference || ref.isAlreadyIncluded) return count;
       const fields = ref.contentType.fields.filter(
         (f) => f.localized && !isEntryField(f) && !isEntryArrayField(f)
       );
       return count + fields.length;
     }, 0);
   }, [referencedEntries]);
+
+  const uniqueReferencedEntryCount = useMemo(
+    () => referencedEntries.filter((ref) => !ref.isAlreadyIncluded).length,
+    [referencedEntries]
+  );
 
   const visibleEntries = referencedEntries.slice(0, visibleCount);
   const hasMore = visibleCount < referencedEntries.length;
@@ -251,10 +260,10 @@ const PreviewStepComponent = ({
 
         {/* Referenced entries (all depths, rendered in traversal order) */}
         <Flex flexDirection="column" gap="spacingS" marginTop="spacingM">
-          {referencedEntries.length > 0 && (
+          {uniqueReferencedEntryCount > 0 && (
             <Note variant="neutral">
-              {referencedEntries.length} referenced{' '}
-              {referencedEntries.length === 1 ? 'entry' : 'entries'} with {totalReferencedFields}{' '}
+              {uniqueReferencedEntryCount} referenced{' '}
+              {uniqueReferencedEntryCount === 1 ? 'entry' : 'entries'} with {totalReferencedFields}{' '}
               localizable fields
             </Note>
           )}
@@ -274,6 +283,7 @@ const PreviewStepComponent = ({
                 handleAdoptAll(referenceData.entry.sys.id, referenceData.contentType, adopted)
               }
               isSelfReference={referenceData.isSelfReference}
+              isAlreadyIncluded={referenceData.isAlreadyIncluded}
               isDisabled={isDisabled}
               baseUrl={baseUrl}
               depth={referenceData.depth}

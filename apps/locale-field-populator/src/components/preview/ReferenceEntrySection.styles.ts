@@ -21,6 +21,11 @@ export const styles = {
     borderRadius: tokens.borderRadiusSmall,
     marginTop: tokens.spacingS,
   }),
+  noteNeutral: css({
+    padding: tokens.spacingM,
+    borderRadius: tokens.borderRadiusSmall,
+    marginTop: tokens.spacingS,
+  }),
   fieldBox: css({
     border: `1px solid ${tokens.gray300}`,
     borderRadius: tokens.borderRadiusSmall,
