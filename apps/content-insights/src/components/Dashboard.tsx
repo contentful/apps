@@ -27,14 +27,16 @@ const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
 const Dashboard = () => {
   const sdk = useSDK();
   const { installation, refetchInstallationParameters } = useInstallationParameters(sdk);
-  const { entries, isFetchingEntries, fetchingEntriesError, refetchEntries } = useAllEntries();
+  const { contentTypes, isFetchingContentTypes, refetchContentTypes } = useContentTypes();
+  const contentTypeIds = Array.from(contentTypes.keys());
+  const { entries, isFetchingEntries, fetchingEntriesError, refetchEntries } =
+    useAllEntries(contentTypeIds);
   const {
     scheduledActions,
     isFetchingScheduledActions,
     fetchingScheduledActionsError,
     refetchScheduledActions,
   } = useScheduledActions();
-  const { contentTypes, isFetchingContentTypes, refetchContentTypes } = useContentTypes();
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.Year);
 
   const handleRefresh = async () => {
@@ -44,7 +46,7 @@ const Dashboard = () => {
     await refetchInstallationParameters();
   };
 
-  const isRefreshing = isFetchingEntries || isFetchingScheduledActions;
+  const isRefreshing = isFetchingContentTypes || isFetchingEntries || isFetchingScheduledActions;
   const hasError = fetchingEntriesError || fetchingScheduledActionsError;
 
   const metricsCalculator = new MetricsCalculator(entries, scheduledActions, {

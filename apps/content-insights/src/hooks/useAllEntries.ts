@@ -14,12 +14,14 @@ export interface UseAllEntriesResult {
   refetchEntries: () => void;
 }
 
-export function useAllEntries(): UseAllEntriesResult {
+export function useAllEntries(contentTypeIds: string[]): UseAllEntriesResult {
   const sdk = useSDK<PageAppSDK>();
 
+  const sortedIds = [...contentTypeIds].sort();
   const { data, isFetching, error, refetch } = useQuery<FetchAllEntriesResult, Error>({
-    queryKey: ['entries', sdk.ids.space, getEnvironmentId(sdk)],
-    queryFn: () => fetchAllEntries(sdk),
+    queryKey: ['entries', sdk.ids.space, getEnvironmentId(sdk), sortedIds],
+    queryFn: () => fetchAllEntries(sdk, sortedIds),
+    enabled: sortedIds.length > 0,
   });
 
   return {
