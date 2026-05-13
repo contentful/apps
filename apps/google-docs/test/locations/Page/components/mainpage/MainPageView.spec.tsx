@@ -18,16 +18,13 @@ const defaultProps = {
   onSelectFile: vi.fn(),
 };
 
-const renderWithLayout = (ui: React.ReactElement) =>
-  render(<Layout>{ui}</Layout>);
+const renderWithLayout = (ui: React.ReactElement) => render(<Layout>{ui}</Layout>);
 
 describe('MainPageView', () => {
   it('shows file type guidance copy when connected', () => {
     renderWithLayout(<MainPageView {...defaultProps} />);
 
-    expect(
-      screen.getByText(/Only Google Doc files are supported/i)
-    ).toBeTruthy();
+    expect(screen.getByText(/Only Google Doc files are supported/i)).toBeTruthy();
     expect(
       screen.getByText(/Sheets, Slides, and PDFs will not appear in the file picker/i)
     ).toBeTruthy();
