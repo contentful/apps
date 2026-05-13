@@ -138,10 +138,18 @@ export const fetchReferencesForLocale = async (
   sourceLocale: string,
   maxDepth: number = MAX_REFERENCE_DEPTH
 ): Promise<ReferencedEntryData[]> => {
+  // `visited` does double duty: it suppresses re-traversal of a subtree and
+  // it marks which entries already have a "real" entry section in the result
+  // list. When the same entry is reached again from another path we emit a
+  // pointer record instead of dropping it silently or rendering a misleading
+  // empty section.
   const visited = new Set<string>([entry.sys.id]);
   const allReferences: ReferencedEntryData[] = [];
   const contentTypeCache: Record<string, ContentTypeProps> = {
     [contentType.sys.id]: contentType,
+  };
+  const entryCache: Record<string, EntryProps> = {
+    [entry.sys.id]: entry,
   };
 
   await collectReferencesRecursive(
@@ -153,7 +161,8 @@ export const fetchReferencesForLocale = async (
     maxDepth,
     visited,
     allReferences,
-    contentTypeCache
+    contentTypeCache,
+    entryCache
   );
 
   return allReferences;
@@ -168,35 +177,35 @@ const collectReferencesRecursive = async (
   maxDepth: number,
   visited: Set<string>,
   results: ReferencedEntryData[],
-  contentTypeCache: Record<string, ContentTypeProps>
+  contentTypeCache: Record<string, ContentTypeProps>,
+  entryCache: Record<string, EntryProps>
 ): Promise<void> => {
   if (currentDepth > maxDepth) return;
 
   const referencesToProcess = collectReferences(parentEntry, parentContentType, sourceLocale);
   if (referencesToProcess.length === 0) return;
 
-  const unvisitedIds = [
-    ...new Set(referencesToProcess.map((r) => r.referenceEntryId).filter((id) => !visited.has(id))),
+  const unfetchedIds = [
+    ...new Set(referencesToProcess.map((r) => r.referenceEntryId).filter((id) => !entryCache[id])),
   ];
 
-  const entryMap: Record<string, EntryProps> = {};
-  if (unvisitedIds.length > 0) {
-    const idChunks = chunkArray(unvisitedIds, BATCH_SIZE);
+  if (unfetchedIds.length > 0) {
+    const idChunks = chunkArray(unfetchedIds, BATCH_SIZE);
     for (const chunk of idChunks) {
       const entriesResponse = await cma.entry.getMany({
         query: { 'sys.id[in]': chunk.join(','), limit: BATCH_SIZE },
       });
       for (const fetchedEntry of entriesResponse.items) {
-        entryMap[fetchedEntry.sys.id] = fetchedEntry;
+        entryCache[fetchedEntry.sys.id] = fetchedEntry;
       }
     }
   }
 
   const newContentTypeIds = [
     ...new Set(
-      Object.values(entryMap)
-        .map((e) => e.sys.contentType.sys.id)
-        .filter((id) => !contentTypeCache[id])
+      referencesToProcess
+        .map((r) => entryCache[r.referenceEntryId]?.sys.contentType.sys.id)
+        .filter((id): id is string => Boolean(id) && !contentTypeCache[id])
     ),
   ];
   if (newContentTypeIds.length > 0) {
@@ -211,30 +220,57 @@ const collectReferencesRecursive = async (
     }
   }
 
-  const entriesToRecurse: { entry: EntryProps; contentType: ContentTypeProps }[] = [];
+  // Claim every direct reference of this parent before any recursion runs.
+  // Without this, recursing into the first sibling would let it pick up later
+  // siblings as its own descendants, pushing them deeper in the tree than they
+  // actually live (and inverting which occurrence renders the full UI vs. the
+  // "already included" pointer). Self-references are handled in the main loop
+  // below, not here.
+  const ownedRefIds = new Set<string>();
+  for (const { referenceEntryId } of referencesToProcess) {
+    if (referenceEntryId === parentEntry.sys.id) continue;
+    if (visited.has(referenceEntryId)) continue;
+    visited.add(referenceEntryId);
+    ownedRefIds.add(referenceEntryId);
+  }
 
+  // Now walk the references in order. Each owned ref renders its full UI here
+  // and recurses inline so its nested children appear immediately after it,
+  // which is what the depth-based indentation in the render layer expects.
   for (const { referenceEntryId, field } of referencesToProcess) {
-    if (visited.has(referenceEntryId)) {
-      if (referenceEntryId === parentEntry.sys.id) {
-        results.push({
-          entry: parentEntry,
-          contentType: parentContentType,
-          fieldId: field.id,
-          fieldName: field.name,
-          isSelfReference: true,
-          depth: currentDepth,
-        });
-      }
+    if (referenceEntryId === parentEntry.sys.id) {
+      results.push({
+        entry: parentEntry,
+        contentType: parentContentType,
+        fieldId: field.id,
+        fieldName: field.name,
+        isSelfReference: true,
+        depth: currentDepth,
+      });
       continue;
     }
 
-    visited.add(referenceEntryId);
-
-    const referenceEntry = entryMap[referenceEntryId];
+    const referenceEntry = entryCache[referenceEntryId];
     if (!referenceEntry) continue;
 
     const referenceContentType = contentTypeCache[referenceEntry.sys.contentType.sys.id];
     if (!referenceContentType) continue;
+
+    if (!ownedRefIds.has(referenceEntryId)) {
+      // Visited by an ancestor or earlier sibling at a shallower depth -- emit
+      // a pointer record so the user sees the reference exists without a
+      // misleading empty section.
+      results.push({
+        entry: referenceEntry,
+        contentType: referenceContentType,
+        fieldId: field.id,
+        fieldName: field.name,
+        isSelfReference: false,
+        depth: currentDepth,
+        isAlreadyIncluded: true,
+      });
+      continue;
+    }
 
     results.push({
       entry: referenceEntry,
@@ -246,22 +282,19 @@ const collectReferencesRecursive = async (
     });
 
     if (currentDepth < maxDepth) {
-      entriesToRecurse.push({ entry: referenceEntry, contentType: referenceContentType });
+      await collectReferencesRecursive(
+        cma,
+        referenceEntry,
+        referenceContentType,
+        sourceLocale,
+        currentDepth + 1,
+        maxDepth,
+        visited,
+        results,
+        contentTypeCache,
+        entryCache
+      );
     }
-  }
-
-  for (const { entry: refEntry, contentType: refCt } of entriesToRecurse) {
-    await collectReferencesRecursive(
-      cma,
-      refEntry,
-      refCt,
-      sourceLocale,
-      currentDepth + 1,
-      maxDepth,
-      visited,
-      results,
-      contentTypeCache
-    );
   }
 };
 

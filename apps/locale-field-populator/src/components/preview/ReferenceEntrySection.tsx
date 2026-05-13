@@ -17,6 +17,7 @@ interface ReferenceEntrySectionProps {
   onAdoptedFieldChange: (fieldId: string, adopted: boolean) => void;
   onAdoptAllChange: (adopted: boolean) => void;
   isSelfReference: boolean;
+  isAlreadyIncluded?: boolean;
   baseUrl: string;
   isDisabled?: boolean;
   depth?: number;
@@ -48,6 +49,7 @@ const ReferenceEntrySection = ({
   onAdoptedFieldChange,
   onAdoptAllChange,
   isSelfReference,
+  isAlreadyIncluded = false,
   baseUrl,
   isDisabled = false,
   depth = 1,
@@ -72,6 +74,27 @@ const ReferenceEntrySection = ({
     return entry.fields[fieldId]?.[locale];
   };
 
+  if (isAlreadyIncluded) {
+    return (
+      <Box className={`${styles.accordionContainer} ${depthIndent(depth)}`}>
+        <Accordion>
+          <Accordion.Item
+            title={
+              <Flex className={styles.accordionHeader}>
+                <Text fontSize="fontSizeM" fontWeight="fontWeightDemiBold" fontColor="gray900">
+                  {fieldName}: {entryTitle}
+                </Text>
+              </Flex>
+            }>
+            <Note variant="neutral" className={styles.noteNeutral}>
+              This entry is already included above and will be updated once.
+            </Note>
+          </Accordion.Item>
+        </Accordion>
+      </Box>
+    );
+  }
+
   if (isSelfReference) {
     return (
       <Box marginTop="spacingM" className={`${styles.accordionContainer} ${depthIndent(depth)}`}>
@@ -79,7 +102,7 @@ const ReferenceEntrySection = ({
           <Accordion.Item
             title={
               <Flex className={styles.accordionHeader}>
-                <Text fontSize="fontSizeL" fontWeight="fontWeightDemiBold" fontColor="gray900">
+                <Text fontSize="fontSizeM" fontWeight="fontWeightDemiBold" fontColor="gray900">
                   {fieldName}: {entryTitle}
                 </Text>
               </Flex>
@@ -101,7 +124,7 @@ const ReferenceEntrySection = ({
           <Accordion.Item
             title={
               <Flex className={styles.accordionHeader}>
-                <Text fontSize="fontSizeL" fontWeight="fontWeightDemiBold" fontColor="gray900">
+                <Text fontSize="fontSizeM" fontWeight="fontWeightDemiBold" fontColor="gray900">
                   {fieldName}: {entryTitle}
                 </Text>
               </Flex>
