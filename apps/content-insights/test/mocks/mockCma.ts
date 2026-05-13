@@ -14,7 +14,6 @@ const mockCma: any = {
   },
   entry: {
     getMany: vi.fn(),
-    getManyWithCursor: vi.fn(),
   },
   appInstallation: {
     getForOrganization: vi.fn().mockResolvedValue({
@@ -57,11 +56,5 @@ export const getManyEntries = (entries: EntryProps[], total?: number) => {
     sys: { type: 'Array' },
   };
 };
-
-export const cursorPage = (entries: EntryProps[], next?: string) => ({
-  items: entries,
-  sys: { type: 'Array' },
-  ...(next ? { pages: { next } } : {}),
-});
 
 export { mockCma };
