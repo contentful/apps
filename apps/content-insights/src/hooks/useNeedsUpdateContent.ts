@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useUsers } from './useUsers';
+import { useEntryTitlesForIds } from './useEntryTitlesForIds';
 import type { AppInstallationParameters } from '../locations/ConfigScreen';
 import { ITEMS_PER_PAGE } from '../utils/consts';
 import { getEntryTitle, getUniqueUserIdsFromEntries } from '../utils/EntryUtils';
@@ -64,36 +65,52 @@ export function useNeedsUpdate(
     error: usersError,
   } = useUsers(userIds);
 
-  const needsUpdateItems = useMemo(() => {
-    return filteredEntries
-      .map((entry) => {
-        return {
-          id: entry.sys.id,
-          title: getEntryTitle(
-            entry,
-            contentTypes.get(entry.sys.contentType?.sys?.id || ''),
-            defaultLocale
-          ),
-          age: calculateAgeInDays(parseDate(entry.sys.updatedAt) || new Date()),
-          publishedDate: entry.sys.publishedAt ?? null,
-          creator: getCreatorFromEntry(entry, usersMap),
-          contentType: contentTypes.get(entry.sys.contentType?.sys?.id || '')?.name || '',
-        };
-      })
-      .sort((a, b) => {
-        return b.age - a.age;
-      });
-  }, [filteredEntries, contentTypes, usersMap, defaultLocale]);
+  // Sort by age (sys-level) before paginating so the visible-id list is
+  // stable and we only fetch titles for the rows actually shown.
+  const sortedEntries = useMemo(() => {
+    return [...filteredEntries].sort((a, b) => {
+      const aUpdated = parseDate(a.sys.updatedAt)?.getTime() ?? 0;
+      const bUpdated = parseDate(b.sys.updatedAt)?.getTime() ?? 0;
+      return aUpdated - bUpdated;
+    });
+  }, [filteredEntries]);
 
   const skip = page * ITEMS_PER_PAGE;
+  const visibleEntries = useMemo(
+    () => sortedEntries.slice(skip, skip + ITEMS_PER_PAGE),
+    [sortedEntries, skip]
+  );
+  const visibleIds = useMemo(() => visibleEntries.map((e) => e.sys.id), [visibleEntries]);
+
+  const {
+    titlesMap,
+    isFetching: isFetchingTitles,
+    refetch: refetchTitles,
+    error: titlesError,
+  } = useEntryTitlesForIds(visibleIds);
+
+  const needsUpdateItems = useMemo(() => {
+    return visibleEntries.map((entry) => {
+      const contentType = contentTypes.get(entry.sys.contentType?.sys?.id || '');
+      return {
+        id: entry.sys.id,
+        title: getEntryTitle(titlesMap.get(entry.sys.id) ?? entry, contentType, defaultLocale),
+        age: calculateAgeInDays(parseDate(entry.sys.updatedAt) || new Date()),
+        publishedDate: entry.sys.publishedAt ?? null,
+        creator: getCreatorFromEntry(entry, usersMap),
+        contentType: contentType?.name || '',
+      };
+    });
+  }, [visibleEntries, contentTypes, usersMap, defaultLocale, titlesMap]);
 
   return {
-    items: needsUpdateItems.slice(skip, skip + ITEMS_PER_PAGE),
-    total: needsUpdateItems.length,
-    isFetching: isFetchingUsers,
-    error: usersError ?? null,
+    items: needsUpdateItems,
+    total: sortedEntries.length,
+    isFetching: isFetchingUsers || isFetchingTitles,
+    error: usersError ?? titlesError ?? null,
     refetch: () => {
       refetchUsers();
+      refetchTitles();
     },
   };
 }
