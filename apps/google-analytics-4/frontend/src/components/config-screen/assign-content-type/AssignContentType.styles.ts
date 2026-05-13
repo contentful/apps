@@ -63,6 +63,11 @@ export const styles = {
     padding: '12px',
     width: '100%',
   }),
+  hiddenColumnSpacer: css({
+    minHeight: '40px',
+    visibility: 'hidden',
+    width: '100%',
+  }),
   rowSpacing: css({
     marginBottom: '16px',
     width: '100%',

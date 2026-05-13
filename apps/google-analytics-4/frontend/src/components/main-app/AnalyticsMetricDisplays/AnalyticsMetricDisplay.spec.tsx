@@ -37,4 +37,24 @@ describe('Analytics metric display components for the analytics app', () => {
     expect(slug).toBeVisible();
     expect(chart).toBeVisible();
   });
+
+  it('uses the selected metric label when report data has not loaded a metric name', () => {
+    render(
+      <AnalyticsMetricDisplay
+        handleDateRangeChange={() => {}}
+        handleMetricChange={() => {}}
+        handleCustomRangeRequest={() => {}}
+        pageViews={0}
+        metricName=""
+        runReportResponse={runReportResponseHasViews}
+        reportSlug="/en-US"
+        propertyId=""
+        startEndDates={{ start: '2023-03-26', end: '2023-03-27' }}
+        selectedMetric="activeUsers"
+      />
+    );
+
+    expect(getByText('Unique Views')).toBeVisible();
+    expect(screen.queryByText('Undetermined metric')).toBeNull();
+  });
 });

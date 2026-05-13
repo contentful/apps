@@ -37,6 +37,7 @@ export default function GoogleAnalyticsConfigPage() {
   const [hasServiceCheckErrors, setHasServiceCheckErrors] = useState<boolean>(true);
   const [validKeyFile, setValidKeyFile] = useState<ServiceAccountKey | undefined>();
   const [isSavingConfiguration, setIsSavingConfiguration] = useState<boolean>(false);
+  const [showContentTypeValidation, setShowContentTypeValidation] = useState<boolean>(false);
   const [isApiAccessLoading, setIsApiAccessLoading] = useState(true);
 
   const sdk = useSDK<AppExtensionSDK>();
@@ -106,6 +107,7 @@ export default function GoogleAnalyticsConfigPage() {
 
   const handleConfigure = useCallback(async () => {
     setIsSavingConfiguration(true);
+    setShowContentTypeValidation(true);
 
     // if no serviceAccountKeyId (most likely when user is saving on first install without providing a key)
     if (isEmpty(parameters.serviceAccountKeyId)) {
@@ -293,6 +295,7 @@ export default function GoogleAnalyticsConfigPage() {
                 originalParameters.contentTypeRules,
                 originalParameters.contentTypes
               )}
+              showPatternValidation={showContentTypeValidation}
             />
           </>
         )}

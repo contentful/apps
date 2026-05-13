@@ -7,6 +7,11 @@ interface FieldItem {
   type: string;
 }
 
+interface CompatibleField {
+  type: string;
+  items?: FieldItem;
+}
+
 export const generateEditorInterfaceAssignments = (
   currentEditorInterface: Partial<EditorInterface>,
   contentTypeIds: string[],
@@ -41,10 +46,14 @@ export const generateEditorInterfaceAssignments = (
   return { ...newAssignments, ...assignmentsToAdd };
 };
 
-// only include short text and short text list fields in the slug field dropdown
-const isCompatibleFieldType = (field: ContentTypeField): boolean => {
+export const isSlugFieldType = (field: CompatibleField): boolean => {
   const isArray = field.type === 'Array';
-  return field.type === 'Symbol' || (isArray && (field.items as FieldItem).type === 'Symbol');
+  return field.type === 'Symbol' || (isArray && field.items?.type === 'Symbol');
+};
+
+// only include fields that can be represented in URL path or query segments
+export const isUrlPatternFieldType = (field: CompatibleField): boolean => {
+  return isSlugFieldType(field) || field.type === 'Integer';
 };
 
 export const sortAndFormatAllContentTypes = (
@@ -53,7 +62,7 @@ export const sortAndFormatAllContentTypes = (
   const sortedContentTypes = sortBy(contentTypeItems, ['name']);
 
   const formattedContentTypes = sortedContentTypes.reduce((acc: AllContentTypes, contentType) => {
-    const fields = sortBy(contentType.fields.filter(isCompatibleFieldType), ['name']);
+    const fields = sortBy(contentType.fields.filter(isUrlPatternFieldType), ['name']);
 
     if (fields.length) {
       acc[contentType.sys.id] = {
