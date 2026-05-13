@@ -1,10 +1,14 @@
 import { ConfigAppSDK, AppState } from '@contentful/app-sdk';
-import { Flex, Heading, Paragraph, FormControl, Select } from '@contentful/f36-components';
+import { Flex, Heading, Paragraph, FormControl, TextInput } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
 import { ContentTypeProps } from 'contentful-management';
 import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
-import { MAX_REFERENCE_DEPTH } from '../utils/entry';
+import {
+  MAX_REFERENCE_DEPTH,
+  MAX_REFERENCE_DEPTH_OPTION,
+  MIN_REFERENCE_DEPTH_OPTION,
+} from '../utils/entry';
 import { styles } from './ConfigScreen.styles';
 
 export interface AppInstallationParameters {
@@ -150,21 +154,26 @@ const ConfigScreen = () => {
           </Paragraph>
           <FormControl id="maxReferenceDepth">
             <FormControl.Label>Maximum reference depth</FormControl.Label>
-            <Select
+            <TextInput
               id="maxReferenceDepth"
               name="maxReferenceDepth"
+              type="number"
+              min={MIN_REFERENCE_DEPTH_OPTION}
+              max={MAX_REFERENCE_DEPTH_OPTION}
+              step={1}
               value={String(parameters.maxReferenceDepth ?? MAX_REFERENCE_DEPTH)}
-              onChange={(e) =>
-                setParameters({ ...parameters, maxReferenceDepth: Number(e.target.value) })
-              }>
-              <Select.Option value="0">None (main entry only)</Select.Option>
-              <Select.Option value="1">1 (direct references)</Select.Option>
-              <Select.Option value="2">2</Select.Option>
-              <Select.Option value="3">3 (default)</Select.Option>
-              <Select.Option value="5">5</Select.Option>
-            </Select>
+              onChange={(e) => {
+                const parsed = Number(e.target.value);
+                if (!Number.isFinite(parsed)) return;
+                const clamped = Math.min(
+                  MAX_REFERENCE_DEPTH_OPTION,
+                  Math.max(MIN_REFERENCE_DEPTH_OPTION, Math.trunc(parsed))
+                );
+                setParameters({ ...parameters, maxReferenceDepth: clamped });
+              }}
+            />
             <FormControl.HelpText>
-              Higher depths may increase loading time for entries with many references.
+              {`Choose a value between ${MIN_REFERENCE_DEPTH_OPTION} and ${MAX_REFERENCE_DEPTH_OPTION}. Default is ${MAX_REFERENCE_DEPTH}. Higher depths may increase loading time for entries with many references.`}
             </FormControl.HelpText>
           </FormControl>
         </Flex>
