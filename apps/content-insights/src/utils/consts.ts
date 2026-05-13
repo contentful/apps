@@ -29,8 +29,4 @@ export const FETCH_CONFIG = {
   DEFAULT_BATCH_SIZE: 1000,
   // Minimum batch size when reducing due to response size limits
   MIN_BATCH_SIZE: 15,
-  // Max parallel cursor streams; CMA rate limit is ~7 req/s, leave headroom.
-  CONCURRENCY: 5,
-  // sys.id[in] CSV size; CMA accepts up to 50.
-  TITLE_BATCH_SIZE: 50,
 } as const;

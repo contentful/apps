@@ -11,7 +11,7 @@
     "@tanstack/react-query": "^5.90.12",
     "@tanstack/react-query-devtools": "^5.91.1",
     "@testing-library/user-event": "^14.6.1",
-    "contentful-management": "11.76.0",
+    "contentful-management": "11.63.1",
     "dayjs": "^1.11.19",
     "emotion": "10.0.27",
     "happy-dom": "^20.0.11",
