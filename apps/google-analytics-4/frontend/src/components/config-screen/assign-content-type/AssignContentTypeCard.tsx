@@ -20,6 +20,10 @@ interface AssignContentTypeCardProps {
   currentEditorInterface: Partial<EditorInterface>;
   originalContentTypeRules: ContentTypeRules;
   rulesMissingPattern: Set<string>;
+  rulesWithUnknownPatternTokens: Map<string, string[]>;
+  rulesWithMissingSelectedPatternTokens: Map<string, string[]>;
+  duplicateRuleIds: Set<string>;
+  showPatternValidation: boolean;
 }
 
 interface HeaderLabelProps {
@@ -65,6 +69,10 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
     currentEditorInterface,
     originalContentTypeRules,
     rulesMissingPattern,
+    rulesWithUnknownPatternTokens,
+    rulesWithMissingSelectedPatternTokens,
+    duplicateRuleIds,
+    showPatternValidation,
   } = props;
 
   return (
@@ -76,7 +84,7 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
         />
         <HeaderLabel
           label="Slug field"
-          helpText='The field on your content type where the page path is stored. If you select a short text list field, the elements in the array will be joined by a forward slash. Example: This field would typically have short slug text like "a-blog-post-i-wrote" that appears in the URL for the page.'
+          helpText='For standard paths, choose the short text field where the entry stores its page path. Use advanced matching to build a custom page path.'
         />
         <HeaderLabel
           label="URL prefix"
@@ -85,7 +93,7 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
         <HeaderLabel
           label="Advanced"
           className={styles.toggleItem}
-          helpText="Use advanced matching when the URL needs more than a fixed prefix plus the selected slug field, like query strings or custom path patterns."
+          helpText="Enable advanced matching to build a custom path pattern from entry fields, locale, and/or wildcards."
         />
         <Box className={styles.removeItem}></Box>
       </Flex>
@@ -104,7 +112,22 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
             onRemoveContentType={onRemoveContentType}
             currentEditorInterface={currentEditorInterface}
             originalContentTypeRules={originalContentTypeRules}
-            isMissingPattern={rulesMissingPattern.has(contentTypeRule.id)}
+            isMissingPattern={
+              showPatternValidation && rulesMissingPattern.has(contentTypeRule.id)
+            }
+            unknownPatternTokens={
+              showPatternValidation
+                ? (rulesWithUnknownPatternTokens.get(contentTypeRule.id) ?? [])
+                : []
+            }
+            missingSelectedPatternTokens={
+              showPatternValidation
+                ? (rulesWithMissingSelectedPatternTokens.get(contentTypeRule.id) ?? [])
+                : []
+            }
+            isDuplicateConfiguration={
+              showPatternValidation && duplicateRuleIds.has(contentTypeRule.id)
+            }
             focus={index + 1 === contentTypeRules.length}
           />
         );

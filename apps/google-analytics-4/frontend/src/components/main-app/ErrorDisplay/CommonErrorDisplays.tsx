@@ -15,9 +15,13 @@ export const AppConfigPageHyperLink = (props: AppConfigPageHyperLinkProps) => {
   return <HyperLink body={bodyMsg} substring="app configuration page." onClick={openConfigPage} />;
 };
 
-export const SupportHyperLink = () => (
+interface SupportHyperLinkProps {
+  bodyMsg?: string;
+}
+
+export const SupportHyperLink = ({ bodyMsg = DEFAULT_ERR_MSG }: SupportHyperLinkProps) => (
   <HyperLink
-    body={DEFAULT_ERR_MSG}
+    body={bodyMsg}
     substring="contact support."
     hyperLinkHref="https://www.contentful.com/support/?utm_source=webapp&utm_medium=help-menu&utm_campaign=in-app-help"
   />

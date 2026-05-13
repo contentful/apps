@@ -1,7 +1,13 @@
 import ChartFooter from 'components/main-app/ChartFooter/ChartFooter';
 import ChartHeader from 'components/main-app/ChartHeader/ChartHeader';
 import ChartContent from '../ChartContent/ChartContent';
-import { AnalyticsMetricType, RunReportResponse, StartEndDates, DateRangeType } from 'types';
+import {
+  AnalyticsMetricType,
+  RunReportResponse,
+  StartEndDates,
+  DateRangeType,
+  LocaleOption,
+} from 'types';
 import { getExternalUrl } from 'helpers/externalUrlHelpers/externalUrlHelpers';
 
 interface Props {
@@ -20,6 +26,9 @@ interface Props {
   selectedDateRange?: DateRangeType;
   selectedMetric?: AnalyticsMetricType;
   isLoading?: boolean;
+  localeOptions?: LocaleOption[];
+  selectedLocale?: string;
+  handleLocaleChange?: (locale: string) => void;
 }
 
 const AnalyticsMetricDisplay = (props: Props) => {
@@ -39,6 +48,9 @@ const AnalyticsMetricDisplay = (props: Props) => {
     selectedDateRange,
     selectedMetric,
     isLoading = false,
+    localeOptions = [],
+    selectedLocale,
+    handleLocaleChange,
   } = props;
   const safePageViews = Number.isFinite(pageViews) ? pageViews : 0;
 
@@ -50,7 +62,7 @@ const AnalyticsMetricDisplay = (props: Props) => {
   return (
     <>
       <ChartHeader
-        metricName={metricName ? metricName : ''}
+        metricName={metricName || selectedMetric || 'screenPageViews'}
         metricValue={Intl.NumberFormat('en', { notation: 'compact' }).format(safePageViews)}
         handleChange={handleDateRangeChange}
         handleMetricChange={handleMetricChange}
@@ -58,6 +70,9 @@ const AnalyticsMetricDisplay = (props: Props) => {
         startEndDates={startEndDates}
         selectedDateRange={selectedDateRange}
         selectedMetric={selectedMetric}
+        localeOptions={localeOptions}
+        selectedLocale={selectedLocale}
+        handleLocaleChange={handleLocaleChange}
       />
 
       <ChartContent error={error} pageViewData={runReportResponse} isLoading={isLoading} />

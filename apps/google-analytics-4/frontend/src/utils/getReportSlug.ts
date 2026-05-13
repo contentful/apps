@@ -5,7 +5,7 @@ import { pathJoin } from 'utils/pathJoin';
 const SLUG_TOKEN = '{slug}';
 const TOKEN_REGEX = /\{([^}]+)\}/g;
 
-type FieldValueMap = Record<string, string | object | undefined>;
+type FieldValueMap = Record<string, string | number | object | undefined>;
 
 const getPatternValue = (token: string, fieldValues: FieldValueMap) => {
   const normalizedFieldValue = token === 'slug' ? fieldValues.slug : fieldValues[token];
@@ -15,6 +15,10 @@ const getPatternValue = (token: string, fieldValues: FieldValueMap) => {
 
 const normalizePattern = (pathPattern: string, fieldValues: FieldValueMap) => {
   return pathPattern.replace(TOKEN_REGEX, (_match, token) => getPatternValue(token, fieldValues));
+};
+
+const ensureLeadingSlash = (path: string) => {
+  return path.startsWith('/') ? path : `/${path}`;
 };
 
 const applyTrailingSlash = (path: string, forceTrailingSlash: boolean) => {
@@ -28,16 +32,16 @@ const applyTrailingSlash = (path: string, forceTrailingSlash: boolean) => {
 export const buildDefaultPathPattern = (
   urlPrefix = '',
   additionalFieldIds: string[] = [],
-  matchDimension: ContentTypeValue['matchDimension'] = 'unifiedPagePathScreen'
+  matchDimension: ContentTypeValue['matchDimension'] = 'unifiedPagePathScreen',
+  primaryToken = SLUG_TOKEN
 ) => {
+  const pathTokens = primaryToken
+    ? [...additionalFieldIds.map((fieldId) => `{${fieldId}}`), primaryToken]
+    : additionalFieldIds.map((fieldId) => `{${fieldId}}`);
   const basePath =
     matchDimension === 'pagePathPlusQueryString'
-      ? `/${pathJoin(urlPrefix, SLUG_TOKEN)}`
-      : `/${pathJoin(
-          urlPrefix,
-          ...additionalFieldIds.map((fieldId) => `{${fieldId}}`),
-          SLUG_TOKEN
-        )}`;
+      ? `/${pathJoin(urlPrefix, primaryToken)}`
+      : `/${pathJoin(urlPrefix, ...pathTokens)}`;
 
   if (matchDimension !== 'pagePathPlusQueryString' || additionalFieldIds.length === 0) {
     return basePath;
@@ -50,20 +54,24 @@ export const buildDefaultPathPattern = (
 
 export const getReportSlug = (
   contentTypeValue: ContentTypeValue,
-  slugFieldValue: string | object,
+  slugFieldValue: string | number | object,
   forceTrailingSlash: boolean
 ) => {
   const { pathPattern, urlPrefix } = contentTypeValue;
+  const hasAdvancedPattern =
+    hasAdvancedMatchingConfigured(contentTypeValue) && Boolean(pathPattern?.trim());
   const fieldValues =
     typeof slugFieldValue === 'object' && !Array.isArray(slugFieldValue)
       ? ({ slug: '', ...slugFieldValue } as FieldValueMap)
       : ({ slug: slugFieldValue } as FieldValueMap);
-  const basePath =
-    hasAdvancedMatchingConfigured(contentTypeValue) && pathPattern?.trim()
-      ? normalizePattern(pathPattern, fieldValues)
-      : pathJoin(urlPrefix || '', fieldValues.slug || '');
 
-  return `/${applyTrailingSlash(pathJoin(basePath), forceTrailingSlash)}`;
+  if (hasAdvancedPattern) {
+    return ensureLeadingSlash(normalizePattern(pathPattern!, fieldValues).trim());
+  }
+
+  const basePath = pathJoin(urlPrefix || '', fieldValues.slug || '');
+
+  return `/${applyTrailingSlash(basePath, forceTrailingSlash)}`;
 };
 
 export const pathPatternPreview = (pathPattern: string, additionalFieldIds: string[] = []) => {

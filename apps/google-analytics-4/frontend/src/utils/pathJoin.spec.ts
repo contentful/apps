@@ -21,6 +21,11 @@ describe('pathJoin', () => {
     expect(result).toEqual('a/b/c');
   });
 
+  it('handles numbers as inputs', () => {
+    const result = pathJoin('/article/', 360054483454);
+    expect(result).toEqual('article/360054483454');
+  });
+
   it('handles arrays as inputs', () => {
     const result = pathJoin(['a', 'b'], ['c', 'd']);
     expect(result).toEqual('a/b/c/d');

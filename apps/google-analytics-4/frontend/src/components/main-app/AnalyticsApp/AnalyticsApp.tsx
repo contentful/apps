@@ -14,6 +14,7 @@ import { Skeleton } from '@contentful/f36-components';
 import { isEmpty } from 'lodash';
 import { RunReportData } from 'apis/apiTypes';
 import { useSidebarRules } from 'hooks/useSidebarRules/useSidebarRules';
+import { convertWildcardPatternToRegex } from 'utils/contentTypeMatching';
 import SlugWarningDisplay from 'components/main-app/SlugWarningDisplay/SlugWarningDisplay';
 import AnalyticsMetricDisplay from 'components/main-app/AnalyticsMetricDisplays/AnalyticsMetricDisplay';
 
@@ -69,6 +70,9 @@ const AnalyticsApp = (props: Props) => {
     warningRule,
     haveLoadedFieldValues,
     haveLoadedPublicationState,
+    localeOptions,
+    selectedLocale,
+    handleLocaleChange,
   } = useSidebarRules(slugFieldRules);
 
   useAutoResizer();
@@ -90,7 +94,10 @@ const AnalyticsApp = (props: Props) => {
               propertyId,
               dimensions: ['date'],
               metrics: [selectedMetric],
-              slug: rule.reportSlug,
+              slug:
+                rule.enableAdvancedMatching && rule.matchType === 'PARTIAL_REGEXP'
+                  ? convertWildcardPatternToRegex(rule.reportSlug)
+                  : rule.reportSlug,
               matchDimension: rule.enableAdvancedMatching ? rule.matchDimension : undefined,
               matchType: rule.enableAdvancedMatching ? rule.matchType : undefined,
             })
@@ -185,6 +192,9 @@ const AnalyticsApp = (props: Props) => {
         selectedDateRange={dateRange}
         selectedMetric={selectedMetric}
         isLoading={loading && !pendingData}
+        localeOptions={localeOptions}
+        selectedLocale={selectedLocale}
+        handleLocaleChange={handleLocaleChange}
       />
     );
   };

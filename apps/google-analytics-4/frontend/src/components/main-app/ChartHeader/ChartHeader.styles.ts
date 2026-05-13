@@ -18,7 +18,6 @@ export const styles = {
     flexDirection: 'column',
     alignItems: 'flex-end',
     width: '168px',
-    minHeight: '52px',
   }),
   customRangeRowVisible: css({
     visibility: 'visible',
@@ -26,10 +25,6 @@ export const styles = {
   customRangeRowHidden: css({
     visibility: 'hidden',
     pointerEvents: 'none',
-  }),
-  customRangeSummary: css({
-    fontSize: tokens.fontSizeS,
-    textAlign: 'right',
   }),
   customRangeButton: css({
     width: '168px',

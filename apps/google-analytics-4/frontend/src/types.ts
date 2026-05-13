@@ -104,6 +104,11 @@ export type DateRangeType =
 
 export type AnalyticsMetricType = 'screenPageViews' | 'activeUsers';
 
+export interface LocaleOption {
+  code: string;
+  label: string;
+}
+
 export interface StartEndDates {
   start: string;
   end: string;
