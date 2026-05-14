@@ -84,7 +84,7 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
         />
         <HeaderLabel
           label="Slug field"
-          helpText='For standard paths, choose the short text field where the entry stores its page path. Use advanced matching to build a custom page path.'
+          helpText="For standard paths, choose the short text field where the entry stores its page path. Use advanced matching to build a custom page path."
         />
         <HeaderLabel
           label="URL prefix"
@@ -112,17 +112,15 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
             onRemoveContentType={onRemoveContentType}
             currentEditorInterface={currentEditorInterface}
             originalContentTypeRules={originalContentTypeRules}
-            isMissingPattern={
-              showPatternValidation && rulesMissingPattern.has(contentTypeRule.id)
-            }
+            isMissingPattern={showPatternValidation && rulesMissingPattern.has(contentTypeRule.id)}
             unknownPatternTokens={
               showPatternValidation
-                ? (rulesWithUnknownPatternTokens.get(contentTypeRule.id) ?? [])
+                ? rulesWithUnknownPatternTokens.get(contentTypeRule.id) ?? []
                 : []
             }
             missingSelectedPatternTokens={
               showPatternValidation
-                ? (rulesWithMissingSelectedPatternTokens.get(contentTypeRule.id) ?? [])
+                ? rulesWithMissingSelectedPatternTokens.get(contentTypeRule.id) ?? []
                 : []
             }
             isDuplicateConfiguration={

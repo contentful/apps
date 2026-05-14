@@ -103,20 +103,26 @@ const AssignContentTypeSection = (props: Props) => {
   const rulesWithUnknownPatternTokens = new Map(
     contentTypeRules
       .filter((rule) => rule.enableAdvancedMatching)
-      .map((rule) => [
-        rule.id,
-        getUnknownPatternTokens(rule.pathPattern, rule.additionalFieldIds, rule.slugField),
-      ] as const)
+      .map(
+        (rule) =>
+          [
+            rule.id,
+            getUnknownPatternTokens(rule.pathPattern, rule.additionalFieldIds, rule.slugField),
+          ] as const
+      )
       .filter(([, unknownTokens]) => unknownTokens.length > 0)
   );
 
   const rulesWithMissingSelectedPatternTokens = new Map(
     contentTypeRules
       .filter((rule) => rule.enableAdvancedMatching)
-      .map((rule) => [
-        rule.id,
-        getMissingSelectedPatternTokens(rule.pathPattern, rule.additionalFieldIds),
-      ] as const)
+      .map(
+        (rule) =>
+          [
+            rule.id,
+            getMissingSelectedPatternTokens(rule.pathPattern, rule.additionalFieldIds),
+          ] as const
+      )
       .filter(([, missingTokens]) => missingTokens.length > 0)
   );
 
@@ -260,7 +266,8 @@ const AssignContentTypeSection = (props: Props) => {
           Append a trailing slash to all page paths
         </Checkbox>
         <Paragraph marginTop="spacing2Xs" marginBottom="none">
-          Trailing slash applies to standard configurations only. Advanced patterns are used exactly as written.
+          Trailing slash applies to standard configurations only. Advanced patterns are used exactly
+          as written.
         </Paragraph>
       </Box>
       {!loadingContentTypes && !loadingAllContentTypes ? (

@@ -237,8 +237,7 @@ const AssignContentTypeRow = (props: Props) => {
 
   const hasInvalidPattern =
     isMissingPattern || unknownPatternTokens.length > 0 || missingSelectedPatternTokens.length > 0;
-  const availableVariableHint =
-    'Use the variables shown on the left.';
+  const availableVariableHint = 'Use the variables shown on the left.';
   const unknownPatternMessage =
     unknownPatternTokens.length === 1
       ? `Pattern contains an unknown variable: {${unknownPatternTokens[0]}}. ${availableVariableHint}`

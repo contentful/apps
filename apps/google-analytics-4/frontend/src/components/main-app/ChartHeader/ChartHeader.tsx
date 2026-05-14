@@ -1,12 +1,5 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Button,
-  DisplayText,
-  Flex,
-  Paragraph,
-  Select,
-} from '@contentful/f36-components';
+import { Box, Button, DisplayText, Flex, Paragraph, Select } from '@contentful/f36-components';
 import { AnalyticsMetricType, DateRangeType, LocaleOption, StartEndDates } from 'types';
 import { DATE_RANGE_SELECT_OPTIONS, DateRange } from 'helpers/DateRangeHelpers/DateRangeHelpers';
 import { styles } from './ChartHeader.styles';

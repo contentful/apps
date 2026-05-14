@@ -195,9 +195,7 @@ export const useSidebarRules = (slugFieldRules: ContentTypeRule[]) => {
   const resolvedRules = useMemo<ResolvedSidebarRule[]>(
     () =>
       slugFieldRules.map((rule) => {
-        const patternTokens = rule.enableAdvancedMatching
-          ? getPatternTokens(rule.pathPattern)
-          : [];
+        const patternTokens = rule.enableAdvancedMatching ? getPatternTokens(rule.pathPattern) : [];
         const requiresSlugField =
           !rule.enableAdvancedMatching || patternTokens.includes(SLUG_PATTERN_TOKEN);
         const slugFieldValue = requiresSlugField ? debouncedFieldValues[rule.slugField] ?? '' : '';

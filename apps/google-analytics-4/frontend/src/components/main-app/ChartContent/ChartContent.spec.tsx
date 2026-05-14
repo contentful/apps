@@ -27,7 +27,9 @@ describe('ChartContent component', () => {
       <ChartContent pageViewData={runReportResponseHasViews} error={new Error('api error')} />
     );
 
-    const noteText = getByText(ANALYTICS_DATA_LOAD_ERROR_MSG.replace('contact support.', '').trim());
+    const noteText = getByText(
+      ANALYTICS_DATA_LOAD_ERROR_MSG.replace('contact support.', '').trim()
+    );
 
     expect(noteText).toBeVisible();
     expect(screen.queryByText('api error')).toBeNull();
