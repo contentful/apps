@@ -13,6 +13,7 @@ import WarningDisplay from 'components/config-screen/WarningDisplay/WarningDispl
 interface Props {
   contentTypeId: string;
   slugField: string;
+  requiresSlugField: boolean;
   isSaved: boolean;
   isInSidebar: boolean;
   isContentTypeInOptions: boolean;
@@ -23,6 +24,7 @@ const ContentTypeWarning = (props: Props) => {
   const {
     contentTypeId,
     slugField,
+    requiresSlugField,
     isSaved,
     isInSidebar,
     isContentTypeInOptions,
@@ -36,7 +38,7 @@ const ContentTypeWarning = (props: Props) => {
     let content = '';
 
     // Warning states
-    if (contentTypeId && !slugField) {
+    if (requiresSlugField && contentTypeId && !slugField) {
       setWarningType(WarningTypes.Warning);
       content += NO_SLUG_WARNING_MSG;
     }
@@ -46,7 +48,13 @@ const ContentTypeWarning = (props: Props) => {
       content += REMOVED_FROM_SIDEBAR_WARNING_MSG;
     }
 
-    if (contentTypeId && isContentTypeInOptions && slugField && !isSlugFieldInOptions) {
+    if (
+      requiresSlugField &&
+      contentTypeId &&
+      isContentTypeInOptions &&
+      slugField &&
+      !isSlugFieldInOptions
+    ) {
       setWarningType(WarningTypes.Warning);
       content += getSlugFieldDeletedMsg(contentTypeId, slugField);
     }
@@ -65,6 +73,7 @@ const ContentTypeWarning = (props: Props) => {
   }, [
     contentTypeId,
     slugField,
+    requiresSlugField,
     isSaved,
     isInSidebar,
     isContentTypeInOptions,

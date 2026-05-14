@@ -1,6 +1,10 @@
 import { FunctionEventContext } from '@contentful/node-apps-toolkit';
 import { PlainClientAPI } from 'contentful-management';
-import { checkAllEntryLinks, type CheckAllEntryLinksParameters, type CheckAllEntryLinksResponse } from './checkEntryLinks';
+import {
+  checkAllEntryLinks,
+  type CheckAllEntryLinksParameters,
+  type CheckAllEntryLinksResponse,
+} from './checkEntryLinks';
 
 interface CheckAllEntryLinksEvent {
   body?: CheckAllEntryLinksParameters;

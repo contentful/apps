@@ -1,40 +1,52 @@
-import { Box, Card, Flex, FormControl, Stack, Tooltip } from '@contentful/f36-components';
+import { Box, Card, Flex, FormControl, Tooltip } from '@contentful/f36-components';
 import { HelpCircleIcon } from '@contentful/f36-icons';
 import { styles } from 'components/config-screen/assign-content-type/AssignContentType.styles';
 import { EditorInterface } from '@contentful/app-sdk';
-import { AllContentTypes, AllContentTypeEntries, ContentTypes, ContentTypeEntries } from 'types';
+import { AllContentTypes, AllContentTypeEntries, ContentTypeRule, ContentTypeRules } from 'types';
 import AssignContentTypeRow from 'components/config-screen/assign-content-type/AssignContentTypeRow';
 
 interface AssignContentTypeCardProps {
   allContentTypes: AllContentTypes;
   allContentTypeEntries: AllContentTypeEntries;
-  contentTypes: ContentTypes;
-  contentTypeEntries: ContentTypeEntries;
-  onContentTypeChange: (prevKey: string, newKey: string) => void;
-  onContentTypeFieldChange: (key: string, field: string, value: string) => void;
-  onRemoveContentType: (key: string) => void;
+  contentTypeRules: ContentTypeRules;
+  onContentTypeChange: (ruleId: string, newContentTypeId: string) => void;
+  onContentTypeFieldChange: (
+    ruleId: string,
+    field: string,
+    value: string | boolean | string[]
+  ) => void;
+  onContentTypeRuleChange: (ruleId: string, updates: Partial<ContentTypeRule>) => void;
+  onRemoveContentType: (ruleId: string) => void;
   currentEditorInterface: Partial<EditorInterface>;
-  originalContentTypes: ContentTypes;
+  originalContentTypeRules: ContentTypeRules;
+  rulesMissingPattern: Set<string>;
+  rulesWithUnknownPatternTokens: Map<string, string[]>;
+  rulesWithMissingSelectedPatternTokens: Map<string, string[]>;
+  duplicateRuleIds: Set<string>;
+  showPatternValidation: boolean;
 }
 
 interface HeaderLabelProps {
   label: string;
   helpText?: string;
+  className?: string;
 }
 
 const HeaderLabel = (props: HeaderLabelProps) => {
-  const { label, helpText } = props;
+  const { label, helpText, className } = props;
+
+  const defaultClassName = label === 'URL prefix' ? styles.urlPrefixItem : styles.contentTypeItem;
 
   return (
-    <Box className={styles.contentTypeItem}>
+    <Box className={className || defaultClassName}>
       <FormControl marginBottom="none">
         <FormControl.Label>
           <Flex alignItems="center">
             {label}
             {helpText && (
               <Tooltip placement="top" content={helpText}>
-                <Flex marginLeft="spacing2Xs">
-                  <HelpCircleIcon variant="primary" />
+                <Flex marginLeft="spacing2Xs" className={styles.tooltipIcon}>
+                  <HelpCircleIcon />
                 </Flex>
               </Tooltip>
             )}
@@ -49,48 +61,72 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
   const {
     allContentTypes,
     allContentTypeEntries,
-    contentTypes,
-    contentTypeEntries,
+    contentTypeRules,
     onContentTypeChange,
     onContentTypeFieldChange,
+    onContentTypeRuleChange,
     onRemoveContentType,
     currentEditorInterface,
-    originalContentTypes,
+    originalContentTypeRules,
+    rulesMissingPattern,
+    rulesWithUnknownPatternTokens,
+    rulesWithMissingSelectedPatternTokens,
+    duplicateRuleIds,
+    showPatternValidation,
   } = props;
 
   return (
     <Card>
-      <Stack marginBottom="none" spacing="spacingXs">
-        <Box className={styles.statusItem}></Box>
+      <Flex marginBottom="spacingXs" className={styles.baseRow}>
         <HeaderLabel
           label="Content type"
           helpText='A content type connected to a page on your website. Example: "Blog Post"'
         />
         <HeaderLabel
           label="Slug field"
-          helpText='The field on your content type where the page path is stored. If you select a short text list field, the elements in the array will be joined by a forward slash. Example: This field would typically have short slug text like "a-blog-post-i-wrote" that appears in the URL for the page.'
+          helpText="For standard paths, choose the short text field where the entry stores its page path. Use advanced matching to build a custom page path."
         />
         <HeaderLabel
           label="URL prefix"
-          helpText='The URL prefix (if any) where pages of this content type appear. Example: If you were hosting a blog, a typical URL might be "www.myblog.com/blogs/a-blog-post-i-wrote". In this case, "blogs" would be the prefix that combines correctly with the selected slug field.'
+          helpText='An optional prefix that appears before the slug in the page URL. Example: "/blog/"'
+        />
+        <HeaderLabel
+          label="Advanced"
+          className={styles.toggleItem}
+          helpText="Enable advanced matching to build a custom path pattern from entry fields, locale, and/or wildcards."
         />
         <Box className={styles.removeItem}></Box>
-      </Stack>
-      {contentTypeEntries.map((contentTypeEntry, index) => {
+      </Flex>
+      {contentTypeRules.map((contentTypeRule, index) => {
         return (
           <AssignContentTypeRow
-            key={contentTypeEntry[0]}
-            contentTypeEntry={contentTypeEntry}
+            key={contentTypeRule.id}
+            contentTypeRule={contentTypeRule}
             index={index}
             allContentTypes={allContentTypes}
             allContentTypeEntries={allContentTypeEntries}
-            contentTypes={contentTypes}
+            contentTypeRules={contentTypeRules}
             onContentTypeChange={onContentTypeChange}
             onContentTypeFieldChange={onContentTypeFieldChange}
+            onContentTypeRuleChange={onContentTypeRuleChange}
             onRemoveContentType={onRemoveContentType}
             currentEditorInterface={currentEditorInterface}
-            originalContentTypes={originalContentTypes}
-            focus={index + 1 === contentTypeEntries.length}
+            originalContentTypeRules={originalContentTypeRules}
+            isMissingPattern={showPatternValidation && rulesMissingPattern.has(contentTypeRule.id)}
+            unknownPatternTokens={
+              showPatternValidation
+                ? rulesWithUnknownPatternTokens.get(contentTypeRule.id) ?? []
+                : []
+            }
+            missingSelectedPatternTokens={
+              showPatternValidation
+                ? rulesWithMissingSelectedPatternTokens.get(contentTypeRule.id) ?? []
+                : []
+            }
+            isDuplicateConfiguration={
+              showPatternValidation && duplicateRuleIds.has(contentTypeRule.id)
+            }
+            focus={index + 1 === contentTypeRules.length}
           />
         );
       })}

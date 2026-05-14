@@ -276,10 +276,8 @@ async function checkExtractedUrls(
       }
 
       try {
-        resolvedUrl = new URL(
-          item.url,
-          baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`
-        ).href;
+        resolvedUrl = new URL(item.url, baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`)
+          .href;
       } catch {
         skippedCount += 1;
         continue;

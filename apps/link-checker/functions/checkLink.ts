@@ -57,9 +57,7 @@ export async function checkUrl(url: string): Promise<CheckLinkResult> {
   }
 }
 
-export const handler = async (
-  event: CheckLinkEvent
-): Promise<CheckLinkResult> => {
+export const handler = async (event: CheckLinkEvent): Promise<CheckLinkResult> => {
   const url = event?.body?.url;
   if (typeof url !== 'string' || !url.trim()) {
     return { error: 'Missing or invalid url parameter' };

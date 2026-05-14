@@ -2,7 +2,8 @@ import { IdsAPI } from '@contentful/app-sdk';
 
 export interface AppInstallationParameters {
   serviceAccountKeyId: ServiceAccountKeyId;
-  contentTypes: ContentTypes;
+  contentTypes?: ContentTypes;
+  contentTypeRules?: ContentTypeRule[];
   propertyId: string;
   forceTrailingSlash: boolean;
 }
@@ -78,21 +79,48 @@ export interface RunReportResponse {
   propertyQuota: null;
   kind: string;
 }
+
+export type GAMatchDimension = 'unifiedPagePathScreen' | 'pagePathPlusQueryString';
+export type GAStringMatchType = 'EXACT' | 'PARTIAL_REGEXP';
+
 export interface RunReportParamsType {
   propertyId: string;
   slug: string;
+  matchDimension?: GAMatchDimension;
+  matchType?: GAStringMatchType;
   startDate: string;
   endDate: string;
   dimensions: string | string[];
   metrics: string | string[];
 }
 
-export type DateRangeType = 'lastWeek' | 'lastDay' | 'lastMonth';
+export type DateRangeType =
+  | 'lastDay'
+  | 'lastWeek'
+  | 'lastMonth'
+  | 'lastQuarter'
+  | 'lastYear'
+  | 'custom';
+
+export type AnalyticsMetricType = 'screenPageViews' | 'activeUsers';
+
+export interface LocaleOption {
+  code: string;
+  label: string;
+}
 
 export interface StartEndDates {
   start: string;
   end: string;
 }
+
+export interface CustomRangeDialogInvocationParams {
+  mode: 'customDateRange';
+  startDate: string;
+  endDate: string;
+}
+
+export interface CustomRangeDialogResult extends StartEndDates {}
 export interface AccountSummariesType {
   displayName: string;
   name: string;
@@ -110,6 +138,16 @@ export interface PropertySummariesType {
 export interface ContentTypeValue {
   slugField: string;
   urlPrefix: string;
+  additionalFieldIds?: string[];
+  enableAdvancedMatching?: boolean;
+  pathPattern?: string;
+  matchDimension?: GAMatchDimension;
+  matchType?: GAStringMatchType;
+}
+
+export interface ContentTypeRule extends ContentTypeValue {
+  id: string;
+  contentTypeId: string;
 }
 
 export interface ContentTypes {
@@ -117,6 +155,7 @@ export interface ContentTypes {
 }
 
 export type ContentTypeEntries = [string, ContentTypeValue][];
+export type ContentTypeRules = ContentTypeRule[];
 
 interface AllContentTypeValue {
   name: string;
