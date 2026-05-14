@@ -52,12 +52,13 @@ export const MainPageView = ({
             gap="spacingS"
             style={{ width: '100%' }}>
             <Heading marginBottom="spacingS">Select your file</Heading>
-            <Grid columns="3fr 2fr" style={{ width: '100%' }}>
+            <Grid columns="4fr 1fr" style={{ width: '100%' }}>
               <Grid.Item>
                 <Paragraph>
                   Create entries using existing content types from a Google Drive file.
                   <br />
-                  Get started by selecting the file you would like to use.
+                  Get started by selecting the .doc file you would like to use. Only Google Doc
+                  files are supported. Sheets, Slides, and PDFs will not appear in the file picker.
                 </Paragraph>
               </Grid.Item>
               <Grid.Item justifySelf="end">
