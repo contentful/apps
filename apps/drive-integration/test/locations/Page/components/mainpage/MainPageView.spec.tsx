@@ -40,7 +40,7 @@ describe('MainPageView', () => {
     renderWithLayout(<MainPageView {...defaultProps} isOAuthConnected={false} oauthToken="" />);
 
     expect(
-      screen.getByText(/Please connect to Google Drive before selecting your file\./i)
+      screen.getByText(/Please connect to Drive before selecting your file\./i)
     ).toBeTruthy();
   });
 
@@ -48,7 +48,7 @@ describe('MainPageView', () => {
     renderWithLayout(<MainPageView {...defaultProps} />);
 
     expect(
-      screen.queryByText(/Please connect to Google Drive before selecting your file\./i)
+      screen.queryByText(/Please connect to Drive before selecting your file\./i)
     ).toBeNull();
   });
 });
