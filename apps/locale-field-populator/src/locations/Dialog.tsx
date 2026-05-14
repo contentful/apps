@@ -8,9 +8,15 @@ import LocaleSelectionStep from '../components/steps/LocaleSelectionStep';
 import PreviewStep from '../components/steps/PreviewStep';
 import { AdoptedFieldsMap, hasAnyAdoptedFields, ReferencedEntryData } from '../utils/adoptedFields';
 import { SimplifiedLocale, mapLocaleNamesToSimplifiedLocales } from '../utils/locales';
-import { updateEntries, UpdateResult } from '../utils/entry';
+import {
+  fetchEntryAndContentType,
+  fetchReferencesForLocale,
+  MAX_REFERENCE_DEPTH,
+  updateEntries,
+  UpdateResult,
+} from '../utils/entry';
+import { AppInstallationParameters } from './ConfigScreen';
 import { styles } from './Dialog.styles';
-import { fetchEntries } from '../utils/entry';
 
 type DialogStep = 'locale-selection' | 'preview' | 'confirmation';
 
@@ -22,6 +28,8 @@ interface InvocationParameters {
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
   const invocationParams = sdk.parameters.invocation as unknown as InvocationParameters;
+  const installParams = sdk.parameters.installation as unknown as AppInstallationParameters;
+  const maxDepth = installParams?.maxReferenceDepth ?? MAX_REFERENCE_DEPTH;
 
   const [currentStep, setCurrentStep] = useState<DialogStep>('locale-selection');
 
@@ -38,6 +46,7 @@ const Dialog = () => {
 
   const [adoptedFields, setAdoptedFields] = useState<AdoptedFieldsMap>({});
 
+  const [loadingReferences, setLoadingReferences] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateResult, setUpdateResult] = useState<UpdateResult | null>(null);
 
@@ -49,14 +58,13 @@ const Dialog = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const result = await fetchEntries(
+        const result = await fetchEntryAndContentType(
           sdk.cma,
           invocationParams.entryId,
           invocationParams.contentTypeId
         );
         setEntry(result.entry);
         setContentType(result.contentType);
-        setReferencedEntries(result.referencedEntriesData);
       } catch (error) {
         console.error('Error fetching entry data:', error);
         setError('Failed to fetch entry data');
@@ -67,16 +75,36 @@ const Dialog = () => {
     fetchData();
   }, [sdk.cma, invocationParams.entryId, invocationParams.contentTypeId]);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!selectedSourceLocale || selectedTargetLocales.length === 0) {
       setMissingSourceLocale(!selectedSourceLocale);
       setMissingTargetLocales(selectedTargetLocales.length === 0);
       return;
     }
-    setCurrentStep('preview');
+
+    if (!entry || !contentType) return;
+
+    setLoadingReferences(true);
+    try {
+      const references = await fetchReferencesForLocale(
+        sdk.cma,
+        entry,
+        contentType,
+        selectedSourceLocale,
+        maxDepth
+      );
+      setReferencedEntries(references);
+      setCurrentStep('preview');
+    } catch (error) {
+      console.error('Error fetching references:', error);
+      setError('Failed to fetch referenced entries');
+    } finally {
+      setLoadingReferences(false);
+    }
   };
 
   const handleBack = () => {
+    setAdoptedFields({});
     setCurrentStep('locale-selection');
   };
 
@@ -172,7 +200,11 @@ const Dialog = () => {
             />
             <Flex justifyContent="flex-end" gap="spacingM">
               <Button onClick={() => sdk.close()}>Cancel</Button>
-              <Button variant="primary" onClick={handleNext}>
+              <Button
+                variant="primary"
+                onClick={handleNext}
+                isLoading={loadingReferences}
+                isDisabled={loadingReferences}>
                 Next
               </Button>
             </Flex>

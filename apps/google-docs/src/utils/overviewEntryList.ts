@@ -5,6 +5,8 @@ import { collectReferencedTempIdsFromEntry } from '../services/referenceResoluti
 import { type ContentTypeDisplayInfo } from '../services/contentTypeService';
 import { orderEntriesByCreationOrder } from './createEntries';
 import { getEntryDisplayTitle } from './getEntryDisplayTitle';
+import { getEntryTitleFromFieldMappings } from './getEntryTitle';
+import { getEntrySelectionKey } from './selectEntryBlockGraph';
 
 export interface EntryListRow {
   id: string;
@@ -197,6 +199,9 @@ export function buildEntryListFromEntryBlockGraph(
   referenceEdges?: Array<{ from: string; to: string }>
 ): EntryListRow[] {
   const contentTypeNameById = new Map(contentTypes.map((ct) => [ct.sys.id, ct.name ?? '']));
+  const contentTypeDisplayInfoById = new Map(
+    contentTypes.map((ct) => [ct.sys.id, { name: ct.name ?? '', displayField: ct.displayField }])
+  );
 
   const indexByTempId = new Map<string, number>();
   entries.forEach((entry, index) => {
@@ -217,7 +222,7 @@ export function buildEntryListFromEntryBlockGraph(
   }
 
   const makeRow = (entry: EntryBlockGraphEntry, index: number): EntryListRow => {
-    const id = entry.tempId ?? String(index);
+    const id = getEntrySelectionKey(entry, index);
     const childTempIds = entry.tempId ? childrenByParent.get(entry.tempId) ?? [] : [];
     const childRows = childTempIds
       .map((childId) => {
@@ -227,11 +232,14 @@ export function buildEntryListFromEntryBlockGraph(
       })
       .filter((r): r is EntryListRow => r !== undefined);
 
+    const contentTypeDisplayInfo = contentTypeDisplayInfoById.get(entry.contentTypeId);
+    const entryTitle = getEntryTitleFromFieldMappings(entry, contentTypeDisplayInfo?.displayField);
+
     return {
       id,
       entryIndex: index,
       contentTypeName: contentTypeNameById.get(entry.contentTypeId) ?? entry.contentTypeId,
-      entryTitle: undefined,
+      entryTitle,
       children: childRows,
     };
   };

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { Button, Layout } from '@contentful/f36-components';
+import { Button, Flex, Heading, Layout, Note, Paragraph } from '@contentful/f36-components';
 import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
@@ -11,21 +11,24 @@ import { ReviewPage } from './components/review/ReviewPage';
 import { loadFixtureReviewPayload } from '../../fixtures/googleDocsReview/loadFixtureReviewPayload';
 import type { MappingReviewSuspendPayload } from '@types';
 import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
+import { useGoogleDriveOAuth } from '@hooks/useGoogleDriveOAuth';
+import { ERROR_MESSAGES } from '@constants/messages';
+import { isAiAccessDeniedError } from '../../utils/aiAccess';
 
 const enableMockReviewPayload = import.meta.env.VITE_ENABLE_MOCK_REVIEW_PAYLOAD === 'true';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
   const modalOrchestratorRef = useRef<ModalOrchestratorHandle>(null);
-  const [oauthToken, setOauthToken] = useState<string>('');
-  const [isOAuthConnected, setIsOAuthConnected] = useState(false);
-  const [isOAuthLoading, setIsOAuthLoading] = useState(true);
+  const [isAiAccessDenied, setIsAiAccessDenied] = useState(false);
   const [mappingReviewState, setMappingReviewState] = useState<{
     payload: MappingReviewSuspendPayload;
     runId?: string;
   } | null>(null);
   const [fixtureReviewPayload, setFixtureReviewPayload] =
     useState<MappingReviewSuspendPayload | null>(null);
+  const { oauthToken, isOAuthConnected, isOAuthLoading, isOAuthBusy, startOAuth, disconnectOAuth } =
+    useGoogleDriveOAuth(sdk);
   const { resumeWorkflow } = useWorkflowAgent({
     sdk,
     documentId: '',
@@ -53,20 +56,19 @@ const Page = () => {
     };
   }, []);
 
-  const handleOauthTokenChange = (token: string) => {
-    setOauthToken(token);
-  };
-
-  const handleOAuthConnectedChange = (isConnected: boolean) => {
-    setIsOAuthConnected(isConnected);
-  };
-
-  const handleOAuthLoadingStateChange = (isLoading: boolean) => {
-    setIsOAuthLoading(isLoading);
-  };
-
   const handleSelectFile = () => {
     modalOrchestratorRef.current?.startFlow();
+  };
+
+  const handleAiAccessDenied = () => {
+    setIsAiAccessDenied(true);
+    setMappingReviewState(null);
+  };
+
+  const handleAiAccessRestored = () => {
+    if (isAiAccessDenied) {
+      setIsAiAccessDenied(false);
+    }
   };
 
   const handleMappingReviewReady = (payload: MappingReviewSuspendPayload, runId: string) => {
@@ -77,9 +79,14 @@ const Page = () => {
     setMappingReviewState(null);
   };
 
+  const resetFlowAndReturnToMainPage = () => {
+    modalOrchestratorRef.current?.resetFlow();
+    handleReturnToMainPage();
+  };
+
   const handleCancelMappingReview = async () => {
     if (!mappingReviewState?.runId) {
-      handleReturnToMainPage();
+      resetFlowAndReturnToMainPage();
       return;
     }
 
@@ -88,9 +95,46 @@ const Page = () => {
     } catch (error) {
       console.error(error);
     } finally {
-      handleReturnToMainPage();
+      resetFlowAndReturnToMainPage();
     }
   };
+
+  const handleConnectGoogleDrive = async () => {
+    handleAiAccessRestored();
+    try {
+      await startOAuth();
+    } catch (error) {
+      if (isAiAccessDeniedError(error)) {
+        handleAiAccessDenied();
+      }
+    }
+  };
+
+  const handleDisconnectGoogleDrive = async () => {
+    try {
+      await disconnectOAuth();
+    } catch (error) {
+      if (isAiAccessDeniedError(error)) {
+        handleAiAccessDenied();
+      }
+    }
+  };
+
+  if (isAiAccessDenied) {
+    return (
+      <Layout withBoxShadow={true} offsetTop={10}>
+        <Layout.Body>
+          <Flex
+            flexDirection="column"
+            gap="spacingM"
+            style={{ maxWidth: '900px', margin: '24px auto' }}>
+            <Heading marginBottom="none">Google Drive Integration</Heading>
+            <Note variant="warning">{ERROR_MESSAGES.AI_ACCESS_DENIED}</Note>
+          </Flex>
+        </Layout.Body>
+      </Layout>
+    );
+  }
 
   return (
     <>
@@ -101,7 +145,7 @@ const Page = () => {
             payload={mappingReviewState.payload}
             runId={mappingReviewState.runId}
             onCancelReview={handleCancelMappingReview}
-            onReturnToMainPage={handleReturnToMainPage}
+            onExitReview={resetFlowAndReturnToMainPage}
           />
         ) : (
           <>
@@ -115,11 +159,10 @@ const Page = () => {
               oauthToken={oauthToken}
               isOAuthConnected={isOAuthConnected}
               isOAuthLoading={isOAuthLoading}
-              onOAuthConnectedChange={handleOAuthConnectedChange}
-              onOauthTokenChange={handleOauthTokenChange}
-              onLoadingStateChange={handleOAuthLoadingStateChange}
+              isOAuthBusy={isOAuthBusy}
+              onConnectGoogleDrive={handleConnectGoogleDrive}
+              onDisconnectGoogleDrive={handleDisconnectGoogleDrive}
               onSelectFile={handleSelectFile}
-              sdk={sdk}
             />
           </>
         )}
@@ -129,6 +172,10 @@ const Page = () => {
         ref={modalOrchestratorRef}
         sdk={sdk}
         oauthToken={oauthToken}
+        isOAuthConnected={isOAuthConnected}
+        isOAuthBusy={isOAuthBusy}
+        onReconnectGoogleDrive={startOAuth}
+        onAiAccessDenied={handleAiAccessDenied}
         onMappingReviewReady={handleMappingReviewReady}
         onResetToMain={handleReturnToMainPage}
       />

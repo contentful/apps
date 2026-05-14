@@ -1,8 +1,9 @@
-import { Box, Card, Image, MenuItem } from '@contentful/f36-components';
+import { Box, Card, Flex, Image, MenuItem, Text } from '@contentful/f36-components';
+import { PencilSimpleIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
-import type { ImageSourceRef, NormalizedDocumentImage, SourceRef } from '@types';
+import type { ImageSourceRef, NormalizedDocumentImage } from '@types';
 import Splitter from '../../mainpage/Splitter';
-import { buildSourceRefKey, isImageSourceRefExcluded } from './sourceRefUtils';
+import { buildSourceRefKey } from './sourceRefUtils';
 
 export interface ReviewImageAssetCardProps {
   image: NormalizedDocumentImage;
@@ -11,11 +12,12 @@ export interface ReviewImageAssetCardProps {
   /** When the mapping rail highlights this image (same as plain `img` hover). */
   hovered?: boolean;
   isExcluded: boolean;
+  /** When true, render a green border without a green fill for highlighted mappings. */
+  isViewMode?: boolean;
   size?: 'small' | 'default';
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
-  onAssign: () => void;
-  onExclude: () => void;
+  onEdit?: () => void;
 }
 
 export function getNormalizedImageDisplayName(image: NormalizedDocumentImage): string {
@@ -28,18 +30,31 @@ export function ReviewImageAssetCard({
   isHighlighted,
   hovered = false,
   isExcluded,
+  isViewMode = false,
   size = 'default',
   onMouseEnter,
   onMouseLeave,
-  onAssign,
-  onExclude,
+  onEdit,
 }: ReviewImageAssetCardProps): JSX.Element {
   const title = getNormalizedImageDisplayName(image);
 
   const imageHeight = size === 'small' ? '180px' : '280px';
 
-  const borderColor =
-    isExcluded || !isHighlighted ? tokens.gray300 : hovered ? tokens.green600 : tokens.green500;
+  // View mode: highlighted images use a green border with no fill; unmapped images are unchanged.
+  // Edit mode (default): highlighted images use a green fill with transparent border.
+  const backgroundColor = isViewMode
+    ? tokens.gray100
+    : isHighlighted
+    ? hovered
+      ? tokens.green300
+      : tokens.green100
+    : tokens.gray100;
+
+  const border = isViewMode
+    ? isHighlighted
+      ? `${hovered ? 2 : 1}px solid ${hovered ? tokens.green600 : tokens.green500}`
+      : `1px solid ${tokens.gray300}`
+    : `1px solid ${isHighlighted ? 'transparent' : tokens.gray300}`;
 
   return (
     <Box
@@ -47,28 +62,32 @@ export function ReviewImageAssetCard({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       style={{
-        opacity: isExcluded ? 0.55 : 1,
+        opacity: isExcluded && !isHighlighted ? 0.55 : 1,
         display: 'inline-block',
         maxWidth: '100%',
         verticalAlign: 'top',
         borderRadius: tokens.borderRadiusMedium,
-        border: `2px solid ${borderColor}`,
-        backgroundColor: isHighlighted ? tokens.green100 : tokens.gray100,
-        transition: 'border-color 120ms ease',
+        border,
+        backgroundColor,
+        transition: 'background-color 120ms ease, border-color 120ms ease',
         overflow: 'hidden',
         boxSizing: 'border-box',
         padding: tokens.spacingXs,
       }}>
       <Card
         ariaLabel={title}
-        actions={[
-          <MenuItem key="assigned" onClick={onAssign}>
-            Assign
-          </MenuItem>,
-          <MenuItem key="exclude" onClick={onExclude}>
-            Exclude
-          </MenuItem>,
-        ]}>
+        actions={
+          onEdit
+            ? [
+                <MenuItem key="edit" onClick={onEdit}>
+                  <Flex alignItems="center" gap="spacing2Xs">
+                    <PencilSimpleIcon size="tiny" />
+                    <Text>Edit content mapping</Text>
+                  </Flex>
+                </MenuItem>,
+              ]
+            : undefined
+        }>
         <Splitter />
         <Box padding="spacingS">
           <Image

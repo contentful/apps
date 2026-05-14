@@ -1,29 +1,35 @@
 import { ArrowRightIcon } from '@contentful/f36-icons';
-import { Button, Card, Flex, Heading, Layout, Note, Paragraph } from '@contentful/f36-components';
+import {
+  Button,
+  Card,
+  Flex,
+  Grid,
+  Heading,
+  Layout,
+  Note,
+  Paragraph,
+} from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { OAuthConnector } from './OAuthConnector';
-import { PageAppSDK } from '@contentful/app-sdk';
 
 interface MainPageViewProps {
   oauthToken: string;
   isOAuthConnected: boolean;
   isOAuthLoading: boolean;
-  onOAuthConnectedChange: (isConnected: boolean) => void;
-  onOauthTokenChange: (token: string) => void;
-  onLoadingStateChange: (isLoading: boolean) => void;
+  isOAuthBusy: boolean;
+  onConnectGoogleDrive: () => Promise<void>;
+  onDisconnectGoogleDrive: () => Promise<void>;
   onSelectFile: () => void;
-  sdk: PageAppSDK;
 }
 
 export const MainPageView = ({
   oauthToken,
   isOAuthConnected,
   isOAuthLoading,
-  onOAuthConnectedChange,
-  onOauthTokenChange,
-  onLoadingStateChange,
+  isOAuthBusy,
+  onConnectGoogleDrive,
+  onDisconnectGoogleDrive,
   onSelectFile,
-  sdk,
 }: MainPageViewProps) => {
   return (
     <Layout.Body>
@@ -31,45 +37,49 @@ export const MainPageView = ({
         flexDirection="column"
         gap="spacingXl"
         style={{ maxWidth: '900px', margin: `${tokens.spacingL} auto` }}>
-        <Heading marginBottom="none">Drive Integration</Heading>
+        <Heading marginBottom="none">Google Drive Integration</Heading>
         <OAuthConnector
-          oauthToken={oauthToken}
-          onOAuthConnectedChange={onOAuthConnectedChange}
           isOAuthConnected={isOAuthConnected}
-          onOauthTokenChange={onOauthTokenChange}
-          onLoadingStateChange={onLoadingStateChange}
+          isOAuthBusy={isOAuthBusy}
+          onConnect={onConnectGoogleDrive}
+          onDisconnect={onDisconnectGoogleDrive}
         />
         <Card padding="large">
-          {!isOAuthLoading && !isOAuthConnected && (
-            <Note variant="warning" style={{ marginBottom: tokens.spacingM }}>
-              Please connect to Drive Integration before selecting your file.
-            </Note>
-          )}
           <Flex
-            flexDirection="row"
-            alignItems="center"
+            flexDirection="column"
+            alignItems="flex-start"
             justifyContent="space-between"
-            flexWrap="wrap"
-            gap="spacingL">
-            <Flex flexDirection="column" alignItems="flex-start">
-              <Heading marginBottom="spacingS">Select your file</Heading>
-              <Paragraph>
-                Create entries using existing content types from a Google Drive file.
-                <br />
-                Get started by selecting the file you would like to use.
-              </Paragraph>
-            </Flex>
-
-            <Flex flexDirection="row" alignItems="center" gap="spacingS">
-              <Button
-                variant="primary"
-                size="medium"
-                isDisabled={!oauthToken}
-                onClick={onSelectFile}
-                endIcon={<ArrowRightIcon />}>
-                Select your file
-              </Button>
-            </Flex>
+            gap="spacingS"
+            style={{ width: '100%' }}>
+            <Heading marginBottom="spacingS">Select your file</Heading>
+            <Grid columns="3fr 2fr" style={{ width: '100%' }}>
+              <Grid.Item>
+                <Paragraph>
+                  Create entries using existing content types from a Google Drive file.
+                  <br />
+                  Get started by selecting the file you would like to use.
+                </Paragraph>
+              </Grid.Item>
+              <Grid.Item justifySelf="end">
+                <Button
+                  variant="primary"
+                  size="small"
+                  isDisabled={!oauthToken}
+                  onClick={onSelectFile}
+                  endIcon={<ArrowRightIcon />}>
+                  Select
+                </Button>
+              </Grid.Item>
+            </Grid>
+            <Note variant="neutral">
+              This app only creates new entries. Any existing entries that need to be referenced
+              must be assigned after the draft entries are created.
+            </Note>
+            {!isOAuthLoading && !isOAuthConnected && (
+              <Note variant="warning" style={{ width: '100%' }}>
+                Please connect to Google Drive before selecting your file.
+              </Note>
+            )}
           </Flex>
         </Card>
       </Flex>

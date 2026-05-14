@@ -5,7 +5,7 @@ const mockSdk: any = {
   cma: mockCma,
   app: {
     onConfigure: vi.fn(),
-    getParameters: vi.fn().mockReturnValueOnce({}),
+    getParameters: vi.fn().mockResolvedValue({}),
     setReady: vi.fn(),
     getCurrentState: vi.fn(),
   },

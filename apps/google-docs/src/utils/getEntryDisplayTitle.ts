@@ -13,7 +13,7 @@ export function getEntryDisplayTitle(
     return UNTITLED_ENTRY_LABEL;
   }
   if (!contentTypeInfo.displayField) {
-    return '';
+    return UNTITLED_ENTRY_LABEL;
   }
   const raw = entry.fields[contentTypeInfo.displayField]?.[defaultLocale];
   if (raw != null && String(raw).trim().length > 0) {

@@ -16,7 +16,6 @@ describe('LoadingModal', () => {
           step="reviewingContentTypes"
           title="Preparing your preview"
           contentTypeCount={2}
-          onClose={vi.fn()}
         />
       </Modal>
     );
@@ -29,6 +28,12 @@ describe('LoadingModal', () => {
     expect(screen.getByText('Fetching document')).toBeTruthy();
     expect(screen.queryByText('Fetching document...')).toBeNull();
     expect(firstRow?.querySelector('[data-test-id="cf-ui-spinner"]')).toBeTruthy();
+  });
+
+  it('does not render a close button', () => {
+    renderLoadingModal();
+
+    expect(screen.queryByRole('button', { name: 'Close' })).toBeNull();
   });
 
   it('moves the active indicator to the newest visible step over time', () => {

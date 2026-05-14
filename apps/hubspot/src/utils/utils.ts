@@ -26,6 +26,7 @@ export interface ContentType {
 
 export type AppInstallationParameters = {
   hubspotAccessToken: string;
+  enableEmailModules: boolean;
 };
 
 export type ConnectedField = {

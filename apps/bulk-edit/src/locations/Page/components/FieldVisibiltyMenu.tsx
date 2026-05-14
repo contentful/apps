@@ -2,6 +2,7 @@ import { IconButton, Menu } from '@contentful/f36-components';
 import * as icons from '@contentful/f36-icons';
 import { ContentTypeField, FilterOption } from '../types';
 import tokens from '@contentful/f36-tokens';
+import { scrollableMenuListStyle } from './menuStyles';
 
 interface FieldVisibiltyMenuProps {
   selectedColumns: FilterOption[];
@@ -25,7 +26,7 @@ export const FieldVisibiltyMenu = ({
           icon={<icons.GearSixIcon />}
         />
       </Menu.Trigger>
-      <Menu.List>
+      <Menu.List style={scrollableMenuListStyle}>
         <Menu.Item onClick={() => setSelectedColumns(getFieldsMapped(fields))}>
           Select all
         </Menu.Item>

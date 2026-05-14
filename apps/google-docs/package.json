@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@ai-sdk/openai": "^2.0.56",
-    "@contentful/app-sdk": "^4.51.3",
+    "@contentful/app-sdk": "^4.56.0",
     "@contentful/f36-components": "^5.6.0",
     "@contentful/f36-icons": "^6.7.1",
     "@contentful/f36-multiselect": "^6.7.1",
@@ -14,7 +14,7 @@
     "@contentful/react-apps-toolkit": "^1.2.16",
     "@emotion/css": "^11.13.4",
     "ai": "^5.0.81",
-    "contentful-management": "^11.61.0",
+    "contentful-management": "^11.76.0",
     "googleapis": "^166.0.0",
     "mammoth": "^1.11.0",
     "react": "^18.3.1",

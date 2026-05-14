@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ChangeEvent } from 'react';
 import {
   Button,
   Flex,
@@ -10,7 +10,6 @@ import {
 } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
-import { css } from '@emotion/css';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
 import { multiselect, pillsContainer } from './ContentTypePickerModal.styles';
 import { truncateLabel } from '../../../../../utils/utils';
@@ -73,8 +72,12 @@ export const ContentTypePickerModal = ({
           skip += items.length;
         }
 
-        setContentTypes(allContentTypes);
-        setFilteredContentTypes(allContentTypes);
+        const sortedContentTypes = allContentTypes.sort((a, b) =>
+          a.name.trim().localeCompare(b.name.trim())
+        );
+
+        setContentTypes(sortedContentTypes);
+        setFilteredContentTypes(sortedContentTypes);
       } catch (error) {
         console.error('Failed to fetch content types:', error);
         setHasFetchError(true);
@@ -87,7 +90,7 @@ export const ContentTypePickerModal = ({
     fetchContentTypes();
   }, [sdk]);
 
-  const onSearchValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onSearchValueChange = (e: ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value.toLowerCase().trim();
     setFilteredContentTypes(
       searchTerm
@@ -103,7 +106,7 @@ export const ContentTypePickerModal = ({
     return `${selectedContentTypes.length} selected`;
   };
 
-  const handleSelectContentType = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSelectContentType = (e: ChangeEvent<HTMLInputElement>) => {
     const { checked, value } = e.target;
     if (checked) {
       setSelectedContentTypes([
@@ -155,7 +158,6 @@ export const ContentTypePickerModal = ({
             }}>
             {filteredContentTypes.map((ct) => (
               <Multiselect.Option
-                className={css({ padding: `0.25rem` })}
                 key={ct.sys.id}
                 value={ct.sys.id}
                 itemId={ct.sys.id}

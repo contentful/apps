@@ -25,6 +25,11 @@ import type { ListMarker } from './buildListMarkers';
 import { buildTextSegments, type TextSegment } from './buildTextSegments';
 import { ReviewImageAssetCard } from './ReviewImageAssetCard';
 import { isImageSourceRefExcluded } from './sourceRefUtils';
+import {
+  tableCellChromeMapped,
+  tableCellChromeMappedHovered,
+  tableCellChromeUnmapped,
+} from './documentRenderers.styles';
 
 // ─── Shared helpers ─────────────────────────────────────────────────────────
 
@@ -41,11 +46,16 @@ function isMappingHovered(keys: string[], hoveredMappingKeys: string[]): boolean
   return keys.some((k) => hoveredMappingKeys.includes(k));
 }
 
-function getHighlightStyle(highlighted: boolean, hovered: boolean) {
-  if (!highlighted) return { border: tokens.gray300, background: 'transparent' };
+function getTextSegmentHighlightCss(
+  highlighted: boolean,
+  hovered: boolean,
+  isViewMode: boolean
+): Pick<CSSProperties, 'backgroundColor' | 'padding' | 'boxShadow'> {
+  if (!highlighted || isViewMode) return {};
+
   return {
-    border: hovered ? tokens.green600 : tokens.green500,
-    background: hovered ? tokens.green300 : tokens.green200,
+    backgroundColor: hovered ? tokens.green300 : tokens.green100,
+    padding: `${tokens.spacing2Xs} 0`,
   };
 }
 
@@ -68,16 +78,48 @@ interface TextSegmentSpanProps {
   id: string;
   segment: TextSegment;
   hovered: boolean;
+  isViewMode: boolean;
   onSetHoveredMappings: (keys: string[]) => void;
+  textScope: 'block' | 'table';
+  rangeStart: number;
+  rangeEnd: number;
+  blockId?: string;
+  tableId?: string;
+  rowId?: string;
+  cellId?: string;
+  partId?: string;
 }
 
-const TextSegmentSpan = ({ id, segment, hovered, onSetHoveredMappings }: TextSegmentSpanProps) => {
+const TextSegmentSpan = ({
+  id,
+  segment,
+  hovered,
+  isViewMode,
+  onSetHoveredMappings,
+  textScope,
+  rangeStart,
+  rangeEnd,
+  blockId,
+  tableId,
+  rowId,
+  cellId,
+  partId,
+}: TextSegmentSpanProps) => {
+  const highlightCss = getTextSegmentHighlightCss(segment.highlighted, hovered, isViewMode);
   const content = (
     <Box
       as="span"
       key={id}
       data-review-text-segment="true"
       data-is-mapped={segment.highlighted ? 'true' : 'false'}
+      data-text-scope={textScope}
+      data-range-start={String(rangeStart)}
+      data-range-end={String(rangeEnd)}
+      data-block-id={blockId ?? undefined}
+      data-table-id={tableId ?? undefined}
+      data-row-id={rowId ?? undefined}
+      data-cell-id={cellId ?? undefined}
+      data-part-id={partId ?? undefined}
       data-mapping-keys={segment.mappingKeys.join('|')}
       onMouseEnter={
         segment.highlighted ? () => onSetHoveredMappings(segment.mappingKeys) : undefined
@@ -85,8 +127,7 @@ const TextSegmentSpan = ({ id, segment, hovered, onSetHoveredMappings }: TextSeg
       onMouseLeave={segment.highlighted ? () => onSetHoveredMappings([]) : undefined}
       style={{
         ...getTextSegmentStyle(segment.styles),
-        backgroundColor: getHighlightStyle(segment.highlighted, hovered).background,
-        borderRadius: segment.highlighted ? tokens.borderRadiusSmall : undefined,
+        ...highlightCss,
         whiteSpace: 'pre-wrap',
         transition: 'background-color 120ms ease',
       }}>
@@ -115,13 +156,10 @@ interface BlockRendererProps {
   excludedSourceRefs: SourceRef[];
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
+  isViewMode: boolean;
   onSetHoveredMappingKeys: (keys: string[]) => void;
-  onAssignImage: (
-    sourceRef: { type: 'blockImage'; blockId: string; imageId: string },
-    label: string
-  ) => void;
-  onExcludeImage: (
-    sourceRef: { type: 'blockImage'; blockId: string; imageId: string },
+  onEditImage?: (
+    sourceRef: { type: 'image'; blockId: string; imageId: string },
     label: string
   ) => void;
 }
@@ -135,9 +173,9 @@ export const BlockRenderer = ({
   excludedSourceRefs,
   selectedEntryIndex,
   hoveredMappingKeys,
+  isViewMode,
   onSetHoveredMappingKeys,
-  onAssignImage,
-  onExcludeImage,
+  onEditImage,
 }: BlockRendererProps) => {
   const visibleHighlights = filterByEntry(
     highlightIndex.blockHighlights[block.id] ?? [],
@@ -154,7 +192,12 @@ export const BlockRenderer = ({
           id={`${block.id}-${index}`}
           segment={seg}
           hovered={isMappingHovered(seg.mappingKeys, hoveredMappingKeys)}
+          isViewMode={isViewMode}
           onSetHoveredMappings={onSetHoveredMappingKeys}
+          textScope="block"
+          rangeStart={seg.start}
+          rangeEnd={seg.end}
+          blockId={block.id}
         />
       ))}
     </Text>
@@ -191,7 +234,7 @@ export const BlockRenderer = ({
         if (!image) return null;
 
         const imageSourceRef = {
-          type: 'blockImage' as const,
+          type: 'image' as const,
           blockId: block.id,
           imageId,
         };
@@ -202,22 +245,30 @@ export const BlockRenderer = ({
         const hovered = isMappingHovered(imageMappingKeys, hoveredMappingKeys);
 
         return (
-          <Box key={image.id} marginTop="spacingS">
+          <Box
+            key={image.id}
+            marginTop="spacingS"
+            data-review-image-segment="true"
+            data-is-mapped={highlighted ? 'true' : 'false'}
+            data-image-scope="block"
+            data-block-id={block.id}
+            data-image-id={imageId}
+            data-mapping-keys={imageMappingKeys.join('|')}>
             <ReviewImageAssetCard
               image={image}
               sourceRef={imageSourceRef}
               isHighlighted={highlighted}
               hovered={hovered}
               isExcluded={isImageSourceRefExcluded(imageSourceRef, excludedSourceRefs)}
+              isViewMode={isViewMode}
               onMouseEnter={
                 highlighted ? () => onSetHoveredMappingKeys(imageMappingKeys) : undefined
               }
               onMouseLeave={highlighted ? () => onSetHoveredMappingKeys([]) : undefined}
-              onAssign={() =>
-                onAssignImage(imageSourceRef, image.title ?? image.altText ?? image.id)
-              }
-              onExclude={() =>
-                onExcludeImage(imageSourceRef, image.title ?? image.altText ?? image.id)
+              onEdit={
+                onEditImage
+                  ? () => onEditImage(imageSourceRef, image.title ?? image.altText ?? image.id)
+                  : undefined
               }
             />
           </Box>
@@ -233,23 +284,15 @@ interface TableRendererProps {
   segmentId: string;
   table: NormalizedDocumentTable;
   highlightIndex: MappingHighlightIndex;
+  /** Full (unfiltered) highlight index for per-cell border computation in view mode. */
+  fullHighlightIndex?: MappingHighlightIndex;
   imageById: Record<string, NormalizedDocumentImage>;
   excludedSourceRefs: SourceRef[];
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
+  isViewMode: boolean;
   onSetHoveredMappingKeys: (keys: string[]) => void;
-  onAssignImage: (
-    sourceRef: {
-      type: 'tableImage';
-      tableId: string;
-      rowId: string;
-      cellId: string;
-      partId: string;
-      imageId: string;
-    },
-    label: string
-  ) => void;
-  onExcludeImage: (
+  onEditImage?: (
     sourceRef: {
       type: 'tableImage';
       tableId: string;
@@ -272,9 +315,9 @@ interface TablePartRendererProps {
   imageById: Record<string, NormalizedDocumentImage>;
   excludedSourceRefs: SourceRef[];
   hoveredMappingKeys: string[];
+  isViewMode: boolean;
   onSetHoveredMappingKeys: (keys: string[]) => void;
-  onAssignImage: TableRendererProps['onAssignImage'];
-  onExcludeImage: TableRendererProps['onExcludeImage'];
+  onEditImage?: TableRendererProps['onEditImage'];
 }
 
 const TablePartRenderer = ({
@@ -287,9 +330,9 @@ const TablePartRenderer = ({
   imageById,
   excludedSourceRefs,
   hoveredMappingKeys,
+  isViewMode,
   onSetHoveredMappingKeys,
-  onAssignImage,
-  onExcludeImage,
+  onEditImage,
 }: TablePartRendererProps) => {
   if (part.type === 'image') {
     const image = imageById[part.imageId];
@@ -318,18 +361,32 @@ const TablePartRenderer = ({
     const hovered = isMappingHovered(mappingKeys, hoveredMappingKeys);
 
     return (
-      <Box marginTop="spacing2Xs">
+      <Box
+        marginTop="spacing2Xs"
+        data-review-image-segment="true"
+        data-is-mapped={highlighted ? 'true' : 'false'}
+        data-image-scope="table"
+        data-table-id={tableId}
+        data-row-id={rowId}
+        data-cell-id={cellId}
+        data-part-id={part.id}
+        data-image-id={part.imageId}
+        data-mapping-keys={mappingKeys.join('|')}>
         <ReviewImageAssetCard
           image={image}
           sourceRef={imageSourceRef}
           isHighlighted={highlighted}
           hovered={hovered}
           isExcluded={isImageSourceRefExcluded(imageSourceRef, excludedSourceRefs)}
+          isViewMode={isViewMode}
           size="small"
           onMouseEnter={highlighted ? () => onSetHoveredMappingKeys(mappingKeys) : undefined}
           onMouseLeave={highlighted ? () => onSetHoveredMappingKeys([]) : undefined}
-          onAssign={() => onAssignImage(imageSourceRef, image.title ?? image.altText ?? image.id)}
-          onExclude={() => onExcludeImage(imageSourceRef, image.title ?? image.altText ?? image.id)}
+          onEdit={
+            onEditImage
+              ? () => onEditImage(imageSourceRef, image.title ?? image.altText ?? image.id)
+              : undefined
+          }
         />
       </Box>
     );
@@ -345,7 +402,15 @@ const TablePartRenderer = ({
           id={`${part.id}-${index}`}
           segment={seg}
           hovered={isMappingHovered(seg.mappingKeys, hoveredMappingKeys)}
+          isViewMode={isViewMode}
           onSetHoveredMappings={onSetHoveredMappingKeys}
+          textScope="table"
+          rangeStart={seg.start}
+          rangeEnd={seg.end}
+          tableId={tableId}
+          rowId={rowId}
+          cellId={cellId}
+          partId={part.id}
         />
       ))}
     </Box>
@@ -356,16 +421,34 @@ export const TableRenderer = ({
   segmentId,
   table,
   highlightIndex,
+  fullHighlightIndex,
   imageById,
   excludedSourceRefs,
   selectedEntryIndex,
   hoveredMappingKeys,
+  isViewMode,
   onSetHoveredMappingKeys,
-  onAssignImage,
-  onExcludeImage,
+  onEditImage,
 }: TableRendererProps) => {
+  const borderIndex = fullHighlightIndex ?? highlightIndex;
+
   const getVisiblePartHighlights = (partKey: string) =>
     filterByEntry(highlightIndex.tablePartHighlights[partKey] ?? [], selectedEntryIndex);
+
+  const getCellMappingKeys = (rowId: string, cellId: string): string[] => {
+    const keys: string[] = [];
+    const row = table.rows.find((r) => r.id === rowId);
+    const cell = row?.cells.find((c) => c.id === cellId);
+    cell?.parts.forEach((part) => {
+      const partKey = [table.id, rowId, cellId, part.id].join(':');
+      filterByEntry(borderIndex.tablePartHighlights[partKey] ?? [], selectedEntryIndex).forEach(
+        (h) => {
+          keys.push(getMappingCardKey(segmentId, h));
+        }
+      );
+    });
+    return Array.from(new Set(keys));
+  };
 
   return (
     <Table>
@@ -384,11 +467,13 @@ export const TableRenderer = ({
             key={row.id}
             id={`row:${table.id}:${row.id}`}
             data-testid={`table-row-${row.id}`}>
-            {row.cells.map((cell) => (
-              <TableCell
-                key={cell.id}
-                data-testid={`table-cell-${cell.id}`}
-                style={{ backgroundColor: 'transparent', verticalAlign: 'top' }}>
+            {row.cells.map((cell) => {
+              const cellMappingKeys = getCellMappingKeys(row.id, cell.id);
+              const hasCellMapping = cellMappingKeys.length > 0;
+              const isCellSurfaceHovered =
+                isViewMode && isMappingHovered(cellMappingKeys, hoveredMappingKeys);
+
+              const cellBody = (
                 <Flex flexDirection="column" gap="spacing2Xs">
                   {cell.parts.map((part) => {
                     const partKey = [table.id, row.id, cell.id, part.id].join(':');
@@ -404,16 +489,37 @@ export const TableRenderer = ({
                           imageById={imageById}
                           excludedSourceRefs={excludedSourceRefs}
                           hoveredMappingKeys={hoveredMappingKeys}
+                          isViewMode={isViewMode}
                           onSetHoveredMappingKeys={onSetHoveredMappingKeys}
-                          onAssignImage={onAssignImage}
-                          onExcludeImage={onExcludeImage}
+                          onEditImage={onEditImage}
                         />
                       </Box>
                     );
                   })}
                 </Flex>
-              </TableCell>
-            ))}
+              );
+
+              const viewModeChrome = hasCellMapping ? (
+                <Box
+                  data-testid={`table-cell-mapping-surface-${cell.id}`}
+                  className={
+                    isCellSurfaceHovered ? tableCellChromeMappedHovered : tableCellChromeMapped
+                  }>
+                  {cellBody}
+                </Box>
+              ) : (
+                cellBody
+              );
+
+              return (
+                <TableCell
+                  key={cell.id}
+                  data-testid={`table-cell-${cell.id}`}
+                  style={{ backgroundColor: 'transparent', verticalAlign: 'top' }}>
+                  {isViewMode ? viewModeChrome : cellBody}
+                </TableCell>
+              );
+            })}
           </TableRow>
         ))}
       </TableBody>

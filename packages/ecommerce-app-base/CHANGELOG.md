@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.2](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.1.1...@contentful/ecommerce-app-base@4.1.2) (2026-04-22)
+
+### Bug Fixes
+
+- republish ecommerce app base ([#10915](https://github.com/contentful/apps/issues/10915)) ([8ba0b1d](https://github.com/contentful/apps/commit/8ba0b1d29e4e11b18f063100f83db3ea48c3d0c7))
+
+## [4.1.1](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.1.0...@contentful/ecommerce-app-base@4.1.1) (2026-04-22)
+
+### Bug Fixes
+
+- run package builds during publish ([#10912](https://github.com/contentful/apps/issues/10912)) ([0efc908](https://github.com/contentful/apps/commit/0efc908a884212b0a9457e0d712404f6ba92e4ab))
+
+# [4.1.0](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.47...@contentful/ecommerce-app-base@4.1.0) (2026-04-22)
+
+### Features
+
+- support select options in ecommerce app config ([#10908](https://github.com/contentful/apps/issues/10908)) ([8951aac](https://github.com/contentful/apps/commit/8951aacdb01a6e3d9bce17dc959af7e621c7cb29))
+
 ## [4.0.47](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.46...@contentful/ecommerce-app-base@4.0.47) (2026-03-24)
 
 ### Bug Fixes

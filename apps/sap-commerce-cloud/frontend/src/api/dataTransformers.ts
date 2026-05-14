@@ -10,7 +10,11 @@ export const productTransformer =
   (item: Hash): Product => {
     const id = get(item, ['id'], '');
     let imageUrl = get(item, ['images', 0, 'url'], '');
-    if (imageUrl.length > 0) {
+    if (
+      imageUrl.length > 0 &&
+      !imageUrl.startsWith('http://') &&
+      !imageUrl.startsWith('https://')
+    ) {
       imageUrl = apiEndpoint + imageUrl;
     }
     const sku = get(item, ['code'], '');
@@ -42,7 +46,11 @@ export const productDetailsTransformer =
   (item: Hash): Product => {
     const id = get(item, ['id'], '');
     let imageUrl = get(item, ['images', 0, 'url'], '');
-    if (imageUrl.length > 0) {
+    if (
+      imageUrl.length > 0 &&
+      !imageUrl.startsWith('http://') &&
+      !imageUrl.startsWith('https://')
+    ) {
       imageUrl = apiEndpoint + imageUrl;
     }
     return {

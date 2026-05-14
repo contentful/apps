@@ -3,6 +3,14 @@
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 
+if (typeof window !== 'undefined' && typeof ResizeObserver === 'undefined') {
+  window.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
+
 // Only configure if we're in a DOM environment (not Node.js)
 // This file is for frontend tests only - function tests use functions/vitest.config.mts
 if (typeof window !== 'undefined') {

@@ -16,7 +16,7 @@ commands:
             echo "//npm.pkg.github.com/:_authToken=${GITHUB_PACKAGES_WRITE_TOKEN}" >> ~/.npmrc
       - run:
           name: Publish packages
-          command: npm run publish-packages
+          command: NPM_CONFIG_IGNORE_SCRIPTS=false npm run publish-packages
 
   set_since:
     steps:
@@ -31,7 +31,7 @@ commands:
             source $BASH_ENV
 
   run_allow_scripts:
-    description: "Run LavaMoat allow-scripts for packages that use it"
+    description: 'Run LavaMoat allow-scripts for packages that use it'
     steps:
       - run:
           name: Run allow-scripts (lifecycle scripts for whitelisted packages)

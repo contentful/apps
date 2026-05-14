@@ -1,21 +1,33 @@
-import { useId, useMemo } from 'react';
-import { Flex, Stack, Text } from '@contentful/f36-components';
+import { useEffect, useId, useMemo } from 'react';
+import { Badge, Flex, FormControl, Text } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import type { EditModalFieldMapping, EditModalFieldOption } from '@types';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
+import { isSelectableFieldType } from './utils';
+import { optionRow } from './FieldSelectionDropdown.styles';
 
 interface FieldSelectionDropdownProps {
+  selectedText: string;
+  isImageContent?: boolean;
   fieldOptions: EditModalFieldOption[];
   fieldMappings: EditModalFieldMapping[];
   selectedFieldIds: string[];
-  onSelectedFieldIdsChange: (selectedFieldIds: string[]) => void;
+  /** Functional updates avoid stale `selectedFieldIds` when selecting multiple fields quickly. */
+  onSelectedFieldIdsChange: (updater: (previous: string[]) => string[]) => void;
+  onSelectableStateChange?: (state: {
+    hasFieldOptions: boolean;
+    hasSelectableOptions: boolean;
+  }) => void;
 }
 
 export const FieldSelectionDropdown = ({
+  selectedText,
+  isImageContent = false,
   fieldOptions,
   fieldMappings,
   selectedFieldIds,
   onSelectedFieldIdsChange,
+  onSelectableStateChange,
 }: FieldSelectionDropdownProps) => {
   const key = useId();
   const selectedOptions = useMemo(
@@ -25,15 +37,50 @@ export const FieldSelectionDropdown = ({
   const multiselectListRef = useMultiselectScrollReflow(selectedFieldIds);
 
   const filledFieldIds = useMemo(
-    () => new Set(fieldMappings.map((fieldMapping) => fieldMapping.fieldId)),
+    () =>
+      new Set(
+        fieldMappings
+          .filter((fieldMapping) => fieldMapping.sourceRefs.length > 0)
+          .map((fieldMapping) => fieldMapping.fieldId)
+      ),
     [fieldMappings]
   );
+  const isSelectableForImage = (option: EditModalFieldOption) =>
+    option.isAssetField === true || option.fieldType === 'RichText';
+
+  const selectableOptions = useMemo(() => {
+    if (isImageContent) {
+      return fieldOptions.filter(isSelectableForImage);
+    }
+    return fieldOptions.filter((option) => isSelectableFieldType(option, selectedText));
+  }, [fieldOptions, isImageContent, selectedText]);
+
+  const hasUnsupportedFields = useMemo(
+    () =>
+      fieldOptions.some((option) =>
+        isImageContent
+          ? !isSelectableForImage(option)
+          : !isSelectableFieldType(option, selectedText) && !option.isAssetField
+      ),
+    [fieldOptions, isImageContent, selectedText]
+  );
+
+  useEffect(() => {
+    onSelectableStateChange?.({
+      hasFieldOptions: fieldOptions.length > 0,
+      hasSelectableOptions: selectableOptions.length > 0,
+    });
+  }, [fieldOptions.length, isImageContent, onSelectableStateChange, selectableOptions.length]);
 
   const handleSelectField = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { checked, value } = event.target;
 
-    onSelectedFieldIdsChange(
-      checked ? [...selectedFieldIds, value] : selectedFieldIds.filter((id) => id !== value)
+    onSelectedFieldIdsChange((previous) =>
+      checked
+        ? previous.includes(value)
+          ? previous
+          : [...previous, value]
+        : previous.filter((id) => id !== value)
     );
   };
 
@@ -41,51 +88,57 @@ export const FieldSelectionDropdown = ({
   const placeholder =
     selectedOptions.length === 0 ? 'Select one or more' : `${selectedOptions.length} selected`;
 
-  const isSelectableFieldType = (fieldType: string) => {
-    const normalizedFieldType = fieldType.trim().toLowerCase();
-    return normalizedFieldType === 'short text' || normalizedFieldType === 'long text';
-  };
-
   return (
-    <Stack flexDirection="column" alignItems="start">
+    <FormControl as="div">
       <Multiselect
         key={key}
         currentSelection={currentSelection}
         placeholder={placeholder}
         popoverProps={{
-          listMaxHeight: 360,
+          listMaxHeight: 280,
           listRef: multiselectListRef,
+          placement: 'bottom',
+          isAutoalignmentEnabled: false,
         }}>
-        {fieldOptions.map((option) =>
-          (() => {
-            const isDisabled = !isSelectableFieldType(option.fieldType);
-            const isFilled = filledFieldIds.has(option.id);
-            return (
-              <Multiselect.Option
-                key={`${key}-${option.id}`}
-                value={option.id}
-                itemId={option.id}
-                isChecked={selectedFieldIds.includes(option.id)}
-                isDisabled={isDisabled}
-                onSelectItem={handleSelectField}>
-                <Flex gap="spacingS">
-                  <Flex gap="spacing2Xs">
-                    <Text as="div" fontColor="gray700" fontWeight="fontWeightDemiBold">
-                      {option.fieldName}
-                    </Text>
-                    <Text as="div" fontColor="gray700" fontWeight="fontWeightNormal">
-                      ({option.fieldType})
-                    </Text>
-                  </Flex>
-                  <Text as="div" fontColor="gray700" fontWeight="fontWeightNormal">
-                    {isFilled ? 'Filled' : 'Empty'}
-                  </Text>
-                </Flex>
-              </Multiselect.Option>
-            );
-          })()
-        )}
+        {fieldOptions.map((option) => {
+          const fieldTypeDisplay = option.fieldDisplayType;
+          const isDisabled = isImageContent
+            ? !isSelectableForImage(option)
+            : !isSelectableFieldType(option, selectedText);
+          const isFilled = filledFieldIds.has(option.id);
+          return (
+            <Multiselect.Option
+              key={`${key}-${option.id}`}
+              value={option.id}
+              itemId={option.id}
+              isChecked={selectedFieldIds.includes(option.id)}
+              isDisabled={isDisabled && !selectedFieldIds.includes(option.id)}
+              onSelectItem={handleSelectField}
+              className={optionRow}>
+              <Flex gap="spacing2Xs">
+                <Text as="div" fontColor="gray700" fontWeight="fontWeightDemiBold">
+                  {option.fieldName}
+                </Text>
+                <Text as="div" fontColor="gray700" fontWeight="fontWeightNormal">
+                  ({fieldTypeDisplay})
+                </Text>
+              </Flex>
+              <Badge
+                variant={isFilled ? 'positive' : 'secondary'}
+                size="small"
+                style={{ marginLeft: 'auto' }}>
+                {isFilled ? 'Filled' : 'Empty'}
+              </Badge>
+            </Multiselect.Option>
+          );
+        })}
       </Multiselect>
-    </Stack>
+      {hasUnsupportedFields && (
+        <FormControl.HelpText style={{ fontSize: '0.7rem' }}>
+          This app doesn&apos;t support edits for Reference, Boolean, Date &amp; time, Location or
+          JSON fields. Use the entry editor instead.
+        </FormControl.HelpText>
+      )}
+    </FormControl>
   );
 };

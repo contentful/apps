@@ -9,27 +9,30 @@ import { BlockRenderer, TableRenderer } from './documentRenderers';
 interface ReviewDocumentBodyProps {
   segment: DocSegment;
   highlightIndex: MappingHighlightIndex;
+  /** Full (unfiltered) highlight index used for cell border computation in view mode. Defaults to highlightIndex. */
+  fullHighlightIndex?: MappingHighlightIndex;
   imageById: Record<string, NormalizedDocumentImage>;
   listMarkers: Record<string, ListMarker>;
   excludedSourceRefs: SourceRef[];
   selectedEntryIndex: number | null;
   hoveredMappingKeys: string[];
+  isViewMode: boolean;
   onSetHoveredMappingKeys: (keys: string[]) => void;
-  onAssignImage: (sourceRef: ImageSourceRef, label: string) => void;
-  onExcludeImage: (sourceRef: ImageSourceRef, label: string) => void;
+  onEditImage?: (sourceRef: ImageSourceRef, label: string) => void;
 }
 
 export const NormalizedDocumentSection = ({
   segment,
   highlightIndex,
+  fullHighlightIndex,
   imageById,
   listMarkers,
   excludedSourceRefs,
   selectedEntryIndex,
   hoveredMappingKeys,
+  isViewMode,
   onSetHoveredMappingKeys,
-  onAssignImage,
-  onExcludeImage,
+  onEditImage,
 }: ReviewDocumentBodyProps): JSX.Element => {
   return (
     <Box style={{ flex: 2 }}>
@@ -45,13 +48,14 @@ export const NormalizedDocumentSection = ({
               segmentId={segment.id}
               table={segment.table}
               highlightIndex={highlightIndex}
+              fullHighlightIndex={fullHighlightIndex ?? highlightIndex}
               imageById={imageById}
               excludedSourceRefs={excludedSourceRefs}
               selectedEntryIndex={selectedEntryIndex}
               hoveredMappingKeys={hoveredMappingKeys}
+              isViewMode={isViewMode}
               onSetHoveredMappingKeys={onSetHoveredMappingKeys}
-              onAssignImage={onAssignImage}
-              onExcludeImage={onExcludeImage}
+              onEditImage={onEditImage}
             />
           ) : (
             <BlockRenderer
@@ -63,9 +67,9 @@ export const NormalizedDocumentSection = ({
               excludedSourceRefs={excludedSourceRefs}
               selectedEntryIndex={selectedEntryIndex}
               hoveredMappingKeys={hoveredMappingKeys}
+              isViewMode={isViewMode}
               onSetHoveredMappingKeys={onSetHoveredMappingKeys}
-              onAssignImage={onAssignImage}
-              onExcludeImage={onExcludeImage}
+              onEditImage={onEditImage}
             />
           )}
         </Box>

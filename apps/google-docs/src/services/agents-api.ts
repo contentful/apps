@@ -1,16 +1,17 @@
 import { PageAppSDK } from '@contentful/app-sdk';
-import { LOCAL_AGENTS_API_BASE_URL, WORKFLOW_AGENT_ID } from '../utils/constants/agent';
+import { WORKFLOW_AGENT_ID } from '../utils/constants/agent';
+import { normalizeAiAccessError } from '../utils/aiAccess';
 import {
   AgentRunMessage,
   MappingReviewSuspendPayload,
   ResumePayload,
   RunStatus,
   TabsImagesSuspendPayload,
+  WorkflowFailure,
 } from '@types';
 
 const AGENTS_API_HEADERS = {
   'x-contentful-enable-alpha-feature': 'agents-api',
-  'X-Contentful-App-Definition-Id': '653vTnuQw3j5onU1tUoH6t',
 };
 
 export interface AgentGeneratePayload {
@@ -39,12 +40,30 @@ export interface AgentRunData {
     workflowId?: string;
     workflowRunId?: string;
     suspendPayload?: TabsImagesSuspendPayload | MappingReviewSuspendPayload;
+    workflowFailure?: WorkflowFailure;
     googleDocPayload?: Record<string, unknown>;
   };
   payload?: string;
   messages?: AgentRunMessage[];
   error?: Record<string, unknown>;
 }
+
+type AgentRunResumeParams = {
+  spaceId: string;
+  environmentId: string;
+  runId: string;
+};
+
+type AgentRunResumeApi = {
+  resumeRun?: (
+    params: AgentRunResumeParams,
+    body: { resumePayload: Record<string, unknown> }
+  ) => Promise<unknown>;
+  resume?: (
+    params: AgentRunResumeParams,
+    body: { resumePayload: ResumePayload }
+  ) => Promise<unknown>;
+};
 
 function getJsonHeaders(): HeadersInit {
   return {
@@ -59,9 +78,10 @@ export async function getWorkflowRun(
   environmentId: string,
   runId: string
 ): Promise<AgentRunData | null> {
-  if (LOCAL_AGENTS_API_BASE_URL) {
+  const localAgentsApiBaseUrl = import.meta.env.VITE_LOCAL_AGENTS_API_BASE_URL?.trim();
+  if (localAgentsApiBaseUrl) {
     const response = await fetch(
-      `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}`,
+      `${localAgentsApiBaseUrl}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}`,
       {
         headers: AGENTS_API_HEADERS,
       }
@@ -72,6 +92,10 @@ export async function getWorkflowRun(
     }
 
     if (!response.ok) {
+      if (response.status === 403) {
+        throw normalizeAiAccessError({ status: response.status });
+      }
+
       throw new Error(`Failed to poll agent run: ${response.status} ${response.statusText}`);
     }
 
@@ -90,7 +114,7 @@ export async function getWorkflowRun(
       return null;
     }
 
-    throw error;
+    throw normalizeAiAccessError(error);
   }
 }
 
@@ -101,10 +125,11 @@ export async function startAgentRun(
   payload: AgentGeneratePayload
 ): Promise<string> {
   let runData: AgentRunData;
+  const localAgentsApiBaseUrl = import.meta.env.VITE_LOCAL_AGENTS_API_BASE_URL?.trim();
 
-  if (LOCAL_AGENTS_API_BASE_URL) {
+  if (localAgentsApiBaseUrl) {
     const response = await fetch(
-      `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${WORKFLOW_AGENT_ID}/generate`,
+      `${localAgentsApiBaseUrl}/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${WORKFLOW_AGENT_ID}/generate`,
       {
         method: 'POST',
         headers: getJsonHeaders(),
@@ -113,6 +138,10 @@ export async function startAgentRun(
     );
 
     if (!response.ok) {
+      if (response.status === 403) {
+        throw normalizeAiAccessError({ status: response.status });
+      }
+
       throw new Error(
         `Failed to start workflow agent run: ${response.status} ${response.statusText}`
       );
@@ -126,7 +155,7 @@ export async function startAgentRun(
         payload
       )) as AgentRunData;
     } catch (error) {
-      throw new Error(`Failed to start workflow agent run: ${error as Error}`);
+      throw normalizeAiAccessError(error);
     }
   }
 
@@ -137,6 +166,12 @@ export async function startAgentRun(
   return runData.sys.id;
 }
 
+/**
+ * Resumes a suspended agent run. For the Google Docs mapping-review step, the
+ * edited `entryBlockGraph` must live in `resumePayload` (see Network tab). After resume,
+ * mapping-review repopulates `metadata.suspendPayload` with the reviewed graph (the resume
+ * handler clears it first).
+ */
 export async function resumeWorkflowRun(
   sdk: PageAppSDK,
   spaceId: string,
@@ -144,9 +179,10 @@ export async function resumeWorkflowRun(
   runId: string,
   resumePayload: ResumePayload
 ): Promise<void> {
-  if (LOCAL_AGENTS_API_BASE_URL) {
+  const localAgentsApiBaseUrl = import.meta.env.VITE_LOCAL_AGENTS_API_BASE_URL?.trim();
+  if (localAgentsApiBaseUrl) {
     const response = await fetch(
-      `${LOCAL_AGENTS_API_BASE_URL}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}/resume`,
+      `${localAgentsApiBaseUrl}/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}/resume`,
       {
         method: 'POST',
         headers: getJsonHeaders(),
@@ -155,22 +191,37 @@ export async function resumeWorkflowRun(
     );
 
     if (!response.ok) {
+      if (response.status === 403) {
+        throw normalizeAiAccessError({ status: response.status });
+      }
+
       throw new Error(`Failed to resume agent run: ${response.status} ${response.statusText}`);
     }
 
     return;
   }
 
-  const agentRunApi = sdk.cma.agentRun as {
-    resume?: (
-      params: { spaceId: string; environmentId: string; runId: string },
-      body: { resumePayload: ResumePayload }
-    ) => Promise<unknown>;
-  };
+  const agentRunApi = sdk.cma.agentRun as AgentRunResumeApi;
+
+  if (agentRunApi.resumeRun) {
+    try {
+      await agentRunApi.resumeRun(
+        { spaceId, environmentId, runId },
+        { resumePayload: resumePayload as Record<string, unknown> }
+      );
+      return;
+    } catch (error) {
+      throw normalizeAiAccessError(error);
+    }
+  }
 
   if (!agentRunApi.resume) {
     throw new Error('Agent run resume is not available in the current SDK.');
   }
 
-  await agentRunApi.resume({ spaceId, environmentId, runId }, { resumePayload });
+  try {
+    await agentRunApi.resume({ spaceId, environmentId, runId }, { resumePayload });
+  } catch (error) {
+    throw normalizeAiAccessError(error);
+  }
 }

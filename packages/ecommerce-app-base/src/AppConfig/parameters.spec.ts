@@ -43,6 +43,7 @@ export const definitions: ParameterDefinition[] = [
     description: 'The Commercetools data locale to display',
     type: 'Symbol',
     required: true,
+    options: ['en', 'de'],
   },
 ];
 

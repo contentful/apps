@@ -1,11 +1,13 @@
 import { ContentTypeField } from '@contentful/app-sdk';
 import {
   Box,
+  Button,
   Caption,
   Checkbox,
   Flex,
   FormControl,
   List,
+  Note,
   Paragraph,
   Select,
   Subheading,
@@ -45,8 +47,12 @@ function initializeAdoptedFields(
   for (const referenceEntryData of referencedEntries) {
     const referenceEntryId = referenceEntryData.entry.sys.id;
 
-    if (referenceEntryData.isSelfReference || initialAdoptedFields[referenceEntryId]) {
-      // Self reference or already adopted, skip it
+    if (
+      referenceEntryData.isSelfReference ||
+      referenceEntryData.isAlreadyIncluded ||
+      initialAdoptedFields[referenceEntryId]
+    ) {
+      // Self reference, duplicate occurrence, or already adopted -- skip it.
       continue;
     }
 
@@ -87,9 +93,11 @@ const PreviewStepComponent = ({
   baseUrl,
   isDisabled = false,
 }: PreviewStepProps) => {
+  const ENTRIES_PAGE_SIZE = 50;
   const [selectedTargetLocale, setSelectedTargetLocale] = useState<string>(
     targetLocales[0]?.code || ''
   );
+  const [visibleCount, setVisibleCount] = useState(ENTRIES_PAGE_SIZE);
 
   useEffect(() => {
     if (Object.keys(adoptedFields).length === 0) {
@@ -111,6 +119,24 @@ const PreviewStepComponent = ({
   const allFieldsAdopted = useMemo(() => {
     return localizedFields.every((field) => adoptedFields[entry.sys.id]?.[field.id] === true);
   }, [localizedFields, adoptedFields]);
+
+  const totalReferencedFields = useMemo(() => {
+    return referencedEntries.reduce((count, ref) => {
+      if (ref.isSelfReference || ref.isAlreadyIncluded) return count;
+      const fields = ref.contentType.fields.filter(
+        (f) => f.localized && !isEntryField(f) && !isEntryArrayField(f)
+      );
+      return count + fields.length;
+    }, 0);
+  }, [referencedEntries]);
+
+  const uniqueReferencedEntryCount = useMemo(
+    () => referencedEntries.filter((ref) => !ref.isAlreadyIncluded).length,
+    [referencedEntries]
+  );
+
+  const visibleEntries = referencedEntries.slice(0, visibleCount);
+  const hasMore = visibleCount < referencedEntries.length;
 
   const handleAdoptAll = (entryId: string, contentType: ContentTypeProps, adopted: boolean) => {
     const fieldIds = contentType.fields
@@ -205,33 +231,11 @@ const PreviewStepComponent = ({
           </Flex>
         </Flex>
 
-        {/* Field rows */}
+        {/* Main entry field rows */}
         <Flex flexDirection="column" gap="spacingS">
           {contentType.fields.map((field) => {
             if (isEntryField(field) || isEntryArrayField(field)) {
-              const fieldReferences = referencedEntries.filter(
-                (referenceData) => referenceData.fieldId === field.id
-              );
-              return fieldReferences.map((referenceData) => (
-                <ReferenceEntrySection
-                  key={`${referenceData.fieldId}-${referenceData.entry.sys.id}`}
-                  entry={referenceData.entry}
-                  contentType={referenceData.contentType}
-                  fieldName={referenceData.fieldName}
-                  sourceLocale={sourceLocale}
-                  targetLocale={selectedTargetLocale}
-                  adoptedFields={adoptedFields[referenceData.entry.sys.id] || {}}
-                  onAdoptedFieldChange={(fieldId, adopted) =>
-                    handleFieldAdopted(referenceData.entry.sys.id, fieldId, adopted)
-                  }
-                  onAdoptAllChange={(adopted) =>
-                    handleAdoptAll(referenceData.entry.sys.id, referenceData.contentType, adopted)
-                  }
-                  isSelfReference={referenceData.isSelfReference}
-                  isDisabled={isDisabled}
-                  baseUrl={baseUrl}
-                />
-              ));
+              return null;
             }
 
             if (field.localized) {
@@ -250,9 +254,49 @@ const PreviewStepComponent = ({
               );
             }
 
-            // Non-localized, non-reference fields are not displayed
             return null;
           })}
+        </Flex>
+
+        {/* Referenced entries (all depths, rendered in traversal order) */}
+        <Flex flexDirection="column" gap="spacingS" marginTop="spacingM">
+          {uniqueReferencedEntryCount > 0 && (
+            <Note variant="neutral">
+              {uniqueReferencedEntryCount} referenced{' '}
+              {uniqueReferencedEntryCount === 1 ? 'entry' : 'entries'} with {totalReferencedFields}{' '}
+              localizable fields
+            </Note>
+          )}
+          {visibleEntries.map((referenceData) => (
+            <ReferenceEntrySection
+              key={`${referenceData.depth}-${referenceData.fieldId}-${referenceData.entry.sys.id}`}
+              entry={referenceData.entry}
+              contentType={referenceData.contentType}
+              fieldName={referenceData.fieldName}
+              sourceLocale={sourceLocale}
+              targetLocale={selectedTargetLocale}
+              adoptedFields={adoptedFields[referenceData.entry.sys.id] || {}}
+              onAdoptedFieldChange={(fieldId, adopted) =>
+                handleFieldAdopted(referenceData.entry.sys.id, fieldId, adopted)
+              }
+              onAdoptAllChange={(adopted) =>
+                handleAdoptAll(referenceData.entry.sys.id, referenceData.contentType, adopted)
+              }
+              isSelfReference={referenceData.isSelfReference}
+              isAlreadyIncluded={referenceData.isAlreadyIncluded}
+              isDisabled={isDisabled}
+              baseUrl={baseUrl}
+              depth={referenceData.depth}
+            />
+          ))}
+          {hasMore && (
+            <Button
+              variant="secondary"
+              onClick={() => setVisibleCount((prev) => prev + ENTRIES_PAGE_SIZE)}>
+              Show {Math.min(ENTRIES_PAGE_SIZE, referencedEntries.length - visibleCount)} more
+              entries
+            </Button>
+          )}
         </Flex>
       </Box>
     </Flex>

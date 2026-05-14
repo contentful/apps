@@ -1,7 +1,7 @@
 {
   "name": "@contentful/ecommerce-app-base",
   "description": "Library to quickly build an app to integrate your e-commerce system of choice with Contentful",
-  "version": "4.0.47",
+  "version": "4.1.2",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "author": "Contentful GmbH",
@@ -74,7 +74,7 @@
   "scripts": {
     "build": "rimraf lib && tsc",
     "build:docs": "rimraf docs && typedoc",
-    "prepublishOnly": "npm run build",
+    "prepack": "npm run build",
     "test": "vitest",
     "test:ci": "CI=true vitest",
     "storybook": "storybook dev -p 6006",

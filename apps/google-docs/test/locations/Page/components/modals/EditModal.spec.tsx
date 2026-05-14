@@ -1,62 +1,40 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EditModal } from '../../../../../src/locations/Page/components/review/mapping/edit-modals/EditModal';
 import React from 'react';
 
 const onClose = vi.fn();
+const onConfirmPrimary = vi.fn();
 
-const viewModel = {
-  selectedText: 'Sample selected content',
-  isOpen: true,
-  currentLocations: [
+const baseNewLocation = {
+  id: 'page-event-detail',
+  title: 'Page: Event detail',
+  fieldMappings: [],
+  fieldOptions: [
+    {
+      id: 'title',
+      fieldName: 'Title',
+      fieldType: 'Symbol',
+      fieldDisplayType: 'Short text',
+      isAssetField: false,
+    },
     {
       id: 'summary',
-      contentTypeId: 'sampleContentType',
-      contentTypeName: 'Sample content type',
-      entryName: 'Sample entry',
-      fieldId: 'summary',
       fieldName: 'Summary',
-      fieldType: 'Long text',
-      sourceRef: {
-        type: 'blockText' as const,
-        blockId: 'mock-block-1',
-        start: 0,
-        end: 23,
-        flattenedRuns: [
-          {
-            start: 0,
-            end: 23,
-            text: 'Sample selected content',
-            styles: {},
-          },
-        ],
-      },
-      isSelected: true,
-    },
-    {
-      id: 'description',
-      contentTypeId: 'sampleContentType',
-      contentTypeName: 'Sample content type',
-      entryName: 'Sample entry',
-      fieldId: 'description',
-      fieldName: 'Description',
-      fieldType: 'Short text',
-      sourceRef: {
-        type: 'blockText' as const,
-        blockId: 'mock-block-2',
-        start: 0,
-        end: 23,
-        flattenedRuns: [
-          {
-            start: 0,
-            end: 23,
-            text: 'Sample selected content',
-            styles: {},
-          },
-        ],
-      },
+      fieldType: 'Text',
+      fieldDisplayType: 'Long text',
+      isAssetField: false,
     },
   ],
+  initialFieldIds: [],
+};
+
+const baseViewModel = {
+  selectedText: 'Sample selected content',
+  isOpen: true,
+  isImageContent: false,
+  currentLocations: [],
+  newLocation: baseNewLocation,
 };
 
 describe('EditModal', () => {
@@ -64,126 +42,79 @@ describe('EditModal', () => {
     vi.clearAllMocks();
   });
 
-  it('renders the provided title and configured labels', async () => {
+  it('renders the provided title and button label', async () => {
     render(
       <EditModal
         isOpen={true}
         onClose={onClose}
-        viewModel={viewModel}
-        title="Exclude content"
-        locationSectionDescription="Choose which location to use."
-        primaryButtonLabel="Exclude content"
+        viewModel={baseViewModel}
+        title="Edit content mapping"
+        primaryButtonLabel="Apply"
       />
     );
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Exclude content' })).toBeTruthy();
+      expect(screen.getByRole('heading', { name: 'Edit content mapping' })).toBeTruthy();
       expect(screen.getByText('"Sample selected content"')).toBeTruthy();
-      expect(screen.getAllByText('Sample content type')).toHaveLength(2);
-      expect(screen.getByText('Choose which location to use.')).toBeTruthy();
-      expect(screen.getByRole('button', { name: 'Exclude content' })).toBeTruthy();
-      expect(screen.queryByText('New location')).toBeNull();
+      expect(screen.getByRole('button', { name: 'Apply' })).toBeTruthy();
     });
   });
 
-  it('allows switching the selected location card', async () => {
+  it('renders the "Assign to fields" section when newLocation has an id', async () => {
     render(
       <EditModal
         isOpen={true}
         onClose={onClose}
-        viewModel={viewModel}
-        title="Exclude content"
-        locationSectionDescription="Choose which location to use."
-        primaryButtonLabel="Exclude content"
+        viewModel={baseViewModel}
+        title="Edit content mapping"
+        primaryButtonLabel="Apply"
       />
     );
 
-    const locationCards = screen
-      .getAllByRole('button')
-      .filter((element) => element.getAttribute('aria-pressed') !== null);
-    const [summaryCard, descriptionCard] = locationCards;
-
-    expect(summaryCard).toHaveAttribute('aria-pressed', 'true');
-    expect(descriptionCard).toHaveAttribute('aria-pressed', 'false');
-
-    fireEvent.click(descriptionCard);
-
     await waitFor(() => {
-      expect(summaryCard).toHaveAttribute('aria-pressed', 'false');
-      expect(descriptionCard).toHaveAttribute('aria-pressed', 'true');
+      expect(screen.getByText('Assign to fields')).toBeTruthy();
+      expect(screen.getByText('Page: Event detail')).toBeTruthy();
     });
   });
 
-  it('renders the new location section when provided', async () => {
+  it('primary button is disabled when selectedFieldIds equals initialFieldIds (no change)', async () => {
+    render(
+      <EditModal
+        isOpen={true}
+        onClose={onClose}
+        viewModel={{ ...baseViewModel, newLocation: { ...baseNewLocation, initialFieldIds: [] } }}
+        title="Edit content mapping"
+        primaryButtonLabel="Apply"
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Apply' })).toBeDisabled();
+    });
+  });
+
+  it('does not render the "Assign to fields" section when newLocation has no id', async () => {
     render(
       <EditModal
         isOpen={true}
         onClose={onClose}
         viewModel={{
-          ...viewModel,
-          newLocations: [
-            {
-              id: 'page-event-detail',
-              title: "Page: Event detail (Don't enter NRF uncaffeinated.)",
-              fieldMappings: [],
-              fieldOptions: [
-                {
-                  id: 'title',
-                  fieldName: 'Title',
-                  fieldType: 'Short text',
-                },
-              ],
-            },
-            {
-              id: 'component-resource-detail-hero',
-              title: "Component: Resource detail hero (Don't enter NRF uncaffeinated.)",
-              fieldMappings: [{ fieldId: 'headline' }],
-              fieldOptions: [
-                {
-                  id: 'headline',
-                  fieldName: 'Headline',
-                  fieldType: 'Short text',
-                },
-              ],
-            },
-          ],
+          ...baseViewModel,
+          newLocation: {
+            id: '',
+            title: '',
+            fieldMappings: [],
+            fieldOptions: [],
+            initialFieldIds: [],
+          },
         }}
-        title="Assign content"
-        locationSectionDescription=""
-        primaryButtonLabel="Move content"
+        title="Edit content mapping"
+        primaryButtonLabel="Apply"
       />
     );
 
     await waitFor(() => {
-      expect(screen.getByText('New location')).toBeTruthy();
-      expect(screen.getByText("Page: Event detail (Don't enter NRF uncaffeinated.)")).toBeTruthy();
-      expect(
-        screen.getByText("Component: Resource detail hero (Don't enter NRF uncaffeinated.)")
-      ).toBeTruthy();
-      expect(screen.getAllByText('Fields')).toHaveLength(2);
-      expect(screen.getAllByText('Select one or more')).toHaveLength(2);
-    });
-  });
-
-  it('keeps the current location heading visible when the section is empty', async () => {
-    render(
-      <EditModal
-        isOpen={true}
-        onClose={onClose}
-        viewModel={{ ...viewModel, currentLocations: [] }}
-        title="Assign content"
-        locationSectionDescription=""
-        primaryButtonLabel="Move content"
-      />
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText('Current location')).toBeTruthy();
-      expect(
-        screen
-          .getAllByRole('button')
-          .filter((element) => element.getAttribute('aria-pressed') !== null)
-      ).toHaveLength(0);
+      expect(screen.queryByText('Assign to fields')).toBeNull();
     });
   });
 });

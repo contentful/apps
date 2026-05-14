@@ -1,6 +1,8 @@
 import { type Ref } from 'react';
-import { Box, Text } from '@contentful/f36-components';
+import { Box } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
+import { FIELD_TYPE_SEPARATOR, truncateFieldValue } from './mappingCardTextUtils';
+import { TruncatedRow } from './TruncatedRow';
 
 export interface MappingCardData {
   key: string;
@@ -17,19 +19,6 @@ interface MappingCardProps {
   onMouseLeave?: () => void;
 }
 
-const labelTextStyle = {
-  fontSize: tokens.fontSizeS,
-  lineHeight: tokens.lineHeightS,
-};
-
-const valueTextStyle = {
-  fontSize: tokens.fontSizeS,
-  lineHeight: tokens.lineHeightS,
-  whiteSpace: 'nowrap',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-} as const;
-
 export const MappingCard = ({
   card,
   top,
@@ -37,38 +26,34 @@ export const MappingCard = ({
   isHovered = false,
   onMouseEnter,
   onMouseLeave,
-}: MappingCardProps) => (
-  <Box
-    ref={wrapperRef}
-    data-testid={`mapping-card-${card.key}`}
-    data-hovered={isHovered ? 'true' : 'false'}
-    onMouseEnter={onMouseEnter}
-    onMouseLeave={onMouseLeave}
-    style={{
-      position: 'absolute',
-      insetInlineStart: 0,
-      insetInlineEnd: 0,
-      top,
-      border: `${isHovered ? 2 : 1}px solid ${isHovered ? tokens.green600 : tokens.green500}`,
-      borderRadius: tokens.borderRadiusMedium,
-      padding: tokens.spacing2Xs,
-      backgroundColor: tokens.green100,
-      transition: 'border-color 120ms ease, border-width 120ms ease',
-    }}>
-    <Text as="span" fontColor="gray600" style={labelTextStyle} marginRight="spacingXs">
-      Field:
-    </Text>
-    <Text
-      as="span"
-      fontWeight="fontWeightDemiBold"
-      title={`${card.fieldName} (${card.fieldType})`}
-      style={valueTextStyle}>
-      {card.fieldName}
-
-      <Box as="span" style={{ color: tokens.gray600 }}>
-        {' | '}
-        {card.fieldType}
-      </Box>
-    </Text>
-  </Box>
-);
+}: MappingCardProps) => {
+  const { fieldName, fieldType } = card;
+  const { labelPart, typePart, fullValue, isTruncated } = truncateFieldValue(fieldName, fieldType);
+  return (
+    <Box
+      ref={wrapperRef}
+      data-testid={`mapping-card-${card.key}`}
+      data-hovered={isHovered ? 'true' : 'false'}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      style={{
+        position: 'absolute',
+        insetInlineStart: 0,
+        insetInlineEnd: 0,
+        top,
+        border: `${isHovered ? 2 : 1}px solid`,
+        borderRadius: tokens.borderRadiusMedium,
+        padding: tokens.spacing2Xs,
+        backgroundColor: tokens.green100,
+        transition: 'border-color 120ms ease, border-width 120ms ease',
+      }}>
+      <TruncatedRow
+        label="Field"
+        value={labelPart}
+        secondaryValue={typePart ? `${FIELD_TYPE_SEPARATOR}${typePart}` : undefined}
+        tooltipValue={fullValue}
+        isTruncated={isTruncated}
+      />
+    </Box>
+  );
+};

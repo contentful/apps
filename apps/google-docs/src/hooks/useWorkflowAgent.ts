@@ -1,6 +1,11 @@
 import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
-import { POLL_INTERVAL_MS, MAX_POLL_ATTEMPTS, WORKFLOW_AGENT_ID } from '../utils/constants/agent';
+import {
+  POLL_INTERVAL_MS,
+  MAX_POLL_ATTEMPTS,
+  WORKFLOW_AGENT_ID,
+  MAX_PENDING_REVIEW_MISSING_PAYLOAD_RETRIES,
+} from '../utils/constants/agent';
 import {
   MappingReviewSuspendPayload,
   ResumePayload,
@@ -8,6 +13,8 @@ import {
   CompletedWorkflowPayload,
   WorkflowRunResult,
   RunStatus,
+  WorkflowFailureReason,
+  WorkflowRunError,
 } from '@types';
 import {
   AgentGeneratePayload,
@@ -17,6 +24,7 @@ import {
   startAgentRun,
 } from '../services/agents-api';
 import { validatePayloadShape } from '../utils/createEntries';
+import { ERROR_MESSAGES } from '@constants/messages';
 
 interface UseWorkflowParams {
   sdk: PageAppSDK;
@@ -91,17 +99,46 @@ const previewPayloadFromCompletedRun = (runData: AgentRunData): CompletedWorkflo
 };
 
 const getRunErrorMessage = (runData: AgentRunData): string => {
+  const workflowFailureMessage = runData.metadata?.workflowFailure?.message;
+  if (typeof workflowFailureMessage === 'string' && workflowFailureMessage.trim().length > 0) {
+    return workflowFailureMessage;
+  }
+
   const payload = getAgentPayload(runData);
   if (payload) {
     return payload;
   }
 
-  const errorMessage = runData.error?.message;
-  if (typeof errorMessage === 'string' && errorMessage.trim().length > 0) {
-    return errorMessage;
+  return 'Workflow failed';
+};
+
+const getBackendWorkflowFailureReason = (runData: AgentRunData): WorkflowFailureReason | null => {
+  const workflowFailure = runData.metadata?.workflowFailure;
+
+  if (!workflowFailure) {
+    return null;
   }
 
-  return 'Workflow failed';
+  if (workflowFailure.code === WorkflowFailureReason.GOOGLE_DRIVE_AUTH_EXPIRED) {
+    return WorkflowFailureReason.GOOGLE_DRIVE_AUTH_EXPIRED;
+  }
+
+  if (workflowFailure.code === WorkflowFailureReason.GENERIC) {
+    return WorkflowFailureReason.GENERIC;
+  }
+
+  return null;
+};
+
+const getWorkflowFailureMessage = (
+  runData: AgentRunData,
+  failureReason: WorkflowFailureReason
+): string => {
+  if (failureReason === WorkflowFailureReason.GOOGLE_DRIVE_AUTH_EXPIRED) {
+    return ERROR_MESSAGES.GOOGLE_DRIVE_AUTH_ERROR;
+  }
+
+  return getRunErrorMessage(runData);
 };
 
 const getSuspendPayload = (
@@ -112,17 +149,24 @@ const getSuspendPayload = (
 
 const getWorkflowRunResult = (
   runData: AgentRunData,
-  threadId: string
+  threadId: string,
+  pendingReviewMissingPayloadCount: number
 ): WorkflowRunResult | null => {
   const status = getRunStatus(runData);
 
   switch (status) {
-    case RunStatus.FAILED:
-      throw new Error(getRunErrorMessage(runData));
+    case RunStatus.FAILED: {
+      const failureReason =
+        getBackendWorkflowFailureReason(runData) ?? WorkflowFailureReason.GENERIC;
+      throw new WorkflowRunError(getWorkflowFailureMessage(runData, failureReason), failureReason);
+    }
 
     case RunStatus.PENDING_REVIEW: {
       const suspendPayload = getSuspendPayload(runData);
       if (!suspendPayload) {
+        if (pendingReviewMissingPayloadCount < MAX_PENDING_REVIEW_MISSING_PAYLOAD_RETRIES) {
+          return null; // suspendPayload not flushed yet; poller will retry
+        }
         throw new Error('Workflow paused for review, but suspend payload was missing.');
       }
 
@@ -150,27 +194,46 @@ const getWorkflowRunResult = (
   }
 };
 
+const elapsedSec = (startMs: number) => `${((Date.now() - startMs) / 1000).toFixed(1)}s`;
+
 const pollAgentRun = async (
   sdk: PageAppSDK,
   spaceId: string,
   environmentId: string,
   runId: string
 ): Promise<WorkflowRunResult> => {
+  const startMs = Date.now();
+  let pendingReviewMissingPayloadCount = 0;
+  console.log(`⏳ Polling run [${runId}]`);
+
   for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
     const runData = await getWorkflowRun(sdk, spaceId, environmentId, runId);
+
     if (!runData) {
+      console.log(`  #${attempt + 1} — not found yet (${elapsedSec(startMs)})`);
       await wait(POLL_INTERVAL_MS);
       continue;
     }
 
-    const workflowRun = getWorkflowRunResult(runData, runId);
+    const status = getRunStatus(runData);
+    console.log(`  #${attempt + 1} — status: ${status} (${elapsedSec(startMs)})`);
+
+    if (status === RunStatus.PENDING_REVIEW && !getSuspendPayload(runData)) {
+      pendingReviewMissingPayloadCount++;
+    } else {
+      pendingReviewMissingPayloadCount = 0;
+    }
+
+    const workflowRun = getWorkflowRunResult(runData, runId, pendingReviewMissingPayloadCount);
     if (workflowRun) {
+      console.log(`✓ Run [${runId}] settled: ${status} in ${elapsedSec(startMs)}`);
       return workflowRun;
     }
 
     await wait(POLL_INTERVAL_MS);
   }
 
+  console.error(`✗ Run [${runId}] timed out after ${elapsedSec(startMs)}`);
   throw new Error('Workflow polling timeout');
 };
 
@@ -235,6 +298,7 @@ export const useWorkflowAgent = ({
         await resumeWorkflowRun(sdk, spaceId, environmentId, runId, resumePayload);
         return await pollAgentRun(sdk, spaceId, environmentId, runId);
       } catch (err) {
+        console.error(`✗ resumeWorkflow [${runId}] failed`, err);
         const error = err instanceof Error ? err : new Error('Workflow failed');
         throw error;
       } finally {
