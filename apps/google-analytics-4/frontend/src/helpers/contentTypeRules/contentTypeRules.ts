@@ -51,7 +51,7 @@ export const normalizeContentTypeRules = (
   contentTypeRules?: ContentTypeRules,
   legacyContentTypes?: ContentTypes
 ): ContentTypeRules => {
-  if (contentTypeRules?.length) {
+  if (contentTypeRules !== undefined) {
     return contentTypeRules.map((rule) => ({
       ...(() => {
         const normalizedRule = {

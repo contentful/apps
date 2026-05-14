@@ -53,6 +53,14 @@ describe('contentTypeRules normalization', () => {
     expect(rule.enableAdvancedMatching).toBe(true);
   });
 
+  it('treats an empty contentTypeRules array as authoritative and does not fall back to legacy contentTypes', () => {
+    const rules = normalizeContentTypeRules([], {
+      blogPost: { slugField: 'slug', urlPrefix: '', additionalFieldIds: [] },
+    });
+
+    expect(rules).toHaveLength(0);
+  });
+
   it('infers regex matching from advanced patterns during normalization', () => {
     const [rule] = normalizeContentTypeRules([
       {
