@@ -276,7 +276,6 @@ describe('Assign Content Type Card for Config Screen', () => {
     expect(screen.getByText(/\/shop\/products\/\{product_id\}/)).toBeVisible();
   });
 
-
   it('adds the locale token to a custom pattern', async () => {
     const user = userEvent.setup();
     render(

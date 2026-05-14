@@ -21,7 +21,6 @@ describe('contentTypeMatching', () => {
     expect(convertWildcardPatternToRegex('/search?category=*')).toBe('/search\\?category=.*');
   });
 
-
   it('allows the locale token in patterns', () => {
     expect(getUnknownPatternTokens('/{locale}/{slug}', [], 'slug')).toEqual([]);
   });

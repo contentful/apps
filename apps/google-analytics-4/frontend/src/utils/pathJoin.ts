@@ -1,5 +1,7 @@
 const trimAndRemoveSlashes = (item: string | number) => {
-  return String(item).trim().replace(/(^[/]*|[/]*$)/g, '');
+  return String(item)
+    .trim()
+    .replace(/(^[/]*|[/]*$)/g, '');
 };
 
 type PathPart = string | number | object | undefined;

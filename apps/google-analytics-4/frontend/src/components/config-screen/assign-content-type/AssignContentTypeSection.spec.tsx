@@ -147,7 +147,6 @@ describe('Assign Content Type Section for Config Screen', () => {
     await waitFor(() => expect(onIsValidContentTypeAssignment).toHaveBeenLastCalledWith(false));
   });
 
-
   it('allows advanced rules to use the locale token', async () => {
     const onIsValidContentTypeAssignment = vi.fn();
 

@@ -44,7 +44,6 @@ describe('Chart Header for the analytics app', () => {
     expect(screen.getByRole('option', { name: 'Custom range' })).toBeVisible();
   });
 
-
   it('renders a locale selector when locale options are provided', () => {
     render(
       <ChartHeader
