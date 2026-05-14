@@ -67,10 +67,10 @@ export const OAuthConnector = ({
             borderRadius: tokens.borderRadiusMedium,
             backgroundColor: tokens.gray100,
           }}>
-          <Image src={googleDriveLogo} alt="Google Drive Integration" height="28px" width="32px" />
+          <Image src={googleDriveLogo} alt="Drive Integration" height="28px" width="32px" />
         </Flex>
         <Text fontSize="fontSizeL" fontWeight="fontWeightMedium" lineHeight="lineHeightL">
-          Google Drive Integration
+          Drive Integration
         </Text>
       </Flex>
       <Flex

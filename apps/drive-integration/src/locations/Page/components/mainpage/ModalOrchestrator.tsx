@@ -157,7 +157,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       ) {
         setPreviewErrorState({
           reason: WorkflowFailureReason.GOOGLE_DRIVE_AUTH_EXPIRED,
-          title: 'Reconnect Google Drive to continue',
+          title: 'Reconnect Drive to continue',
           message: ERROR_MESSAGES.GOOGLE_DRIVE_AUTH_ERROR,
         });
         return;
@@ -327,7 +327,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return {
           title: previewErrorState.title,
           message: previewErrorState.message,
-          primaryActionLabel: 'Reconnect Google Drive',
+          primaryActionLabel: 'Reconnect Drive',
           onPrimaryAction: () => void handleReconnectGoogleDrive(),
           secondaryActionLabel: 'Close',
           onSecondaryAction: closePreviewErrorAndReset,

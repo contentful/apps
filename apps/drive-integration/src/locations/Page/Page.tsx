@@ -128,7 +128,7 @@ const Page = () => {
             flexDirection="column"
             gap="spacingM"
             style={{ maxWidth: '900px', margin: '24px auto' }}>
-            <Heading marginBottom="none">Google Drive Integration</Heading>
+            <Heading marginBottom="none">Drive Integration</Heading>
             <Note variant="warning">{ERROR_MESSAGES.AI_ACCESS_DENIED}</Note>
           </Flex>
         </Layout.Body>
