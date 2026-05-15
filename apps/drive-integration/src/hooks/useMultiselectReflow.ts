@@ -5,6 +5,12 @@ export const useMultiselectScrollReflow = <T>(selection: T[]): RefObject<HTMLULi
 
   useEffect(() => {
     if (listRef.current) {
+      listRef.current.style.overscrollBehavior = 'contain';
+    }
+  }, []);
+
+  useEffect(() => {
+    if (listRef.current) {
       const element = listRef.current;
       const currentScroll = element.scrollTop;
       const maxScroll = element.scrollHeight - element.clientHeight;
