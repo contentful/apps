@@ -15,6 +15,7 @@ import {
   RunStatus,
   WorkflowFailureReason,
   WorkflowRunError,
+  WorkflowDiagnosticInfo,
 } from '@types';
 import {
   AgentGeneratePayload,
@@ -147,9 +148,24 @@ const getSuspendPayload = (
   return runData.metadata?.suspendPayload;
 };
 
+const buildDiagnosticInfo = (
+  runData: AgentRunData,
+  runId: string,
+  spaceId: string,
+  environmentId: string
+): WorkflowDiagnosticInfo => ({
+  runId,
+  workflowRunId: runData.metadata?.workflowRunId,
+  spaceId,
+  environmentId,
+  timestamp: new Date().toISOString(),
+});
+
 const getWorkflowRunResult = (
   runData: AgentRunData,
   threadId: string,
+  spaceId: string,
+  environmentId: string,
   pendingReviewMissingPayloadCount: number
 ): WorkflowRunResult | null => {
   const status = getRunStatus(runData);
@@ -158,7 +174,11 @@ const getWorkflowRunResult = (
     case RunStatus.FAILED: {
       const failureReason =
         getBackendWorkflowFailureReason(runData) ?? WorkflowFailureReason.GENERIC;
-      throw new WorkflowRunError(getWorkflowFailureMessage(runData, failureReason), failureReason);
+      throw new WorkflowRunError(
+        getWorkflowFailureMessage(runData, failureReason),
+        failureReason,
+        buildDiagnosticInfo(runData, threadId, spaceId, environmentId)
+      );
     }
 
     case RunStatus.PENDING_REVIEW: {
@@ -167,7 +187,11 @@ const getWorkflowRunResult = (
         if (pendingReviewMissingPayloadCount < MAX_PENDING_REVIEW_MISSING_PAYLOAD_RETRIES) {
           return null; // suspendPayload not flushed yet; poller will retry
         }
-        throw new Error('Workflow paused for review, but suspend payload was missing.');
+        throw new WorkflowRunError(
+          'Workflow paused for review, but suspend payload was missing.',
+          WorkflowFailureReason.GENERIC,
+          buildDiagnosticInfo(runData, threadId, spaceId, environmentId)
+        );
       }
 
       return {
@@ -204,6 +228,7 @@ const pollAgentRun = async (
 ): Promise<WorkflowRunResult> => {
   const startMs = Date.now();
   let pendingReviewMissingPayloadCount = 0;
+  let lastRunData: AgentRunData | null = null;
   console.log(`⏳ Polling run [${runId}]`);
 
   for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
@@ -215,6 +240,7 @@ const pollAgentRun = async (
       continue;
     }
 
+    lastRunData = runData;
     const status = getRunStatus(runData);
     console.log(`  #${attempt + 1} — status: ${status} (${elapsedSec(startMs)})`);
 
@@ -224,7 +250,13 @@ const pollAgentRun = async (
       pendingReviewMissingPayloadCount = 0;
     }
 
-    const workflowRun = getWorkflowRunResult(runData, runId, pendingReviewMissingPayloadCount);
+    const workflowRun = getWorkflowRunResult(
+      runData,
+      runId,
+      spaceId,
+      environmentId,
+      pendingReviewMissingPayloadCount
+    );
     if (workflowRun) {
       console.log(`✓ Run [${runId}] settled: ${status} in ${elapsedSec(startMs)}`);
       return workflowRun;
@@ -234,7 +266,11 @@ const pollAgentRun = async (
   }
 
   console.error(`✗ Run [${runId}] timed out after ${elapsedSec(startMs)}`);
-  throw new Error('Workflow polling timeout');
+  throw new WorkflowRunError(
+    'Workflow polling timeout',
+    WorkflowFailureReason.GENERIC,
+    buildDiagnosticInfo(lastRunData ?? {}, runId, spaceId, environmentId)
+  );
 };
 
 export const useWorkflowAgent = ({

@@ -5,8 +5,8 @@ import tokens from '@contentful/f36-tokens';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { cx } from '@emotion/css';
 import type { EntryProps } from 'contentful-management';
-import type { EntryBlockGraph, MappingReviewSuspendPayload } from '@types';
-import { RunStatus } from '@types';
+import type { EntryBlockGraph, MappingReviewSuspendPayload, WorkflowDiagnosticInfo } from '@types';
+import { RunStatus, WorkflowRunError } from '@types';
 import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
 import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
 import type { ContentTypeDisplayInfoMap } from '../../../../utils/overviewEntryList';
@@ -52,6 +52,8 @@ export const ReviewPage = ({
   const [createdEntries, setCreatedEntries] = useState<EntryProps[] | null>(null);
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [createErrorDiagnostics, setCreateErrorDiagnostics] =
+    useState<WorkflowDiagnosticInfo | null>(null);
   const [entryBlockGraph, setEntryBlockGraph] = useState<EntryBlockGraph>(() =>
     structuredClone(payload.entryBlockGraph)
   );
@@ -136,6 +138,7 @@ export const ReviewPage = ({
           setCreateError(
             errors[0]?.error ?? 'An unexpected error occurred while creating entries.'
           );
+          setCreateErrorDiagnostics(null);
           return;
         }
 
@@ -147,12 +150,16 @@ export const ReviewPage = ({
       // WorkflowRunResult is COMPLETED | PENDING_REVIEW; only PENDING_REVIEW reaches here.
       console.warn('[ReviewPage] workflow re-suspended after resume; status:', result.status);
       setCreateError('The review workflow did not return a completed payload.');
+      setCreateErrorDiagnostics(null);
     } catch (error) {
       console.error(error);
       setCreateError(
         error instanceof Error
           ? error.message
           : 'An unexpected error occurred while creating entries.'
+      );
+      setCreateErrorDiagnostics(
+        error instanceof WorkflowRunError ? error.diagnosticInfo ?? null : null
       );
     } finally {
       setIsCreatePending(false);
@@ -291,10 +298,14 @@ export const ReviewPage = ({
       />
       <ErrorModal
         isOpen={createError !== null}
-        onClose={() => setCreateError(null)}
+        onClose={() => {
+          setCreateError(null);
+          setCreateErrorDiagnostics(null);
+        }}
         config={{
           title: 'Failed to create entries',
           message: createError ?? '',
+          diagnosticInfo: createErrorDiagnostics ?? undefined,
         }}
       />
     </>
