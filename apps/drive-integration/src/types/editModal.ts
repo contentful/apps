@@ -30,6 +30,7 @@ export interface EditModalFieldMapping {
 
 export interface EditModalNewLocation {
   id: string;
+  entryIndex: number;
   title: string;
   fieldOptions: EditModalFieldOption[];
   fieldMappings: EditModalFieldMapping[];
@@ -40,10 +41,10 @@ export interface EditModalContent {
   selectedText: string;
   /** Mapped-only preview for exclude flow; falls back to selectedText in the modal when absent. */
   contentPreview?: string;
-  /** Replaces the default "Selected content" heading for the preview card. */
+  /** Replaces the default "Content" heading for the preview card. */
   previewSectionTitle?: string;
   isOpen: boolean;
   isImageContent: boolean;
   currentLocations: EditLocationOption[];
-  newLocation: EditModalNewLocation;
+  newLocations: EditModalNewLocation[];
 }

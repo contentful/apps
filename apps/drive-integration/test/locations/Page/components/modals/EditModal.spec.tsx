@@ -8,6 +8,7 @@ const onConfirmPrimary = vi.fn();
 
 const baseNewLocation = {
   id: 'page-event-detail',
+  entryIndex: 0,
   title: 'Page: Event detail',
   fieldMappings: [],
   fieldOptions: [
@@ -34,7 +35,7 @@ const baseViewModel = {
   isOpen: true,
   isImageContent: false,
   currentLocations: [],
-  newLocation: baseNewLocation,
+  newLocations: [baseNewLocation],
 };
 
 describe('EditModal', () => {
@@ -49,25 +50,24 @@ describe('EditModal', () => {
         onClose={onClose}
         viewModel={baseViewModel}
         title="Edit content mapping"
-        primaryButtonLabel="Apply"
+        primaryButtonLabel="Save"
       />
     );
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'Edit content mapping' })).toBeTruthy();
-      expect(screen.getByText('"Sample selected content"')).toBeTruthy();
-      expect(screen.getByRole('button', { name: 'Apply' })).toBeTruthy();
+      expect(screen.getByRole('button', { name: 'Save' })).toBeTruthy();
     });
   });
 
-  it('renders the "Assign to fields" section when newLocation has an id', async () => {
+  it('renders the "Assign to fields" section when newLocations is non-empty', async () => {
     render(
       <EditModal
         isOpen={true}
         onClose={onClose}
         viewModel={baseViewModel}
         title="Edit content mapping"
-        primaryButtonLabel="Apply"
+        primaryButtonLabel="Save"
       />
     );
 
@@ -77,44 +77,75 @@ describe('EditModal', () => {
     });
   });
 
-  it('primary button is disabled when selectedFieldIds equals initialFieldIds (no change)', async () => {
+  it('primary button is disabled when no changes have been made', async () => {
     render(
       <EditModal
         isOpen={true}
         onClose={onClose}
-        viewModel={{ ...baseViewModel, newLocation: { ...baseNewLocation, initialFieldIds: [] } }}
+        viewModel={baseViewModel}
         title="Edit content mapping"
-        primaryButtonLabel="Apply"
+        primaryButtonLabel="Save"
       />
     );
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Apply' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
     });
   });
 
-  it('does not render the "Assign to fields" section when newLocation has no id', async () => {
+  it('does not render the "Assign to fields" section when newLocations is empty', async () => {
     render(
       <EditModal
         isOpen={true}
         onClose={onClose}
         viewModel={{
           ...baseViewModel,
-          newLocation: {
-            id: '',
-            title: '',
-            fieldMappings: [],
-            fieldOptions: [],
-            initialFieldIds: [],
-          },
+          newLocations: [],
         }}
         title="Edit content mapping"
-        primaryButtonLabel="Apply"
+        primaryButtonLabel="Save"
       />
     );
 
     await waitFor(() => {
       expect(screen.queryByText('Assign to fields')).toBeNull();
+    });
+  });
+
+  it('renders multiple entry sections when multiple newLocations are provided', async () => {
+    const secondLocation = {
+      id: 'component-hero',
+      entryIndex: 1,
+      title: 'Component: Resource detail hero',
+      fieldMappings: [],
+      fieldOptions: [
+        {
+          id: 'headline',
+          fieldName: 'Headline',
+          fieldType: 'Symbol',
+          fieldDisplayType: 'Short text',
+          isAssetField: false,
+        },
+      ],
+      initialFieldIds: [],
+    };
+
+    render(
+      <EditModal
+        isOpen={true}
+        onClose={onClose}
+        viewModel={{
+          ...baseViewModel,
+          newLocations: [baseNewLocation, secondLocation],
+        }}
+        title="Edit content mapping"
+        primaryButtonLabel="Save"
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Page: Event detail')).toBeTruthy();
+      expect(screen.getByText('Component: Resource detail hero')).toBeTruthy();
     });
   });
 });

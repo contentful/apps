@@ -110,7 +110,7 @@ export const FieldSelectionDropdown = ({
             <Multiselect.Option
               key={`${key}-${option.id}`}
               value={option.id}
-              itemId={option.id}
+              itemId={`${key}-${option.id}`}
               isChecked={selectedFieldIds.includes(option.id)}
               isDisabled={isDisabled && !selectedFieldIds.includes(option.id)}
               onSelectItem={handleSelectField}
@@ -133,12 +133,6 @@ export const FieldSelectionDropdown = ({
           );
         })}
       </Multiselect>
-      {hasUnsupportedFields && (
-        <FormControl.HelpText style={{ fontSize: '0.7rem' }}>
-          This app doesn&apos;t support edits for Reference, Boolean, Date &amp; time, Location or
-          JSON fields. Use the entry editor instead.
-        </FormControl.HelpText>
-      )}
     </FormControl>
   );
 };

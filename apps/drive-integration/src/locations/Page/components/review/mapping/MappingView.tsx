@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefCallback } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState, type RefCallback } from 'react';
 import { Box, Flex, Note, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import {
@@ -82,20 +82,12 @@ interface MappingViewProps {
   mode?: 'view' | 'edit';
 }
 
-const EMPTY_NEW_LOCATION: EditModalNewLocation = {
-  id: '',
-  title: '',
-  fieldOptions: [],
-  fieldMappings: [],
-  initialFieldIds: [],
-};
-
 const EMPTY_EDIT_MODAL: EditModalState = {
   viewModel: {
     selectedText: '',
     isImageContent: false,
     currentLocations: [],
-    newLocation: EMPTY_NEW_LOCATION,
+    newLocations: [],
     isOpen: false,
   },
   title: '',
@@ -195,21 +187,6 @@ export const MappingView = ({
     setPendingPreviewSourceRefs([]);
     setPendingPreviewHasTableContent(false);
   };
-
-  const previousSelectedEntryIndexRef = useRef<number | null | undefined>(undefined);
-
-  // Avoid confirming an exclude/assign that was opened under a different overview entry.
-  useEffect(() => {
-    if (previousSelectedEntryIndexRef.current === undefined) {
-      previousSelectedEntryIndexRef.current = selectedEntryIndex;
-      return;
-    }
-    if (previousSelectedEntryIndexRef.current !== selectedEntryIndex) {
-      previousSelectedEntryIndexRef.current = selectedEntryIndex;
-      closeEditModal();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to entry focus changes
-  }, [selectedEntryIndex]);
 
   const { selectionRectangle, selectedText, selectedRange, clearSelection } =
     useReviewTextSelection(textSelectionRootRef);
@@ -392,6 +369,7 @@ export const MappingView = ({
 
     return {
       id: entry.tempId ?? `${entry.contentTypeId}-${entryIndex}`,
+      entryIndex,
       title: `${contentTypeName}: ${entryTitle}`,
       fieldOptions,
       fieldMappings: entry.fieldMappings.map((fieldMapping) => ({
@@ -402,18 +380,11 @@ export const MappingView = ({
     };
   };
 
-  const newLocation = useMemo<EditModalNewLocation>(() => {
-    if (selectedEntryIndex === null) {
-      return EMPTY_NEW_LOCATION;
-    }
-
-    const selectedEntry = entryBlockGraph.entries[selectedEntryIndex];
-    if (!selectedEntry) {
-      return EMPTY_NEW_LOCATION;
-    }
-
-    return getNewLocationForEntry(selectedEntry, selectedEntryIndex);
-  }, [entryBlockGraph.entries, payload.contentTypes, selectedEntryIndex]);
+  const allNewLocations = useMemo<EditModalNewLocation[]>(
+    () => entryBlockGraph.entries.map((entry, idx) => getNewLocationForEntry(entry, idx)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- recompute when entries or content types change
+    [entryBlockGraph.entries, payload.contentTypes]
+  );
 
   const getLocationsForSourceRef = (sourceRef: SourceRef): EditLocationOption[] => {
     const targetKey = buildSourceRefKey(sourceRef);
@@ -555,14 +526,15 @@ export const MappingView = ({
     );
     const currentLocations = getLocationsForSelectedText();
 
-    const currentSourceRefKeys = new Set(
-      currentLocations.flatMap((loc) =>
-        (loc.sourceRefs?.length ? loc.sourceRefs : [loc.sourceRef]).map(buildSourceRefKey)
-      )
-    );
-    const initialFieldIds = newLocation.fieldMappings
-      .filter((fm) => fm.sourceRefs.some((sr) => currentSourceRefKeys.has(buildSourceRefKey(sr))))
-      .map((fm) => fm.fieldId);
+    const selectedSourceRefKeys = new Set(previewSourceRefs.map(buildSourceRefKey));
+    const newLocationsWithInitial = allNewLocations.map((loc) => ({
+      ...loc,
+      initialFieldIds: loc.fieldMappings
+        .filter((fm) =>
+          fm.sourceRefs.some((sr) => selectedSourceRefKeys.has(buildSourceRefKey(sr)))
+        )
+        .map((fm) => fm.fieldId),
+    }));
 
     setPendingTextExclusionRanges(exclusionRanges.length ? exclusionRanges : null);
     setPendingTextAssignRanges(assignRanges);
@@ -581,11 +553,11 @@ export const MappingView = ({
         selectedText: selectedText.trim(),
         isImageContent: false,
         currentLocations,
-        newLocation: { ...newLocation, initialFieldIds },
+        newLocations: newLocationsWithInitial,
         isOpen: true,
       },
       title: 'Edit content mapping',
-      primaryButtonLabel: 'Apply',
+      primaryButtonLabel: 'Save',
     });
     clearSelection();
   };
@@ -594,14 +566,13 @@ export const MappingView = ({
     if (isDisabled) return;
     const currentLocations = getLocationsForSourceRef(sourceRef);
 
-    const currentSourceRefKeys = new Set(
-      currentLocations.flatMap((loc) =>
-        (loc.sourceRefs?.length ? loc.sourceRefs : [loc.sourceRef]).map(buildSourceRefKey)
-      )
-    );
-    const initialFieldIds = newLocation.fieldMappings
-      .filter((fm) => fm.sourceRefs.some((sr) => currentSourceRefKeys.has(buildSourceRefKey(sr))))
-      .map((fm) => fm.fieldId);
+    const imageSourceRefKey = buildSourceRefKey(sourceRef);
+    const newLocationsWithInitial = allNewLocations.map((loc) => ({
+      ...loc,
+      initialFieldIds: loc.fieldMappings
+        .filter((fm) => fm.sourceRefs.some((sr) => buildSourceRefKey(sr) === imageSourceRefKey))
+        .map((fm) => fm.fieldId),
+    }));
 
     setPendingTextExclusionRanges(null);
     setPendingTextAssignRanges([]);
@@ -614,125 +585,129 @@ export const MappingView = ({
         selectedText: label,
         isImageContent: true,
         currentLocations,
-        newLocation: { ...newLocation, initialFieldIds },
+        newLocations: newLocationsWithInitial,
         isOpen: true,
       },
       title: 'Edit content mapping',
-      primaryButtonLabel: 'Apply',
+      primaryButtonLabel: 'Save',
     });
     setHoveredMappingKeys([]);
   };
 
-  const handleEditModalConfirmPrimary = (selectedFieldIds: string[]) => {
-    const {
-      isImageContent,
-      newLocation: modalNewLocation,
-      currentLocations,
-    } = editModalState.viewModel;
-    const initialFieldIds = modalNewLocation.initialFieldIds;
-    const addedFieldIds = selectedFieldIds.filter((id) => !initialFieldIds.includes(id));
-    const removedFieldIds = initialFieldIds.filter((id) => !selectedFieldIds.includes(id));
+  const handleEditModalConfirmPrimary = (selectionsByEntryId: Record<string, string[]>) => {
+    const { isImageContent, newLocations } = editModalState.viewModel;
     let next = entryBlockGraph;
 
-    // ── REMOVALS ──────────────────────────────────────────────────────────────
-    for (const fieldId of removedFieldIds) {
-      const loc = currentLocations.find((l) => l.fieldId === fieldId);
-      if (!loc) continue;
+    for (const entryLoc of newLocations) {
+      const selectedFieldIds = selectionsByEntryId[entryLoc.id] ?? [];
+      const initialFieldIds = entryLoc.initialFieldIds;
+      const addedFieldIds = selectedFieldIds.filter((id) => !initialFieldIds.includes(id));
+      const removedFieldIds = initialFieldIds.filter((id) => !selectedFieldIds.includes(id));
 
-      const locSourceRefKeys = new Set(
-        (loc.sourceRefs?.length ? loc.sourceRefs : [loc.sourceRef]).map(buildSourceRefKey)
-      );
+      // ── REMOVALS for this entry ──
+      for (const fieldId of removedFieldIds) {
+        const fieldMapping = entryLoc.fieldMappings.find((fm) => fm.fieldId === fieldId);
+        if (!fieldMapping) continue;
 
-      if (isImageContent) {
-        // Remove image ref from any field type (asset or rich text).
-        const matchingImages = pendingExcludeImageSourceRefs.filter((ref) =>
-          locSourceRefKeys.has(buildSourceRefKey(ref))
-        );
-        for (const imgRef of matchingImages) {
-          next = applyImageExclusionToEntryBlockGraph(next, loc, imgRef);
-        }
-      } else {
-        // Text removal: remove text ranges and any inline images in selection.
-        if (pendingTextExclusionRanges?.length) {
-          next = applyTextExclusionToEntryBlockGraph(next, loc, pendingTextExclusionRanges);
-        }
-        const matchingImages = pendingExcludeImageSourceRefs.filter((ref) =>
-          locSourceRefKeys.has(buildSourceRefKey(ref))
-        );
-        for (const imgRef of matchingImages) {
-          next = applyImageExclusionToEntryBlockGraph(next, loc, imgRef);
+        const loc: EditLocationOption = {
+          entryIndex: entryLoc.entryIndex,
+          id: entryLoc.id,
+          contentTypeId: '',
+          contentTypeName: '',
+          entryName: '',
+          fieldId,
+          fieldName: '',
+          fieldType: '',
+          sourceRef: fieldMapping.sourceRefs[0],
+          sourceRefs: fieldMapping.sourceRefs,
+        };
+
+        const locSourceRefKeys = new Set(fieldMapping.sourceRefs.map(buildSourceRefKey));
+
+        if (isImageContent) {
+          const matchingImages = pendingExcludeImageSourceRefs.filter((ref) =>
+            locSourceRefKeys.has(buildSourceRefKey(ref))
+          );
+          for (const imgRef of matchingImages) {
+            next = applyImageExclusionToEntryBlockGraph(next, loc, imgRef);
+          }
+        } else {
+          if (pendingTextExclusionRanges?.length) {
+            next = applyTextExclusionToEntryBlockGraph(next, loc, pendingTextExclusionRanges);
+          }
+          const matchingImages = pendingExcludeImageSourceRefs.filter((ref) =>
+            locSourceRefKeys.has(buildSourceRefKey(ref))
+          );
+          for (const imgRef of matchingImages) {
+            next = applyImageExclusionToEntryBlockGraph(next, loc, imgRef);
+          }
         }
       }
-    }
 
-    // ── ADDITIONS ─────────────────────────────────────────────────────────────
-    if (addedFieldIds.length && selectedEntryIndex !== null) {
-      const entry = entryBlockGraph.entries[selectedEntryIndex];
-      const contentType = entry
-        ? payload.contentTypes.find((c) => c.sys.id === entry.contentTypeId)
-        : undefined;
+      // ── ADDITIONS for this entry ──
+      if (addedFieldIds.length) {
+        const entry = entryBlockGraph.entries[entryLoc.entryIndex];
+        const contentType = entry
+          ? payload.contentTypes.find((c) => c.sys.id === entry.contentTypeId)
+          : undefined;
 
-      const resolvedTargets = addedFieldIds.flatMap((fieldId) => {
-        const field = contentType?.fields?.find((f) => 'id' in f && f.id === fieldId);
-        const fieldType =
-          field && 'type' in field && typeof field.type === 'string' ? field.type : 'Text';
-        return [{ entryIndex: selectedEntryIndex, fieldId, fieldType }];
-      });
+        const resolvedTargets = addedFieldIds.flatMap((fieldId) => {
+          const field = contentType?.fields?.find((f) => 'id' in f && f.id === fieldId);
+          const fieldType =
+            field && 'type' in field && typeof field.type === 'string' ? field.type : 'Text';
+          return [{ entryIndex: entryLoc.entryIndex, fieldId, fieldType }];
+        });
 
-      if (isImageContent) {
-        // Image assignment: asset fields via appendImageToTargets,
-        // rich text fields via applyRichTextAssignToEntryBlockGraph.
-        const imageRef = pendingExcludeImageSourceRefs[0];
-        if (imageRef) {
-          const assetTargets = resolvedTargets.filter((t) => t.fieldType !== 'RichText');
-          const richTextTargets = resolvedTargets.filter((t) => t.fieldType === 'RichText');
+        if (isImageContent) {
+          const imageRef = pendingExcludeImageSourceRefs[0];
+          if (imageRef) {
+            const assetTargets = resolvedTargets.filter((t) => t.fieldType !== 'RichText');
+            const richTextTargets = resolvedTargets.filter((t) => t.fieldType === 'RichText');
 
-          if (assetTargets.length) {
-            next = appendImageToTargets(next, imageRef, assetTargets);
+            if (assetTargets.length) {
+              next = appendImageToTargets(next, imageRef, assetTargets);
+            }
+            if (richTextTargets.length) {
+              next = applyRichTextAssignToEntryBlockGraph(
+                next,
+                document,
+                [imageRef],
+                richTextTargets
+              );
+              const imageKey = buildSourceRefKey(imageRef);
+              next = {
+                ...next,
+                excludedSourceRefs: next.excludedSourceRefs.filter(
+                  (r) => buildSourceRefKey(r) !== imageKey
+                ),
+              };
+            }
           }
-          if (richTextTargets.length) {
+        } else {
+          const richTextTargets = resolvedTargets.filter((t) => t.fieldType === 'RichText');
+          const nonRichTextTargets = resolvedTargets.filter((t) => t.fieldType !== 'RichText');
+
+          if (richTextTargets.length && pendingPreviewSourceRefs.length) {
             next = applyRichTextAssignToEntryBlockGraph(
               next,
               document,
-              [imageRef],
+              pendingPreviewSourceRefs,
               richTextTargets
             );
-            // appendImageToTargets clears excludedSourceRefs automatically, but
-            // applyRichTextAssignToEntryBlockGraph does not — remove it explicitly.
-            const imageKey = buildSourceRefKey(imageRef);
-            next = {
-              ...next,
-              excludedSourceRefs: next.excludedSourceRefs.filter(
-                (r) => buildSourceRefKey(r) !== imageKey
-              ),
-            };
           }
-        }
-      } else {
-        // Text assignment: rich text via DOM selection, non-rich-text via character ranges.
-        const richTextTargets = resolvedTargets.filter((t) => t.fieldType === 'RichText');
-        const nonRichTextTargets = resolvedTargets.filter((t) => t.fieldType !== 'RichText');
 
-        if (richTextTargets.length && pendingPreviewSourceRefs.length) {
-          next = applyRichTextAssignToEntryBlockGraph(
-            next,
-            document,
-            pendingPreviewSourceRefs,
-            richTextTargets
-          );
-        }
-
-        const allRangesForAssign = [
-          ...(pendingTextExclusionRanges ?? []),
-          ...pendingTextAssignRanges,
-        ];
-        if (nonRichTextTargets.length && allRangesForAssign.length) {
-          next = applyTextAssignToEntryBlockGraph(
-            next,
-            document,
-            allRangesForAssign,
-            nonRichTextTargets
-          );
+          const allRangesForAssign = [
+            ...(pendingTextExclusionRanges ?? []),
+            ...pendingTextAssignRanges,
+          ];
+          if (nonRichTextTargets.length && allRangesForAssign.length) {
+            next = applyTextAssignToEntryBlockGraph(
+              next,
+              document,
+              allRangesForAssign,
+              nonRichTextTargets
+            );
+          }
         }
       }
     }

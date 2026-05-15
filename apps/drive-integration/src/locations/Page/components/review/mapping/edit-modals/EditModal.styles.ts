@@ -4,11 +4,13 @@ import tokens from '@contentful/f36-tokens';
 export const modalContent = css({
   display: 'flex',
   flexDirection: 'column',
-  gap: tokens.spacingL,
+  gap: tokens.spacingXl,
 });
 
-export const modalContentWithDropdown = css({
-  minHeight: '500px',
+export const contentSection = css({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: tokens.spacingXs,
 });
 
 export const sectionCard = css({
