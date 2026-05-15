@@ -7,7 +7,7 @@ export const ERROR_MESSAGES = {
   CREATE_ENTRIES_ERROR: 'No entries were created, please try again.',
   GENERIC_ERROR: 'This preview could not be completed. Please start again.',
   GOOGLE_DRIVE_AUTH_ERROR:
-    'Your Google Drive connection has expired or is no longer valid. Reconnect your account to continue generating a preview.',
+    'Your Drive connection has expired or is no longer valid. Reconnect your account to continue generating a preview.',
 } as const;
 
 export const SUCCESS_MESSAGES = {

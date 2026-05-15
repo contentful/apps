@@ -1,4 +1,4 @@
-# Agent Guide — google-docs
+# Agent Guide — drive-integration
 
 ## What This App Does
 Connects Google Docs to Contentful. Lets editors import a Google Doc's content directly into a Contentful rich-text field, handling the conversion from Google Docs format to Contentful's rich-text document model.
