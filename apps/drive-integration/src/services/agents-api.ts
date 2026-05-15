@@ -92,11 +92,8 @@ export async function getWorkflowRun(
     }
 
     if (!response.ok) {
-      if (response.status === 403) {
-        throw normalizeAiAccessError({ status: response.status });
-      }
-
-      throw new Error(`Failed to poll agent run: ${response.status} ${response.statusText}`);
+      const body = await response.json().catch(() => ({}));
+      throw normalizeAiAccessError({ status: response.status, ...body });
     }
 
     return (await response.json()) as AgentRunData;
@@ -138,13 +135,8 @@ export async function startAgentRun(
     );
 
     if (!response.ok) {
-      if (response.status === 403) {
-        throw normalizeAiAccessError({ status: response.status });
-      }
-
-      throw new Error(
-        `Failed to start workflow agent run: ${response.status} ${response.statusText}`
-      );
+      const body = await response.json().catch(() => ({}));
+      throw normalizeAiAccessError({ status: response.status, ...body });
     }
 
     runData = (await response.json()) as AgentRunData;
@@ -191,11 +183,8 @@ export async function resumeWorkflowRun(
     );
 
     if (!response.ok) {
-      if (response.status === 403) {
-        throw normalizeAiAccessError({ status: response.status });
-      }
-
-      throw new Error(`Failed to resume agent run: ${response.status} ${response.statusText}`);
+      const body = await response.json().catch(() => ({}));
+      throw normalizeAiAccessError({ status: response.status, ...body });
     }
 
     return;

@@ -43,7 +43,7 @@ interface ModalOrchestratorProps {
   isOAuthConnected?: boolean;
   isOAuthBusy?: boolean;
   onReconnectGoogleDrive?: () => Promise<void>;
-  onAiAccessDenied?: () => void;
+  onAiAccessDenied?: (message: string) => void;
   onMappingReviewReady: (payload: MappingReviewSuspendPayload, runId: string) => void;
   onResetToMain: () => void;
 }
@@ -182,7 +182,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       if (isAiAccessDeniedError(error)) {
         resetProgress();
         onResetToMain();
-        onAiAccessDenied?.();
+        onAiAccessDenied?.(error.message);
         return;
       }
 

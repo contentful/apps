@@ -55,15 +55,10 @@ export function isAiAccessDeniedError(error: unknown): error is AiAccessDeniedEr
     return false;
   }
 
-  const message = (getReasons(err) ?? err.message ?? '').toLowerCase();
-
   const hasForbiddenStatus = err.status === 403;
   const hasAccessDeniedIdentifier = err.sys?.id === 'AccessDenied';
-  const hasAiAccessDeniedMessage = message
-    .toLowerCase()
-    .includes('ai features have been temporarily disabled');
 
-  return hasForbiddenStatus && hasAccessDeniedIdentifier && hasAiAccessDeniedMessage;
+  return hasForbiddenStatus && hasAccessDeniedIdentifier;
 }
 
 export function normalizeAiAccessError(error: unknown): Error {

@@ -6,28 +6,37 @@ import {
 } from '../../src/utils/aiAccess';
 
 describe('aiAccess utils', () => {
-  it('detects AI access denied only when status, identifier, and message all match', () => {
+  it('detects AI access denied when status is 403 and sys.id is AccessDenied', () => {
     expect(
       isAiAccessDeniedError({
         status: 403,
         sys: { id: 'AccessDenied' },
-        message: 'AI features have been temporarily disabled for this space.',
       })
     ).toBe(true);
   });
 
-  it('normalizes 403-style errors into AiAccessDeniedError', () => {
+  it('detects AI access denied regardless of message content', () => {
+    expect(
+      isAiAccessDeniedError({
+        status: 403,
+        sys: { id: 'AccessDenied' },
+        message: 'google-docs-workflow-agent requires a higher plan',
+      })
+    ).toBe(true);
+  });
+
+  it('normalizes 403+AccessDenied errors into AiAccessDeniedError preserving the reason', () => {
     const error = normalizeAiAccessError({
       status: 403,
       sys: { id: 'AccessDenied' },
-      details: { reasons: 'AI features have been temporarily disabled for this space.' },
+      details: { reasons: 'google-docs-workflow-agent is not available for your plan' },
     });
 
     expect(error).toBeInstanceOf(AiAccessDeniedError);
-    expect(error.message).toContain('temporarily disabled');
+    expect(error.message).toContain('not available for your plan');
   });
 
-  it('does not classify generic 403 errors as AI access denied', () => {
+  it('does not classify 403 errors without AccessDenied sys.id as AI access denied', () => {
     const error = normalizeAiAccessError({
       status: 403,
       message: 'Forbidden',

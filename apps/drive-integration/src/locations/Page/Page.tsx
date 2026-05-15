@@ -12,7 +12,6 @@ import { loadFixtureReviewPayload } from '../../fixtures/googleDocsReview/loadFi
 import type { MappingReviewSuspendPayload } from '@types';
 import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
 import { useGoogleDriveOAuth } from '@hooks/useGoogleDriveOAuth';
-import { ERROR_MESSAGES } from '@constants/messages';
 import { isAiAccessDeniedError } from '../../utils/aiAccess';
 
 const enableMockReviewPayload = import.meta.env.VITE_ENABLE_MOCK_REVIEW_PAYLOAD === 'true';
@@ -20,7 +19,7 @@ const enableMockReviewPayload = import.meta.env.VITE_ENABLE_MOCK_REVIEW_PAYLOAD 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
   const modalOrchestratorRef = useRef<ModalOrchestratorHandle>(null);
-  const [isAiAccessDenied, setIsAiAccessDenied] = useState(false);
+  const [aiAccessDeniedMessage, setAiAccessDeniedMessage] = useState<string | null>(null);
   const [mappingReviewState, setMappingReviewState] = useState<{
     payload: MappingReviewSuspendPayload;
     runId?: string;
@@ -60,14 +59,14 @@ const Page = () => {
     modalOrchestratorRef.current?.startFlow();
   };
 
-  const handleAiAccessDenied = () => {
-    setIsAiAccessDenied(true);
+  const handleAiAccessDenied = (message: string) => {
+    setAiAccessDeniedMessage(message);
     setMappingReviewState(null);
   };
 
   const handleAiAccessRestored = () => {
-    if (isAiAccessDenied) {
-      setIsAiAccessDenied(false);
+    if (aiAccessDeniedMessage !== null) {
+      setAiAccessDeniedMessage(null);
     }
   };
 
@@ -105,7 +104,7 @@ const Page = () => {
       await startOAuth();
     } catch (error) {
       if (isAiAccessDeniedError(error)) {
-        handleAiAccessDenied();
+        handleAiAccessDenied(error.message);
       }
     }
   };
@@ -115,12 +114,12 @@ const Page = () => {
       await disconnectOAuth();
     } catch (error) {
       if (isAiAccessDeniedError(error)) {
-        handleAiAccessDenied();
+        handleAiAccessDenied(error.message);
       }
     }
   };
 
-  if (isAiAccessDenied) {
+  if (aiAccessDeniedMessage !== null) {
     return (
       <Layout withBoxShadow={true} offsetTop={10}>
         <Layout.Body>
@@ -129,7 +128,7 @@ const Page = () => {
             gap="spacingM"
             style={{ maxWidth: '900px', margin: '24px auto' }}>
             <Heading marginBottom="none">Drive Integration</Heading>
-            <Note variant="warning">{ERROR_MESSAGES.AI_ACCESS_DENIED}</Note>
+            <Note variant="warning">{aiAccessDeniedMessage}</Note>
           </Flex>
         </Layout.Body>
       </Layout>
