@@ -37,7 +37,7 @@ export const MainPageView = ({
         flexDirection="column"
         gap="spacingXl"
         style={{ maxWidth: '900px', margin: `${tokens.spacingL} auto` }}>
-        <Heading marginBottom="none">Google Drive Integration</Heading>
+        <Heading marginBottom="none">Drive Integration</Heading>
         <OAuthConnector
           isOAuthConnected={isOAuthConnected}
           isOAuthBusy={isOAuthBusy}
@@ -55,7 +55,7 @@ export const MainPageView = ({
             <Grid columns="4fr 1fr" style={{ width: '100%' }}>
               <Grid.Item>
                 <Paragraph>
-                  Create entries using existing content types from a Google Drive file.
+                  Create entries using existing content types from a Drive file.
                   <br />
                   Get started by selecting the .doc file you would like to use. Only Google Doc
                   files are supported. Sheets, Slides, and PDFs will not appear in the file picker.
@@ -78,7 +78,7 @@ export const MainPageView = ({
             </Note>
             {!isOAuthLoading && !isOAuthConnected && (
               <Note variant="warning" style={{ width: '100%' }}>
-                Please connect to Google Drive before selecting your file.
+                Please connect to Drive before selecting your file.
               </Note>
             )}
           </Flex>

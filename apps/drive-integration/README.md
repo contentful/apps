@@ -1,6 +1,6 @@
-# Google Docs App for Contentful
+# Drive Integration App for Contentful
 
-A Contentful App that enables importing content from Google Docs into Contentful entries.
+A Contentful App that enables importing content from Google Drive into Contentful entries.
 
 ## Frontend Setup
 
@@ -8,7 +8,7 @@ A Contentful App that enables importing content from Google Docs into Contentful
 2. Navigate to the app directory:
 
 ```bash
-cd apps/google-docs
+cd apps/drive-integration
 ```
 
 3. Install dependencies:

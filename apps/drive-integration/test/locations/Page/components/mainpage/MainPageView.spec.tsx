@@ -39,16 +39,12 @@ describe('MainPageView', () => {
   it('shows warning note when not connected', () => {
     renderWithLayout(<MainPageView {...defaultProps} isOAuthConnected={false} oauthToken="" />);
 
-    expect(
-      screen.getByText(/Please connect to Google Drive before selecting your file\./i)
-    ).toBeTruthy();
+    expect(screen.getByText(/Please connect to Drive before selecting your file\./i)).toBeTruthy();
   });
 
   it('does not show warning note when connected', () => {
     renderWithLayout(<MainPageView {...defaultProps} />);
 
-    expect(
-      screen.queryByText(/Please connect to Google Drive before selecting your file\./i)
-    ).toBeNull();
+    expect(screen.queryByText(/Please connect to Drive before selecting your file\./i)).toBeNull();
   });
 });
