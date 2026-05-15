@@ -2,7 +2,7 @@ import { FieldAppSDK } from '@contentful/app-sdk';
 import { Button, Tooltip } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { RichTextEditor } from '@contentful/field-editor-rich-text';
 import { Document } from '@contentful/rich-text-types';
 import { EntrySys } from '@contentful/app-sdk/dist/types/utils';
@@ -44,6 +44,55 @@ const Field = () => {
 
     return detachValueChangeHandler;
   }, [sdk.entry]);
+
+  // Inject `entityId` + `referenceFieldId` into entity-picker `recommendations`
+  // so the Suggested tab populates inside the marketplace-app iframe. The web
+  // app's rtSdkDecorator only runs around the native rich-text widget, and
+  // field-editor-rich-text itself only sets `searchQuery` (in HyperlinkModal)
+  // -- never `entityId`/`referenceFieldId`. Without this, the picker dialog
+  // never calls /semantic/reference-suggestions. See ES-262.
+  //
+  // The `recommendations` key is not declared on @contentful/app-sdk's
+  // selectSingleEntry/selectMultipleEntries options type, but the host's
+  // dialog channel forwards arbitrary option keys to the picker, which reads
+  // `recommendations` directly. We cast at the wrapper boundary.
+  const decoratedSdk = useMemo<FieldAppSDK>(() => {
+    const recommendationsBase = {
+      entityId: sdk.entry.getSys().id,
+      referenceFieldId: sdk.field.id,
+    };
+
+    type WithRecommendations<T> = T & {
+      recommendations?: Record<string, unknown>;
+    };
+
+    return {
+      ...sdk,
+      dialogs: {
+        ...sdk.dialogs,
+        selectSingleEntry: (options = {}) => {
+          const merged: WithRecommendations<typeof options> = {
+            ...options,
+            recommendations: {
+              ...recommendationsBase,
+              ...((options as WithRecommendations<typeof options>).recommendations ?? {}),
+            },
+          };
+          return sdk.dialogs.selectSingleEntry(merged);
+        },
+        selectMultipleEntries: (options = {}) => {
+          const merged: WithRecommendations<typeof options> = {
+            ...options,
+            recommendations: {
+              ...recommendationsBase,
+              ...((options as WithRecommendations<typeof options>).recommendations ?? {}),
+            },
+          };
+          return sdk.dialogs.selectMultipleEntries(merged);
+        },
+      },
+    };
+  }, [sdk]);
 
   const isChanged = (sys: EntrySys | ReleaseEntrySys) => {
     if ('fieldStatus' in sys && sys.fieldStatus) {
@@ -101,7 +150,7 @@ const Field = () => {
   return (
     <>
       <div className={styles.richTextEditorContainer}>
-        <RichTextEditor sdk={sdk} isInitiallyDisabled={false} />
+        <RichTextEditor sdk={decoratedSdk} isInitiallyDisabled={false} />
       </div>
       <Tooltip
         placement="top"
