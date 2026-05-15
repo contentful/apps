@@ -35,10 +35,10 @@ export const EditMappingButton = forwardRef<HTMLDivElement, EditMappingButtonPro
           width: 'fit-content',
         }}>
         <Button
-          variant="transparent"
+          variant="secondary"
           size="small"
           onClick={onEdit}
-          startIcon={<PencilSimpleIcon size="tiny" />}
+          startIcon={<PencilSimpleIcon size="small" />}
           style={{ paddingTop: '2px', paddingBottom: '2px' }}>
           Edit content mapping
         </Button>
