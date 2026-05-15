@@ -3,7 +3,7 @@ import { type ComponentProps } from 'react';
 import { Button, Flex, Text, Image } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { CheckCircleIcon } from '@contentful/f36-icons';
-import googleDriveLogo from '../../../../assets/drive-integration.svg';
+import driveLogo from '../../../../assets/drive-integration.svg';
 
 type OAuthConnectorProps = {
   isOAuthConnected: boolean;
@@ -67,7 +67,7 @@ export const OAuthConnector = ({
             borderRadius: tokens.borderRadiusMedium,
             backgroundColor: tokens.gray100,
           }}>
-          <Image src={googleDriveLogo} alt="Drive Integration" height="28px" width="32px" />
+          <Image src={driveLogo} alt="Drive Integration" height="28px" width="32px" />
         </Flex>
         <Text fontSize="fontSizeL" fontWeight="fontWeightMedium" lineHeight="lineHeightL">
           Drive Integration
