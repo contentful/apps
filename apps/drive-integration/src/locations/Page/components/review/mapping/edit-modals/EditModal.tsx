@@ -36,6 +36,15 @@ export const EditModal = ({
 
   useEffect(() => {
     if (!isOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
     setSelectedFieldIdsByEntry(
       Object.fromEntries(viewModel.newLocations.map((loc) => [loc.id, loc.initialFieldIds]))
     );
