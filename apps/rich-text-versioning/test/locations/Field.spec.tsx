@@ -4,10 +4,12 @@ import { mockSdk } from '../mocks';
 import Field from '../../src/locations/Field';
 import { Document, BLOCKS } from '@contentful/rich-text-types';
 
+let capturedDecoratedSdk: any = null;
 vi.mock('@contentful/field-editor-rich-text', () => ({
-  RichTextEditor: ({ sdk }: { sdk: any }) => (
-    <div data-testid="rich-text-editor">Rich Text Editor</div>
-  ),
+  RichTextEditor: ({ sdk }: { sdk: any }) => {
+    capturedDecoratedSdk = sdk;
+    return <div data-testid="rich-text-editor">Rich Text Editor</div>;
+  },
 }));
 
 const mockOpenCurrentApp = vi.fn();
@@ -25,6 +27,8 @@ const fieldMockSdk = {
   },
   dialogs: {
     openCurrentApp: mockOpenCurrentApp,
+    selectSingleEntry: vi.fn(),
+    selectMultipleEntries: vi.fn(),
   },
   parameters: {
     installation: {
@@ -174,6 +178,62 @@ describe('Field component', () => {
           errorInfo: {
             hasError: false,
           },
+        },
+      });
+    });
+  });
+
+  describe('SDK decorator for entity-picker recommendations (ES-262)', () => {
+    beforeEach(() => {
+      capturedDecoratedSdk = null;
+      fieldMockSdk.entry.getSys.mockReturnValue({ id: 'test-entry' });
+      fieldMockSdk.field = { ...fieldMockSdk.field, id: 'mainContent' } as any;
+    });
+
+    it('injects entityId and referenceFieldId into selectSingleEntry recommendations', () => {
+      render(<Field />);
+      capturedDecoratedSdk.dialogs.selectSingleEntry({});
+      expect(fieldMockSdk.dialogs.selectSingleEntry).toHaveBeenCalledWith({
+        recommendations: { entityId: 'test-entry', referenceFieldId: 'mainContent' },
+      });
+    });
+
+    it('preserves caller-supplied recommendations keys (e.g. searchQuery from HyperlinkModal)', () => {
+      render(<Field />);
+      capturedDecoratedSdk.dialogs.selectSingleEntry({
+        contentTypes: ['article'],
+        recommendations: { searchQuery: 'how does X work' },
+      });
+      expect(fieldMockSdk.dialogs.selectSingleEntry).toHaveBeenCalledWith({
+        contentTypes: ['article'],
+        recommendations: {
+          entityId: 'test-entry',
+          referenceFieldId: 'mainContent',
+          searchQuery: 'how does X work',
+        },
+      });
+    });
+
+    it('lets caller-supplied recommendations keys override the injected base', () => {
+      render(<Field />);
+      capturedDecoratedSdk.dialogs.selectSingleEntry({
+        recommendations: { entityId: 'override', referenceFieldId: 'override-field' },
+      });
+      expect(fieldMockSdk.dialogs.selectSingleEntry).toHaveBeenCalledWith({
+        recommendations: { entityId: 'override', referenceFieldId: 'override-field' },
+      });
+    });
+
+    it('decorates selectMultipleEntries the same way', () => {
+      render(<Field />);
+      capturedDecoratedSdk.dialogs.selectMultipleEntries({
+        recommendations: { searchQuery: 'q' },
+      });
+      expect(fieldMockSdk.dialogs.selectMultipleEntries).toHaveBeenCalledWith({
+        recommendations: {
+          entityId: 'test-entry',
+          referenceFieldId: 'mainContent',
+          searchQuery: 'q',
         },
       });
     });
