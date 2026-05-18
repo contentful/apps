@@ -1,0 +1,50 @@
+{
+  "name": "html-to-rich-text-conversion-contentful",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@contentful/app-sdk": "4.25.0",
+    "@contentful/f36-components": "4.65.4",
+    "@contentful/f36-tokens": "4.0.2",
+    "@contentful/react-apps-toolkit": "1.2.16",
+    "@contentful/rich-text-html-renderer": "^17.2.2",
+    "@contentful/rich-text-types": "16.8.5",
+    "@tiptap/extension-link": "^3.23.2",
+    "@tiptap/extension-subscript": "^3.23.2",
+    "@tiptap/extension-superscript": "^3.23.2",
+    "@tiptap/extension-table": "^3.23.2",
+    "@tiptap/extension-table-cell": "^3.23.2",
+    "@tiptap/extension-table-header": "^3.23.2",
+    "@tiptap/extension-table-row": "^3.23.2",
+    "@tiptap/extension-underline": "^3.23.2",
+    "@tiptap/pm": "^3.23.2",
+    "@tiptap/react": "^3.23.2",
+    "@tiptap/starter-kit": "^3.23.2",
+    "contentful-management": "10.46.4",
+    "emotion": "10.0.27",
+    "happy-dom": "^15.11.6",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "scripts": {
+    "start": "vite",
+    "build": "tsc && vite build",
+    "test": "vitest",
+    "test:ci": "vitest run",
+    "create-app-definition": "contentful-app-scripts create-app-definition",
+    "add-locations": "contentful-app-scripts add-locations",
+    "upload": "contentful-app-scripts upload --bundle-dir ./dist",
+    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./dist  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
+  },
+  "devDependencies": {
+    "@contentful/app-scripts": "^2.3.0",
+    "@testing-library/react": "14.0.0",
+    "@types/node": "16.18.38",
+    "@types/react": "18.3.1",
+    "@types/react-dom": "18.3.0",
+    "@vitejs/plugin-react": "4.2.1",
+    "typescript": "5.1.6",
+    "vite": "4.5.14",
+    "vitest": "0.32.4"
+  }
+}
