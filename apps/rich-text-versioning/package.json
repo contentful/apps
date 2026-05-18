@@ -8,7 +8,7 @@
     "@contentful/f36-components": "^6.7.1",
     "@contentful/f36-multiselect": "^6.7.1",
     "@contentful/f36-tokens": "^6.1.2",
-    "@contentful/field-editor-rich-text": "6.3.5",
+    "@contentful/field-editor-rich-text": "6.3.6",
     "@contentful/react-apps-toolkit": "^2.0.0",
     "@contentful/rich-text-html-renderer": "^17.2.2",
     "@contentful/rich-text-react-renderer": "^16.2.1",
