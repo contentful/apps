@@ -1,4 +1,4 @@
-import { Box, Card, Checkbox, Flex, Paragraph, Text } from '@contentful/f36-components';
+import { Badge, Box, Card, Checkbox, Flex, Paragraph, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { cx } from '@emotion/css';
 import type { EntryListRow as OverviewEntryListRow } from '../../../../utils/overviewEntryList';
@@ -90,6 +90,11 @@ function OverviewEntryRowCard({
                 </Text>
               ) : null}
             </Paragraph>
+            {row.hasNoMappedContent ? (
+              <Badge variant="secondary" size="small">
+                No mapped content
+              </Badge>
+            ) : null}
           </button>
         </Flex>
       </Card>
