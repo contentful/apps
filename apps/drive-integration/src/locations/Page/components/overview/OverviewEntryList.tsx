@@ -90,11 +90,11 @@ function OverviewEntryRowCard({
                   ({truncateLabel(row.entryTitle, 150)})
                 </Text>
               ) : null}
-              {row.hasNoMappedContent ? (
+              {row.hasNoMappedContent && (
                 <Badge variant="secondary" size="small" className={noMappedContentBadge}>
                   No mapped content
                 </Badge>
-              ) : null}
+              )}
             </Paragraph>
           </button>
         </Flex>
