@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo } from 'react';
+import { useEffect, useId, useMemo, useRef } from 'react';
 import { Badge, Flex, FormControl, Text } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import type { EditModalFieldMapping, EditModalFieldOption } from '@types';
@@ -65,12 +65,15 @@ export const FieldSelectionDropdown = ({
     [fieldOptions, isImageContent, selectedText]
   );
 
+  const onSelectableStateChangeRef = useRef(onSelectableStateChange);
+  onSelectableStateChangeRef.current = onSelectableStateChange;
+
   useEffect(() => {
-    onSelectableStateChange?.({
+    onSelectableStateChangeRef.current?.({
       hasFieldOptions: fieldOptions.length > 0,
       hasSelectableOptions: selectableOptions.length > 0,
     });
-  }, [fieldOptions.length, isImageContent, onSelectableStateChange, selectableOptions.length]);
+  }, [fieldOptions.length, isImageContent, selectableOptions.length]);
 
   const handleSelectField = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { checked, value } = event.target;

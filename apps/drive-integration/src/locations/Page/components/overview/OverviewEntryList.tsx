@@ -3,6 +3,7 @@ import tokens from '@contentful/f36-tokens';
 import { cx } from '@emotion/css';
 import type { EntryListRow as OverviewEntryListRow } from '../../../../utils/overviewEntryList';
 import {
+  noMappedContentBadge,
   treeChildRowBase,
   treeChildRowLast,
   treeChildRowNotLast,
@@ -89,12 +90,12 @@ function OverviewEntryRowCard({
                   ({truncateLabel(row.entryTitle, 150)})
                 </Text>
               ) : null}
+              {row.hasNoMappedContent ? (
+                <Badge variant="secondary" size="small" className={noMappedContentBadge}>
+                  No mapped content
+                </Badge>
+              ) : null}
             </Paragraph>
-            {row.hasNoMappedContent ? (
-              <Badge variant="secondary" size="small">
-                No mapped content
-              </Badge>
-            ) : null}
           </button>
         </Flex>
       </Card>
