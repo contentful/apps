@@ -164,6 +164,47 @@ describe('buildEntryListFromEntryBlockGraph', () => {
     expect(rows[0].entryTitle).toBe('Entry title');
   });
 
+  it('sets hasNoMappedContent to true when all fieldMappings have empty sourceRefs', () => {
+    const rows = buildEntryListFromEntryBlockGraph(
+      [
+        {
+          tempId: 'entry-1',
+          contentTypeId: 'article',
+          fieldMappings: [
+            { fieldId: 'title', fieldType: 'Symbol', sourceRefs: [], confidence: 0 },
+            { fieldId: 'body', fieldType: 'Text', sourceRefs: [], confidence: 0 },
+          ],
+        },
+      ],
+      contentTypes
+    );
+
+    expect(rows[0].hasNoMappedContent).toBe(true);
+  });
+
+  it('sets hasNoMappedContent to false when at least one fieldMapping has a sourceRef', () => {
+    const rows = buildEntryListFromEntryBlockGraph(
+      [
+        {
+          tempId: 'entry-1',
+          contentTypeId: 'article',
+          fieldMappings: [
+            {
+              fieldId: 'title',
+              fieldType: 'Symbol',
+              sourceRefs: [createTextSourceRef('Hello')],
+              confidence: 0.9,
+            },
+            { fieldId: 'body', fieldType: 'Text', sourceRefs: [], confidence: 0 },
+          ],
+        },
+      ],
+      contentTypes
+    );
+
+    expect(rows[0].hasNoMappedContent).toBe(false);
+  });
+
   it('truncates long display-field text using the first text source ref only', () => {
     const long = 'a'.repeat(100);
     const rows = buildEntryListFromEntryBlockGraph(

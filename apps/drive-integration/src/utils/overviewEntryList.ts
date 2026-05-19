@@ -13,6 +13,7 @@ export interface EntryListRow {
   entryIndex: number;
   contentTypeName: string;
   entryTitle?: string;
+  hasNoMappedContent?: boolean;
   children: EntryListRow[];
 }
 
@@ -235,11 +236,14 @@ export function buildEntryListFromEntryBlockGraph(
     const contentTypeDisplayInfo = contentTypeDisplayInfoById.get(entry.contentTypeId);
     const entryTitle = getEntryTitleFromFieldMappings(entry, contentTypeDisplayInfo?.displayField);
 
+    const hasNoMappedContent = entry.fieldMappings.every((fm) => fm.sourceRefs.length === 0);
+
     return {
       id,
       entryIndex: index,
       contentTypeName: contentTypeNameById.get(entry.contentTypeId) ?? entry.contentTypeId,
       entryTitle,
+      hasNoMappedContent,
       children: childRows,
     };
   };
