@@ -1,7 +1,7 @@
-import ConfigScreen from './ConfigScreen';
+import ConfigScreen from '../../../src/locations/ConfigScreen/ConfigScreen';
 import { render } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { createMockSDK, createMockCMA } from '../../../test/mocks';
+import { createMockSDK, createMockCMA } from '../../mocks';
 
 const mockSdk = createMockSDK() as any;
 const mockCma = createMockCMA();
