@@ -25,8 +25,3 @@ export const createMockCMA = () => {
     },
   };
 };
-
-// Default mock CMA instance for backward compatibility
-const mockCma: any = createMockCMA();
-
-export { mockCma };

@@ -50,7 +50,3 @@ export const createMockSDK = (
     },
   } as unknown as PageAppSDK | ConfigAppSDK;
 };
-
-const mockSdk: any = createMockSDK();
-
-export { mockSdk };
