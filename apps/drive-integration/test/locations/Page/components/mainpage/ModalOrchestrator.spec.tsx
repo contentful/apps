@@ -125,12 +125,12 @@ describe('ModalOrchestrator', () => {
       messages: [],
       googleDocPayload: mockWorkflowPayload,
     } satisfies WorkflowRunResult);
-    vi.mocked(mockSdk.cma.space.get).mockResolvedValue({ sys: { id: 'test-space-id' } });
-    vi.mocked(mockSdk.cma.environment.get).mockResolvedValue({ sys: { id: 'test-env-id' } });
+    vi.mocked(mockSdk.cma.space.get).mockResolvedValue({ sys: { id: 'test-space-id' } } as any);
+    vi.mocked(mockSdk.cma.environment.get).mockResolvedValue({ sys: { id: 'test-env-id' } } as any);
     vi.mocked(mockSdk.cma.contentType.getMany).mockResolvedValue({
       items: mockContentTypes,
       total: mockContentTypes.length,
-    });
+    } as any);
   });
 
   it('shows ContentTypePickerModal after document is picked', async () => {

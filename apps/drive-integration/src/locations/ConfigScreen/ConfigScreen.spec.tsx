@@ -3,7 +3,7 @@ import { render } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { createMockSDK, createMockCMA } from '../../../test/mocks';
 
-const mockSdk = createMockSDK();
+const mockSdk = createMockSDK() as any;
 const mockCma = createMockCMA();
 
 vi.mock('@contentful/react-apps-toolkit', () => ({

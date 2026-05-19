@@ -80,7 +80,7 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
   ModalOrchestrator: require('react').forwardRef(
     (
       props: {
-        onAiAccessDenied: () => void;
+        onAiAccessDenied: (message: string) => void;
         onMappingReviewReady: (payload: MappingReviewSuspendPayload, runId: string) => void;
         onResetToMain: () => void;
         oauthToken: string;
