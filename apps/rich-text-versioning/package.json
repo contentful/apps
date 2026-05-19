@@ -4,25 +4,22 @@
   "private": true,
   "dependencies": {
     "@ali-tas/htmldiff-js": "^2.0.1",
-    "@contentful/app-sdk": "^4.54.0",
-    "@contentful/f36-components": "^6.7.1",
-    "@contentful/f36-multiselect": "^6.7.1",
-    "@contentful/f36-tokens": "^6.1.2",
-    "@contentful/field-editor-rich-text": "6.3.5",
-    "@contentful/react-apps-toolkit": "^2.0.0",
-    "@contentful/rich-text-html-renderer": "^17.2.2",
-    "@contentful/rich-text-react-renderer": "^16.2.1",
-    "@contentful/rich-text-types": "^17.2.5",
-    "@emotion/css": "^11.13.5",
-    "@lingui/core": "^5.3.0",
-    "@tanstack/react-query": "^5.0.0",
+    "@contentful/app-sdk": "^4.42.0",
+    "@contentful/f36-components": "4.81.1",
+    "@contentful/f36-multiselect": "^4.81.1",
+    "@contentful/f36-tokens": "4.2.0",
+    "@contentful/field-editor-rich-text": "4.16.0",
+    "@contentful/react-apps-toolkit": "1.2.16",
+    "@contentful/rich-text-html-renderer": "^17.1.0",
+    "@contentful/rich-text-react-renderer": "^16.1.0",
+    "@contentful/rich-text-types": "^16.1.0",
     "contentful": "^11.7.15",
-    "contentful-management": "^12.3.0",
+    "contentful-management": "11.54.4",
     "dompurify": "^3.0.8",
+    "emotion": "10.0.27",
     "happy-dom": "^20.0.0",
     "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "scheduler": "^0.23.2"
+    "react-dom": "18.3.1"
   },
   "scripts": {
     "start": "vite",
@@ -38,7 +35,6 @@
   },
   "devDependencies": {
     "@contentful/app-scripts": "^2.5.5",
-    "@testing-library/dom": "^10.0.0",
     "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "16.3.0",
     "@testing-library/user-event": "^14.6.1",
@@ -52,7 +48,7 @@
     "vitest": "^3.2.4"
   },
   "overrides": {
-    "@contentful/rich-text-types": "^17.2.5",
+    "@contentful/rich-text-types": "^16.1.0",
     "slate": "0.94.1",
     "slate-react": "0.102.0"
   }
