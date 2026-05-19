@@ -12,7 +12,9 @@ import {
   WorkflowRunResult,
   RunStatus,
 } from '@types';
-import { mockSdk } from '../../../../mocks';
+import { createMockSDK } from '../../../../mocks';
+
+const mockSdk = createMockSDK();
 
 const mockStartWorkflow = vi.fn();
 const mockResumeWorkflow = vi.fn();

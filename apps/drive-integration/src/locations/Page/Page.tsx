@@ -1,20 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { Button, Flex, Heading, Layout, Note, Paragraph } from '@contentful/f36-components';
+import { Flex, Heading, Layout, Note, Paragraph } from '@contentful/f36-components';
 import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
 } from './components/mainpage/ModalOrchestrator';
 import { MainPageView } from './components/mainpage/MainPageView';
 import { ReviewPage } from './components/review/ReviewPage';
-import { loadFixtureReviewPayload } from '../../fixtures/googleDocsReview/loadFixtureReviewPayload';
 import type { MappingReviewSuspendPayload } from '@types';
 import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
 import { useGoogleDriveOAuth } from '@hooks/useGoogleDriveOAuth';
 import { isAiAccessDeniedError } from '../../utils/aiAccess';
-
-const enableMockReviewPayload = import.meta.env.VITE_ENABLE_MOCK_REVIEW_PAYLOAD === 'true';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -24,8 +21,6 @@ const Page = () => {
     payload: MappingReviewSuspendPayload;
     runId?: string;
   } | null>(null);
-  const [fixtureReviewPayload, setFixtureReviewPayload] =
-    useState<MappingReviewSuspendPayload | null>(null);
   const { oauthToken, isOAuthConnected, isOAuthLoading, isOAuthBusy, startOAuth, disconnectOAuth } =
     useGoogleDriveOAuth(sdk);
   const { resumeWorkflow } = useWorkflowAgent({
@@ -33,27 +28,6 @@ const Page = () => {
     documentId: '',
     oauthToken: '',
   });
-
-  // TODO: remove fixture review payload loading before launch
-  useEffect(() => {
-    let isCancelled = false;
-
-    void loadFixtureReviewPayload()
-      .then((payload) => {
-        if (!isCancelled) {
-          setFixtureReviewPayload(payload);
-        }
-      })
-      .catch(() => {
-        if (!isCancelled) {
-          setFixtureReviewPayload(null);
-        }
-      });
-
-    return () => {
-      isCancelled = true;
-    };
-  }, []);
 
   const handleSelectFile = () => {
     modalOrchestratorRef.current?.startFlow();
@@ -148,12 +122,6 @@ const Page = () => {
           />
         ) : (
           <>
-            {/* TODO: remove mock review payload button before launch */}
-            {enableMockReviewPayload && fixtureReviewPayload ? (
-              <Button onClick={() => setMappingReviewState({ payload: fixtureReviewPayload })}>
-                Mock from fixture
-              </Button>
-            ) : null}
             <MainPageView
               oauthToken={oauthToken}
               isOAuthConnected={isOAuthConnected}

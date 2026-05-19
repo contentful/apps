@@ -1,7 +1,10 @@
 import ConfigScreen from './ConfigScreen';
 import { render } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { mockSdk, mockCma } from '../../../test/mocks';
+import { createMockSDK, createMockCMA } from '../../../test/mocks';
+
+const mockSdk = createMockSDK();
+const mockCma = createMockCMA();
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,

@@ -1,9 +1,11 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { mockSdk } from '../../mocks';
+import { createMockSDK } from '../../mocks';
 import { vi, describe, it, expect, afterEach, beforeEach } from 'vitest';
 import React from 'react';
 import type { MappingReviewSuspendPayload } from '@types';
 import Page from '../../../src/locations/Page/Page';
+
+const mockSdk = createMockSDK();
 
 const mappingReviewPayloadMock: MappingReviewSuspendPayload = {
   suspendStepId: 'mapping-review',
@@ -109,7 +111,9 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
           <button onClick={props.onResetToMain} type="button">
             Trigger Reset To Main
           </button>
-          <button onClick={props.onAiAccessDenied} type="button">
+          <button
+            onClick={() => props.onAiAccessDenied('AI features are currently disabled')}
+            type="button">
             Trigger Modal AI Access Denied
           </button>
         </>
