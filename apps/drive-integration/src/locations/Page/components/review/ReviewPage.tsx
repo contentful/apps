@@ -209,9 +209,7 @@ export const ReviewPage = ({
     if (mode === 'view') {
       setSelectedEntryIndex(null);
     } else if (mode === 'edit' && selectedEntryIndex === null) {
-      const assignedChildTempIds = new Set(
-        (payload.referenceGraph.edges ?? []).map((e) => e.to)
-      );
+      const assignedChildTempIds = new Set((payload.referenceGraph.edges ?? []).map((e) => e.to));
       const firstRootIndex = entryBlockGraph.entries.findIndex(
         (e) => !e.tempId || !assignedChildTempIds.has(e.tempId)
       );
