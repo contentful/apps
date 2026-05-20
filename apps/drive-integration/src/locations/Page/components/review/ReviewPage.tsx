@@ -209,7 +209,11 @@ export const ReviewPage = ({
     if (mode === 'view') {
       setSelectedEntryIndex(null);
     } else if (mode === 'edit' && selectedEntryIndex === null) {
-      setSelectedEntryIndex(entryBlockGraph.entries.length > 0 ? 0 : null);
+      const assignedChildTempIds = new Set((payload.referenceGraph.edges ?? []).map((e) => e.to));
+      const firstRootIndex = entryBlockGraph.entries.findIndex(
+        (e) => !e.tempId || !assignedChildTempIds.has(e.tempId)
+      );
+      setSelectedEntryIndex(firstRootIndex >= 0 ? firstRootIndex : null);
     }
   };
 
