@@ -3,43 +3,47 @@
 exports[`App > #render > should render the extension field view 1`] = `
 <div>
   <div
-    class="css-rvp98e"
+    class="css-e585x0"
   >
-    <input
-      aria-describedby="focal-point-validation"
-      aria-invalid="true"
-      class="css-r283cc css-93644d"
-      data-test-id="focal-point"
-      disabled=""
-      id="focal-point"
-      type="text"
-      value="Focal point not set"
-      width="large"
-    />
-    <button
-      class="css-127ixdm css-dp0f2t"
-      data-test-id="cf-ui-button"
-      type="button"
+    <div
+      class="css-imi2tp"
     >
-      <span
-        class="css-40g50j"
+      <input
+        aria-describedby="focal-point-validation"
+        aria-invalid="true"
+        class="css-r283cc css-93644d"
+        data-test-id="focal-point"
+        disabled=""
+        id="focal-point"
+        type="text"
+        value="Focal point not set"
+        width="large"
+      />
+      <button
+        class="css-127ixdm css-9u48bm"
+        data-test-id="cf-ui-button"
+        type="button"
       >
-        Set focal point
-      </span>
-    </button>
-    <button
-      class="css-1ulo0xy"
-      data-test-id="cf-ui-text-link"
-      type="button"
-    >
-      <span
-        class="css-x1sij0"
-      >
-        <span>
-          Reset focal point
+        <span
+          class="css-40g50j"
+        >
+          Set focal point
         </span>
-      </span>
-    </button>
+      </button>
+      <button
+        class="css-1ulo0xy"
+        data-test-id="cf-ui-text-link"
+        type="button"
+      >
+        <span
+          class="css-x1sij0"
+        >
+          <span>
+            Reset focal point
+          </span>
+        </span>
+      </button>
+    </div>
   </div>
 </div>
 `;

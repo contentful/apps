@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Button, Subheading, Modal } from '@contentful/f36-components';
 
+import { AspectRatioPreviewGallery } from '../AspectRatioPreviewGallery';
 import { FocalPoint } from '../FocalPoint';
-import { ImagePreviewWithFocalPoint } from '../ImagePreviewWithFocalPoint';
 
 import { MAX_PREVIEW_WRAPPER_SIZE, styles } from './styles';
 
@@ -120,35 +120,7 @@ export class FocalPointDialog extends Component {
               </div>
             </div>
             <div className={styles.focalPointDemo}>
-              <Subheading className={styles.subheading}>
-                Preview for different screen sizes
-              </Subheading>
-              <div className={styles.displayFlex}>
-                <ImagePreviewWithFocalPoint
-                  file={file}
-                  focalPoint={focalPoint}
-                  wrapperWidth={410}
-                  wrapperHeight={180}
-                  subtitle="Desktop"
-                />
-              </div>
-              <div className={styles.displayFlex}>
-                <ImagePreviewWithFocalPoint
-                  file={file}
-                  focalPoint={focalPoint}
-                  wrapperWidth={280}
-                  wrapperHeight={180}
-                  subtitle="Tablet"
-                />
-                <ImagePreviewWithFocalPoint
-                  className={styles.spacingLeftXs}
-                  file={file}
-                  focalPoint={focalPoint}
-                  wrapperWidth={120}
-                  wrapperHeight={180}
-                  subtitle="Mobile"
-                />
-              </div>
+              <AspectRatioPreviewGallery file={file} focalPoint={focalPoint} />
             </div>
           </div>
         </Modal.Content>

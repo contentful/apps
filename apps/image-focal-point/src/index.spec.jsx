@@ -19,6 +19,7 @@ const sdk = {
 };
 
 vi.mock('./utils', () => ({
+  clamp: (num, min, max) => Math.min(Math.max(num, min), max),
   getField: vi.fn(),
   isCompatibleImageField: () => true,
 }));
@@ -51,6 +52,44 @@ describe('App', () => {
   it('should call startAutoResizer', () => {
     renderComponent(sdk);
     expect(sdk.window.startAutoResizer).toHaveBeenCalled();
+  });
+
+  it('should render aspect ratio previews for the linked image asset', async () => {
+    const imageField = {
+      locales: ['en-US'],
+      getValue: vi.fn(() => ({ sys: { id: 'asset-id' } })),
+      onValueChanged: vi.fn(),
+    };
+    const sdkWithImage = {
+      ...sdk,
+      entry: {
+        fields: {
+          image: imageField,
+        },
+      },
+      field: {
+        ...sdk.field,
+        locale: 'en-US',
+        getValue: vi.fn(() => ({ focalPoint: mockProps.focalPoint })),
+      },
+      space: {
+        getAsset: vi.fn(() =>
+          Promise.resolve({
+            fields: {
+              file: {
+                'en-US': mockProps.file,
+              },
+            },
+          })
+        ),
+      },
+    };
+    const { findByText } = renderComponent(sdkWithImage);
+
+    expect(await findByText('16:9')).toBeDefined();
+    expect(await findByText('4:3')).toBeDefined();
+    expect(await findByText('1:1')).toBeDefined();
+    expect(sdkWithImage.space.getAsset).toHaveBeenCalledWith('asset-id');
   });
 
   describe('#render', () => {

@@ -24,24 +24,36 @@ export class App extends React.Component {
 
   detachExternalChangeHandler = null;
 
+  detachImageChangeHandler = null;
+
+  isMounted = false;
+
   constructor(props) {
     super(props);
     this.state = {
       value: props.sdk.field.getValue() || { focalPoint: null },
+      imageFile: null,
     };
   }
 
   componentDidMount() {
     const { sdk } = this.props;
+    this.isMounted = true;
     sdk.window.startAutoResizer();
 
     // Handler for external field value changes (e.g. when multiple authors are working on the same entry).
     this.detachExternalChangeHandler = sdk.field.onValueChanged(this.onExternalChange);
+    this.detachImageChangeHandler = this.getImageEntryField()?.onValueChanged?.(this.loadImageFile);
+    this.loadImageFile();
   }
 
   componentWillUnmount() {
+    this.isMounted = false;
     if (this.detachExternalChangeHandler) {
       this.detachExternalChangeHandler();
+    }
+    if (this.detachImageChangeHandler) {
+      this.detachImageChangeHandler();
     }
   }
 
@@ -61,14 +73,49 @@ export class App extends React.Component {
     }
   };
 
-  findProperLocale() {
+  getImageEntryField() {
     const imageFieldId = getImageFieldId(this.props.sdk);
-    const imageField = this.props.sdk.entry.fields[imageFieldId];
+    return this.props.sdk.entry?.fields?.[imageFieldId];
+  }
 
-    return imageField.locales.includes(this.props.sdk.field.locale)
+  findProperLocale() {
+    const imageField = this.getImageEntryField();
+
+    return imageField?.locales?.includes(this.props.sdk.field.locale)
       ? this.props.sdk.field.locale
       : this.props.sdk.locales.default;
   }
+
+  getImageFile = async () => {
+    const { sdk } = this.props;
+    const imageField = this.getImageEntryField();
+    const locale = this.findProperLocale();
+    const assetId = imageField?.getValue?.(locale)?.sys?.id;
+
+    if (!assetId || !sdk.space?.getAsset) {
+      return null;
+    }
+
+    const asset = await sdk.space.getAsset(assetId);
+    const files = asset?.fields?.file || {};
+
+    return files[locale] ?? files[sdk.locales.default] ?? null;
+  };
+
+  isPreviewableImageFile = (file) => !!(file?.url && /image\/.*/.test(file.contentType));
+
+  loadImageFile = async () => {
+    try {
+      const file = await this.getImageFile();
+      if (this.isMounted) {
+        this.setState({ imageFile: this.isPreviewableImageFile(file) ? file : null });
+      }
+    } catch (e) {
+      if (this.isMounted) {
+        this.setState({ imageFile: null });
+      }
+    }
+  };
 
   resetFocalPoint = () => {
     this.setState({ value: { focalPoint: null } });
@@ -89,26 +136,20 @@ export class App extends React.Component {
 
   showFocalPointDialog = async () => {
     const {
-      sdk: { notifier, space, entry },
+      sdk: { notifier },
     } = this.props;
 
     try {
-      const imageFieldId = getImageFieldId(this.props.sdk);
-      const imageField = entry.fields[imageFieldId];
-      const asset = await space.getAsset(imageField.getValue(this.findProperLocale()).sys.id);
-      const file =
-        asset.fields.file[this.findProperLocale()] ??
-        asset.fields.file[this.props.sdk.locales.default];
-      const imageUrl = file.url;
-      const isOfImageMimeType = /image\/.*/.test(file.contentType);
-
-      if (!isOfImageMimeType) {
-        notifier.error('The uploaded asset must be an image');
-        return;
-      }
+      const file = await this.getImageFile();
+      const imageUrl = file?.url;
 
       if (!imageUrl) {
         notifier.error('Add an image to the entry first');
+        return;
+      }
+
+      if (!this.isPreviewableImageFile(file)) {
+        notifier.error('The uploaded asset must be an image');
         return;
       }
 
@@ -140,6 +181,7 @@ export class App extends React.Component {
         <FocalPointView
           showFocalPointDialog={this.showFocalPointDialog}
           focalPoint={this.state.value.focalPoint}
+          file={this.state.imageFile}
           resetFocalPoint={this.resetFocalPoint}
         />
       );
