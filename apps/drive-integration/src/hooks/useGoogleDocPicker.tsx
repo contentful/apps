@@ -15,9 +15,9 @@ type UseGoogleDocsPickerOptions = {
   onCancel?: () => void;
 };
 
-const GOOGLE_PICKER_API_KEY = '';
+const GOOGLE_PICKER_API_KEY = import.meta.env.VITE_GOOGLE_PICKER_API_KEY ?? '';
 
-const GOOGLE_APP_ID = 1;
+const GOOGLE_APP_ID = import.meta.env.VITE_GOOGLE_APP_ID ?? '';
 
 // These are already exposed by google in the network even if they were hidden as environment variables
 // and google acknowledges that these are okay to be public and that restrictions come from defining the
