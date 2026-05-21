@@ -15,34 +15,15 @@ describe('Field', () => {
     mockSdk = createMockFieldSdk();
   });
 
-  it('opens the dialog with the latest installation parameters', async () => {
+  it('opens the dialog with installation parameters from the SDK', async () => {
     const fieldSdk = createMockFieldSdk({
       installationParameters: {
-        enabledWeights: JSON.stringify(['regular']),
-        positionOptions: JSON.stringify(['start']),
-        iconAvailabilityMode: 'all',
-      },
-      liveInstallationParameters: {
         enabledWeights: JSON.stringify(['bold', 'duotone']),
         positionOptions: JSON.stringify(['end', 'top']),
         iconAvailabilityMode: 'specific',
         selectedIconNames: JSON.stringify(['airplane', 'anchor']),
       },
     });
-    fieldSdk.cma = {
-      appInstallation: {
-        get: vi.fn(() =>
-          Promise.resolve({
-            parameters: {
-              enabledWeights: JSON.stringify(['bold', 'duotone']),
-              positionOptions: JSON.stringify(['end', 'top']),
-              iconAvailabilityMode: 'specific',
-              selectedIconNames: JSON.stringify(['airplane', 'anchor']),
-            },
-          })
-        ),
-      },
-    } as never;
     mockSdk = fieldSdk;
 
     render(<Field />);
@@ -75,25 +56,7 @@ describe('Field', () => {
         positionOptions: JSON.stringify(['start']),
         iconAvailabilityMode: 'all',
       },
-      liveInstallationParameters: {
-        enabledWeights: JSON.stringify(['regular']),
-        positionOptions: JSON.stringify(['start']),
-        iconAvailabilityMode: 'all',
-      },
     });
-    fieldSdk.cma = {
-      appInstallation: {
-        get: vi.fn(() =>
-          Promise.resolve({
-            parameters: {
-              enabledWeights: JSON.stringify(['regular']),
-              positionOptions: JSON.stringify(['start']),
-              iconAvailabilityMode: 'all',
-            },
-          })
-        ),
-      },
-    } as never;
     mockSdk = fieldSdk;
 
     render(<Field />);

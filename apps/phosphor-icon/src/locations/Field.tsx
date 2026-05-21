@@ -4,7 +4,7 @@ import { css } from 'emotion';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { IconPreview } from '../components/IconPreview/IconPreview';
-import type { IconFieldValue, IconWeight } from '../types/icon';
+import type { IconFieldValue } from '../types/icon';
 import { ICON_WEIGHT_LABELS } from '../types/icon';
 import type { AppInstallationParameters, DialogInvocationParameters } from '../types/parameters';
 import {
@@ -39,8 +39,8 @@ const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
   const [value, setValue] = useState<IconFieldValue | null>(sdk.field.getValue() ?? null);
   const [isOpeningDialog, setIsOpeningDialog] = useState(false);
-  const [enabledWeights, setEnabledWeights] = useState<IconWeight[]>(
-    parseEnabledWeights((sdk.parameters.installation as AppInstallationParameters)?.enabledWeights)
+  const enabledWeights = parseEnabledWeights(
+    (sdk.parameters.installation as AppInstallationParameters)?.enabledWeights
   );
 
   useEffect(() => {
@@ -55,71 +55,9 @@ const Field = () => {
     return () => detach();
   }, [sdk.field]);
 
-  const fetchLatestInstallationParameters =
-    useCallback(async (): Promise<AppInstallationParameters> => {
-      try {
-        if (!sdk.ids.app) {
-          throw new Error('Required app ID not available');
-        }
-
-        if (
-          sdk.cma?.appInstallation &&
-          typeof sdk.cma.appInstallation.getForOrganization === 'function' &&
-          sdk.ids.organization &&
-          sdk.ids.space &&
-          sdk.ids.environment
-        ) {
-          const appInstallation = await sdk.cma.appInstallation.getForOrganization({
-            appDefinitionId: sdk.ids.app,
-            organizationId: sdk.ids.organization,
-          });
-
-          const currentInstallation = appInstallation.items.find(
-            (installation) =>
-              installation.sys.space.sys.id === sdk.ids.space &&
-              installation.sys.environment.sys.id === sdk.ids.environment
-          );
-
-          if (currentInstallation?.parameters) {
-            return currentInstallation.parameters as AppInstallationParameters;
-          }
-        }
-
-        if (sdk.cma?.appInstallation && typeof sdk.cma.appInstallation.get === 'function') {
-          const appInstallation = await sdk.cma.appInstallation.get({
-            appDefinitionId: sdk.ids.app,
-          });
-
-          if (appInstallation?.parameters) {
-            return appInstallation.parameters as AppInstallationParameters;
-          }
-        }
-      } catch (error) {
-        console.warn('Failed to fetch fresh installation parameters from CMA:', error);
-      }
-
-      return (sdk.parameters.installation as AppInstallationParameters) ?? {};
-    }, [sdk]);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const syncInstallationParameters = async () => {
-      const installationParams = await fetchLatestInstallationParameters();
-
-      if (!isMounted) {
-        return;
-      }
-
-      setEnabledWeights(parseEnabledWeights(installationParams?.enabledWeights));
-    };
-
-    void syncInstallationParameters();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [fetchLatestInstallationParameters]);
+  const getInstallationParameters = useCallback((): AppInstallationParameters => {
+    return (sdk.parameters.installation as AppInstallationParameters) ?? {};
+  }, [sdk.parameters.installation]);
 
   const openDialog = useCallback(async () => {
     if (isOpeningDialog) {
@@ -129,7 +67,7 @@ const Field = () => {
     setIsOpeningDialog(true);
 
     try {
-      const installationParams = await fetchLatestInstallationParameters();
+      const installationParams = getInstallationParameters();
       const enabledWeights = parseEnabledWeights(installationParams?.enabledWeights);
       const positionOptions = parsePositionOptions(installationParams?.positionOptions);
       const allowedIconNames =
@@ -158,7 +96,7 @@ const Field = () => {
     } finally {
       setIsOpeningDialog(false);
     }
-  }, [fetchLatestInstallationParameters, isOpeningDialog, sdk.dialogs, sdk.field, value]);
+  }, [getInstallationParameters, isOpeningDialog, sdk.dialogs, sdk.field, value]);
 
   const handleRemove = useCallback(async () => {
     await sdk.field.removeValue();
