@@ -127,6 +127,10 @@ const getBackendWorkflowFailureReason = (runData: AgentRunData): WorkflowFailure
     return WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND;
   }
 
+  if (workflowFailure.code === WorkflowFailureReason.AI_SERVICE_UNAVAILABLE) {
+    return WorkflowFailureReason.AI_SERVICE_UNAVAILABLE;
+  }
+
   if (workflowFailure.code === WorkflowFailureReason.GENERIC) {
     return WorkflowFailureReason.GENERIC;
   }
@@ -144,6 +148,10 @@ const getWorkflowFailureMessage = (
 
   if (failureReason === WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND) {
     return ERROR_MESSAGES.GOOGLE_DOCS_NOT_FOUND;
+  }
+
+  if (failureReason === WorkflowFailureReason.AI_SERVICE_UNAVAILABLE) {
+    return ERROR_MESSAGES.AI_SERVICE_UNAVAILABLE;
   }
 
   return getRunErrorMessage(runData);
