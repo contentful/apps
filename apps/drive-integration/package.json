@@ -38,7 +38,9 @@
     "deploy:sync-prod": "aws s3 sync ./build ${PROD_STATIC_S3_BASE}/google-docs && aws cloudfront create-invalidation --distribution-id $GOOGLE_DOCS_PROD_CLOUDFRONT_DIST_ID --paths \"/*\" > /dev/null 2>&1",
     "deploy:prod": "npm run build && npm run upload:app-prod && npm run deploy:sync-prod",
     "deploy": "npm run deploy:prod",
-    "deploy:test": "npm run deploy:flinkly"
+    "deploy:test": "npm run deploy:flinkly",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "eslintConfig": {
     "extends": "react-app"

@@ -1,26 +1,28 @@
 # Agent Guide — drive-integration
 
 ## What This App Does
+
 Connects Google Docs to Contentful. Lets editors import a Google Doc's content directly into a Contentful rich-text field, handling the conversion from Google Docs format to Contentful's rich-text document model.
 
 ## Archetype
+
 Standard Vite app.
 
 ## Locations
 
-| Location | File | Purpose |
-|----------|------|---------|
+| Location              | File                             | Purpose                                         |
+| --------------------- | -------------------------------- | ----------------------------------------------- |
 | `LOCATION_APP_CONFIG` | `src/locations/ConfigScreen.tsx` | Configure Google OAuth credentials and mappings |
-| `LOCATION_PAGE` | `src/locations/Page/` | Main import UI — browse/select Google Docs |
+| `LOCATION_PAGE`       | `src/locations/Page/`            | Main import UI — browse/select Google Docs      |
 
 ## Key Dependencies
 
-| Package | Role |
-|---------|------|
-| `@contentful/app-sdk` | App Framework SDK |
+| Package                         | Role                                    |
+| ------------------------------- | --------------------------------------- |
+| `@contentful/app-sdk`           | App Framework SDK                       |
 | `@contentful/field-editor-json` | JSON field editor (for raw doc preview) |
-| `@contentful/node-apps-toolkit` | Shared utilities |
-| `contentful-management` | CMA for writing imported content |
+| `@contentful/node-apps-toolkit` | Shared utilities                        |
+| `contentful-management`         | CMA for writing imported content        |
 
 ## Source Layout
 
