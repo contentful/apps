@@ -98,7 +98,7 @@ export const FieldSelectionDropdown = ({
         currentSelection={currentSelection}
         placeholder={placeholder}
         popoverProps={{
-          listMaxHeight: 200,
+          listMaxHeight: 150,
           listRef: multiselectListRef,
           placement: 'bottom',
           isAutoalignmentEnabled: false,
