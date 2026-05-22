@@ -388,7 +388,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
             <LoadingModal
               step="reviewingContentTypes"
               title="Preparing your preview"
-              contentTypeCount={selectedContentTypes.length}
               progressMessages={progressMessages}
             />
           );

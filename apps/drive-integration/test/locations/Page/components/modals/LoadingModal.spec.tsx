@@ -9,25 +9,24 @@ describe('LoadingModal', () => {
     vi.useRealTimers();
   });
 
-  const renderLoadingModal = () =>
+  const renderLoadingModal = (progressMessages: string[] = ['Analyzing document structure']) =>
     render(
       <Modal isShown onClose={vi.fn()}>
         <LoadingModal
           step="reviewingContentTypes"
           title="Preparing your preview"
-          contentTypeCount={2}
+          progressMessages={progressMessages}
         />
       </Modal>
     );
 
-  it('shows the first active step without ellipsis', () => {
-    renderLoadingModal();
+  it('shows the current step with a spinner', () => {
+    renderLoadingModal(['Analyzing document structure']);
 
-    const firstRow = screen.getByText('Fetching document').closest('div');
+    const row = screen.getByText('Analyzing document structure').closest('div');
 
-    expect(screen.getByText('Fetching document')).toBeTruthy();
-    expect(screen.queryByText('Fetching document...')).toBeNull();
-    expect(firstRow?.querySelector('[data-test-id="cf-ui-spinner"]')).toBeTruthy();
+    expect(screen.getByText('Analyzing document structure')).toBeTruthy();
+    expect(row?.querySelector('[data-test-id="cf-ui-spinner"]')).toBeTruthy();
   });
 
   it('does not render a close button', () => {
@@ -36,20 +35,15 @@ describe('LoadingModal', () => {
     expect(screen.queryByRole('button', { name: 'Close' })).toBeNull();
   });
 
-  it('moves the active indicator to the newest visible step over time', () => {
-    vi.useFakeTimers();
+  it('shows all accumulated messages and puts the spinner on the last one', () => {
+    renderLoadingModal([
+      'Analyzing document structure',
+      'Classifying tables and preparing assets',
+    ]);
 
-    renderLoadingModal();
+    const firstRow = screen.getByText('Analyzing document structure').closest('div');
+    const secondRow = screen.getByText('Classifying tables and preparing assets').closest('div');
 
-    act(() => {
-      vi.advanceTimersByTime(20000);
-    });
-
-    const firstRow = screen.getByText('Fetching document').closest('div');
-    const secondRow = screen.getByText('Analyzing document structure').closest('div');
-
-    expect(screen.getByText('Fetching document')).toBeTruthy();
-    expect(screen.getByText('Analyzing document structure')).toBeTruthy();
     expect(firstRow?.querySelector('[data-test-id="cf-ui-spinner"]')).toBeNull();
     expect(secondRow?.querySelector('[data-test-id="cf-ui-spinner"]')).toBeTruthy();
   });

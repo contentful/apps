@@ -290,6 +290,7 @@ export const useWorkflowAgent = ({
 
       try {
         const runId = await startAgentRun(sdk, spaceId, environmentId, payload);
+        onProgress('Analyzing document structure');
         return await pollAgentRun(sdk, spaceId, environmentId, runId, onProgress);
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Workflow failed');
@@ -311,6 +312,7 @@ export const useWorkflowAgent = ({
 
       try {
         await resumeWorkflowRun(sdk, spaceId, environmentId, runId, resumePayload);
+        onProgress('Analyzing document structure');
         return await pollAgentRun(sdk, spaceId, environmentId, runId, onProgress);
       } catch (err) {
         console.error(`✗ resumeWorkflow [${runId}] failed`, err);

@@ -1,6 +1,5 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Modal, Paragraph, Skeleton, Flex, Spinner, Box } from '@contentful/f36-components';
-import { useSequentialMessages } from '@hooks/useSequentialMessages';
 import tokens, { ColorTokens } from '@contentful/f36-tokens';
 import { css, keyframes } from '@emotion/css';
 
@@ -57,7 +56,6 @@ interface LoadingModalProps {
   step?: 'reviewingContentTypes' | 'creatingEntries';
   title: string;
   entriesCount?: number;
-  contentTypeCount?: number;
   progressMessages?: string[];
 }
 
@@ -65,32 +63,9 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
   step,
   title,
   entriesCount,
-  contentTypeCount,
   progressMessages,
 }) => {
-  const hasLiveMessages = progressMessages && progressMessages.length > 0;
-
-  const fallbackMessages = useMemo(() => {
-    if (step === 'reviewingContentTypes') {
-      return [
-        'Analyzing document structure',
-        contentTypeCount
-          ? `Analyzing content for ${contentTypeCount} content type${
-              contentTypeCount === 1 ? '' : 's'
-            }`
-          : 'Analyzing content for content types',
-        'Generating preview entries',
-      ];
-    }
-    return [];
-  }, [step, contentTypeCount]);
-
-  const sequentialMessages = useSequentialMessages({
-    messages: fallbackMessages,
-    isActive: step === 'reviewingContentTypes' && !hasLiveMessages,
-  });
-
-  const visibleMessages = hasLiveMessages ? progressMessages : sequentialMessages;
+  const visibleMessages = progressMessages ?? [];
 
   return (
     <>
