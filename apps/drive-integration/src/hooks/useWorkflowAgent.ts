@@ -296,7 +296,6 @@ export const useWorkflowAgent = ({
         throw error;
       } finally {
         setIsAnalyzing(false);
-        setProgressMessages([]);
       }
     },
     [sdk, documentId, oauthToken, onProgress]
@@ -319,7 +318,6 @@ export const useWorkflowAgent = ({
         throw error;
       } finally {
         setIsAnalyzing(false);
-        setProgressMessages([]);
       }
     },
     [sdk, onProgress]
