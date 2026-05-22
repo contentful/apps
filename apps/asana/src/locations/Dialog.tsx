@@ -145,7 +145,9 @@ const Dialog = () => {
   if (!task) {
     return (
       <Box padding="spacingL">
-        <Paragraph marginBottom="spacingM">No linked Asana task was provided to this dialog.</Paragraph>
+        <Paragraph marginBottom="spacingM">
+          No linked Asana task was provided to this dialog.
+        </Paragraph>
         <Button onClick={handleClose}>Close</Button>
       </Box>
     );
@@ -193,9 +195,7 @@ const Dialog = () => {
             rows={8}
             isDisabled={isSaving || isPostingComment}
           />
-          <FormControl.HelpText>
-            Updates the linked Asana task description.
-          </FormControl.HelpText>
+          <FormControl.HelpText>Updates the linked Asana task description.</FormControl.HelpText>
         </FormControl>
 
         <Box>
@@ -215,7 +215,10 @@ const Dialog = () => {
         </Box>
 
         <Flex justifyContent="flex-end" gap="spacingS">
-          <Button variant="secondary" onClick={handleClose} isDisabled={isSaving || isPostingComment}>
+          <Button
+            variant="secondary"
+            onClick={handleClose}
+            isDisabled={isSaving || isPostingComment}>
             Close
           </Button>
           <Button

@@ -66,7 +66,7 @@ async function getDefaultLocale(cma: PlainClientAPI) {
     const locales = await cma.locale.getMany({ query: { limit: 1000 } });
     const defaultLocale = locales.items.find((locale) => locale.default);
     return defaultLocale?.code ?? 'en-US';
-  } catch (_error) {
+  } catch {
     return 'en-US';
   }
 }
@@ -101,7 +101,7 @@ async function getEntryContext(
       })),
       displayFieldId: contentType.displayField || 'title',
     };
-  } catch (_error) {
+  } catch {
     return {
       entry,
       contentTypeFields: [],
@@ -145,11 +145,7 @@ async function waitForEntryTitle(
   let nextEntryContext = entryContext;
   let entryTitle = getEntryTitle(nextEntryContext, titleFieldId);
 
-  for (
-    let attempt = 0;
-    !entryTitle && attempt < ENTRY_TITLE_RETRY_ATTEMPTS;
-    attempt += 1
-  ) {
+  for (let attempt = 0; !entryTitle && attempt < ENTRY_TITLE_RETRY_ATTEMPTS; attempt += 1) {
     await sleep(ENTRY_TITLE_RETRY_DELAY_MS);
     nextEntryContext = await getEntryContext(cma, entryId);
 

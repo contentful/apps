@@ -17,7 +17,10 @@ type AsanaEnvelope<TData> = {
 };
 
 function getAsanaErrorMessage<TData>(response: AsanaEnvelope<TData>) {
-  return response.errors?.map((error) => error.message).filter(Boolean).join(', ');
+  return response.errors
+    ?.map((error) => error.message)
+    .filter(Boolean)
+    .join(', ');
 }
 
 export function getPersonalAccessToken(
@@ -69,10 +72,7 @@ export async function callAsana<TData>(
   return body.data;
 }
 
-async function callAsanaList<TData>(
-  path: string,
-  personalAccessToken: string
-): Promise<TData[]> {
+async function callAsanaList<TData>(path: string, personalAccessToken: string): Promise<TData[]> {
   const items: TData[] = [];
   let nextPath: string | null = path;
 
@@ -300,16 +300,12 @@ export async function addCommentToTask(
   taskGid: string,
   comment: string
 ): Promise<void> {
-  await callAsana<Record<string, unknown>>(
-    `/tasks/${taskGid}/stories`,
-    personalAccessToken,
-    {
-      method: 'POST',
-      body: JSON.stringify({
-        data: {
-          text: comment,
-        },
-      }),
-    }
-  );
+  await callAsana<Record<string, unknown>>(`/tasks/${taskGid}/stories`, personalAccessToken, {
+    method: 'POST',
+    body: JSON.stringify({
+      data: {
+        text: comment,
+      },
+    }),
+  });
 }

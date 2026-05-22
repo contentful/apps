@@ -63,17 +63,13 @@ describe('buildEditorInterfaceTargetState', () => {
 
   it('assigns mapped fields to the entry field location controls', () => {
     expect(
-      buildEditorInterfaceTargetState(
-        {},
-        ['blogPost'],
-        {
-          blogPost: {
-            taskGidFieldId: 'asanaTaskGid',
-            taskUrlFieldId: 'asanaTaskUrl',
-            taskNameFieldId: 'asanaTaskName',
-          },
-        }
-      )
+      buildEditorInterfaceTargetState({}, ['blogPost'], {
+        blogPost: {
+          taskGidFieldId: 'asanaTaskGid',
+          taskUrlFieldId: 'asanaTaskUrl',
+          taskNameFieldId: 'asanaTaskName',
+        },
+      })
     ).toEqual({
       blogPost: {
         sidebar: {
@@ -90,18 +86,14 @@ describe('buildEditorInterfaceTargetState', () => {
 
   it('prefers the canonical object field when one is configured', () => {
     expect(
-      buildEditorInterfaceTargetState(
-        {},
-        ['blogPost'],
-        {
-          blogPost: {
-            objectFieldId: 'asanaTaskLink',
-            taskGidFieldId: 'asanaTaskGid',
-            taskUrlFieldId: 'asanaTaskUrl',
-            taskNameFieldId: 'asanaTaskName',
-          },
-        }
-      )
+      buildEditorInterfaceTargetState({}, ['blogPost'], {
+        blogPost: {
+          objectFieldId: 'asanaTaskLink',
+          taskGidFieldId: 'asanaTaskGid',
+          taskUrlFieldId: 'asanaTaskUrl',
+          taskNameFieldId: 'asanaTaskName',
+        },
+      })
     ).toEqual({
       blogPost: {
         sidebar: {

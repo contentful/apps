@@ -132,7 +132,7 @@ const ConfigScreen = () => {
         personalAccessToken: personalAccessToken ?? parameters.personalAccessToken,
       });
       setProjects(data.projects);
-    } catch (_error) {
+    } catch {
       sdk.notifier.error(VALIDATION_MESSAGES.projectsFailed);
       setProjects([]);
     } finally {
@@ -148,7 +148,7 @@ const ConfigScreen = () => {
       });
       setWorkspaces(data.workspaces);
       return data.workspaces;
-    } catch (_error) {
+    } catch {
       sdk.notifier.error(VALIDATION_MESSAGES.workspacesFailed);
       setWorkspaces([]);
       return [];
@@ -467,8 +467,8 @@ const ConfigScreen = () => {
                   !parameters.defaultWorkspaceGid
                     ? 'Select a workspace first'
                     : isLoadingProjects
-                      ? 'Loading projects...'
-                      : 'Type to search projects'
+                    ? 'Loading projects...'
+                    : 'Type to search projects'
                 }
                 isDisabled={!parameters.defaultWorkspaceGid || isLoadingProjects}
                 itemToString={(item) => item.name}

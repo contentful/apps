@@ -203,7 +203,7 @@ const Sidebar = () => {
         if (!isCanceled && nextTaskLink) {
           setTaskLink(nextTaskLink);
         }
-      } catch (_error) {
+      } catch {
         // Best-effort refresh so an open sidebar can notice automation write-backs.
       }
     };
@@ -512,7 +512,7 @@ const Sidebar = () => {
           query: taskSearchQuery.trim(),
         });
         setTaskSearchResults(response.tasks);
-      } catch (_error) {
+      } catch {
         setTaskSearchResults([]);
         sdk.notifier.error('Could not search Asana tasks.');
       } finally {

@@ -38,7 +38,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
       ? await getProjectTasks(personalAccessToken, body.projectGid.trim(), body.query ?? '')
       : await searchTasks(personalAccessToken, body.workspaceGid.trim(), body.query ?? '');
     return { tasks };
-  } catch (_error) {
+  } catch {
     throw new Error('Could not search Asana tasks.');
   }
 };

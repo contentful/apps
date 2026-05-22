@@ -1,15 +1,12 @@
 import { FieldAppSDK } from '@contentful/app-sdk';
-import {
-  Box,
-  Note,
-  Paragraph,
-  Text,
-  TextLink,
-} from '@contentful/f36-components';
+import { Box, Note, Paragraph, Text, TextLink } from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { useEffect, useMemo, useState } from 'react';
 import type { AppInstallationParameters, PrimaryAsanaTaskLinkValue } from '../types';
-import { buildPrimaryTaskLinkFromEntryValues, getPrimaryTaskLinkMapping } from '../utils/primaryTaskLink';
+import {
+  buildPrimaryTaskLinkFromEntryValues,
+  getPrimaryTaskLinkMapping,
+} from '../utils/primaryTaskLink';
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();

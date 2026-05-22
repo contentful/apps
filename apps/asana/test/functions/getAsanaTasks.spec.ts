@@ -22,18 +22,23 @@ describe('getAsanaTasks handler', () => {
     environmentId: 'test-env',
   } as unknown as FunctionEventContext;
 
-  const createEvent = (
-    body: { workspaceGid?: string; projectGid?: string; query?: string }
-  ): AppActionRequest<'Custom', { workspaceGid?: string; projectGid?: string; query?: string }> =>
+  const createEvent = (body: {
+    workspaceGid?: string;
+    projectGid?: string;
+    query?: string;
+  }): AppActionRequest<'Custom', { workspaceGid?: string; projectGid?: string; query?: string }> =>
     ({
       type: FunctionTypeEnum.AppActionCall,
       body,
       headers: {},
-    }) as AppActionRequest<'Custom', {
-      workspaceGid?: string;
-      projectGid?: string;
-      query?: string;
-    }>;
+    } as AppActionRequest<
+      'Custom',
+      {
+        workspaceGid?: string;
+        projectGid?: string;
+        query?: string;
+      }
+    >);
 
   beforeEach(() => {
     vi.clearAllMocks();

@@ -30,7 +30,7 @@ describe('getAsanaTask handler', () => {
       type: FunctionTypeEnum.AppActionCall,
       body,
       headers: {},
-    }) as AppActionRequest<'Custom', GetAsanaTaskRequest>;
+    } as AppActionRequest<'Custom', GetAsanaTaskRequest>);
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -91,7 +91,8 @@ describe('getAsanaTask handler', () => {
 
     await handler(
       createEvent({
-        taskId: 'https://app.asana.com/1/25238013228946/project/1214128631444825/task/1214128635770002',
+        taskId:
+          'https://app.asana.com/1/25238013228946/project/1214128631444825/task/1214128635770002',
       }) as Parameters<typeof handler>[0],
       mockContext
     );
@@ -110,10 +111,7 @@ describe('getAsanaTask handler', () => {
   });
 
   it('returns a validation error when task id is missing', async () => {
-    const result = await handler(
-      createEvent({}) as Parameters<typeof handler>[0],
-      mockContext
-    );
+    const result = await handler(createEvent({}) as Parameters<typeof handler>[0], mockContext);
 
     expect(result).toEqual({
       success: false,

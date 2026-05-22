@@ -30,7 +30,7 @@ describe('updateAsanaTask handler', () => {
       type: FunctionTypeEnum.AppActionCall,
       body,
       headers: {},
-    }) as AppActionRequest<'Custom', UpdateAsanaTaskRequest>;
+    } as AppActionRequest<'Custom', UpdateAsanaTaskRequest>);
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -110,7 +110,8 @@ describe('updateAsanaTask handler', () => {
 
     await handler(
       createEvent({
-        taskId: 'https://app.asana.com/1/25238013228946/project/1214128631444825/task/1214128635770002',
+        taskId:
+          'https://app.asana.com/1/25238013228946/project/1214128631444825/task/1214128635770002',
         completed: true,
       }) as Parameters<typeof handler>[0],
       mockContext

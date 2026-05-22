@@ -27,6 +27,10 @@ export default defineConfig([
     extends: ['js/recommended'],
     languageOptions: { globals: globals.browser },
   },
+  {
+    files: ['scripts/**/*.mjs'],
+    languageOptions: { globals: globals.node },
+  },
   tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,
   {

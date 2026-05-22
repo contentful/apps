@@ -58,7 +58,9 @@ describe('Asana ConfigScreen', () => {
     mockCma.appActionCall.createWithResponse.mockImplementation(({ appActionId }) => {
       if (appActionId === 'validateAsanaCredentialsAction') {
         return Promise.resolve({
-          response: { body: JSON.stringify({ valid: true, message: VALIDATION_MESSAGES.validCredentials }) },
+          response: {
+            body: JSON.stringify({ valid: true, message: VALIDATION_MESSAGES.validCredentials }),
+          },
         });
       }
 
@@ -158,5 +160,4 @@ describe('Asana ConfigScreen', () => {
       },
     });
   });
-
 });

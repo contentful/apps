@@ -42,9 +42,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
     return {
       success: false,
       message:
-        error instanceof Error && error.message
-          ? error.message
-          : 'Could not load the Asana task.',
+        error instanceof Error && error.message ? error.message : 'Could not load the Asana task.',
     };
   }
 };

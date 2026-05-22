@@ -32,8 +32,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   } catch (error) {
     return {
       valid: false,
-      message:
-        error instanceof Error ? error.message : VALIDATION_MESSAGES.invalidCredentials,
+      message: error instanceof Error ? error.message : VALIDATION_MESSAGES.invalidCredentials,
     };
   }
 };

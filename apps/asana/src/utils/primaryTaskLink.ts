@@ -77,7 +77,9 @@ export const getMappedPrimaryTaskLinkFieldIds = (
   }
 
   return Array.from(
-    new Set([mapping.taskGidFieldId, mapping.taskUrlFieldId, mapping.taskNameFieldId].filter(Boolean))
+    new Set(
+      [mapping.taskGidFieldId, mapping.taskUrlFieldId, mapping.taskNameFieldId].filter(Boolean)
+    )
   ) as string[];
 };
 
@@ -85,11 +87,13 @@ export const buildPrimaryTaskLinkFromEntryValues = (
   fieldValues: Record<string, PrimaryAsanaTaskLinkValue | string | undefined>,
   mapping: PrimaryTaskLinkFieldMapping
 ): PrimaryAsanaTaskLink | null => {
-  const objectFieldValue = mapping.objectFieldId
-    ? fieldValues[mapping.objectFieldId]
-    : undefined;
+  const objectFieldValue = mapping.objectFieldId ? fieldValues[mapping.objectFieldId] : undefined;
 
-  if (objectFieldValue && typeof objectFieldValue === 'object' && !Array.isArray(objectFieldValue)) {
+  if (
+    objectFieldValue &&
+    typeof objectFieldValue === 'object' &&
+    !Array.isArray(objectFieldValue)
+  ) {
     const taskGid = objectFieldValue.taskGid?.trim();
     const taskUrl = objectFieldValue.taskUrl?.trim();
     const taskName = objectFieldValue.taskName?.trim();

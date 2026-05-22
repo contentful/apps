@@ -30,7 +30,7 @@ describe('addAsanaComment handler', () => {
       type: FunctionTypeEnum.AppActionCall,
       body,
       headers: {},
-    }) as AppActionRequest<'Custom', AddAsanaCommentRequest>;
+    } as AppActionRequest<'Custom', AddAsanaCommentRequest>);
 
   beforeEach(() => {
     vi.clearAllMocks();
