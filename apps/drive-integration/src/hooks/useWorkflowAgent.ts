@@ -34,7 +34,7 @@ interface UseWorkflowParams {
 
 interface WorkflowHook {
   isAnalyzing: boolean;
-  progressMessage: string | null;
+  progressMessages: string[];
   startWorkflow: (contentTypeIds: string[]) => Promise<WorkflowRunResult>;
   resumeWorkflow: (runId: string, resumePayload: ResumePayload) => Promise<WorkflowRunResult>;
 }
@@ -247,12 +247,20 @@ export const useWorkflowAgent = ({
   oauthToken,
 }: UseWorkflowParams): WorkflowHook => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [progressMessage, setProgressMessage] = useState<string | null>(null);
+  const [progressMessages, setProgressMessages] = useState<string[]>([]);
+
+  const onProgress = useCallback((message: string | null) => {
+    if (!message) return;
+    setProgressMessages((prev) => {
+      if (prev[prev.length - 1] === message) return prev;
+      return [...prev, message];
+    });
+  }, []);
 
   const startWorkflow = useCallback(
     async (contentTypeIds: string[]) => {
       setIsAnalyzing(true);
-      setProgressMessage(null);
+      setProgressMessages([]);
 
       const spaceId = sdk.ids.space;
       const environmentId = sdk.ids.environment;
@@ -282,44 +290,44 @@ export const useWorkflowAgent = ({
 
       try {
         const runId = await startAgentRun(sdk, spaceId, environmentId, payload);
-        return await pollAgentRun(sdk, spaceId, environmentId, runId, setProgressMessage);
+        return await pollAgentRun(sdk, spaceId, environmentId, runId, onProgress);
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Workflow failed');
         throw error;
       } finally {
         setIsAnalyzing(false);
-        setProgressMessage(null);
+        setProgressMessages([]);
       }
     },
-    [sdk, documentId, oauthToken]
+    [sdk, documentId, oauthToken, onProgress]
   );
 
   const resumeWorkflow = useCallback(
     async (runId: string, resumePayload: ResumePayload) => {
       setIsAnalyzing(true);
-      setProgressMessage(null);
+      setProgressMessages([]);
 
       const spaceId = sdk.ids.space;
       const environmentId = sdk.ids.environment;
 
       try {
         await resumeWorkflowRun(sdk, spaceId, environmentId, runId, resumePayload);
-        return await pollAgentRun(sdk, spaceId, environmentId, runId, setProgressMessage);
+        return await pollAgentRun(sdk, spaceId, environmentId, runId, onProgress);
       } catch (err) {
         console.error(`✗ resumeWorkflow [${runId}] failed`, err);
         const error = err instanceof Error ? err : new Error('Workflow failed');
         throw error;
       } finally {
         setIsAnalyzing(false);
-        setProgressMessage(null);
+        setProgressMessages([]);
       }
     },
-    [sdk]
+    [sdk, onProgress]
   );
 
   return {
     isAnalyzing,
-    progressMessage,
+    progressMessages,
     startWorkflow,
     resumeWorkflow,
   };
