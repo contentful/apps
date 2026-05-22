@@ -74,7 +74,7 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
         {step === 'reviewingContentTypes' ? (
           <Flex flexDirection="column" alignItems="flex-start" gap="spacingM">
             <Paragraph marginBottom="none">This can take up to 20 minutes.</Paragraph>
-            <Flex
+            {visibleMessages.length > 0 && <Flex
               alignSelf="center"
               flexDirection="row"
               alignItems="stretch"
@@ -99,7 +99,7 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
                   </Flex>
                 ))}
               </Flex>
-            </Flex>
+            </Flex>}
           </Flex>
         ) : (
           <>
