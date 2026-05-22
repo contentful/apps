@@ -25,11 +25,7 @@ import type { ListMarker } from './buildListMarkers';
 import { buildTextSegments, type TextSegment } from './buildTextSegments';
 import { ReviewImageAssetCard } from './ReviewImageAssetCard';
 import { isImageSourceRefExcluded } from './sourceRefUtils';
-import {
-  tableCellChromeMapped,
-  tableCellChromeMappedHovered,
-  tableCellChromeUnmapped,
-} from './documentRenderers.styles';
+import { tableCellChromeMapped, tableCellChromeMappedHovered } from './documentRenderers.styles';
 
 // ─── Shared helpers ─────────────────────────────────────────────────────────
 

@@ -55,16 +55,6 @@ export const FieldSelectionDropdown = ({
     return fieldOptions.filter((option) => isSelectableFieldType(option, selectedText));
   }, [fieldOptions, isImageContent, selectedText]);
 
-  const hasUnsupportedFields = useMemo(
-    () =>
-      fieldOptions.some((option) =>
-        isImageContent
-          ? !isSelectableForImage(option)
-          : !isSelectableFieldType(option, selectedText) && !option.isAssetField
-      ),
-    [fieldOptions, isImageContent, selectedText]
-  );
-
   const onSelectableStateChangeRef = useRef(onSelectableStateChange);
   onSelectableStateChangeRef.current = onSelectableStateChange;
 

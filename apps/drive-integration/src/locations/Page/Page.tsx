@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { Flex, Heading, Layout, Note, Paragraph } from '@contentful/f36-components';
+import { Flex, Heading, Layout, Note } from '@contentful/f36-components';
 import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
