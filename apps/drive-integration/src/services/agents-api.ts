@@ -42,6 +42,7 @@ export interface AgentRunData {
     suspendPayload?: TabsImagesSuspendPayload | MappingReviewSuspendPayload;
     workflowFailure?: WorkflowFailure;
     googleDocPayload?: Record<string, unknown>;
+    progressMessage?: string;
   };
   payload?: string;
   messages?: AgentRunMessage[];

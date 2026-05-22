@@ -58,6 +58,7 @@ interface LoadingModalProps {
   title: string;
   entriesCount?: number;
   contentTypeCount?: number;
+  progressMessage?: string | null;
 }
 
 export const LoadingModal: React.FC<LoadingModalProps> = ({
@@ -65,13 +66,12 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
   title,
   entriesCount,
   contentTypeCount,
+  progressMessage,
 }) => {
-  const messages = useMemo(() => {
+  const fallbackMessages = useMemo(() => {
     if (step === 'reviewingContentTypes') {
-      const baseMessages = [
-        'Fetching document',
+      return [
         'Analyzing document structure',
-        'Processing document with AI',
         contentTypeCount
           ? `Analyzing content for ${contentTypeCount} content type${
               contentTypeCount === 1 ? '' : 's'
@@ -79,15 +79,16 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
           : 'Analyzing content for content types',
         'Generating preview entries',
       ];
-      return baseMessages;
     }
     return [];
   }, [step, contentTypeCount]);
 
-  const visibleMessages = useSequentialMessages({
-    messages,
-    isActive: step === 'reviewingContentTypes',
+  const sequentialMessages = useSequentialMessages({
+    messages: fallbackMessages,
+    isActive: step === 'reviewingContentTypes' && !progressMessage,
   });
+
+  const visibleMessages = progressMessage ? [progressMessage] : sequentialMessages;
 
   return (
     <>

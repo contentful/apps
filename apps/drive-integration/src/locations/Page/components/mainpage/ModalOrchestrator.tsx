@@ -81,7 +81,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const [includeImages, setIncludeImages] = useState<boolean | null>(null);
     const [requiresImageSelection, setRequiresImageSelection] = useState(false);
     const [activeRunId, setActiveRunId] = useState<string | null>(null);
-    const { startWorkflow, resumeWorkflow } = useWorkflowAgent({
+    const { startWorkflow, resumeWorkflow, progressMessage } = useWorkflowAgent({
       sdk,
       documentId,
       oauthToken,
@@ -389,6 +389,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
               step="reviewingContentTypes"
               title="Preparing your preview"
               contentTypeCount={selectedContentTypes.length}
+              progressMessage={progressMessage}
             />
           );
         default:

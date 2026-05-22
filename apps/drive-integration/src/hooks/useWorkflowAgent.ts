@@ -34,6 +34,7 @@ interface UseWorkflowParams {
 
 interface WorkflowHook {
   isAnalyzing: boolean;
+  progressMessage: string | null;
   startWorkflow: (contentTypeIds: string[]) => Promise<WorkflowRunResult>;
   resumeWorkflow: (runId: string, resumePayload: ResumePayload) => Promise<WorkflowRunResult>;
 }
@@ -200,7 +201,8 @@ const pollAgentRun = async (
   sdk: PageAppSDK,
   spaceId: string,
   environmentId: string,
-  runId: string
+  runId: string,
+  onProgress?: (message: string | null) => void
 ): Promise<WorkflowRunResult> => {
   const startMs = Date.now();
   let pendingReviewMissingPayloadCount = 0;
@@ -217,6 +219,8 @@ const pollAgentRun = async (
 
     const status = getRunStatus(runData);
     console.log(`  #${attempt + 1} — status: ${status} (${elapsedSec(startMs)})`);
+
+    onProgress?.(runData.metadata?.progressMessage ?? null);
 
     if (status === RunStatus.PENDING_REVIEW && !getSuspendPayload(runData)) {
       pendingReviewMissingPayloadCount++;
@@ -243,10 +247,12 @@ export const useWorkflowAgent = ({
   oauthToken,
 }: UseWorkflowParams): WorkflowHook => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [progressMessage, setProgressMessage] = useState<string | null>(null);
 
   const startWorkflow = useCallback(
     async (contentTypeIds: string[]) => {
       setIsAnalyzing(true);
+      setProgressMessage(null);
 
       const spaceId = sdk.ids.space;
       const environmentId = sdk.ids.environment;
@@ -276,12 +282,13 @@ export const useWorkflowAgent = ({
 
       try {
         const runId = await startAgentRun(sdk, spaceId, environmentId, payload);
-        return await pollAgentRun(sdk, spaceId, environmentId, runId);
+        return await pollAgentRun(sdk, spaceId, environmentId, runId, setProgressMessage);
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Workflow failed');
         throw error;
       } finally {
         setIsAnalyzing(false);
+        setProgressMessage(null);
       }
     },
     [sdk, documentId, oauthToken]
@@ -290,19 +297,21 @@ export const useWorkflowAgent = ({
   const resumeWorkflow = useCallback(
     async (runId: string, resumePayload: ResumePayload) => {
       setIsAnalyzing(true);
+      setProgressMessage(null);
 
       const spaceId = sdk.ids.space;
       const environmentId = sdk.ids.environment;
 
       try {
         await resumeWorkflowRun(sdk, spaceId, environmentId, runId, resumePayload);
-        return await pollAgentRun(sdk, spaceId, environmentId, runId);
+        return await pollAgentRun(sdk, spaceId, environmentId, runId, setProgressMessage);
       } catch (err) {
         console.error(`✗ resumeWorkflow [${runId}] failed`, err);
         const error = err instanceof Error ? err : new Error('Workflow failed');
         throw error;
       } finally {
         setIsAnalyzing(false);
+        setProgressMessage(null);
       }
     },
     [sdk]
@@ -310,6 +319,7 @@ export const useWorkflowAgent = ({
 
   return {
     isAnalyzing,
+    progressMessage,
     startWorkflow,
     resumeWorkflow,
   };
