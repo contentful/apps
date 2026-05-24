@@ -10,7 +10,8 @@
     "test": "jest --watch",
     "test:ci": "jest --ci",
     "create-app-definition": "contentful-app-scripts create-app-definition",
-    "add-locations": "contentful-app-scripts add-locations"
+    "add-locations": "contentful-app-scripts add-locations",
+    "upload": "contentful-app-scripts upload --bundle-dir out"
   },
   "dependencies": {
     "@contentful/app-sdk": "4.22.0",
