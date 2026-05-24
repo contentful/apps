@@ -1,8 +1,5 @@
 {
-  "packages": [
-    "apps/**/*",
-    "packages/*"
-  ],
+  "packages": ["apps/**/*", "packages/*"],
   "version": "independent",
   "command": {
     "publish": {
@@ -10,7 +7,5 @@
       "conventionalCommits": true
     }
   },
-  "ignoreChanges": [
-    "**/*.md"
-  ]
+  "ignoreChanges": ["**/*.md"]
 }

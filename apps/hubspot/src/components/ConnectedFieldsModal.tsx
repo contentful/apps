@@ -20,7 +20,7 @@ import {
   TextLink,
 } from '@contentful/f36-components';
 import { styles } from './ConnectedFieldsModal.styles';
-import { WarningOctagonIcon } from '@phosphor-icons/react';
+import { WarningOctagonIcon } from '@contentful/f36-icons';
 
 type ConnectedFieldsModalProps = {
   entryWithContentType: EntryWithContentType;
