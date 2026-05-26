@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef } from 'react';
+import React, { useEffect, useId, useMemo, useRef } from 'react';
 import { Badge, Flex, FormControl, Text } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import type { EditModalFieldMapping, EditModalFieldOption } from '@types';
@@ -117,6 +117,14 @@ export const FieldSelectionDropdown = ({
               isChecked={selectedFieldIds.includes(option.id)}
               isDisabled={isDisabled && !selectedFieldIds.includes(option.id)}
               onSelectItem={handleSelectField}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleSelectField({
+                    target: { checked: !selectedFieldIds.includes(option.id), value: option.id },
+                  } as React.ChangeEvent<HTMLInputElement>);
+                }
+              }}
               className={optionRow}>
               <Flex gap="spacing2Xs">
                 <Text as="div" fontColor="gray700" fontWeight="fontWeightDemiBold">
