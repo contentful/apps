@@ -7,12 +7,13 @@ import type { SelectionViewportRectangle } from './selectionViewportRectangle';
 interface EditMappingButtonProps {
   anchorRectangle: SelectionViewportRectangle;
   onEdit: () => void;
+  onBlur?: () => void;
 }
 
 const BUTTON_ESTIMATE_WIDTH_PX = 160;
 
 export const EditMappingButton = forwardRef<HTMLDivElement, EditMappingButtonProps>(
-  ({ anchorRectangle, onEdit }, ref) => {
+  ({ anchorRectangle, onEdit, onBlur }, ref) => {
     const centerX = (anchorRectangle.left + anchorRectangle.right) / 2;
     const half = BUTTON_ESTIMATE_WIDTH_PX / 2;
     const clampedCenterX = Math.min(Math.max(centerX, 8 + half), window.innerWidth - 8 - half);
@@ -38,6 +39,7 @@ export const EditMappingButton = forwardRef<HTMLDivElement, EditMappingButtonPro
           variant="secondary"
           size="small"
           onClick={onEdit}
+          onBlur={onBlur}
           startIcon={<PencilSimpleIcon size="small" />}
           style={{ paddingTop: '2px', paddingBottom: '2px' }}>
           Edit content mapping
