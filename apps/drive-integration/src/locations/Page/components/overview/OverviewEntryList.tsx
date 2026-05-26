@@ -50,11 +50,20 @@ function OverviewEntryRowCard({
   const rowContent = (
     <>
       <Card
+        tabIndex={0}
+        onClick={() => { if (!isSelected) onSelect(row.entryIndex); }}
+        onKeyDown={(e) => {
+          if ((e.key === 'Enter' || e.key === ' ') && !isSelected) {
+            e.preventDefault();
+            onSelect(row.entryIndex);
+          }
+        }}
         style={{
           border: `2px solid ${isSelected ? tokens.blue500 : tokens.gray300}`,
           backgroundColor: tokens.colorWhite,
           width: '100%',
           padding: `${tokens.spacingXs} ${tokens.spacingS}`,
+          cursor: isSelected ? 'default' : 'pointer',
         }}>
         <Flex alignItems="center" gap="spacingXs">
           <Checkbox
@@ -65,38 +74,22 @@ function OverviewEntryRowCard({
             isDisabled={areEntrySelectionsDisabled}
             onChange={(event) => onToggleEntrySelection(row.id, event.target.checked)}
           />
-          <button
-            type="button"
-            onClick={() => {
-              if (!isSelected) onSelect(row.entryIndex);
-            }}
-            style={{
-              appearance: 'none',
-              background: 'transparent',
-              border: 0,
-              cursor: isSelected ? 'default' : 'pointer',
-              flex: 1,
-              font: 'inherit',
-              padding: 0,
-              textAlign: 'left',
-            }}>
-            <Paragraph marginBottom="none">
-              <Text as="span" fontWeight="fontWeightDemiBold">
-                {row.contentTypeName || 'Untitled'}
+          <Paragraph marginBottom="none">
+            <Text as="span" fontWeight="fontWeightDemiBold">
+              {row.contentTypeName || 'Untitled'}
+            </Text>
+            {row.contentTypeName && row.entryTitle ? (
+              <Text as="span" fontColor="gray600">
+                {' '}
+                ({truncateLabel(row.entryTitle, 150)})
               </Text>
-              {row.contentTypeName && row.entryTitle ? (
-                <Text as="span" fontColor="gray600">
-                  {' '}
-                  ({truncateLabel(row.entryTitle, 150)})
-                </Text>
-              ) : null}
-              {row.hasNoMappedContent && (
-                <Badge variant="secondary" size="small" className={noMappedContentBadge}>
-                  No mapped content
-                </Badge>
-              )}
-            </Paragraph>
-          </button>
+            ) : null}
+            {row.hasNoMappedContent && (
+              <Badge variant="secondary" size="small" className={noMappedContentBadge}>
+                No mapped content
+              </Badge>
+            )}
+          </Paragraph>
         </Flex>
       </Card>
       {row.children.length > 0 ? (
