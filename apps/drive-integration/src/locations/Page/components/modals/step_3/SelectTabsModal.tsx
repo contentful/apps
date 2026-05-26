@@ -12,7 +12,7 @@ import {
 } from '@contentful/f36-components';
 import { modalControls, multiselect, pillsContainer } from './SelectTabsModal.styles';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
-import { onEnterToggleMultiselectOption } from '../../../../utils/keyboardUtils';
+import { onEnterToggleMultiselectOption } from '../../../../../utils/keyboardUtils';
 import { DocumentTabProps } from '@types';
 import { truncateLabel } from '../../../../../utils/utils';
 
