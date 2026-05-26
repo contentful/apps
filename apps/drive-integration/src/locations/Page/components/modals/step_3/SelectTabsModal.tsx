@@ -12,6 +12,7 @@ import {
 } from '@contentful/f36-components';
 import { modalControls, multiselect, pillsContainer } from './SelectTabsModal.styles';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
+import { onEnterToggleMultiselectOption } from '../../../../utils/keyboardUtils';
 import { DocumentTabProps } from '@types';
 import { truncateLabel } from '../../../../../utils/utils';
 
@@ -107,7 +108,12 @@ export const SelectTabsModal = ({
                           value={tab.tabId}
                           itemId={tab.tabId}
                           isChecked={selectedTabs.some((selected) => selected.tabId === tab.tabId)}
-                          onSelectItem={handleSelectTab}>
+                          onSelectItem={handleSelectTab}
+                          onKeyDown={onEnterToggleMultiselectOption(
+                            tab.tabId,
+                            selectedTabs.some((selected) => selected.tabId === tab.tabId),
+                            handleSelectTab
+                          )}>
                           {tab.tabTitle}
                         </Multiselect.Option>
                       ))}
