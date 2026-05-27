@@ -1,8 +1,9 @@
-import { Box, Card, Checkbox, Flex, Paragraph, Text } from '@contentful/f36-components';
+import { Badge, Box, Card, Checkbox, Flex, Paragraph, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { cx } from '@emotion/css';
 import type { EntryListRow as OverviewEntryListRow } from '../../../../utils/overviewEntryList';
 import {
+  noMappedContentBadge,
   treeChildRowBase,
   treeChildRowLast,
   treeChildRowNotLast,
@@ -89,6 +90,11 @@ function OverviewEntryRowCard({
                   ({truncateLabel(row.entryTitle, 150)})
                 </Text>
               ) : null}
+              {row.hasNoMappedContent && (
+                <Badge variant="secondary" size="small" className={noMappedContentBadge}>
+                  No mapped content
+                </Badge>
+              )}
             </Paragraph>
           </button>
         </Flex>

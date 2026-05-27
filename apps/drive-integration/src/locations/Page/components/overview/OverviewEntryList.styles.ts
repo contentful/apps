@@ -66,3 +66,7 @@ export const treeChildrenList = css({
     pointerEvents: 'none',
   },
 });
+
+export const noMappedContentBadge = css({
+  marginLeft: tokens.spacingS,
+});

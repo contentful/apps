@@ -15,22 +15,7 @@ const mockCma: any = {
   entry: {
     getMany: vi.fn(),
   },
-  appInstallation: {
-    getForOrganization: vi.fn().mockResolvedValue({
-      items: [
-        {
-          sys: {
-            space: {
-              sys: {
-                id: 'test-space',
-              },
-            },
-          },
-          parameters: {},
-        },
-      ],
-    }),
-  },
+  appInstallation: {},
   user: {
     getForSpace: vi.fn().mockResolvedValue({
       sys: {

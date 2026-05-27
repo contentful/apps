@@ -110,7 +110,7 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
             Trigger Reset To Main
           </button>
           <button
-            onClick={() => props.onAiAccessDenied('AI features are currently disabled')}
+            onClick={() => props.onAiAccessDenied?.('AI features are currently disabled')}
             type="button">
             Trigger Modal AI Access Denied
           </button>
