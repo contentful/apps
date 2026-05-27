@@ -4,7 +4,6 @@ import { Multiselect } from '@contentful/f36-multiselect';
 import type { EditModalFieldMapping, EditModalFieldOption } from '@types';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
 import { isSelectableFieldType } from './utils';
-import { onEnterToggleMultiselectContainer } from '../../../../../../utils/keyboardUtils';
 import { optionRow } from './FieldSelectionDropdown.styles';
 
 interface FieldSelectionDropdownProps {
@@ -93,7 +92,7 @@ export const FieldSelectionDropdown = ({
     selectedOptions.length === 0 ? 'Select one or more' : `${selectedOptions.length} selected`;
 
   return (
-    <FormControl as="div" onKeyDown={onEnterToggleMultiselectContainer(handleSelectField)}>
+    <FormControl as="div">
       <Multiselect
         key={key}
         currentSelection={currentSelection}

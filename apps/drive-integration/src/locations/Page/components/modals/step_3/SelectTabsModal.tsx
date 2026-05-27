@@ -12,7 +12,6 @@ import {
 } from '@contentful/f36-components';
 import { modalControls, multiselect, pillsContainer } from './SelectTabsModal.styles';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
-import { onEnterToggleMultiselectContainer } from '../../../../../utils/keyboardUtils';
 import { DocumentTabProps } from '@types';
 import { truncateLabel } from '../../../../../utils/utils';
 
@@ -91,11 +90,7 @@ export const SelectTabsModal = ({
             <Radio value="false">Yes, select specific tabs</Radio>
             {useAllTabs === false && (
               <Flex flexDirection="column" gap="spacingS" marginLeft="spacingL" fullWidth>
-                <FormControl
-                  isRequired
-                  isInvalid={isInvalidSelectionError}
-                  marginBottom="none"
-                  onKeyDown={onEnterToggleMultiselectContainer(handleSelectTab)}>
+                <FormControl isRequired isInvalid={isInvalidSelectionError} marginBottom="none">
                   <FormControl.Label>Document tabs</FormControl.Label>
                   <Checkbox.Group name="document-tabs" value={selectedTabs.map((t) => t.tabId)}>
                     <Multiselect

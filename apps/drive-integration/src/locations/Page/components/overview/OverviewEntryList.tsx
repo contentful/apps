@@ -10,7 +10,6 @@ import {
   treeChildrenList,
 } from './OverviewEntryList.styles';
 import { truncateLabel } from '../../../../utils/utils';
-import { onEnterToggleCheckbox } from '../../../../utils/keyboardUtils';
 
 export interface OverviewEntryListProps {
   rows: OverviewEntryListRow[];
@@ -65,9 +64,6 @@ function OverviewEntryRowCard({
             isChecked={isEntrySelectedForCreation}
             isDisabled={areEntrySelectionsDisabled}
             onChange={(event) => onToggleEntrySelection(row.id, event.target.checked)}
-            onKeyDown={onEnterToggleCheckbox(isEntrySelectedForCreation, (checked) =>
-              onToggleEntrySelection(row.id, checked)
-            )}
           />
           <button
             type="button"
