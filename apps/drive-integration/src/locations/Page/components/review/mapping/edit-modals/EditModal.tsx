@@ -55,7 +55,17 @@ export const EditModal = ({
 
   const handleSelectableStateChangeForEntry = useCallback(
     (entryId: string) => (state: { hasFieldOptions: boolean; hasSelectableOptions: boolean }) => {
-      setDestinationFieldStateByEntry((prev) => ({ ...prev, [entryId]: state }));
+      setDestinationFieldStateByEntry((prev) => {
+        const existing = prev[entryId];
+        if (
+          existing &&
+          existing.hasFieldOptions === state.hasFieldOptions &&
+          existing.hasSelectableOptions === state.hasSelectableOptions
+        ) {
+          return prev;
+        }
+        return { ...prev, [entryId]: state };
+      });
     },
     []
   );

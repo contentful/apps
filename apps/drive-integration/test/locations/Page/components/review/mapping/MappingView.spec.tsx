@@ -866,7 +866,7 @@ describe('MappingView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Edit content mapping' }));
 
     expect(screen.getByRole('heading', { name: 'Edit content mapping' })).toBeTruthy();
-    expect(screen.getByText('"fresh body text"')).toBeTruthy();
+    expect(screen.getByText('“fresh body text”')).toBeTruthy();
     expect(screen.getByText('Assign to fields')).toBeTruthy();
     expect(screen.getByText('Article: Untitled')).toBeTruthy();
     expect(mockClearSelection).toHaveBeenCalledTimes(1);

@@ -78,7 +78,7 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
   ModalOrchestrator: require('react').forwardRef(
     (
       props: {
-        onAiAccessDenied: () => void;
+        onAiAccessDenied: (message: string) => void;
         onMappingReviewReady: (payload: MappingReviewSuspendPayload, runId: string) => void;
         onResetToMain: () => void;
         oauthToken: string;
@@ -109,7 +109,9 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
           <button onClick={props.onResetToMain} type="button">
             Trigger Reset To Main
           </button>
-          <button onClick={props.onAiAccessDenied} type="button">
+          <button
+            onClick={() => props.onAiAccessDenied('AI features are currently disabled')}
+            type="button">
             Trigger Modal AI Access Denied
           </button>
         </>
