@@ -1,12 +1,5 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
-import {
-  Button,
-  Flex,
-  FormControl,
-  Modal,
-  Paragraph,
-  Pill,
-} from '@contentful/f36-components';
+import { Button, Flex, FormControl, Modal, Paragraph, Pill } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
