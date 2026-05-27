@@ -12,7 +12,7 @@ import {
 } from '@contentful/f36-components';
 import { modalControls, multiselect, pillsContainer } from './SelectTabsModal.styles';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
-import { onEnterToggleMultiselectOption } from '../../../../../utils/keyboardUtils';
+import { onEnterToggleMultiselectContainer } from '../../../../../utils/keyboardUtils';
 import { DocumentTabProps } from '@types';
 import { truncateLabel } from '../../../../../utils/utils';
 
@@ -91,7 +91,7 @@ export const SelectTabsModal = ({
             <Radio value="false">Yes, select specific tabs</Radio>
             {useAllTabs === false && (
               <Flex flexDirection="column" gap="spacingS" marginLeft="spacingL" fullWidth>
-                <FormControl isRequired isInvalid={isInvalidSelectionError} marginBottom="none">
+                <FormControl isRequired isInvalid={isInvalidSelectionError} marginBottom="none" onKeyDown={onEnterToggleMultiselectContainer(handleSelectTab)}>
                   <FormControl.Label>Document tabs</FormControl.Label>
                   <Checkbox.Group name="document-tabs" value={selectedTabs.map((t) => t.tabId)}>
                     <Multiselect
@@ -108,12 +108,7 @@ export const SelectTabsModal = ({
                           value={tab.tabId}
                           itemId={tab.tabId}
                           isChecked={selectedTabs.some((selected) => selected.tabId === tab.tabId)}
-                          onSelectItem={handleSelectTab}
-                          onKeyDown={onEnterToggleMultiselectOption(
-                            tab.tabId,
-                            selectedTabs.some((selected) => selected.tabId === tab.tabId),
-                            handleSelectTab
-                          )}>
+                          onSelectItem={handleSelectTab}>
                           {tab.tabTitle}
                         </Multiselect.Option>
                       ))}

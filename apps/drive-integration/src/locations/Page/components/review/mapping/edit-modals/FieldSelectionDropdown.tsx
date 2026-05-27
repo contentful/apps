@@ -4,7 +4,7 @@ import { Multiselect } from '@contentful/f36-multiselect';
 import type { EditModalFieldMapping, EditModalFieldOption } from '@types';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
 import { isSelectableFieldType } from './utils';
-import { onEnterToggleMultiselectOption } from '../../../../../../utils/keyboardUtils';
+import { onEnterToggleMultiselectContainer } from '../../../../../../utils/keyboardUtils';
 import { optionRow } from './FieldSelectionDropdown.styles';
 
 interface FieldSelectionDropdownProps {
@@ -93,7 +93,7 @@ export const FieldSelectionDropdown = ({
     selectedOptions.length === 0 ? 'Select one or more' : `${selectedOptions.length} selected`;
 
   return (
-    <FormControl as="div">
+    <FormControl as="div" onKeyDown={onEnterToggleMultiselectContainer(handleSelectField)}>
       <Multiselect
         key={key}
         currentSelection={currentSelection}
@@ -118,11 +118,6 @@ export const FieldSelectionDropdown = ({
               isChecked={selectedFieldIds.includes(option.id)}
               isDisabled={isDisabled && !selectedFieldIds.includes(option.id)}
               onSelectItem={handleSelectField}
-              onKeyDown={onEnterToggleMultiselectOption(
-                option.id,
-                selectedFieldIds.includes(option.id),
-                handleSelectField
-              )}
               className={optionRow}>
               <Flex gap="spacing2Xs">
                 <Text as="div" fontColor="gray700" fontWeight="fontWeightDemiBold">
