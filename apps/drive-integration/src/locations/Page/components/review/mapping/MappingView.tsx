@@ -1,4 +1,11 @@
-import { useLayoutEffect, useMemo, useRef, useState, type RefCallback } from 'react';
+import {
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type RefCallback,
+} from 'react';
 import { Box, Flex, Note, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import {
@@ -179,7 +186,13 @@ export const MappingView = ({
   const cardWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const document = payload.normalizedDocument;
 
+  const { selectionRectangle, selectedText, selectedRange, clearSelection, freezeSelection } =
+    useReviewTextSelection(textSelectionRootRef);
+
+  const editButtonRef = useRef<HTMLDivElement>(null);
+
   const closeEditModal = () => {
+    clearSelection();
     setEditModalState(EMPTY_EDIT_MODAL);
     setPendingTextExclusionRanges(null);
     setPendingExcludeImageSourceRefs([]);
@@ -188,8 +201,16 @@ export const MappingView = ({
     setPendingPreviewHasTableContent(false);
   };
 
-  const { selectionRectangle, selectedText, selectedRange, clearSelection } =
-    useReviewTextSelection(textSelectionRootRef);
+  const handleDocumentKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Tab' && !e.shiftKey && selectedText.trim()) {
+      const button = editButtonRef.current?.querySelector('button') as HTMLElement | null;
+      if (button) {
+        e.preventDefault();
+        freezeSelection();
+        button.focus();
+      }
+    }
+  };
 
   const highlightIndex = useMemo(
     () => buildMappingHighlightIndex(entryBlockGraph, payload.contentTypes),
@@ -757,9 +778,16 @@ export const MappingView = ({
     <>
       <Flex
         ref={textSelectionRootRef}
+        contentEditable={!isViewMode || undefined}
+        suppressContentEditableWarning
+        onBeforeInput={(e) => e.preventDefault()}
+        onPaste={(e) => e.preventDefault()}
+        onCut={(e) => e.preventDefault()}
+        onDrop={(e) => e.preventDefault()}
+        onKeyDown={handleDocumentKeyDown}
         flexDirection="column"
         gap="spacingS"
-        style={{ marginTop: tokens.spacingM }}>
+        style={{ marginTop: tokens.spacingM, outline: 'none' }}>
         {(isViewMode || selectedEntryRow) && (
           <Flex
             gap="spacingM"
@@ -916,7 +944,12 @@ export const MappingView = ({
       </Flex>
 
       {selectionRectangle && !isDisabled && !isViewMode ? (
-        <EditMappingButton anchorRectangle={selectionRectangle} onEdit={handleEditFromSelection} />
+        <EditMappingButton
+          ref={editButtonRef}
+          anchorRectangle={selectionRectangle}
+          onEdit={handleEditFromSelection}
+          onBlur={clearSelection}
+        />
       ) : null}
 
       <EditModal

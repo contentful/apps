@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type RefObject } from 'react';
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import type { SelectionViewportRectangle } from '../locations/Page/components/review/mapping/selectionViewportRectangle';
 
 const SEGMENT_SURFACE_SELECTOR = '[data-review-segment-surface]';
@@ -57,6 +57,7 @@ export interface UseReviewTextSelectionResult {
   selectedText: string;
   selectedRange: Range | null;
   clearSelection: () => void;
+  freezeSelection: () => void;
 }
 
 export function useReviewTextSelection(
@@ -64,8 +65,11 @@ export function useReviewTextSelection(
 ): UseReviewTextSelectionResult {
   const [selectedText, setSelectedText] = useState('');
   const [selectedRange, setSelectedRange] = useState<Range | null>(null);
+  const frozenRef = useRef(false);
 
   const updateFromSelection = useCallback(() => {
+    if (frozenRef.current) return;
+
     const root = rootRef.current;
     const currentSelection = window.getSelection();
     if (!root || !currentSelection) {
@@ -85,9 +89,14 @@ export function useReviewTextSelection(
   }, [rootRef]);
 
   const clearSelection = useCallback(() => {
+    frozenRef.current = false;
     window.getSelection()?.removeAllRanges();
     setSelectedText('');
     setSelectedRange(null);
+  }, []);
+
+  const freezeSelection = useCallback(() => {
+    frozenRef.current = true;
   }, []);
 
   const selectionRectangle = selectedRange ? getSelectionViewportRectangle(selectedRange) : null;
@@ -106,5 +115,5 @@ export function useReviewTextSelection(
     };
   }, [rootRef, updateFromSelection]);
 
-  return { selectionRectangle, selectedText, selectedRange, clearSelection };
+  return { selectionRectangle, selectedText, selectedRange, clearSelection, freezeSelection };
 }
