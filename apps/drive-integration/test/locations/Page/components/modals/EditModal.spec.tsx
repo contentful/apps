@@ -4,7 +4,6 @@ import { EditModal } from '../../../../../src/locations/Page/components/review/m
 import React from 'react';
 
 const onClose = vi.fn();
-const onConfirmPrimary = vi.fn();
 
 const baseNewLocation = {
   id: 'page-event-detail',

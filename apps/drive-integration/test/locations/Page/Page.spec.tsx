@@ -77,6 +77,7 @@ vi.mock('../../../src/locations/Page/components/review/ReviewPage', () => ({
 }));
 
 vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   ModalOrchestrator: require('react').forwardRef(
     (
       props: {

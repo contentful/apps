@@ -76,17 +76,6 @@ const previewPayloadFromCompletedRun = (runData: AgentRunData): CompletedWorkflo
     'cancelled' in googleDocPayload &&
     (googleDocPayload as { cancelled?: unknown }).cancelled === true
   ) {
-    const documentId =
-      'documentId' in googleDocPayload &&
-      typeof (googleDocPayload as { documentId?: unknown }).documentId === 'string'
-        ? (googleDocPayload as { documentId: string }).documentId
-        : '';
-    const title =
-      'title' in googleDocPayload &&
-      typeof (googleDocPayload as { title?: unknown }).title === 'string'
-        ? (googleDocPayload as { title: string }).title
-        : undefined;
-
     // Cancelled runs complete without full preview payload; return a no-op preview shape.
     return {
       entries: [],
