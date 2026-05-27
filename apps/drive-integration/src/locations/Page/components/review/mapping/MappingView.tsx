@@ -1,4 +1,11 @@
-import { useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type RefCallback } from 'react';
+import {
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type RefCallback,
+} from 'react';
 import { Box, Flex, Note, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import {
