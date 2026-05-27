@@ -1,0 +1,90 @@
+name: Deploy Contentful Apps
+
+on:
+  workflow_dispatch:
+    inputs:
+      app:
+        description: 'App to deploy'
+        required: true
+        type: choice
+        options:
+          - rich-text-html-converter
+          - salesforce-commerce-cloud
+  push:
+    branches:
+      - master
+    paths:
+      - 'apps/**'
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.build-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Build deploy matrix
+        id: build-matrix
+        shell: bash
+        run: |
+          # Map: app directory name -> GitHub secret suffix for CONTENTFUL_APP_DEF_ID_*
+          declare -A APPS=(
+            ["rich-text-html-converter"]="RICH_TEXT_HTML_CONVERTER"
+            ["salesforce-commerce-cloud"]="SALESFORCE_COMMERCE_CLOUD"
+          )
+
+          includes=()
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            app="${{ github.event.inputs.app }}"
+            secret_suffix="${APPS[$app]}"
+            includes+=("{\"app\":\"$app\",\"app_def_id_secret\":\"CONTENTFUL_APP_DEF_ID_${secret_suffix}\"}")
+          else
+            changed=$(git diff --name-only HEAD^ HEAD)
+            for app in "${!APPS[@]}"; do
+              if echo "$changed" | grep -q "^apps/$app/"; then
+                secret_suffix="${APPS[$app]}"
+                includes+=("{\"app\":\"$app\",\"app_def_id_secret\":\"CONTENTFUL_APP_DEF_ID_${secret_suffix}\"}")
+              fi
+            done
+          fi
+
+          if [ ${#includes[@]} -eq 0 ]; then
+            echo 'matrix={"include":[]}' >> "$GITHUB_OUTPUT"
+          else
+            joined=$(IFS=,; printf '%s' "${includes[*]}")
+            echo "matrix={\"include\":[$joined]}" >> "$GITHUB_OUTPUT"
+          fi
+
+  deploy:
+    needs: detect
+    if: needs.detect.outputs.matrix != '{"include":[]}'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.detect.outputs.matrix) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: apps/${{ matrix.app }}/package-lock.json
+
+      - run: npm ci
+        working-directory: apps/${{ matrix.app }}
+
+      - run: npm run build
+        working-directory: apps/${{ matrix.app }}
+
+      - run: npm run deploy
+        working-directory: apps/${{ matrix.app }}
+        env:
+          CONTENTFUL_ORG_ID: ${{ secrets.CONTENTFUL_ORG_ID }}
+          CONTENTFUL_APP_DEF_ID: ${{ secrets[matrix.app_def_id_secret] }}
+          CONTENTFUL_ACCESS_TOKEN: ${{ secrets.CONTENTFUL_ACCESS_TOKEN }}
