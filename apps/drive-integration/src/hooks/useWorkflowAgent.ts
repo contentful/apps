@@ -204,19 +204,16 @@ const pollAgentRun = async (
 ): Promise<WorkflowRunResult> => {
   const startMs = Date.now();
   let pendingReviewMissingPayloadCount = 0;
-  console.log(`⏳ Polling run [${runId}]`);
 
   for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
     const runData = await getWorkflowRun(sdk, spaceId, environmentId, runId);
 
     if (!runData) {
-      console.log(`  #${attempt + 1} — not found yet (${elapsedSec(startMs)})`);
       await wait(POLL_INTERVAL_MS);
       continue;
     }
 
     const status = getRunStatus(runData);
-    console.log(`  #${attempt + 1} — status: ${status} (${elapsedSec(startMs)})`);
 
     if (status === RunStatus.PENDING_REVIEW && !getSuspendPayload(runData)) {
       pendingReviewMissingPayloadCount++;
@@ -226,7 +223,6 @@ const pollAgentRun = async (
 
     const workflowRun = getWorkflowRunResult(runData, runId, pendingReviewMissingPayloadCount);
     if (workflowRun) {
-      console.log(`✓ Run [${runId}] settled: ${status} in ${elapsedSec(startMs)}`);
       return workflowRun;
     }
 

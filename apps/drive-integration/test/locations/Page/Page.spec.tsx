@@ -1,9 +1,11 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { mockSdk } from '../../mocks';
+import { createMockSDK } from '../../mocks';
 import { vi, describe, it, expect, afterEach, beforeEach } from 'vitest';
 import React from 'react';
 import type { MappingReviewSuspendPayload } from '@types';
 import Page from '../../../src/locations/Page/Page';
+
+const mockSdk = createMockSDK();
 
 const mappingReviewPayloadMock: MappingReviewSuspendPayload = {
   suspendStepId: 'mapping-review',

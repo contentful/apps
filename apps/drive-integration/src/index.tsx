@@ -9,9 +9,7 @@ const root = createRoot(container);
 
 const handleOAuthCallback = () => {
   const params = new URLSearchParams(window.location.search);
-  console.log('OAuth callback params:', params);
   if (params.has('code') && params.has('state') && window.opener) {
-    console.log('Sending OAuth completion message to parent window');
     window.opener.postMessage(
       {
         type: 'oauth:complete',
