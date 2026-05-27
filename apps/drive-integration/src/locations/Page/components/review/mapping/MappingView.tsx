@@ -778,7 +778,7 @@ export const MappingView = ({
     <>
       <Flex
         ref={textSelectionRootRef}
-        contentEditable
+        contentEditable={!isViewMode || undefined}
         suppressContentEditableWarning
         onBeforeInput={(e) => e.preventDefault()}
         onPaste={(e) => e.preventDefault()}

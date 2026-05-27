@@ -6,8 +6,8 @@ import {
   Modal,
   Paragraph,
   Pill,
-  Multiselect,
 } from '@contentful/f36-components';
+import { Multiselect } from '@contentful/f36-multiselect';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';

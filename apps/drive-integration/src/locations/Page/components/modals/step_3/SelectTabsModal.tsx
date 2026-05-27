@@ -7,9 +7,9 @@ import {
   Modal,
   Paragraph,
   Pill,
-  Multiselect,
   Radio,
 } from '@contentful/f36-components';
+import { Multiselect } from '@contentful/f36-multiselect';
 import { modalControls, multiselect, pillsContainer } from './SelectTabsModal.styles';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
 import { DocumentTabProps } from '@types';
