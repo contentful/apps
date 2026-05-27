@@ -91,7 +91,11 @@ export const SelectTabsModal = ({
             <Radio value="false">Yes, select specific tabs</Radio>
             {useAllTabs === false && (
               <Flex flexDirection="column" gap="spacingS" marginLeft="spacingL" fullWidth>
-                <FormControl isRequired isInvalid={isInvalidSelectionError} marginBottom="none" onKeyDown={onEnterToggleMultiselectContainer(handleSelectTab)}>
+                <FormControl
+                  isRequired
+                  isInvalid={isInvalidSelectionError}
+                  marginBottom="none"
+                  onKeyDown={onEnterToggleMultiselectContainer(handleSelectTab)}>
                   <FormControl.Label>Document tabs</FormControl.Label>
                   <Checkbox.Group name="document-tabs" value={selectedTabs.map((t) => t.tabId)}>
                     <Multiselect
