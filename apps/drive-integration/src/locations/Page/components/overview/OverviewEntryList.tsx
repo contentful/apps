@@ -64,6 +64,9 @@ function OverviewEntryRowCard({
             isChecked={isEntrySelectedForCreation}
             isDisabled={areEntrySelectionsDisabled}
             onChange={(event) => onToggleEntrySelection(row.id, event.target.checked)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') e.currentTarget.click();
+            }}
           />
           <button
             type="button"
