@@ -10,10 +10,16 @@ import {
   Radio,
 } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
-import { modalControls, multiselect, pillsContainer } from './SelectTabsModal.styles';
+import {
+  modalControls,
+  multiselect,
+  multiselectContainer,
+  pillsContainer,
+} from './SelectTabsModal.styles';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
 import { DocumentTabProps } from '@types';
 import { truncateLabel } from '../../../../../utils/utils';
+import { handleMultiselectKeyDown } from '../../../../../utils/keyboard';
 
 interface SelectTabsModalProps {
   onContinue: (selectedTabs: DocumentTabProps[]) => void;
@@ -51,12 +57,6 @@ export const SelectTabsModal = ({
   useEffect(() => {
     setHasAttemptedSubmit(false);
   }, [availableTabs]);
-
-  const handleMultiselectKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key !== 'Enter') return;
-    const target = e.target as HTMLInputElement;
-    if (target.type === 'checkbox') target.click();
-  };
 
   const handleSelectTab = (e: React.ChangeEvent<HTMLInputElement>) => {
     setHasAttemptedSubmit(false);
@@ -99,7 +99,7 @@ export const SelectTabsModal = ({
                 <FormControl isRequired isInvalid={isInvalidSelectionError} marginBottom="none">
                   <FormControl.Label>Document tabs</FormControl.Label>
                   <Checkbox.Group name="document-tabs" value={selectedTabs.map((t) => t.tabId)}>
-                    <div onKeyDown={handleMultiselectKeyDown}>
+                    <div onKeyDown={handleMultiselectKeyDown} className={multiselectContainer}>
                       <Multiselect
                         className={multiselect}
                         currentSelection={selectedTabs.map((tab) => tab.tabTitle)}

@@ -6,6 +6,7 @@ import { ContentTypeProps } from 'contentful-management';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
 import { multiselect, pillsContainer } from './ContentTypePickerModal.styles';
 import { truncateLabel } from '../../../../../utils/utils';
+import { handleMultiselectKeyDown } from '../../../../../utils/keyboard';
 
 interface ContentTypePickerModalProps {
   sdk: PageAppSDK;
@@ -97,12 +98,6 @@ export const ContentTypePickerModal = ({
     if (contentTypes.length === 0) return 'No content types in space';
     if (selectedContentTypes.length === 0) return 'Select one or more';
     return `${selectedContentTypes.length} selected`;
-  };
-
-  const handleMultiselectKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key !== 'Enter') return;
-    const target = e.target as HTMLInputElement;
-    if (target.type === 'checkbox') target.click();
   };
 
   const handleSelectContentType = (e: ChangeEvent<HTMLInputElement>) => {

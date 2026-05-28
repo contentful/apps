@@ -5,6 +5,7 @@ import type { EditModalFieldMapping, EditModalFieldOption } from '@types';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
 import { isSelectableFieldType } from './utils';
 import { optionRow } from './FieldSelectionDropdown.styles';
+import { handleMultiselectKeyDown } from '../../../../../../utils/keyboard';
 
 interface FieldSelectionDropdownProps {
   selectedText: string;
@@ -74,12 +75,6 @@ export const FieldSelectionDropdown = ({
       hasSelectableOptions: selectableOptions.length > 0,
     });
   }, [fieldOptions.length, isImageContent, selectableOptions.length]);
-
-  const handleMultiselectKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key !== 'Enter') return;
-    const target = e.target as HTMLInputElement;
-    if (target.type === 'checkbox') target.click();
-  };
 
   const handleSelectField = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { checked, value } = event.target;
