@@ -1,12 +1,5 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
-import {
-  Button,
-  Flex,
-  FormControl,
-  Modal,
-  Paragraph,
-  Pill,
-} from '@contentful/f36-components';
+import { Button, Flex, FormControl, Modal, Paragraph, Pill } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
@@ -106,6 +99,12 @@ export const ContentTypePickerModal = ({
     return `${selectedContentTypes.length} selected`;
   };
 
+  const handleMultiselectKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key !== 'Enter') return;
+    const target = e.target as HTMLInputElement;
+    if (target.type === 'checkbox') target.click();
+  };
+
   const handleSelectContentType = (e: ChangeEvent<HTMLInputElement>) => {
     const { checked, value } = e.target;
     if (checked) {
@@ -144,30 +143,32 @@ export const ContentTypePickerModal = ({
           isInvalid={showSelectionError || showFetchError}
           marginBottom="none">
           <FormControl.Label>Content type</FormControl.Label>
-          <Multiselect
-            className={multiselect}
-            searchProps={{
-              searchPlaceholder: 'Search content types',
-              onSearchValueChange,
-            }}
-            currentSelection={selectedContentTypes.map((ct) => ct.name)}
-            placeholder={getPlaceholderText()}
-            popoverProps={{
-              listMaxHeight: 300,
-              listRef: multiselectListRef,
-            }}>
-            {filteredContentTypes.map((ct) => (
-              <Multiselect.Option
-                key={ct.sys.id}
-                value={ct.sys.id}
-                itemId={ct.sys.id}
-                isChecked={selectedContentTypes.some((selected) => selected.sys.id === ct.sys.id)}
-                isDisabled={isFetching || isSubmitting}
-                onSelectItem={handleSelectContentType}>
-                {ct.name}
-              </Multiselect.Option>
-            ))}
-          </Multiselect>
+          <div onKeyDown={handleMultiselectKeyDown}>
+            <Multiselect
+              className={multiselect}
+              searchProps={{
+                searchPlaceholder: 'Search content types',
+                onSearchValueChange,
+              }}
+              currentSelection={selectedContentTypes.map((ct) => ct.name)}
+              placeholder={getPlaceholderText()}
+              popoverProps={{
+                listMaxHeight: 300,
+                listRef: multiselectListRef,
+              }}>
+              {filteredContentTypes.map((ct) => (
+                <Multiselect.Option
+                  key={ct.sys.id}
+                  value={ct.sys.id}
+                  itemId={ct.sys.id}
+                  isChecked={selectedContentTypes.some((selected) => selected.sys.id === ct.sys.id)}
+                  isDisabled={isFetching || isSubmitting}
+                  onSelectItem={handleSelectContentType}>
+                  {ct.name}
+                </Multiselect.Option>
+              ))}
+            </Multiselect>
+          </div>
           {showFetchError && (
             <FormControl.ValidationMessage>
               Unable to load content types.

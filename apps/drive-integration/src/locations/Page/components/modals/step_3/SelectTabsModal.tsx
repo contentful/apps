@@ -52,6 +52,12 @@ export const SelectTabsModal = ({
     setHasAttemptedSubmit(false);
   }, [availableTabs]);
 
+  const handleMultiselectKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key !== 'Enter') return;
+    const target = e.target as HTMLInputElement;
+    if (target.type === 'checkbox') target.click();
+  };
+
   const handleSelectTab = (e: React.ChangeEvent<HTMLInputElement>) => {
     setHasAttemptedSubmit(false);
 
@@ -93,25 +99,29 @@ export const SelectTabsModal = ({
                 <FormControl isRequired isInvalid={isInvalidSelectionError} marginBottom="none">
                   <FormControl.Label>Document tabs</FormControl.Label>
                   <Checkbox.Group name="document-tabs" value={selectedTabs.map((t) => t.tabId)}>
-                    <Multiselect
-                      className={multiselect}
-                      currentSelection={selectedTabs.map((tab) => tab.tabTitle)}
-                      placeholder={'Select one or more'}
-                      popoverProps={{
-                        listMaxHeight: 300,
-                        listRef: multiselectListRef,
-                      }}>
-                      {availableTabs.map((tab) => (
-                        <Multiselect.Option
-                          key={tab.tabId}
-                          value={tab.tabId}
-                          itemId={tab.tabId}
-                          isChecked={selectedTabs.some((selected) => selected.tabId === tab.tabId)}
-                          onSelectItem={handleSelectTab}>
-                          {tab.tabTitle}
-                        </Multiselect.Option>
-                      ))}
-                    </Multiselect>
+                    <div onKeyDown={handleMultiselectKeyDown}>
+                      <Multiselect
+                        className={multiselect}
+                        currentSelection={selectedTabs.map((tab) => tab.tabTitle)}
+                        placeholder={'Select one or more'}
+                        popoverProps={{
+                          listMaxHeight: 300,
+                          listRef: multiselectListRef,
+                        }}>
+                        {availableTabs.map((tab) => (
+                          <Multiselect.Option
+                            key={tab.tabId}
+                            value={tab.tabId}
+                            itemId={tab.tabId}
+                            isChecked={selectedTabs.some(
+                              (selected) => selected.tabId === tab.tabId
+                            )}
+                            onSelectItem={handleSelectTab}>
+                            {tab.tabTitle}
+                          </Multiselect.Option>
+                        ))}
+                      </Multiselect>
+                    </div>
                   </Checkbox.Group>
                   {isInvalidSelectionError && (
                     <FormControl.ValidationMessage>
