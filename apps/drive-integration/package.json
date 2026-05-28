@@ -35,7 +35,7 @@
     "deploy:sync-flinkly": "aws s3 sync ./build ${STATIC_S3_BASE}/google-docs-dev/flinkly && aws cloudfront create-invalidation --distribution-id $GOOGLE_DOCS_TEST_CLOUDFRONT_DIST_ID --paths \"/*\" > /dev/null 2>&1",
     "deploy:flinkly": "npm run build && npm run upload:app-flinkly && npm run deploy:sync-flinkly",
     "upload:app-prod": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id 5EJGHo8tYJcjnEhYWDxivp --definition-id 3EaGZUMKRKVZUyrcoNJ4o4 --token $CONTENTFUL_ACCESS_TOKEN",
-    "deploy:sync-prod": "aws s3 sync ./build ${PROD_STATIC_S3_BASE}/google-docs && aws cloudfront create-invalidation --distribution-id $GOOGLE_DOCS_PROD_CLOUDFRONT_DIST_ID --paths \"/*\" > /dev/null 2>&1",
+    "deploy:sync-prod": "aws s3 sync ./build ${STATIC_S3_BASE}/google-docs && aws cloudfront create-invalidation --distribution-id $GOOGLE_DOCS_PROD_CLOUDFRONT_DIST_ID --paths \"/*\" > /dev/null 2>&1",
     "deploy:prod": "npm run build && npm run upload:app-prod && npm run deploy:sync-prod",
     "deploy": "npm run deploy:prod",
     "deploy:test": "npm run deploy:flinkly",
