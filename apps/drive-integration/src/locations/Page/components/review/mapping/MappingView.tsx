@@ -186,8 +186,13 @@ export const MappingView = ({
   const cardWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const document = payload.normalizedDocument;
 
-  const { selectionRectangle, selectedText, selectedRange, clearSelection, freezeSelection } =
-    useReviewTextSelection(textSelectionRootRef);
+  const {
+    selectionRectangle,
+    selectedText,
+    selectedRange,
+    clearSelection,
+    lockSelection: freezeSelection,
+  } = useReviewTextSelection(textSelectionRootRef);
 
   const editButtonRef = useRef<HTMLDivElement>(null);
 

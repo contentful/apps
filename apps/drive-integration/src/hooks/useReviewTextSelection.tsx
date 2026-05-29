@@ -57,7 +57,7 @@ export interface UseReviewTextSelectionResult {
   selectedText: string;
   selectedRange: Range | null;
   clearSelection: () => void;
-  freezeSelection: () => void;
+  lockSelection: () => void;
 }
 
 export function useReviewTextSelection(
@@ -65,10 +65,10 @@ export function useReviewTextSelection(
 ): UseReviewTextSelectionResult {
   const [selectedText, setSelectedText] = useState('');
   const [selectedRange, setSelectedRange] = useState<Range | null>(null);
-  const frozenRef = useRef(false);
+  const lockSelectionRef = useRef(false);
 
   const updateFromSelection = useCallback(() => {
-    if (frozenRef.current) return;
+    if (lockSelectionRef.current) return;
 
     const root = rootRef.current;
     const currentSelection = window.getSelection();
@@ -89,14 +89,14 @@ export function useReviewTextSelection(
   }, [rootRef]);
 
   const clearSelection = useCallback(() => {
-    frozenRef.current = false;
+    lockSelectionRef.current = false;
     window.getSelection()?.removeAllRanges();
     setSelectedText('');
     setSelectedRange(null);
   }, []);
 
   const freezeSelection = useCallback(() => {
-    frozenRef.current = true;
+    lockSelectionRef.current = true;
   }, []);
 
   const selectionRectangle = selectedRange ? getSelectionViewportRectangle(selectedRange) : null;
@@ -115,5 +115,11 @@ export function useReviewTextSelection(
     };
   }, [rootRef, updateFromSelection]);
 
-  return { selectionRectangle, selectedText, selectedRange, clearSelection, freezeSelection };
+  return {
+    selectionRectangle,
+    selectedText,
+    selectedRange,
+    clearSelection,
+    lockSelection: freezeSelection,
+  };
 }
