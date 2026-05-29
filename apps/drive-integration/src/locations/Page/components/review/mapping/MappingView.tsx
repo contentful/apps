@@ -37,7 +37,6 @@ import {
   buildMappingHighlightIndex,
   getMappingCardKey,
   type MappingHighlight,
-  type MappingHighlightIndex,
   uniqueHighlights,
 } from './buildHighlights';
 import { buildListMarkers } from './buildListMarkers';
@@ -60,7 +59,6 @@ import { MappingEntryCards } from './MappingEntryCards';
 import { NormalizedDocumentSection } from './NormalizedDocumentSection';
 import { buildMappingDisplayGroups, type MappingDisplayGroup } from './buildMappingDisplayGroups';
 import { ViewMappingRail, type ViewMappingCardEntry } from './ViewMappingRail';
-import { ViewMappingCard } from './ViewMappingCard';
 import {
   applyImageExclusionToEntryBlockGraph,
   appendImageToTargets,

@@ -14,4 +14,3 @@ export default defineConfig(({ mode }) => ({
     include: ['**/*.test.ts', '**/*.spec.ts'],
   },
 }));
-
