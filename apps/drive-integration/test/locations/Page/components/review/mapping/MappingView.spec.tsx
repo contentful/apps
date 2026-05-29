@@ -276,6 +276,7 @@ describe('MappingView', () => {
       selectedText: '',
       selectedRange: null,
       clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
     });
   });
 
@@ -805,6 +806,7 @@ describe('MappingView', () => {
       selectedText: '',
       selectedRange: null,
       clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
     });
 
     const { container, rerender } = render(
@@ -823,6 +825,7 @@ describe('MappingView', () => {
       selectedText: 'Second',
       selectedRange,
       clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
     });
 
     rerender(
@@ -851,6 +854,7 @@ describe('MappingView', () => {
       selectedText: 'fresh body text',
       selectedRange,
       clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
     });
 
     const payload = createPayload();
@@ -879,6 +883,7 @@ describe('MappingView', () => {
       selectedText: 'plain text',
       selectedRange,
       clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
     });
 
     const payload = createPayload();
@@ -900,6 +905,7 @@ describe('MappingView', () => {
       selectedText: '',
       selectedRange: null,
       clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
     });
 
     const payload = createPayload();
@@ -921,6 +927,7 @@ describe('MappingView', () => {
       selectedText: 'selected body text',
       selectedRange,
       clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
     });
     rerender(
       <MappingView
@@ -967,6 +974,7 @@ describe('MappingView', () => {
       selectedText: '',
       selectedRange: null,
       clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
     });
 
     const { container, rerender } = render(
@@ -992,6 +1000,7 @@ describe('MappingView', () => {
       selectedText: selectedRange.toString(),
       selectedRange,
       clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
     });
 
     rerender(
