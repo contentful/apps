@@ -99,6 +99,9 @@ const ExperienceToolbar = () => {
         }
       })
       .catch(() => {
+        // The node was likely removed or the host couldn't resolve it; clear
+        // the panel back to the empty state rather than leaving a stale spinner.
+        // A real app may want to surface this via sdk.notifier.
         if (active) {
           setProperties(null);
           setLoadingProperties(false);
