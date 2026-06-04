@@ -14,6 +14,8 @@ export enum WorkflowFailureReason {
   GENERIC = 'generic',
   GOOGLE_DRIVE_AUTH_EXPIRED = 'google-drive-auth-expired',
   GOOGLE_DOCS_NOT_FOUND = 'google-docs-not-found',
+  AI_SERVICE_UNAVAILABLE = 'ai-service-unavailable',
+  APP_NOT_INSTALLED = 'app-not-installed',
 }
 
 export interface WorkflowFailure {

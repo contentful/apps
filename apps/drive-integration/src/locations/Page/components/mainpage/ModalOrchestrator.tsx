@@ -175,6 +175,30 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
+      if (
+        error instanceof WorkflowRunError &&
+        error.reason === WorkflowFailureReason.AI_SERVICE_UNAVAILABLE
+      ) {
+        setPreviewErrorState({
+          reason: WorkflowFailureReason.AI_SERVICE_UNAVAILABLE,
+          title: 'AI service temporarily unavailable',
+          message: ERROR_MESSAGES.AI_SERVICE_UNAVAILABLE,
+        });
+        return;
+      }
+
+      if (
+        error instanceof WorkflowRunError &&
+        error.reason === WorkflowFailureReason.APP_NOT_INSTALLED
+      ) {
+        setPreviewErrorState({
+          reason: WorkflowFailureReason.APP_NOT_INSTALLED,
+          title: 'App not installed in this environment',
+          message: ERROR_MESSAGES.APP_NOT_INSTALLED,
+        });
+        return;
+      }
+
       setPreviewErrorState({
         reason: WorkflowFailureReason.GENERIC,
         title: 'Unable to generate preview',
