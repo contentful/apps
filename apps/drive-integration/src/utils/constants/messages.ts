@@ -13,7 +13,7 @@ export const ERROR_MESSAGES = {
   AI_SERVICE_UNAVAILABLE:
     'The AI service is temporarily unavailable. Please try again in a few minutes.',
   APP_NOT_INSTALLED:
-    'The Drive Integration app is not installed in this space. Install it via Apps > Manage apps and try again.',
+    'The Drive Integration app is not installed in this environment. Install it via Apps > Manage apps and try again.',
 } as const;
 
 export const SUCCESS_MESSAGES = {
