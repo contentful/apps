@@ -163,6 +163,18 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
+      if (
+        error instanceof WorkflowRunError &&
+        error.reason === WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND
+      ) {
+        setPreviewErrorState({
+          reason: WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND,
+          title: 'Document not found',
+          message: ERROR_MESSAGES.GOOGLE_DOCS_NOT_FOUND,
+        });
+        return;
+      }
+
       setPreviewErrorState({
         reason: WorkflowFailureReason.GENERIC,
         title: 'Unable to generate preview',
