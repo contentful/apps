@@ -84,6 +84,9 @@ const ExperienceToolbar = () => {
   }, [sdk]);
 
   // Initial audit + re-audit whenever the experience changes.
+  // Simplification for the example: every onChange triggers a full traversal.
+  // A production app editing rapidly would debounce this (e.g. trailing 300ms)
+  // so a burst of edits collapses into a single re-audit instead of N+1 passes.
   useEffect(() => {
     void audit();
     return sdk.exo.experience.onChange(() => {
@@ -116,6 +119,9 @@ const ExperienceToolbar = () => {
         }
         await node.setContentProperty(finding.fix.propertyKey, finding.fix.value);
         sdk.notifier.success('Fix applied.');
+        // Re-audit explicitly rather than relying on the setContentProperty
+        // write to round-trip back through onChange — that keeps the panel in
+        // sync even if the host doesn't emit a change event for this write.
         await audit();
       } catch {
         sdk.notifier.error('Could not apply the fix. Please try again.');

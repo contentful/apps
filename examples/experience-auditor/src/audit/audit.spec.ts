@@ -58,6 +58,20 @@ describe('audit rules', () => {
     expect(report.findings.filter((f) => f.ruleId === 'a11y/image-alt-text')).toHaveLength(0);
   });
 
+  it('does not flag string fields whose key merely looks image-ish', () => {
+    // `iconName`/`logoText`/`assetId` are string labels, not images — they must
+    // not trigger a (publish-blocking) missing-alt error.
+    const report = runAudit([
+      node('badge', [
+        { key: 'iconName', area: 'content', value: 'star' },
+        { key: 'logoText', area: 'content', value: 'ACME' },
+        { key: 'assetId', area: 'content', value: 'abc123' },
+      ]),
+    ]);
+    expect(report.findings.filter((f) => f.ruleId === 'a11y/image-alt-text')).toHaveLength(0);
+    expect(report.counts.error).toBe(0);
+  });
+
   it('flags an empty heading as a warning', () => {
     const report = runAudit([node('cta', [{ key: 'heading', area: 'content', value: '' }])]);
     const finding = report.findings.find((f) => f.ruleId === 'content/required-empty');
@@ -70,6 +84,15 @@ describe('audit rules', () => {
     ]);
     const finding = report.findings.find((f) => f.ruleId === 'seo/missing-meta');
     expect(finding?.severity).toBe('info');
+  });
+
+  it('does not double-fire on a key that matches both heading and meta hints', () => {
+    // `metaTitle` matches the meta hint and the bare "title" — it should be
+    // owned by the SEO rule only, producing exactly one finding.
+    const report = runAudit([node('page', [{ key: 'metaTitle', area: 'content', value: '' }])]);
+    const forKey = report.findings.filter((f) => f.propertyKey === 'metaTitle');
+    expect(forKey).toHaveLength(1);
+    expect(forKey[0].ruleId).toBe('seo/missing-meta');
   });
 
   it('flags a broken entry binding as an error', () => {

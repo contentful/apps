@@ -2,20 +2,38 @@ import type { ComponentPropertyDescriptor } from '@contentful/app-sdk';
 import type { AuditFinding, AuditRule, CollectedNode, Severity } from './types';
 
 /** Property keys are matched case-insensitively against these hints. */
-const IMAGE_KEY_HINT = /(image|photo|asset|media|thumbnail|icon|logo)/i;
+const IMAGE_KEY_HINT = /(image|photo|media|thumbnail)/i;
 const ALT_KEY_HINT = /(alt|alttext|alternativetext|a11ylabel|arialabel)/i;
-const HEADING_KEY_HINT = /(heading|title|headline)/i;
 const META_KEY_HINT = /(metadescription|seodescription|metatitle|seotitle|opengraph|ogtitle|ogdescription)/i;
+// Heading must look like a heading but NOT like SEO metadata — otherwise
+// `metaTitle`/`seoTitle` would match both rules and double-count one field.
+const HEADING_KEY_HINT = /(heading|headline|^title$|pagetitle)/i;
 
 function findProperty(
   node: CollectedNode,
-  matcher: RegExp
+  matcher: RegExp,
+  predicate?: (p: ComponentPropertyDescriptor) => boolean
 ): ComponentPropertyDescriptor | undefined {
-  return node.properties.find((p) => matcher.test(stripNonAlpha(p.key)));
+  return node.properties.find(
+    (p) => matcher.test(stripNonAlpha(p.key)) && (!predicate || predicate(p))
+  );
 }
 
 function stripNonAlpha(key: string): string {
   return key.replace(/[^a-z0-9]/gi, '');
+}
+
+/**
+ * Whether a property value looks like an actual image — an asset Link object
+ * (`{ sys: { linkType: 'Asset', ... } }`) or an array of them. Matching on the
+ * key alone is too loose: `iconName`, `logoText`, `assetId` are string labels,
+ * not images, and flagging them for missing alt text produces false errors.
+ */
+function looksLikeImageValue(value: unknown): boolean {
+  const isAssetLink = (v: unknown): boolean =>
+    typeof v === 'object' && v !== null && 'sys' in (v as Record<string, unknown>);
+  if (Array.isArray(value)) return value.some(isAssetLink);
+  return isAssetLink(value);
 }
 
 function isEmptyValue(value: unknown): boolean {
@@ -59,7 +77,9 @@ const altTextRule: AuditRule = {
   id: 'a11y/image-alt-text',
   description: 'Images should have non-empty alternative text.',
   evaluate(node) {
-    const image = findProperty(node, IMAGE_KEY_HINT);
+    // Require both an image-like key AND an asset-shaped value, so string
+    // fields like `iconName`/`logoText` don't trigger false alt-text errors.
+    const image = findProperty(node, IMAGE_KEY_HINT, (p) => looksLikeImageValue(p.value));
     if (!image || isEmptyValue(image.value)) {
       // No image set on this node — nothing to audit.
       return [];
@@ -109,7 +129,13 @@ const requiredContentRule: AuditRule = {
   id: 'content/required-empty',
   description: 'Required content fields should not be empty.',
   evaluate(node) {
-    const heading = findProperty(node, HEADING_KEY_HINT);
+    // Exclude meta-ish keys so `metaTitle`/`seoTitle` are owned solely by the
+    // SEO rule and don't double-fire here.
+    const heading = findProperty(
+      node,
+      HEADING_KEY_HINT,
+      (p) => !META_KEY_HINT.test(stripNonAlpha(p.key))
+    );
     if (heading && heading.area === 'content' && isEmptyValue(heading.value)) {
       return [
         makeFinding(requiredContentRule, node, {
