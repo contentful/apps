@@ -74,7 +74,7 @@ npm run deploy:prod     # Deploy to production
 
 ## Google OAuth Scopes
 
-The app is registered under Google Cloud project `onyx-ivy-459019-g7` (Contentful Google Docs App). It requests the following OAuth scopes:
+The app is registered as (Contentful Google Docs App). It requests the following OAuth scopes:
 
 ### Non-sensitive scopes
 
