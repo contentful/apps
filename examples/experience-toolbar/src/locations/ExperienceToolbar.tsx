@@ -9,6 +9,7 @@ import type {
 import {
   Badge,
   Box,
+  Button,
   Flex,
   Heading,
   Note,
@@ -18,6 +19,7 @@ import {
   Subheading,
   Table,
   Text,
+  Tooltip,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 
@@ -46,9 +48,7 @@ const ExperienceToolbar = () => {
 
   const [context, setContext] = useState<ExoContext>(() => sdk.exo.context);
   const [uiMode, setUiMode] = useState<UiMode>(() => sdk.exo.getUiMode());
-  const [selection, setSelection] = useState<Selection>(() =>
-    sdk.exo.experience.selection.get()
-  );
+  const [selection, setSelection] = useState<Selection>(() => sdk.exo.experience.selection.get());
   const [properties, setProperties] = useState<ComponentPropertyDescriptor[] | null>(null);
   const [loadingProperties, setLoadingProperties] = useState(false);
 
@@ -128,6 +128,20 @@ const ExperienceToolbar = () => {
     };
   }, [sdk, selection]);
 
+  // Drive the canvas from the toolbar: highlight (and scroll to) the selected
+  // node. This is the outbound counterpart to the selection.onChange subscription
+  // above — the app directing the canvas, not just reading from it. In form mode
+  // the host treats highlight as a no-op, so the button is disabled there.
+  const handleHighlight = () => {
+    if (!selection.nodeId) {
+      return;
+    }
+    sdk.exo.experience.selection.highlight(selection.nodeId, {
+      flash: true,
+      scrollIntoView: true,
+    });
+  };
+
   return (
     <Box padding="spacingM">
       <Stack flexDirection="column" alignItems="flex-start" spacing="spacingM">
@@ -156,6 +170,8 @@ const ExperienceToolbar = () => {
             selection={selection}
             properties={properties}
             loading={loadingProperties}
+            uiMode={uiMode}
+            onHighlight={handleHighlight}
           />
         </Box>
       </Stack>
@@ -167,9 +183,17 @@ interface SelectedNodeProps {
   selection: Selection;
   properties: ComponentPropertyDescriptor[] | null;
   loading: boolean;
+  uiMode: UiMode;
+  onHighlight: () => void;
 }
 
-const SelectedNode = ({ selection, properties, loading }: SelectedNodeProps) => {
+const SelectedNode = ({
+  selection,
+  properties,
+  loading,
+  uiMode,
+  onHighlight,
+}: SelectedNodeProps) => {
   if (!selection.nodeId) {
     return (
       <Note variant="neutral" data-test-id="empty-state">
@@ -178,11 +202,30 @@ const SelectedNode = ({ selection, properties, loading }: SelectedNodeProps) => 
     );
   }
 
+  const canHighlight = uiMode === 'visual';
+
   return (
     <Stack flexDirection="column" alignItems="flex-start" spacing="spacingS">
-      <Text fontColor="gray600">
-        <code>{selection.nodeType ?? 'Node'}</code> &middot; <code>{selection.nodeId}</code>
-      </Text>
+      <Flex alignItems="center" gap="spacingXs" flexWrap="wrap">
+        <Text fontColor="gray600">
+          <code>{selection.nodeType ?? 'Node'}</code> &middot; <code>{selection.nodeId}</code>
+        </Text>
+        <Tooltip
+          content={
+            canHighlight
+              ? 'Flash and scroll to this component on the canvas'
+              : 'Switch to visual mode to highlight components on the canvas'
+          }>
+          <Button
+            size="small"
+            variant="secondary"
+            isDisabled={!canHighlight}
+            onClick={onHighlight}
+            testId="highlight-button">
+            Highlight on canvas
+          </Button>
+        </Tooltip>
+      </Flex>
 
       {loading && <Spinner size="small" />}
 

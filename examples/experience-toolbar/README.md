@@ -82,6 +82,13 @@ when the editor opens and stays mounted for the session — selection changes do
 **not** remount it, so all live data flows through `on*` subscriptions, each of
 which returns an unsubscribe function called on cleanup.
 
+The toolbar can also **drive the canvas**, not just read from it. The "Highlight
+on canvas" button calls `sdk.exo.experience.selection.highlight(nodeId, { flash:
+true, scrollIntoView: true })` to flash and scroll to the selected component —
+the outbound counterpart to the `selection.onChange` subscription the panel reads
+from. Canvas affordances like highlighting are no-ops in `form` mode, so the
+button is disabled there and enabled only in `visual` mode.
+
 ## A note on verification
 
 This example is built against the published `@contentful/app-sdk@4.58.0` types,

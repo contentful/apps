@@ -1,5 +1,5 @@
 import React from 'react';
-import { act, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import ExperienceToolbar from './ExperienceToolbar';
 import { mockSdk } from '../../test/mocks';
@@ -142,5 +142,39 @@ describe('ExperienceToolbar', () => {
       const table = getByTestId('properties-table');
       expect(table).toHaveTextContent('entry → entry-42');
     });
+  });
+
+  it('highlights the selected node on the canvas in visual mode', async () => {
+    mockSdk.exo.getUiMode.mockReturnValue('visual');
+
+    const { getByTestId } = render(<ExperienceToolbar />);
+    const onSelectionChange = mockSdk.exo.experience.selection.onChange.mock.calls[0][0];
+    act(() => {
+      onSelectionChange({ nodeId: 'node-1', nodeType: 'Component' });
+    });
+
+    const button = await waitFor(() => getByTestId('highlight-button'));
+    fireEvent.click(button);
+
+    expect(mockSdk.exo.experience.selection.highlight).toHaveBeenCalledWith('node-1', {
+      flash: true,
+      scrollIntoView: true,
+    });
+  });
+
+  it('disables the highlight button in form mode', async () => {
+    mockSdk.exo.getUiMode.mockReturnValue('form');
+
+    const { getByTestId } = render(<ExperienceToolbar />);
+    const onSelectionChange = mockSdk.exo.experience.selection.onChange.mock.calls[0][0];
+    act(() => {
+      onSelectionChange({ nodeId: 'node-1', nodeType: 'Component' });
+    });
+
+    const button = await waitFor(() => getByTestId('highlight-button'));
+    expect(button).toBeDisabled();
+
+    fireEvent.click(button);
+    expect(mockSdk.exo.experience.selection.highlight).not.toHaveBeenCalled();
   });
 });
