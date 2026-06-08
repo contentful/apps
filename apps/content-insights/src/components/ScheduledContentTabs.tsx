@@ -86,12 +86,18 @@ export const ScheduledContentTabs = ({
                   initialSelectedIds={installation.needsUpdateContentTypes}
                   disablePills={false}
                 />
-                <FormControl.HelpText>Leave empty to show all content types.</FormControl.HelpText>
+                <FormControl.HelpText>
+                  Leave empty to use the configured default.
+                </FormControl.HelpText>
               </FormControl>
               <NeedsUpdateTable
                 entries={entries}
                 contentTypes={contentTypes}
-                selectedContentTypeIds={selectedNeedsUpdateContentTypes.map((ct) => ct.id)}
+                selectedContentTypeIds={
+                  selectedNeedsUpdateContentTypes.length > 0
+                    ? selectedNeedsUpdateContentTypes.map((ct) => ct.id)
+                    : undefined
+                }
               />
             </TabPanelContent>
           </Tabs.Panel>
