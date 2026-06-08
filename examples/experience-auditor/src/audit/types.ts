@@ -21,8 +21,6 @@ export interface CollectedNode {
 
 /** The resolution result for an entry-bound property, captured at collect time. */
 export interface ResolvedBinding {
-  /** True when the binding declared an entry source. */
-  isEntryBinding: boolean;
   /** True when `resolveEntryBinding` returned a target; false when it returned null. */
   resolved: boolean;
 }

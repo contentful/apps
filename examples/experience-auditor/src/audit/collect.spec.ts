@@ -52,7 +52,7 @@ describe('collectNodes', () => {
     const experience: any = { getRootNodes: vi.fn().mockReturnValue([okNode]) };
     const [collected] = await collectNodes(experience);
     expect(collected.resolvedBindings).toEqual({
-      featured: { isEntryBinding: true, resolved: true },
+      featured: { resolved: true },
     });
   });
 
@@ -69,15 +69,30 @@ describe('collectNodes', () => {
     const experience: any = { getRootNodes: vi.fn().mockReturnValue([brokenNode]) };
     const [collected] = await collectNodes(experience);
     expect(collected.resolvedBindings).toEqual({
-      featured: { isEntryBinding: true, resolved: false },
+      featured: { resolved: false },
     });
   });
 
-  it('omits resolvedBindings when the node has no resolveEntryBinding method', async () => {
+  it('omits resolvedBindings when no property is entry-bound', async () => {
     const node = makeMockNode('plain', 'Component', [
       { key: 'body', area: 'content', value: 'hi' },
     ]);
-    // makeMockNode may or may not define resolveEntryBinding; this node has no entry-bound props anyway.
+    const experience: any = { getRootNodes: vi.fn().mockReturnValue([node]) };
+    const [collected] = await collectNodes(experience);
+    expect(collected.resolvedBindings).toBeUndefined();
+  });
+
+  it('omits resolvedBindings when the host does not implement resolveEntryBinding', async () => {
+    const node = makeMockNode('card', 'Component', [
+      {
+        key: 'featured',
+        area: 'content',
+        value: 'x',
+        binding: { sourceType: 'entry', entryId: 'e1' },
+      },
+    ]);
+    // Simulate a partial host bridge that has not shipped resolveEntryBinding yet.
+    delete (node as { resolveEntryBinding?: unknown }).resolveEntryBinding;
     const experience: any = { getRootNodes: vi.fn().mockReturnValue([node]) };
     const [collected] = await collectNodes(experience);
     expect(collected.resolvedBindings).toBeUndefined();
