@@ -1,5 +1,5 @@
 import type { CollectedNode } from './types';
-import { stripNonAlpha, HEADING_KEY_HINT } from './keys';
+import { stripNonAlpha, HEADING_KEY_HINT, HEADING_LEVEL_HINT } from './keys';
 
 /**
  * Derives a suggested SEO meta value from the node's heading, when one exists.
@@ -10,7 +10,10 @@ import { stripNonAlpha, HEADING_KEY_HINT } from './keys';
  * per-key logic; the heading is the source regardless of which meta key is empty.
  */
 export function suggestMetaFromHeading(node: CollectedNode, _metaKey: string): string | null {
-  const heading = node.properties.find((p) => HEADING_KEY_HINT.test(stripNonAlpha(p.key)));
+  const heading = node.properties.find(
+    (p) =>
+      HEADING_KEY_HINT.test(stripNonAlpha(p.key)) && !HEADING_LEVEL_HINT.test(stripNonAlpha(p.key))
+  );
   if (!heading || typeof heading.value !== 'string') return null;
   const trimmed = heading.value.trim();
   return trimmed.length > 0 ? trimmed : null;
