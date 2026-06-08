@@ -365,4 +365,135 @@ describe('useNeedsUpdate', () => {
       expect(result.current.total).toBe(1);
     });
   });
+
+  describe('Content type filtering', () => {
+    const setupOldEntries = () => {
+      const thresholdDate = subMonths(new Date(), 6);
+      const oldDate = new Date(thresholdDate);
+      oldDate.setDate(oldDate.getDate() - 1);
+
+      mockUseUsers.mockReturnValue({
+        usersMap: new Map(),
+        isFetching: false,
+        refetch: mockRefetchUsers,
+        error: null,
+      });
+
+      return oldDate;
+    };
+
+    it('filters entries to selected content types when overrideContentTypeIds is provided', async () => {
+      const oldDate = setupOldEntries();
+
+      const entries = [
+        createMockEntry({
+          id: 'entry-1',
+          contentTypeId: 'blogPost',
+          updatedAt: oldDate.toISOString(),
+        }),
+        createMockEntry({
+          id: 'entry-2',
+          contentTypeId: 'navItem',
+          updatedAt: oldDate.toISOString(),
+        }),
+        createMockEntry({
+          id: 'entry-3',
+          contentTypeId: 'blogPost',
+          updatedAt: oldDate.toISOString(),
+        }),
+      ];
+
+      const contentTypes = new Map([
+        ['blogPost', createMockContentType({ id: 'blogPost', name: 'Blog Post' })],
+        ['navItem', createMockContentType({ id: 'navItem', name: 'Nav Item' })],
+      ]);
+
+      const { result } = renderHook(() => useNeedsUpdate(entries, 0, contentTypes, ['blogPost']), {
+        wrapper: createQueryProviderWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(result.current.items).toHaveLength(2);
+      });
+
+      expect(result.current.total).toBe(2);
+      expect(result.current.items.every((item) => item.contentType === 'Blog Post')).toBe(true);
+    });
+
+    it('includes all entries when overrideContentTypeIds is empty', async () => {
+      const oldDate = setupOldEntries();
+
+      const entries = [
+        createMockEntry({
+          id: 'entry-1',
+          contentTypeId: 'blogPost',
+          updatedAt: oldDate.toISOString(),
+        }),
+        createMockEntry({
+          id: 'entry-2',
+          contentTypeId: 'navItem',
+          updatedAt: oldDate.toISOString(),
+        }),
+      ];
+
+      const contentTypes = new Map([
+        ['blogPost', createMockContentType({ id: 'blogPost', name: 'Blog Post' })],
+        ['navItem', createMockContentType({ id: 'navItem', name: 'Nav Item' })],
+      ]);
+
+      const { result } = renderHook(() => useNeedsUpdate(entries, 0, contentTypes, []), {
+        wrapper: createQueryProviderWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(result.current.items).toHaveLength(2);
+      });
+
+      expect(result.current.total).toBe(2);
+    });
+
+    it('uses installation needsUpdateContentTypes when no override is provided', async () => {
+      mockUseSDK.mockReturnValue({
+        ids: { space: 'test-space', environment: 'test-environment' },
+        locales: { default: 'en-US' },
+        parameters: {
+          installation: {
+            needsUpdateMonths: 6,
+            needsUpdateContentTypes: ['blogPost'],
+          },
+        },
+      });
+
+      const oldDate = setupOldEntries();
+
+      const entries = [
+        createMockEntry({
+          id: 'entry-1',
+          contentTypeId: 'blogPost',
+          updatedAt: oldDate.toISOString(),
+        }),
+        createMockEntry({
+          id: 'entry-2',
+          contentTypeId: 'navItem',
+          updatedAt: oldDate.toISOString(),
+        }),
+      ];
+
+      const contentTypes = new Map([
+        ['blogPost', createMockContentType({ id: 'blogPost', name: 'Blog Post' })],
+        ['navItem', createMockContentType({ id: 'navItem', name: 'Nav Item' })],
+      ]);
+
+      const { result } = renderHook(() => useNeedsUpdate(entries, 0, contentTypes), {
+        wrapper: createQueryProviderWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(result.current.items).toHaveLength(1);
+      });
+
+      expect(result.current.total).toBe(1);
+      expect(result.current.items[0].id).toBe('entry-1');
+    });
+  });
 });

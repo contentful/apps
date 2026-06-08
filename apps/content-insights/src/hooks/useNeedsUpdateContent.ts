@@ -34,6 +34,8 @@ function calculateAgeInDays(date: Date): number {
   return Math.floor(diffTime / msPerDay);
 }
 
+const EMPTY_CONTENT_TYPES: string[] = [];
+
 export function useNeedsUpdate(
   entries: EntryProps[],
   page: number = 0,
@@ -43,26 +45,29 @@ export function useNeedsUpdate(
   const sdk = useSDK<HomeAppSDK | PageAppSDK>();
   const installation = (sdk.parameters.installation ?? {}) as AppInstallationParameters;
   const needsUpdateMonths = installation.needsUpdateMonths ?? 6;
-  const needsUpdateContentTypes = installation.needsUpdateContentTypes ?? [];
-  const activeContentTypeIds = overrideContentTypeIds ?? needsUpdateContentTypes;
+  const installationContentTypes = installation.needsUpdateContentTypes ?? EMPTY_CONTENT_TYPES;
+  const activeContentTypeIds = overrideContentTypeIds ?? installationContentTypes;
   const defaultLocale = sdk.locales.default;
+
+  const activeContentTypeSet = useMemo(
+    () => (activeContentTypeIds.length > 0 ? new Set(activeContentTypeIds) : null),
+    [activeContentTypeIds]
+  );
 
   const filteredEntries = useMemo(
     () =>
       entries.filter((entry) => {
+        if (activeContentTypeSet !== null) {
+          const contentTypeId = entry.sys.contentType?.sys?.id;
+          if (!contentTypeId || !activeContentTypeSet.has(contentTypeId)) return false;
+        }
+
         const updatedAt = parseDate(entry?.sys?.updatedAt);
         if (!updatedAt) return false;
         const thresholdDate = subMonths(new Date(), needsUpdateMonths);
-        if (updatedAt.getTime() >= thresholdDate.getTime()) return false;
-
-        if (activeContentTypeIds.length > 0) {
-          const contentTypeId = entry.sys.contentType?.sys?.id;
-          if (!contentTypeId || !activeContentTypeIds.includes(contentTypeId)) return false;
-        }
-
-        return true;
+        return updatedAt.getTime() < thresholdDate.getTime();
       }),
-    [entries, needsUpdateMonths, activeContentTypeIds]
+    [entries, needsUpdateMonths, activeContentTypeSet]
   );
 
   const userIds = getUniqueUserIdsFromEntries(filteredEntries);
