@@ -15,6 +15,7 @@ export function makeMockNode(
     get: vi.fn().mockReturnValue({ id, nodeType }),
     onChange: vi.fn().mockReturnValue(noopUnsubscribe),
     getProperties: vi.fn().mockResolvedValue(properties),
+    resolveEntryBinding: vi.fn().mockResolvedValue({ entryId: 'mock-entry' }),
     getContentProperty: vi.fn().mockResolvedValue(undefined),
     setContentProperty: vi.fn().mockResolvedValue(undefined),
     onContentPropertyChanged: vi.fn().mockReturnValue(noopUnsubscribe),
