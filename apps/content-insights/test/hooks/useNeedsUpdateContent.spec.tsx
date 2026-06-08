@@ -207,7 +207,7 @@ describe('useNeedsUpdate', () => {
       const oldDate = new Date(thresholdDate);
       oldDate.setDate(oldDate.getDate() - 1);
 
-      const entries = Array.from({ length: 12 }, (_, i) =>
+      const entries = Array.from({ length: 25 }, (_, i) =>
         createMockEntry({
           id: `entry-${i + 1}`,
           contentTypeId: 'blogPost',
@@ -232,10 +232,10 @@ describe('useNeedsUpdate', () => {
       );
 
       await waitFor(() => {
-        expect(resultPage0.current.items).toHaveLength(5);
+        expect(resultPage0.current.items).toHaveLength(10);
       });
 
-      expect(resultPage0.current.total).toBe(12);
+      expect(resultPage0.current.total).toBe(25);
 
       const { result: resultPage1 } = renderHook(
         () => useNeedsUpdate(entries, 1, new Map([['blogPost', contentType]])),
@@ -245,10 +245,10 @@ describe('useNeedsUpdate', () => {
       );
 
       await waitFor(() => {
-        expect(resultPage1.current.items).toHaveLength(5);
+        expect(resultPage1.current.items).toHaveLength(10);
       });
 
-      expect(resultPage1.current.total).toBe(12);
+      expect(resultPage1.current.total).toBe(25);
       expect(resultPage1.current.items[0].id).not.toBe(resultPage0.current.items[0].id);
     });
   });
