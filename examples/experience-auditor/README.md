@@ -18,8 +18,8 @@ experience tree as the author works.**
 ## What it does
 
 - **Live audit** — walks the experience tree with `getRootNodes()` →
-  `getNode()` → `getProperties()`, runs a set of pure rules, and re-runs
-  automatically on `sdk.exo.experience.onChange()`.
+  `getProperties()`, runs a set of pure rules, and re-runs automatically on
+  `sdk.exo.experience.onChange()`.
 - **Scored dashboard** — a 0–100 health score with error / warning / info
   counts.
 - **Locate on canvas** — clicking **Locate** calls
