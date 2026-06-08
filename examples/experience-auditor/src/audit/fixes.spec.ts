@@ -13,8 +13,7 @@ describe('suggestMetaFromHeading', () => {
       node([
         { key: 'heading', area: 'content', value: '  Our Spring Sale  ' },
         { key: 'metaTitle', area: 'content', value: '' },
-      ]),
-      'metaTitle'
+      ])
     );
     expect(result).toBe('Our Spring Sale');
   });
@@ -24,8 +23,7 @@ describe('suggestMetaFromHeading', () => {
       node([
         { key: 'heading', area: 'content', value: '   ' },
         { key: 'metaTitle', area: 'content', value: '' },
-      ]),
-      'metaTitle'
+      ])
     );
     expect(result).toBeNull();
   });
@@ -35,8 +33,7 @@ describe('suggestMetaFromHeading', () => {
       node([
         { key: 'heading', area: 'content', value: { sys: { id: 'x' } } },
         { key: 'metaTitle', area: 'content', value: '' },
-      ]),
-      'metaTitle'
+      ])
     );
     expect(result).toBeNull();
   });
