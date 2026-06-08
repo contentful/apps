@@ -40,8 +40,9 @@ export function useNeedsUpdate(
   contentTypes: Map<string, ContentTypeProps>
 ): UseNeedsUpdateResult {
   const sdk = useSDK<HomeAppSDK | PageAppSDK>();
-  const needsUpdateMonths =
-    ((sdk.parameters.installation ?? {}) as AppInstallationParameters).needsUpdateMonths ?? 6;
+  const installation = (sdk.parameters.installation ?? {}) as AppInstallationParameters;
+  const needsUpdateMonths = installation.needsUpdateMonths ?? 6;
+  const needsUpdateContentTypes = installation.needsUpdateContentTypes ?? [];
   const defaultLocale = sdk.locales.default;
 
   const filteredEntries = useMemo(
@@ -50,10 +51,16 @@ export function useNeedsUpdate(
         const updatedAt = parseDate(entry?.sys?.updatedAt);
         if (!updatedAt) return false;
         const thresholdDate = subMonths(new Date(), needsUpdateMonths);
+        if (updatedAt.getTime() >= thresholdDate.getTime()) return false;
 
-        return updatedAt.getTime() < thresholdDate.getTime();
+        if (needsUpdateContentTypes.length > 0) {
+          const contentTypeId = entry.sys.contentType?.sys?.id;
+          if (!contentTypeId || !needsUpdateContentTypes.includes(contentTypeId)) return false;
+        }
+
+        return true;
       }),
-    [entries, needsUpdateMonths]
+    [entries, needsUpdateMonths, needsUpdateContentTypes]
   );
 
   const userIds = getUniqueUserIdsFromEntries(filteredEntries);
