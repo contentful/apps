@@ -70,7 +70,14 @@ const FindingList = ({
                       {finding.detail}
                     </Text>
                     {finding.fix?.kind === 'suggested' && (
+                      // Key on the suggested value so a *changed* suggestion (same
+                      // finding.id, new derived value) remounts SuggestedFix and
+                      // re-seeds its state; an unchanged suggestion keeps the same
+                      // key, preserving the author's in-progress edit across a
+                      // no-op re-audit. React's "reset state with a key" idiom —
+                      // preferred over a useEffect-sync anti-pattern.
                       <SuggestedFix
+                        key={finding.fix.suggestedValue}
                         suggestedValue={finding.fix.suggestedValue}
                         source={finding.fix.source}
                         canApply={canFix}
