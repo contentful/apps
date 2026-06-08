@@ -162,6 +162,24 @@ describe('audit rules', () => {
     });
   });
 
+  it('suggests meta from the real heading even when a numeric headingLevel is present', () => {
+    const report = runAudit([
+      node('hero', [
+        { key: 'headingLevel', area: 'content', value: 2 },
+        { key: 'heading', area: 'content', value: 'Spring Sale' },
+        { key: 'metaTitle', area: 'content', value: '' },
+      ]),
+    ]);
+    const finding = report.findings.find((f) => f.ruleId === 'seo/missing-meta');
+    expect(finding?.fix).toEqual({
+      kind: 'suggested',
+      label: 'Use heading as meta',
+      propertyKey: 'metaTitle',
+      suggestedValue: 'Spring Sale',
+      source: 'the heading on this component',
+    });
+  });
+
   it('flags an entry binding that fails to resolve via resolvedBindings', () => {
     const n: CollectedNode = {
       id: 'card',
