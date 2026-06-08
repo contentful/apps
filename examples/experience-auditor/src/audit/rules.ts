@@ -134,7 +134,8 @@ const requiredContentRule: AuditRule = {
     const heading = findProperty(
       node,
       HEADING_KEY_HINT,
-      (p) => !META_KEY_HINT.test(stripNonAlpha(p.key))
+      (p) =>
+        !META_KEY_HINT.test(stripNonAlpha(p.key)) && !HEADING_LEVEL_HINT.test(stripNonAlpha(p.key))
     );
     if (heading && heading.area === 'content' && isEmptyValue(heading.value)) {
       return [
@@ -219,9 +220,10 @@ const brokenBindingRule: AuditRule = {
   },
 };
 
-function headingLevelOf(node: CollectedNode): number | undefined {
+function headingLevelOf(node: CollectedNode): { level: number; key: string } | undefined {
   const prop = node.properties.find((p) => HEADING_LEVEL_HINT.test(stripNonAlpha(p.key)));
-  return typeof prop?.value === 'number' ? prop.value : undefined;
+  if (!prop || typeof prop.value !== 'number') return undefined;
+  return { level: prop.value, key: prop.key };
 }
 
 /**
@@ -233,11 +235,11 @@ export function evaluateHeadingOrder(nodes: CollectedNode[]): AuditFinding[] {
   const findings: AuditFinding[] = [];
   let previous: number | undefined;
   for (const node of nodes) {
-    const level = headingLevelOf(node);
-    if (level === undefined) continue;
+    const heading = headingLevelOf(node);
+    if (heading === undefined) continue;
+    const { level, key } = heading;
     if (previous !== undefined && level > previous + 1) {
       const expected = previous + 1;
-      const key = node.properties.find((p) => HEADING_LEVEL_HINT.test(stripNonAlpha(p.key)))!.key;
       findings.push(
         makeFinding({ id: 'a11y/heading-order' }, node, {
           propertyKey: key,

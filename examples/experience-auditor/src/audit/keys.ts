@@ -10,5 +10,6 @@ export const META_KEY_HINT =
 // Heading must look like a heading but NOT like SEO metadata — otherwise
 // `metaTitle`/`seoTitle` would match both rules and double-count one field.
 export const HEADING_KEY_HINT = /(heading|headline|^title$|pagetitle)/i;
-// Numeric heading-level property (e.g. `headingLevel`), used by the heading-order rule.
-export const HEADING_LEVEL_HINT = /(headinglevel|level|hlevel)/i;
+// Matches a dedicated heading-level key (e.g. `headingLevel`, `hLevel`, `level`)
+// without catching unrelated `*Level` keys like `nestingLevel` or `accessLevel`.
+export const HEADING_LEVEL_HINT = /(headinglevel|hlevel|^level$)/i;
