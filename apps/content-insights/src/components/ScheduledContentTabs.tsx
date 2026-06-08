@@ -91,11 +91,7 @@ export const ScheduledContentTabs = ({
               <NeedsUpdateTable
                 entries={entries}
                 contentTypes={contentTypes}
-                selectedContentTypeIds={
-                  selectedNeedsUpdateContentTypes.length > 0
-                    ? selectedNeedsUpdateContentTypes.map((ct) => ct.id)
-                    : undefined
-                }
+                selectedContentTypeIds={selectedNeedsUpdateContentTypes.map((ct) => ct.id)}
               />
             </TabPanelContent>
           </Tabs.Panel>
