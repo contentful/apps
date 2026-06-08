@@ -37,12 +37,14 @@ function calculateAgeInDays(date: Date): number {
 export function useNeedsUpdate(
   entries: EntryProps[],
   page: number = 0,
-  contentTypes: Map<string, ContentTypeProps>
+  contentTypes: Map<string, ContentTypeProps>,
+  overrideContentTypeIds?: string[]
 ): UseNeedsUpdateResult {
   const sdk = useSDK<HomeAppSDK | PageAppSDK>();
   const installation = (sdk.parameters.installation ?? {}) as AppInstallationParameters;
   const needsUpdateMonths = installation.needsUpdateMonths ?? 6;
   const needsUpdateContentTypes = installation.needsUpdateContentTypes ?? [];
+  const activeContentTypeIds = overrideContentTypeIds ?? needsUpdateContentTypes;
   const defaultLocale = sdk.locales.default;
 
   const filteredEntries = useMemo(
@@ -53,14 +55,14 @@ export function useNeedsUpdate(
         const thresholdDate = subMonths(new Date(), needsUpdateMonths);
         if (updatedAt.getTime() >= thresholdDate.getTime()) return false;
 
-        if (needsUpdateContentTypes.length > 0) {
+        if (activeContentTypeIds.length > 0) {
           const contentTypeId = entry.sys.contentType?.sys?.id;
-          if (!contentTypeId || !needsUpdateContentTypes.includes(contentTypeId)) return false;
+          if (!contentTypeId || !activeContentTypeIds.includes(contentTypeId)) return false;
         }
 
         return true;
       }),
-    [entries, needsUpdateMonths, needsUpdateContentTypes]
+    [entries, needsUpdateMonths, activeContentTypeIds]
   );
 
   const userIds = getUniqueUserIdsFromEntries(filteredEntries);
