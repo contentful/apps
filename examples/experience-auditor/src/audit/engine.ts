@@ -1,5 +1,5 @@
 import type { AuditFinding, AuditReport, AuditRule, CollectedNode, Severity } from './types';
-import { AUDIT_RULES } from './rules';
+import { AUDIT_RULES, evaluateHeadingOrder } from './rules';
 
 /** Penalty applied to the health score per finding, by severity. */
 const SEVERITY_WEIGHT: Record<Severity, number> = {
@@ -16,10 +16,7 @@ const EMPTY_COUNTS: Record<Severity, number> = { error: 0, warning: 0, info: 0 }
  * properties) happens in the collector before this is called, which keeps the
  * scoring logic trivially testable.
  */
-export function runAudit(
-  nodes: CollectedNode[],
-  rules: AuditRule[] = AUDIT_RULES
-): AuditReport {
+export function runAudit(nodes: CollectedNode[], rules: AuditRule[] = AUDIT_RULES): AuditReport {
   const findings: AuditFinding[] = [];
 
   for (const node of nodes) {
@@ -27,6 +24,7 @@ export function runAudit(
       findings.push(...rule.evaluate(node));
     }
   }
+  findings.push(...evaluateHeadingOrder(nodes));
 
   const counts = { ...EMPTY_COUNTS };
   for (const finding of findings) {
@@ -45,9 +43,7 @@ const SEVERITY_ORDER: Record<Severity, number> = { error: 0, warning: 1, info: 2
 
 /** Errors first, then warnings, then info; stable within a severity. */
 function sortFindings(findings: AuditFinding[]): AuditFinding[] {
-  return [...findings].sort(
-    (a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity]
-  );
+  return [...findings].sort((a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity]);
 }
 
 /**
