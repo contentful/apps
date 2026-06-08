@@ -10,8 +10,10 @@ import App from './App';
 const container = document.getElementById('root');
 const root = createRoot(container!);
 
-const params = new URLSearchParams(window.location.search);
-const demoMode = process.env.NODE_ENV === 'development' && params.has('demo');
+// `process.env.NODE_ENV` is evaluated first so the URL parse is fully
+// eliminated from production builds (the whole `&&` folds away).
+const demoMode =
+  process.env.NODE_ENV === 'development' && new URLSearchParams(window.location.search).has('demo');
 
 if (demoMode) {
   // Standalone demo: `npm start` + `?demo` renders the toolbar against a seeded
