@@ -34,26 +34,40 @@ function calculateAgeInDays(date: Date): number {
   return Math.floor(diffTime / msPerDay);
 }
 
+const EMPTY_CONTENT_TYPES: string[] = [];
+
 export function useNeedsUpdate(
   entries: EntryProps[],
   page: number = 0,
-  contentTypes: Map<string, ContentTypeProps>
+  contentTypes: Map<string, ContentTypeProps>,
+  overrideContentTypeIds?: string[]
 ): UseNeedsUpdateResult {
   const sdk = useSDK<HomeAppSDK | PageAppSDK>();
-  const needsUpdateMonths =
-    ((sdk.parameters.installation ?? {}) as AppInstallationParameters).needsUpdateMonths ?? 6;
+  const installation = (sdk.parameters.installation ?? {}) as AppInstallationParameters;
+  const needsUpdateMonths = installation.needsUpdateMonths ?? 6;
+  const installationContentTypes = installation.needsUpdateContentTypes ?? EMPTY_CONTENT_TYPES;
+  const activeContentTypeIds = overrideContentTypeIds ?? installationContentTypes;
   const defaultLocale = sdk.locales.default;
+
+  const activeContentTypeSet = useMemo(
+    () => (activeContentTypeIds.length > 0 ? new Set(activeContentTypeIds) : null),
+    [activeContentTypeIds]
+  );
 
   const filteredEntries = useMemo(
     () =>
       entries.filter((entry) => {
+        if (activeContentTypeSet !== null) {
+          const contentTypeId = entry.sys.contentType?.sys?.id;
+          if (!contentTypeId || !activeContentTypeSet.has(contentTypeId)) return false;
+        }
+
         const updatedAt = parseDate(entry?.sys?.updatedAt);
         if (!updatedAt) return false;
         const thresholdDate = subMonths(new Date(), needsUpdateMonths);
-
         return updatedAt.getTime() < thresholdDate.getTime();
       }),
-    [entries, needsUpdateMonths]
+    [entries, needsUpdateMonths, activeContentTypeSet]
   );
 
   const userIds = getUniqueUserIdsFromEntries(filteredEntries);
