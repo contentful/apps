@@ -52,7 +52,7 @@ async function resolveBindings(
   for (const property of properties) {
     if (property.binding?.sourceType !== 'entry') continue;
     const target = await node.resolveEntryBinding(property.key);
-    entries.push([property.key, { isEntryBinding: true, resolved: target !== null }]);
+    entries.push([property.key, { resolved: target !== null }]);
   }
 
   return entries.length > 0 ? Object.fromEntries(entries) : undefined;
