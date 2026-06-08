@@ -47,6 +47,7 @@ describe('audit rules', () => {
     const finding = report.findings.find((f) => f.ruleId === 'a11y/image-alt-text');
     expect(finding?.severity).toBe('warning');
     expect(finding?.fix).toEqual({
+      kind: 'deterministic',
       label: 'Trim whitespace',
       propertyKey: 'altText',
       value: 'spaced',

@@ -108,7 +108,9 @@ const ExperienceToolbar = () => {
 
   const handleFix = useCallback(
     async (finding: AuditFinding) => {
-      if (!finding.fix) return;
+      // This handler applies deterministic fixes (write the precomputed value).
+      // Suggested fixes are applied through a separate confirm path (added later).
+      if (finding.fix?.kind !== 'deterministic') return;
 
       setBusyFindingId(finding.id);
       try {

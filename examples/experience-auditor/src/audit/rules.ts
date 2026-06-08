@@ -107,6 +107,7 @@ const altTextRule: AuditRule = {
           title: 'Alt text has surrounding whitespace',
           detail: 'The alt text has leading or trailing whitespace.',
           fix: {
+            kind: 'deterministic',
             label: 'Trim whitespace',
             propertyKey: alt.key,
             value: alt.value.trim(),
