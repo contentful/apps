@@ -4,10 +4,7 @@ import { computeScore, hasBlockingErrors, runAudit } from './engine';
 import { AUDIT_RULES } from './rules';
 import type { CollectedNode } from './types';
 
-function node(
-  id: string,
-  properties: ComponentPropertyDescriptor[]
-): CollectedNode {
+function node(id: string, properties: ComponentPropertyDescriptor[]): CollectedNode {
   return { id, nodeType: 'Component', properties };
 }
 
@@ -125,6 +122,83 @@ describe('audit rules', () => {
     expect(report.findings.find((f) => f.ruleId === 'content/broken-binding')).toBeUndefined();
   });
 
+  it('flags a heading level that skips a level', () => {
+    const report = runAudit([
+      node('a', [{ key: 'headingLevel', area: 'content', value: 2 }]),
+      node('b', [{ key: 'headingLevel', area: 'content', value: 4 }]),
+    ]);
+    const finding = report.findings.find((f) => f.ruleId === 'a11y/heading-order');
+    expect(finding?.severity).toBe('warning');
+    expect(finding?.fix).toEqual({
+      kind: 'deterministic',
+      label: 'Set to H3',
+      propertyKey: 'headingLevel',
+      value: 3,
+    });
+  });
+
+  it('does not flag sequential heading levels', () => {
+    const report = runAudit([
+      node('a', [{ key: 'headingLevel', area: 'content', value: 2 }]),
+      node('b', [{ key: 'headingLevel', area: 'content', value: 3 }]),
+    ]);
+    expect(report.findings.filter((f) => f.ruleId === 'a11y/heading-order')).toHaveLength(0);
+  });
+
+  it('offers a suggested meta value derived from the heading', () => {
+    const report = runAudit([
+      node('hero', [
+        { key: 'heading', area: 'content', value: 'Spring Sale' },
+        { key: 'metaTitle', area: 'content', value: '' },
+      ]),
+    ]);
+    const finding = report.findings.find((f) => f.ruleId === 'seo/missing-meta');
+    expect(finding?.fix).toEqual({
+      kind: 'suggested',
+      label: 'Use heading as meta',
+      propertyKey: 'metaTitle',
+      suggestedValue: 'Spring Sale',
+      source: 'the heading on this component',
+    });
+  });
+
+  it('flags an entry binding that fails to resolve via resolvedBindings', () => {
+    const n: CollectedNode = {
+      id: 'card',
+      nodeType: 'Component',
+      properties: [
+        {
+          key: 'featured',
+          area: 'content',
+          value: null,
+          binding: { sourceType: 'entry', entryId: 'e1' },
+        },
+      ],
+      resolvedBindings: { featured: { isEntryBinding: true, resolved: false } },
+    };
+    const finding = runAudit([n]).findings.find((f) => f.ruleId === 'content/broken-binding');
+    expect(finding?.severity).toBe('error');
+  });
+
+  it('does not flag a binding that resolves', () => {
+    const n: CollectedNode = {
+      id: 'card',
+      nodeType: 'Component',
+      properties: [
+        {
+          key: 'featured',
+          area: 'content',
+          value: 'x',
+          binding: { sourceType: 'entry', entryId: 'e1' },
+        },
+      ],
+      resolvedBindings: { featured: { isEntryBinding: true, resolved: true } },
+    };
+    expect(
+      runAudit([n]).findings.find((f) => f.ruleId === 'content/broken-binding')
+    ).toBeUndefined();
+  });
+
   it('exposes a stable rule set', () => {
     expect(AUDIT_RULES.map((r) => r.id)).toEqual([
       'a11y/image-alt-text',
@@ -146,9 +220,33 @@ describe('scoring', () => {
     expect(computeScore([])).toBe(100);
     expect(
       computeScore([
-        { id: 'a', ruleId: 'r', nodeId: 'n', nodeType: 'Component', severity: 'error', title: '', detail: '' },
-        { id: 'b', ruleId: 'r', nodeId: 'n', nodeType: 'Component', severity: 'warning', title: '', detail: '' },
-        { id: 'c', ruleId: 'r', nodeId: 'n', nodeType: 'Component', severity: 'info', title: '', detail: '' },
+        {
+          id: 'a',
+          ruleId: 'r',
+          nodeId: 'n',
+          nodeType: 'Component',
+          severity: 'error',
+          title: '',
+          detail: '',
+        },
+        {
+          id: 'b',
+          ruleId: 'r',
+          nodeId: 'n',
+          nodeType: 'Component',
+          severity: 'warning',
+          title: '',
+          detail: '',
+        },
+        {
+          id: 'c',
+          ruleId: 'r',
+          nodeId: 'n',
+          nodeType: 'Component',
+          severity: 'info',
+          title: '',
+          detail: '',
+        },
       ])
     ).toBe(85); // 100 - (10 + 4 + 1)
   });

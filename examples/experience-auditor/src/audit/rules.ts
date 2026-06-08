@@ -1,13 +1,14 @@
 import type { ComponentPropertyDescriptor } from '@contentful/app-sdk';
 import type { AuditFinding, AuditRule, CollectedNode, Severity } from './types';
-
-/** Property keys are matched case-insensitively against these hints. */
-const IMAGE_KEY_HINT = /(image|photo|media|thumbnail)/i;
-const ALT_KEY_HINT = /(alt|alttext|alternativetext|a11ylabel|arialabel)/i;
-const META_KEY_HINT = /(metadescription|seodescription|metatitle|seotitle|opengraph|ogtitle|ogdescription)/i;
-// Heading must look like a heading but NOT like SEO metadata — otherwise
-// `metaTitle`/`seoTitle` would match both rules and double-count one field.
-const HEADING_KEY_HINT = /(heading|headline|^title$|pagetitle)/i;
+import {
+  stripNonAlpha,
+  IMAGE_KEY_HINT,
+  ALT_KEY_HINT,
+  META_KEY_HINT,
+  HEADING_KEY_HINT,
+  HEADING_LEVEL_HINT,
+} from './keys';
+import { suggestMetaFromHeading } from './fixes';
 
 function findProperty(
   node: CollectedNode,
@@ -17,10 +18,6 @@ function findProperty(
   return node.properties.find(
     (p) => matcher.test(stripNonAlpha(p.key)) && (!predicate || predicate(p))
   );
-}
-
-function stripNonAlpha(key: string): string {
-  return key.replace(/[^a-z0-9]/gi, '');
 }
 
 /**
@@ -44,7 +41,9 @@ function isEmptyValue(value: unknown): boolean {
 }
 
 /** True when a property resolves to text the author actually authored. */
-function isContentText(property: ComponentPropertyDescriptor): property is ComponentPropertyDescriptor & { value: string } {
+function isContentText(
+  property: ComponentPropertyDescriptor
+): property is ComponentPropertyDescriptor & { value: string } {
   return property.area === 'content' && typeof property.value === 'string';
 }
 
@@ -161,12 +160,22 @@ const seoMetaRule: AuditRule = {
   evaluate(node) {
     const meta = findProperty(node, META_KEY_HINT);
     if (meta && meta.area === 'content' && isEmptyValue(meta.value)) {
+      const suggestion = suggestMetaFromHeading(node, meta.key);
       return [
         makeFinding(seoMetaRule, node, {
           propertyKey: meta.key,
           severity: 'info',
           title: 'SEO metadata is empty',
           detail: `"${meta.key}" is empty. Populate it to improve search and social sharing.`,
+          fix: suggestion
+            ? {
+                kind: 'suggested',
+                label: 'Use heading as meta',
+                propertyKey: meta.key,
+                suggestedValue: suggestion,
+                source: 'the heading on this component',
+              }
+            : undefined,
         }),
       ];
     }
@@ -175,8 +184,11 @@ const seoMetaRule: AuditRule = {
 };
 
 /**
- * Content properties bound to an entry must actually resolve. A binding whose
- * source is an entry but with no entryId recorded is a broken reference.
+ * Content properties bound to an entry must actually resolve. When the collector
+ * recorded a real resolution (`resolvedBindings`), prefer it: a binding is broken
+ * iff it is an entry binding that did not resolve. Where no resolution is present
+ * (host without `resolveEntryBinding`), fall back to the structural check — an
+ * entry source with no recorded `entryId` is a broken reference.
  */
 const brokenBindingRule: AuditRule = {
   id: 'content/broken-binding',
@@ -185,13 +197,20 @@ const brokenBindingRule: AuditRule = {
     const findings: AuditFinding[] = [];
     for (const property of node.properties) {
       const binding = property.binding;
-      if (binding && binding.sourceType === 'entry' && !binding.entryId) {
+      if (!binding || binding.sourceType !== 'entry') continue;
+
+      const resolution = node.resolvedBindings?.[property.key];
+      const broken = resolution
+        ? resolution.isEntryBinding && !resolution.resolved
+        : !binding.entryId;
+
+      if (broken) {
         findings.push(
           makeFinding(brokenBindingRule, node, {
             propertyKey: property.key,
             severity: 'error',
             title: 'Broken entry binding',
-            detail: `"${property.key}" is bound to an entry, but the reference is missing or unresolved.`,
+            detail: `"${property.key}" is bound to an entry, but the reference does not resolve.`,
           })
         );
       }
@@ -199,6 +218,45 @@ const brokenBindingRule: AuditRule = {
     return findings;
   },
 };
+
+function headingLevelOf(node: CollectedNode): number | undefined {
+  const prop = node.properties.find((p) => HEADING_LEVEL_HINT.test(stripNonAlpha(p.key)));
+  return typeof prop?.value === 'number' ? prop.value : undefined;
+}
+
+/**
+ * Heading levels should not skip (e.g. H2 -> H4 is an a11y/SEO problem).
+ * Order-sensitive across nodes, so unlike the per-node rules this is applied by
+ * the engine over the full node list.
+ */
+export function evaluateHeadingOrder(nodes: CollectedNode[]): AuditFinding[] {
+  const findings: AuditFinding[] = [];
+  let previous: number | undefined;
+  for (const node of nodes) {
+    const level = headingLevelOf(node);
+    if (level === undefined) continue;
+    if (previous !== undefined && level > previous + 1) {
+      const expected = previous + 1;
+      const key = node.properties.find((p) => HEADING_LEVEL_HINT.test(stripNonAlpha(p.key)))!.key;
+      findings.push(
+        makeFinding({ id: 'a11y/heading-order' }, node, {
+          propertyKey: key,
+          severity: 'warning',
+          title: 'Heading level skips a level',
+          detail: `This heading is H${level} but follows an H${previous}. Use H${expected} so the outline is sequential.`,
+          fix: {
+            kind: 'deterministic',
+            label: `Set to H${expected}`,
+            propertyKey: key,
+            value: expected,
+          },
+        })
+      );
+    }
+    previous = level;
+  }
+  return findings;
+}
 
 export const AUDIT_RULES: AuditRule[] = [
   altTextRule,
