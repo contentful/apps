@@ -1,9 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import type {
-  ExoContext,
-  ExperienceEditorToolbarAppSDK,
-  UiMode,
-} from '@contentful/app-sdk';
+import type { ExoContext, ExperienceEditorToolbarAppSDK, UiMode } from '@contentful/app-sdk';
 import {
   Badge,
   Box,
@@ -19,7 +15,8 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 
 import { collectNodes } from '../audit/collect';
 import { hasBlockingErrors, runAudit } from '../audit/engine';
-import type { AuditFinding, AuditReport } from '../audit/types';
+import { detectCapabilities } from '../audit/capabilities';
+import type { AuditFinding, AuditReport, Capabilities } from '../audit/types';
 import ScoreSummary from '../components/ScoreSummary';
 import FindingList from '../components/FindingList';
 
@@ -43,6 +40,8 @@ const ExperienceToolbar = () => {
   const [canFix, setCanFix] = useState(false);
   const [busyFindingId, setBusyFindingId] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
+  const [capabilities, setCapabilities] = useState<Capabilities>(() => detectCapabilities(sdk.exo));
+  useEffect(() => setCapabilities(detectCapabilities(sdk.exo)), [sdk]);
 
   // Guard against state updates after unmount / stale async audits.
   const runIdRef = useRef(0);
@@ -106,12 +105,8 @@ const ExperienceToolbar = () => {
     [sdk]
   );
 
-  const handleFix = useCallback(
-    async (finding: AuditFinding) => {
-      // This handler applies deterministic fixes (write the precomputed value).
-      // Suggested fixes are applied through a separate confirm path (added later).
-      if (finding.fix?.kind !== 'deterministic') return;
-
+  const applyWrite = useCallback(
+    async (finding: AuditFinding, propertyKey: string, value: unknown) => {
       setBusyFindingId(finding.id);
       try {
         const node = sdk.exo.experience.getNode(finding.nodeId);
@@ -119,11 +114,11 @@ const ExperienceToolbar = () => {
           sdk.notifier.error('That component no longer exists.');
           return;
         }
-        await node.setContentProperty(finding.fix.propertyKey, finding.fix.value);
+        await node.setContentProperty(propertyKey, value);
         sdk.notifier.success('Fix applied.');
         // Re-audit explicitly rather than relying on the setContentProperty
-        // write to round-trip back through onChange — that keeps the panel in
-        // sync even if the host doesn't emit a change event for this write.
+        // write to round-trip back through onChange — keeps the panel in sync
+        // even if the host does not emit a change event for this write.
         await audit();
       } catch {
         sdk.notifier.error('Could not apply the fix. Please try again.');
@@ -132,6 +127,22 @@ const ExperienceToolbar = () => {
       }
     },
     [sdk, audit]
+  );
+
+  const handleApplyDeterministic = useCallback(
+    (finding: AuditFinding) => {
+      if (finding.fix?.kind !== 'deterministic') return;
+      void applyWrite(finding, finding.fix.propertyKey, finding.fix.value);
+    },
+    [applyWrite]
+  );
+
+  const handleApplySuggested = useCallback(
+    (finding: AuditFinding, value: string) => {
+      if (finding.fix?.kind !== 'suggested') return;
+      void applyWrite(finding, finding.fix.propertyKey, value);
+    },
+    [applyWrite]
   );
 
   const handlePublish = useCallback(async () => {
@@ -154,7 +165,7 @@ const ExperienceToolbar = () => {
   }, [sdk, report]);
 
   const blocked = report ? hasBlockingErrors(report) : false;
-  const canLocate = uiMode === 'visual';
+  const canLocate = uiMode === 'visual' && capabilities.selection;
 
   return (
     <Box padding="spacingM">
@@ -170,8 +181,7 @@ const ExperienceToolbar = () => {
             size="small"
             variant="secondary"
             onClick={() => void audit()}
-            isLoading={auditing}
-          >
+            isLoading={auditing}>
             Re-run audit
           </Button>
         </Flex>
@@ -197,7 +207,8 @@ const ExperienceToolbar = () => {
             canLocate={canLocate}
             canFix={canFix}
             onLocate={handleLocate}
-            onFix={handleFix}
+            onApplyDeterministic={handleApplyDeterministic}
+            onApplySuggested={handleApplySuggested}
             busyFindingId={busyFindingId}
           />
         )}
@@ -212,8 +223,7 @@ const ExperienceToolbar = () => {
             variant="positive"
             isDisabled={!report || blocked || publishing}
             isLoading={publishing}
-            onClick={() => void handlePublish()}
-          >
+            onClick={() => void handlePublish()}>
             Publish experience
           </Button>
         </Flex>
