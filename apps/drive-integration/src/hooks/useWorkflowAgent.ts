@@ -277,7 +277,7 @@ export const useWorkflowAgent = ({
                 type: 'text' as const,
                 text: `Analyze the following google docs document ${documentId} and extract the Contentful entries and assets for the following content types: ${contentTypeIds.join(
                   ', '
-                )} with the following oauth token: ${oauthToken}`,
+                )}`,
               },
             ],
           },
