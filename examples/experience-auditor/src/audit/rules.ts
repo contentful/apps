@@ -161,7 +161,7 @@ const seoMetaRule: AuditRule = {
   evaluate(node) {
     const meta = findProperty(node, META_KEY_HINT);
     if (meta && meta.area === 'content' && isEmptyValue(meta.value)) {
-      const suggestion = suggestMetaFromHeading(node, meta.key);
+      const suggestion = suggestMetaFromHeading(node);
       return [
         makeFinding(seoMetaRule, node, {
           propertyKey: meta.key,

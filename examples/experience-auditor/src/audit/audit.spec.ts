@@ -218,6 +218,8 @@ describe('audit rules', () => {
   });
 
   it('exposes a stable rule set', () => {
+    // Per-node rules only; the cross-node a11y/heading-order rule is invoked by
+    // the engine over the full node list, not registered in AUDIT_RULES.
     expect(AUDIT_RULES.map((r) => r.id)).toEqual([
       'a11y/image-alt-text',
       'content/required-empty',

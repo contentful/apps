@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Button, Flex, Text, TextInput } from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
 
 interface SuggestedFixProps {
   /** The proposed value, pre-filled and editable. */
@@ -33,7 +34,11 @@ const SuggestedFix = ({
     <Box
       marginTop="spacingXs"
       padding="spacingXs"
-      style={{ background: '#f0f6ff', border: '1px dashed #9cc2f5', borderRadius: '5px' }}
+      style={{
+        background: tokens.blue100,
+        border: `1px dashed ${tokens.blue300}`,
+        borderRadius: '5px',
+      }}
       data-test-id="suggested-fix">
       <Text fontColor="blue600" fontSize="fontSizeS" fontWeight="fontWeightDemiBold">
         💡 Suggested from {source}
