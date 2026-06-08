@@ -192,7 +192,7 @@ describe('audit rules', () => {
           binding: { sourceType: 'entry', entryId: 'e1' },
         },
       ],
-      resolvedBindings: { featured: { isEntryBinding: true, resolved: false } },
+      resolvedBindings: { featured: { resolved: false } },
     };
     const finding = runAudit([n]).findings.find((f) => f.ruleId === 'content/broken-binding');
     expect(finding?.severity).toBe('error');
@@ -210,7 +210,7 @@ describe('audit rules', () => {
           binding: { sourceType: 'entry', entryId: 'e1' },
         },
       ],
-      resolvedBindings: { featured: { isEntryBinding: true, resolved: true } },
+      resolvedBindings: { featured: { resolved: true } },
     };
     expect(
       runAudit([n]).findings.find((f) => f.ruleId === 'content/broken-binding')
