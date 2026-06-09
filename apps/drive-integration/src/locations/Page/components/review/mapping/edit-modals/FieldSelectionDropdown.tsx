@@ -83,7 +83,7 @@ export const FieldSelectionDropdown = ({
     selectedOptions.length === 0 ? 'Select one or more' : `${selectedOptions.length} selected`;
 
   return (
-    <FormControl as="div">
+    <FormControl as="div" marginBottom="none">
       <div onKeyDown={handleMultiselectKeyDown}>
         <Multiselect
           key={key}
