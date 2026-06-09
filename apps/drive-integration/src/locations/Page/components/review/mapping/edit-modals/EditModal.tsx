@@ -5,13 +5,14 @@ import { type EditModalContent } from '@types';
 
 import {
   modalContent,
-  contentSection,
   sectionCard,
-  locationsRow,
-  locationColumn,
+  locationsContainer,
+  selectedContentSection,
+  locationColumnLeft,
+  locationColumnRight,
   locationColumnHeader,
-  currentLocationCard,
   newLocationCard,
+  newLocationScrollableList,
 } from './EditModal.styles';
 import { FieldSelectionDropdown } from './FieldSelectionDropdown';
 
@@ -132,64 +133,64 @@ export const EditModal = ({
           <Modal.Header title={title} onClose={onClose} />
           <Modal.Content>
             <Box className={modalContent}>
-              {/* Selected content preview */}
-              <Box className={contentSection}>
-                <Text as="p" fontWeight="fontWeightDemiBold">
-                  {previewSectionTitle}
-                </Text>
-                <Box className={sectionCard}>
-                  {additionalContent ??
-                    (viewModel.isImageContent ? (
-                      <Text as="p">
-                        <Text as="span">IMAGE: </Text>
-                        {previewText}
-                      </Text>
-                    ) : (
-                      <Text as="p">{previewText}</Text>
-                    ))}
-                </Box>
-              </Box>
-
-              {/* Two-column: Current location | New location */}
-              <Box className={locationsRow}>
-                {/* Left: Current location */}
-                <Box className={locationColumn}>
+              {/* Three sections in one bordered container */}
+              <Box className={locationsContainer}>
+                {/* Top: Selected content — spans full width */}
+                <Box className={selectedContentSection}>
                   <Text as="p" fontWeight="fontWeightDemiBold">
-                    Current location
+                    {previewSectionTitle}
                   </Text>
+                  <Box className={sectionCard}>
+                    {additionalContent ??
+                      (viewModel.isImageContent ? (
+                        <Text as="p">
+                          <Text as="span">IMAGE: </Text>
+                          {previewText}
+                        </Text>
+                      ) : (
+                        <Text as="p">{previewText}</Text>
+                      ))}
+                  </Box>
+                </Box>
+
+                {/* Left: Current location */}
+                <Box className={locationColumnLeft}>
+                  <Box className={locationColumnHeader}>
+                    <Text as="p" fontWeight="fontWeightDemiBold">
+                      Current location
+                    </Text>
+                  </Box>
                   {firstCurrentLocation ? (
-                    <Box className={currentLocationCard}>
-                      <Flex flexDirection="column" gap="spacingXs">
-                        <Box>
-                          <Text as="p" fontColor="gray600" fontSize="fontSizeS">
-                            Content type
+                    <Flex flexDirection="column" gap="spacingXs">
+                      <Box>
+                        <Text as="p" fontColor="gray600" fontSize="fontSizeS">
+                          Content type
+                        </Text>
+                        <Text as="p">{firstCurrentLocation.contentTypeName}</Text>
+                      </Box>
+                      <Box>
+                        <Text as="p" fontColor="gray600" fontSize="fontSizeS">
+                          Entry name
+                        </Text>
+                        <Text as="p">{firstCurrentLocation.entryName}</Text>
+                      </Box>
+                      <Box>
+                        <Text as="p" fontColor="gray600" fontSize="fontSizeS">
+                          Field
+                        </Text>
+                        <Text as="p">
+                          {firstCurrentLocation.fieldName}{' '}
+                          <Text as="span" fontColor="blue500">
+                            | {firstCurrentLocation.fieldType}
                           </Text>
-                          <Text as="p">{firstCurrentLocation.contentTypeName}</Text>
-                        </Box>
-                        <Box>
-                          <Text as="p" fontColor="gray600" fontSize="fontSizeS">
-                            Entry name
-                          </Text>
-                          <Text as="p">{firstCurrentLocation.entryName}</Text>
-                        </Box>
-                        <Box>
-                          <Text as="p" fontColor="gray600" fontSize="fontSizeS">
-                            Field
-                          </Text>
-                          <Text as="p">
-                            {firstCurrentLocation.fieldName}{' '}
-                            <Text as="span" fontColor="blue500">
-                              | {firstCurrentLocation.fieldType}
-                            </Text>
-                          </Text>
-                        </Box>
-                      </Flex>
-                    </Box>
+                        </Text>
+                      </Box>
+                    </Flex>
                   ) : null}
                 </Box>
 
                 {/* Right: New location */}
-                <Box className={locationColumn}>
+                <Box className={locationColumnRight}>
                   <Box className={locationColumnHeader}>
                     <Text as="p" fontWeight="fontWeightDemiBold">
                       New location
@@ -200,7 +201,6 @@ export const EditModal = ({
                     </Button>
                   </Box>
 
-                  {/* Search */}
                   <TextInput
                     placeholder="Search entries"
                     value={entrySearch}
@@ -208,8 +208,8 @@ export const EditModal = ({
                     aria-label="Search entries"
                   />
 
-                  {/* Entry cards */}
-                  <Flex flexDirection="column" gap="spacingS">
+                  {/* Only this list scrolls */}
+                  <Box className={newLocationScrollableList}>
                     {filteredNewLocations.map((loc) => {
                       const [contentTypePart, ...rest] = loc.title.split(': ');
                       const entryNamePart = rest.join(': ');
@@ -239,7 +239,7 @@ export const EditModal = ({
                         </Box>
                       );
                     })}
-                  </Flex>
+                  </Box>
                 </Box>
               </Box>
             </Box>

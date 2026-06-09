@@ -7,44 +7,43 @@ export const modalContent = css({
   gap: tokens.spacingL,
 });
 
-export const contentSection = css({
+export const sectionCard = css({
+  border: `1px solid ${tokens.gray200}`,
+  borderRadius: tokens.borderRadiusSmall,
+  padding: tokens.spacingS,
   display: 'flex',
   flexDirection: 'column',
   gap: tokens.spacingXs,
 });
 
-export const sectionCard = css({
-  border: `1px solid ${tokens.gray200}`,
-  borderRadius: tokens.borderRadiusSmall,
-  padding: tokens.spacingS,
-});
-
-export const locationsRow = css({
+export const locationsContainer = css({
   display: 'grid',
   gridTemplateColumns: '1fr 1fr',
-  gap: tokens.spacingL,
-  alignItems: 'start',
+  border: `1px solid ${tokens.gray200}`,
+  borderRadius: tokens.borderRadiusSmall,
+  overflow: 'hidden',
 });
 
-export const locationColumn = css({
+export const locationColumnLeft = css({
   display: 'flex',
   flexDirection: 'column',
   gap: tokens.spacingS,
+  padding: tokens.spacingS,
+  borderRight: `1px solid ${tokens.gray200}`,
+});
+
+export const locationColumnRight = css({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: tokens.spacingS,
+  padding: tokens.spacingS,
 });
 
 export const locationColumnHeader = css({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-});
-
-export const currentLocationCard = css({
-  border: `1px solid ${tokens.gray200}`,
-  borderRadius: tokens.borderRadiusSmall,
-  padding: tokens.spacingS,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: tokens.spacingXs,
+  minHeight: '32px',
 });
 
 export const newLocationCard = css({
@@ -56,14 +55,19 @@ export const newLocationCard = css({
   gap: tokens.spacingS,
 });
 
-export const searchInput = css({
-  width: '100%',
-  border: `1px solid ${tokens.gray300}`,
-  borderRadius: tokens.borderRadiusSmall,
-  padding: `${tokens.spacingXs} ${tokens.spacingS}`,
-  fontSize: tokens.fontSizeM,
-  outline: 'none',
-  '&:focus': {
-    borderColor: tokens.blue500,
-  },
+export const newLocationScrollableList = css({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: tokens.spacingS,
+  maxHeight: '260px',
+  overflowY: 'auto',
+});
+
+export const selectedContentSection = css({
+  gridColumn: '1 / -1',
+  borderBottom: `1px solid ${tokens.gray200}`,
+  padding: tokens.spacingS,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: tokens.spacingXs,
 });
