@@ -92,13 +92,13 @@ export const FieldSelectionDropdown = ({
     selectedOptions.length === 0 ? 'Select one or more' : `${selectedOptions.length} selected`;
 
   return (
-    <FormControl as="div">
+    <FormControl as="div" marginBottom="none">
       <Multiselect
         key={key}
         currentSelection={currentSelection}
         placeholder={placeholder}
         popoverProps={{
-          listMaxHeight: 200,
+          listMaxHeight: 190,
           listRef: multiselectListRef,
           placement: 'bottom',
           isAutoalignmentEnabled: false,

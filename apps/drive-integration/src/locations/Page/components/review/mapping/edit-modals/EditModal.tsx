@@ -129,7 +129,6 @@ export const EditModal = ({
           <Modal.Header title={title} onClose={onClose} />
           <Modal.Content>
             <Box className={locationsContainer}>
-              {/* Selected content — full width top row */}
               <Flex
                 flexDirection="column"
                 gap="spacingXs"
@@ -163,7 +162,11 @@ export const EditModal = ({
                   </Text>
                 </Flex>
                 {firstCurrentLocation ? (
-                  <Flex flexDirection="column" gap="spacingXs" padding="spacingXs" className={greyCard}>
+                  <Flex
+                    flexDirection="column"
+                    gap="spacingXs"
+                    padding="spacingXs"
+                    className={greyCard}>
                     <Box>
                       <Text as="p" fontColor="gray600" fontSize="fontSizeS">
                         Content type
@@ -193,11 +196,13 @@ export const EditModal = ({
 
               {/* New location */}
               <Flex flexDirection="column" gap="spacingS" padding="spacingS">
-                <Flex alignItems="center" justifyContent="space-between" style={{ minHeight: '32px' }}>
+                <Flex
+                  alignItems="center"
+                  justifyContent="space-between"
+                  style={{ minHeight: '32px' }}>
                   <Text as="p" fontWeight="fontWeightDemiBold">
                     New location
                   </Text>
-                  {/* + Add entry — no-op for now */}
                   <Button variant="transparent" size="small" startIcon={<PlusIcon />}>
                     Add entry
                   </Button>
@@ -210,7 +215,6 @@ export const EditModal = ({
                   aria-label="Search entries"
                 />
 
-                {/* Only this list scrolls */}
                 <Flex flexDirection="column" gap="spacingS" className={newLocationScrollableList}>
                   {filteredNewLocations.map((loc) => {
                     const [contentTypePart, ...rest] = loc.title.split(': ');
@@ -221,7 +225,6 @@ export const EditModal = ({
                         flexDirection="column"
                         gap="spacingXs"
                         padding="spacingXs"
-                        paddingBottom="spacing2Xs"
                         className={greyCard}>
                         <Box>
                           <Text as="p" fontColor="gray600" fontSize="fontSizeS">
