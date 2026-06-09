@@ -48,8 +48,9 @@ export const locationColumnHeader = css({
 
 export const greyInfoCard = css({
   backgroundColor: tokens.gray100,
+  border: `1px solid ${tokens.gray200}`,
   borderRadius: tokens.borderRadiusSmall,
-  padding: tokens.spacingS,
+  padding: tokens.spacingXs,
   display: 'flex',
   flexDirection: 'column',
   gap: tokens.spacingXs,
@@ -57,8 +58,9 @@ export const greyInfoCard = css({
 
 export const newLocationCard = css({
   backgroundColor: tokens.gray100,
+  border: `1px solid ${tokens.gray200}`,
   borderRadius: tokens.borderRadiusSmall,
-  padding: `${tokens.spacingS} ${tokens.spacingS} ${tokens.spacing2Xs} ${tokens.spacingS}`,
+  padding: `${tokens.spacingXs} ${tokens.spacingXs} ${tokens.spacing2Xs} ${tokens.spacingXs}`,
   display: 'flex',
   flexDirection: 'column',
   gap: tokens.spacingXs,
@@ -83,6 +85,7 @@ export const selectedContentSection = css({
 
 export const selectedContentPreview = css({
   backgroundColor: tokens.gray100,
+  border: `1px solid ${tokens.gray200}`,
   borderRadius: tokens.borderRadiusSmall,
-  padding: tokens.spacingS,
+  padding: tokens.spacingXs,
 });
