@@ -23,13 +23,27 @@ export interface WorkflowFailure {
   httpStatus?: number;
 }
 
+export interface WorkflowDiagnosticInfo {
+  runId?: string;
+  workflowRunId?: string;
+  spaceId?: string;
+  environmentId?: string;
+  timestamp: string;
+}
+
 export class WorkflowRunError extends Error {
   reason: WorkflowFailureReason;
+  diagnosticInfo?: WorkflowDiagnosticInfo;
 
-  constructor(message: string, reason: WorkflowFailureReason = WorkflowFailureReason.GENERIC) {
+  constructor(
+    message: string,
+    reason: WorkflowFailureReason = WorkflowFailureReason.GENERIC,
+    diagnosticInfo?: WorkflowDiagnosticInfo
+  ) {
     super(message);
     this.name = 'WorkflowRunError';
     this.reason = reason;
+    this.diagnosticInfo = diagnosticInfo;
   }
 }
 
