@@ -198,7 +198,7 @@ const brokenBindingRule: AuditRule = {
     const findings: AuditFinding[] = [];
     for (const property of node.properties) {
       const binding = property.binding;
-      if (!binding || binding.sourceType !== 'entry') continue;
+      if (!binding || binding.type !== 'entry') continue;
 
       const resolution = node.resolvedBindings?.[property.key];
       const broken = resolution ? !resolution.resolved : !binding.entryId;
