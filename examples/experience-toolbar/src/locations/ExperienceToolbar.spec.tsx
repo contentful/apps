@@ -117,7 +117,7 @@ describe('ExperienceToolbar', () => {
     expect(queryByTestId('properties-table')).not.toBeInTheDocument();
   });
 
-  it('renders a bound property as "sourceType → entryId"', async () => {
+  it('renders a bound property as "type → entryId"', async () => {
     mockSdk.exo.experience.getNode.mockReturnValue({
       id: 'node-1',
       nodeType: 'Component',
@@ -127,7 +127,7 @@ describe('ExperienceToolbar', () => {
           key: 'title',
           area: 'content',
           value: null,
-          binding: { sourceType: 'entry', entryId: 'entry-42' },
+          binding: { type: 'entry', entryId: 'entry-42', fieldId: 'title' },
         },
       ]),
     });
