@@ -840,7 +840,7 @@ describe('MappingView', () => {
     expect(
       screen.getAllByText((_, node) => node?.textContent?.includes('Second') ?? false).length
     ).toBeGreaterThan(0);
-    expect(screen.getByText('Assign to fields')).toBeTruthy();
+    expect(screen.getByText('New location')).toBeTruthy();
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
 
@@ -866,9 +866,10 @@ describe('MappingView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Edit content mapping' }));
 
     expect(screen.getByRole('heading', { name: 'Edit content mapping' })).toBeTruthy();
-    expect(screen.getByText('“fresh body text”')).toBeTruthy();
-    expect(screen.getByText('Assign to fields')).toBeTruthy();
-    expect(screen.getByText('Article: Untitled')).toBeTruthy();
+    expect(screen.getByText('fresh body text')).toBeTruthy();
+    expect(screen.getByText('New location')).toBeTruthy();
+    expect(screen.getAllByText('Article').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Untitled').length).toBeGreaterThan(0);
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
 
@@ -934,7 +935,7 @@ describe('MappingView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Edit content mapping' }));
 
     expect(screen.getByRole('heading', { name: 'Edit content mapping' })).toBeTruthy();
-    expect(screen.getByText('Assign to fields')).toBeTruthy();
+    expect(screen.getByText('New location')).toBeTruthy();
     expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
@@ -1007,7 +1008,7 @@ describe('MappingView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Edit content mapping' }));
 
     expect(screen.getByRole('heading', { name: 'Edit content mapping' })).toBeTruthy();
-    expect(screen.getByText('Assign to fields')).toBeTruthy();
+    expect(screen.getByText('New location')).toBeTruthy();
     expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
@@ -1042,6 +1043,7 @@ describe('MappingView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Assign image' }));
 
     expect(screen.getByRole('heading', { name: 'Edit content mapping' })).toBeTruthy();
-    expect(screen.getByText('Selected Article: Untitled')).toBeTruthy();
+    expect(screen.getAllByText('Selected Article').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Untitled').length).toBeGreaterThan(0);
   });
 });
