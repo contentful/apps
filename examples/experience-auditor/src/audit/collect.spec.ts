@@ -45,7 +45,7 @@ describe('collectNodes', () => {
         key: 'featured',
         area: 'content',
         value: 'x',
-        binding: { sourceType: 'entry', entryId: 'e1' },
+        binding: { type: 'entry', entryId: 'e1', fieldId: 'featured' },
       },
     ]);
     okNode.resolveEntryBinding = vi.fn().mockResolvedValue({ entryId: 'e1' });
@@ -62,7 +62,7 @@ describe('collectNodes', () => {
         key: 'featured',
         area: 'content',
         value: null,
-        binding: { sourceType: 'entry', entryId: 'gone' },
+        binding: { type: 'entry', entryId: 'gone', fieldId: 'featured' },
       },
     ]);
     brokenNode.resolveEntryBinding = vi.fn().mockResolvedValue(null);
@@ -88,7 +88,7 @@ describe('collectNodes', () => {
         key: 'featured',
         area: 'content',
         value: 'x',
-        binding: { sourceType: 'entry', entryId: 'e1' },
+        binding: { type: 'entry', entryId: 'e1', fieldId: 'featured' },
       },
     ]);
     // Simulate a partial host bridge that has not shipped resolveEntryBinding yet.

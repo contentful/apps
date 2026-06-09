@@ -50,7 +50,7 @@ async function resolveBindings(
 
   const entries: Array<[string, ResolvedBinding]> = [];
   for (const property of properties) {
-    if (property.binding?.sourceType !== 'entry') continue;
+    if (property.binding?.type !== 'entry') continue;
     const target = await node.resolveEntryBinding(property.key);
     entries.push([property.key, { resolved: target !== null }]);
   }
