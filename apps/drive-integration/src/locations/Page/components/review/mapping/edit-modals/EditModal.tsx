@@ -5,12 +5,13 @@ import { type EditModalContent } from '@types';
 
 import {
   modalContent,
-  sectionCard,
   locationsContainer,
   selectedContentSection,
+  selectedContentPreview,
   locationColumnLeft,
   locationColumnRight,
   locationColumnHeader,
+  greyInfoCard,
   newLocationCard,
   newLocationScrollableList,
 } from './EditModal.styles';
@@ -140,7 +141,7 @@ export const EditModal = ({
                   <Text as="p" fontWeight="fontWeightDemiBold">
                     {previewSectionTitle}
                   </Text>
-                  <Box className={sectionCard}>
+                  <Box className={selectedContentPreview}>
                     {additionalContent ??
                       (viewModel.isImageContent ? (
                         <Text as="p">
@@ -161,7 +162,7 @@ export const EditModal = ({
                     </Text>
                   </Box>
                   {firstCurrentLocation ? (
-                    <Flex flexDirection="column" gap="spacingXs">
+                    <Box className={greyInfoCard}>
                       <Box>
                         <Text as="p" fontColor="gray600" fontSize="fontSizeS">
                           Content type
@@ -185,7 +186,7 @@ export const EditModal = ({
                           </Text>
                         </Text>
                       </Box>
-                    </Flex>
+                    </Box>
                   ) : null}
                 </Box>
 
