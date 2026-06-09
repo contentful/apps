@@ -18,7 +18,7 @@ export const sectionCard = css({
 
 export const locationsContainer = css({
   display: 'grid',
-  gridTemplateColumns: '1fr 1fr',
+  gridTemplateColumns: '217px 1fr',
   border: `1px solid ${tokens.gray200}`,
   borderRadius: tokens.borderRadiusSmall,
   overflow: 'hidden',
@@ -46,13 +46,22 @@ export const locationColumnHeader = css({
   minHeight: '32px',
 });
 
-export const newLocationCard = css({
-  border: `1px solid ${tokens.gray200}`,
+export const greyInfoCard = css({
+  backgroundColor: tokens.gray100,
   borderRadius: tokens.borderRadiusSmall,
   padding: tokens.spacingS,
   display: 'flex',
   flexDirection: 'column',
-  gap: tokens.spacingS,
+  gap: tokens.spacingXs,
+});
+
+export const newLocationCard = css({
+  backgroundColor: tokens.gray100,
+  borderRadius: tokens.borderRadiusSmall,
+  padding: `${tokens.spacingS} ${tokens.spacingS} ${tokens.spacing2Xs} ${tokens.spacingS}`,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: tokens.spacingXs,
 });
 
 export const newLocationScrollableList = css({
@@ -70,4 +79,10 @@ export const selectedContentSection = css({
   display: 'flex',
   flexDirection: 'column',
   gap: tokens.spacingXs,
+});
+
+export const selectedContentPreview = css({
+  backgroundColor: tokens.gray100,
+  borderRadius: tokens.borderRadiusSmall,
+  padding: tokens.spacingS,
 });
