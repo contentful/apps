@@ -1,8 +1,18 @@
 import { useEffect, useMemo, useState, useCallback, type ReactNode } from 'react';
-import { Box, Button, Modal, Flex, Text } from '@contentful/f36-components';
+import { Box, Button, Modal, Flex, Text, TextInput } from '@contentful/f36-components';
+
 import { type EditModalContent } from '@types';
 
-import { modalContent, contentSection, sectionCard } from './EditModal.styles';
+import {
+  modalContent,
+  contentSection,
+  sectionCard,
+  locationsRow,
+  locationColumn,
+  locationColumnHeader,
+  currentLocationCard,
+  newLocationCard,
+} from './EditModal.styles';
 import { FieldSelectionDropdown } from './FieldSelectionDropdown';
 
 interface EditModalProps {
@@ -32,6 +42,8 @@ export const EditModal = ({
     Record<string, { hasFieldOptions: boolean; hasSelectableOptions: boolean }>
   >({});
 
+  const [entrySearch, setEntrySearch] = useState('');
+
   const newLocationIdsKey = viewModel.newLocations.map((loc) => loc.id).join('|');
 
   useEffect(() => {
@@ -49,6 +61,7 @@ export const EditModal = ({
       Object.fromEntries(viewModel.newLocations.map((loc) => [loc.id, loc.initialFieldIds]))
     );
     setDestinationFieldStateByEntry({});
+    setEntrySearch('');
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sync from props only on open / location set change
   }, [isOpen, newLocationIdsKey]);
 
@@ -83,8 +96,14 @@ export const EditModal = ({
     onConfirmPrimary?.({ ...selectedFieldIdsByEntry });
   };
 
-  const previewSectionTitle = viewModel.previewSectionTitle ?? 'Content';
-  const previewQuotedText = (viewModel.contentPreview ?? viewModel.selectedText).trim();
+  const previewSectionTitle = viewModel.previewSectionTitle ?? 'Selected content';
+  const previewText = (viewModel.contentPreview ?? viewModel.selectedText).trim();
+
+  const filteredNewLocations = useMemo(() => {
+    const query = entrySearch.trim().toLowerCase();
+    if (!query) return viewModel.newLocations;
+    return viewModel.newLocations.filter((loc) => loc.title.toLowerCase().includes(query));
+  }, [viewModel.newLocations, entrySearch]);
 
   const isPrimaryDisabled = useMemo(() => {
     if (viewModel.newLocations.length === 0) return true;
@@ -104,14 +123,17 @@ export const EditModal = ({
     return !hasAnyChange;
   }, [viewModel.newLocations, selectedFieldIdsByEntry, destinationFieldStateByEntry]);
 
+  const firstCurrentLocation = viewModel.currentLocations[0];
+
   return (
     <Modal isShown={isOpen} onClose={onClose} size="large" shouldCloseOnOverlayClick={false}>
       {() => (
         <>
           <Modal.Header title={title} onClose={onClose} />
           <Modal.Content>
-            <Box className={`${modalContent}`}>
-              <Box className={`${contentSection}`}>
+            <Box className={modalContent}>
+              {/* Selected content preview */}
+              <Box className={contentSection}>
                 <Text as="p" fontWeight="fontWeightDemiBold">
                   {previewSectionTitle}
                 </Text>
@@ -120,54 +142,106 @@ export const EditModal = ({
                     (viewModel.isImageContent ? (
                       <Text as="p">
                         <Text as="span">IMAGE: </Text>
-                        {previewQuotedText}
+                        {previewText}
                       </Text>
                     ) : (
-                      <Text as="p">&ldquo;{previewQuotedText}&rdquo;</Text>
+                      <Text as="p">{previewText}</Text>
                     ))}
                 </Box>
               </Box>
 
-              {viewModel.newLocations.length > 0 && (
-                <Box>
-                  <Text as="p" fontWeight="fontWeightMedium" marginBottom="spacingXs">
-                    Assign to fields
+              {/* Two-column: Current location | New location */}
+              <Box className={locationsRow}>
+                {/* Left: Current location */}
+                <Box className={locationColumn}>
+                  <Text as="p" fontWeight="fontWeightDemiBold">
+                    Current location
                   </Text>
-                  <Text as="p" fontColor="gray700" marginBottom="spacingM">
-                    This app does not support edits for Reference, Boolean, Date &amp; time,
-                    Location or JSON fields. Use the entry editor instead.
-                  </Text>
-                  <Flex flexDirection="column" gap="spacingXs">
-                    {viewModel.newLocations.map((loc) => (
-                      <Box key={loc.id} className={sectionCard}>
-                        <Text as="p" marginBottom="spacingXs">
-                          Select field(s) from the entry &ldquo;
-                          <Text as="span" fontWeight="fontWeightDemiBold">
-                            {loc.title}
+                  {firstCurrentLocation ? (
+                    <Box className={currentLocationCard}>
+                      <Flex flexDirection="column" gap="spacingXs">
+                        <Box>
+                          <Text as="p" fontColor="gray600" fontSize="fontSizeS">
+                            Content type
                           </Text>
-                          &rdquo;
-                        </Text>
-                        <Text
-                          as="p"
-                          fontWeight="fontWeightDemiBold"
-                          marginTop="spacingM"
-                          marginBottom="spacingXs">
-                          Fields
-                        </Text>
-                        <FieldSelectionDropdown
-                          isImageContent={viewModel.isImageContent}
-                          selectedText={viewModel.selectedText}
-                          fieldOptions={loc.fieldOptions}
-                          fieldMappings={loc.fieldMappings}
-                          selectedFieldIds={selectedFieldIdsByEntry[loc.id] ?? []}
-                          onSelectedFieldIdsChange={handleSelectedFieldIdsChangeForEntry(loc.id)}
-                          onSelectableStateChange={handleSelectableStateChangeForEntry(loc.id)}
-                        />
-                      </Box>
-                    ))}
+                          <Text as="p">{firstCurrentLocation.contentTypeName}</Text>
+                        </Box>
+                        <Box>
+                          <Text as="p" fontColor="gray600" fontSize="fontSizeS">
+                            Entry name
+                          </Text>
+                          <Text as="p">{firstCurrentLocation.entryName}</Text>
+                        </Box>
+                        <Box>
+                          <Text as="p" fontColor="gray600" fontSize="fontSizeS">
+                            Field
+                          </Text>
+                          <Text as="p">
+                            {firstCurrentLocation.fieldName}{' '}
+                            <Text as="span" fontColor="blue500">
+                              | {firstCurrentLocation.fieldType}
+                            </Text>
+                          </Text>
+                        </Box>
+                      </Flex>
+                    </Box>
+                  ) : null}
+                </Box>
+
+                {/* Right: New location */}
+                <Box className={locationColumn}>
+                  <Box className={locationColumnHeader}>
+                    <Text as="p" fontWeight="fontWeightDemiBold">
+                      New location
+                    </Text>
+                    {/* + Add entry — no-op for now */}
+                    <Button variant="transparent" size="small" startIcon={<span>+</span>}>
+                      Add entry
+                    </Button>
+                  </Box>
+
+                  {/* Search */}
+                  <TextInput
+                    placeholder="Search entries"
+                    value={entrySearch}
+                    onChange={(e) => setEntrySearch(e.target.value)}
+                    aria-label="Search entries"
+                  />
+
+                  {/* Entry cards */}
+                  <Flex flexDirection="column" gap="spacingS">
+                    {filteredNewLocations.map((loc) => {
+                      const [contentTypePart, ...rest] = loc.title.split(': ');
+                      const entryNamePart = rest.join(': ');
+                      return (
+                        <Box key={loc.id} className={newLocationCard}>
+                          <Box>
+                            <Text as="p" fontColor="gray600" fontSize="fontSizeS">
+                              Content type
+                            </Text>
+                            <Text as="p">{contentTypePart}</Text>
+                          </Box>
+                          <Box>
+                            <Text as="p" fontColor="gray600" fontSize="fontSizeS">
+                              Entry name
+                            </Text>
+                            <Text as="p">{entryNamePart || loc.title}</Text>
+                          </Box>
+                          <FieldSelectionDropdown
+                            isImageContent={viewModel.isImageContent}
+                            selectedText={viewModel.selectedText}
+                            fieldOptions={loc.fieldOptions}
+                            fieldMappings={loc.fieldMappings}
+                            selectedFieldIds={selectedFieldIdsByEntry[loc.id] ?? []}
+                            onSelectedFieldIdsChange={handleSelectedFieldIdsChangeForEntry(loc.id)}
+                            onSelectableStateChange={handleSelectableStateChangeForEntry(loc.id)}
+                          />
+                        </Box>
+                      );
+                    })}
                   </Flex>
                 </Box>
-              )}
+              </Box>
             </Box>
           </Modal.Content>
           <Modal.Controls>
