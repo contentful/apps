@@ -266,8 +266,8 @@ const SelectedNode = ({
 /** Renders a property value as a compact, readable string for display. */
 function formatPropertyValue(property: ComponentPropertyDescriptor): string {
   if (property.binding) {
-    const { sourceType, entryId } = property.binding;
-    return entryId ? `${sourceType} → ${entryId}` : sourceType;
+    const { binding } = property;
+    return binding.type === 'entry' ? `${binding.type} → ${binding.entryId}` : binding.type;
   }
 
   const { value } = property;
