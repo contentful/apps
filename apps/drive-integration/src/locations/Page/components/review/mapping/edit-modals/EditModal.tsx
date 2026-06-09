@@ -1,18 +1,13 @@
 import { useEffect, useMemo, useState, useCallback, type ReactNode } from 'react';
 import { Box, Button, Modal, Flex, Text, TextInput } from '@contentful/f36-components';
-
+import { PlusIcon } from '@contentful/f36-icons';
 import { type EditModalContent } from '@types';
 
 import {
-  modalContent,
   locationsContainer,
   selectedContentSection,
-  selectedContentPreview,
+  greyCard,
   locationColumnLeft,
-  locationColumnRight,
-  locationColumnHeader,
-  greyInfoCard,
-  newLocationCard,
   newLocationScrollableList,
 } from './EditModal.styles';
 import { FieldSelectionDropdown } from './FieldSelectionDropdown';
@@ -133,116 +128,127 @@ export const EditModal = ({
         <>
           <Modal.Header title={title} onClose={onClose} />
           <Modal.Content>
-            <Box className={modalContent}>
-              {/* Three sections in one bordered container */}
-              <Box className={locationsContainer}>
-                {/* Top: Selected content — spans full width */}
-                <Box className={selectedContentSection}>
+            <Box className={locationsContainer}>
+              {/* Selected content — full width top row */}
+              <Flex
+                flexDirection="column"
+                gap="spacingXs"
+                padding="spacingS"
+                className={selectedContentSection}>
+                <Text as="p" fontWeight="fontWeightDemiBold">
+                  {previewSectionTitle}
+                </Text>
+                <Box className={greyCard} padding="spacingXs">
+                  {additionalContent ??
+                    (viewModel.isImageContent ? (
+                      <Text as="p">
+                        <Text as="span">IMAGE: </Text>
+                        {previewText}
+                      </Text>
+                    ) : (
+                      <Text as="p">{previewText}</Text>
+                    ))}
+                </Box>
+              </Flex>
+
+              {/* Current location */}
+              <Flex
+                flexDirection="column"
+                gap="spacingS"
+                padding="spacingS"
+                className={locationColumnLeft}>
+                <Flex alignItems="center" style={{ minHeight: '32px' }}>
                   <Text as="p" fontWeight="fontWeightDemiBold">
-                    {previewSectionTitle}
+                    Current location
                   </Text>
-                  <Box className={selectedContentPreview}>
-                    {additionalContent ??
-                      (viewModel.isImageContent ? (
-                        <Text as="p">
-                          <Text as="span">IMAGE: </Text>
-                          {previewText}
-                        </Text>
-                      ) : (
-                        <Text as="p">{previewText}</Text>
-                      ))}
-                  </Box>
-                </Box>
-
-                {/* Left: Current location */}
-                <Box className={locationColumnLeft}>
-                  <Box className={locationColumnHeader}>
-                    <Text as="p" fontWeight="fontWeightDemiBold">
-                      Current location
-                    </Text>
-                  </Box>
-                  {firstCurrentLocation ? (
-                    <Box className={greyInfoCard}>
-                      <Box>
-                        <Text as="p" fontColor="gray600" fontSize="fontSizeS">
-                          Content type
-                        </Text>
-                        <Text as="p">{firstCurrentLocation.contentTypeName}</Text>
-                      </Box>
-                      <Box>
-                        <Text as="p" fontColor="gray600" fontSize="fontSizeS">
-                          Entry name
-                        </Text>
-                        <Text as="p">{firstCurrentLocation.entryName}</Text>
-                      </Box>
-                      <Box>
-                        <Text as="p" fontColor="gray600" fontSize="fontSizeS">
-                          Field
-                        </Text>
-                        <Text as="p">
-                          {firstCurrentLocation.fieldName}{' '}
-                          <Text as="span" fontColor="blue500">
-                            | {firstCurrentLocation.fieldType}
-                          </Text>
-                        </Text>
-                      </Box>
+                </Flex>
+                {firstCurrentLocation ? (
+                  <Flex flexDirection="column" gap="spacingXs" padding="spacingXs" className={greyCard}>
+                    <Box>
+                      <Text as="p" fontColor="gray600" fontSize="fontSizeS">
+                        Content type
+                      </Text>
+                      <Text as="p">{firstCurrentLocation.contentTypeName}</Text>
                     </Box>
-                  ) : null}
-                </Box>
+                    <Box>
+                      <Text as="p" fontColor="gray600" fontSize="fontSizeS">
+                        Entry name
+                      </Text>
+                      <Text as="p">{firstCurrentLocation.entryName}</Text>
+                    </Box>
+                    <Box>
+                      <Text as="p" fontColor="gray600" fontSize="fontSizeS">
+                        Field
+                      </Text>
+                      <Text as="p">
+                        {firstCurrentLocation.fieldName}{' '}
+                        <Text as="span" fontColor="blue500">
+                          | {firstCurrentLocation.fieldType}
+                        </Text>
+                      </Text>
+                    </Box>
+                  </Flex>
+                ) : null}
+              </Flex>
 
-                {/* Right: New location */}
-                <Box className={locationColumnRight}>
-                  <Box className={locationColumnHeader}>
-                    <Text as="p" fontWeight="fontWeightDemiBold">
-                      New location
-                    </Text>
-                    {/* + Add entry — no-op for now */}
-                    <Button variant="transparent" size="small" startIcon={<span>+</span>}>
-                      Add entry
-                    </Button>
-                  </Box>
+              {/* New location */}
+              <Flex flexDirection="column" gap="spacingS" padding="spacingS">
+                <Flex alignItems="center" justifyContent="space-between" style={{ minHeight: '32px' }}>
+                  <Text as="p" fontWeight="fontWeightDemiBold">
+                    New location
+                  </Text>
+                  {/* + Add entry — no-op for now */}
+                  <Button variant="transparent" size="small" startIcon={<PlusIcon />}>
+                    Add entry
+                  </Button>
+                </Flex>
 
-                  <TextInput
-                    placeholder="Search entries"
-                    value={entrySearch}
-                    onChange={(e) => setEntrySearch(e.target.value)}
-                    aria-label="Search entries"
-                  />
+                <TextInput
+                  placeholder="Search entries"
+                  value={entrySearch}
+                  onChange={(e) => setEntrySearch(e.target.value)}
+                  aria-label="Search entries"
+                />
 
-                  {/* Only this list scrolls */}
-                  <Box className={newLocationScrollableList}>
-                    {filteredNewLocations.map((loc) => {
-                      const [contentTypePart, ...rest] = loc.title.split(': ');
-                      const entryNamePart = rest.join(': ');
-                      return (
-                        <Box key={loc.id} className={newLocationCard}>
-                          <Box>
-                            <Text as="p" fontColor="gray600" fontSize="fontSizeS">
-                              Content type
-                            </Text>
-                            <Text as="p">{contentTypePart}</Text>
-                          </Box>
-                          <Box>
-                            <Text as="p" fontColor="gray600" fontSize="fontSizeS">
-                              Entry name
-                            </Text>
-                            <Text as="p">{entryNamePart || loc.title}</Text>
-                          </Box>
-                          <FieldSelectionDropdown
-                            isImageContent={viewModel.isImageContent}
-                            selectedText={viewModel.selectedText}
-                            fieldOptions={loc.fieldOptions}
-                            fieldMappings={loc.fieldMappings}
-                            selectedFieldIds={selectedFieldIdsByEntry[loc.id] ?? []}
-                            onSelectedFieldIdsChange={handleSelectedFieldIdsChangeForEntry(loc.id)}
-                            onSelectableStateChange={handleSelectableStateChangeForEntry(loc.id)}
-                          />
+                {/* Only this list scrolls */}
+                <Flex flexDirection="column" gap="spacingS" className={newLocationScrollableList}>
+                  {filteredNewLocations.map((loc) => {
+                    const [contentTypePart, ...rest] = loc.title.split(': ');
+                    const entryNamePart = rest.join(': ');
+                    return (
+                      <Flex
+                        key={loc.id}
+                        flexDirection="column"
+                        gap="spacingXs"
+                        padding="spacingXs"
+                        paddingBottom="spacing2Xs"
+                        className={greyCard}>
+                        <Box>
+                          <Text as="p" fontColor="gray600" fontSize="fontSizeS">
+                            Content type
+                          </Text>
+                          <Text as="p">{contentTypePart}</Text>
                         </Box>
-                      );
-                    })}
-                  </Box>
-                </Box>
-              </Box>
+                        <Box>
+                          <Text as="p" fontColor="gray600" fontSize="fontSizeS">
+                            Entry name
+                          </Text>
+                          <Text as="p">{entryNamePart || loc.title}</Text>
+                        </Box>
+                        <FieldSelectionDropdown
+                          isImageContent={viewModel.isImageContent}
+                          selectedText={viewModel.selectedText}
+                          fieldOptions={loc.fieldOptions}
+                          fieldMappings={loc.fieldMappings}
+                          selectedFieldIds={selectedFieldIdsByEntry[loc.id] ?? []}
+                          onSelectedFieldIdsChange={handleSelectedFieldIdsChangeForEntry(loc.id)}
+                          onSelectableStateChange={handleSelectableStateChangeForEntry(loc.id)}
+                        />
+                      </Flex>
+                    );
+                  })}
+                </Flex>
+              </Flex>
             </Box>
           </Modal.Content>
           <Modal.Controls>
