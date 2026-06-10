@@ -265,7 +265,7 @@ export const useWorkflowAgent = ({
       setIsAnalyzing(true);
 
       const spaceId = sdk.ids.space;
-      const environmentId = sdk.ids.environment;
+      const environmentId = sdk.ids.environmentAlias ?? sdk.ids.environment;
       const threadId = [crypto.randomUUID(), WORKFLOW_AGENT_ID].join('-');
 
       const payload: AgentGeneratePayload = {
@@ -308,7 +308,7 @@ export const useWorkflowAgent = ({
       setIsAnalyzing(true);
 
       const spaceId = sdk.ids.space;
-      const environmentId = sdk.ids.environment;
+      const environmentId = sdk.ids.environmentAlias ?? sdk.ids.environment;
 
       try {
         await resumeWorkflowRun(sdk, spaceId, environmentId, runId, resumePayload);
