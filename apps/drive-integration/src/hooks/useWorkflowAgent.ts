@@ -253,6 +253,21 @@ const pollAgentRun = async (
   throw new Error('Workflow polling timeout');
 };
 
+async function resolveEnvironmentId(sdk: PageAppSDK): Promise<string> {
+  if (sdk.ids.environmentAlias) {
+    return sdk.ids.environmentAlias;
+  }
+  const spaceId = sdk.ids.space;
+  const rawEnvId = sdk.ids.environment;
+  try {
+    const env = await sdk.cma.environment.get({ spaceId, environmentId: rawEnvId });
+    const alias = env.sys.aliases?.[0]?.sys.id;
+    return alias ?? rawEnvId;
+  } catch {
+    return rawEnvId;
+  }
+}
+
 export const useWorkflowAgent = ({
   sdk,
   documentId,
@@ -265,7 +280,7 @@ export const useWorkflowAgent = ({
       setIsAnalyzing(true);
 
       const spaceId = sdk.ids.space;
-      const environmentId = sdk.ids.environmentAlias ?? sdk.ids.environment;
+      const environmentId = await resolveEnvironmentId(sdk);
       const threadId = [crypto.randomUUID(), WORKFLOW_AGENT_ID].join('-');
 
       const payload: AgentGeneratePayload = {
@@ -308,7 +323,7 @@ export const useWorkflowAgent = ({
       setIsAnalyzing(true);
 
       const spaceId = sdk.ids.space;
-      const environmentId = sdk.ids.environmentAlias ?? sdk.ids.environment;
+      const environmentId = await resolveEnvironmentId(sdk);
 
       try {
         await resumeWorkflowRun(sdk, spaceId, environmentId, runId, resumePayload);
