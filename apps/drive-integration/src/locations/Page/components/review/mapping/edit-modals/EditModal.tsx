@@ -11,6 +11,7 @@ import {
   newLocationScrollableList,
 } from './EditModal.styles';
 import { FieldSelectionDropdown } from './FieldSelectionDropdown';
+import { truncateMiddle } from '../../../../../../utils/utils';
 
 interface EditModalProps {
   isOpen: boolean;
@@ -21,6 +22,9 @@ interface EditModalProps {
   additionalContent?: ReactNode;
   onConfirmPrimary?: (selections: Record<string, string[]>) => void;
 }
+
+const CURRENT_LOCATION_MAX_LENGTH = 20;
+const NEW_LOCATION_MAX_LENGTH = 50;
 
 export const EditModal = ({
   isOpen,
@@ -171,22 +175,32 @@ export const EditModal = ({
                       <Text as="p" fontColor="gray600" fontSize="fontSizeS">
                         Content type
                       </Text>
-                      <Text as="p">{firstCurrentLocation.contentTypeName}</Text>
+                      <Text as="p">
+                        {truncateMiddle(
+                          firstCurrentLocation.contentTypeName,
+                          CURRENT_LOCATION_MAX_LENGTH
+                        )}
+                      </Text>
                     </Box>
                     <Box>
                       <Text as="p" fontColor="gray600" fontSize="fontSizeS">
                         Entry name
                       </Text>
-                      <Text as="p">{firstCurrentLocation.entryName}</Text>
+                      <Text as="p">
+                        {truncateMiddle(
+                          firstCurrentLocation.entryName,
+                          CURRENT_LOCATION_MAX_LENGTH
+                        )}
+                      </Text>
                     </Box>
                     <Box>
                       <Text as="p" fontColor="gray600" fontSize="fontSizeS">
                         Field
                       </Text>
                       <Text as="p">
-                        {firstCurrentLocation.fieldName}{' '}
+                        {truncateMiddle(firstCurrentLocation.fieldName, 15)}{' '}
                         <Text as="span" fontColor="blue500">
-                          | {firstCurrentLocation.fieldType}
+                          | {truncateMiddle(firstCurrentLocation.fieldType, 10)}
                         </Text>
                       </Text>
                     </Box>
@@ -230,13 +244,17 @@ export const EditModal = ({
                           <Text as="p" fontColor="gray600" fontSize="fontSizeS">
                             Content type
                           </Text>
-                          <Text as="p">{contentTypePart}</Text>
+                          <Text as="p">
+                            {truncateMiddle(contentTypePart, NEW_LOCATION_MAX_LENGTH)}
+                          </Text>
                         </Box>
                         <Box>
                           <Text as="p" fontColor="gray600" fontSize="fontSizeS">
                             Entry name
                           </Text>
-                          <Text as="p">{entryNamePart || loc.title}</Text>
+                          <Text as="p">
+                            {truncateMiddle(entryNamePart || loc.title, NEW_LOCATION_MAX_LENGTH)}
+                          </Text>
                         </Box>
                         <FieldSelectionDropdown
                           isImageContent={viewModel.isImageContent}

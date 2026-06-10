@@ -5,7 +5,7 @@ import { PageAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
 import { multiselect, pillsContainer } from './ContentTypePickerModal.styles';
-import { truncateLabel } from '../../../../../utils/utils';
+import { truncateMiddle } from '../../../../../utils/utils';
 import { handleMultiselectKeyDown } from '../../../../../utils/keyboard';
 
 interface ContentTypePickerModalProps {
@@ -181,7 +181,7 @@ export const ContentTypePickerModal = ({
             {selectedContentTypes.map((ct) => (
               <Pill
                 key={ct.sys.id}
-                label={truncateLabel(ct.name)}
+                label={truncateMiddle(ct.name)}
                 onClose={() =>
                   setSelectedContentTypes(
                     selectedContentTypes.filter((selected) => selected.sys.id !== ct.sys.id)

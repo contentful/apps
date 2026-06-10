@@ -1,6 +1,6 @@
 import { Box, Text, Tooltip } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import { truncate } from './mappingCardTextUtils';
+import { truncateEnd } from '../../../../../utils/utils';
 
 const valueContainerStyle = {
   whiteSpace: 'nowrap',
@@ -24,7 +24,7 @@ export const TruncatedRow = ({
   isTruncated,
   maxLength,
 }: TruncatedRowProps) => {
-  const truncated = maxLength === undefined ? truncate(value) : truncate(value, maxLength);
+  const truncated = maxLength === undefined ? truncateEnd(value) : truncateEnd(value, maxLength);
   const shouldShowTooltip = isTruncated ?? truncated !== value;
   const tooltipContentValue =
     tooltipValue ?? (secondaryValue ? `${value}${secondaryValue}` : value);

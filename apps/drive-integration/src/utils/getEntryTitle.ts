@@ -2,7 +2,7 @@ import { ContentType, PageAppSDK } from '@contentful/app-sdk';
 import type { EntryToCreate } from '@types';
 import type { EntryBlockGraphEntry } from '../types/entryBlockGraph';
 import { isTextSourceRef } from '../types/entryBlockGraph';
-import { truncateLabel } from './utils';
+import { truncateMiddle } from './utils';
 
 /**
  * Gets the title of an entry by fetching its content type's display field
@@ -74,5 +74,5 @@ export function getEntryTitleFromFieldMappings(
 
   if (!text.length) return UNTITLED_ENTRY_LABEL;
 
-  return truncateLabel(text, DISPLAY_FIELD_TITLE_EXCERPT_MAX);
+  return truncateMiddle(text, DISPLAY_FIELD_TITLE_EXCERPT_MAX);
 }

@@ -5,7 +5,7 @@ import {
   buildEntryList,
   buildEntryListFromEntryBlockGraph,
 } from '../../src/utils/overviewEntryList';
-import { truncateLabel } from '../../src/utils/utils';
+import { truncateMiddle } from '../../src/utils/utils';
 
 describe('buildEntryList', () => {
   it('omits entries without tempId', () => {
@@ -234,6 +234,6 @@ describe('buildEntryListFromEntryBlockGraph', () => {
       contentTypes
     );
 
-    expect(rows[0].entryTitle).toBe(truncateLabel(long, 80));
+    expect(rows[0].entryTitle).toBe(truncateMiddle(long, 80));
   });
 });
