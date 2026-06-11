@@ -867,9 +867,8 @@ export const MappingView = ({
     return result;
   }, [allGroups, locationsByCardKey, entryBlockGraph.entries, payload.contentTypes]);
 
-  const selectionLocations = selectionRectangle && !isDisabled && !isViewMode
-    ? getLocationsForSelectedText()
-    : [];
+  const selectionLocations =
+    selectionRectangle && !isDisabled && !isViewMode ? getLocationsForSelectedText() : [];
 
   return (
     <>
