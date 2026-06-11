@@ -71,12 +71,27 @@ import {
   collectTextExclusionRangesFromSelection,
   type TextExclusionRange,
 } from './entryBlockGraphExclusion';
+import { RemoveContentModal } from './edit-modals/RemoveContentModal';
 
 interface EditModalState {
   viewModel: EditModalContent;
   title: string;
   primaryButtonLabel: string;
 }
+
+interface RemoveModalState {
+  isOpen: boolean;
+  locations: EditLocationOption[];
+  textRanges: TextExclusionRange[];
+  imageRefs: ImageSourceRef[];
+}
+
+const EMPTY_REMOVE_MODAL: RemoveModalState = {
+  isOpen: false,
+  locations: [],
+  textRanges: [],
+  imageRefs: [],
+};
 
 interface MappingViewProps {
   payload: MappingReviewSuspendPayload;
@@ -170,6 +185,7 @@ export const MappingView = ({
     Record<string, Record<string, number>>
   >({});
   const [editModalState, setEditModalState] = useState<EditModalState>(EMPTY_EDIT_MODAL);
+  const [removeModalState, setRemoveModalState] = useState<RemoveModalState>(EMPTY_REMOVE_MODAL);
   const [pendingTextExclusionRanges, setPendingTextExclusionRanges] = useState<
     TextExclusionRange[] | null
   >(null);
@@ -586,6 +602,62 @@ export const MappingView = ({
     clearSelection();
   };
 
+  const handleRemoveFromSelection = () => {
+    if (isDisabled || !selectedText.trim()) return;
+    const selectionRange = selectedRange ? selectedRange.cloneRange() : null;
+    const textRanges = collectTextExclusionRangesFromSelection(
+      textSelectionRootRef.current,
+      selectionRange
+    );
+    const imageRefs = collectRichTextSourceRefsFromSelection(
+      textSelectionRootRef.current,
+      selectionRange,
+      document
+    ).filter(
+      (ref): ref is ImageSourceRef => isBlockImageSourceRef(ref) || isTableImageSourceRef(ref)
+    );
+    const locations = getLocationsForSelectedText();
+
+    if (!locations.length || (!textRanges.length && !imageRefs.length)) {
+      clearSelection();
+      return;
+    }
+
+    setRemoveModalState({ isOpen: true, locations, textRanges, imageRefs });
+    clearSelection();
+  };
+
+  const closeRemoveModal = () => {
+    setRemoveModalState(EMPTY_REMOVE_MODAL);
+  };
+
+  const handleConfirmRemove = () => {
+    const { locations, textRanges, imageRefs } = removeModalState;
+    let next = entryBlockGraph;
+
+    for (const location of locations) {
+      const locationSourceRefKeys = new Set(
+        (location.sourceRefs?.length ? location.sourceRefs : [location.sourceRef]).map(
+          buildSourceRefKey
+        )
+      );
+
+      if (textRanges.length) {
+        next = applyTextExclusionToEntryBlockGraph(next, location, textRanges);
+      }
+
+      const matchingImages = imageRefs.filter((ref) =>
+        locationSourceRefKeys.has(buildSourceRefKey(ref))
+      );
+      for (const imageRef of matchingImages) {
+        next = applyImageExclusionToEntryBlockGraph(next, location, imageRef);
+      }
+    }
+
+    if (next !== entryBlockGraph) onEntryBlockGraphChange(next);
+    closeRemoveModal();
+  };
+
   const handleEditImage = (sourceRef: ImageSourceRef, label: string) => {
     if (isDisabled) return;
     const currentLocations = getLocationsForSourceRef(sourceRef);
@@ -951,6 +1023,9 @@ export const MappingView = ({
           ref={editButtonRef}
           anchorRectangle={selectionRectangle}
           onEdit={handleEditFromSelection}
+          onRemove={
+            getLocationsForSelectedText().length > 0 ? handleRemoveFromSelection : undefined
+          }
           onBlur={clearSelection}
         />
       ) : null}
@@ -1001,6 +1076,12 @@ export const MappingView = ({
           );
         })()}
         onConfirmPrimary={handleEditModalConfirmPrimary}
+      />
+
+      <RemoveContentModal
+        isOpen={removeModalState.isOpen}
+        onConfirm={handleConfirmRemove}
+        onCancel={closeRemoveModal}
       />
     </>
   );
