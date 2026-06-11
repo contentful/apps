@@ -16,15 +16,22 @@ vi.mock(
   () => ({
     ReviewImageAssetCard: ({
       onEdit,
+      onRemove,
       isHighlighted,
     }: {
       onEdit: () => void;
+      onRemove?: () => void;
       isHighlighted: boolean;
     }) => (
       <div>
         <button type="button" onClick={onEdit}>
           {isHighlighted ? 'Reassign image' : 'Assign image'}
         </button>
+        {onRemove ? (
+          <button type="button" onClick={onRemove}>
+            Remove image
+          </button>
+        ) : null}
       </div>
     ),
   })
@@ -1053,6 +1060,34 @@ describe('MappingView', () => {
 
     expect(screen.getByRole('heading', { name: 'Edit content mapping' })).toBeTruthy();
     expect(screen.getByText('Selected Article: Untitled')).toBeTruthy();
+  });
+
+  it('removes mapped image from the entry via the image card menu', () => {
+    const payload = createImagePayload();
+    let currentGraph = payload.entryBlockGraph;
+    const onEntryBlockGraphChange = vi.fn(
+      (nextGraph: MappingReviewSuspendPayload['entryBlockGraph']) => {
+        currentGraph = nextGraph;
+      }
+    );
+
+    render(
+      <MappingView
+        payload={payload}
+        entryBlockGraph={currentGraph}
+        onEntryBlockGraphChange={onEntryBlockGraphChange}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Remove image' }));
+
+    const dialog = screen.getByRole('dialog');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Remove' }));
+
+    expect(onEntryBlockGraphChange).toHaveBeenCalledTimes(1);
+    expect(currentGraph.entries[0].fieldMappings).toHaveLength(0);
   });
 
   it('does not offer Remove in the selection menu for unmapped text', () => {

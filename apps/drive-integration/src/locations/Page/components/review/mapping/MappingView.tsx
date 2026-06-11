@@ -609,22 +609,24 @@ export const MappingView = ({
       textSelectionRootRef.current,
       selectionRange
     );
-    const imageRefs = collectRichTextSourceRefsFromSelection(
-      textSelectionRootRef.current,
-      selectionRange,
-      document
-    ).filter(
-      (ref): ref is ImageSourceRef => isBlockImageSourceRef(ref) || isTableImageSourceRef(ref)
-    );
     const locations = getLocationsForSelectedText();
 
-    if (!locations.length || (!textRanges.length && !imageRefs.length)) {
+    if (!locations.length || !textRanges.length) {
       clearSelection();
       return;
     }
 
-    setRemoveModalState({ isOpen: true, locations, textRanges, imageRefs });
+    setRemoveModalState({ isOpen: true, locations, textRanges, imageRefs: [] });
     clearSelection();
+  };
+
+  const handleRemoveImage = (sourceRef: ImageSourceRef) => {
+    if (isDisabled) return;
+    const locations = getLocationsForSourceRef(sourceRef);
+    if (!locations.length) return;
+
+    setRemoveModalState({ isOpen: true, locations, textRanges: [], imageRefs: [sourceRef] });
+    setHoveredMappingKeys([]);
   };
 
   const closeRemoveModal = () => {
@@ -966,6 +968,7 @@ export const MappingView = ({
                                   isViewMode={isViewMode}
                                   onSetHoveredMappingKeys={setHoveredMappingKeys}
                                   onEditImage={isViewMode ? undefined : handleEditImage}
+                                  onRemoveImage={isViewMode ? undefined : handleRemoveImage}
                                 />
                               ))}
                             </Flex>
@@ -985,6 +988,7 @@ export const MappingView = ({
                                 isViewMode={isViewMode}
                                 onSetHoveredMappingKeys={setHoveredMappingKeys}
                                 onEditImage={isViewMode ? undefined : handleEditImage}
+                                onRemoveImage={isViewMode ? undefined : handleRemoveImage}
                               />
                             ))}
                           </Flex>
