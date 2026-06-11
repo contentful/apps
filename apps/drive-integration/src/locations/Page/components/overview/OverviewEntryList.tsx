@@ -9,7 +9,7 @@ import {
   treeChildRowNotLast,
   treeChildrenList,
 } from './OverviewEntryList.styles';
-import { truncateLabel } from '../../../../utils/utils';
+import { truncateMiddle } from '../../../../utils/utils';
 
 export interface OverviewEntryListProps {
   rows: OverviewEntryListRow[];
@@ -59,7 +59,7 @@ function OverviewEntryRowCard({
         <Flex alignItems="center" gap="spacingXs">
           <Checkbox
             aria-label={`Create entry ${row.contentTypeName || 'Untitled'}${
-              row.entryTitle ? ` (${truncateLabel(row.entryTitle, 150)})` : ''
+              row.entryTitle ? ` (${truncateMiddle(row.entryTitle, 150)})` : ''
             }`}
             isChecked={isEntrySelectedForCreation}
             isDisabled={areEntrySelectionsDisabled}
@@ -90,7 +90,7 @@ function OverviewEntryRowCard({
               {row.contentTypeName && row.entryTitle ? (
                 <Text as="span" fontColor="gray600">
                   {' '}
-                  ({truncateLabel(row.entryTitle, 150)})
+                  ({truncateMiddle(row.entryTitle, 150)})
                 </Text>
               ) : null}
               {row.hasNoMappedContent && (

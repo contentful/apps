@@ -59,7 +59,7 @@ describe('EditModal', () => {
     });
   });
 
-  it('renders the "Assign to fields" section when newLocations is non-empty', async () => {
+  it('renders the new location section when newLocations is non-empty', async () => {
     render(
       <EditModal
         isOpen={true}
@@ -71,8 +71,8 @@ describe('EditModal', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Assign to fields')).toBeTruthy();
-      expect(screen.getByText('Page: Event detail')).toBeTruthy();
+      expect(screen.getByText('New location')).toBeTruthy();
+      expect(screen.getByText('Event detail')).toBeTruthy();
     });
   });
 
@@ -92,7 +92,7 @@ describe('EditModal', () => {
     });
   });
 
-  it('does not render the "Assign to fields" section when newLocations is empty', async () => {
+  it('renders an empty new location list when newLocations is empty', async () => {
     render(
       <EditModal
         isOpen={true}
@@ -107,7 +107,7 @@ describe('EditModal', () => {
     );
 
     await waitFor(() => {
-      expect(screen.queryByText('Assign to fields')).toBeNull();
+      expect(screen.queryByText('Event detail')).toBeNull();
     });
   });
 
@@ -143,8 +143,8 @@ describe('EditModal', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Page: Event detail')).toBeTruthy();
-      expect(screen.getByText('Component: Resource detail hero')).toBeTruthy();
+      expect(screen.getByText('Event detail')).toBeTruthy();
+      expect(screen.getByText('Resource detail hero')).toBeTruthy();
     });
   });
 });

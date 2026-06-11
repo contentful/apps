@@ -18,7 +18,7 @@ import {
 } from './SelectTabsModal.styles';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
 import { DocumentTabProps } from '@types';
-import { truncateLabel } from '../../../../../utils/utils';
+import { truncateMiddle } from '../../../../../utils/utils';
 import { handleMultiselectKeyDown } from '../../../../../utils/keyboard';
 
 interface SelectTabsModalProps {
@@ -134,7 +134,7 @@ export const SelectTabsModal = ({
                     {selectedTabs.map((tab) => (
                       <Pill
                         key={tab.tabId}
-                        label={truncateLabel(tab.tabTitle)}
+                        label={truncateMiddle(tab.tabTitle)}
                         onClose={() =>
                           setSelectedTabs(selectedTabs.filter((t) => t.tabId !== tab.tabId))
                         }
