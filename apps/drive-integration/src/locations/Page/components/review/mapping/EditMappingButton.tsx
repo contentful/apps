@@ -1,55 +1,49 @@
-import { forwardRef, type FocusEvent } from 'react';
-import { Box } from '@contentful/f36-components';
-import { PencilSimpleIcon, TrashSimpleIcon } from '@contentful/f36-icons';
+import { forwardRef } from 'react';
+import { Box, Button } from '@contentful/f36-components';
+import { PencilSimpleIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import type { SelectionViewportRectangle } from './selectionViewportRectangle';
-import {
-  BUTTON_ESTIMATE_WIDTH_PX,
-  divider,
-  editAction,
-  getMenuPosition,
-  removeAction,
-} from './EditMappingButton.styles';
 
 interface EditMappingButtonProps {
   anchorRectangle: SelectionViewportRectangle;
   onEdit: () => void;
-  onRemove?: () => void;
   onBlur?: () => void;
 }
 
+const BUTTON_ESTIMATE_WIDTH_PX = 160;
+
 export const EditMappingButton = forwardRef<HTMLDivElement, EditMappingButtonProps>(
-  ({ anchorRectangle, onEdit, onRemove, onBlur }, ref) => {
+  ({ anchorRectangle, onEdit, onBlur }, ref) => {
     const centerX = (anchorRectangle.left + anchorRectangle.right) / 2;
     const half = BUTTON_ESTIMATE_WIDTH_PX / 2;
     const clampedCenterX = Math.min(Math.max(centerX, 8 + half), window.innerWidth - 8 - half);
 
-    const handleBlur = (event: FocusEvent<HTMLDivElement>) => {
-      if (event.currentTarget.contains(event.relatedTarget as Node | null)) {
-        return;
-      }
-      onBlur?.();
-    };
-
     return (
       <Box
         ref={ref}
+        aria-label="Edit content mapping"
         data-testid="review-selection-menu"
-        onBlur={handleBlur}
-        className={getMenuPosition(Math.max(anchorRectangle.top - 36, 8), clampedCenterX)}>
-        <button type="button" className={editAction} onClick={onEdit}>
-          <PencilSimpleIcon size="small" color={tokens.gray700} />
+        style={{
+          position: 'fixed',
+          top: Math.max(anchorRectangle.top - 36, 8),
+          left: clampedCenterX,
+          transform: 'translateX(-50%)',
+          zIndex: 3,
+          display: 'inline-flex',
+          borderRadius: tokens.borderRadiusMedium,
+          border: `1px solid ${tokens.gray300}`,
+          backgroundColor: tokens.colorWhite,
+          width: 'fit-content',
+        }}>
+        <Button
+          variant="secondary"
+          size="small"
+          onClick={onEdit}
+          onBlur={onBlur}
+          startIcon={<PencilSimpleIcon size="small" />}
+          style={{ paddingTop: '2px', paddingBottom: '2px' }}>
           Edit content mapping
-        </button>
-        {onRemove ? (
-          <>
-            <span aria-hidden="true" className={divider} />
-            <button type="button" className={removeAction} onClick={onRemove}>
-              <TrashSimpleIcon size="small" color={tokens.red600} />
-              Remove
-            </button>
-          </>
-        ) : null}
+        </Button>
       </Box>
     );
   }
