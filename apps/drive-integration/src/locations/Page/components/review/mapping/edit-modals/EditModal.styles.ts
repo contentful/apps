@@ -2,15 +2,12 @@ import { css } from '@emotion/css';
 import tokens from '@contentful/f36-tokens';
 
 export const locationsContainer = css({
-  display: 'grid',
-  gridTemplateColumns: '217px 1fr',
   border: `1px solid ${tokens.gray200}`,
   borderRadius: tokens.borderRadiusSmall,
   overflow: 'hidden',
 });
 
 export const selectedContentSection = css({
-  gridColumn: '1 / -1',
   borderBottom: `1px solid ${tokens.gray200}`,
 });
 

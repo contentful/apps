@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useCallback, type ReactNode } from 'react';
-import { Box, Button, Modal, Flex, Text, TextInput } from '@contentful/f36-components';
+import { Box, Button, Grid, Modal, Flex, Text, TextInput } from '@contentful/f36-components';
 import { PlusIcon } from '@contentful/f36-icons';
 import { type EditModalContent } from '@types';
 
@@ -13,6 +13,9 @@ import {
 import { FieldSelectionDropdown } from './FieldSelectionDropdown';
 import { truncateMiddle } from '../../../../../../utils/utils';
 
+const CURRENT_LOCATION_MAX_LENGTH = 20;
+const NEW_LOCATION_MAX_LENGTH = 50;
+
 interface EditModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -22,9 +25,6 @@ interface EditModalProps {
   additionalContent?: ReactNode;
   onConfirmPrimary?: (selections: Record<string, string[]>) => void;
 }
-
-const CURRENT_LOCATION_MAX_LENGTH = 20;
-const NEW_LOCATION_MAX_LENGTH = 50;
 
 export const EditModal = ({
   isOpen,
@@ -132,145 +132,151 @@ export const EditModal = ({
         <>
           <Modal.Header title={title} onClose={onClose} />
           <Modal.Content>
-            <Box className={locationsContainer}>
-              <Flex
-                flexDirection="column"
-                gap="spacingXs"
-                padding="spacingS"
-                className={selectedContentSection}>
-                <Text as="p" fontWeight="fontWeightDemiBold">
-                  {previewSectionTitle}
-                </Text>
-                <Box className={greyCard} padding="spacingXs">
-                  {additionalContent ??
-                    (viewModel.isImageContent ? (
-                      <Text as="p">
-                        <Text as="span">IMAGE: </Text>
-                        {previewText}
-                      </Text>
-                    ) : (
-                      <Text as="p">{previewText}</Text>
-                    ))}
-                </Box>
-              </Flex>
+            <Grid columns="217px 1fr" rowGap="none" columnGap="none" className={locationsContainer}>
+              <Grid.Item columnStart={1} columnEnd={-1}>
+                <Flex
+                  flexDirection="column"
+                  gap="spacingXs"
+                  padding="spacingS"
+                  className={selectedContentSection}>
+                  <Text as="p" fontWeight="fontWeightDemiBold">
+                    {previewSectionTitle}
+                  </Text>
+                  <Box className={greyCard} padding="spacingXs">
+                    {additionalContent ??
+                      (viewModel.isImageContent ? (
+                        <Text as="p">
+                          <Text as="span">IMAGE: </Text>
+                          {previewText}
+                        </Text>
+                      ) : (
+                        <Text as="p">{previewText}</Text>
+                      ))}
+                  </Box>
+                </Flex>
+              </Grid.Item>
 
               {/* Current location */}
-              <Flex
-                flexDirection="column"
-                gap="spacingS"
-                padding="spacingS"
-                className={locationColumnLeft}>
-                <Flex alignItems="center" style={{ minHeight: '32px' }}>
-                  <Text as="p" fontWeight="fontWeightDemiBold">
-                    Current location
-                  </Text>
-                </Flex>
-                {firstCurrentLocation ? (
-                  <Flex
-                    flexDirection="column"
-                    gap="spacingXs"
-                    padding="spacingXs"
-                    className={greyCard}>
-                    <Box>
-                      <Text as="p" fontColor="gray600" fontSize="fontSizeS">
-                        Content type
-                      </Text>
-                      <Text as="p">
-                        {truncateMiddle(
-                          firstCurrentLocation.contentTypeName,
-                          CURRENT_LOCATION_MAX_LENGTH
-                        )}
-                      </Text>
-                    </Box>
-                    <Box>
-                      <Text as="p" fontColor="gray600" fontSize="fontSizeS">
-                        Entry name
-                      </Text>
-                      <Text as="p">
-                        {truncateMiddle(
-                          firstCurrentLocation.entryName,
-                          CURRENT_LOCATION_MAX_LENGTH
-                        )}
-                      </Text>
-                    </Box>
-                    <Box>
-                      <Text as="p" fontColor="gray600" fontSize="fontSizeS">
-                        Field
-                      </Text>
-                      <Text as="p">
-                        {truncateMiddle(firstCurrentLocation.fieldName, 15)}{' '}
-                        <Text as="span" fontColor="blue500">
-                          | {truncateMiddle(firstCurrentLocation.fieldType, 10)}
-                        </Text>
-                      </Text>
-                    </Box>
+              <Grid.Item>
+                <Flex
+                  flexDirection="column"
+                  gap="spacingS"
+                  padding="spacingS"
+                  className={locationColumnLeft}>
+                  <Flex alignItems="center" style={{ minHeight: '32px' }}>
+                    <Text as="p" fontWeight="fontWeightDemiBold">
+                      Current location
+                    </Text>
                   </Flex>
-                ) : null}
-              </Flex>
+                  {firstCurrentLocation ? (
+                    <Flex
+                      flexDirection="column"
+                      gap="spacingXs"
+                      padding="spacingXs"
+                      className={greyCard}>
+                      <Box>
+                        <Text as="p" fontColor="gray600" fontSize="fontSizeS">
+                          Content type
+                        </Text>
+                        <Text as="p">
+                          {truncateMiddle(
+                            firstCurrentLocation.contentTypeName,
+                            CURRENT_LOCATION_MAX_LENGTH
+                          )}
+                        </Text>
+                      </Box>
+                      <Box>
+                        <Text as="p" fontColor="gray600" fontSize="fontSizeS">
+                          Entry name
+                        </Text>
+                        <Text as="p">
+                          {truncateMiddle(
+                            firstCurrentLocation.entryName,
+                            CURRENT_LOCATION_MAX_LENGTH
+                          )}
+                        </Text>
+                      </Box>
+                      <Box>
+                        <Text as="p" fontColor="gray600" fontSize="fontSizeS">
+                          Field
+                        </Text>
+                        <Text as="p">
+                          {truncateMiddle(firstCurrentLocation.fieldName, 15)}{' '}
+                          <Text as="span" fontColor="blue500">
+                            | {truncateMiddle(firstCurrentLocation.fieldType, 10)}
+                          </Text>
+                        </Text>
+                      </Box>
+                    </Flex>
+                  ) : null}
+                </Flex>
+              </Grid.Item>
 
               {/* New location */}
-              <Flex flexDirection="column" gap="spacingS" padding="spacingS">
-                <Flex
-                  alignItems="center"
-                  justifyContent="space-between"
-                  style={{ minHeight: '32px' }}>
-                  <Text as="p" fontWeight="fontWeightDemiBold">
-                    New location
-                  </Text>
-                  <Button variant="transparent" size="small" startIcon={<PlusIcon />}>
-                    Add entry
-                  </Button>
-                </Flex>
+              <Grid.Item>
+                <Flex flexDirection="column" gap="spacingS" padding="spacingS">
+                  <Flex
+                    alignItems="center"
+                    justifyContent="space-between"
+                    style={{ minHeight: '32px' }}>
+                    <Text as="p" fontWeight="fontWeightDemiBold">
+                      New location
+                    </Text>
+                    <Button variant="transparent" size="small" startIcon={<PlusIcon />}>
+                      Add entry
+                    </Button>
+                  </Flex>
 
-                <TextInput
-                  placeholder="Search entries"
-                  value={entrySearch}
-                  onChange={(e) => setEntrySearch(e.target.value)}
-                  aria-label="Search entries"
-                />
+                  <TextInput
+                    placeholder="Search entries"
+                    value={entrySearch}
+                    onChange={(e) => setEntrySearch(e.target.value)}
+                    aria-label="Search entries"
+                  />
 
-                <Flex flexDirection="column" gap="spacingS" className={newLocationScrollableList}>
-                  {filteredNewLocations.map((loc) => {
-                    const [contentTypePart, ...rest] = loc.title.split(': ');
-                    const entryNamePart = rest.join(': ');
-                    return (
-                      <Flex
-                        key={loc.id}
-                        flexDirection="column"
-                        gap="spacingXs"
-                        padding="spacingXs"
-                        className={greyCard}>
-                        <Box>
-                          <Text as="p" fontColor="gray600" fontSize="fontSizeS">
-                            Content type
-                          </Text>
-                          <Text as="p">
-                            {truncateMiddle(contentTypePart, NEW_LOCATION_MAX_LENGTH)}
-                          </Text>
-                        </Box>
-                        <Box>
-                          <Text as="p" fontColor="gray600" fontSize="fontSizeS">
-                            Entry name
-                          </Text>
-                          <Text as="p">
-                            {truncateMiddle(entryNamePart || loc.title, NEW_LOCATION_MAX_LENGTH)}
-                          </Text>
-                        </Box>
-                        <FieldSelectionDropdown
-                          isImageContent={viewModel.isImageContent}
-                          selectedText={viewModel.selectedText}
-                          fieldOptions={loc.fieldOptions}
-                          fieldMappings={loc.fieldMappings}
-                          selectedFieldIds={selectedFieldIdsByEntry[loc.id] ?? []}
-                          onSelectedFieldIdsChange={handleSelectedFieldIdsChangeForEntry(loc.id)}
-                          onSelectableStateChange={handleSelectableStateChangeForEntry(loc.id)}
-                        />
-                      </Flex>
-                    );
-                  })}
+                  <Flex flexDirection="column" gap="spacingS" className={newLocationScrollableList}>
+                    {filteredNewLocations.map((loc) => {
+                      const [contentTypePart, ...rest] = loc.title.split(': ');
+                      const entryNamePart = rest.join(': ');
+                      return (
+                        <Flex
+                          key={loc.id}
+                          flexDirection="column"
+                          gap="spacingXs"
+                          padding="spacingXs"
+                          className={greyCard}>
+                          <Box>
+                            <Text as="p" fontColor="gray600" fontSize="fontSizeS">
+                              Content type
+                            </Text>
+                            <Text as="p">
+                              {truncateMiddle(contentTypePart, NEW_LOCATION_MAX_LENGTH)}
+                            </Text>
+                          </Box>
+                          <Box>
+                            <Text as="p" fontColor="gray600" fontSize="fontSizeS">
+                              Entry name
+                            </Text>
+                            <Text as="p">
+                              {truncateMiddle(entryNamePart || loc.title, NEW_LOCATION_MAX_LENGTH)}
+                            </Text>
+                          </Box>
+                          <FieldSelectionDropdown
+                            isImageContent={viewModel.isImageContent}
+                            selectedText={viewModel.selectedText}
+                            fieldOptions={loc.fieldOptions}
+                            fieldMappings={loc.fieldMappings}
+                            selectedFieldIds={selectedFieldIdsByEntry[loc.id] ?? []}
+                            onSelectedFieldIdsChange={handleSelectedFieldIdsChangeForEntry(loc.id)}
+                            onSelectableStateChange={handleSelectableStateChangeForEntry(loc.id)}
+                          />
+                        </Flex>
+                      );
+                    })}
+                  </Flex>
                 </Flex>
-              </Flex>
-            </Box>
+              </Grid.Item>
+            </Grid>
           </Modal.Content>
           <Modal.Controls>
             <Button onClick={onClose} size="small" variant="secondary">
