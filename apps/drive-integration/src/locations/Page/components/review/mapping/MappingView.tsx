@@ -611,7 +611,7 @@ export const MappingView = ({
     clearSelection();
   };
 
-  const handleRemoveFromSelection = () => {
+  const handleRemoveFromSelection = (locations: EditLocationOption[]) => {
     if (isDisabled || !selectedText.trim()) return;
     const selectionRange = selectedRange ? selectedRange.cloneRange() : null;
     const textRanges = collectTextExclusionRangesFromSelection(
@@ -626,7 +626,6 @@ export const MappingView = ({
     ).filter(
       (ref): ref is ImageSourceRef => isBlockImageSourceRef(ref) || isTableImageSourceRef(ref)
     );
-    const locations = getLocationsForSelectedText();
 
     if (!locations.length || (!textRanges.length && !imageRefs.length)) {
       clearSelection();
@@ -868,6 +867,10 @@ export const MappingView = ({
     return result;
   }, [allGroups, locationsByCardKey, entryBlockGraph.entries, payload.contentTypes]);
 
+  const selectionLocations = selectionRectangle && !isDisabled && !isViewMode
+    ? getLocationsForSelectedText()
+    : [];
+
   return (
     <>
       <Flex
@@ -1045,7 +1048,9 @@ export const MappingView = ({
           anchorRectangle={selectionRectangle}
           onEdit={handleEditFromSelection}
           onRemove={
-            getLocationsForSelectedText().length > 0 ? handleRemoveFromSelection : undefined
+            selectionLocations.length > 0
+              ? () => handleRemoveFromSelection(selectionLocations)
+              : undefined
           }
           onBlur={clearSelection}
         />
