@@ -2,7 +2,13 @@ import { Box, Card, Flex, FormControl, Tooltip } from '@contentful/f36-component
 import { HelpCircleIcon } from '@contentful/f36-icons';
 import { styles } from 'components/config-screen/assign-content-type/AssignContentType.styles';
 import { EditorInterface } from '@contentful/app-sdk';
-import { AllContentTypes, AllContentTypeEntries, ContentTypeRule, ContentTypeRules } from 'types';
+import {
+  AllContentTypes,
+  AllContentTypeEntries,
+  ContentTypeRule,
+  ContentTypeRules,
+  LocaleOption,
+} from 'types';
 import AssignContentTypeRow from 'components/config-screen/assign-content-type/AssignContentTypeRow';
 
 interface AssignContentTypeCardProps {
@@ -19,6 +25,7 @@ interface AssignContentTypeCardProps {
   onRemoveContentType: (ruleId: string) => void;
   currentEditorInterface: Partial<EditorInterface>;
   originalContentTypeRules: ContentTypeRules;
+  localeOptions?: LocaleOption[];
   rulesMissingPattern: Set<string>;
   rulesWithUnknownPatternTokens: Map<string, string[]>;
   rulesWithMissingSelectedPatternTokens: Map<string, string[]>;
@@ -68,6 +75,7 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
     onRemoveContentType,
     currentEditorInterface,
     originalContentTypeRules,
+    localeOptions = [],
     rulesMissingPattern,
     rulesWithUnknownPatternTokens,
     rulesWithMissingSelectedPatternTokens,
@@ -112,6 +120,7 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
             onRemoveContentType={onRemoveContentType}
             currentEditorInterface={currentEditorInterface}
             originalContentTypeRules={originalContentTypeRules}
+            localeOptions={localeOptions}
             isMissingPattern={showPatternValidation && rulesMissingPattern.has(contentTypeRule.id)}
             unknownPatternTokens={
               showPatternValidation

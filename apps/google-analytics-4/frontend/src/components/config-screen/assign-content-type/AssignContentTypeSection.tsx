@@ -21,6 +21,7 @@ import {
   ContentTypeRule,
   ContentTypeRules,
   ContentTypes,
+  LocaleOption,
 } from 'types';
 import AssignContentTypeCard from 'components/config-screen/assign-content-type/AssignContentTypeCard';
 import { sortAndFormatAllContentTypes } from 'helpers/contentTypeHelpers/contentTypeHelpers';
@@ -31,6 +32,7 @@ import {
   normalizeContentTypeRules,
 } from 'helpers/contentTypeRules/contentTypeRules';
 import {
+  getContentTypeValuePathPatterns,
   getMissingSelectedPatternTokens,
   getUnknownPatternTokens,
 } from 'utils/contentTypeMatching';
@@ -44,6 +46,39 @@ interface Props {
   originalContentTypeRules: ContentTypeRules;
   showPatternValidation: boolean;
 }
+
+const getSortedLocaleOptions = (locales?: {
+  available?: string[];
+  names?: Record<string, string>;
+}): LocaleOption[] =>
+  [...(locales?.available || [])]
+    .map((code) => ({
+      code,
+      label: locales?.names?.[code] ? `${locales.names[code]} (${code})` : code,
+    }))
+    .sort((left, right) => left.label.localeCompare(right.label));
+
+const getRuleUnknownPatternTokens = (rule: ContentTypeRule) =>
+  Array.from(
+    new Set(
+      getContentTypeValuePathPatterns(rule)
+        .filter((pathPattern) => pathPattern.trim())
+        .flatMap((pathPattern) =>
+          getUnknownPatternTokens(pathPattern, rule.additionalFieldIds, rule.slugField)
+        )
+    )
+  );
+
+const getRuleMissingSelectedPatternTokens = (rule: ContentTypeRule) =>
+  Array.from(
+    new Set(
+      getContentTypeValuePathPatterns(rule)
+        .filter((pathPattern) => pathPattern.trim())
+        .flatMap((pathPattern) =>
+          getMissingSelectedPatternTokens(pathPattern, rule.additionalFieldIds)
+        )
+    )
+  );
 
 const AssignContentTypeSection = (props: Props) => {
   const {
@@ -74,6 +109,7 @@ const AssignContentTypeSection = (props: Props) => {
   const [loadingAllContentTypes, setLoadingAllContentTypes] = useState<boolean>(true);
 
   const sdk = useSDK<KnownAppSDK>();
+  const localeOptions = getSortedLocaleOptions(sdk.locales);
 
   useEffect(() => {
     setLoadingContentTypes(true);
@@ -107,7 +143,7 @@ const AssignContentTypeSection = (props: Props) => {
         (rule) =>
           [
             rule.id,
-            getUnknownPatternTokens(rule.pathPattern, rule.additionalFieldIds, rule.slugField),
+            getRuleUnknownPatternTokens(rule),
           ] as const
       )
       .filter(([, unknownTokens]) => unknownTokens.length > 0)
@@ -120,7 +156,7 @@ const AssignContentTypeSection = (props: Props) => {
         (rule) =>
           [
             rule.id,
-            getMissingSelectedPatternTokens(rule.pathPattern, rule.additionalFieldIds),
+            getRuleMissingSelectedPatternTokens(rule),
           ] as const
       )
       .filter(([, missingTokens]) => missingTokens.length > 0)
@@ -283,6 +319,7 @@ const AssignContentTypeSection = (props: Props) => {
               onRemoveContentType={handleRemoveContentType}
               currentEditorInterface={currentEditorInterface}
               originalContentTypeRules={originalContentTypeRules}
+              localeOptions={localeOptions}
               rulesMissingPattern={rulesMissingPattern}
               rulesWithUnknownPatternTokens={rulesWithUnknownPatternTokens}
               rulesWithMissingSelectedPatternTokens={rulesWithMissingSelectedPatternTokens}

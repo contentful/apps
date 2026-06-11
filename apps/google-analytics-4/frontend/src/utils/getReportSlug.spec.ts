@@ -41,6 +41,74 @@ describe('getReportSlug', () => {
     expect(reportSlug).toBe('/north-america/denver/luxury-homes');
   });
 
+  it('uses a locale-specific advanced pattern when one is configured', () => {
+    const reportSlug = getReportSlug(
+      {
+        slugField: 'slug',
+        urlPrefix: '',
+        enableAdvancedMatching: true,
+        additionalFieldIds: ['sectionSlug'],
+        pathPattern: '/products/{sectionSlug}/{slug}',
+        enableLocalizedPathPatterns: true,
+        localizedPathPatterns: {
+          'de-DE': '/produkte/{sectionSlug}/{slug}',
+        },
+      },
+      {
+        slug: 'produkt',
+        sectionSlug: 'vertragscloud',
+      },
+      true,
+      'de-DE'
+    );
+
+    expect(reportSlug).toBe('/produkte/vertragscloud/produkt');
+  });
+
+  it('falls back to the base advanced pattern when a locale override is empty', () => {
+    const reportSlug = getReportSlug(
+      {
+        slugField: 'slug',
+        urlPrefix: '',
+        enableAdvancedMatching: true,
+        pathPattern: '/products/{slug}',
+        enableLocalizedPathPatterns: true,
+        localizedPathPatterns: {
+          'fr-FR': '',
+        },
+      },
+      {
+        slug: 'produit',
+      },
+      true,
+      'fr-FR'
+    );
+
+    expect(reportSlug).toBe('/products/produit');
+  });
+
+  it('ignores locale-specific patterns when the override toggle is disabled', () => {
+    const reportSlug = getReportSlug(
+      {
+        slugField: 'slug',
+        urlPrefix: '',
+        enableAdvancedMatching: true,
+        pathPattern: '/products/{slug}',
+        enableLocalizedPathPatterns: false,
+        localizedPathPatterns: {
+          'de-DE': '/produkte/{slug}',
+        },
+      },
+      {
+        slug: 'produkt',
+      },
+      true,
+      'de-DE'
+    );
+
+    expect(reportSlug).toBe('/products/produkt');
+  });
+
   it('preserves an authored trailing slash in advanced patterns', () => {
     const reportSlug = getReportSlug(
       {

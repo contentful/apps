@@ -141,6 +141,8 @@ export interface ContentTypeValue {
   additionalFieldIds?: string[];
   enableAdvancedMatching?: boolean;
   pathPattern?: string;
+  enableLocalizedPathPatterns?: boolean;
+  localizedPathPatterns?: Record<string, string>;
   matchDimension?: GAMatchDimension;
   matchType?: GAStringMatchType;
 }

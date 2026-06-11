@@ -73,6 +73,15 @@ const createMockSdk = ({ focused, active }: { focused?: string; active?: string[
         }),
         onValueChanged: vi.fn(() => vi.fn()),
       },
+      sectionSlug: {
+        locales: ['en-US', 'fr-FR', 'de-DE'],
+        getValue: vi.fn((locale?: string) => {
+          if (locale === 'de-DE') return 'vertragscloud';
+          if (locale === 'fr-FR') return 'accords';
+          return 'agreement-cloud';
+        }),
+        onValueChanged: vi.fn(() => vi.fn()),
+      },
     },
   },
 });
@@ -100,6 +109,35 @@ describe('useSidebarRules', () => {
 
     expect(await screen.findByText('selectedLocale: fr-FR')).toBeVisible();
     expect(await screen.findByText('reportSlug: /fr-FR/produit')).toBeVisible();
+    expect(
+      screen.getByText('localeOptions: English (en-US)|French (fr-FR)|German (de-DE)')
+    ).toBeVisible();
+  });
+
+  it('uses the selected locale to resolve localized route pattern overrides', async () => {
+    vi.mocked(useSDK).mockReturnValue(
+      createMockSdk({ focused: 'de-DE', active: ['fr-FR'] }) as any
+    );
+
+    render(
+      <TestComponent
+        rules={[
+          {
+            ...localeRule,
+            additionalFieldIds: ['sectionSlug'],
+            pathPattern: '/products/{sectionSlug}/{slug}',
+            enableLocalizedPathPatterns: true,
+            localizedPathPatterns: {
+              'de-DE': '/produkte/{sectionSlug}/{slug}',
+              'fr-FR': '/produits/{sectionSlug}/{slug}',
+            },
+          },
+        ]}
+      />
+    );
+
+    expect(await screen.findByText('selectedLocale: de-DE')).toBeVisible();
+    expect(await screen.findByText('reportSlug: /produkte/vertragscloud/produkt')).toBeVisible();
     expect(
       screen.getByText('localeOptions: English (en-US)|French (fr-FR)|German (de-DE)')
     ).toBeVisible();
