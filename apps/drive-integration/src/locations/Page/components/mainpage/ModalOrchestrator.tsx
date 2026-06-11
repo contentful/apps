@@ -162,6 +162,30 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
+      if (
+        error instanceof WorkflowRunError &&
+        error.reason === WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND
+      ) {
+        setPreviewErrorState({
+          reason: WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND,
+          title: 'Document not found',
+          message: ERROR_MESSAGES.GOOGLE_DOCS_NOT_FOUND,
+        });
+        return;
+      }
+
+      if (
+        error instanceof WorkflowRunError &&
+        error.reason === WorkflowFailureReason.AI_SERVICE_UNAVAILABLE
+      ) {
+        setPreviewErrorState({
+          reason: WorkflowFailureReason.AI_SERVICE_UNAVAILABLE,
+          title: 'AI service temporarily unavailable',
+          message: ERROR_MESSAGES.AI_SERVICE_UNAVAILABLE,
+        });
+        return;
+      }
+
       setPreviewErrorState({
         reason: WorkflowFailureReason.GENERIC,
         title: 'Unable to generate preview',

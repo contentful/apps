@@ -19,12 +19,12 @@ import {
   AllContentTypeEntries,
   ContentTypeRule,
   ContentTypeRules,
-  ContentTypeValue,
+  LocaleOption,
 } from 'types';
 import ContentTypeWarning from 'components/config-screen/assign-content-type/ContentTypeWarning';
 import { buildDefaultPathPattern } from 'utils/getReportSlug';
 import { isSlugFieldType } from 'helpers/contentTypeHelpers/contentTypeHelpers';
-import { getPatternTokens, inferMatchTypeFromPattern } from 'utils/contentTypeMatching';
+import { getPatternTokens, inferMatchTypeFromContentTypeValue } from 'utils/contentTypeMatching';
 
 interface Props {
   contentTypeRule: ContentTypeRule;
@@ -46,6 +46,7 @@ interface Props {
   onRemoveContentType: (ruleId: string) => void;
   currentEditorInterface: Partial<EditorInterface>;
   originalContentTypeRules: ContentTypeRules;
+  localeOptions?: LocaleOption[];
   focus: boolean;
 }
 
@@ -66,6 +67,7 @@ const AssignContentTypeRow = (props: Props) => {
     onRemoveContentType,
     currentEditorInterface,
     originalContentTypeRules,
+    localeOptions = [],
     focus,
   } = props;
 
@@ -77,6 +79,8 @@ const AssignContentTypeRow = (props: Props) => {
       urlPrefix,
       enableAdvancedMatching,
       pathPattern = '',
+      enableLocalizedPathPatterns = false,
+      localizedPathPatterns = {},
       additionalFieldIds = [],
       matchDimension = 'unifiedPagePathScreen',
     },
@@ -155,6 +159,35 @@ const AssignContentTypeRow = (props: Props) => {
   const requiresSlugField = !enableAdvancedMatching;
   const localePatternToken = '{locale}';
   const hasLocaleToken = getPatternTokens(pathPattern).includes('locale');
+
+  const getMatchTypeForUpdates = (updates: Partial<ContentTypeRule>) =>
+    inferMatchTypeFromContentTypeValue({ ...contentTypeRule, ...updates });
+
+  const handleLocalizedPathPatternChange = (localeCode: string, nextPattern: string) => {
+    const nextLocalizedPathPatterns = { ...localizedPathPatterns };
+
+    if (nextPattern.trim()) {
+      nextLocalizedPathPatterns[localeCode] = nextPattern;
+    } else {
+      delete nextLocalizedPathPatterns[localeCode];
+    }
+
+    onContentTypeRuleChange(ruleId, {
+      localizedPathPatterns: nextLocalizedPathPatterns,
+      matchType: getMatchTypeForUpdates({
+        localizedPathPatterns: nextLocalizedPathPatterns,
+      }),
+    });
+  };
+
+  const handleLocalizedPathPatternsToggle = (isEnabled: boolean) => {
+    onContentTypeRuleChange(ruleId, {
+      enableLocalizedPathPatterns: isEnabled,
+      matchType: getMatchTypeForUpdates({
+        enableLocalizedPathPatterns: isEnabled,
+      }),
+    });
+  };
 
   const getGeneratedPattern = (
     selectedFieldIds = additionalFieldIds,
@@ -411,7 +444,10 @@ const AssignContentTypeRow = (props: Props) => {
                                 onContentTypeRuleChange(ruleId, {
                                   additionalFieldIds: nextSelectedFields,
                                   pathPattern: nextPattern,
-                                  matchType: inferMatchTypeFromPattern(nextPattern),
+                                  matchType: getMatchTypeForUpdates({
+                                    additionalFieldIds: nextSelectedFields,
+                                    pathPattern: nextPattern,
+                                  }),
                                 });
                               }}>
                               {field.name} {`{${field.id}}`}
@@ -438,7 +474,7 @@ const AssignContentTypeRow = (props: Props) => {
 
                         onContentTypeRuleChange(ruleId, {
                           pathPattern: nextPattern,
-                          matchType: inferMatchTypeFromPattern(nextPattern),
+                          matchType: getMatchTypeForUpdates({ pathPattern: nextPattern }),
                         });
                       }}>
                       Locale
@@ -474,7 +510,7 @@ const AssignContentTypeRow = (props: Props) => {
                       const nextPattern = event.target.value;
                       onContentTypeRuleChange(ruleId, {
                         pathPattern: nextPattern,
-                        matchType: inferMatchTypeFromPattern(nextPattern),
+                        matchType: getMatchTypeForUpdates({ pathPattern: nextPattern }),
                       });
                     }}
                     value={pathPattern}
@@ -531,7 +567,10 @@ const AssignContentTypeRow = (props: Props) => {
                         onContentTypeRuleChange(ruleId, {
                           matchDimension: nextMatchDimension,
                           pathPattern: nextPattern,
-                          matchType: inferMatchTypeFromPattern(nextPattern),
+                          matchType: getMatchTypeForUpdates({
+                            matchDimension: nextMatchDimension,
+                            pathPattern: nextPattern,
+                          }),
                         });
                       }}
                       value={matchDimension}>
@@ -544,6 +583,64 @@ const AssignContentTypeRow = (props: Props) => {
                 </Box>
               </Box>
             </Flex>
+            {localeOptions.length > 0 && (
+              <Box className={styles.localizedPatternPanel}>
+                <FormControl marginBottom="none">
+                  <Checkbox
+                    testId="localizedPathPatternsToggle"
+                    isChecked={enableLocalizedPathPatterns}
+                    isDisabled={!contentTypeId || !isContentTypeInOptions}
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                      handleLocalizedPathPatternsToggle(event.target.checked)
+                    }>
+                    Use locale-specific patterns
+                  </Checkbox>
+                  <FormControl.HelpText>
+                    Override the Pattern value for locales with translated URL routes.
+                  </FormControl.HelpText>
+                </FormControl>
+                {enableLocalizedPathPatterns && (
+                  <Box className={styles.localizedPatternInputs}>
+                    <FormControl marginBottom="none">
+                      <FormControl.Label>Locale-specific patterns</FormControl.Label>
+                      <FormControl.HelpText>
+                        Leave a locale empty to use the Pattern value above.
+                      </FormControl.HelpText>
+                      <Stack
+                        spacing="spacing2Xs"
+                        flexDirection="column"
+                        className={styles.localizedPatternRows}>
+                        {localeOptions.map((localeOption) => (
+                          <Flex
+                            key={localeOption.code}
+                            alignItems="center"
+                            className={styles.localizedPatternRow}>
+                            <Box className={styles.localizedPatternLabel}>
+                              <Text fontColor="gray600">{localeOption.label}</Text>
+                            </Box>
+                            <Box className={styles.localizedPatternInput}>
+                              <TextInput
+                                aria-label={`${localeOption.label} pattern`}
+                                testId={`localizedPathPatternInput-${localeOption.code}`}
+                                isDisabled={!contentTypeId || !isContentTypeInOptions}
+                                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                                  handleLocalizedPathPatternChange(
+                                    localeOption.code,
+                                    event.target.value
+                                  )
+                                }
+                                placeholder={pathPattern || '/{slug}'}
+                                value={localizedPathPatterns[localeOption.code] ?? ''}
+                              />
+                            </Box>
+                          </Flex>
+                        ))}
+                      </Stack>
+                    </FormControl>
+                  </Box>
+                )}
+              </Box>
+            )}
           </Box>
         </Box>
       )}

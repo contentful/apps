@@ -68,6 +68,33 @@ export const styles = {
     visibility: 'hidden',
     width: '100%',
   }),
+  localizedPatternInput: css({
+    flex: '1 1 420px',
+    minWidth: '280px',
+  }),
+  localizedPatternLabel: css({
+    flex: '0 0 240px',
+    minWidth: 0,
+  }),
+  localizedPatternPanel: css({
+    borderTop: '1px solid #E5EBED',
+    marginTop: '12px',
+    paddingTop: '12px',
+    width: '100%',
+  }),
+  localizedPatternInputs: css({
+    marginTop: '8px',
+    width: '100%',
+  }),
+  localizedPatternRow: css({
+    gap: '12px',
+    flexWrap: 'wrap',
+    width: '100%',
+  }),
+  localizedPatternRows: css({
+    marginTop: '8px',
+    width: '100%',
+  }),
   rowSpacing: css({
     marginBottom: '16px',
     width: '100%',

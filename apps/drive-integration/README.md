@@ -71,3 +71,29 @@ npm run deploy:prod     # Deploy to production
 - `PROD_STATIC_S3_BASE` - S3 bucket base path for production
 - `GOOGLE_DOCS_TEST_CLOUDFRONT_DIST_ID` - CloudFront distribution for dev/staging
 - `GOOGLE_DOCS_PROD_CLOUDFRONT_DIST_ID` - CloudFront distribution for production
+
+## Google OAuth Scopes
+
+The app is registered as (Contentful Google Docs App). It requests the following OAuth scopes:
+
+### Non-sensitive scopes
+
+| Scope | Description | Justification |
+|---|---|---|
+| `https://www.googleapis.com/auth/drive.file` | See, edit, create, and delete only the specific Google Drive files you use with this app | Required for the Google Drive Picker to display the user's Google Docs files for selection. This scope limits access to only files the user explicitly opens with the app — it does not grant broad Drive access. |
+
+### Sensitive scopes
+
+| Scope | Description | Justification |
+|---|---|---|
+| `https://www.googleapis.com/auth/documents.readonly` | See all your Google Docs documents | Required to fetch the full document content via the Google Docs API (`docs.googleapis.com/v1/documents/{id}`) after the user selects a file. The `drive.file` scope alone is insufficient to read document body content for processing. This scope is the minimum necessary to retrieve the text, structure, and inline images needed to perform the import. |
+
+### Restricted scopes
+
+None.
+
+### Notes
+
+- No data from either scope is stored persistently. Document content is fetched transiently during an import operation and discarded after the Contentful entries are created.
+- The OAuth token is used server-side in `agents-api` solely to call the Google Docs API. When processed via Inngest, the token travels exclusively in the KMS-encrypted `inputData` portion of the event payload and is stripped from the unencrypted `requestContext` before serialization.
+- Users can revoke access at any time from the app configuration screen, which calls Google's OAuth token revocation endpoint.

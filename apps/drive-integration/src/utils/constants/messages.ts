@@ -8,6 +8,10 @@ export const ERROR_MESSAGES = {
   GENERIC_ERROR: 'This preview could not be completed. Please start again.',
   GOOGLE_DRIVE_AUTH_ERROR:
     'Your Drive connection has expired or is no longer valid. Reconnect your account to continue generating a preview.',
+  GOOGLE_DOCS_NOT_FOUND:
+    'Google Doc not found. Make sure the document exists and your Google account has access to it.',
+  AI_SERVICE_UNAVAILABLE:
+    'The AI service is temporarily unavailable. Please try again in a few minutes.',
 } as const;
 
 export const SUCCESS_MESSAGES = {
