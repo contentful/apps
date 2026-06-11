@@ -253,7 +253,7 @@ const pollAgentRun = async (
   throw new Error('Workflow polling timeout');
 };
 
-async function resolveEnvironmentId(sdk: PageAppSDK): Promise<string> {
+export async function resolveEnvironmentId(sdk: PageAppSDK): Promise<string> {
   if (sdk.ids.environmentAlias) {
     return sdk.ids.environmentAlias;
   }
