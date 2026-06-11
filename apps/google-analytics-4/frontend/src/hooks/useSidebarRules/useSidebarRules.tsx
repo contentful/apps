@@ -212,7 +212,9 @@ export const useSidebarRules = (slugFieldRules: ContentTypeRule[]) => {
     () =>
       slugFieldRules.map((rule) => {
         const activePathPattern = getLocalizedPathPattern(rule, selectedLocale);
-        const patternTokens = rule.enableAdvancedMatching ? getPatternTokens(activePathPattern) : [];
+        const patternTokens = rule.enableAdvancedMatching
+          ? getPatternTokens(activePathPattern)
+          : [];
         const requiresSlugField =
           !rule.enableAdvancedMatching || patternTokens.includes(SLUG_PATTERN_TOKEN);
         const slugFieldValue = requiresSlugField ? debouncedFieldValues[rule.slugField] ?? '' : '';

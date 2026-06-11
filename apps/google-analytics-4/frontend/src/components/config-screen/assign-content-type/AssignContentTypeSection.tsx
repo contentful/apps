@@ -139,26 +139,14 @@ const AssignContentTypeSection = (props: Props) => {
   const rulesWithUnknownPatternTokens = new Map(
     contentTypeRules
       .filter((rule) => rule.enableAdvancedMatching)
-      .map(
-        (rule) =>
-          [
-            rule.id,
-            getRuleUnknownPatternTokens(rule),
-          ] as const
-      )
+      .map((rule) => [rule.id, getRuleUnknownPatternTokens(rule)] as const)
       .filter(([, unknownTokens]) => unknownTokens.length > 0)
   );
 
   const rulesWithMissingSelectedPatternTokens = new Map(
     contentTypeRules
       .filter((rule) => rule.enableAdvancedMatching)
-      .map(
-        (rule) =>
-          [
-            rule.id,
-            getRuleMissingSelectedPatternTokens(rule),
-          ] as const
-      )
+      .map((rule) => [rule.id, getRuleMissingSelectedPatternTokens(rule)] as const)
       .filter(([, missingTokens]) => missingTokens.length > 0)
   );
 
