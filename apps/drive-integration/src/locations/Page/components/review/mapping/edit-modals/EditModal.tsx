@@ -202,7 +202,7 @@ export const EditModal = ({
                         </Text>
                         <Text as="p">
                           {truncateMiddle(firstCurrentLocation.fieldName, 15)}{' '}
-                          <Text as="span" fontColor="blue500">
+                          <Text as="span" fontColor="gray500">
                             | {truncateMiddle(firstCurrentLocation.fieldType, 10)}
                           </Text>
                         </Text>
