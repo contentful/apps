@@ -455,16 +455,16 @@ export const MappingView = ({
     return matches;
   };
 
-  const getLocationsForSelectedText = (): EditLocationOption[] => {
+  const collectMappingKeysFromSelection = (): Set<string> => {
     const root = textSelectionRootRef.current;
     if (!root || !selectedRange) {
-      return [];
+      return new Set();
     }
 
-    const selectedMappedSegments = root.querySelectorAll<HTMLElement>(
-      '[data-review-text-segment="true"][data-is-mapped="true"]'
-    );
     const mappingKeys = new Set<string>();
+    const selectedMappedSegments = root.querySelectorAll<HTMLElement>(
+      '[data-review-text-segment="true"][data-is-mapped="true"], [data-review-image-segment="true"][data-is-mapped="true"]'
+    );
 
     for (const segment of selectedMappedSegments) {
       if (!rangeIntersectsNode(selectedRange, segment)) {
@@ -477,6 +477,15 @@ export const MappingView = ({
         .map((key) => key.trim())
         .filter(Boolean)
         .forEach((key) => mappingKeys.add(key));
+    }
+
+    return mappingKeys;
+  };
+
+  const getLocationsForSelectedText = (): EditLocationOption[] => {
+    const mappingKeys = collectMappingKeysFromSelection();
+    if (!mappingKeys.size) {
+      return [];
     }
 
     const locations = allGroups
@@ -609,14 +618,22 @@ export const MappingView = ({
       textSelectionRootRef.current,
       selectionRange
     );
+    const imageRefs = collectRichTextSourceRefsFromSelection(
+      textSelectionRootRef.current,
+      selectionRange,
+      document,
+      { mappedState: 'mapped' }
+    ).filter(
+      (ref): ref is ImageSourceRef => isBlockImageSourceRef(ref) || isTableImageSourceRef(ref)
+    );
     const locations = getLocationsForSelectedText();
 
-    if (!locations.length || !textRanges.length) {
+    if (!locations.length || (!textRanges.length && !imageRefs.length)) {
       clearSelection();
       return;
     }
 
-    setRemoveModalState({ isOpen: true, locations, textRanges, imageRefs: [] });
+    setRemoveModalState({ isOpen: true, locations, textRanges, imageRefs });
     clearSelection();
   };
 
