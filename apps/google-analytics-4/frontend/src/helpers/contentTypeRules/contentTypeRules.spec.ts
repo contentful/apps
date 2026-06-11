@@ -78,4 +78,29 @@ describe('contentTypeRules normalization', () => {
 
     expect(rule.matchType).toBe('PARTIAL_REGEXP');
   });
+
+  it('preserves locale-specific patterns and includes them when inferring match type', () => {
+    const [rule] = normalizeContentTypeRules([
+      {
+        id: 'localized-rule',
+        contentTypeId: 'comparePage',
+        slugField: 'slug',
+        urlPrefix: '',
+        enableAdvancedMatching: true,
+        pathPattern: '/shop/products/{slug}',
+        localizedPathPatterns: {
+          'de-DE': '/shop/produkte/{slug}/vergleich/*',
+        },
+        additionalFieldIds: [],
+        matchDimension: 'unifiedPagePathScreen',
+        matchType: 'EXACT',
+      },
+    ]);
+
+    expect(rule.localizedPathPatterns).toEqual({
+      'de-DE': '/shop/produkte/{slug}/vergleich/*',
+    });
+    expect(rule.enableLocalizedPathPatterns).toBe(true);
+    expect(rule.matchType).toBe('PARTIAL_REGEXP');
+  });
 });

@@ -109,6 +109,48 @@ describe('Assign Content Type Section for Config Screen', () => {
     await waitFor(() => expect(onIsValidContentTypeAssignment).toHaveBeenLastCalledWith(false));
   });
 
+  it('validates locale-specific advanced pattern overrides', async () => {
+    const onIsValidContentTypeAssignment = vi.fn();
+
+    render(
+      <AssignContentTypeSection
+        mergeSdkParameters={() => {}}
+        onIsValidContentTypeAssignment={onIsValidContentTypeAssignment}
+        parameters={{
+          contentTypeRules: [
+            {
+              id: 'rule-1',
+              contentTypeId: 'searchPage',
+              slugField: 'slug',
+              urlPrefix: '',
+              enableAdvancedMatching: true,
+              pathPattern: '/products/{slug}',
+              enableLocalizedPathPatterns: true,
+              localizedPathPatterns: {
+                'de-DE': '/produkte/{routeSegment}/{slug}',
+              },
+              additionalFieldIds: [],
+              matchDimension: 'unifiedPagePathScreen',
+              matchType: 'EXACT',
+            },
+          ],
+        }}
+        currentEditorInterface={{}}
+        originalContentTypes={{}}
+        originalContentTypeRules={[]}
+        showPatternValidation={true}
+      />
+    );
+
+    expect(
+      await screen.findByText(
+        'Pattern contains an unknown variable: {routeSegment}. Use the variables shown on the left.'
+      )
+    ).toBeVisible();
+
+    await waitFor(() => expect(onIsValidContentTypeAssignment).toHaveBeenLastCalledWith(false));
+  });
+
   it('marks advanced rules with selected fields missing from the pattern as invalid', async () => {
     const onIsValidContentTypeAssignment = vi.fn();
 

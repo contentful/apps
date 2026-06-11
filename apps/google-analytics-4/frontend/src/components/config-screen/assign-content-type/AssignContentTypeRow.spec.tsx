@@ -467,6 +467,71 @@ describe('Assign Content Type Card for Config Screen', () => {
     });
   });
 
+  it('hides locale-specific pattern inputs until the override toggle is enabled', async () => {
+    const user = userEvent.setup();
+    render(
+      <AssignContentTypeRow
+        contentTypeRule={{
+          ...contentTypeRules[1],
+          contentTypeId: 'category',
+          enableAdvancedMatching: true,
+          pathPattern: '/products/{slug}',
+        }}
+        {...props}
+        localeOptions={[
+          { code: 'en-US', label: 'English (en-US)' },
+          { code: 'de-DE', label: 'German (de-DE)' },
+        ]}
+      />
+    );
+
+    expect(screen.getByText('Use locale-specific patterns')).toBeVisible();
+    expect(screen.queryByText('Locale-specific patterns')).not.toBeInTheDocument();
+
+    await user.click(screen.getByTestId('localizedPathPatternsToggle'));
+
+    expect(onContentTypeRuleChange).toHaveBeenLastCalledWith('rule-category', {
+      enableLocalizedPathPatterns: true,
+      matchType: 'EXACT',
+    });
+  });
+
+  it('updates locale-specific advanced pattern overrides', async () => {
+    render(
+      <AssignContentTypeRow
+        contentTypeRule={{
+          ...contentTypeRules[1],
+          contentTypeId: 'category',
+          enableAdvancedMatching: true,
+          pathPattern: '/products/{slug}',
+          enableLocalizedPathPatterns: true,
+          localizedPathPatterns: {
+            'en-US': '/products/{slug}',
+          },
+        }}
+        {...props}
+        localeOptions={[
+          { code: 'en-US', label: 'English (en-US)' },
+          { code: 'de-DE', label: 'German (de-DE)' },
+        ]}
+      />
+    );
+
+    expect(screen.getByText('Locale-specific patterns')).toBeVisible();
+
+    fireEvent.change(screen.getByTestId('localizedPathPatternInput-de-DE'), {
+      target: { value: '/produkte/{slug}' },
+    });
+
+    expect(onContentTypeRuleChange).toHaveBeenLastCalledWith('rule-category', {
+      localizedPathPatterns: {
+        'en-US': '/products/{slug}',
+        'de-DE': '/produkte/{slug}',
+      },
+      matchType: 'EXACT',
+    });
+  });
+
   it('calls field change handler when match dimension selection is changed', async () => {
     const user = userEvent.setup();
     render(

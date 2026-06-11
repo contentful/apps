@@ -30,6 +30,7 @@ import TextInputInteger from '../components/TextInputInteger';
 
 export interface AppInstallationParameters {
   defaultContentTypes?: string[];
+  needsUpdateContentTypes?: string[];
   needsUpdateMonths?: number;
   recentlyPublishedDays?: number;
   showUpcomingReleases?: boolean;
@@ -40,6 +41,7 @@ export interface AppInstallationParameters {
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
   const [selectedContentTypes, setSelectedContentTypes] = useState<ContentType[]>([]);
+  const [needsUpdateContentTypes, setNeedsUpdateContentTypes] = useState<ContentType[]>([]);
   const sdk = useSDK<ConfigAppSDK>();
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -86,10 +88,11 @@ const ConfigScreen = () => {
       parameters: {
         ...parameters,
         defaultContentTypes: selectedContentTypes.map((ct) => ct.id),
+        needsUpdateContentTypes: needsUpdateContentTypes.map((ct) => ct.id),
       },
       targetState: currentState,
     };
-  }, [parameters, selectedContentTypes, sdk]);
+  }, [parameters, selectedContentTypes, needsUpdateContentTypes, sdk]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -178,6 +181,22 @@ const ConfigScreen = () => {
                 Content will be marked as &quot;Needs update&quot; when it hasn&apos;t been updated
                 for this amount of time. Range: {NEEDS_UPDATE_MONTHS_RANGE.min}-
                 {NEEDS_UPDATE_MONTHS_RANGE.max} months.
+              </FormControl.HelpText>
+            </FormControl>
+
+            <FormControl marginBottom="spacingL">
+              <FormControl.Label>
+                Content types included in &quot;Needs update&quot;
+              </FormControl.Label>
+              <ContentTypeMultiSelect
+                selectedContentTypes={needsUpdateContentTypes}
+                setSelectedContentTypes={setNeedsUpdateContentTypes}
+                sdk={sdk}
+                initialSelectedIds={parameters.needsUpdateContentTypes}
+              />
+              <FormControl.HelpText>
+                Only entries of the selected content types will count toward the &quot;Needs
+                update&quot; metric. Leave empty to include all content types.
               </FormControl.HelpText>
             </FormControl>
 

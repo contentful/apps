@@ -235,6 +235,7 @@ describe('Config Screen component', () => {
         timeToPublishDays: TIME_TO_PUBLISH_DAYS_RANGE.min,
         showUpcomingReleases: true,
         defaultContentTypes: [],
+        needsUpdateContentTypes: [],
       },
       targetState: {},
     });

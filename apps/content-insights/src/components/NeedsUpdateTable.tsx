@@ -13,13 +13,20 @@ import { getEnvironmentId } from '../utils/sdkUtils';
 export const NeedsUpdateTable = ({
   entries,
   contentTypes,
+  selectedContentTypeIds,
 }: {
   entries: EntryProps[];
   contentTypes: Map<string, ContentTypeProps>;
+  selectedContentTypeIds?: string[];
 }) => {
   const sdk = useSDK<HomeAppSDK | PageAppSDK>();
   const [currentPage, setCurrentPage] = useState(0);
-  const { items, total, isFetching, error } = useNeedsUpdate(entries, currentPage, contentTypes);
+  const { items, total, isFetching, error } = useNeedsUpdate(
+    entries,
+    currentPage,
+    contentTypes,
+    selectedContentTypeIds
+  );
 
   const columns = useMemo<TableColumn<NeedsUpdateItem>[]>(
     () => [

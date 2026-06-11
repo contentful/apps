@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from 'react';
-import { Box, Flex, Heading, Paragraph } from '@contentful/f36-components';
+import { Box, Flex, Heading, Paragraph, Text, TextLink } from '@contentful/f36-components';
+import { ArrowSquareOutIcon } from '@contentful/f36-icons';
 import { css } from '@emotion/css';
 import tokens from '@contentful/f36-tokens';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -12,6 +13,12 @@ const styles = {
   }),
   heading: css({
     fontWeight: tokens.fontWeightDemiBold,
+  }),
+  disclosure: css({
+    border: `1px solid ${tokens.gray300}`,
+    borderRadius: tokens.borderRadiusMedium,
+    padding: tokens.spacingL,
+    width: '100%',
   }),
 };
 
@@ -62,6 +69,21 @@ const ConfigScreen = () => {
             Connect Drive Integration to Contentful to seamlessly sync content, eliminate
             copy-paste, reduce errors, and speed up your publishing workflow.
           </Paragraph>
+        </Box>
+        <Box className={styles.disclosure}>
+          <Text>
+            <Text fontWeight="fontWeightDemiBold">Disclosure:</Text> The use and transfer of raw or
+            derived user data received from Google Workspace APIs will adhere to the{' '}
+            <TextLink
+              href="https://developers.google.com/terms/api-services-user-data-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              icon={<ArrowSquareOutIcon />}
+              alignIcon="end">
+              Google API Services User Data Policy
+            </TextLink>
+            , including the Limited Use requirements.
+          </Text>
         </Box>
       </Flex>
     </Flex>
