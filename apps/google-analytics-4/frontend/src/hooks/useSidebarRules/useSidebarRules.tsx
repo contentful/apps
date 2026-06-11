@@ -7,8 +7,13 @@ import {
   SidebarExtensionSDK,
 } from '@contentful/app-sdk';
 import { AppInstallationParameters, ContentTypeRule, LocaleOption } from 'types';
-import { getPatternTokens } from 'utils/contentTypeMatching';
-import { getReportSlug } from 'utils/getReportSlug';
+import {
+  getContentTypeValuePathPatterns,
+  getPatternTokens,
+  inferMatchTypeFromPattern,
+  isLocalizedPathPatternsEnabled,
+} from 'utils/contentTypeMatching';
+import { getLocalizedPathPattern, getReportSlug } from 'utils/getReportSlug';
 
 interface ResolvedSidebarRule extends ContentTypeRule {
   reportSlug: string;
@@ -26,7 +31,13 @@ const RESERVED_PATTERN_TOKENS = new Set([LOCALE_PATTERN_TOKEN, SLUG_PATTERN_TOKE
 
 const getPatternFieldTokens = (rule: ContentTypeRule) =>
   rule.enableAdvancedMatching
-    ? getPatternTokens(rule.pathPattern).filter((token) => !RESERVED_PATTERN_TOKENS.has(token))
+    ? Array.from(
+        new Set(
+          getContentTypeValuePathPatterns(rule)
+            .flatMap((pathPattern) => getPatternTokens(pathPattern))
+            .filter((token) => !RESERVED_PATTERN_TOKENS.has(token))
+        )
+      )
     : [];
 
 const getSortedLocaleOptions = (locales?: LocalesAPI): LocaleOption[] =>
@@ -104,7 +115,10 @@ export const useSidebarRules = (slugFieldRules: ContentTypeRule[]) => {
       slugFieldRules.some(
         (rule) =>
           rule.enableAdvancedMatching &&
-          getPatternTokens(rule.pathPattern).includes(LOCALE_PATTERN_TOKEN)
+          (isLocalizedPathPatternsEnabled(rule) ||
+            getContentTypeValuePathPatterns(rule).some((pathPattern) =>
+              getPatternTokens(pathPattern).includes(LOCALE_PATTERN_TOKEN)
+            ))
       ),
     [slugFieldRules]
   );
@@ -115,7 +129,9 @@ export const useSidebarRules = (slugFieldRules: ContentTypeRule[]) => {
           slugFieldRules
             .flatMap((rule) => {
               const patternTokens = rule.enableAdvancedMatching
-                ? getPatternTokens(rule.pathPattern)
+                ? getContentTypeValuePathPatterns(rule).flatMap((pathPattern) =>
+                    getPatternTokens(pathPattern)
+                  )
                 : [];
               const usesSlugToken =
                 !rule.enableAdvancedMatching || patternTokens.includes(SLUG_PATTERN_TOKEN);
@@ -195,7 +211,10 @@ export const useSidebarRules = (slugFieldRules: ContentTypeRule[]) => {
   const resolvedRules = useMemo<ResolvedSidebarRule[]>(
     () =>
       slugFieldRules.map((rule) => {
-        const patternTokens = rule.enableAdvancedMatching ? getPatternTokens(rule.pathPattern) : [];
+        const activePathPattern = getLocalizedPathPattern(rule, selectedLocale);
+        const patternTokens = rule.enableAdvancedMatching
+          ? getPatternTokens(activePathPattern)
+          : [];
         const requiresSlugField =
           !rule.enableAdvancedMatching || patternTokens.includes(SLUG_PATTERN_TOKEN);
         const slugFieldValue = requiresSlugField ? debouncedFieldValues[rule.slugField] ?? '' : '';
@@ -245,7 +264,10 @@ export const useSidebarRules = (slugFieldRules: ContentTypeRule[]) => {
           contentTypeHasSlugField,
           contentTypeHasAllFields,
           isValidRule,
-          reportSlug: getReportSlug(rule, tokenValues, forceTrailingSlash),
+          matchType: rule.enableAdvancedMatching
+            ? inferMatchTypeFromPattern(activePathPattern)
+            : rule.matchType,
+          reportSlug: getReportSlug(rule, tokenValues, forceTrailingSlash, selectedLocale),
         };
       }),
     [

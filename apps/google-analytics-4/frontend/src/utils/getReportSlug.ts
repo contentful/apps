@@ -1,5 +1,8 @@
 import { ContentTypeValue } from 'types';
-import { hasAdvancedMatchingConfigured } from 'utils/contentTypeMatching';
+import {
+  hasAdvancedMatchingConfigured,
+  isLocalizedPathPatternsEnabled,
+} from 'utils/contentTypeMatching';
 import { pathJoin } from 'utils/pathJoin';
 
 const SLUG_TOKEN = '{slug}';
@@ -29,6 +32,18 @@ const applyTrailingSlash = (path: string, forceTrailingSlash: boolean) => {
   return path.endsWith('/') ? path : `${path}/`;
 };
 
+export const getLocalizedPathPattern = (
+  contentTypeValue: ContentTypeValue,
+  selectedLocale = ''
+) => {
+  const localizedPathPattern =
+    selectedLocale && isLocalizedPathPatternsEnabled(contentTypeValue)
+      ? contentTypeValue.localizedPathPatterns?.[selectedLocale]?.trim()
+      : '';
+
+  return localizedPathPattern || contentTypeValue.pathPattern || '';
+};
+
 export const buildDefaultPathPattern = (
   urlPrefix = '',
   additionalFieldIds: string[] = [],
@@ -55,9 +70,11 @@ export const buildDefaultPathPattern = (
 export const getReportSlug = (
   contentTypeValue: ContentTypeValue,
   slugFieldValue: string | number | object,
-  forceTrailingSlash: boolean
+  forceTrailingSlash: boolean,
+  selectedLocale = ''
 ) => {
-  const { pathPattern, urlPrefix } = contentTypeValue;
+  const { urlPrefix } = contentTypeValue;
+  const pathPattern = getLocalizedPathPattern(contentTypeValue, selectedLocale);
   const hasAdvancedPattern =
     hasAdvancedMatchingConfigured(contentTypeValue) && Boolean(pathPattern?.trim());
   const fieldValues =
@@ -66,7 +83,7 @@ export const getReportSlug = (
       : ({ slug: slugFieldValue } as FieldValueMap);
 
   if (hasAdvancedPattern) {
-    return ensureLeadingSlash(normalizePattern(pathPattern!, fieldValues).trim());
+    return ensureLeadingSlash(normalizePattern(pathPattern, fieldValues).trim());
   }
 
   const basePath = pathJoin(urlPrefix || '', fieldValues.slug || '');

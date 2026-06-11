@@ -1,7 +1,8 @@
 import { ContentTypeRule, ContentTypeRules, ContentTypes, ContentTypeValue } from 'types';
 import {
+  getLocalizedPathPatternEntries,
   hasAdvancedMatchingConfigured,
-  inferMatchTypeFromPattern,
+  inferMatchTypeFromContentTypeValue,
 } from 'utils/contentTypeMatching';
 
 const createRuleId = () =>
@@ -17,6 +18,8 @@ export const createDefaultRule = (contentTypeId = ''): ContentTypeRule => ({
   additionalFieldIds: [],
   enableAdvancedMatching: false,
   pathPattern: '',
+  enableLocalizedPathPatterns: false,
+  localizedPathPatterns: {},
   matchDimension: 'unifiedPagePathScreen',
   matchType: 'EXACT',
 });
@@ -24,20 +27,29 @@ export const createDefaultRule = (contentTypeId = ''): ContentTypeRule => ({
 export const createRuleFromContentType = (
   contentTypeId: string,
   value: ContentTypeValue
-): ContentTypeRule => ({
-  id: createRuleId(),
-  contentTypeId,
-  slugField: value.slugField,
-  urlPrefix: value.urlPrefix,
-  additionalFieldIds: value.additionalFieldIds || [],
-  enableAdvancedMatching: hasAdvancedMatchingConfigured(value),
-  pathPattern: value.pathPattern || '',
-  matchDimension: value.matchDimension || 'unifiedPagePathScreen',
-  matchType:
-    hasAdvancedMatchingConfigured(value) && value.pathPattern
-      ? inferMatchTypeFromPattern(value.pathPattern)
+): ContentTypeRule => {
+  const enableLocalizedPathPatterns =
+    value.enableLocalizedPathPatterns ??
+    getLocalizedPathPatternEntries(value.localizedPathPatterns).length > 0;
+  const normalizedValue = { ...value, enableLocalizedPathPatterns };
+  const enableAdvancedMatching = hasAdvancedMatchingConfigured(normalizedValue);
+
+  return {
+    id: createRuleId(),
+    contentTypeId,
+    slugField: value.slugField,
+    urlPrefix: value.urlPrefix,
+    additionalFieldIds: value.additionalFieldIds || [],
+    enableAdvancedMatching,
+    pathPattern: value.pathPattern || '',
+    enableLocalizedPathPatterns,
+    localizedPathPatterns: value.localizedPathPatterns || {},
+    matchDimension: value.matchDimension || 'unifiedPagePathScreen',
+    matchType: enableAdvancedMatching
+      ? inferMatchTypeFromContentTypeValue(normalizedValue)
       : value.matchType || 'EXACT',
-});
+  };
+};
 
 export const migrateContentTypesToRules = (contentTypes?: ContentTypes): ContentTypeRules => {
   if (!contentTypes) return [];
@@ -54,19 +66,23 @@ export const normalizeContentTypeRules = (
   if (contentTypeRules !== undefined) {
     return contentTypeRules.map((rule) => ({
       ...(() => {
+        const enableLocalizedPathPatterns =
+          rule.enableLocalizedPathPatterns ??
+          getLocalizedPathPatternEntries(rule.localizedPathPatterns).length > 0;
         const normalizedRule = {
           ...createDefaultRule(rule.contentTypeId),
           ...rule,
+          enableLocalizedPathPatterns,
         };
+        const enableAdvancedMatching =
+          rule.enableAdvancedMatching ?? hasAdvancedMatchingConfigured(normalizedRule);
 
         return {
           ...normalizedRule,
-          matchType:
-            normalizedRule.enableAdvancedMatching && normalizedRule.pathPattern
-              ? inferMatchTypeFromPattern(normalizedRule.pathPattern)
-              : normalizedRule.matchType ?? 'EXACT',
-          enableAdvancedMatching:
-            rule.enableAdvancedMatching ?? hasAdvancedMatchingConfigured(normalizedRule),
+          matchType: enableAdvancedMatching
+            ? inferMatchTypeFromContentTypeValue(normalizedRule)
+            : normalizedRule.matchType ?? 'EXACT',
+          enableAdvancedMatching,
         };
       })(),
       id: rule.id || createRuleId(),
@@ -94,9 +110,15 @@ const getRuleValidationSignature = (rule: ContentTypeRule) => {
       slugField: rule.slugField || '',
       enableAdvancedMatching: true,
       pathPattern: rule.pathPattern?.trim() ?? '',
+      enableLocalizedPathPatterns: Boolean(rule.enableLocalizedPathPatterns),
+      localizedPathPatterns: Object.fromEntries(
+        Object.entries(rule.localizedPathPatterns ?? {})
+          .filter(([, pathPattern]) => pathPattern.trim())
+          .sort(([leftLocale], [rightLocale]) => leftLocale.localeCompare(rightLocale))
+      ),
       additionalFieldIds: [...(rule.additionalFieldIds ?? [])].sort(),
       matchDimension: rule.matchDimension ?? 'unifiedPagePathScreen',
-      matchType: inferMatchTypeFromPattern(rule.pathPattern ?? ''),
+      matchType: inferMatchTypeFromContentTypeValue(rule),
     });
   }
 
