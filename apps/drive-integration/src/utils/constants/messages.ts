@@ -12,6 +12,8 @@ export const ERROR_MESSAGES = {
     'Google Doc not found. Make sure the document exists and your Google account has access to it.',
   AI_SERVICE_UNAVAILABLE:
     'The AI service is temporarily unavailable. Please try again in a few minutes.',
+  APP_NOT_INSTALLED:
+    'The Drive Integration app is not installed in this environment. Install it via Apps > Manage apps and try again.',
 } as const;
 
 export const SUCCESS_MESSAGES = {

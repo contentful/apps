@@ -131,6 +131,10 @@ const getBackendWorkflowFailureReason = (runData: AgentRunData): WorkflowFailure
     return WorkflowFailureReason.AI_SERVICE_UNAVAILABLE;
   }
 
+  if (workflowFailure.code === WorkflowFailureReason.APP_NOT_INSTALLED) {
+    return WorkflowFailureReason.APP_NOT_INSTALLED;
+  }
+
   if (workflowFailure.code === WorkflowFailureReason.GENERIC) {
     return WorkflowFailureReason.GENERIC;
   }
@@ -152,6 +156,10 @@ const getWorkflowFailureMessage = (
 
   if (failureReason === WorkflowFailureReason.AI_SERVICE_UNAVAILABLE) {
     return ERROR_MESSAGES.AI_SERVICE_UNAVAILABLE;
+  }
+
+  if (failureReason === WorkflowFailureReason.APP_NOT_INSTALLED) {
+    return ERROR_MESSAGES.APP_NOT_INSTALLED;
   }
 
   return getRunErrorMessage(runData);
@@ -265,7 +273,7 @@ export const useWorkflowAgent = ({
       setIsAnalyzing(true);
 
       const spaceId = sdk.ids.space;
-      const environmentId = sdk.ids.environment;
+      const environmentId = sdk.ids.environmentAlias ?? sdk.ids.environment;
       const threadId = [crypto.randomUUID(), WORKFLOW_AGENT_ID].join('-');
 
       const payload: AgentGeneratePayload = {
@@ -308,7 +316,7 @@ export const useWorkflowAgent = ({
       setIsAnalyzing(true);
 
       const spaceId = sdk.ids.space;
-      const environmentId = sdk.ids.environment;
+      const environmentId = sdk.ids.environmentAlias ?? sdk.ids.environment;
 
       try {
         await resumeWorkflowRun(sdk, spaceId, environmentId, runId, resumePayload);
