@@ -1,15 +1,8 @@
 import { forwardRef, type FocusEvent } from 'react';
-import { Box } from '@contentful/f36-components';
+import { Box, Button } from '@contentful/f36-components';
 import { PencilSimpleIcon, TrashSimpleIcon } from '@contentful/f36-icons';
-import tokens from '@contentful/f36-tokens';
 import type { SelectionViewportRectangle } from './selectionViewportRectangle';
-import {
-  BUTTON_ESTIMATE_WIDTH_PX,
-  divider,
-  editAction,
-  getMenuPosition,
-  removeAction,
-} from './EditMappingButton.styles';
+import tokens from '@contentful/f36-tokens';
 
 interface EditMappingButtonProps {
   anchorRectangle: SelectionViewportRectangle;
@@ -17,6 +10,8 @@ interface EditMappingButtonProps {
   onRemove?: () => void;
   onBlur?: () => void;
 }
+
+export const BUTTON_ESTIMATE_WIDTH_PX = 280;
 
 export const EditMappingButton = forwardRef<HTMLDivElement, EditMappingButtonProps>(
   ({ anchorRectangle, onEdit, onRemove, onBlur }, ref) => {
@@ -36,18 +31,41 @@ export const EditMappingButton = forwardRef<HTMLDivElement, EditMappingButtonPro
         ref={ref}
         data-testid="review-selection-menu"
         onBlur={handleBlur}
-        className={getMenuPosition(Math.max(anchorRectangle.top - 36, 8), clampedCenterX)}>
-        <button type="button" className={editAction} onClick={onEdit}>
-          <PencilSimpleIcon size="small" color={tokens.gray700} />
+        style={{
+          position: 'fixed',
+          top: Math.max(anchorRectangle.top - 36, 8),
+          left: clampedCenterX,
+          transform: 'translateX(-50%)',
+          zIndex: 3,
+          display: 'inline-flex',
+          gap: 0,
+          borderRadius: tokens.borderRadiusMedium,
+          backgroundColor: tokens.colorWhite,
+          width: 'fit-content',
+          padding: 0,
+        }}>
+        <Button
+          variant="secondary"
+          size="small"
+          startIcon={<PencilSimpleIcon />}
+          onClick={onEdit}
+          style={{
+            borderRight: `1px solid ${tokens.gray400}`,
+            borderBottomRightRadius: 0,
+            borderTopRightRadius: 0,
+          }}>
           Edit content mapping
-        </button>
+        </Button>
         {onRemove ? (
           <>
-            <span aria-hidden="true" className={divider} />
-            <button type="button" className={removeAction} onClick={onRemove}>
-              <TrashSimpleIcon size="small" color={tokens.red600} />
+            <Button
+              variant="negative"
+              size="small"
+              startIcon={<TrashSimpleIcon />}
+              onClick={onRemove}
+              style={{ borderBottomLeftRadius: 0, borderTopLeftRadius: 0, borderLeft: 0 }}>
               Remove
-            </button>
+            </Button>
           </>
         ) : null}
       </Box>
