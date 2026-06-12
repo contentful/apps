@@ -18,7 +18,7 @@ export const createMockCMA = () => {
       get: vi.fn().mockResolvedValue({ sys: { id: 'test-space-id' } }),
     },
     environment: {
-      get: vi.fn().mockResolvedValue({ sys: { id: 'test-environment-id', aliases: [] } }),
+      get: vi.fn().mockResolvedValue({ sys: { id: 'test-environment-id' } }),
     },
     appAction: {
       getManyForEnvironment: vi.fn().mockResolvedValue({ items: [] }),
