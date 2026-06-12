@@ -262,12 +262,14 @@ export const BlockRenderer = ({
               }
               onMouseLeave={highlighted ? () => onSetHoveredMappingKeys([]) : undefined}
               onEdit={
-                onEditImage
+                !isViewMode && onEditImage
                   ? () => onEditImage(imageSourceRef, image.title ?? image.altText ?? image.id)
                   : undefined
               }
               onRemove={
-                highlighted && onRemoveImage ? () => onRemoveImage(imageSourceRef) : undefined
+                !isViewMode && highlighted && onRemoveImage
+                  ? () => onRemoveImage(imageSourceRef)
+                  : undefined
               }
             />
           </Box>
@@ -375,11 +377,15 @@ const TablePartRenderer = ({
           onMouseEnter={highlighted ? () => onSetHoveredMappingKeys(mappingKeys) : undefined}
           onMouseLeave={highlighted ? () => onSetHoveredMappingKeys([]) : undefined}
           onEdit={
-            onEditImage
+            !isViewMode && onEditImage
               ? () => onEditImage(imageSourceRef, image.title ?? image.altText ?? image.id)
               : undefined
           }
-          onRemove={highlighted && onRemoveImage ? () => onRemoveImage(imageSourceRef) : undefined}
+          onRemove={
+            !isViewMode && highlighted && onRemoveImage
+              ? () => onRemoveImage(imageSourceRef)
+              : undefined
+          }
         />
       </Box>
     );

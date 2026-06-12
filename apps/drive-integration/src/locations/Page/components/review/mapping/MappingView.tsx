@@ -986,8 +986,8 @@ export const MappingView = ({
                                   hoveredMappingKeys={hoveredMappingKeys}
                                   isViewMode={isViewMode}
                                   onSetHoveredMappingKeys={setHoveredMappingKeys}
-                                  onEditImage={isViewMode ? undefined : handleEditImage}
-                                  onRemoveImage={isViewMode ? undefined : handleRemoveImage}
+                                  onEditImage={handleEditImage}
+                                  onRemoveImage={handleRemoveImage}
                                 />
                               ))}
                             </Flex>
@@ -1006,8 +1006,8 @@ export const MappingView = ({
                                 hoveredMappingKeys={hoveredMappingKeys}
                                 isViewMode={isViewMode}
                                 onSetHoveredMappingKeys={setHoveredMappingKeys}
-                                onEditImage={isViewMode ? undefined : handleEditImage}
-                                onRemoveImage={isViewMode ? undefined : handleRemoveImage}
+                                onEditImage={handleEditImage}
+                                onRemoveImage={handleRemoveImage}
                               />
                             ))}
                           </Flex>
