@@ -1,0 +1,100 @@
+import { describe, expect, it, vi } from 'vitest';
+import { collectNodes } from './collect';
+import { makeMockNode } from '../../test/mocks';
+
+describe('collectNodes', () => {
+  it('resolves properties for every root node', async () => {
+    const experience: any = {
+      getRootNodes: vi
+        .fn()
+        .mockReturnValue([
+          makeMockNode('a', 'Component', [{ key: 'heading', area: 'content', value: 'Hi' }]),
+          makeMockNode('b', 'Component', [{ key: 'body', area: 'content', value: 'There' }]),
+        ]),
+    };
+
+    const collected = await collectNodes(experience);
+
+    expect(collected).toHaveLength(2);
+    expect(collected[0]).toMatchObject({ id: 'a', nodeType: 'Component' });
+    expect(collected[0].properties[0].key).toBe('heading');
+  });
+
+  it('skips nodes whose properties fail to resolve', async () => {
+    const broken = makeMockNode('broken', 'Component', []);
+    broken.getProperties = vi.fn().mockRejectedValue(new Error('gone'));
+
+    const experience: any = {
+      getRootNodes: vi
+        .fn()
+        .mockReturnValue([
+          broken,
+          makeMockNode('ok', 'Component', [{ key: 'heading', area: 'content', value: 'Hi' }]),
+        ]),
+    };
+
+    const collected = await collectNodes(experience);
+
+    expect(collected).toHaveLength(1);
+    expect(collected[0].id).toBe('ok');
+  });
+
+  it('populates resolvedBindings when the node resolves an entry binding', async () => {
+    const okNode = makeMockNode('card', 'Component', [
+      {
+        key: 'featured',
+        area: 'content',
+        value: 'x',
+        binding: { type: 'entry', entryId: 'e1', fieldId: 'featured' },
+      },
+    ]);
+    okNode.resolveEntryBinding = vi.fn().mockResolvedValue({ entryId: 'e1' });
+    const experience: any = { getRootNodes: vi.fn().mockReturnValue([okNode]) };
+    const [collected] = await collectNodes(experience);
+    expect(collected.resolvedBindings).toEqual({
+      featured: { resolved: true },
+    });
+  });
+
+  it('marks a binding unresolved when resolveEntryBinding returns null', async () => {
+    const brokenNode = makeMockNode('card', 'Component', [
+      {
+        key: 'featured',
+        area: 'content',
+        value: null,
+        binding: { type: 'entry', entryId: 'gone', fieldId: 'featured' },
+      },
+    ]);
+    brokenNode.resolveEntryBinding = vi.fn().mockResolvedValue(null);
+    const experience: any = { getRootNodes: vi.fn().mockReturnValue([brokenNode]) };
+    const [collected] = await collectNodes(experience);
+    expect(collected.resolvedBindings).toEqual({
+      featured: { resolved: false },
+    });
+  });
+
+  it('omits resolvedBindings when no property is entry-bound', async () => {
+    const node = makeMockNode('plain', 'Component', [
+      { key: 'body', area: 'content', value: 'hi' },
+    ]);
+    const experience: any = { getRootNodes: vi.fn().mockReturnValue([node]) };
+    const [collected] = await collectNodes(experience);
+    expect(collected.resolvedBindings).toBeUndefined();
+  });
+
+  it('omits resolvedBindings when the host does not implement resolveEntryBinding', async () => {
+    const node = makeMockNode('card', 'Component', [
+      {
+        key: 'featured',
+        area: 'content',
+        value: 'x',
+        binding: { type: 'entry', entryId: 'e1', fieldId: 'featured' },
+      },
+    ]);
+    // Simulate a partial host bridge that has not shipped resolveEntryBinding yet.
+    delete (node as { resolveEntryBinding?: unknown }).resolveEntryBinding;
+    const experience: any = { getRootNodes: vi.fn().mockReturnValue([node]) };
+    const [collected] = await collectNodes(experience);
+    expect(collected.resolvedBindings).toBeUndefined();
+  });
+});
