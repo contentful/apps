@@ -43,9 +43,9 @@ const ConfigScreen = () => {
           experience you are editing for accessibility, SEO, and content-completeness issues.
         </Paragraph>
         <Note variant="primary">
-          Nothing to configure here. Once installed, make sure the{' '}
-          <code>experience-toolbar</code> location is registered on your app definition — the
-          auditor appears automatically when editing an experience.
+          Nothing to configure here. Once installed, make sure the <code>experience-toolbar</code>{' '}
+          location is registered on your app definition — the auditor appears automatically when
+          editing an experience.
         </Note>
       </Form>
     </Flex>
