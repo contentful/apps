@@ -261,7 +261,6 @@ const pollAgentRun = async (
   throw new Error('Workflow polling timeout');
 };
 
-
 export const useWorkflowAgent = ({
   sdk,
   documentId,
