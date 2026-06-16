@@ -1,95 +1,50 @@
-import { useState } from 'react';
-import {
-  Box,
-  Button,
-  Flex,
-  FormControl,
-  Radio,
-  Select,
-  Text,
-} from '@contentful/f36-components';
-import type { WorkflowContentType, AddEntryWizardParams, EditModalNewLocation } from '@types';
+import { FormControl, Flex, Radio, Select, Text } from '@contentful/f36-components';
+import type { WorkflowContentType, EditModalNewLocation } from '@types';
 import { FieldSelectionDropdown } from './FieldSelectionDropdown';
 
-type WizardStep = 'content-type' | 'is-reference' | 'select-reference' | 'select-fields';
+export type WizardStep = 'content-type' | 'is-reference' | 'select-reference' | 'select-fields';
 
-interface ExistingEntry {
+export interface WizardState {
+  step: WizardStep;
+  contentTypeId: string;
+  isReference: boolean | null;
+  referenceEntryId: string;
+  selectedFieldIds: string[];
+}
+
+export const INITIAL_WIZARD_STATE: WizardState = {
+  step: 'content-type',
+  contentTypeId: '',
+  isReference: null,
+  referenceEntryId: '',
+  selectedFieldIds: [],
+};
+
+export interface ExistingEntryOption {
   tempId: string;
   label: string;
 }
 
 interface AddEntryWizardProps {
+  state: WizardState;
+  onChange: (next: Partial<WizardState>) => void;
   contentTypes: WorkflowContentType[];
-  existingEntries: ExistingEntry[];
+  existingEntries: ExistingEntryOption[];
   selectedText: string;
   isImageContent: boolean;
-  onAdd: (params: AddEntryWizardParams) => void;
-  onCancel: () => void;
   buildNewLocation: (contentTypeId: string) => EditModalNewLocation;
 }
 
 export const AddEntryWizard = ({
+  state,
+  onChange,
   contentTypes,
   existingEntries,
   selectedText,
   isImageContent,
-  onAdd,
-  onCancel,
   buildNewLocation,
 }: AddEntryWizardProps) => {
-  const [step, setStep] = useState<WizardStep>('content-type');
-  const [contentTypeId, setContentTypeId] = useState('');
-  const [isReference, setIsReference] = useState<boolean | null>(null);
-  const [referenceEntryId, setReferenceEntryId] = useState('');
-  const [selectedFieldIds, setSelectedFieldIds] = useState<string[]>([]);
-
-  const newLocation = contentTypeId ? buildNewLocation(contentTypeId) : null;
-
-  const handleNext = () => {
-    if (step === 'content-type') {
-      setStep('is-reference');
-    } else if (step === 'is-reference') {
-      if (isReference) {
-        setStep('select-reference');
-      } else {
-        setStep('select-fields');
-      }
-    } else if (step === 'select-reference') {
-      setStep('select-fields');
-    }
-  };
-
-  const handleBack = () => {
-    if (step === 'is-reference') {
-      setStep('content-type');
-    } else if (step === 'select-reference') {
-      setStep('is-reference');
-    } else if (step === 'select-fields') {
-      if (isReference) {
-        setStep('select-reference');
-      } else {
-        setStep('is-reference');
-      }
-    }
-  };
-
-  const handleSave = () => {
-    onAdd({
-      contentTypeId,
-      isReference: isReference ?? false,
-      referenceEntryId: isReference ? referenceEntryId || null : null,
-      fieldIds: selectedFieldIds,
-    });
-  };
-
-  const isNextDisabled = () => {
-    if (step === 'content-type') return !contentTypeId;
-    if (step === 'is-reference') return isReference === null;
-    if (step === 'select-reference') return !referenceEntryId;
-    return false;
-  };
-
-  const isSaveDisabled = selectedFieldIds.length === 0;
+  const newLocation = state.contentTypeId ? buildNewLocation(state.contentTypeId) : null;
 
   return (
     <Flex flexDirection="column" gap="spacingS">
@@ -97,12 +52,12 @@ export const AddEntryWizard = ({
         Add entry
       </Text>
 
-      {step === 'content-type' && (
+      {state.step === 'content-type' && (
         <FormControl marginBottom="none">
           <FormControl.Label>Select content type</FormControl.Label>
           <Select
-            value={contentTypeId}
-            onChange={(e) => setContentTypeId(e.target.value)}>
+            value={state.contentTypeId}
+            onChange={(e) => onChange({ contentTypeId: e.target.value })}>
             <Select.Option value="" isDisabled>
               Select a content type
             </Select.Option>
@@ -115,7 +70,7 @@ export const AddEntryWizard = ({
         </FormControl>
       )}
 
-      {step === 'is-reference' && (
+      {state.step === 'is-reference' && (
         <FormControl marginBottom="none">
           <FormControl.Label>Should this entry be a reference entry?</FormControl.Label>
           <Flex flexDirection="column" gap="spacingXs">
@@ -123,28 +78,28 @@ export const AddEntryWizard = ({
               id="ref-yes"
               name="is-reference"
               value="yes"
-              isChecked={isReference === true}
-              onChange={() => setIsReference(true)}>
+              isChecked={state.isReference === true}
+              onChange={() => onChange({ isReference: true })}>
               Yes
             </Radio>
             <Radio
               id="ref-no"
               name="is-reference"
               value="no"
-              isChecked={isReference === false}
-              onChange={() => setIsReference(false)}>
+              isChecked={state.isReference === false}
+              onChange={() => onChange({ isReference: false })}>
               No
             </Radio>
           </Flex>
         </FormControl>
       )}
 
-      {step === 'select-reference' && (
+      {state.step === 'select-reference' && (
         <FormControl marginBottom="none">
           <FormControl.Label>Select entry it should be a reference to</FormControl.Label>
           <Select
-            value={referenceEntryId}
-            onChange={(e) => setReferenceEntryId(e.target.value)}>
+            value={state.referenceEntryId}
+            onChange={(e) => onChange({ referenceEntryId: e.target.value })}>
             <Select.Option value="" isDisabled>
               Select an entry
             </Select.Option>
@@ -157,7 +112,7 @@ export const AddEntryWizard = ({
         </FormControl>
       )}
 
-      {step === 'select-fields' && newLocation && (
+      {state.step === 'select-fields' && newLocation && (
         <FormControl marginBottom="none">
           <FormControl.Label>Select the field(s) the content should map to</FormControl.Label>
           <FieldSelectionDropdown
@@ -165,30 +120,13 @@ export const AddEntryWizard = ({
             isImageContent={isImageContent}
             fieldOptions={newLocation.fieldOptions}
             fieldMappings={newLocation.fieldMappings}
-            selectedFieldIds={selectedFieldIds}
+            selectedFieldIds={state.selectedFieldIds}
             onSelectedFieldIdsChange={(updater) =>
-              setSelectedFieldIds((prev) => updater(prev))
+              onChange({ selectedFieldIds: updater(state.selectedFieldIds) })
             }
           />
         </FormControl>
       )}
-
-      <Box>
-        <Flex justifyContent="flex-end" gap="spacingXs">
-          <Button size="small" variant="secondary" onClick={step === 'content-type' ? onCancel : handleBack}>
-            {step === 'content-type' ? 'Cancel' : 'Back'}
-          </Button>
-          {step === 'select-fields' ? (
-            <Button size="small" variant="primary" isDisabled={isSaveDisabled} onClick={handleSave}>
-              Save
-            </Button>
-          ) : (
-            <Button size="small" variant="primary" isDisabled={isNextDisabled()} onClick={handleNext}>
-              Next
-            </Button>
-          )}
-        </Flex>
-      </Box>
     </Flex>
   );
 };
