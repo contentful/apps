@@ -77,7 +77,7 @@ export const AddEntryWizard = ({
 
       {state.step === WizardStep.IsReference && (
         <FormControl marginBottom="none">
-          <FormControl.Label>Should this entry be a reference entry?</FormControl.Label>
+          <FormControl.Label>Should an existing entry reference this new entry?</FormControl.Label>
           <Flex flexDirection="column" gap="spacingXs">
             <Radio
               id="ref-yes"
@@ -101,7 +101,7 @@ export const AddEntryWizard = ({
 
       {state.step === WizardStep.SelectReference && (
         <FormControl marginBottom="none">
-          <FormControl.Label>Select entry it should be a reference to</FormControl.Label>
+          <FormControl.Label>Select the parent entry that will reference this new entry</FormControl.Label>
           <Select
             value={state.referenceEntryId}
             onChange={(e) => onChange({ referenceEntryId: e.target.value })}>
