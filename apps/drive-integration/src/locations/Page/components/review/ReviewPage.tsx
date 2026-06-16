@@ -280,6 +280,7 @@ export const ReviewPage = ({
             onEntryBlockGraphChange={setEntryBlockGraph}
             onReferenceGraphChange={setReferenceGraph}
             selectedEntryIndex={selectedEntryIndex}
+            defaultLocale={sdk.locales.default}
             isDisabled={isMappingDisabled}
             mode={reviewMode}
           />

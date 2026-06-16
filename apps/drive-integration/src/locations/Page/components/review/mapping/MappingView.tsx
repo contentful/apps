@@ -85,6 +85,7 @@ interface MappingViewProps {
   onEntryBlockGraphChange: (next: EntryBlockGraph) => void;
   onReferenceGraphChange?: (next: ReviewedReferenceGraph) => void;
   selectedEntryIndex: number | null;
+  defaultLocale: string;
   isDisabled?: boolean;
   mode?: 'view' | 'edit';
 }
@@ -144,6 +145,7 @@ export const MappingView = ({
   onEntryBlockGraphChange,
   onReferenceGraphChange,
   selectedEntryIndex,
+  defaultLocale,
   isDisabled = false,
   mode = 'view',
 }: MappingViewProps): JSX.Element => {
@@ -433,9 +435,30 @@ export const MappingView = ({
     const newEntryIndex = entryBlockGraph.entries.length;
     const tempId = `new-entry-${contentTypeId}-${newEntryIndex}`;
 
+    const refFieldId =
+      params.isReference && params.referenceEntryId
+        ? contentType?.fields?.find(
+            (f) =>
+              (f.type === 'Link' && f.linkType === 'Entry') ||
+              (f.type === 'Array' && f.items?.linkType === 'Entry')
+          )?.id
+        : undefined;
+
+    const newEntryFields: Record<string, Record<string, unknown>> =
+      refFieldId
+        ? {
+            [refFieldId]: {
+              [defaultLocale]: refFieldId && (contentType?.fields?.find((f) => f.id === refFieldId)?.type === 'Array')
+                ? [{ __ref: params.referenceEntryId }]
+                : { __ref: params.referenceEntryId },
+            },
+          }
+        : {};
+
     const newEntry = {
       contentTypeId,
       tempId,
+      fields: newEntryFields,
       fieldMappings: [],
     };
 
