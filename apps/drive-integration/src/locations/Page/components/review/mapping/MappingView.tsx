@@ -44,8 +44,7 @@ import {
 import { buildListMarkers } from './buildListMarkers';
 import {
   displayType,
-  isAssetFieldForImageAssign,
-  isWorkflowContentTypeFieldWithId,
+  buildFieldOptionsForContentType,
 } from './fieldFormatting';
 import { EditModal } from './edit-modals/EditModal';
 import { RichTextSelectionPreview } from './edit-modals/RichTextSelectionPreview';
@@ -382,24 +381,12 @@ export const MappingView = ({
     const contentType = payload.contentTypes.find((item) => item.sys.id === entry.contentTypeId);
     const contentTypeName = contentType?.name ?? entry.contentTypeId;
     const entryTitle = getEntryTitleFromFieldMappings(entry, contentType?.displayField);
-    const contentTypeFields = contentType?.fields ?? [];
-    const fieldOptions = contentTypeFields.filter(isWorkflowContentTypeFieldWithId).map((field) => {
-      const fieldType = typeof field.type === 'string' ? field.type : 'Text';
-
-      return {
-        id: field.id,
-        fieldName: (field.name ?? '').trim() || field.id,
-        fieldType,
-        fieldDisplayType: displayType(fieldType, field.linkType, field.items),
-        isAssetField: isAssetFieldForImageAssign(field),
-      };
-    });
 
     return {
       id: entry.tempId ?? `${entry.contentTypeId}-${entryIndex}`,
       entryIndex,
       title: `${contentTypeName}: ${entryTitle}`,
-      fieldOptions,
+      fieldOptions: buildFieldOptionsForContentType(contentType),
       fieldMappings: entry.fieldMappings.map((fieldMapping) => ({
         fieldId: fieldMapping.fieldId,
         sourceRefs: fieldMapping.sourceRefs,
@@ -416,23 +403,11 @@ export const MappingView = ({
 
   const buildNewLocationForContentType = (contentTypeId: string): EditModalNewLocation => {
     const contentType = payload.contentTypes.find((ct) => ct.sys.id === contentTypeId);
-    const contentTypeName = contentType?.name ?? contentTypeId;
-    const contentTypeFields = contentType?.fields ?? [];
-    const fieldOptions = contentTypeFields.filter(isWorkflowContentTypeFieldWithId).map((field) => {
-      const fieldType = typeof field.type === 'string' ? field.type : 'Text';
-      return {
-        id: field.id,
-        fieldName: (field.name ?? '').trim() || field.id,
-        fieldType,
-        fieldDisplayType: displayType(fieldType, field.linkType, field.items),
-        isAssetField: isAssetFieldForImageAssign(field),
-      };
-    });
     return {
       id: `new-${contentTypeId}`,
       entryIndex: entryBlockGraph.entries.length,
-      title: contentTypeName,
-      fieldOptions,
+      title: contentType?.name ?? contentTypeId,
+      fieldOptions: buildFieldOptionsForContentType(contentType),
       fieldMappings: [],
       initialFieldIds: [],
     };
