@@ -435,10 +435,30 @@ export const MappingView = ({
     const newEntryIndex = entryBlockGraph.entries.length;
     const tempId = `new-entry-${contentTypeId}-${newEntryIndex}`;
 
+    const refFieldId =
+      params.isReference && params.referenceEntryId
+        ? contentType?.fields?.find(
+            (f) =>
+              (f.type === 'Link' && f.linkType === 'Entry') ||
+              (f.type === 'Array' && f.items?.linkType === 'Entry')
+          )?.id
+        : undefined;
+
+    const newEntryFields: Record<string, Record<string, unknown>> =
+      refFieldId
+        ? {
+            [refFieldId]: {
+              [defaultLocale]: refFieldId && (contentType?.fields?.find((f) => f.id === refFieldId)?.type === 'Array')
+                ? [{ __ref: params.referenceEntryId }]
+                : { __ref: params.referenceEntryId },
+            },
+          }
+        : {};
+
     const newEntry = {
       contentTypeId,
       tempId,
-      fields: {},
+      fields: newEntryFields,
       fieldMappings: [],
     };
 
@@ -446,37 +466,6 @@ export const MappingView = ({
       ...entryBlockGraph,
       entries: [...entryBlockGraph.entries, newEntry],
     };
-
-    // If a parent entry is selected, wire the reference on the parent's side:
-    // the parent entry holds { __ref: newTempId } in its first Link/Entry or Array/Entry field.
-    if (params.isReference && params.referenceEntryId) {
-      const parentEntryIndex = entryBlockGraph.entries.findIndex(
-        (e) => e.tempId === params.referenceEntryId
-      );
-      const parentEntry = parentEntryIndex >= 0 ? entryBlockGraph.entries[parentEntryIndex] : undefined;
-      const parentContentType = parentEntry
-        ? payload.contentTypes.find((ct) => ct.sys.id === parentEntry.contentTypeId)
-        : undefined;
-      const refField = parentContentType?.fields?.find(
-        (f) =>
-          (f.type === 'Link' && f.linkType === 'Entry') ||
-          (f.type === 'Array' && f.items?.linkType === 'Entry')
-      );
-
-      if (refField?.id && parentEntryIndex >= 0) {
-        const refValue =
-          refField.type === 'Array'
-            ? [{ __ref: tempId }]
-            : { __ref: tempId };
-        const updatedParentFields = {
-          ...parentEntry!.fields,
-          [refField.id]: { [defaultLocale]: refValue },
-        };
-        const updatedEntries = [...next.entries];
-        updatedEntries[parentEntryIndex] = { ...parentEntry!, fields: updatedParentFields };
-        next = { ...next, entries: updatedEntries };
-      }
-    }
 
     if (fieldIds.length > 0) {
       const resolvedTargets = fieldIds.flatMap((fieldId) => {
@@ -528,7 +517,7 @@ export const MappingView = ({
         ...payload.referenceGraph,
         edges: [
           ...existingEdges,
-          { from: params.referenceEntryId, to: tempId, fieldId: '' },
+          { from: tempId, to: params.referenceEntryId, fieldId: '' },
         ],
       });
     }
