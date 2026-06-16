@@ -1107,6 +1107,7 @@ export const MappingView = ({
         isOpen={removeModalState.isOpen}
         onConfirm={handleConfirmRemove}
         onCancel={closeRemoveModal}
+        locations={removeModalState.locations}
       />
     </>
   );
