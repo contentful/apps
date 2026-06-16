@@ -3,6 +3,7 @@ import { Box, Button, Grid, Modal, Flex, Text, TextInput } from '@contentful/f36
 import { PlusIcon } from '@contentful/f36-icons';
 import { type EditModalContent, type AddEntryWizardParams, type EditModalNewLocation } from '@types';
 import type { WorkflowContentType } from '@types';
+import { buildFieldOptionsForContentType } from '../fieldFormatting';
 
 import {
   locationsContainer,
@@ -117,6 +118,16 @@ export const EditModal = ({
     onConfirmPrimary?.({ ...selectedFieldIdsByEntry });
   };
 
+  const referenceFieldOptions = useMemo(() => {
+    if (!wizardState?.contentTypeId) return [];
+    const contentType = contentTypes.find((ct) => ct.sys.id === wizardState.contentTypeId);
+    return buildFieldOptionsForContentType(contentType).filter(
+      (f) => f.fieldDisplayType === 'Reference' || f.fieldDisplayType === 'Reference list'
+    );
+  }, [wizardState?.contentTypeId, contentTypes]);
+
+  const needsReferenceFieldStep = referenceFieldOptions.length > 1;
+
   const handleWizardNext = () => {
     if (!wizardState) return;
     switch (wizardState.step) {
@@ -127,6 +138,9 @@ export const EditModal = ({
         setWizardState({ ...wizardState, step: wizardState.isReference ? WizardStep.SelectReference : WizardStep.SelectFields });
         break;
       case WizardStep.SelectReference:
+        setWizardState({ ...wizardState, step: needsReferenceFieldStep ? WizardStep.SelectReferenceField : WizardStep.SelectFields });
+        break;
+      case WizardStep.SelectReferenceField:
         setWizardState({ ...wizardState, step: WizardStep.SelectFields });
         break;
     }
@@ -141,8 +155,11 @@ export const EditModal = ({
       case WizardStep.SelectReference:
         setWizardState({ ...wizardState, step: WizardStep.IsReference });
         break;
+      case WizardStep.SelectReferenceField:
+        setWizardState({ ...wizardState, step: WizardStep.SelectReference });
+        break;
       case WizardStep.SelectFields:
-        setWizardState({ ...wizardState, step: wizardState.isReference ? WizardStep.SelectReference : WizardStep.IsReference });
+        setWizardState({ ...wizardState, step: wizardState.isReference ? (needsReferenceFieldStep ? WizardStep.SelectReferenceField : WizardStep.SelectReference) : WizardStep.IsReference });
         break;
     }
   };
@@ -153,6 +170,7 @@ export const EditModal = ({
       contentTypeId: wizardState.contentTypeId,
       isReference: wizardState.isReference ?? false,
       referenceEntryId: wizardState.isReference ? wizardState.referenceEntryId || null : null,
+      referenceFieldId: wizardState.isReference ? (wizardState.referenceFieldId || referenceFieldOptions[0]?.id || null) : null,
       fieldIds: wizardState.selectedFieldIds,
     });
     setWizardState(null);
@@ -164,6 +182,7 @@ export const EditModal = ({
       case WizardStep.ContentType: return !wizardState.contentTypeId;
       case WizardStep.IsReference: return wizardState.isReference === null;
       case WizardStep.SelectReference: return !wizardState.referenceEntryId;
+      case WizardStep.SelectReferenceField: return !wizardState.referenceFieldId;
       default: return false;
     }
   };
@@ -293,6 +312,7 @@ export const EditModal = ({
                       onChange={(next) => setWizardState((prev) => prev ? { ...prev, ...next } : prev)}
                       contentTypes={contentTypes}
                       existingEntries={existingEntries}
+                      referenceFieldOptions={referenceFieldOptions}
                       selectedText={viewModel.selectedText}
                       isImageContent={viewModel.isImageContent}
                       buildNewLocation={buildNewLocationForContentType}

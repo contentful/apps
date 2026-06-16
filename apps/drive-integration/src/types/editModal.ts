@@ -53,5 +53,6 @@ export interface AddEntryWizardParams {
   contentTypeId: string;
   isReference: boolean;
   referenceEntryId: string | null;
+  referenceFieldId: string | null;
   fieldIds: string[];
 }
