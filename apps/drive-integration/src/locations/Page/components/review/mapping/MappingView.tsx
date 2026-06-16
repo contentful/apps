@@ -22,6 +22,7 @@ import type {
   SourceRef,
   TableTextSourceRef,
   AddEntryWizardParams,
+  ReviewedReferenceGraph,
 } from '@types';
 import {
   isBlockImageSourceRef,
@@ -83,6 +84,7 @@ interface MappingViewProps {
   payload: MappingReviewSuspendPayload;
   entryBlockGraph: EntryBlockGraph;
   onEntryBlockGraphChange: (next: EntryBlockGraph) => void;
+  onReferenceGraphChange?: (next: ReviewedReferenceGraph) => void;
   selectedEntryIndex: number | null;
   isDisabled?: boolean;
   mode?: 'view' | 'edit';
@@ -141,6 +143,7 @@ export const MappingView = ({
   payload,
   entryBlockGraph,
   onEntryBlockGraphChange,
+  onReferenceGraphChange,
   selectedEntryIndex,
   isDisabled = false,
   mode = 'view',
@@ -509,6 +512,18 @@ export const MappingView = ({
     }
 
     onEntryBlockGraphChange(next);
+
+    if (params.isReference && params.referenceEntryId && onReferenceGraphChange) {
+      const existingEdges = payload.referenceGraph.edges ?? [];
+      onReferenceGraphChange({
+        ...payload.referenceGraph,
+        edges: [
+          ...existingEdges,
+          { from: tempId, to: params.referenceEntryId, fieldId: '' },
+        ],
+      });
+    }
+
     closeEditModal();
   };
 
