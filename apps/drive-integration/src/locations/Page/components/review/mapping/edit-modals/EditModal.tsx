@@ -12,16 +12,16 @@ import {
   newLocationScrollableList,
 } from './EditModal.styles';
 import { FieldSelectionDropdown } from './FieldSelectionDropdown';
-import { AddEntryWizard } from './AddEntryWizard';
+import {
+  AddEntryWizard,
+  INITIAL_WIZARD_STATE,
+  type WizardState,
+  type ExistingEntryOption,
+} from './AddEntryWizard';
 import { truncateMiddle } from '../../../../../../utils/utils';
 
 const CURRENT_LOCATION_MAX_LENGTH = 20;
 const NEW_LOCATION_MAX_LENGTH = 50;
-
-interface ExistingEntryOption {
-  tempId: string;
-  label: string;
-}
 
 interface EditModalProps {
   isOpen: boolean;
@@ -50,7 +50,8 @@ export const EditModal = ({
   onAddEntry,
   buildNewLocationForContentType,
 }: EditModalProps) => {
-  const [showWizard, setShowWizard] = useState(false);
+  const [wizardState, setWizardState] = useState<WizardState | null>(null);
+  const showWizard = wizardState !== null;
 
   const [selectedFieldIdsByEntry, setSelectedFieldIdsByEntry] = useState<Record<string, string[]>>(
     () => Object.fromEntries(viewModel.newLocations.map((loc) => [loc.id, loc.initialFieldIds]))
@@ -80,7 +81,7 @@ export const EditModal = ({
     );
     setDestinationFieldStateByEntry({});
     setEntrySearch('');
-    setShowWizard(false);
+    setWizardState(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sync from props only on open / location set change
   }, [isOpen, newLocationIdsKey]);
 
@@ -113,6 +114,41 @@ export const EditModal = ({
 
   const handlePrimaryAction = () => {
     onConfirmPrimary?.({ ...selectedFieldIdsByEntry });
+  };
+
+  const handleWizardNext = () => {
+    if (!wizardState) return;
+    const { step, isReference } = wizardState;
+    if (step === 'content-type') setWizardState({ ...wizardState, step: 'is-reference' });
+    else if (step === 'is-reference') setWizardState({ ...wizardState, step: isReference ? 'select-reference' : 'select-fields' });
+    else if (step === 'select-reference') setWizardState({ ...wizardState, step: 'select-fields' });
+  };
+
+  const handleWizardBack = () => {
+    if (!wizardState) return;
+    const { step, isReference } = wizardState;
+    if (step === 'is-reference') setWizardState({ ...wizardState, step: 'content-type' });
+    else if (step === 'select-reference') setWizardState({ ...wizardState, step: 'is-reference' });
+    else if (step === 'select-fields') setWizardState({ ...wizardState, step: isReference ? 'select-reference' : 'is-reference' });
+  };
+
+  const handleWizardSave = () => {
+    if (!wizardState) return;
+    onAddEntry?.({
+      contentTypeId: wizardState.contentTypeId,
+      isReference: wizardState.isReference ?? false,
+      referenceEntryId: wizardState.isReference ? wizardState.referenceEntryId || null : null,
+      fieldIds: wizardState.selectedFieldIds,
+    });
+    setWizardState(null);
+  };
+
+  const isWizardNextDisabled = () => {
+    if (!wizardState) return true;
+    if (wizardState.step === 'content-type') return !wizardState.contentTypeId;
+    if (wizardState.step === 'is-reference') return wizardState.isReference === null;
+    if (wizardState.step === 'select-reference') return !wizardState.referenceEntryId;
+    return false;
   };
 
   const previewSectionTitle = viewModel.previewSectionTitle ?? 'Selected content';
@@ -233,18 +269,15 @@ export const EditModal = ({
               {/* New location */}
               <Grid.Item>
                 <Flex flexDirection="column" gap="spacingS" padding="spacingS">
-                  {showWizard && buildNewLocationForContentType ? (
+                  {showWizard && wizardState && buildNewLocationForContentType ? (
                     <AddEntryWizard
+                      state={wizardState}
+                      onChange={(next) => setWizardState((prev) => prev ? { ...prev, ...next } : prev)}
                       contentTypes={contentTypes}
                       existingEntries={existingEntries}
                       selectedText={viewModel.selectedText}
                       isImageContent={viewModel.isImageContent}
                       buildNewLocation={buildNewLocationForContentType}
-                      onAdd={(params) => {
-                        onAddEntry?.(params);
-                        setShowWizard(false);
-                      }}
-                      onCancel={() => setShowWizard(false)}
                     />
                   ) : (
                     <>
@@ -260,7 +293,7 @@ export const EditModal = ({
                             variant="transparent"
                             size="small"
                             startIcon={<PlusIcon />}
-                            onClick={() => setShowWizard(true)}>
+                            onClick={() => setWizardState({ ...INITIAL_WIZARD_STATE })}>
                             Add entry
                           </Button>
                         )}
@@ -320,16 +353,35 @@ export const EditModal = ({
             </Grid>
           </Modal.Content>
           <Modal.Controls>
-            <Button onClick={onClose} size="small" variant="secondary">
-              Cancel
-            </Button>
-            <Button
-              onClick={handlePrimaryAction}
-              size="small"
-              variant="primary"
-              isDisabled={isPrimaryDisabled}>
-              {primaryButtonLabel}
-            </Button>
+            {showWizard ? (
+              <>
+                <Button onClick={wizardState?.step === 'content-type' ? () => setWizardState(null) : handleWizardBack} size="small" variant="secondary">
+                  Back
+                </Button>
+                {wizardState?.step === 'select-fields' ? (
+                  <Button onClick={handleWizardSave} size="small" variant="primary" isDisabled={!wizardState.selectedFieldIds.length}>
+                    Save
+                  </Button>
+                ) : (
+                  <Button onClick={handleWizardNext} size="small" variant="primary" isDisabled={isWizardNextDisabled()}>
+                    Next
+                  </Button>
+                )}
+              </>
+            ) : (
+              <>
+                <Button onClick={onClose} size="small" variant="secondary">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handlePrimaryAction}
+                  size="small"
+                  variant="primary"
+                  isDisabled={isPrimaryDisabled}>
+                  {primaryButtonLabel}
+                </Button>
+              </>
+            )}
           </Modal.Controls>
         </>
       )}
