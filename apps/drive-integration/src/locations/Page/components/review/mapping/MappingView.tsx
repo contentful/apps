@@ -71,12 +71,27 @@ import {
   collectTextExclusionRangesFromSelection,
   type TextExclusionRange,
 } from './entryBlockGraphExclusion';
+import { RemoveContentModal } from './edit-modals/RemoveContentModal';
 
 interface EditModalState {
   viewModel: EditModalContent;
   title: string;
   primaryButtonLabel: string;
 }
+
+interface RemoveModalState {
+  isOpen: boolean;
+  locations: EditLocationOption[];
+  textRanges: TextExclusionRange[];
+  imageRefs: ImageSourceRef[];
+}
+
+const EMPTY_REMOVE_MODAL: RemoveModalState = {
+  isOpen: false,
+  locations: [],
+  textRanges: [],
+  imageRefs: [],
+};
 
 interface MappingViewProps {
   payload: MappingReviewSuspendPayload;
@@ -170,6 +185,7 @@ export const MappingView = ({
     Record<string, Record<string, number>>
   >({});
   const [editModalState, setEditModalState] = useState<EditModalState>(EMPTY_EDIT_MODAL);
+  const [removeModalState, setRemoveModalState] = useState<RemoveModalState>(EMPTY_REMOVE_MODAL);
   const [pendingTextExclusionRanges, setPendingTextExclusionRanges] = useState<
     TextExclusionRange[] | null
   >(null);
@@ -439,16 +455,16 @@ export const MappingView = ({
     return matches;
   };
 
-  const getLocationsForSelectedText = (): EditLocationOption[] => {
+  const collectMappingKeysFromSelection = (): Set<string> => {
     const root = textSelectionRootRef.current;
     if (!root || !selectedRange) {
-      return [];
+      return new Set();
     }
 
-    const selectedMappedSegments = root.querySelectorAll<HTMLElement>(
-      '[data-review-text-segment="true"][data-is-mapped="true"]'
-    );
     const mappingKeys = new Set<string>();
+    const selectedMappedSegments = root.querySelectorAll<HTMLElement>(
+      '[data-review-text-segment="true"][data-is-mapped="true"], [data-review-image-segment="true"][data-is-mapped="true"]'
+    );
 
     for (const segment of selectedMappedSegments) {
       if (!rangeIntersectsNode(selectedRange, segment)) {
@@ -461,6 +477,15 @@ export const MappingView = ({
         .map((key) => key.trim())
         .filter(Boolean)
         .forEach((key) => mappingKeys.add(key));
+    }
+
+    return mappingKeys;
+  };
+
+  const getLocationsForSelectedText = (): EditLocationOption[] => {
+    const mappingKeys = collectMappingKeysFromSelection();
+    if (!mappingKeys.size) {
+      return [];
     }
 
     const locations = allGroups
@@ -584,6 +609,71 @@ export const MappingView = ({
       primaryButtonLabel: 'Save',
     });
     clearSelection();
+  };
+
+  const handleRemoveFromSelection = (locations: EditLocationOption[]) => {
+    if (isDisabled || !selectedText.trim()) return;
+    const selectionRange = selectedRange ? selectedRange.cloneRange() : null;
+    const textRanges = collectTextExclusionRangesFromSelection(
+      textSelectionRootRef.current,
+      selectionRange
+    );
+    const imageRefs = collectRichTextSourceRefsFromSelection(
+      textSelectionRootRef.current,
+      selectionRange,
+      document,
+      { mappedState: 'mapped' }
+    ).filter(
+      (ref): ref is ImageSourceRef => isBlockImageSourceRef(ref) || isTableImageSourceRef(ref)
+    );
+
+    if (!locations.length || (!textRanges.length && !imageRefs.length)) {
+      clearSelection();
+      return;
+    }
+
+    setRemoveModalState({ isOpen: true, locations, textRanges, imageRefs });
+    clearSelection();
+  };
+
+  const handleRemoveImage = (sourceRef: ImageSourceRef) => {
+    if (isDisabled) return;
+    const locations = getLocationsForSourceRef(sourceRef);
+    if (!locations.length) return;
+
+    setRemoveModalState({ isOpen: true, locations, textRanges: [], imageRefs: [sourceRef] });
+    setHoveredMappingKeys([]);
+  };
+
+  const closeRemoveModal = () => {
+    setRemoveModalState(EMPTY_REMOVE_MODAL);
+  };
+
+  const handleConfirmRemove = () => {
+    const { locations, textRanges, imageRefs } = removeModalState;
+    let next = entryBlockGraph;
+
+    for (const location of locations) {
+      const locationSourceRefKeys = new Set(
+        (location.sourceRefs?.length ? location.sourceRefs : [location.sourceRef]).map(
+          buildSourceRefKey
+        )
+      );
+
+      if (textRanges.length) {
+        next = applyTextExclusionToEntryBlockGraph(next, location, textRanges);
+      }
+
+      const matchingImages = imageRefs.filter((ref) =>
+        locationSourceRefKeys.has(buildSourceRefKey(ref))
+      );
+      for (const imageRef of matchingImages) {
+        next = applyImageExclusionToEntryBlockGraph(next, location, imageRef);
+      }
+    }
+
+    if (next !== entryBlockGraph) onEntryBlockGraphChange(next);
+    closeRemoveModal();
   };
 
   const handleEditImage = (sourceRef: ImageSourceRef, label: string) => {
@@ -777,6 +867,9 @@ export const MappingView = ({
     return result;
   }, [allGroups, locationsByCardKey, entryBlockGraph.entries, payload.contentTypes]);
 
+  const selectionLocations =
+    selectionRectangle && !isDisabled && !isViewMode ? getLocationsForSelectedText() : [];
+
   return (
     <>
       <Flex
@@ -893,7 +986,8 @@ export const MappingView = ({
                                   hoveredMappingKeys={hoveredMappingKeys}
                                   isViewMode={isViewMode}
                                   onSetHoveredMappingKeys={setHoveredMappingKeys}
-                                  onEditImage={isViewMode ? undefined : handleEditImage}
+                                  onEditImage={handleEditImage}
+                                  onRemoveImage={handleRemoveImage}
                                 />
                               ))}
                             </Flex>
@@ -912,7 +1006,8 @@ export const MappingView = ({
                                 hoveredMappingKeys={hoveredMappingKeys}
                                 isViewMode={isViewMode}
                                 onSetHoveredMappingKeys={setHoveredMappingKeys}
-                                onEditImage={isViewMode ? undefined : handleEditImage}
+                                onEditImage={handleEditImage}
+                                onRemoveImage={handleRemoveImage}
                               />
                             ))}
                           </Flex>
@@ -951,6 +1046,11 @@ export const MappingView = ({
           ref={editButtonRef}
           anchorRectangle={selectionRectangle}
           onEdit={handleEditFromSelection}
+          onRemove={
+            selectionLocations.length > 0
+              ? () => handleRemoveFromSelection(selectionLocations)
+              : undefined
+          }
           onBlur={clearSelection}
         />
       ) : null}
@@ -1001,6 +1101,12 @@ export const MappingView = ({
           );
         })()}
         onConfirmPrimary={handleEditModalConfirmPrimary}
+      />
+
+      <RemoveContentModal
+        isOpen={removeModalState.isOpen}
+        onConfirm={handleConfirmRemove}
+        onCancel={closeRemoveModal}
       />
     </>
   );
