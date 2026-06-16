@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState, useCallback, type ReactNode } from 'react';
 import { Box, Button, Grid, Modal, Flex, Text, TextInput } from '@contentful/f36-components';
 import { PlusIcon } from '@contentful/f36-icons';
-import { type EditModalContent } from '@types';
+import { type EditModalContent, type AddEntryWizardParams, type EditModalNewLocation } from '@types';
+import type { WorkflowContentType } from '@types';
 
 import {
   locationsContainer,
@@ -11,10 +12,16 @@ import {
   newLocationScrollableList,
 } from './EditModal.styles';
 import { FieldSelectionDropdown } from './FieldSelectionDropdown';
+import { AddEntryWizard } from './AddEntryWizard';
 import { truncateMiddle } from '../../../../../../utils/utils';
 
 const CURRENT_LOCATION_MAX_LENGTH = 20;
 const NEW_LOCATION_MAX_LENGTH = 50;
+
+interface ExistingEntryOption {
+  tempId: string;
+  label: string;
+}
 
 interface EditModalProps {
   isOpen: boolean;
@@ -24,6 +31,10 @@ interface EditModalProps {
   primaryButtonLabel: string;
   additionalContent?: ReactNode;
   onConfirmPrimary?: (selections: Record<string, string[]>) => void;
+  contentTypes?: WorkflowContentType[];
+  existingEntries?: ExistingEntryOption[];
+  onAddEntry?: (params: AddEntryWizardParams) => void;
+  buildNewLocationForContentType?: (contentTypeId: string) => EditModalNewLocation;
 }
 
 export const EditModal = ({
@@ -34,7 +45,13 @@ export const EditModal = ({
   primaryButtonLabel,
   additionalContent,
   onConfirmPrimary,
+  contentTypes = [],
+  existingEntries = [],
+  onAddEntry,
+  buildNewLocationForContentType,
 }: EditModalProps) => {
+  const [showWizard, setShowWizard] = useState(false);
+
   const [selectedFieldIdsByEntry, setSelectedFieldIdsByEntry] = useState<Record<string, string[]>>(
     () => Object.fromEntries(viewModel.newLocations.map((loc) => [loc.id, loc.initialFieldIds]))
   );
@@ -63,6 +80,7 @@ export const EditModal = ({
     );
     setDestinationFieldStateByEntry({});
     setEntrySearch('');
+    setShowWizard(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sync from props only on open / location set change
   }, [isOpen, newLocationIdsKey]);
 
@@ -215,65 +233,88 @@ export const EditModal = ({
               {/* New location */}
               <Grid.Item>
                 <Flex flexDirection="column" gap="spacingS" padding="spacingS">
-                  <Flex
-                    alignItems="center"
-                    justifyContent="space-between"
-                    style={{ minHeight: '32px' }}>
-                    <Text as="p" fontWeight="fontWeightDemiBold">
-                      New location
-                    </Text>
-                    <Button variant="transparent" size="small" startIcon={<PlusIcon />}>
-                      Add entry
-                    </Button>
-                  </Flex>
+                  {showWizard && buildNewLocationForContentType ? (
+                    <AddEntryWizard
+                      contentTypes={contentTypes}
+                      existingEntries={existingEntries}
+                      selectedText={viewModel.selectedText}
+                      isImageContent={viewModel.isImageContent}
+                      buildNewLocation={buildNewLocationForContentType}
+                      onAdd={(params) => {
+                        onAddEntry?.(params);
+                        setShowWizard(false);
+                      }}
+                      onCancel={() => setShowWizard(false)}
+                    />
+                  ) : (
+                    <>
+                      <Flex
+                        alignItems="center"
+                        justifyContent="space-between"
+                        style={{ minHeight: '32px' }}>
+                        <Text as="p" fontWeight="fontWeightDemiBold">
+                          New location
+                        </Text>
+                        {onAddEntry && (
+                          <Button
+                            variant="transparent"
+                            size="small"
+                            startIcon={<PlusIcon />}
+                            onClick={() => setShowWizard(true)}>
+                            Add entry
+                          </Button>
+                        )}
+                      </Flex>
 
-                  <TextInput
-                    placeholder="Search entries"
-                    value={entrySearch}
-                    onChange={(e) => setEntrySearch(e.target.value)}
-                    aria-label="Search entries"
-                  />
+                      <TextInput
+                        placeholder="Search entries"
+                        value={entrySearch}
+                        onChange={(e) => setEntrySearch(e.target.value)}
+                        aria-label="Search entries"
+                      />
 
-                  <Flex flexDirection="column" gap="spacingS" className={newLocationScrollableList}>
-                    {filteredNewLocations.map((loc) => {
-                      const [contentTypePart, ...rest] = loc.title.split(': ');
-                      const entryNamePart = rest.join(': ');
-                      return (
-                        <Flex
-                          key={loc.id}
-                          flexDirection="column"
-                          gap="spacingXs"
-                          padding="spacingXs"
-                          className={greyCard}>
-                          <Box>
-                            <Text as="p" fontColor="gray600" fontSize="fontSizeS">
-                              Content type
-                            </Text>
-                            <Text as="p">
-                              {truncateMiddle(contentTypePart, NEW_LOCATION_MAX_LENGTH)}
-                            </Text>
-                          </Box>
-                          <Box>
-                            <Text as="p" fontColor="gray600" fontSize="fontSizeS">
-                              Entry name
-                            </Text>
-                            <Text as="p">
-                              {truncateMiddle(entryNamePart || loc.title, NEW_LOCATION_MAX_LENGTH)}
-                            </Text>
-                          </Box>
-                          <FieldSelectionDropdown
-                            isImageContent={viewModel.isImageContent}
-                            selectedText={viewModel.selectedText}
-                            fieldOptions={loc.fieldOptions}
-                            fieldMappings={loc.fieldMappings}
-                            selectedFieldIds={selectedFieldIdsByEntry[loc.id] ?? []}
-                            onSelectedFieldIdsChange={handleSelectedFieldIdsChangeForEntry(loc.id)}
-                            onSelectableStateChange={handleSelectableStateChangeForEntry(loc.id)}
-                          />
-                        </Flex>
-                      );
-                    })}
-                  </Flex>
+                      <Flex flexDirection="column" gap="spacingS" className={newLocationScrollableList}>
+                        {filteredNewLocations.map((loc) => {
+                          const [contentTypePart, ...rest] = loc.title.split(': ');
+                          const entryNamePart = rest.join(': ');
+                          return (
+                            <Flex
+                              key={loc.id}
+                              flexDirection="column"
+                              gap="spacingXs"
+                              padding="spacingXs"
+                              className={greyCard}>
+                              <Box>
+                                <Text as="p" fontColor="gray600" fontSize="fontSizeS">
+                                  Content type
+                                </Text>
+                                <Text as="p">
+                                  {truncateMiddle(contentTypePart, NEW_LOCATION_MAX_LENGTH)}
+                                </Text>
+                              </Box>
+                              <Box>
+                                <Text as="p" fontColor="gray600" fontSize="fontSizeS">
+                                  Entry name
+                                </Text>
+                                <Text as="p">
+                                  {truncateMiddle(entryNamePart || loc.title, NEW_LOCATION_MAX_LENGTH)}
+                                </Text>
+                              </Box>
+                              <FieldSelectionDropdown
+                                isImageContent={viewModel.isImageContent}
+                                selectedText={viewModel.selectedText}
+                                fieldOptions={loc.fieldOptions}
+                                fieldMappings={loc.fieldMappings}
+                                selectedFieldIds={selectedFieldIdsByEntry[loc.id] ?? []}
+                                onSelectedFieldIdsChange={handleSelectedFieldIdsChangeForEntry(loc.id)}
+                                onSelectableStateChange={handleSelectableStateChangeForEntry(loc.id)}
+                              />
+                            </Flex>
+                          );
+                        })}
+                      </Flex>
+                    </>
+                  )}
                 </Flex>
               </Grid.Item>
             </Grid>
