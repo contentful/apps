@@ -2,7 +2,12 @@ import { FormControl, Flex, Radio, Select, Text } from '@contentful/f36-componen
 import type { WorkflowContentType, EditModalNewLocation } from '@types';
 import { FieldSelectionDropdown } from './FieldSelectionDropdown';
 
-export type WizardStep = 'content-type' | 'is-reference' | 'select-reference' | 'select-fields';
+export enum WizardStep {
+  ContentType = 'content-type',
+  IsReference = 'is-reference',
+  SelectReference = 'select-reference',
+  SelectFields = 'select-fields',
+}
 
 export interface WizardState {
   step: WizardStep;
@@ -13,7 +18,7 @@ export interface WizardState {
 }
 
 export const INITIAL_WIZARD_STATE: WizardState = {
-  step: 'content-type',
+  step: WizardStep.ContentType,
   contentTypeId: '',
   isReference: null,
   referenceEntryId: '',
@@ -52,7 +57,7 @@ export const AddEntryWizard = ({
         Add entry
       </Text>
 
-      {state.step === 'content-type' && (
+      {state.step === WizardStep.ContentType && (
         <FormControl marginBottom="none">
           <FormControl.Label>Select content type</FormControl.Label>
           <Select
@@ -70,7 +75,7 @@ export const AddEntryWizard = ({
         </FormControl>
       )}
 
-      {state.step === 'is-reference' && (
+      {state.step === WizardStep.IsReference && (
         <FormControl marginBottom="none">
           <FormControl.Label>Should this entry be a reference entry?</FormControl.Label>
           <Flex flexDirection="column" gap="spacingXs">
@@ -94,7 +99,7 @@ export const AddEntryWizard = ({
         </FormControl>
       )}
 
-      {state.step === 'select-reference' && (
+      {state.step === WizardStep.SelectReference && (
         <FormControl marginBottom="none">
           <FormControl.Label>Select entry it should be a reference to</FormControl.Label>
           <Select
@@ -112,7 +117,7 @@ export const AddEntryWizard = ({
         </FormControl>
       )}
 
-      {state.step === 'select-fields' && newLocation && (
+      {state.step === WizardStep.SelectFields && newLocation && (
         <FormControl marginBottom="none">
           <FormControl.Label>Select the field(s) the content should map to</FormControl.Label>
           <FieldSelectionDropdown
