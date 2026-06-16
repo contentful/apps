@@ -1,11 +1,12 @@
 import { FormControl, Flex, Radio, Select, Text } from '@contentful/f36-components';
-import type { WorkflowContentType, EditModalNewLocation } from '@types';
+import type { WorkflowContentType, EditModalNewLocation, EditModalFieldOption } from '@types';
 import { FieldSelectionDropdown } from './FieldSelectionDropdown';
 
 export enum WizardStep {
   ContentType = 'content-type',
   IsReference = 'is-reference',
   SelectReference = 'select-reference',
+  SelectReferenceField = 'select-reference-field',
   SelectFields = 'select-fields',
 }
 
@@ -14,6 +15,7 @@ export interface WizardState {
   contentTypeId: string;
   isReference: boolean | null;
   referenceEntryId: string;
+  referenceFieldId: string;
   selectedFieldIds: string[];
 }
 
@@ -22,6 +24,7 @@ export const INITIAL_WIZARD_STATE: WizardState = {
   contentTypeId: '',
   isReference: null,
   referenceEntryId: '',
+  referenceFieldId: '',
   selectedFieldIds: [],
 };
 
@@ -35,6 +38,7 @@ interface AddEntryWizardProps {
   onChange: (next: Partial<WizardState>) => void;
   contentTypes: WorkflowContentType[];
   existingEntries: ExistingEntryOption[];
+  referenceFieldOptions: EditModalFieldOption[];
   selectedText: string;
   isImageContent: boolean;
   buildNewLocation: (contentTypeId: string) => EditModalNewLocation;
@@ -45,6 +49,7 @@ export const AddEntryWizard = ({
   onChange,
   contentTypes,
   existingEntries,
+  referenceFieldOptions,
   selectedText,
   isImageContent,
   buildNewLocation,
@@ -111,6 +116,24 @@ export const AddEntryWizard = ({
             {existingEntries.map((entry) => (
               <Select.Option key={entry.tempId} value={entry.tempId}>
                 {entry.label}
+              </Select.Option>
+            ))}
+          </Select>
+        </FormControl>
+      )}
+
+      {state.step === WizardStep.SelectReferenceField && (
+        <FormControl marginBottom="none">
+          <FormControl.Label>Which field should hold this reference?</FormControl.Label>
+          <Select
+            value={state.referenceFieldId}
+            onChange={(e) => onChange({ referenceFieldId: e.target.value })}>
+            <Select.Option value="" isDisabled>
+              Select a field
+            </Select.Option>
+            {referenceFieldOptions.map((field) => (
+              <Select.Option key={field.id} value={field.id}>
+                {field.fieldName} ({field.fieldDisplayType})
               </Select.Option>
             ))}
           </Select>

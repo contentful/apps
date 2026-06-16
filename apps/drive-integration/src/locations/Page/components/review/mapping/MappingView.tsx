@@ -437,11 +437,12 @@ export const MappingView = ({
 
     const refFieldId =
       params.isReference && params.referenceEntryId
-        ? contentType?.fields?.find(
-            (f) =>
-              (f.type === 'Link' && f.linkType === 'Entry') ||
-              (f.type === 'Array' && f.items?.linkType === 'Entry')
-          )?.id
+        ? (params.referenceFieldId ??
+            contentType?.fields?.find(
+              (f) =>
+                (f.type === 'Link' && f.linkType === 'Entry') ||
+                (f.type === 'Array' && f.items?.linkType === 'Entry')
+            )?.id)
         : undefined;
 
     const newEntryFields: Record<string, Record<string, unknown>> =
