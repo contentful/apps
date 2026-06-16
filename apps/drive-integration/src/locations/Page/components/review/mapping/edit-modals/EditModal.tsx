@@ -216,7 +216,8 @@ export const EditModal = ({
                   flexDirection="column"
                   gap="spacingS"
                   padding="spacingS"
-                  className={locationColumnLeft}>
+                  className={locationColumnLeft}
+                  style={{ height: '100%' }}>
                   <Flex alignItems="center" style={{ minHeight: '32px' }}>
                     <Text as="p" fontWeight="fontWeightDemiBold">
                       Current location
