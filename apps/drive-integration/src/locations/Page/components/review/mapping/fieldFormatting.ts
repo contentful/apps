@@ -1,4 +1,4 @@
-import type { WorkflowContentTypeField } from '@types';
+import type { WorkflowContentType, WorkflowContentTypeField, EditModalFieldOption } from '@types';
 
 export const FIELD_TYPE_LABELS: Record<string, string> = {
   Symbol: 'Short text',
@@ -57,6 +57,23 @@ export function isAssetFieldForImageAssign(field: WorkflowContentTypeField): boo
     default:
       return false;
   }
+}
+
+export function buildFieldOptionsForContentType(
+  contentType: WorkflowContentType | undefined
+): EditModalFieldOption[] {
+  return (contentType?.fields ?? [])
+    .filter(isWorkflowContentTypeFieldWithId)
+    .map((field) => {
+      const fieldType = typeof field.type === 'string' ? field.type : 'Text';
+      return {
+        id: field.id,
+        fieldName: (field.name ?? '').trim() || field.id,
+        fieldType,
+        fieldDisplayType: displayType(fieldType, field.linkType, field.items),
+        isAssetField: isAssetFieldForImageAssign(field),
+      };
+    });
 }
 
 export const displayType = (type: string, linkType?: string, items?: FieldItems) => {
