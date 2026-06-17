@@ -439,16 +439,19 @@ export const MappingView = ({
     const refField =
       params.isReference && params.referenceEntryId
         ? contentType?.fields?.find(
-            (f) => f.id === params.referenceFieldId || (!params.referenceFieldId && isEntryReferenceField(f))
+            (f) =>
+              f.id === params.referenceFieldId ||
+              (!params.referenceFieldId && isEntryReferenceField(f))
           )
         : undefined;
 
     const newEntryFields: Record<string, Record<string, unknown>> = refField?.id
       ? {
           [refField.id]: {
-            [defaultLocale]: refField.type === 'Array'
-              ? [{ __ref: params.referenceEntryId }]
-              : { __ref: params.referenceEntryId },
+            [defaultLocale]:
+              refField.type === 'Array'
+                ? [{ __ref: params.referenceEntryId }]
+                : { __ref: params.referenceEntryId },
           },
         }
       : {};
@@ -502,7 +505,12 @@ export const MappingView = ({
           ...pendingTextAssignRanges,
         ];
         if (nonRichTextTargets.length && allRangesForAssign.length) {
-          next = applyTextAssignToEntryBlockGraph(next, document, allRangesForAssign, nonRichTextTargets);
+          next = applyTextAssignToEntryBlockGraph(
+            next,
+            document,
+            allRangesForAssign,
+            nonRichTextTargets
+          );
         }
       }
     }
@@ -513,10 +521,7 @@ export const MappingView = ({
       const existingEdges = payload.referenceGraph.edges ?? [];
       onReferenceGraphChange({
         ...payload.referenceGraph,
-        edges: [
-          ...existingEdges,
-          { from: tempId, to: params.referenceEntryId, fieldId: '' },
-        ],
+        edges: [...existingEdges, { from: tempId, to: params.referenceEntryId, fieldId: '' }],
       });
     }
 

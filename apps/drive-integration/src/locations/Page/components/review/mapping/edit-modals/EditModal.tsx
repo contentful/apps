@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState, useCallback, type ReactNode } from 'react';
 import { Box, Button, Grid, Modal, Flex, Text, TextInput } from '@contentful/f36-components';
 import { PlusIcon } from '@contentful/f36-icons';
-import { type EditModalContent, type AddEntryWizardParams, type EditModalNewLocation } from '@types';
+import {
+  type EditModalContent,
+  type AddEntryWizardParams,
+  type EditModalNewLocation,
+} from '@types';
 import type { WorkflowContentType } from '@types';
 import { buildFieldOptionsForContentType, isEntryReferenceField } from '../fieldFormatting';
 
@@ -122,7 +126,10 @@ export const EditModal = ({
     if (!wizardState?.contentTypeId) return [];
     const contentType = contentTypes.find((ct) => ct.sys.id === wizardState.contentTypeId);
     const referenceFields = (contentType?.fields ?? []).filter(isEntryReferenceField);
-    return buildFieldOptionsForContentType({ ...contentType, fields: referenceFields } as typeof contentType);
+    return buildFieldOptionsForContentType({
+      ...contentType,
+      fields: referenceFields,
+    } as typeof contentType);
   }, [wizardState?.contentTypeId, contentTypes]);
 
   const needsReferenceFieldStep = referenceFieldOptions.length > 1;
@@ -134,10 +141,16 @@ export const EditModal = ({
         setWizardState({ ...wizardState, step: WizardStep.IsReference });
         break;
       case WizardStep.IsReference:
-        setWizardState({ ...wizardState, step: wizardState.isReference ? WizardStep.SelectReference : WizardStep.SelectFields });
+        setWizardState({
+          ...wizardState,
+          step: wizardState.isReference ? WizardStep.SelectReference : WizardStep.SelectFields,
+        });
         break;
       case WizardStep.SelectReference:
-        setWizardState({ ...wizardState, step: needsReferenceFieldStep ? WizardStep.SelectReferenceField : WizardStep.SelectFields });
+        setWizardState({
+          ...wizardState,
+          step: needsReferenceFieldStep ? WizardStep.SelectReferenceField : WizardStep.SelectFields,
+        });
         break;
       case WizardStep.SelectReferenceField:
         setWizardState({ ...wizardState, step: WizardStep.SelectFields });
@@ -158,7 +171,14 @@ export const EditModal = ({
         setWizardState({ ...wizardState, step: WizardStep.SelectReference });
         break;
       case WizardStep.SelectFields:
-        setWizardState({ ...wizardState, step: wizardState.isReference ? (needsReferenceFieldStep ? WizardStep.SelectReferenceField : WizardStep.SelectReference) : WizardStep.IsReference });
+        setWizardState({
+          ...wizardState,
+          step: wizardState.isReference
+            ? needsReferenceFieldStep
+              ? WizardStep.SelectReferenceField
+              : WizardStep.SelectReference
+            : WizardStep.IsReference,
+        });
         break;
     }
   };
@@ -169,7 +189,9 @@ export const EditModal = ({
       contentTypeId: wizardState.contentTypeId,
       isReference: wizardState.isReference ?? false,
       referenceEntryId: wizardState.isReference ? wizardState.referenceEntryId || null : null,
-      referenceFieldId: wizardState.isReference ? (wizardState.referenceFieldId || referenceFieldOptions[0]?.id || null) : null,
+      referenceFieldId: wizardState.isReference
+        ? wizardState.referenceFieldId || referenceFieldOptions[0]?.id || null
+        : null,
       fieldIds: wizardState.selectedFieldIds,
     });
     setWizardState(null);
@@ -178,11 +200,16 @@ export const EditModal = ({
   const isWizardNextDisabled = () => {
     if (!wizardState) return true;
     switch (wizardState.step) {
-      case WizardStep.ContentType: return !wizardState.contentTypeId;
-      case WizardStep.IsReference: return wizardState.isReference === null;
-      case WizardStep.SelectReference: return !wizardState.referenceEntryId;
-      case WizardStep.SelectReferenceField: return !wizardState.referenceFieldId;
-      default: return false;
+      case WizardStep.ContentType:
+        return !wizardState.contentTypeId;
+      case WizardStep.IsReference:
+        return wizardState.isReference === null;
+      case WizardStep.SelectReference:
+        return !wizardState.referenceEntryId;
+      case WizardStep.SelectReferenceField:
+        return !wizardState.referenceFieldId;
+      default:
+        return false;
     }
   };
 
@@ -308,7 +335,9 @@ export const EditModal = ({
                   {showWizard && wizardState && buildNewLocationForContentType ? (
                     <AddEntryWizard
                       state={wizardState}
-                      onChange={(next) => setWizardState((prev) => prev ? { ...prev, ...next } : prev)}
+                      onChange={(next) =>
+                        setWizardState((prev) => (prev ? { ...prev, ...next } : prev))
+                      }
                       contentTypes={contentTypes}
                       existingEntries={existingEntries}
                       referenceFieldOptions={referenceFieldOptions}
@@ -343,7 +372,10 @@ export const EditModal = ({
                         aria-label="Search entries"
                       />
 
-                      <Flex flexDirection="column" gap="spacingS" className={newLocationScrollableList}>
+                      <Flex
+                        flexDirection="column"
+                        gap="spacingS"
+                        className={newLocationScrollableList}>
                         {filteredNewLocations.map((loc) => {
                           const [contentTypePart, ...rest] = loc.title.split(': ');
                           const entryNamePart = rest.join(': ');
@@ -367,7 +399,10 @@ export const EditModal = ({
                                   Entry name
                                 </Text>
                                 <Text as="p">
-                                  {truncateMiddle(entryNamePart || loc.title, NEW_LOCATION_MAX_LENGTH)}
+                                  {truncateMiddle(
+                                    entryNamePart || loc.title,
+                                    NEW_LOCATION_MAX_LENGTH
+                                  )}
                                 </Text>
                               </Box>
                               <FieldSelectionDropdown
@@ -376,8 +411,12 @@ export const EditModal = ({
                                 fieldOptions={loc.fieldOptions}
                                 fieldMappings={loc.fieldMappings}
                                 selectedFieldIds={selectedFieldIdsByEntry[loc.id] ?? []}
-                                onSelectedFieldIdsChange={handleSelectedFieldIdsChangeForEntry(loc.id)}
-                                onSelectableStateChange={handleSelectableStateChangeForEntry(loc.id)}
+                                onSelectedFieldIdsChange={handleSelectedFieldIdsChangeForEntry(
+                                  loc.id
+                                )}
+                                onSelectableStateChange={handleSelectableStateChangeForEntry(
+                                  loc.id
+                                )}
                               />
                             </Flex>
                           );
@@ -392,15 +431,30 @@ export const EditModal = ({
           <Modal.Controls>
             {showWizard ? (
               <>
-                <Button onClick={wizardState?.step === WizardStep.ContentType ? () => setWizardState(null) : handleWizardBack} size="small" variant="secondary">
+                <Button
+                  onClick={
+                    wizardState?.step === WizardStep.ContentType
+                      ? () => setWizardState(null)
+                      : handleWizardBack
+                  }
+                  size="small"
+                  variant="secondary">
                   Back
                 </Button>
                 {wizardState?.step === WizardStep.SelectFields ? (
-                  <Button onClick={handleWizardSave} size="small" variant="primary" isDisabled={!wizardState.selectedFieldIds.length}>
+                  <Button
+                    onClick={handleWizardSave}
+                    size="small"
+                    variant="primary"
+                    isDisabled={!wizardState.selectedFieldIds.length}>
                     Save
                   </Button>
                 ) : (
-                  <Button onClick={handleWizardNext} size="small" variant="primary" isDisabled={isWizardNextDisabled()}>
+                  <Button
+                    onClick={handleWizardNext}
+                    size="small"
+                    variant="primary"
+                    isDisabled={isWizardNextDisabled()}>
                     Next
                   </Button>
                 )}
