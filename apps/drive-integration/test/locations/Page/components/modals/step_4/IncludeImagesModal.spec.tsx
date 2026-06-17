@@ -1,6 +1,6 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useState } from 'react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { Modal } from '@contentful/f36-components';
 import { IncludeImagesModal } from '../../../../../../src/locations/Page/components/modals/step_4/IncludeImagesModal';
 import React from 'react';
@@ -33,8 +33,18 @@ const renderModal = (initialIncludeImages: boolean | null = null, props = {}) =>
 
 describe('IncludeImagesModal', () => {
   beforeEach(() => {
+    // shouldAdvanceTime keeps real-time progression so waitFor still works,
+    // while giving us control to flush the react-modal 200ms close timer
+    // before jsdom tears down (prevents "document is not defined" errors).
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.clearAllMocks();
     vi.useFakeTimers({ shouldAdvanceTime: true });
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.runAllTimers();
+    vi.useRealTimers();
   });
 
   afterEach(() => {

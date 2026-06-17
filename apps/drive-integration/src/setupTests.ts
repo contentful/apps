@@ -4,15 +4,6 @@
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 
-// Suppress react-modal's "closeTimeoutMS" portal teardown from firing after
-// jsdom is torn down. Setting the app element here ensures react-modal always
-// has a valid parent to remove its portal from.
-if (typeof document !== 'undefined') {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const ReactModal = require('react-modal');
-  ReactModal.setAppElement(document.body);
-}
-
 if (typeof window !== 'undefined' && typeof ResizeObserver === 'undefined') {
   window.ResizeObserver = class ResizeObserver {
     observe() {}
