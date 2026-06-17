@@ -27,7 +27,12 @@ const existingEntries = [
 ];
 
 const referenceFieldOptions = [
-  { id: 'relatedArticles', fieldName: 'Related articles', fieldType: 'Array', fieldDisplayType: 'Reference list' },
+  {
+    id: 'relatedArticles',
+    fieldName: 'Related articles',
+    fieldType: 'Array',
+    fieldDisplayType: 'Reference list',
+  },
   { id: 'author', fieldName: 'Author', fieldType: 'Link', fieldDisplayType: 'Reference' },
 ];
 
@@ -131,7 +136,11 @@ describe('AddEntryWizard', () => {
     it('calls onChange with referenceEntryId when an entry is selected', async () => {
       const onChange = vi.fn();
       renderWizard(
-        makeState({ step: WizardStep.SelectReference, contentTypeId: 'article', isReference: true }),
+        makeState({
+          step: WizardStep.SelectReference,
+          contentTypeId: 'article',
+          isReference: true,
+        }),
         onChange
       );
 
@@ -180,9 +189,7 @@ describe('AddEntryWizard', () => {
 
   describe('SelectFields step', () => {
     it('calls buildNewLocation with the selected content type id', async () => {
-      renderWizard(
-        makeState({ step: WizardStep.SelectFields, contentTypeId: 'article' })
-      );
+      renderWizard(makeState({ step: WizardStep.SelectFields, contentTypeId: 'article' }));
 
       await waitFor(() => {
         expect(buildNewLocation).toHaveBeenCalledWith('article');
@@ -190,9 +197,7 @@ describe('AddEntryWizard', () => {
     });
 
     it('renders the field selection component', async () => {
-      renderWizard(
-        makeState({ step: WizardStep.SelectFields, contentTypeId: 'article' })
-      );
+      renderWizard(makeState({ step: WizardStep.SelectFields, contentTypeId: 'article' }));
 
       await waitFor(() => {
         expect(screen.getByText('Field selection')).toBeTruthy();
