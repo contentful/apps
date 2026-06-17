@@ -281,7 +281,10 @@ describe('Page component', () => {
               space: { sys: { id: mockSdk.ids.space } },
               environment: { sys: { id: mockSdk.ids.environment } },
             },
-            parameters: { selectedContentTypeIds: ['article'], allowedUrlPatterns: 'new-domain.com' },
+            parameters: {
+              selectedContentTypeIds: ['article'],
+              allowedUrlPatterns: 'new-domain.com',
+            },
           },
         ],
       }),
