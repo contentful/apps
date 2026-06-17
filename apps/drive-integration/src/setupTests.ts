@@ -4,6 +4,20 @@
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 
+import { beforeEach, afterEach, vi } from 'vitest';
+
+// react-modal schedules a setTimeout to remove its portal on close. Without fake
+// timers that timeout can fire after jsdom is torn down → "document is not defined".
+// shouldAdvanceTime keeps the wall clock running so waitFor still resolves normally.
+beforeEach(() => {
+  vi.useFakeTimers({ shouldAdvanceTime: true });
+});
+
+afterEach(() => {
+  vi.runAllTimers();
+  vi.useRealTimers();
+});
+
 if (typeof window !== 'undefined' && typeof ResizeObserver === 'undefined') {
   window.ResizeObserver = class ResizeObserver {
     observe() {}
