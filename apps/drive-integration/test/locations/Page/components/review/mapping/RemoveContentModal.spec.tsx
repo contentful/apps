@@ -47,12 +47,7 @@ describe('RemoveContentModal', () => {
     const onConfirm = vi.fn();
 
     render(
-      <RemoveContentModal
-        isOpen={true}
-        onConfirm={onConfirm}
-        onCancel={vi.fn()}
-        locations={[]}
-      />
+      <RemoveContentModal isOpen={true} onConfirm={onConfirm} onCancel={vi.fn()} locations={[]} />
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Remove' }));
@@ -64,12 +59,7 @@ describe('RemoveContentModal', () => {
     const onCancel = vi.fn();
 
     render(
-      <RemoveContentModal
-        isOpen={true}
-        onConfirm={vi.fn()}
-        onCancel={onCancel}
-        locations={[]}
-      />
+      <RemoveContentModal isOpen={true} onConfirm={vi.fn()} onCancel={onCancel} locations={[]} />
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
@@ -98,7 +88,9 @@ describe('RemoveContentModal', () => {
     expect(screen.getByText('The following mappings will be removed:')).toBeTruthy();
     expect(screen.getByText('My Entry')).toBeTruthy();
     expect(
-      screen.getByText((_, el) => el?.tagName === 'LI' && el?.textContent === 'My Entry → Body (RichText)')
+      screen.getByText(
+        (_, el) => el?.tagName === 'LI' && el?.textContent === 'My Entry → Body (RichText)'
+      )
     ).toBeTruthy();
   });
 });
