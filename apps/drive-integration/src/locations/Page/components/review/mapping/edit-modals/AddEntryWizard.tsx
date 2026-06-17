@@ -124,7 +124,7 @@ export const AddEntryWizard = ({
 
       {state.step === WizardStep.SelectReferenceField && (
         <FormControl marginBottom="none">
-          <FormControl.Label>Which field should hold this reference?</FormControl.Label>
+          <FormControl.Label>Which field should connect to this reference?</FormControl.Label>
           <Select
             value={state.referenceFieldId}
             onChange={(e) => onChange({ referenceFieldId: e.target.value })}>
