@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createRef } from 'react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { Box, Button } from '@contentful/f36-components';
@@ -135,6 +135,7 @@ describe('ModalOrchestrator', () => {
   });
 
   afterEach(() => {
+    cleanup();
     vi.runAllTimers();
     vi.useRealTimers();
   });

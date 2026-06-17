@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { EditModal } from '../../../../../src/locations/Page/components/review/mapping/edit-modals/EditModal';
 import React from 'react';
@@ -44,6 +44,7 @@ describe('EditModal', () => {
   });
 
   afterEach(() => {
+    cleanup();
     vi.runAllTimers();
     vi.useRealTimers();
   });

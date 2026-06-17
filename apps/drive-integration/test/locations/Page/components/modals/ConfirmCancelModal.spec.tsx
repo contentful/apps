@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { ConfirmCancelModal } from '../../../../../src/locations/Page/components/modals/ConfirmCancelModal';
 import React from 'react';
@@ -13,6 +13,7 @@ describe('ConfirmCancelModal', () => {
   });
 
   afterEach(() => {
+    cleanup();
     vi.runAllTimers();
     vi.useRealTimers();
   });
