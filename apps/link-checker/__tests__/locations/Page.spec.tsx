@@ -4,6 +4,11 @@ import { vi } from 'vitest';
 import { mockSdk } from '../mocks';
 import Page from '@/components/locations/Page';
 
+const triggerVisibilityChange = (state: DocumentVisibilityState) => {
+  Object.defineProperty(document, 'visibilityState', { value: state, configurable: true });
+  document.dispatchEvent(new Event('visibilitychange'));
+};
+
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
@@ -258,6 +263,55 @@ describe('Page component', () => {
     await waitFor(() => {
       expect(createWithResponse).not.toHaveBeenCalled();
     });
+  });
+
+  it('reloads when installation parameters have changed on visibility restored', async () => {
+    const reload = vi.fn();
+    Object.defineProperty(window, 'location', {
+      value: { reload },
+      configurable: true,
+      writable: true,
+    });
+
+    mockSdk.cma.appInstallation = {
+      get: vi.fn().mockResolvedValue({
+        parameters: { selectedContentTypeIds: ['article'], allowedUrlPatterns: 'new-domain.com' },
+      }),
+    };
+
+    render(<Page />);
+
+    triggerVisibilityChange('hidden');
+    triggerVisibilityChange('visible');
+
+    await waitFor(() => {
+      expect(reload).toHaveBeenCalled();
+    });
+  });
+
+  it('does not reload when installation parameters are unchanged on visibility restored', async () => {
+    const reload = vi.fn();
+    Object.defineProperty(window, 'location', {
+      value: { reload },
+      configurable: true,
+      writable: true,
+    });
+
+    mockSdk.cma.appInstallation = {
+      get: vi.fn().mockResolvedValue({
+        parameters: { selectedContentTypeIds: ['article'] },
+      }),
+    };
+
+    render(<Page />);
+
+    triggerVisibilityChange('hidden');
+    triggerVisibilityChange('visible');
+
+    await waitFor(() => {
+      expect(mockSdk.cma.appInstallation.get).toHaveBeenCalled();
+    });
+    expect(reload).not.toHaveBeenCalled();
   });
 
   it('checks www URLs as absolute https URLs instead of resolving them against the current domain', async () => {

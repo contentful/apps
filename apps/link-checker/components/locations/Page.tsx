@@ -168,6 +168,29 @@ export default function Page() {
 
   const installation = (sdk.parameters.installation || {}) as AppInstallationParameters;
   const hasAssignedContentTypes = Boolean(installation.selectedContentTypeIds?.length);
+
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState !== 'visible') return;
+      try {
+        const appDefinitionId = sdk.ids.app;
+        if (!appDefinitionId || !sdk.cma?.appInstallation?.get) return;
+        const current = await sdk.cma.appInstallation.get({
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environment,
+          appDefinitionId,
+        });
+        if (JSON.stringify(current?.parameters) !== JSON.stringify(sdk.parameters.installation)) {
+          window.location.reload();
+        }
+      } catch {
+        // Silently ignore — a failed check should never block the user.
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [sdk]);
   const explicitAllowedPatterns = (installation.allowedUrlPatterns || '')
     .split(',')
     .map((p) => normalizeDomainPattern(p))
