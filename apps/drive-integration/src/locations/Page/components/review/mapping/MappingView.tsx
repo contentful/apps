@@ -84,6 +84,7 @@ interface MappingViewProps {
   payload: MappingReviewSuspendPayload;
   entryBlockGraph: EntryBlockGraph;
   onEntryBlockGraphChange: (next: EntryBlockGraph) => void;
+  referenceGraph: ReviewedReferenceGraph;
   onReferenceGraphChange?: (next: ReviewedReferenceGraph) => void;
   selectedEntryIndex: number | null;
   defaultLocale: string;
@@ -144,6 +145,7 @@ export const MappingView = ({
   payload,
   entryBlockGraph,
   onEntryBlockGraphChange,
+  referenceGraph,
   onReferenceGraphChange,
   selectedEntryIndex,
   defaultLocale,
@@ -482,13 +484,16 @@ export const MappingView = ({
       if (editModalState.viewModel.isImageContent) {
         const imageRef = pendingExcludeImageSourceRefs[0];
         if (imageRef) {
-          const assetTargets = resolvedTargets.filter((t) => t.fieldType !== 'RichText');
-          const rtTargets = resolvedTargets.filter((t) => t.fieldType === 'RichText');
-          if (assetTargets.length) {
-            next = appendImageToTargets(next, imageRef, assetTargets);
+          if (nonRichTextTargets.length) {
+            next = appendImageToTargets(next, imageRef, nonRichTextTargets);
           }
-          if (rtTargets.length) {
-            next = applyRichTextAssignToEntryBlockGraph(next, document, [imageRef], rtTargets);
+          if (richTextTargets.length) {
+            next = applyRichTextAssignToEntryBlockGraph(
+              next,
+              document,
+              [imageRef],
+              richTextTargets
+            );
           }
         }
       } else {
@@ -518,10 +523,12 @@ export const MappingView = ({
     onEntryBlockGraphChange(next);
 
     if (params.isReference && params.referenceEntryId && onReferenceGraphChange) {
-      const existingEdges = payload.referenceGraph.edges ?? [];
       onReferenceGraphChange({
-        ...payload.referenceGraph,
-        edges: [...existingEdges, { from: tempId, to: params.referenceEntryId, fieldId: '' }],
+        ...referenceGraph,
+        edges: [
+          ...(referenceGraph.edges ?? []),
+          { from: tempId, to: params.referenceEntryId, fieldId: '' },
+        ],
       });
     }
 

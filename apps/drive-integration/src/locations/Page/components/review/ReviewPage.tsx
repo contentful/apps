@@ -278,6 +278,7 @@ export const ReviewPage = ({
             payload={reviewPayload}
             entryBlockGraph={entryBlockGraph}
             onEntryBlockGraphChange={setEntryBlockGraph}
+            referenceGraph={referenceGraph}
             onReferenceGraphChange={setReferenceGraph}
             selectedEntryIndex={selectedEntryIndex}
             defaultLocale={sdk.locales.default}
