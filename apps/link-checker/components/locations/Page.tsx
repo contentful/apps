@@ -22,6 +22,15 @@ import { normalizeDomainPattern, urlMatchesAnyDomainPattern } from '@/utils/doma
 import { extractUrlsFromEntry, isRelativeUrl, type ExtractedUrl } from '@/utils/extractUrls';
 import { type AppInstallationParameters } from './ConfigScreen';
 
+function deepEqual(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (a === null || b === null || typeof a !== 'object' || typeof b !== 'object') return false;
+  const keysA = Object.keys(a as object).sort();
+  const keysB = Object.keys(b as object).sort();
+  if (keysA.length !== keysB.length || keysA.some((k, i) => k !== keysB[i])) return false;
+  return keysA.every((k) => deepEqual((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k]));
+}
+
 const CHECK_LINK_FUNCTION_ID = 'checkLink';
 const FETCH_LIMIT = 1000;
 const ENTRY_FETCH_LIMIT = 100;
@@ -184,7 +193,7 @@ export default function Page() {
             item.sys.space.sys.id === sdk.ids.space &&
             item.sys.environment.sys.id === sdk.ids.environment
         );
-        if (JSON.stringify(match?.parameters) !== JSON.stringify(sdk.parameters.installation)) {
+        if (!deepEqual(match?.parameters, sdk.parameters.installation)) {
           window.location.reload();
         }
       } catch {

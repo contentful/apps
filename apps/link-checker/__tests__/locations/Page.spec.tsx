@@ -308,6 +308,8 @@ describe('Page component', () => {
       writable: true,
     });
 
+    mockSdk.parameters.installation = { selectedContentTypeIds: ['article'] };
+
     mockSdk.cma.appInstallation = {
       getForOrganization: vi.fn().mockResolvedValue({
         items: [
@@ -317,6 +319,42 @@ describe('Page component', () => {
               environment: { sys: { id: mockSdk.ids.environment } },
             },
             parameters: { selectedContentTypeIds: ['article'] },
+          },
+        ],
+      }),
+    };
+
+    render(<Page />);
+
+    triggerVisibilityChange('hidden');
+    triggerVisibilityChange('visible');
+
+    await waitFor(() => {
+      expect(mockSdk.cma.appInstallation.getForOrganization).toHaveBeenCalled();
+    });
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  it('does not reload when installation parameters match but CMA returns keys in different order', async () => {
+    const reload = vi.fn();
+    Object.defineProperty(window, 'location', {
+      value: { reload },
+      configurable: true,
+      writable: true,
+    });
+
+    mockSdk.parameters.installation = { allowedUrlPatterns: 'example.com', selectedContentTypeIds: ['article'] };
+
+    mockSdk.cma.appInstallation = {
+      getForOrganization: vi.fn().mockResolvedValue({
+        items: [
+          {
+            sys: {
+              space: { sys: { id: mockSdk.ids.space } },
+              environment: { sys: { id: mockSdk.ids.environment } },
+            },
+            // Same values, different key order — must not trigger spurious reload
+            parameters: { selectedContentTypeIds: ['article'], allowedUrlPatterns: 'example.com' },
           },
         ],
       }),
