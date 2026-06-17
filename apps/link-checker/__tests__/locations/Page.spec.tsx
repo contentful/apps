@@ -274,8 +274,16 @@ describe('Page component', () => {
     });
 
     mockSdk.cma.appInstallation = {
-      get: vi.fn().mockResolvedValue({
-        parameters: { selectedContentTypeIds: ['article'], allowedUrlPatterns: 'new-domain.com' },
+      getForOrganization: vi.fn().mockResolvedValue({
+        items: [
+          {
+            sys: {
+              space: { sys: { id: mockSdk.ids.space } },
+              environment: { sys: { id: mockSdk.ids.environment } },
+            },
+            parameters: { selectedContentTypeIds: ['article'], allowedUrlPatterns: 'new-domain.com' },
+          },
+        ],
       }),
     };
 
@@ -298,8 +306,16 @@ describe('Page component', () => {
     });
 
     mockSdk.cma.appInstallation = {
-      get: vi.fn().mockResolvedValue({
-        parameters: { selectedContentTypeIds: ['article'] },
+      getForOrganization: vi.fn().mockResolvedValue({
+        items: [
+          {
+            sys: {
+              space: { sys: { id: mockSdk.ids.space } },
+              environment: { sys: { id: mockSdk.ids.environment } },
+            },
+            parameters: { selectedContentTypeIds: ['article'] },
+          },
+        ],
       }),
     };
 
@@ -309,7 +325,7 @@ describe('Page component', () => {
     triggerVisibilityChange('visible');
 
     await waitFor(() => {
-      expect(mockSdk.cma.appInstallation.get).toHaveBeenCalled();
+      expect(mockSdk.cma.appInstallation.getForOrganization).toHaveBeenCalled();
     });
     expect(reload).not.toHaveBeenCalled();
   });

@@ -174,13 +174,17 @@ export default function Page() {
       if (document.visibilityState !== 'visible') return;
       try {
         const appDefinitionId = sdk.ids.app;
-        if (!appDefinitionId || !sdk.cma?.appInstallation?.get) return;
-        const current = await sdk.cma.appInstallation.get({
-          spaceId: sdk.ids.space,
-          environmentId: sdk.ids.environment,
+        if (!appDefinitionId || !sdk.cma?.appInstallation?.getForOrganization) return;
+        const result = await sdk.cma.appInstallation.getForOrganization({
+          organizationId: sdk.ids.organization,
           appDefinitionId,
         });
-        if (JSON.stringify(current?.parameters) !== JSON.stringify(sdk.parameters.installation)) {
+        const match = result.items.find(
+          (item) =>
+            item.sys.space.sys.id === sdk.ids.space &&
+            item.sys.environment.sys.id === sdk.ids.environment
+        );
+        if (JSON.stringify(match?.parameters) !== JSON.stringify(sdk.parameters.installation)) {
           window.location.reload();
         }
       } catch {
