@@ -48,6 +48,13 @@ function isAssetLinkField(
   );
 }
 
+export function isEntryReferenceField(field: WorkflowContentTypeField): boolean {
+  return (
+    (field.type === 'Link' && field.linkType === 'Entry') ||
+    (field.type === 'Array' && field.items?.linkType === 'Entry')
+  );
+}
+
 export function isAssetFieldForImageAssign(field: WorkflowContentTypeField): boolean {
   switch (field.type) {
     case 'Link':
