@@ -436,22 +436,22 @@ export const MappingView = ({
     const newEntryIndex = entryBlockGraph.entries.length;
     const tempId = `new-entry-${contentTypeId}-${newEntryIndex}`;
 
-    const refFieldId =
+    const refField =
       params.isReference && params.referenceEntryId
-        ? (params.referenceFieldId ??
-            contentType?.fields?.find(isEntryReferenceField)?.id)
+        ? contentType?.fields?.find(
+            (f) => f.id === params.referenceFieldId || (!params.referenceFieldId && isEntryReferenceField(f))
+          )
         : undefined;
 
-    const newEntryFields: Record<string, Record<string, unknown>> =
-      refFieldId
-        ? {
-            [refFieldId]: {
-              [defaultLocale]: refFieldId && (contentType?.fields?.find((f) => f.id === refFieldId)?.type === 'Array')
-                ? [{ __ref: params.referenceEntryId }]
-                : { __ref: params.referenceEntryId },
-            },
-          }
-        : {};
+    const newEntryFields: Record<string, Record<string, unknown>> = refField?.id
+      ? {
+          [refField.id]: {
+            [defaultLocale]: refField.type === 'Array'
+              ? [{ __ref: params.referenceEntryId }]
+              : { __ref: params.referenceEntryId },
+          },
+        }
+      : {};
 
     const newEntry = {
       contentTypeId,
