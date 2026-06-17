@@ -1,8 +1,7 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useState } from 'react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { Modal } from '@contentful/f36-components';
-import ReactModal from 'react-modal';
 import { IncludeImagesModal } from '../../../../../../src/locations/Page/components/modals/step_4/IncludeImagesModal';
 import React from 'react';
 
@@ -34,7 +33,6 @@ const renderModal = (initialIncludeImages: boolean | null = null, props = {}) =>
 
 describe('IncludeImagesModal', () => {
   beforeEach(() => {
-    ReactModal.setAppElement(document.body);
     vi.clearAllMocks();
     vi.useFakeTimers({ shouldAdvanceTime: true });
   });
@@ -43,10 +41,6 @@ describe('IncludeImagesModal', () => {
     cleanup();
     vi.runAllTimers();
     vi.useRealTimers();
-  });
-
-  afterEach(() => {
-    cleanup();
   });
 
   it('renders copy and the include/exclude choices', async () => {
