@@ -3,7 +3,7 @@ import { Box, Button, Grid, Modal, Flex, Text, TextInput } from '@contentful/f36
 import { PlusIcon } from '@contentful/f36-icons';
 import { type EditModalContent, type AddEntryWizardParams, type EditModalNewLocation } from '@types';
 import type { WorkflowContentType } from '@types';
-import { buildFieldOptionsForContentType } from '../fieldFormatting';
+import { buildFieldOptionsForContentType, isEntryReferenceField } from '../fieldFormatting';
 
 import {
   locationsContainer,
@@ -121,9 +121,8 @@ export const EditModal = ({
   const referenceFieldOptions = useMemo(() => {
     if (!wizardState?.contentTypeId) return [];
     const contentType = contentTypes.find((ct) => ct.sys.id === wizardState.contentTypeId);
-    return buildFieldOptionsForContentType(contentType).filter(
-      (f) => f.fieldDisplayType === 'Reference' || f.fieldDisplayType === 'Reference list'
-    );
+    const referenceFields = (contentType?.fields ?? []).filter(isEntryReferenceField);
+    return buildFieldOptionsForContentType({ ...contentType, fields: referenceFields } as typeof contentType);
   }, [wizardState?.contentTypeId, contentTypes]);
 
   const needsReferenceFieldStep = referenceFieldOptions.length > 1;

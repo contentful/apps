@@ -45,6 +45,7 @@ import { buildListMarkers } from './buildListMarkers';
 import {
   displayType,
   buildFieldOptionsForContentType,
+  isEntryReferenceField,
 } from './fieldFormatting';
 import { EditModal } from './edit-modals/EditModal';
 import { RichTextSelectionPreview } from './edit-modals/RichTextSelectionPreview';
@@ -438,11 +439,7 @@ export const MappingView = ({
     const refFieldId =
       params.isReference && params.referenceEntryId
         ? (params.referenceFieldId ??
-            contentType?.fields?.find(
-              (f) =>
-                (f.type === 'Link' && f.linkType === 'Entry') ||
-                (f.type === 'Array' && f.items?.linkType === 'Entry')
-            )?.id)
+            contentType?.fields?.find(isEntryReferenceField)?.id)
         : undefined;
 
     const newEntryFields: Record<string, Record<string, unknown>> =
