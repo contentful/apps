@@ -14,8 +14,12 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  vi.runAllTimers();
-  vi.useRealTimers();
+  // Guard needed for tests that call vi.useRealTimers() inline — runAllTimers()
+  // throws if timers are no longer mocked when this afterEach fires.
+  if (vi.isFakeTimers()) {
+    vi.runAllTimers();
+    vi.useRealTimers();
+  }
 });
 
 if (typeof window !== 'undefined' && typeof ResizeObserver === 'undefined') {
