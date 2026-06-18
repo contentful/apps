@@ -435,12 +435,13 @@ export const MappingView = ({
 
   const handleAddEntry = (params: AddEntryWizardParams) => {
     const { contentTypeId, fieldIds } = params;
+    const isLinkedReference = params.isReference && !!params.referenceEntryId;
     const contentType = payload.contentTypes.find((ct) => ct.sys.id === contentTypeId);
     const newEntryIndex = entryBlockGraph.entries.length;
     const tempId = crypto.randomUUID();
 
     const refField =
-      params.isReference && params.referenceEntryId
+      isLinkedReference
         ? contentType?.fields?.find(
             (f) =>
               f.id === params.referenceFieldId ||
@@ -523,7 +524,7 @@ export const MappingView = ({
 
     onEntryBlockGraphChange(next);
 
-    if (params.isReference && params.referenceEntryId && onReferenceGraphChange) {
+    if (isLinkedReference && onReferenceGraphChange) {
       onReferenceGraphChange({
         ...referenceGraph,
         edges: [
