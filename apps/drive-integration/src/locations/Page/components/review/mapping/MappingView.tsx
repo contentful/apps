@@ -45,6 +45,7 @@ import { buildListMarkers } from './buildListMarkers';
 import {
   displayType,
   buildFieldOptionsForContentType,
+  hasFieldId,
   isEntryReferenceField,
 } from './fieldFormatting';
 import { EditModal } from './edit-modals/EditModal';
@@ -472,7 +473,7 @@ export const MappingView = ({
 
     if (fieldIds.length > 0) {
       const resolvedTargets = fieldIds.flatMap((fieldId) => {
-        const field = contentType?.fields?.find((f) => 'id' in f && f.id === fieldId);
+        const field = contentType?.fields?.find((f) => hasFieldId(f) && f.id === fieldId);
         const fieldType =
           field && 'type' in field && typeof field.type === 'string' ? field.type : 'Text';
         return [{ entryIndex: newEntryIndex, fieldId, fieldType }];
@@ -801,7 +802,7 @@ export const MappingView = ({
           : undefined;
 
         const resolvedTargets = addedFieldIds.flatMap((fieldId) => {
-          const field = contentType?.fields?.find((f) => 'id' in f && f.id === fieldId);
+          const field = contentType?.fields?.find((f) => hasFieldId(f) && f.id === fieldId);
           const fieldType =
             field && 'type' in field && typeof field.type === 'string' ? field.type : 'Text';
           return [{ entryIndex: entryLoc.entryIndex, fieldId, fieldType }];
