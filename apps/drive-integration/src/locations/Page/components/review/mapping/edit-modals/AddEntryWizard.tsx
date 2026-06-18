@@ -56,105 +56,111 @@ export const AddEntryWizard = ({
 }: AddEntryWizardProps) => {
   const newLocation = state.contentTypeId ? buildNewLocation(state.contentTypeId) : null;
 
+  const renderStep = () => {
+    switch (state.step) {
+      case WizardStep.ContentType:
+        return (
+          <FormControl marginBottom="none">
+            <FormControl.Label>Select content type</FormControl.Label>
+            <Select
+              value={state.contentTypeId}
+              onChange={(e) => onChange({ contentTypeId: e.target.value })}>
+              <Select.Option value="" isDisabled>
+                Select a content type
+              </Select.Option>
+              {contentTypes.map((ct) => (
+                <Select.Option key={ct.sys.id} value={ct.sys.id}>
+                  {ct.name ?? ct.sys.id}
+                </Select.Option>
+              ))}
+            </Select>
+          </FormControl>
+        );
+      case WizardStep.IsReference:
+        return (
+          <FormControl marginBottom="none">
+            <FormControl.Label>Should this entry be a reference entry?</FormControl.Label>
+            <Flex flexDirection="column" gap="spacingXs">
+              <Radio
+                id="ref-yes"
+                name="is-reference"
+                value="yes"
+                isChecked={state.isReference === true}
+                onChange={() => onChange({ isReference: true })}>
+                Yes
+              </Radio>
+              <Radio
+                id="ref-no"
+                name="is-reference"
+                value="no"
+                isChecked={state.isReference === false}
+                onChange={() => onChange({ isReference: false })}>
+                No
+              </Radio>
+            </Flex>
+          </FormControl>
+        );
+      case WizardStep.SelectReference:
+        return (
+          <FormControl marginBottom="none">
+            <FormControl.Label>Select entry it should be a reference to</FormControl.Label>
+            <Select
+              value={state.referenceEntryId}
+              onChange={(e) => onChange({ referenceEntryId: e.target.value })}>
+              <Select.Option value="" isDisabled>
+                Select an entry
+              </Select.Option>
+              {existingEntries.map((entry) => (
+                <Select.Option key={entry.tempId} value={entry.tempId}>
+                  {entry.label}
+                </Select.Option>
+              ))}
+            </Select>
+          </FormControl>
+        );
+      case WizardStep.SelectReferenceField:
+        return (
+          <FormControl marginBottom="none">
+            <FormControl.Label>Which field should connect to this reference?</FormControl.Label>
+            <Select
+              value={state.referenceFieldId}
+              onChange={(e) => onChange({ referenceFieldId: e.target.value })}>
+              <Select.Option value="" isDisabled>
+                Select a field
+              </Select.Option>
+              {referenceFieldOptions.map((field) => (
+                <Select.Option key={field.id} value={field.id}>
+                  {field.fieldName} ({field.fieldDisplayType})
+                </Select.Option>
+              ))}
+            </Select>
+          </FormControl>
+        );
+      case WizardStep.SelectFields:
+        return newLocation ? (
+          <FormControl marginBottom="none">
+            <FormControl.Label>Select the field(s) the content should map to</FormControl.Label>
+            <FieldSelectionDropdown
+              selectedText={selectedText}
+              isImageContent={isImageContent}
+              fieldOptions={newLocation.fieldOptions}
+              fieldMappings={newLocation.fieldMappings}
+              selectedFieldIds={state.selectedFieldIds}
+              onSelectedFieldIdsChange={(updater) =>
+                onChange({ selectedFieldIds: updater(state.selectedFieldIds) })
+              }
+            />
+          </FormControl>
+        ) : null;
+    }
+  };
+
   return (
     <Flex flexDirection="column" gap="spacingS">
       <Text as="p" fontWeight="fontWeightDemiBold">
         Add entry
       </Text>
-
-      {state.step === WizardStep.ContentType && (
-        <FormControl marginBottom="none">
-          <FormControl.Label>Select content type</FormControl.Label>
-          <Select
-            value={state.contentTypeId}
-            onChange={(e) => onChange({ contentTypeId: e.target.value })}>
-            <Select.Option value="" isDisabled>
-              Select a content type
-            </Select.Option>
-            {contentTypes.map((ct) => (
-              <Select.Option key={ct.sys.id} value={ct.sys.id}>
-                {ct.name ?? ct.sys.id}
-              </Select.Option>
-            ))}
-          </Select>
-        </FormControl>
-      )}
-
-      {state.step === WizardStep.IsReference && (
-        <FormControl marginBottom="none">
-          <FormControl.Label>Should this entry be a reference entry?</FormControl.Label>
-          <Flex flexDirection="column" gap="spacingXs">
-            <Radio
-              id="ref-yes"
-              name="is-reference"
-              value="yes"
-              isChecked={state.isReference === true}
-              onChange={() => onChange({ isReference: true })}>
-              Yes
-            </Radio>
-            <Radio
-              id="ref-no"
-              name="is-reference"
-              value="no"
-              isChecked={state.isReference === false}
-              onChange={() => onChange({ isReference: false })}>
-              No
-            </Radio>
-          </Flex>
-        </FormControl>
-      )}
-
-      {state.step === WizardStep.SelectReference && (
-        <FormControl marginBottom="none">
-          <FormControl.Label>Select entry it should be a reference to</FormControl.Label>
-          <Select
-            value={state.referenceEntryId}
-            onChange={(e) => onChange({ referenceEntryId: e.target.value })}>
-            <Select.Option value="" isDisabled>
-              Select an entry
-            </Select.Option>
-            {existingEntries.map((entry) => (
-              <Select.Option key={entry.tempId} value={entry.tempId}>
-                {entry.label}
-              </Select.Option>
-            ))}
-          </Select>
-        </FormControl>
-      )}
-
-      {state.step === WizardStep.SelectReferenceField && (
-        <FormControl marginBottom="none">
-          <FormControl.Label>Which field should connect to this reference?</FormControl.Label>
-          <Select
-            value={state.referenceFieldId}
-            onChange={(e) => onChange({ referenceFieldId: e.target.value })}>
-            <Select.Option value="" isDisabled>
-              Select a field
-            </Select.Option>
-            {referenceFieldOptions.map((field) => (
-              <Select.Option key={field.id} value={field.id}>
-                {field.fieldName} ({field.fieldDisplayType})
-              </Select.Option>
-            ))}
-          </Select>
-        </FormControl>
-      )}
-
-      {state.step === WizardStep.SelectFields && newLocation && (
-        <FormControl marginBottom="none">
-          <FormControl.Label>Select the field(s) the content should map to</FormControl.Label>
-          <FieldSelectionDropdown
-            selectedText={selectedText}
-            isImageContent={isImageContent}
-            fieldOptions={newLocation.fieldOptions}
-            fieldMappings={newLocation.fieldMappings}
-            selectedFieldIds={state.selectedFieldIds}
-            onSelectedFieldIdsChange={(updater) =>
-              onChange({ selectedFieldIds: updater(state.selectedFieldIds) })
-            }
-          />
-        </FormControl>
-      )}
+      {renderStep()}
     </Flex>
   );
 };
