@@ -10,7 +10,7 @@ export enum WizardStep {
   SelectFields = 'select-fields',
 }
 
-export interface WizardState {
+export interface Wizard {
   step: WizardStep;
   contentTypeId: string;
   isReference: boolean | null;
@@ -19,7 +19,7 @@ export interface WizardState {
   selectedFieldIds: string[];
 }
 
-export const INITIAL_WIZARD_STATE: WizardState = {
+export const INITIAL_WIZARD_STATE: Wizard = {
   step: WizardStep.ContentType,
   contentTypeId: '',
   isReference: null,
@@ -34,8 +34,8 @@ export interface ExistingEntryOption {
 }
 
 interface AddEntryWizardProps {
-  state: WizardState;
-  onChange: (next: Partial<WizardState>) => void;
+  state: Wizard;
+  onChange: (next: Partial<Wizard>) => void;
   contentTypes: WorkflowContentType[];
   existingEntries: ExistingEntryOption[];
   referenceFieldOptions: EditModalFieldOption[];

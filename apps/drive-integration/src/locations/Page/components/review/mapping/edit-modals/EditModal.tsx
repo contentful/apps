@@ -21,7 +21,7 @@ import {
   AddEntryWizard,
   INITIAL_WIZARD_STATE,
   WizardStep,
-  type WizardState,
+  type Wizard,
   type ExistingEntryOption,
 } from './AddEntryWizard';
 import { truncateMiddle } from '../../../../../../utils/utils';
@@ -56,7 +56,7 @@ export const EditModal = ({
   onAddEntry,
   buildNewLocationForContentType,
 }: EditModalProps) => {
-  const [wizardState, setWizardState] = useState<WizardState | null>(null);
+  const [wizardState, setWizard] = useState<Wizard | null>(null);
   const showWizard = wizardState !== null;
 
   const [selectedFieldIdsByEntry, setSelectedFieldIdsByEntry] = useState<Record<string, string[]>>(
@@ -87,7 +87,7 @@ export const EditModal = ({
     );
     setDestinationFieldStateByEntry({});
     setEntrySearch('');
-    setWizardState(null);
+    setWizard(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sync from props only on open / location set change
   }, [isOpen, newLocationIdsKey]);
 
@@ -138,22 +138,22 @@ export const EditModal = ({
     if (!wizardState) return;
     switch (wizardState.step) {
       case WizardStep.ContentType:
-        setWizardState({ ...wizardState, step: WizardStep.IsReference });
+        setWizard({ ...wizardState, step: WizardStep.IsReference });
         break;
       case WizardStep.IsReference:
-        setWizardState({
+        setWizard({
           ...wizardState,
           step: wizardState.isReference ? WizardStep.SelectReference : WizardStep.SelectFields,
         });
         break;
       case WizardStep.SelectReference:
-        setWizardState({
+        setWizard({
           ...wizardState,
           step: needsReferenceFieldStep ? WizardStep.SelectReferenceField : WizardStep.SelectFields,
         });
         break;
       case WizardStep.SelectReferenceField:
-        setWizardState({ ...wizardState, step: WizardStep.SelectFields });
+        setWizard({ ...wizardState, step: WizardStep.SelectFields });
         break;
     }
   };
@@ -162,16 +162,16 @@ export const EditModal = ({
     if (!wizardState) return;
     switch (wizardState.step) {
       case WizardStep.IsReference:
-        setWizardState({ ...wizardState, step: WizardStep.ContentType });
+        setWizard({ ...wizardState, step: WizardStep.ContentType });
         break;
       case WizardStep.SelectReference:
-        setWizardState({ ...wizardState, step: WizardStep.IsReference });
+        setWizard({ ...wizardState, step: WizardStep.IsReference });
         break;
       case WizardStep.SelectReferenceField:
-        setWizardState({ ...wizardState, step: WizardStep.SelectReference });
+        setWizard({ ...wizardState, step: WizardStep.SelectReference });
         break;
       case WizardStep.SelectFields:
-        setWizardState({
+        setWizard({
           ...wizardState,
           step: wizardState.isReference
             ? needsReferenceFieldStep
@@ -194,7 +194,7 @@ export const EditModal = ({
         : null,
       fieldIds: wizardState.selectedFieldIds,
     });
-    setWizardState(null);
+    setWizard(null);
   };
 
   const isWizardNextDisabled = () => {
@@ -336,7 +336,7 @@ export const EditModal = ({
                     <AddEntryWizard
                       state={wizardState}
                       onChange={(next) =>
-                        setWizardState((prev) => (prev ? { ...prev, ...next } : prev))
+                        setWizard((prev) => (prev ? { ...prev, ...next } : prev))
                       }
                       contentTypes={contentTypes}
                       existingEntries={existingEntries}
@@ -359,7 +359,7 @@ export const EditModal = ({
                             variant="transparent"
                             size="small"
                             startIcon={<PlusIcon />}
-                            onClick={() => setWizardState({ ...INITIAL_WIZARD_STATE })}>
+                            onClick={() => setWizard({ ...INITIAL_WIZARD_STATE })}>
                             Add entry
                           </Button>
                         )}
@@ -434,7 +434,7 @@ export const EditModal = ({
                 <Button
                   onClick={
                     wizardState?.step === WizardStep.ContentType
-                      ? () => setWizardState(null)
+                      ? () => setWizard(null)
                       : handleWizardBack
                   }
                   size="small"

@@ -5,7 +5,7 @@ import {
   AddEntryWizard,
   WizardStep,
   INITIAL_WIZARD_STATE,
-  type WizardState,
+  type Wizard,
 } from '../../../../../src/locations/Page/components/review/mapping/edit-modals/AddEntryWizard';
 import type { EditModalNewLocation } from '@types';
 
@@ -47,12 +47,12 @@ const newLocation: EditModalNewLocation = {
 
 const buildNewLocation = vi.fn(() => newLocation);
 
-const makeState = (overrides: Partial<WizardState> = {}): WizardState => ({
+const makeState = (overrides: Partial<Wizard> = {}): Wizard => ({
   ...INITIAL_WIZARD_STATE,
   ...overrides,
 });
 
-const renderWizard = (state: WizardState, onChange = vi.fn()) =>
+const renderWizard = (state: Wizard, onChange = vi.fn()) =>
   render(
     <AddEntryWizard
       state={state}
