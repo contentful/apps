@@ -33,18 +33,8 @@ const renderModal = (initialIncludeImages: boolean | null = null, props = {}) =>
 
 describe('IncludeImagesModal', () => {
   beforeEach(() => {
-    // shouldAdvanceTime keeps real-time progression so waitFor still works,
-    // while giving us control to flush the react-modal 200ms close timer
-    // before jsdom tears down (prevents "document is not defined" errors).
     vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.clearAllMocks();
-    vi.useFakeTimers({ shouldAdvanceTime: true });
-  });
-
-  afterEach(() => {
-    cleanup();
-    vi.runAllTimers();
-    vi.useRealTimers();
   });
 
   afterEach(() => {
