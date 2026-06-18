@@ -436,7 +436,7 @@ export const MappingView = ({
     const { contentTypeId, fieldIds } = params;
     const contentType = payload.contentTypes.find((ct) => ct.sys.id === contentTypeId);
     const newEntryIndex = entryBlockGraph.entries.length;
-    const tempId = `new-entry-${contentTypeId}-${newEntryIndex}`;
+    const tempId = crypto.randomUUID();
 
     const refField =
       params.isReference && params.referenceEntryId
