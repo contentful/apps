@@ -479,8 +479,16 @@ export const MappingView = ({
         return [{ entryIndex: newEntryIndex, fieldId, fieldType }];
       });
 
-      const richTextTargets = resolvedTargets.filter((t) => t.fieldType === 'RichText');
-      const nonRichTextTargets = resolvedTargets.filter((t) => t.fieldType !== 'RichText');
+      const { richTextTargets, nonRichTextTargets } = resolvedTargets.reduce<{
+        richTextTargets: typeof resolvedTargets;
+        nonRichTextTargets: typeof resolvedTargets;
+      }>(
+        (acc, t) => {
+          (t.fieldType === 'RichText' ? acc.richTextTargets : acc.nonRichTextTargets).push(t);
+          return acc;
+        },
+        { richTextTargets: [], nonRichTextTargets: [] }
+      );
 
       if (editModalState.viewModel.isImageContent) {
         const imageRef = pendingExcludeImageSourceRefs[0];
