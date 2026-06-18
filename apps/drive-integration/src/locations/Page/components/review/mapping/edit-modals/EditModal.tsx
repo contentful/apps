@@ -208,7 +208,11 @@ export const EditModal = ({
                         </Text>
                       </Box>
                     </Flex>
-                  ) : null}
+                  ) : (
+                    <Text as="p" fontColor="gray500" fontSize="fontSizeS">
+                      No current location
+                    </Text>
+                  )}
                 </Flex>
               </Grid.Item>
 
