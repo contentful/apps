@@ -17,7 +17,7 @@ export const FIELD_TYPE_LABELS: Record<string, string> = {
 
 export type FieldItems = NonNullable<WorkflowContentTypeField['items']>;
 
-export function isWorkflowContentTypeFieldWithId(
+export function hasFieldId(
   field: WorkflowContentTypeField
 ): field is WorkflowContentTypeField & { id: string } {
   return Boolean(field.id);
@@ -69,7 +69,7 @@ export function isAssetFieldForImageAssign(field: WorkflowContentTypeField): boo
 export function buildFieldOptionsForContentType(
   contentType: WorkflowContentType | undefined
 ): EditModalFieldOption[] {
-  return (contentType?.fields ?? []).filter(isWorkflowContentTypeFieldWithId).map((field) => {
+  return (contentType?.fields ?? []).filter(hasFieldId).map((field) => {
     const fieldType = typeof field.type === 'string' ? field.type : 'Text';
     return {
       id: field.id,
