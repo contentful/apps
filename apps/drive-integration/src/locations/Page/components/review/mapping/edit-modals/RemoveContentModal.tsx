@@ -1,4 +1,5 @@
-import { Button, Modal, Paragraph, Text, List } from '@contentful/f36-components';
+import { Button, Modal, Paragraph, Text, List, Flex } from '@contentful/f36-components';
+import { ArrowRightIcon } from '@contentful/f36-icons';
 import type { EditLocationOption } from '@types';
 
 interface RemoveContentModalProps {
@@ -31,15 +32,16 @@ export const RemoveContentModal = ({
                 <List>
                   {locations.map((loc) => (
                     <List.Item key={loc.id}>
-                      <Text as="span" fontWeight="fontWeightDemiBold">
-                        {loc.entryName}
-                      </Text>
-                      {' → '}
-                      {loc.fieldName}
-                      <Text as="span" fontColor="gray500">
-                        {' '}
-                        ({loc.fieldType})
-                      </Text>
+                      <Flex alignItems="center" gap="spacing2Xs" as="span">
+                        <Text as="span" fontWeight="fontWeightDemiBold">
+                          {loc.entryName}
+                        </Text>
+                        <ArrowRightIcon size="tiny" />
+                        <Text as="span">{loc.fieldName}</Text>
+                        <Text as="span" fontColor="gray500">
+                          ({loc.fieldType})
+                        </Text>
+                      </Flex>
                     </List.Item>
                   ))}
                 </List>

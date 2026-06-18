@@ -87,10 +87,7 @@ describe('RemoveContentModal', () => {
 
     expect(screen.getByText('The following mappings will be removed:')).toBeTruthy();
     expect(screen.getByText('My Entry')).toBeTruthy();
-    expect(
-      screen.getByText(
-        (_, el) => el?.tagName === 'LI' && el?.textContent === 'My Entry → Body (RichText)'
-      )
-    ).toBeTruthy();
+    expect(screen.getByText('Body')).toBeTruthy();
+    expect(screen.getByText('(RichText)')).toBeTruthy();
   });
 });

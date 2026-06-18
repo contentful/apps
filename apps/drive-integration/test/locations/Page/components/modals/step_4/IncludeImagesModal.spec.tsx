@@ -33,8 +33,8 @@ const renderModal = (initialIncludeImages: boolean | null = null, props = {}) =>
 
 describe('IncludeImagesModal', () => {
   beforeEach(() => {
-    vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.clearAllMocks();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
   });
 
   afterEach(() => {
