@@ -84,9 +84,9 @@ describe('SelectTabsModal', () => {
   });
 
   afterEach(() => {
+    cleanup();
     vi.runAllTimers();
     vi.useRealTimers();
-    cleanup();
   });
 
   describe('Rendering', () => {
