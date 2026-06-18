@@ -25,5 +25,13 @@
     "express": "4.22.1",
     "lodash.get": "^4.4.2",
     "node-fetch": "2.7.0"
+  },
+  "overrides": {
+    "axios": ">=1.15.2",
+    "fast-xml-parser": ">=4.5.5",
+    "lodash": ">=4.18.0",
+    "minimatch": ">=5.1.8",
+    "simple-git": ">=3.36.0",
+    "tar": ">=7.5.11"
   }
 }
