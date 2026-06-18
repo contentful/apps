@@ -1,5 +1,5 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { EditModal } from '../../../../../src/locations/Page/components/review/mapping/edit-modals/EditModal';
 import React from 'react';
 
@@ -40,6 +40,13 @@ const baseViewModel = {
 describe('EditModal', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.runAllTimers();
+    vi.useRealTimers();
   });
 
   it('renders the provided title and button label', async () => {

@@ -1,6 +1,6 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createRef } from 'react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { Box, Button } from '@contentful/f36-components';
 import {
   ModalOrchestrator,
@@ -96,6 +96,7 @@ const mappingReviewSuspendPayload: MappingReviewSuspendPayload = {
 
 describe('ModalOrchestrator', () => {
   beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.clearAllMocks();
     defaultProps.onMappingReviewReady.mockReset();
     defaultProps.onResetToMain.mockReset();
@@ -131,6 +132,12 @@ describe('ModalOrchestrator', () => {
       items: mockContentTypes,
       total: mockContentTypes.length,
     } as any);
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.runAllTimers();
+    vi.useRealTimers();
   });
 
   it('shows ContentTypePickerModal after document is picked', async () => {
