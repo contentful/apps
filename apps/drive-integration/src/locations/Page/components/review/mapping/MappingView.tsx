@@ -529,7 +529,7 @@ export const MappingView = ({
         ...referenceGraph,
         edges: [
           ...(referenceGraph.edges ?? []),
-          { from: tempId, to: params.referenceEntryId, fieldId: '' },
+          { from: tempId, to: params.referenceEntryId!, fieldId: '' },
         ],
       });
     }
