@@ -1,5 +1,5 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { RemoveContentModal } from '../../../../../../src/locations/Page/components/review/mapping/edit-modals/RemoveContentModal';
 import type { EditLocationOption } from '../../../../../../src/types/editModal';
 import React from 'react';
@@ -17,8 +17,14 @@ const mockLocation: EditLocationOption = {
 };
 
 describe('RemoveContentModal', () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+  });
+
   afterEach(() => {
     cleanup();
+    vi.runAllTimers();
+    vi.useRealTimers();
     vi.clearAllMocks();
   });
 
