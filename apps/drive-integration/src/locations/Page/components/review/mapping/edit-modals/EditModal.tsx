@@ -23,8 +23,8 @@ import {
   WizardStep,
   type Wizard,
   type ExistingEntryOption,
+  WIZARD_STEPS,
 } from './AddEntryWizard';
-import { WIZARD_STEPS } from './wizardSteps';
 import { truncateMiddle } from '../../../../../../utils/utils';
 
 const CURRENT_LOCATION_MAX_LENGTH = 20;
