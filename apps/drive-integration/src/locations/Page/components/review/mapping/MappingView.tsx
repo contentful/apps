@@ -475,9 +475,8 @@ export const MappingView = ({
     if (fieldIds.length > 0) {
       const resolvedTargets = fieldIds.flatMap((fieldId) => {
         const field = contentType?.fields?.find((f) => hasFieldId(f) && f.id === fieldId);
-        const fieldType =
-          field && 'type' in field && typeof field.type === 'string' ? field.type : 'Text';
-        return [{ entryIndex: newEntryIndex, fieldId, fieldType }];
+        if (!field || typeof field.type !== 'string') return [];
+        return [{ entryIndex: newEntryIndex, fieldId, fieldType: field.type }];
       });
 
       const richTextTargets = resolvedTargets.filter((t) => t.fieldType === 'RichText');
@@ -804,9 +803,8 @@ export const MappingView = ({
 
         const resolvedTargets = addedFieldIds.flatMap((fieldId) => {
           const field = contentType?.fields?.find((f) => hasFieldId(f) && f.id === fieldId);
-          const fieldType =
-            field && 'type' in field && typeof field.type === 'string' ? field.type : 'Text';
-          return [{ entryIndex: entryLoc.entryIndex, fieldId, fieldType }];
+          if (!field || typeof field.type !== 'string') return [];
+          return [{ entryIndex: entryLoc.entryIndex, fieldId, fieldType: field.type }];
         });
 
         if (isImageContent) {
