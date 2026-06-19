@@ -21,6 +21,8 @@ import type {
   EditModalNewLocation,
   SourceRef,
   TableTextSourceRef,
+  AddEntryWizardParams,
+  ReviewedReferenceGraph,
 } from '@types';
 import {
   isBlockImageSourceRef,
@@ -42,8 +44,10 @@ import {
 import { buildListMarkers } from './buildListMarkers';
 import {
   displayType,
-  isAssetFieldForImageAssign,
-  isWorkflowContentTypeFieldWithId,
+  buildFieldOptionsForContentType,
+  hasFieldId,
+  hasFieldType,
+  isEntryReferenceField,
 } from './fieldFormatting';
 import { EditModal } from './edit-modals/EditModal';
 import { RichTextSelectionPreview } from './edit-modals/RichTextSelectionPreview';
@@ -97,7 +101,10 @@ interface MappingViewProps {
   payload: MappingReviewSuspendPayload;
   entryBlockGraph: EntryBlockGraph;
   onEntryBlockGraphChange: (next: EntryBlockGraph) => void;
+  referenceGraph: ReviewedReferenceGraph;
+  onReferenceGraphChange?: (next: ReviewedReferenceGraph) => void;
   selectedEntryIndex: number | null;
+  defaultLocale: string;
   isDisabled?: boolean;
   mode?: 'view' | 'edit';
 }
@@ -155,7 +162,10 @@ export const MappingView = ({
   payload,
   entryBlockGraph,
   onEntryBlockGraphChange,
+  referenceGraph,
+  onReferenceGraphChange,
   selectedEntryIndex,
+  defaultLocale,
   isDisabled = false,
   mode = 'view',
 }: MappingViewProps): JSX.Element => {
@@ -394,24 +404,12 @@ export const MappingView = ({
     const contentType = payload.contentTypes.find((item) => item.sys.id === entry.contentTypeId);
     const contentTypeName = contentType?.name ?? entry.contentTypeId;
     const entryTitle = getEntryTitleFromFieldMappings(entry, contentType?.displayField);
-    const contentTypeFields = contentType?.fields ?? [];
-    const fieldOptions = contentTypeFields.filter(isWorkflowContentTypeFieldWithId).map((field) => {
-      const fieldType = typeof field.type === 'string' ? field.type : 'Text';
-
-      return {
-        id: field.id,
-        fieldName: (field.name ?? '').trim() || field.id,
-        fieldType,
-        fieldDisplayType: displayType(fieldType, field.linkType, field.items),
-        isAssetField: isAssetFieldForImageAssign(field),
-      };
-    });
 
     return {
       id: entry.tempId ?? `${entry.contentTypeId}-${entryIndex}`,
       entryIndex,
       title: `${contentTypeName}: ${entryTitle}`,
-      fieldOptions,
+      fieldOptions: buildFieldOptionsForContentType(contentType),
       fieldMappings: entry.fieldMappings.map((fieldMapping) => ({
         fieldId: fieldMapping.fieldId,
         sourceRefs: fieldMapping.sourceRefs,
@@ -425,6 +423,122 @@ export const MappingView = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- recompute when entries or content types change
     [entryBlockGraph.entries, payload.contentTypes]
   );
+
+  const existingEntriesForWizard = useMemo(
+    () =>
+      entryBlockGraph.entries.map((entry, idx) => {
+        const contentType = payload.contentTypes.find((ct) => ct.sys.id === entry.contentTypeId);
+        const contentTypeName = contentType?.name ?? entry.contentTypeId;
+        const entryTitle = getEntryTitleFromFieldMappings(entry, contentType?.displayField);
+        return {
+          tempId: entry.tempId ?? `${entry.contentTypeId}-${idx}`,
+          label: `${contentTypeName} (${entryTitle})`,
+        };
+      }),
+    [entryBlockGraph.entries, payload.contentTypes]
+  );
+
+  const handleAddEntry = (params: AddEntryWizardParams) => {
+    const { contentTypeId, fieldIds } = params;
+    const isLinkedReference = params.isReference && !!params.referenceEntryId;
+    const contentType = payload.contentTypes.find((ct) => ct.sys.id === contentTypeId);
+    const newEntryIndex = entryBlockGraph.entries.length;
+    const tempId = crypto.randomUUID();
+
+    const refField = isLinkedReference
+      ? contentType?.fields?.find(
+          (f) =>
+            f.id === params.referenceFieldId ||
+            (!params.referenceFieldId && isEntryReferenceField(f))
+        )
+      : undefined;
+
+    const newEntryFields: Record<string, Record<string, unknown>> = refField?.id
+      ? {
+          [refField.id]: {
+            [defaultLocale]:
+              refField.type === 'Array'
+                ? [{ __ref: params.referenceEntryId }]
+                : { __ref: params.referenceEntryId },
+          },
+        }
+      : {};
+
+    const newEntry = {
+      contentTypeId,
+      tempId,
+      fields: newEntryFields,
+      fieldMappings: [],
+    };
+
+    let next: EntryBlockGraph = {
+      ...entryBlockGraph,
+      entries: [...entryBlockGraph.entries, newEntry],
+    };
+
+    if (fieldIds.length > 0) {
+      const resolvedTargets = fieldIds.flatMap((fieldId) => {
+        const field = contentType?.fields?.find((f) => hasFieldId(f) && f.id === fieldId);
+        if (!field || !hasFieldType(field)) return [];
+        return [{ entryIndex: newEntryIndex, fieldId, fieldType: field.type }];
+      });
+
+      const richTextTargets = resolvedTargets.filter((t) => t.fieldType === 'RichText');
+      const nonRichTextTargets = resolvedTargets.filter((t) => t.fieldType !== 'RichText');
+
+      if (editModalState.viewModel.isImageContent) {
+        const imageRef = pendingExcludeImageSourceRefs[0];
+        if (imageRef) {
+          if (nonRichTextTargets.length) {
+            next = appendImageToTargets(next, imageRef, nonRichTextTargets);
+          }
+          if (richTextTargets.length) {
+            next = applyRichTextAssignToEntryBlockGraph(
+              next,
+              document,
+              [imageRef],
+              richTextTargets
+            );
+          }
+        }
+      } else {
+        if (richTextTargets.length && pendingPreviewSourceRefs.length) {
+          next = applyRichTextAssignToEntryBlockGraph(
+            next,
+            document,
+            pendingPreviewSourceRefs,
+            richTextTargets
+          );
+        }
+        const allRangesForAssign = [
+          ...(pendingTextExclusionRanges ?? []),
+          ...pendingTextAssignRanges,
+        ];
+        if (nonRichTextTargets.length && allRangesForAssign.length) {
+          next = applyTextAssignToEntryBlockGraph(
+            next,
+            document,
+            allRangesForAssign,
+            nonRichTextTargets
+          );
+        }
+      }
+    }
+
+    onEntryBlockGraphChange(next);
+
+    if (isLinkedReference && onReferenceGraphChange) {
+      onReferenceGraphChange({
+        ...referenceGraph,
+        edges: [
+          ...(referenceGraph.edges ?? []),
+          { from: tempId, to: params.referenceEntryId!, fieldId: refField?.id ?? '' },
+        ],
+      });
+    }
+
+    closeEditModal();
+  };
 
   const getLocationsForSourceRef = (sourceRef: SourceRef): EditLocationOption[] => {
     const targetKey = buildSourceRefKey(sourceRef);
@@ -766,10 +880,9 @@ export const MappingView = ({
           : undefined;
 
         const resolvedTargets = addedFieldIds.flatMap((fieldId) => {
-          const field = contentType?.fields?.find((f) => 'id' in f && f.id === fieldId);
-          const fieldType =
-            field && 'type' in field && typeof field.type === 'string' ? field.type : 'Text';
-          return [{ entryIndex: entryLoc.entryIndex, fieldId, fieldType }];
+          const field = contentType?.fields?.find((f) => hasFieldId(f) && f.id === fieldId);
+          if (!field || !hasFieldType(field)) return [];
+          return [{ entryIndex: entryLoc.entryIndex, fieldId, fieldType: field.type }];
         });
 
         if (isImageContent) {
@@ -1061,6 +1174,10 @@ export const MappingView = ({
         viewModel={editModalState.viewModel}
         title={editModalState.title}
         primaryButtonLabel={editModalState.primaryButtonLabel}
+        contentTypes={payload.contentTypes}
+        existingEntries={existingEntriesForWizard}
+        onAddEntry={handleAddEntry}
+        newEntryIndex={entryBlockGraph.entries.length}
         additionalContent={(() => {
           if (!pendingPreviewSourceRefs.length && !pendingPreviewHasTableContent) return undefined;
           const allTableText = pendingPreviewSourceRefs.every(isTableTextSourceRef);

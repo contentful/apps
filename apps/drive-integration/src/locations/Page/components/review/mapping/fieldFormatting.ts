@@ -1,4 +1,4 @@
-import type { WorkflowContentTypeField } from '@types';
+import type { WorkflowContentType, WorkflowContentTypeField, EditModalFieldOption } from '@types';
 
 export const FIELD_TYPE_LABELS: Record<string, string> = {
   Symbol: 'Short text',
@@ -17,10 +17,16 @@ export const FIELD_TYPE_LABELS: Record<string, string> = {
 
 export type FieldItems = NonNullable<WorkflowContentTypeField['items']>;
 
-export function isWorkflowContentTypeFieldWithId(
+export function hasFieldId(
   field: WorkflowContentTypeField
 ): field is WorkflowContentTypeField & { id: string } {
   return Boolean(field.id);
+}
+
+export function hasFieldType(
+  field: WorkflowContentTypeField
+): field is WorkflowContentTypeField & { type: string } {
+  return typeof field.type === 'string';
 }
 
 function hasAssetLinkValidation(validations: unknown[] | undefined): boolean {
@@ -48,6 +54,13 @@ function isAssetLinkField(
   );
 }
 
+export function isEntryReferenceField(field: WorkflowContentTypeField): boolean {
+  return (
+    (field.type === 'Link' && field.linkType === 'Entry') ||
+    (field.type === 'Array' && field.items?.linkType === 'Entry')
+  );
+}
+
 export function isAssetFieldForImageAssign(field: WorkflowContentTypeField): boolean {
   switch (field.type) {
     case 'Link':
@@ -57,6 +70,22 @@ export function isAssetFieldForImageAssign(field: WorkflowContentTypeField): boo
     default:
       return false;
   }
+}
+
+export function buildFieldOptionsForContentType(
+  contentType: WorkflowContentType | undefined
+): EditModalFieldOption[] {
+  return (contentType?.fields ?? [])
+    .filter((f) => hasFieldId(f) && hasFieldType(f))
+    .map((field) => {
+      return {
+        id: field.id,
+        fieldName: (field.name ?? '').trim() || field.id,
+        fieldType: field.type,
+        fieldDisplayType: displayType(field.type, field.linkType, field.items),
+        isAssetField: isAssetFieldForImageAssign(field),
+      };
+    });
 }
 
 export const displayType = (type: string, linkType?: string, items?: FieldItems) => {
