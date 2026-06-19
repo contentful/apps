@@ -1,7 +1,8 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MappingReviewSuspendPayload, SourceRef } from '@types';
 import { MappingView } from '../../../../../../src/locations/Page/components/review/mapping/MappingView';
+import React from 'react';
 
 const mockUseReviewTextSelection = vi.fn();
 const mockClearSelection = vi.fn();
@@ -15,15 +16,22 @@ vi.mock(
   () => ({
     ReviewImageAssetCard: ({
       onEdit,
+      onRemove,
       isHighlighted,
     }: {
       onEdit: () => void;
+      onRemove?: () => void;
       isHighlighted: boolean;
     }) => (
       <div>
         <button type="button" onClick={onEdit}>
           {isHighlighted ? 'Reassign image' : 'Assign image'}
         </button>
+        {onRemove ? (
+          <button type="button" onClick={onRemove}>
+            Remove image
+          </button>
+        ) : null}
       </div>
     ),
   })
@@ -1054,5 +1062,130 @@ describe('MappingView', () => {
     expect(screen.getByRole('heading', { name: 'Edit content mapping' })).toBeTruthy();
     expect(screen.getAllByText('Selected Article').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Untitled').length).toBeGreaterThan(0);
+  });
+
+  it('removes mapped image from the entry via the image card menu', () => {
+    const payload = createImagePayload();
+    let currentGraph = payload.entryBlockGraph;
+    const onEntryBlockGraphChange = vi.fn(
+      (nextGraph: MappingReviewSuspendPayload['entryBlockGraph']) => {
+        currentGraph = nextGraph;
+      }
+    );
+
+    render(
+      <MappingView
+        payload={payload}
+        entryBlockGraph={currentGraph}
+        onEntryBlockGraphChange={onEntryBlockGraphChange}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Remove image' }));
+
+    const dialog = screen.getByRole('dialog');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Remove' }));
+
+    expect(onEntryBlockGraphChange).toHaveBeenCalledTimes(1);
+    expect(currentGraph.entries[0].fieldMappings).toHaveLength(0);
+  });
+
+  it('does not offer Remove in the selection menu for unmapped text', () => {
+    const selectedRange = createDetachedRange('plain text', 0, 5);
+    mockUseReviewTextSelection.mockReturnValue({
+      selectionRectangle: { top: 100, left: 100, right: 160, bottom: 120 },
+      selectedText: 'plain text',
+      selectedRange,
+      clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
+    });
+
+    const payload = createPayload();
+    render(
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
+    );
+
+    const menu = screen.getByTestId('review-selection-menu');
+    expect(within(menu).getByRole('button', { name: 'Edit content mapping' })).toBeTruthy();
+    expect(within(menu).queryByRole('button', { name: 'Remove' })).toBeNull();
+  });
+
+  it('removes content mapped to multiple fields of the same entry', () => {
+    const payload = createPayload({
+      fieldMappings: [
+        {
+          fieldId: 'body',
+          fieldType: 'Text',
+          sourceRefs: [createBlockTextSourceRef('block-1', 'Hello world')],
+        },
+        {
+          fieldId: 'summary',
+          fieldType: 'Text',
+          sourceRefs: [createBlockTextSourceRef('block-1', 'Hello world')],
+        },
+      ],
+    });
+
+    let currentGraph = payload.entryBlockGraph;
+    const onEntryBlockGraphChange = vi.fn(
+      (nextGraph: MappingReviewSuspendPayload['entryBlockGraph']) => {
+        currentGraph = nextGraph;
+      }
+    );
+
+    mockUseReviewTextSelection.mockReturnValueOnce({
+      selectionRectangle: null,
+      selectedText: '',
+      selectedRange: null,
+      clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
+    });
+
+    const { container, rerender } = render(
+      <MappingView
+        payload={payload}
+        entryBlockGraph={currentGraph}
+        onEntryBlockGraphChange={onEntryBlockGraphChange}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
+    );
+
+    const mappedSegment = container.querySelector('[data-review-text-segment="true"]');
+    const selectedRange = createDomRange(mappedSegment?.firstChild as Text, 0, 11);
+
+    mockUseReviewTextSelection.mockReturnValue({
+      selectionRectangle: { top: 100, left: 100, right: 160, bottom: 120 },
+      selectedText: 'Hello world',
+      selectedRange,
+      clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
+    });
+
+    rerender(
+      <MappingView
+        payload={payload}
+        entryBlockGraph={currentGraph}
+        onEntryBlockGraphChange={onEntryBlockGraphChange}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
+    );
+
+    const menu = screen.getByTestId('review-selection-menu');
+    fireEvent.click(within(menu).getByRole('button', { name: 'Remove' }));
+
+    const dialog = screen.getByRole('dialog');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Remove' }));
+
+    expect(onEntryBlockGraphChange).toHaveBeenCalledTimes(1);
+    expect(currentGraph.entries[0].fieldMappings.map((fm) => fm.fieldId)).toEqual([]);
   });
 });
