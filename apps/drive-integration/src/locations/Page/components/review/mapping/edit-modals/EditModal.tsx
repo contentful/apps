@@ -24,6 +24,7 @@ import {
   type Wizard,
   type ExistingEntryOption,
 } from './AddEntryWizard';
+import { WIZARD_STEPS } from './wizardSteps';
 import { truncateMiddle } from '../../../../../../utils/utils';
 
 const CURRENT_LOCATION_MAX_LENGTH = 20;
@@ -133,54 +134,22 @@ export const EditModal = ({
   }, [wizardState?.contentTypeId, contentTypes]);
 
   const needsReferenceFieldStep = referenceFieldOptions.length > 1;
+  const wizardCtx = { needsReferenceFieldStep };
 
   const handleWizardNext = () => {
     if (!wizardState) return;
-    switch (wizardState.step) {
-      case WizardStep.ContentType:
-        setWizard({ ...wizardState, step: WizardStep.IsReference });
-        break;
-      case WizardStep.IsReference:
-        setWizard({
-          ...wizardState,
-          step: wizardState.isReference ? WizardStep.SelectReference : WizardStep.SelectFields,
-        });
-        break;
-      case WizardStep.SelectReference:
-        setWizard({
-          ...wizardState,
-          step: needsReferenceFieldStep ? WizardStep.SelectReferenceField : WizardStep.SelectFields,
-        });
-        break;
-      case WizardStep.SelectReferenceField:
-        setWizard({ ...wizardState, step: WizardStep.SelectFields });
-        break;
-    }
+    setWizard({
+      ...wizardState,
+      step: WIZARD_STEPS[wizardState.step].next(wizardState, wizardCtx),
+    });
   };
 
   const handleWizardBack = () => {
     if (!wizardState) return;
-    switch (wizardState.step) {
-      case WizardStep.IsReference:
-        setWizard({ ...wizardState, step: WizardStep.ContentType });
-        break;
-      case WizardStep.SelectReference:
-        setWizard({ ...wizardState, step: WizardStep.IsReference });
-        break;
-      case WizardStep.SelectReferenceField:
-        setWizard({ ...wizardState, step: WizardStep.SelectReference });
-        break;
-      case WizardStep.SelectFields:
-        setWizard({
-          ...wizardState,
-          step: wizardState.isReference
-            ? needsReferenceFieldStep
-              ? WizardStep.SelectReferenceField
-              : WizardStep.SelectReference
-            : WizardStep.IsReference,
-        });
-        break;
-    }
+    setWizard({
+      ...wizardState,
+      step: WIZARD_STEPS[wizardState.step].back(wizardState, wizardCtx),
+    });
   };
 
   const handleWizardSave = () => {
@@ -197,21 +166,8 @@ export const EditModal = ({
     setWizard(null);
   };
 
-  const isWizardNextDisabled = () => {
-    if (!wizardState) return true;
-    switch (wizardState.step) {
-      case WizardStep.ContentType:
-        return !wizardState.contentTypeId;
-      case WizardStep.IsReference:
-        return wizardState.isReference === null;
-      case WizardStep.SelectReference:
-        return !wizardState.referenceEntryId;
-      case WizardStep.SelectReferenceField:
-        return !wizardState.referenceFieldId;
-      default:
-        return false;
-    }
-  };
+  const isWizardNextDisabled = () =>
+    !wizardState || WIZARD_STEPS[wizardState.step].isDisabled(wizardState);
 
   const previewSectionTitle = viewModel.previewSectionTitle ?? 'Selected content';
   const previewText = (viewModel.contentPreview ?? viewModel.selectedText).trim();
@@ -335,9 +291,7 @@ export const EditModal = ({
                   {showWizard && wizardState && buildNewLocationForContentType ? (
                     <AddEntryWizard
                       state={wizardState}
-                      onChange={(next) =>
-                        setWizard((prev) => (prev ? { ...prev, ...next } : prev))
-                      }
+                      onChange={(next) => setWizard((prev) => (prev ? { ...prev, ...next } : prev))}
                       contentTypes={contentTypes}
                       existingEntries={existingEntries}
                       referenceFieldOptions={referenceFieldOptions}
