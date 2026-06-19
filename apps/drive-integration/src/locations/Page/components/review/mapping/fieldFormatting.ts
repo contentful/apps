@@ -23,6 +23,12 @@ export function hasFieldId(
   return Boolean(field.id);
 }
 
+export function hasFieldType(
+  field: WorkflowContentTypeField
+): field is WorkflowContentTypeField & { type: string } {
+  return typeof field.type === 'string';
+}
+
 function hasAssetLinkValidation(validations: unknown[] | undefined): boolean {
   if (!Array.isArray(validations)) {
     return false;
@@ -69,16 +75,17 @@ export function isAssetFieldForImageAssign(field: WorkflowContentTypeField): boo
 export function buildFieldOptionsForContentType(
   contentType: WorkflowContentType | undefined
 ): EditModalFieldOption[] {
-  return (contentType?.fields ?? []).filter(hasFieldId).map((field) => {
-    const fieldType = typeof field.type === 'string' ? field.type : 'Text';
-    return {
-      id: field.id,
-      fieldName: (field.name ?? '').trim() || field.id,
-      fieldType,
-      fieldDisplayType: displayType(fieldType, field.linkType, field.items),
-      isAssetField: isAssetFieldForImageAssign(field),
-    };
-  });
+  return (contentType?.fields ?? [])
+    .filter((f) => hasFieldId(f) && hasFieldType(f))
+    .map((field) => {
+      return {
+        id: field.id,
+        fieldName: (field.name ?? '').trim() || field.id,
+        fieldType: field.type,
+        fieldDisplayType: displayType(field.type, field.linkType, field.items),
+        isAssetField: isAssetFieldForImageAssign(field),
+      };
+    });
 }
 
 export const displayType = (type: string, linkType?: string, items?: FieldItems) => {

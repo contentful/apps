@@ -46,6 +46,7 @@ import {
   displayType,
   buildFieldOptionsForContentType,
   hasFieldId,
+  hasFieldType,
   isEntryReferenceField,
 } from './fieldFormatting';
 import { EditModal } from './edit-modals/EditModal';
@@ -440,14 +441,13 @@ export const MappingView = ({
     const newEntryIndex = entryBlockGraph.entries.length;
     const tempId = crypto.randomUUID();
 
-    const refField =
-      isLinkedReference
-        ? contentType?.fields?.find(
-            (f) =>
-              f.id === params.referenceFieldId ||
-              (!params.referenceFieldId && isEntryReferenceField(f))
-          )
-        : undefined;
+    const refField = isLinkedReference
+      ? contentType?.fields?.find(
+          (f) =>
+            f.id === params.referenceFieldId ||
+            (!params.referenceFieldId && isEntryReferenceField(f))
+        )
+      : undefined;
 
     const newEntryFields: Record<string, Record<string, unknown>> = refField?.id
       ? {
@@ -475,7 +475,7 @@ export const MappingView = ({
     if (fieldIds.length > 0) {
       const resolvedTargets = fieldIds.flatMap((fieldId) => {
         const field = contentType?.fields?.find((f) => hasFieldId(f) && f.id === fieldId);
-        if (!field || typeof field.type !== 'string') return [];
+        if (!field || !hasFieldType(field)) return [];
         return [{ entryIndex: newEntryIndex, fieldId, fieldType: field.type }];
       });
 
@@ -803,7 +803,7 @@ export const MappingView = ({
 
         const resolvedTargets = addedFieldIds.flatMap((fieldId) => {
           const field = contentType?.fields?.find((f) => hasFieldId(f) && f.id === fieldId);
-          if (!field || typeof field.type !== 'string') return [];
+          if (!field || !hasFieldType(field)) return [];
           return [{ entryIndex: entryLoc.entryIndex, fieldId, fieldType: field.type }];
         });
 
