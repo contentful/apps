@@ -408,18 +408,6 @@ export const MappingView = ({
     [entryBlockGraph.entries, payload.contentTypes]
   );
 
-  const buildNewLocationForContentType = (contentTypeId: string): EditModalNewLocation => {
-    const contentType = payload.contentTypes.find((ct) => ct.sys.id === contentTypeId);
-    return {
-      id: `new-${contentTypeId}`,
-      entryIndex: entryBlockGraph.entries.length,
-      title: contentType?.name ?? contentTypeId,
-      fieldOptions: buildFieldOptionsForContentType(contentType),
-      fieldMappings: [],
-      initialFieldIds: [],
-    };
-  };
-
   const existingEntriesForWizard = useMemo(
     () =>
       entryBlockGraph.entries.map((entry, idx) => {
@@ -1089,7 +1077,7 @@ export const MappingView = ({
         contentTypes={payload.contentTypes}
         existingEntries={existingEntriesForWizard}
         onAddEntry={handleAddEntry}
-        buildNewLocationForContentType={buildNewLocationForContentType}
+        newEntryIndex={entryBlockGraph.entries.length}
         additionalContent={(() => {
           if (!pendingPreviewSourceRefs.length && !pendingPreviewHasTableContent) return undefined;
           const allTableText = pendingPreviewSourceRefs.every(isTableTextSourceRef);

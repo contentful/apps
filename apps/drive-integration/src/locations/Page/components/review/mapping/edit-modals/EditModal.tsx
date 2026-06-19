@@ -41,7 +41,7 @@ interface EditModalProps {
   contentTypes?: WorkflowContentType[];
   existingEntries?: ExistingEntryOption[];
   onAddEntry?: (params: AddEntryWizardParams) => void;
-  buildNewLocationForContentType?: (contentTypeId: string) => EditModalNewLocation;
+  newEntryIndex?: number;
 }
 
 export const EditModal = ({
@@ -55,7 +55,7 @@ export const EditModal = ({
   contentTypes = [],
   existingEntries = [],
   onAddEntry,
-  buildNewLocationForContentType,
+  newEntryIndex = 0,
 }: EditModalProps) => {
   const [wizardState, setWizard] = useState<Wizard | null>(null);
   const showWizard = wizardState !== null;
@@ -132,6 +132,18 @@ export const EditModal = ({
       fields: referenceFields,
     } as typeof contentType);
   }, [wizardState?.contentTypeId, contentTypes]);
+
+  const buildNewLocationForContentType = (contentTypeId: string): EditModalNewLocation => {
+    const contentType = contentTypes.find((ct) => ct.sys.id === contentTypeId);
+    return {
+      id: `new-${contentTypeId}`,
+      entryIndex: newEntryIndex,
+      title: contentType?.name ?? contentTypeId,
+      fieldOptions: buildFieldOptionsForContentType(contentType),
+      fieldMappings: [],
+      initialFieldIds: [],
+    };
+  };
 
   const needsReferenceFieldStep = referenceFieldOptions.length > 1;
   const wizardCtx = { needsReferenceFieldStep };
@@ -288,7 +300,7 @@ export const EditModal = ({
               {/* New location */}
               <Grid.Item>
                 <Flex flexDirection="column" gap="spacingS" padding="spacingS">
-                  {showWizard && wizardState && buildNewLocationForContentType ? (
+                  {showWizard && wizardState ? (
                     <AddEntryWizard
                       state={wizardState}
                       onChange={(next) => setWizard((prev) => (prev ? { ...prev, ...next } : prev))}
