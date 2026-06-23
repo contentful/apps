@@ -22,6 +22,17 @@ import { normalizeDomainPattern, urlMatchesAnyDomainPattern } from '@/utils/doma
 import { extractUrlsFromEntry, isRelativeUrl, type ExtractedUrl } from '@/utils/extractUrls';
 import { type AppInstallationParameters } from './ConfigScreen';
 
+function deepEqual(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (a === null || b === null || typeof a !== 'object' || typeof b !== 'object') return false;
+  const keysA = Object.keys(a as object).sort();
+  const keysB = Object.keys(b as object).sort();
+  if (keysA.length !== keysB.length || keysA.some((k, i) => k !== keysB[i])) return false;
+  return keysA.every((k) =>
+    deepEqual((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k])
+  );
+}
+
 const CHECK_LINK_FUNCTION_ID = 'checkLink';
 const FETCH_LIMIT = 1000;
 const ENTRY_FETCH_LIMIT = 100;
@@ -168,6 +179,33 @@ export default function Page() {
 
   const installation = (sdk.parameters.installation || {}) as AppInstallationParameters;
   const hasAssignedContentTypes = Boolean(installation.selectedContentTypeIds?.length);
+
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState !== 'visible') return;
+      try {
+        const appDefinitionId = sdk.ids.app;
+        if (!appDefinitionId || !sdk.cma?.appInstallation?.getForOrganization) return;
+        const result = await sdk.cma.appInstallation.getForOrganization({
+          organizationId: sdk.ids.organization,
+          appDefinitionId,
+        });
+        const match = result.items.find(
+          (item) =>
+            item.sys.space.sys.id === sdk.ids.space &&
+            item.sys.environment.sys.id === sdk.ids.environment
+        );
+        if (!deepEqual(match?.parameters, sdk.parameters.installation)) {
+          window.location.reload();
+        }
+      } catch {
+        // Silently ignore — a failed check should never block the user.
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [sdk]);
   const explicitAllowedPatterns = (installation.allowedUrlPatterns || '')
     .split(',')
     .map((p) => normalizeDomainPattern(p))
