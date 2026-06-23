@@ -28,7 +28,9 @@ function deepEqual(a: unknown, b: unknown): boolean {
   const keysA = Object.keys(a as object).sort();
   const keysB = Object.keys(b as object).sort();
   if (keysA.length !== keysB.length || keysA.some((k, i) => k !== keysB[i])) return false;
-  return keysA.every((k) => deepEqual((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k]));
+  return keysA.every((k) =>
+    deepEqual((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k])
+  );
 }
 
 const CHECK_LINK_FUNCTION_ID = 'checkLink';

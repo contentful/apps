@@ -343,7 +343,10 @@ describe('Page component', () => {
       writable: true,
     });
 
-    mockSdk.parameters.installation = { allowedUrlPatterns: 'example.com', selectedContentTypeIds: ['article'] };
+    mockSdk.parameters.installation = {
+      allowedUrlPatterns: 'example.com',
+      selectedContentTypeIds: ['article'],
+    };
 
     mockSdk.cma.appInstallation = {
       getForOrganization: vi.fn().mockResolvedValue({
