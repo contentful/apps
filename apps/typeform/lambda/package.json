@@ -24,6 +24,15 @@
     "aws-serverless-express": "3.3.6",
     "express": "^4.18.2",
     "luxon": "1.22.0",
-    "node-fetch": "2.6.0"
+    "node-fetch": "2.7.0"
+  },
+  "overrides": {
+    "axios": ">=1.15.2",
+    "body-parser": ">=1.20.3",
+    "lodash": ">=4.18.0",
+    "minimatch": ">=5.1.8",
+    "qs": ">=6.7.3",
+    "simple-git": ">=3.36.0",
+    "tar": ">=7.5.11"
   }
 }
