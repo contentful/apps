@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Autocomplete, Box, FormControl, GridItem, IconButton } from '@contentful/f36-components';
 import { TrashSimpleIcon } from '@contentful/f36-icons';
 import { FieldSelection, Rule, RuleValidation } from '../utils/types';
@@ -23,6 +23,11 @@ const RuleRow: React.FC<RuleRowProps> = ({
     useState<FieldSelection[]>(availableFields);
   const [filteredReferenceFields, setFilteredReferenceFields] =
     useState<FieldSelection[]>(availableFields);
+
+  useEffect(() => {
+    setFilteredParentFields(availableFields);
+    setFilteredReferenceFields(availableFields);
+  }, [availableFields]);
 
   const normalizeString = (str: string) => str.trim().toLowerCase();
 
