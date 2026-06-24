@@ -1,0 +1,65 @@
+{
+  "functions": [
+    {
+      "id": "getVoicesFunction",
+      "name": "Get voices function",
+      "description": "Function to fetch available ElevenLabs voices.",
+      "path": "functions/getVoices.js",
+      "entryFile": "functions/getVoices.ts",
+      "allowNetworks": ["https://api.elevenlabs.io"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "generateAudioFunction",
+      "name": "Generate audio function",
+      "description": "Function to generate audio from text using ElevenLabs TTS.",
+      "path": "functions/generateAudio.js",
+      "entryFile": "functions/generateAudio.ts",
+      "allowNetworks": ["https://api.elevenlabs.io"],
+      "accepts": ["appaction.call"]
+    }
+  ],
+  "actions": [
+    {
+      "id": "getVoicesAction",
+      "name": "Get voices action",
+      "type": "function-invocation",
+      "functionId": "getVoicesFunction",
+      "category": "Custom",
+      "parameters": []
+    },
+    {
+      "id": "generateAudioAction",
+      "name": "Generate audio action",
+      "type": "function-invocation",
+      "functionId": "generateAudioFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "entryId",
+          "name": "Entry ID",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "fieldId",
+          "name": "Field ID",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "locale",
+          "name": "Locale",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "voiceId",
+          "name": "Voice ID",
+          "type": "Symbol",
+          "required": true
+        }
+      ]
+    }
+  ]
+}
