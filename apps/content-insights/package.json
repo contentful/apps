@@ -14,7 +14,7 @@
     "contentful-management": "11.63.1",
     "dayjs": "^1.11.19",
     "emotion": "10.0.27",
-    "happy-dom": "^20.0.11",
+    "happy-dom": "^20.8.9",
     "prettier": "^3.7.4",
     "react": "18.3.1",
     "react-dom": "18.3.1",
