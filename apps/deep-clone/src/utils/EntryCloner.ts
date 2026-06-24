@@ -52,7 +52,9 @@ class EntryCloner {
     await this.createClones();
     if (this.failedCloneIds.length > 0) {
       throw new Error(
-        `Failed to clone ${this.failedCloneIds.length} ${this.failedCloneIds.length === 1 ? 'entry' : 'entries'}. The clone operation was aborted to prevent a partially-cloned structure.`
+        `Failed to clone ${this.failedCloneIds.length} ${
+          this.failedCloneIds.length === 1 ? 'entry' : 'entries'
+        }. The clone operation was aborted to prevent a partially-cloned structure.`
       );
     }
     await this.updateReferenceTree();
