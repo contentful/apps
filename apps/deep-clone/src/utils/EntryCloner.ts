@@ -15,6 +15,7 @@ class EntryCloner {
   private references: ReferenceMap = {};
   private clones: ReferenceMap = {};
   private failedCloneIds: string[] = [];
+  private failedUpdateIds: string[] = [];
   private referenceChildren: ReferenceChildrenMap = {};
   private contentTypes: { [id: string]: ContentTypeProps } = {};
   private updates: number = 0;
@@ -58,6 +59,13 @@ class EntryCloner {
       );
     }
     await this.updateReferenceTree();
+    if (this.failedUpdateIds.length > 0) {
+      throw new Error(
+        `Failed to update references on ${this.failedUpdateIds.length} cloned ${
+          this.failedUpdateIds.length === 1 ? 'entry' : 'entries'
+        }. The clones were created but some internal links may be incorrect.`
+      );
+    }
     return this.clones[this.entryId] as EntryProps;
   }
 
@@ -157,6 +165,7 @@ class EntryCloner {
               latestClone = await this.cma.entry.get({ entryId: clone.sys.id });
             } else {
               console.warn('Error updating clone.', error);
+              this.failedUpdateIds.push(clone.sys.id);
               break;
             }
           }
