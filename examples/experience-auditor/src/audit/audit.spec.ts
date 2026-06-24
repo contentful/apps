@@ -180,7 +180,7 @@ describe('audit rules', () => {
     });
   });
 
-  it('flags an entry binding that fails to resolve via resolvedBindings', () => {
+  it('flags an entry binding with no entryId (structural check)', () => {
     const n: CollectedNode = {
       id: 'card',
       nodeType: 'Component',
@@ -189,16 +189,15 @@ describe('audit rules', () => {
           key: 'featured',
           area: 'content',
           value: null,
-          binding: { type: 'entry', entryId: 'e1', fieldId: 'featured' },
+          binding: { type: 'entry', entryId: '', fieldId: 'featured' },
         },
       ],
-      resolvedBindings: { featured: { resolved: false } },
     };
     const finding = runAudit([n]).findings.find((f) => f.ruleId === 'content/broken-binding');
     expect(finding?.severity).toBe('error');
   });
 
-  it('does not flag a binding that resolves', () => {
+  it('does not flag an entry binding that references an entry', () => {
     const n: CollectedNode = {
       id: 'card',
       nodeType: 'Component',
@@ -210,7 +209,6 @@ describe('audit rules', () => {
           binding: { type: 'entry', entryId: 'e1', fieldId: 'featured' },
         },
       ],
-      resolvedBindings: { featured: { resolved: true } },
     };
     expect(
       runAudit([n]).findings.find((f) => f.ruleId === 'content/broken-binding')

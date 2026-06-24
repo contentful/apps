@@ -1,35 +1,22 @@
-import React, { useState } from 'react';
-import { Box, Button, Flex, Text, TextInput } from '@contentful/f36-components';
+import React from 'react';
+import { Box, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 
 interface SuggestedFixProps {
-  /** The proposed value, pre-filled and editable. */
+  /** The proposed value. */
   suggestedValue: string;
-  /** Human-readable provenance shown above the field. */
+  /** Human-readable provenance shown above the value. */
   source: string;
-  /** Whether the current user may write (mirrors the deterministic Fix gate). */
-  canApply: boolean;
-  /** True while the write is in flight. */
-  isApplying: boolean;
-  /** Apply the (possibly edited) value. */
-  onApply: (value: string) => void;
 }
 
 /**
- * The confirm-step for a `suggested` fix. Unlike a deterministic fix (applied on
- * click), a suggested value is shown in an editable field so the author reviews
- * and adjusts it before it is written. This keeps the app from silently writing
- * an opinionated value.
+ * Read-only advice for a `suggested` finding. The app-sdk surface exposes no
+ * host call to write a node's content properties, so the auditor cannot apply
+ * the value — it surfaces the derived suggestion for the author to copy across
+ * manually. Provenance (`source`) is shown so the author can judge the
+ * suggestion before using it.
  */
-const SuggestedFix = ({
-  suggestedValue,
-  source,
-  canApply,
-  isApplying,
-  onApply,
-}: SuggestedFixProps) => {
-  const [value, setValue] = useState(suggestedValue);
-
+const SuggestedFix = ({ suggestedValue, source }: SuggestedFixProps) => {
   return (
     <Box
       marginTop="spacingXs"
@@ -43,25 +30,12 @@ const SuggestedFix = ({
       <Text fontColor="blue600" fontSize="fontSizeS" fontWeight="fontWeightDemiBold">
         💡 Suggested from {source}
       </Text>
-      <Flex gap="spacingXs" alignItems="center" marginTop="spacing2Xs">
-        <TextInput
-          size="small"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          isDisabled={!canApply || isApplying}
-          aria-label="Suggested value"
-        />
-        <Button
-          size="small"
-          variant="primary"
-          isDisabled={!canApply || value.trim().length === 0}
-          isLoading={isApplying}
-          onClick={() => onApply(value)}>
-          Apply
-        </Button>
-      </Flex>
-      <Text fontColor="gray500" fontSize="fontSizeS" marginTop="spacing2Xs">
-        Editable before write · confirms via setContentProperty + notifier
+      <Text
+        fontColor="gray700"
+        fontSize="fontSizeS"
+        marginTop="spacing2Xs"
+        data-test-id="suggested-value">
+        <strong>{suggestedValue}</strong>
       </Text>
     </Box>
   );

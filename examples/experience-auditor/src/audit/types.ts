@@ -11,18 +11,6 @@ export interface CollectedNode {
   id: string;
   nodeType: ExoNodeType;
   properties: ComponentPropertyDescriptor[];
-  /**
-   * Per-property-key binding resolution, populated by the collector when the
-   * host backs `resolveEntryBinding`. Absent when the host does not support it
-   * (the binding rule then falls back to a structural check).
-   */
-  resolvedBindings?: Record<string, ResolvedBinding>;
-}
-
-/** The resolution result for an entry-bound property, captured at collect time. */
-export interface ResolvedBinding {
-  /** True when `resolveEntryBinding` returned a target; false when it returned null. */
-  resolved: boolean;
 }
 
 /**

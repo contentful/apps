@@ -24,23 +24,20 @@ function suggestedFinding(suggestedValue: string): AuditFinding {
   };
 }
 
-describe('FindingList suggested-fix seeding', () => {
-  it('re-seeds the suggested value when the suggestion changes for the same finding id', () => {
+describe('FindingList suggested-fix display', () => {
+  it('renders the derived suggestion as read-only advice', () => {
     const props = {
       canLocate: false,
-      canFix: true,
       onLocate: vi.fn(),
-      onApplyDeterministic: vi.fn(),
-      onApplySuggested: vi.fn(),
-      busyFindingId: null,
     };
-    const { getByLabelText, rerender } = render(
+    const { getByTestId, rerender } = render(
       <FindingList findings={[suggestedFinding('Spring Sale')]} {...props} />
     );
-    expect((getByLabelText('Suggested value') as HTMLInputElement).value).toBe('Spring Sale');
+    expect(getByTestId('suggested-value')).toHaveTextContent('Spring Sale');
 
-    // Same finding.id, new derived suggestion (heading changed, meta still empty).
+    // A re-derived suggestion (heading changed, meta still empty) updates the
+    // displayed value.
     rerender(<FindingList findings={[suggestedFinding('Spring Sale 2026')]} {...props} />);
-    expect((getByLabelText('Suggested value') as HTMLInputElement).value).toBe('Spring Sale 2026');
+    expect(getByTestId('suggested-value')).toHaveTextContent('Spring Sale 2026');
   });
 });

@@ -185,25 +185,21 @@ const seoMetaRule: AuditRule = {
 };
 
 /**
- * Content properties bound to an entry must actually resolve. When the collector
- * recorded a real resolution (`resolvedBindings`), prefer it: a binding is broken
- * iff it is an entry binding that did not resolve. Where no resolution is present
- * (host without `resolveEntryBinding`), fall back to the structural check — an
- * entry source with no recorded `entryId` is a broken reference.
+ * Content properties bound to an entry must reference an entry. The audit is
+ * structural: an entry binding with no `entryId` is a broken reference. (The
+ * app-sdk surface exposes no host call to resolve a binding to a live entry, so
+ * the auditor cannot verify the target exists — only that one is referenced.)
  */
 const brokenBindingRule: AuditRule = {
   id: 'content/broken-binding',
-  description: 'Entry bindings should resolve to an entry.',
+  description: 'Entry bindings should reference an entry.',
   evaluate(node) {
     const findings: AuditFinding[] = [];
     for (const property of node.properties) {
       const binding = property.binding;
       if (!binding || binding.type !== 'entry') continue;
 
-      const resolution = node.resolvedBindings?.[property.key];
-      const broken = resolution ? !resolution.resolved : !binding.entryId;
-
-      if (broken) {
+      if (!binding.entryId) {
         findings.push(
           makeFinding(brokenBindingRule, node, {
             propertyKey: property.key,

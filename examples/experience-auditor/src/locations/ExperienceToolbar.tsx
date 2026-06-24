@@ -26,9 +26,11 @@ import FindingList from '../components/FindingList';
  * On mount (and whenever the experience changes) it walks the experience tree
  * with `sdk.exo.experience`, runs a set of pure audit rules, and renders a
  * scored list of findings. Each finding can be located on the canvas
- * (`selection.set` + `selection.highlight`) and, where a safe deterministic fix
- * exists, repaired in place (`getNode().setContentProperty`). Publishing is
- * gated on there being no outstanding errors.
+ * (`selection.set` + `selection.highlight`). Where a finding has a derivable
+ * fix, the suggested value is surfaced as read-only advice — the app-sdk
+ * surface exposes no host call to write a node's content properties, so fixes
+ * are advisory rather than one-click. Publishing is gated on there being no
+ * outstanding errors.
  */
 const ExperienceToolbar = () => {
   const sdk = useSDK<ExperienceEditorToolbarAppSDK>();
@@ -37,8 +39,6 @@ const ExperienceToolbar = () => {
   const [uiMode, setUiMode] = useState<UiMode>(() => sdk.exo.getUiMode());
   const [report, setReport] = useState<AuditReport | null>(null);
   const [auditing, setAuditing] = useState(true);
-  const [canFix, setCanFix] = useState(false);
-  const [busyFindingId, setBusyFindingId] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
   const [capabilities, setCapabilities] = useState<Capabilities>(() => detectCapabilities(sdk.exo));
   useEffect(() => setCapabilities(detectCapabilities(sdk.exo)), [sdk]);
@@ -66,22 +66,6 @@ const ExperienceToolbar = () => {
   useEffect(() => sdk.exo.onContextChanged(setContext), [sdk]);
   useEffect(() => sdk.exo.onUiModeChanged(setUiMode), [sdk]);
 
-  // Resolve write permission once for UX gating (the host still enforces).
-  useEffect(() => {
-    let active = true;
-    sdk.access
-      .can('update', 'Entry')
-      .then((allowed) => {
-        if (active) setCanFix(allowed);
-      })
-      .catch(() => {
-        if (active) setCanFix(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [sdk]);
-
   // Initial audit + re-audit whenever the experience changes.
   // Simplification for the example: every onChange triggers a full traversal.
   // A production app editing rapidly would debounce this (e.g. trailing 300ms)
@@ -103,46 +87,6 @@ const ExperienceToolbar = () => {
       });
     },
     [sdk]
-  );
-
-  const applyWrite = useCallback(
-    async (finding: AuditFinding, propertyKey: string, value: unknown) => {
-      setBusyFindingId(finding.id);
-      try {
-        const node = sdk.exo.experience.getNode(finding.nodeId);
-        if (!node) {
-          sdk.notifier.error('That component no longer exists.');
-          return;
-        }
-        await node.setContentProperty(propertyKey, value);
-        sdk.notifier.success('Fix applied.');
-        // Re-audit explicitly rather than relying on the setContentProperty
-        // write to round-trip back through onChange — keeps the panel in sync
-        // even if the host does not emit a change event for this write.
-        await audit();
-      } catch {
-        sdk.notifier.error('Could not apply the fix. Please try again.');
-      } finally {
-        setBusyFindingId(null);
-      }
-    },
-    [sdk, audit]
-  );
-
-  const handleApplyDeterministic = useCallback(
-    (finding: AuditFinding) => {
-      if (finding.fix?.kind !== 'deterministic') return;
-      void applyWrite(finding, finding.fix.propertyKey, finding.fix.value);
-    },
-    [applyWrite]
-  );
-
-  const handleApplySuggested = useCallback(
-    (finding: AuditFinding, value: string) => {
-      if (finding.fix?.kind !== 'suggested') return;
-      void applyWrite(finding, finding.fix.propertyKey, value);
-    },
-    [applyWrite]
   );
 
   const handlePublish = useCallback(async () => {
@@ -202,15 +146,7 @@ const ExperienceToolbar = () => {
         )}
 
         {report && (
-          <FindingList
-            findings={report.findings}
-            canLocate={canLocate}
-            canFix={canFix}
-            onLocate={handleLocate}
-            onApplyDeterministic={handleApplyDeterministic}
-            onApplySuggested={handleApplySuggested}
-            busyFindingId={busyFindingId}
-          />
+          <FindingList findings={report.findings} canLocate={canLocate} onLocate={handleLocate} />
         )}
 
         <Flex flexDirection="column" gap="spacingXs">
