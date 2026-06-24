@@ -11,9 +11,9 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 describe('ExperienceToolbar', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSdk.exo.context = { type: 'experience', entityId: 'experience-123' };
-    mockSdk.exo.getUiMode.mockReturnValue('visual');
-    mockSdk.exo.experience.selection.get.mockReturnValue({ nodeId: null });
+    mockSdk.experiences.context = { type: 'experience', entityId: 'experience-123' };
+    mockSdk.experiences.getUiMode.mockReturnValue('visual');
+    mockSdk.experiences.experience.selection.get.mockReturnValue({ nodeId: null });
   });
 
   it('renders the editing context and ui mode', () => {
@@ -32,13 +32,13 @@ describe('ExperienceToolbar', () => {
   it('subscribes to context, ui mode, and selection changes', () => {
     render(<ExperienceToolbar />);
 
-    expect(mockSdk.exo.onContextChanged).toHaveBeenCalledOnce();
-    expect(mockSdk.exo.onUiModeChanged).toHaveBeenCalledOnce();
-    expect(mockSdk.exo.experience.selection.onChange).toHaveBeenCalledOnce();
+    expect(mockSdk.experiences.onContextChanged).toHaveBeenCalledOnce();
+    expect(mockSdk.experiences.onUiModeChanged).toHaveBeenCalledOnce();
+    expect(mockSdk.experiences.experience.selection.onChange).toHaveBeenCalledOnce();
   });
 
   it('warns when in form mode', () => {
-    mockSdk.exo.getUiMode.mockReturnValue('form');
+    mockSdk.experiences.getUiMode.mockReturnValue('form');
 
     const { getByText } = render(<ExperienceToolbar />);
 
@@ -50,12 +50,12 @@ describe('ExperienceToolbar', () => {
     const { getByTestId } = render(<ExperienceToolbar />);
 
     // Drive a selection change through the subscription callback.
-    const onSelectionChange = mockSdk.exo.experience.selection.onChange.mock.calls[0][0];
+    const onSelectionChange = mockSdk.experiences.experience.selection.onChange.mock.calls[0][0];
     act(() => {
       onSelectionChange({ nodeId: 'node-1', nodeType: 'Component' });
     });
 
-    expect(mockSdk.exo.experience.getNode).toHaveBeenCalledWith('node-1');
+    expect(mockSdk.experiences.experience.getNode).toHaveBeenCalledWith('node-1');
 
     await waitFor(() => {
       const table = getByTestId('properties-table');
@@ -70,7 +70,7 @@ describe('ExperienceToolbar', () => {
     const pending = new Promise<unknown[]>((resolve) => {
       resolveProps = resolve;
     });
-    mockSdk.exo.experience.getNode.mockReturnValue({
+    mockSdk.experiences.experience.getNode.mockReturnValue({
       id: 'node-1',
       nodeType: 'Component',
       onChange: vi.fn().mockReturnValue(vi.fn()),
@@ -78,7 +78,7 @@ describe('ExperienceToolbar', () => {
     });
 
     const { container, getByTestId } = render(<ExperienceToolbar />);
-    const onSelectionChange = mockSdk.exo.experience.selection.onChange.mock.calls[0][0];
+    const onSelectionChange = mockSdk.experiences.experience.selection.onChange.mock.calls[0][0];
     act(() => {
       onSelectionChange({ nodeId: 'node-1', nodeType: 'Component' });
     });
@@ -96,7 +96,7 @@ describe('ExperienceToolbar', () => {
   });
 
   it('clears the spinner and renders no table when getProperties rejects', async () => {
-    mockSdk.exo.experience.getNode.mockReturnValue({
+    mockSdk.experiences.experience.getNode.mockReturnValue({
       id: 'node-1',
       nodeType: 'Component',
       onChange: vi.fn().mockReturnValue(vi.fn()),
@@ -104,7 +104,7 @@ describe('ExperienceToolbar', () => {
     });
 
     const { container, queryByTestId } = render(<ExperienceToolbar />);
-    const onSelectionChange = mockSdk.exo.experience.selection.onChange.mock.calls[0][0];
+    const onSelectionChange = mockSdk.experiences.experience.selection.onChange.mock.calls[0][0];
     act(() => {
       onSelectionChange({ nodeId: 'node-1', nodeType: 'Component' });
     });
@@ -118,7 +118,7 @@ describe('ExperienceToolbar', () => {
   });
 
   it('renders a bound property as "type → entryId"', async () => {
-    mockSdk.exo.experience.getNode.mockReturnValue({
+    mockSdk.experiences.experience.getNode.mockReturnValue({
       id: 'node-1',
       nodeType: 'Component',
       onChange: vi.fn().mockReturnValue(vi.fn()),
@@ -133,7 +133,7 @@ describe('ExperienceToolbar', () => {
     });
 
     const { getByTestId } = render(<ExperienceToolbar />);
-    const onSelectionChange = mockSdk.exo.experience.selection.onChange.mock.calls[0][0];
+    const onSelectionChange = mockSdk.experiences.experience.selection.onChange.mock.calls[0][0];
     act(() => {
       onSelectionChange({ nodeId: 'node-1', nodeType: 'Component' });
     });
@@ -145,10 +145,10 @@ describe('ExperienceToolbar', () => {
   });
 
   it('highlights the selected node on the canvas in visual mode', async () => {
-    mockSdk.exo.getUiMode.mockReturnValue('visual');
+    mockSdk.experiences.getUiMode.mockReturnValue('visual');
 
     const { getByTestId } = render(<ExperienceToolbar />);
-    const onSelectionChange = mockSdk.exo.experience.selection.onChange.mock.calls[0][0];
+    const onSelectionChange = mockSdk.experiences.experience.selection.onChange.mock.calls[0][0];
     act(() => {
       onSelectionChange({ nodeId: 'node-1', nodeType: 'Component' });
     });
@@ -156,17 +156,17 @@ describe('ExperienceToolbar', () => {
     const button = await waitFor(() => getByTestId('highlight-button'));
     fireEvent.click(button);
 
-    expect(mockSdk.exo.experience.selection.highlight).toHaveBeenCalledWith('node-1', {
+    expect(mockSdk.experiences.experience.selection.highlight).toHaveBeenCalledWith('node-1', {
       flash: true,
       scrollIntoView: true,
     });
   });
 
   it('disables the highlight button in form mode', async () => {
-    mockSdk.exo.getUiMode.mockReturnValue('form');
+    mockSdk.experiences.getUiMode.mockReturnValue('form');
 
     const { getByTestId } = render(<ExperienceToolbar />);
-    const onSelectionChange = mockSdk.exo.experience.selection.onChange.mock.calls[0][0];
+    const onSelectionChange = mockSdk.experiences.experience.selection.onChange.mock.calls[0][0];
     act(() => {
       onSelectionChange({ nodeId: 'node-1', nodeType: 'Component' });
     });
@@ -175,6 +175,6 @@ describe('ExperienceToolbar', () => {
     expect(button).toBeDisabled();
 
     fireEvent.click(button);
-    expect(mockSdk.exo.experience.selection.highlight).not.toHaveBeenCalled();
+    expect(mockSdk.experiences.experience.selection.highlight).not.toHaveBeenCalled();
   });
 });

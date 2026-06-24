@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import type {
   ComponentPropertyDescriptor,
-  ExoContext,
-  ExoNodeType,
+  ExperienceContext,
+  ExperienceNodeType,
   ExperienceEditorToolbarAppSDK,
   UiMode,
 } from '@contentful/app-sdk';
@@ -25,17 +25,17 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 
 interface Selection {
   nodeId: string | null;
-  nodeType?: ExoNodeType;
+  nodeType?: ExperienceNodeType;
 }
 
 /**
- * A minimal Experience Editor toolbar app. It demonstrates the core `sdk.exo`
+ * A minimal Experience Editor toolbar app. It demonstrates the core `sdk.experiences`
  * patterns a toolbar app is built on:
  *
- *  - reading `sdk.exo.context` to tell experience vs. fragment editing apart
- *  - reacting to `sdk.exo.onUiModeChanged()` (form vs. visual mode)
- *  - subscribing to `sdk.exo.experience.selection.onChange()`
- *  - resolving the selected node with `sdk.exo.experience.getNode(nodeId)` and
+ *  - reading `sdk.experiences.context` to tell experience vs. fragment editing apart
+ *  - reacting to `sdk.experiences.onUiModeChanged()` (form vs. visual mode)
+ *  - subscribing to `sdk.experiences.experience.selection.onChange()`
+ *  - resolving the selected node with `sdk.experiences.experience.getNode(nodeId)` and
  *    reading its properties
  *
  * The app mounts once when the editor opens and stays mounted for the session;
@@ -46,27 +46,29 @@ interface Selection {
 const ExperienceToolbar = () => {
   const sdk = useSDK<ExperienceEditorToolbarAppSDK>();
 
-  const [context, setContext] = useState<ExoContext>(() => sdk.exo.context);
-  const [uiMode, setUiMode] = useState<UiMode>(() => sdk.exo.getUiMode());
-  const [selection, setSelection] = useState<Selection>(() => sdk.exo.experience.selection.get());
+  const [context, setContext] = useState<ExperienceContext>(() => sdk.experiences.context);
+  const [uiMode, setUiMode] = useState<UiMode>(() => sdk.experiences.getUiMode());
+  const [selection, setSelection] = useState<Selection>(() =>
+    sdk.experiences.experience.selection.get()
+  );
   const [properties, setProperties] = useState<ComponentPropertyDescriptor[] | null>(null);
   const [loadingProperties, setLoadingProperties] = useState(false);
 
   // Keep the editing context (experience vs. fragment) in sync.
   useEffect(() => {
-    return sdk.exo.onContextChanged(setContext);
+    return sdk.experiences.onContextChanged(setContext);
   }, [sdk]);
 
   // Keep the UI mode (form vs. visual) in sync. In `form` mode, canvas
   // affordances like selection highlighting are no-ops, so apps should degrade
   // gracefully — here we just surface the current mode.
   useEffect(() => {
-    return sdk.exo.onUiModeChanged(setUiMode);
+    return sdk.experiences.onUiModeChanged(setUiMode);
   }, [sdk]);
 
   // Track the canvas selection.
   useEffect(() => {
-    return sdk.exo.experience.selection.onChange(setSelection);
+    return sdk.experiences.experience.selection.onChange(setSelection);
   }, [sdk]);
 
   // When the selection changes, resolve the node and read its properties.
@@ -79,7 +81,7 @@ const ExperienceToolbar = () => {
       return;
     }
 
-    const node = sdk.exo.experience.getNode(nodeId);
+    const node = sdk.experiences.experience.getNode(nodeId);
 
     if (!node) {
       setProperties(null);
@@ -136,7 +138,7 @@ const ExperienceToolbar = () => {
     if (!selection.nodeId) {
       return;
     }
-    sdk.exo.experience.selection.highlight(selection.nodeId, {
+    sdk.experiences.experience.selection.highlight(selection.nodeId, {
       flash: true,
       scrollIntoView: true,
     });

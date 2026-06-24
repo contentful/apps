@@ -32,7 +32,7 @@ const mockSdk: any = {
     setReady: vi.fn(),
     getCurrentState: vi.fn().mockResolvedValue(null),
   },
-  exo: {
+  experiences: {
     context: { type: 'experience', entityId: 'experience-123' },
     onContextChanged: vi.fn().mockReturnValue(noopUnsubscribe),
     getUiMode: vi.fn().mockReturnValue('visual'),
