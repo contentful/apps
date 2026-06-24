@@ -3,7 +3,7 @@ import { render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ExperienceToolbar from './ExperienceToolbar';
-import { mockSdk, defaultNodes } from '../../test/mocks';
+import { mockSdk, defaultNodes, makeMockNode } from '../../test/mocks';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -67,72 +67,43 @@ describe('ExperienceToolbar (Experience Auditor)', () => {
     expect(locateButton).toBeDisabled();
   });
 
-  it('applies a one-click fix via setContentProperty and re-audits', async () => {
-    const user = userEvent.setup();
+  it('surfaces a deterministic fix as read-only advice (no write path on 4.59)', async () => {
     // A node whose alt text has stray whitespace yields a finding with a
-    // "Trim whitespace" fix. setContentProperty trims it and clears the finding.
-    const setContentProperty = vi.fn().mockResolvedValue(undefined);
-    let altValue = '  spaced alt  ';
-    const fixNode = {
-      id: 'hero',
-      nodeType: 'Component',
-      onChange: vi.fn().mockReturnValue(vi.fn()),
-      getProperties: vi.fn().mockImplementation(() =>
-        Promise.resolve([
-          { key: 'image', area: 'content', value: { sys: { id: 'asset-1' } } },
-          { key: 'altText', area: 'content', value: altValue },
-        ])
-      ),
-      setContentProperty: vi.fn().mockImplementation(async (key: string, value: string) => {
-        if (key === 'altText') altValue = value;
-        return setContentProperty(key, value);
-      }),
-    };
+    // "Trim whitespace" fix. The 4.59 surface has no setContentProperty, so the
+    // fix is advisory: the trimmed value is shown, not applied.
+    const fixNode = makeMockNode('hero', 'Component', [
+      { key: 'image', area: 'content', value: { sys: { id: 'asset-1' } } },
+      { key: 'altText', area: 'content', value: '  spaced alt  ' },
+    ]);
     mockSdk.exo.experience.getRootNodes.mockReturnValue([fixNode]);
     mockSdk.exo.experience.getNode.mockReturnValue(fixNode);
 
-    const { getAllByTestId, queryByText } = render(<ExperienceToolbar />);
+    const { getAllByTestId, getByTestId } = render(<ExperienceToolbar />);
 
     await waitFor(() => expect(getAllByTestId('finding').length).toBeGreaterThan(0));
-    const fixButton = within(getAllByTestId('finding')[0]).getByText('Trim whitespace');
-    await user.click(fixButton);
 
-    expect(setContentProperty).toHaveBeenCalledWith('altText', 'spaced alt');
-    await waitFor(() => expect(mockSdk.notifier.success).toHaveBeenCalledWith('Fix applied.'));
-    // Re-audit ran on the trimmed value: the whitespace finding is gone.
-    await waitFor(() => expect(queryByText('Trim whitespace')).toBeNull());
+    // The advice shows the trimmed value; there is no Apply/Fix button to click.
+    const advice = getByTestId('deterministic-advice');
+    expect(advice).toHaveTextContent('Trim whitespace');
+    expect(advice).toHaveTextContent('spaced alt');
+    expect(mockSdk.notifier.success).not.toHaveBeenCalled();
   });
 
-  it('applies a suggested fix with the edited value via setContentProperty', async () => {
-    const user = userEvent.setup();
-    const setContentProperty = vi.fn().mockResolvedValue(undefined);
-    const metaNode = {
-      id: 'page',
-      nodeType: 'Component',
-      onChange: vi.fn().mockReturnValue(vi.fn()),
-      resolveEntryBinding: vi.fn().mockResolvedValue({ entryId: 'e' }),
-      getProperties: vi.fn().mockResolvedValue([
-        { key: 'heading', area: 'content', value: 'Spring Sale' },
-        { key: 'metaTitle', area: 'content', value: '' },
-      ]),
-      setContentProperty,
-    };
+  it('surfaces a suggested fix as a read-only value (no editable apply)', async () => {
+    const metaNode = makeMockNode('page', 'Component', [
+      { key: 'heading', area: 'content', value: 'Spring Sale' },
+      { key: 'metaTitle', area: 'content', value: '' },
+    ]);
     mockSdk.exo.experience.getRootNodes.mockReturnValue([metaNode]);
     mockSdk.exo.experience.getNode.mockReturnValue(metaNode);
 
-    const { getByTestId } = render(<ExperienceToolbar />);
+    const { getByTestId, queryByText } = render(<ExperienceToolbar />);
     await waitFor(() => expect(getByTestId('suggested-fix')).toBeInTheDocument());
 
-    const input = within(getByTestId('suggested-fix')).getByLabelText(
-      'Suggested value'
-    ) as HTMLInputElement;
-    expect(input.value).toBe('Spring Sale');
-    await user.clear(input);
-    await user.type(input, 'Spring Sale 2026');
-    await user.click(within(getByTestId('suggested-fix')).getByText('Apply'));
-
-    expect(setContentProperty).toHaveBeenCalledWith('metaTitle', 'Spring Sale 2026');
-    await waitFor(() => expect(mockSdk.notifier.success).toHaveBeenCalledWith('Fix applied.'));
+    // The derived suggestion is shown read-only; no editable input, no Apply.
+    expect(getByTestId('suggested-value')).toHaveTextContent('Spring Sale');
+    expect(queryByText('Apply')).toBeNull();
+    expect(mockSdk.notifier.success).not.toHaveBeenCalled();
   });
 
   it('renders Locate as disabled when selection is unsupported', async () => {

@@ -14,20 +14,12 @@ interface DemoProperty {
 }
 
 function makeNode(id: string, initialProps: DemoProperty[]) {
-  let props = initialProps;
   return {
     id,
     nodeType: 'Component' as const,
     get: () => ({ id, nodeType: 'Component' as const }),
     onChange: () => () => {},
-    getProperties: async () => props,
-    getContentProperty: async () => undefined,
-    setContentProperty: async (key: string, value: unknown) => {
-      // Mutate in place so a re-audit reflects the applied fix.
-      props = props.map((p) => (p.key === key ? { ...p, value } : p));
-    },
-    onContentPropertyChanged: () => () => {},
-    resolveEntryBinding: async () => ({ entryId: 'demo-entry' }),
+    getProperties: async () => initialProps,
   };
 }
 

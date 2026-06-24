@@ -8,11 +8,7 @@ import EmptyState from './EmptyState';
 interface FindingListProps {
   findings: AuditFinding[];
   canLocate: boolean;
-  canFix: boolean;
   onLocate: (finding: AuditFinding) => void;
-  onApplyDeterministic: (finding: AuditFinding) => void;
-  onApplySuggested: (finding: AuditFinding, value: string) => void;
-  busyFindingId: string | null;
 }
 
 const SEVERITY_VARIANT: Record<Severity, BadgeProps['variant']> = {
@@ -28,15 +24,7 @@ const SEVERITY_LABEL: Record<Severity, string> = {
   info: 'Info',
 };
 
-const FindingList = ({
-  findings,
-  canLocate,
-  canFix,
-  onLocate,
-  onApplyDeterministic,
-  onApplySuggested,
-  busyFindingId,
-}: FindingListProps) => {
+const FindingList = ({ findings, canLocate, onLocate }: FindingListProps) => {
   if (findings.length === 0) return <EmptyState />;
 
   return (
@@ -70,20 +58,19 @@ const FindingList = ({
                       {finding.detail}
                     </Text>
                     {finding.fix?.kind === 'suggested' && (
-                      // Key on the suggested value so a *changed* suggestion (same
-                      // finding.id, new derived value) remounts SuggestedFix and
-                      // re-seeds its state; an unchanged suggestion keeps the same
-                      // key, preserving the author's in-progress edit across a
-                      // no-op re-audit. React's "reset state with a key" idiom —
-                      // preferred over a useEffect-sync anti-pattern.
                       <SuggestedFix
-                        key={finding.fix.suggestedValue}
                         suggestedValue={finding.fix.suggestedValue}
                         source={finding.fix.source}
-                        canApply={canFix}
-                        isApplying={busyFindingId === finding.id}
-                        onApply={(value) => onApplySuggested(finding, value)}
                       />
+                    )}
+                    {finding.fix?.kind === 'deterministic' && (
+                      <Text
+                        fontColor="gray600"
+                        fontSize="fontSizeS"
+                        marginTop="spacing2Xs"
+                        data-test-id="deterministic-advice">
+                        💡 {finding.fix.label}: <strong>{String(finding.fix.value)}</strong>
+                      </Text>
                     )}
                   </Flex>
                   <Flex gap="spacingXs" flexShrink={0}>
@@ -99,19 +86,6 @@ const FindingList = ({
                       }>
                       Locate
                     </Button>
-                    {finding.fix?.kind === 'deterministic' && (
-                      <Button
-                        size="small"
-                        variant="primary"
-                        isDisabled={!canFix}
-                        isLoading={busyFindingId === finding.id}
-                        onClick={() => onApplyDeterministic(finding)}
-                        title={
-                          canFix ? undefined : 'You do not have permission to edit this experience'
-                        }>
-                        {finding.fix.label}
-                      </Button>
-                    )}
                   </Flex>
                 </Flex>
               </Box>
