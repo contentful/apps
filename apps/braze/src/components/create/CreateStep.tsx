@@ -11,13 +11,12 @@ import {
   FormControl,
   Textarea,
   Skeleton,
-  Icon,
 } from '@contentful/f36-components';
+import { CheckCircleIcon, PencilSimpleIcon, WarningOctagonIcon } from '@contentful/f36-icons';
 import { Entry } from '../../fields/Entry';
 import WizardFooter from '../WizardFooter';
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { editButton } from './CreateStep.styles';
-import { PencilSimple, CheckCircle, WarningOctagon } from '@phosphor-icons/react';
 import tokens from '@contentful/f36-tokens';
 import CreateButton from './CreateButton';
 import { ContentBlockData, CreationResultField } from './CreateFlow';
@@ -176,8 +175,8 @@ const ContentBlockView = ({
         <Stack spacing="spacingXs" flexDirection="column" alignItems="flex-start">
           <Text>Content Block name</Text>
           <Flex alignItems="center" style={{ gap: tokens.spacing2Xs }}>
-            {isCreated && <Icon as={CheckCircle} variant="positive" size="tiny" />}
-            {error && <Icon as={WarningOctagon} variant="negative" size="tiny" />}
+            {isCreated && <CheckCircleIcon color={tokens.green600} size="tiny" />}
+            {error && <WarningOctagonIcon color={tokens.red600} size="tiny" />}
             <Text fontWeight="fontWeightMedium">{name}</Text>
           </Flex>
           {error && (
@@ -197,7 +196,7 @@ const ContentBlockView = ({
         <IconButton
           size="small"
           variant="secondary"
-          icon={<PencilSimple size={16} />}
+          icon={<PencilSimpleIcon size="medium" />}
           aria-label="Edit content block"
           onClick={onEdit}
           className={editButton}

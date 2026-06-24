@@ -5,7 +5,7 @@ import { processFields } from '../utils/fieldsProcessing';
 import { useEffect, useState } from 'react';
 import ConfigEntryService from '../utils/ConfigEntryService';
 import { EntryConnectedFields } from '../utils/utils';
-import { ErrorCircleOutlineIcon } from '@contentful/f36-icons';
+import { WarningOctagonIcon } from '@contentful/f36-icons';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
@@ -64,7 +64,7 @@ const Sidebar = () => {
   return (
     <Flex gap="spacingM" flexDirection="column">
       {connectedFields?.some((field) => field.error) && (
-        <Note variant="negative" icon={<ErrorCircleOutlineIcon />}>
+        <Note variant="negative" icon={<WarningOctagonIcon />}>
           <Text lineHeight="lineHeightCondensed" fontColor="gray800">
             Unable to sync content. Review your connected fields or{' '}
             <TextLink onClick={() => sdk.navigator.openAppConfig()}>app configuration</TextLink>.
@@ -72,7 +72,7 @@ const Sidebar = () => {
         </Note>
       )}
       {showTokenError && (
-        <Note variant="negative" icon={<ErrorCircleOutlineIcon />}>
+        <Note variant="negative" icon={<WarningOctagonIcon />}>
           <Text lineHeight="lineHeightCondensed" fontColor="gray800">
             There is an error with your Hubspot private app access token, and entry fields did not
             sync. View instructions on the{' '}

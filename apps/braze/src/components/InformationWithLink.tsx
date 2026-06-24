@@ -1,7 +1,6 @@
 import { Text, Spacing, Paragraph, TextLink } from '@contentful/f36-components';
 import { ColorTokens } from '@contentful/f36-tokens';
-import React from 'react';
-import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { ArrowSquareOutIcon } from '@contentful/f36-icons';
 
 type InformationSectionProps = {
   url: string;
@@ -21,7 +20,7 @@ function InformationWithLink(props: InformationSectionProps) {
       data-testid={props.dataTestId}>
       {props.children}{' '}
       <TextLink
-        icon={<ExternalLinkIcon />}
+        icon={<ArrowSquareOutIcon />}
         alignIcon="end"
         href={props.url}
         target="_blank"

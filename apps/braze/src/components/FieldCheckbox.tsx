@@ -4,7 +4,7 @@ import { ReferenceArrayField } from '../fields/ReferenceArrayField';
 import { ReferenceField } from '../fields/ReferenceField';
 import { ReferenceItem } from '../fields/ReferenceItem';
 import { useState } from 'react';
-import { ChevronDownIcon, ChevronUpIcon } from '@contentful/f36-icons';
+import { CaretDownIcon, CaretUpIcon } from '@contentful/f36-icons';
 import CheckboxCard from './CheckboxCard';
 
 type FieldCheckboxProps =
@@ -178,7 +178,7 @@ const CheckboxContainer = (props: {
       fontWeight="fontWeightDemiBold">
       <IconButton
         style={{ minHeight: '0' }}
-        icon={show ? <ChevronUpIcon /> : <ChevronDownIcon />}
+        icon={show ? <CaretUpIcon /> : <CaretDownIcon />}
         aria-label="Down arrow"
         variant="transparent"
         size="small"

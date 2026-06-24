@@ -1,11 +1,9 @@
 import React from 'react';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ContentTypeMultiSelect from '../../src/components/ContentTypeMultiSelect';
-import { ContentType } from '../../src/utils/utils';
-import { mockSdk } from '../mocks';
-import type { ConfigAppSDK } from '@contentful/app-sdk';
-import { useSDK } from '@contentful/react-apps-toolkit';
+import { ContentTypeMultiSelect } from 'contentful-app-components';
+import { beforeEach, vi, afterEach, describe, it, expect } from 'vitest';
+import { mockSdk } from './mocks/mockSdk';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -14,15 +12,18 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 describe('ContentTypeMultiSelect', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSdk.cma.contentType.getMany.mockResolvedValue({
+    (mockSdk.cma.contentType.getMany as ReturnType<typeof vi.fn>).mockResolvedValue({
       items: [
-        { sys: { id: 'blogPost' }, name: 'Blog Post' },
         { sys: { id: 'article' }, name: 'Article' },
-        { sys: { id: 'news' }, name: 'News' },
+        { sys: { id: 'blogPost' }, name: 'Blog Post' },
+        { sys: { id: 'product' }, name: 'Product' },
+        { sys: { id: 'category' }, name: 'Category' },
+        { sys: { id: 'author' }, name: 'Author' },
+        { sys: { id: 'page' }, name: 'Page' },
       ],
-      total: 3,
+      total: 6,
       skip: 0,
-      limit: 100,
+      limit: 1000,
       sys: { type: 'Array' },
     });
   });
@@ -31,14 +32,12 @@ describe('ContentTypeMultiSelect', () => {
     cleanup();
   });
 
-  const TestWrapper = ({ initialSelected = [] }: { initialSelected?: ContentType[] }) => {
-    const sdk = useSDK<ConfigAppSDK>();
-    const [selected, setSelected] = React.useState<ContentType[]>(initialSelected);
+  const TestWrapper = ({ initialSelected = [] }: { initialSelected?: string[] }) => {
+    const [selected, setSelected] = React.useState<string[]>(initialSelected);
     return (
       <ContentTypeMultiSelect
-        selectedContentTypes={selected}
-        setSelectedContentTypes={setSelected}
-        sdk={sdk}
+        selectedContentTypesIds={selected}
+        setSelectedContentTypesIds={setSelected}
       />
     );
   };
@@ -50,10 +49,12 @@ describe('ContentTypeMultiSelect', () => {
 
   it('renders available content types in the dropdown', async () => {
     render(<TestWrapper />);
-    expect(await screen.findByText('Blog Post')).toBeTruthy();
-
-    expect(screen.getByText('Article')).toBeTruthy();
-    expect(screen.getByText('News')).toBeTruthy();
+    expect(await screen.findByText('Article')).toBeTruthy();
+    expect(screen.getByText('Blog Post')).toBeTruthy();
+    expect(screen.getByText('Product')).toBeTruthy();
+    expect(screen.getByText('Category')).toBeTruthy();
+    expect(screen.getByText('Author')).toBeTruthy();
+    expect(screen.getByText('Page')).toBeTruthy();
   });
 
   it('selects and deselects content types, showing and removing pills', async () => {

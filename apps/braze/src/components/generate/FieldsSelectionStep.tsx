@@ -1,11 +1,11 @@
 import { Box, Button, Checkbox, Paragraph, TextLink, Text } from '@contentful/f36-components';
-import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { ArrowSquareOutIcon } from '@contentful/f36-icons';
 import WizardFooter from '../WizardFooter';
 import FieldCheckbox from '../FieldCheckbox';
 import { Entry } from '../../fields/Entry';
 import React, { useState } from 'react';
 import { Field } from '../../fields/Field';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import tokens from '@contentful/f36-tokens';
 
 type FieldsSelectionStepProps = {
@@ -92,7 +92,7 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
         fields from referenced entries is limited to 5 nested references. For more information on
         Braze Connected Content {''}
         <TextLink
-          icon={<ExternalLinkIcon />}
+          icon={<ArrowSquareOutIcon />}
           alignIcon="end"
           href="https://www.braze.com/docs/user_guide/personalization_and_dynamic_content/connected_content"
           target="_blank"
