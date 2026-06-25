@@ -3,7 +3,7 @@ import type { ComponentPropertyDescriptor } from '@contentful/app-sdk';
 
 const noopUnsubscribe = vi.fn();
 
-/** Builds a mock ExoNodeAPI whose getProperties resolves the given descriptors. */
+/** Builds a mock ExperienceNodeAPI whose getProperties resolves the given descriptors. */
 export function makeMockNode(
   id: string,
   nodeType: 'Component' | 'Fragment' | 'InlineFragment' | 'Slot',
@@ -46,7 +46,7 @@ const mockSdk: any = {
     error: vi.fn(),
     warning: vi.fn(),
   },
-  exo: {
+  experiences: {
     context: { type: 'experience', entityId: 'experience-123' },
     onContextChanged: vi.fn().mockReturnValue(noopUnsubscribe),
     getUiMode: vi.fn().mockReturnValue('visual'),

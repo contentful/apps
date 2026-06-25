@@ -17,7 +17,7 @@ const demoMode =
 
 if (demoMode) {
   // Standalone demo: `npm start` + `?demo` renders the toolbar against a seeded
-  // in-memory sdk.exo. Dynamically imported so the demo scaffolding stays out of
+  // in-memory sdk.experiences. Dynamically imported so the demo scaffolding stays out of
   // the production bundle.
   void import('./demo/DemoProvider').then(({ default: DemoProvider }) => {
     root.render(<DemoProvider />);

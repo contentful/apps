@@ -1,15 +1,15 @@
-import type { ComponentPropertyDescriptor, ExoNodeType } from '@contentful/app-sdk';
+import type { ComponentPropertyDescriptor, ExperienceNodeType } from '@contentful/app-sdk';
 
 export type Severity = 'error' | 'warning' | 'info';
 
 /**
  * A node collected from the experience tree, paired with its resolved
  * properties. This is the SDK-independent shape the audit rules operate on, so
- * the rules can be unit-tested without a live `sdk.exo`.
+ * the rules can be unit-tested without a live `sdk.experiences`.
  */
 export interface CollectedNode {
   id: string;
-  nodeType: ExoNodeType;
+  nodeType: ExperienceNodeType;
   properties: ComponentPropertyDescriptor[];
 }
 
@@ -39,7 +39,7 @@ export interface AuditFinding {
   id: string;
   ruleId: string;
   nodeId: string;
-  nodeType: ExoNodeType;
+  nodeType: ExperienceNodeType;
   propertyKey?: string;
   severity: Severity;
   title: string;
@@ -62,7 +62,7 @@ export interface AuditReport {
   nodeCount: number;
 }
 
-/** Which optional host surfaces are backed by the live `sdk.exo`. */
+/** Which optional host surfaces are backed by the live `sdk.experiences`. */
 export interface Capabilities {
   /** Selection/highlight (Locate-on-canvas). Not backed on the experience route yet. */
   selection: boolean;
