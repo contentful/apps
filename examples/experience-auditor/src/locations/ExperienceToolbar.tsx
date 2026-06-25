@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import type { ExoContext, ExperienceEditorToolbarAppSDK, UiMode } from '@contentful/app-sdk';
+import type { ExperienceContext, ExperienceEditorToolbarAppSDK, UiMode } from '@contentful/app-sdk';
 import {
   Badge,
   Box,
@@ -21,10 +21,10 @@ import ScoreSummary from '../components/ScoreSummary';
 import FindingList from '../components/FindingList';
 
 /**
- * Experience Auditor — a selection-aware ExO toolbar app.
+ * Experience Auditor — a selection-aware Experience toolbar app.
  *
  * On mount (and whenever the experience changes) it walks the experience tree
- * with `sdk.exo.experience`, runs a set of pure audit rules, and renders a
+ * with `sdk.experiences.experience`, runs a set of pure audit rules, and renders a
  * scored list of findings. Each finding can be located on the canvas
  * (`selection.set` + `selection.highlight`). Where a finding has a derivable
  * fix, the suggested value is surfaced as read-only advice — the app-sdk
@@ -35,13 +35,15 @@ import FindingList from '../components/FindingList';
 const ExperienceToolbar = () => {
   const sdk = useSDK<ExperienceEditorToolbarAppSDK>();
 
-  const [context, setContext] = useState<ExoContext>(() => sdk.exo.context);
-  const [uiMode, setUiMode] = useState<UiMode>(() => sdk.exo.getUiMode());
+  const [context, setContext] = useState<ExperienceContext>(() => sdk.experiences.context);
+  const [uiMode, setUiMode] = useState<UiMode>(() => sdk.experiences.getUiMode());
   const [report, setReport] = useState<AuditReport | null>(null);
   const [auditing, setAuditing] = useState(true);
   const [publishing, setPublishing] = useState(false);
-  const [capabilities, setCapabilities] = useState<Capabilities>(() => detectCapabilities(sdk.exo));
-  useEffect(() => setCapabilities(detectCapabilities(sdk.exo)), [sdk]);
+  const [capabilities, setCapabilities] = useState<Capabilities>(() =>
+    detectCapabilities(sdk.experiences)
+  );
+  useEffect(() => setCapabilities(detectCapabilities(sdk.experiences)), [sdk]);
 
   // Guard against state updates after unmount / stale async audits.
   const runIdRef = useRef(0);
@@ -50,7 +52,7 @@ const ExperienceToolbar = () => {
     const runId = ++runIdRef.current;
     setAuditing(true);
     try {
-      const nodes = await collectNodes(sdk.exo.experience);
+      const nodes = await collectNodes(sdk.experiences.experience);
       const next = runAudit(nodes);
       if (runId === runIdRef.current) {
         setReport(next);
@@ -63,8 +65,8 @@ const ExperienceToolbar = () => {
   }, [sdk]);
 
   // Keep context and ui mode in sync.
-  useEffect(() => sdk.exo.onContextChanged(setContext), [sdk]);
-  useEffect(() => sdk.exo.onUiModeChanged(setUiMode), [sdk]);
+  useEffect(() => sdk.experiences.onContextChanged(setContext), [sdk]);
+  useEffect(() => sdk.experiences.onUiModeChanged(setUiMode), [sdk]);
 
   // Initial audit + re-audit whenever the experience changes.
   // Simplification for the example: every onChange triggers a full traversal.
@@ -72,16 +74,16 @@ const ExperienceToolbar = () => {
   // so a burst of edits collapses into a single re-audit instead of N+1 passes.
   useEffect(() => {
     void audit();
-    return sdk.exo.experience.onChange(() => {
+    return sdk.experiences.experience.onChange(() => {
       void audit();
     });
   }, [sdk, audit]);
 
   const handleLocate = useCallback(
     (finding: AuditFinding) => {
-      sdk.exo.experience.selection.set(finding.nodeId);
+      sdk.experiences.experience.selection.set(finding.nodeId);
       // Highlight is a no-op in form mode; the button is disabled there anyway.
-      sdk.exo.experience.selection.highlight(finding.nodeId, {
+      sdk.experiences.experience.selection.highlight(finding.nodeId, {
         flash: true,
         scrollIntoView: true,
       });
@@ -99,7 +101,7 @@ const ExperienceToolbar = () => {
         sdk.notifier.error('You do not have permission to publish this experience.');
         return;
       }
-      await sdk.exo.experience.publish();
+      await sdk.experiences.experience.publish();
       sdk.notifier.success('Experience published.');
     } catch {
       sdk.notifier.error('Publish failed. Please try again.');

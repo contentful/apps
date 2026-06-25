@@ -41,7 +41,7 @@ const nodes = [
 ];
 
 /**
- * DEMO ONLY — a minimal seeded `sdk.exo`. `experience.selection` is deliberately
+ * DEMO ONLY — a minimal seeded `sdk.experiences`. `experience.selection` is deliberately
  * omitted so the demo exercises the graceful "Locate not available" degradation
  * (`detectCapabilities` reports `selection: false` and the button renders
  * disabled).
@@ -55,7 +55,7 @@ export const demoSdk = {
     error: (m: string) => console.warn('[demo notifier]', m),
     warning: (m: string) => console.warn('[demo notifier]', m),
   },
-  exo: {
+  experiences: {
     context: { type: 'experience' as const, entityId: 'demo-experience' },
     onContextChanged: () => () => {},
     getUiMode: () => 'visual' as const,

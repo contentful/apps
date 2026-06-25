@@ -12,16 +12,16 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 describe('ExperienceToolbar (Experience Auditor)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSdk.exo.getUiMode.mockReturnValue('visual');
+    mockSdk.experiences.getUiMode.mockReturnValue('visual');
     mockSdk.access.can.mockResolvedValue(true);
-    mockSdk.exo.experience.selection = {
+    mockSdk.experiences.experience.selection = {
       get: vi.fn().mockReturnValue({ nodeId: null }),
       onChange: vi.fn().mockReturnValue(vi.fn()),
       set: vi.fn(),
       highlight: vi.fn(),
     };
-    mockSdk.exo.experience.getRootNodes.mockReturnValue(defaultNodes);
-    mockSdk.exo.experience.getNode.mockImplementation(
+    mockSdk.experiences.experience.getRootNodes.mockReturnValue(defaultNodes);
+    mockSdk.experiences.experience.getNode.mockImplementation(
       (id: string) => defaultNodes.find((n) => n.id === id) ?? null
     );
   });
@@ -38,7 +38,7 @@ describe('ExperienceToolbar (Experience Auditor)', () => {
     const { getByTestId } = render(<ExperienceToolbar />);
 
     await waitFor(() => expect(getByTestId('publish-blocked')).toBeInTheDocument());
-    expect(mockSdk.exo.experience.publish).not.toHaveBeenCalled();
+    expect(mockSdk.experiences.experience.publish).not.toHaveBeenCalled();
   });
 
   it('locates a finding via selection + highlight', async () => {
@@ -50,15 +50,18 @@ describe('ExperienceToolbar (Experience Auditor)', () => {
     const firstFinding = getAllByTestId('finding')[0];
     await user.click(within(firstFinding).getByText('Locate'));
 
-    expect(mockSdk.exo.experience.selection.set).toHaveBeenCalledOnce();
-    expect(mockSdk.exo.experience.selection.highlight).toHaveBeenCalledWith(expect.any(String), {
-      flash: true,
-      scrollIntoView: true,
-    });
+    expect(mockSdk.experiences.experience.selection.set).toHaveBeenCalledOnce();
+    expect(mockSdk.experiences.experience.selection.highlight).toHaveBeenCalledWith(
+      expect.any(String),
+      {
+        flash: true,
+        scrollIntoView: true,
+      }
+    );
   });
 
   it('disables locate in form mode', async () => {
-    mockSdk.exo.getUiMode.mockReturnValue('form');
+    mockSdk.experiences.getUiMode.mockReturnValue('form');
     const { getAllByTestId } = render(<ExperienceToolbar />);
 
     await waitFor(() => expect(getAllByTestId('finding').length).toBeGreaterThan(0));
@@ -75,8 +78,8 @@ describe('ExperienceToolbar (Experience Auditor)', () => {
       { key: 'image', area: 'content', value: { sys: { id: 'asset-1' } } },
       { key: 'altText', area: 'content', value: '  spaced alt  ' },
     ]);
-    mockSdk.exo.experience.getRootNodes.mockReturnValue([fixNode]);
-    mockSdk.exo.experience.getNode.mockReturnValue(fixNode);
+    mockSdk.experiences.experience.getRootNodes.mockReturnValue([fixNode]);
+    mockSdk.experiences.experience.getNode.mockReturnValue(fixNode);
 
     const { getAllByTestId, getByTestId } = render(<ExperienceToolbar />);
 
@@ -94,8 +97,8 @@ describe('ExperienceToolbar (Experience Auditor)', () => {
       { key: 'heading', area: 'content', value: 'Spring Sale' },
       { key: 'metaTitle', area: 'content', value: '' },
     ]);
-    mockSdk.exo.experience.getRootNodes.mockReturnValue([metaNode]);
-    mockSdk.exo.experience.getNode.mockReturnValue(metaNode);
+    mockSdk.experiences.experience.getRootNodes.mockReturnValue([metaNode]);
+    mockSdk.experiences.experience.getNode.mockReturnValue(metaNode);
 
     const { getByTestId, queryByText } = render(<ExperienceToolbar />);
     await waitFor(() => expect(getByTestId('suggested-fix')).toBeInTheDocument());
@@ -107,7 +110,7 @@ describe('ExperienceToolbar (Experience Auditor)', () => {
   });
 
   it('renders Locate as disabled when selection is unsupported', async () => {
-    mockSdk.exo.experience.selection = undefined;
+    mockSdk.experiences.experience.selection = undefined;
     const { getAllByTestId } = render(<ExperienceToolbar />);
     await waitFor(() => expect(getAllByTestId('finding').length).toBeGreaterThan(0));
     const locate = within(getAllByTestId('finding')[0]).getByText('Locate').closest('button');

@@ -12,14 +12,14 @@ experience tree as the author works.**
 
 > Looking for the bare-bones starter instead? See the
 > [`experience-toolbar`](../experience-toolbar) example, which demonstrates the
-> minimal `sdk.exo` patterns. Experience Auditor builds on those to show a
+> minimal `sdk.experiences` patterns. Experience Auditor builds on those to show a
 > complete, opinionated app.
 
 ## What it does
 
 - **Live audit** — walks the experience tree with `getRootNodes()` →
   `getProperties()`, runs a set of pure rules, and re-runs automatically on
-  `sdk.exo.experience.onChange()`.
+  `sdk.experiences.experience.onChange()`.
 - **Scored dashboard** — a 0–100 health score with error / warning / info
   counts.
 - **Locate on canvas** — clicking **Locate** calls
@@ -73,7 +73,7 @@ each kind to the right UI and the rules stay declarative about what they offer.
 
 ### Capability-aware behavior
 
-Not every `sdk.exo` surface is backed by every host, and surfaces can roll out
+Not every `sdk.experiences` surface is backed by every host, and surfaces can roll out
 incrementally. Rather than call a method and catch the failure, the app probes
 up front which surfaces are available
 ([`src/audit/capabilities.ts`](src/audit/capabilities.ts)) and adapts its UI to
@@ -94,8 +94,8 @@ src/
     rules.ts          Pure audit rules (per-node + the cross-node heading-order rule)
     engine.ts         Runs rules, aggregates findings, computes the score
     fixes.ts          Pure derivation of suggested fix values (e.g. meta from heading)
-    capabilities.ts   Probes which optional sdk.exo surfaces the host backs
-    collect.ts        The only SDK-coupled piece: walks sdk.exo.experience → CollectedNode[]
+    capabilities.ts   Probes which optional sdk.experiences surfaces the host backs
+    collect.ts        The only SDK-coupled piece: walks sdk.experiences.experience → CollectedNode[]
   components/
     ScoreSummary.tsx
     FindingList.tsx   Groups findings by severity; renders locate + fix affordances
@@ -103,7 +103,7 @@ src/
     EmptyState.tsx
   demo/
     DemoProvider.tsx  Dev-only: renders the toolbar against the seeded mock (?demo)
-    mockExo.ts        Seeded in-memory sdk.exo for the demo
+    mockExperiences.ts   Seeded in-memory sdk.experiences for the demo
   locations/
     ConfigScreen.tsx
     ExperienceToolbar.tsx   Wires the SDK to the engine (collect → audit → locate/fix/publish)
@@ -170,7 +170,7 @@ pointing the app at `http://localhost:3000`.
 
 This app is built against the published `@contentful/app-sdk@4.58.0` types,
 which are the contract for the toolbar location. The host renderer that serves
-`sdk.exo` at runtime is still rolling out, so the app is **type-verified and
+`sdk.experiences` at runtime is still rolling out, so the app is **type-verified and
 unit-tested against a mocked SDK** — 40 tests cover the audit rules, scoring,
 the collector and its binding resolution, capability detection, the suggested-
 fix derivation, and the toolbar's locate / fix / publish-gate behavior. It is
@@ -188,4 +188,4 @@ match the published types exactly.
 ## Libraries
 
 - [Forma 36](https://f36.contentful.com/) — Contentful's design system
-- [App SDK](https://www.contentful.com/developers/docs/extensibility/app-framework/sdk/) — the `sdk.exo` reference
+- [App SDK](https://www.contentful.com/developers/docs/extensibility/app-framework/sdk/) — the `sdk.experiences` reference
