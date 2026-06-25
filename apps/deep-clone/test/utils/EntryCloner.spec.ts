@@ -277,6 +277,26 @@ describe('EntryCloner', () => {
     });
   });
 
+  describe('Creation failure handling', () => {
+    beforeEach(() => {
+      contentType = getMockContentType([{ id: 'title', type: 'Text' }]);
+      mainEntry = getMockEntry('main-entry-id', {
+        title: { 'en-US': 'Main Entry Title' },
+      });
+    });
+
+    it('throws when a CMA creation error occurs, aborting before updateReferenceTree', async () => {
+      mockCma.contentType.get.mockResolvedValue(contentType);
+      mockCma.entry.get.mockResolvedValueOnce(mainEntry);
+      mockCma.entry.create.mockRejectedValueOnce(new Error('AccessDenied'));
+
+      await expect(entryCloner.cloneEntry()).rejects.toThrow(
+        'Failed to clone 1 entry. The clone operation was aborted to prevent a partially-cloned structure.'
+      );
+      expect(mockCma.entry.update).not.toHaveBeenCalled();
+    });
+  });
+
   describe('Clone entry with array of references', () => {
     beforeEach(() => {
       contentType = getMockContentType([

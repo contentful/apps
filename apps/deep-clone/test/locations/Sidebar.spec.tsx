@@ -7,6 +7,7 @@ import { mockSdk } from '../mocks';
 beforeEach(() => {
   vi.useFakeTimers();
   vi.resetModules();
+  mockGetFailedUpdateIds.mockReturnValue([]);
 });
 
 afterEach(() => {
@@ -19,6 +20,9 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useAutoResizer: () => {},
 }));
 
+const mockCloneEntry = vi.fn();
+const mockGetFailedUpdateIds = vi.fn().mockReturnValue([]);
+
 vi.mock('../../src/utils/EntryCloner', () => {
   return {
     default: vi
@@ -30,12 +34,13 @@ vi.mock('../../src/utils/EntryCloner', () => {
             label: 'Main Entry',
             children: [{ entryId: 'referenced-entry-id', label: 'Referenced Entry', children: [] }],
           })),
-          cloneEntry: vi.fn().mockImplementation(async () => {
+          cloneEntry: mockCloneEntry.mockImplementation(async () => {
             setReferencesCount(2);
             setClonesCount(2);
             setUpdatesCount(1);
             return { sys: { id: 'cloned-id' } };
           }),
+          getFailedUpdateIds: mockGetFailedUpdateIds,
         })
       ),
   };
@@ -106,6 +111,38 @@ describe('Sidebar component', () => {
       expect.anything(),
       expect.anything()
     );
+  });
+
+  it('shows error Note and fires error notifier when cloneEntry throws', async () => {
+    mockCloneEntry.mockRejectedValueOnce(new Error('Failed to clone 1 entry.'));
+
+    const { getByText } = render(<Sidebar />);
+    await act(async () => {
+      fireEvent.click(getByText('Clone entry'));
+    });
+
+    expect(getByText('Failed to clone 1 entry.')).toBeDefined();
+    expect(mockSdk.notifier.error).toHaveBeenCalledWith(
+      'Clone failed. Some entries could not be created.'
+    );
+    expect(mockSdk.notifier.success).not.toHaveBeenCalled();
+  });
+
+  it('shows warning Note when some reference updates fail after a successful clone', async () => {
+    mockGetFailedUpdateIds.mockReturnValue(['entry-1', 'entry-2']);
+
+    const { getByText } = render(<Sidebar />);
+    await act(async () => {
+      fireEvent.click(getByText('Clone entry'));
+    });
+
+    expect(
+      getByText(
+        'Clone created, but 2 internal links could not be repointed. Some references may still point to the original entries.'
+      )
+    ).toBeDefined();
+    expect(mockSdk.notifier.success).toHaveBeenCalledWith('Clone successful');
+    expect(mockSdk.notifier.error).not.toHaveBeenCalled();
   });
 
   it('opens selection dialog before cloning and passes selected entry ids', async () => {
