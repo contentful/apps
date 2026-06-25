@@ -22,6 +22,7 @@ function Sidebar() {
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [isRedirecting, setIsRedirecting] = useState<boolean>(false);
   const [cloneError, setCloneError] = useState<string | null>(null);
+  const [cloneWarning, setCloneWarning] = useState<string | null>(null);
 
   useEffect(() => {
     if (countdown === 0) return;
@@ -47,6 +48,7 @@ function Sidebar() {
     setClonesCount(0);
     setUpdatesCount(0);
     setCloneError(null);
+    setCloneWarning(null);
   };
 
   const clone = async (): Promise<void> => {
@@ -83,11 +85,22 @@ function Sidebar() {
     let clonedEntry;
     try {
       clonedEntry = await cloner.cloneEntry(selectedEntryIds);
-    } catch (error: any) {
+    } catch (error) {
       setIsCloning(false);
-      setCloneError(error?.message ?? 'An unexpected error occurred during cloning.');
+      setCloneError(
+        error instanceof Error ? error.message : 'An unexpected error occurred during cloning.'
+      );
       sdk.notifier.error('Clone failed. Some entries could not be created.');
       return;
+    }
+
+    const failedUpdateIds = cloner.getFailedUpdateIds();
+    if (failedUpdateIds.length > 0) {
+      setCloneWarning(
+        `Clone created, but ${failedUpdateIds.length} internal ${
+          failedUpdateIds.length === 1 ? 'link' : 'links'
+        } could not be repointed. Some references may still point to the original entries.`
+      );
     }
 
     setIsCloning(false);
@@ -120,6 +133,11 @@ function Sidebar() {
       {cloneError && (
         <Note variant="negative" style={{ width: '100%' }}>
           {cloneError}
+        </Note>
+      )}
+      {cloneWarning && (
+        <Note variant="warning" style={{ width: '100%' }}>
+          {cloneWarning}
         </Note>
       )}
       <Stack spacing="spacing2Xs" flexDirection="column" alignItems="start">

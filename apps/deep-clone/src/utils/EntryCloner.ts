@@ -62,6 +62,10 @@ class EntryCloner {
     return this.clones[this.entryId] as EntryProps;
   }
 
+  getFailedUpdateIds(): string[] {
+    return this.failedUpdateIds;
+  }
+
   async getReferencesQty(): Promise<number> {
     await this.findReferences(this.entryId);
     return Object.keys(this.references).length;
