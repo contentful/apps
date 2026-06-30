@@ -135,6 +135,10 @@ const getBackendWorkflowFailureReason = (runData: AgentRunData): WorkflowFailure
     return WorkflowFailureReason.APP_NOT_INSTALLED;
   }
 
+  if (workflowFailure.code === WorkflowFailureReason.DOCUMENT_TOO_COMPLEX) {
+    return WorkflowFailureReason.DOCUMENT_TOO_COMPLEX;
+  }
+
   if (workflowFailure.code === WorkflowFailureReason.GENERIC) {
     return WorkflowFailureReason.GENERIC;
   }
@@ -160,6 +164,14 @@ const getWorkflowFailureMessage = (
 
   if (failureReason === WorkflowFailureReason.APP_NOT_INSTALLED) {
     return ERROR_MESSAGES.APP_NOT_INSTALLED;
+  }
+
+  if (failureReason === WorkflowFailureReason.DOCUMENT_TOO_COMPLEX) {
+    return ERROR_MESSAGES.DOCUMENT_TOO_COMPLEX;
+  }
+
+  if (failureReason === WorkflowFailureReason.PROCESSING_TIMEOUT) {
+    return ERROR_MESSAGES.PROCESSING_TIMEOUT;
   }
 
   return getRunErrorMessage(runData);
@@ -258,7 +270,10 @@ const pollAgentRun = async (
   }
 
   console.error(`✗ Run [${runId}] timed out after ${elapsedSec(startMs)}`);
-  throw new Error('Workflow polling timeout');
+  throw new WorkflowRunError(
+    ERROR_MESSAGES.PROCESSING_TIMEOUT,
+    WorkflowFailureReason.PROCESSING_TIMEOUT
+  );
 };
 
 export const useWorkflowAgent = ({

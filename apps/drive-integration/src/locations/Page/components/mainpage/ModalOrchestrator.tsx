@@ -199,6 +199,30 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
+      if (
+        error instanceof WorkflowRunError &&
+        error.reason === WorkflowFailureReason.DOCUMENT_TOO_COMPLEX
+      ) {
+        setPreviewErrorState({
+          reason: WorkflowFailureReason.DOCUMENT_TOO_COMPLEX,
+          title: 'Document too large to import',
+          message: ERROR_MESSAGES.DOCUMENT_TOO_COMPLEX,
+        });
+        return;
+      }
+
+      if (
+        error instanceof WorkflowRunError &&
+        error.reason === WorkflowFailureReason.PROCESSING_TIMEOUT
+      ) {
+        setPreviewErrorState({
+          reason: WorkflowFailureReason.PROCESSING_TIMEOUT,
+          title: 'Import timed out',
+          message: ERROR_MESSAGES.PROCESSING_TIMEOUT,
+        });
+        return;
+      }
+
       setPreviewErrorState({
         reason: WorkflowFailureReason.GENERIC,
         title: 'Unable to generate preview',
@@ -315,6 +339,16 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     };
 
     const handleContentTypeContinue = async (contentTypeIds: string[]) => {
+      if (!isOAuthConnected) {
+        showWorkflowError(
+          new WorkflowRunError(
+            ERROR_MESSAGES.GOOGLE_DRIVE_AUTH_ERROR,
+            WorkflowFailureReason.GOOGLE_DRIVE_AUTH_EXPIRED
+          )
+        );
+        return;
+      }
+
       try {
         handleWorkflowResult(await startWorkflowWithDelayedLoading(contentTypeIds));
       } catch (error) {

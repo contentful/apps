@@ -16,6 +16,8 @@ export enum WorkflowFailureReason {
   GOOGLE_DOCS_NOT_FOUND = 'google-docs-not-found',
   AI_SERVICE_UNAVAILABLE = 'ai-service-unavailable',
   APP_NOT_INSTALLED = 'app-not-installed',
+  DOCUMENT_TOO_COMPLEX = 'document-too-complex',
+  PROCESSING_TIMEOUT = 'processing-timeout',
 }
 
 export interface WorkflowFailure {
