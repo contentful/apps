@@ -19,6 +19,7 @@ import {
   WorkflowRunResult,
   WorkflowFailureReason,
   WorkflowRunError,
+  WorkflowDiagnosticInfo,
 } from '@types';
 import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
 import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
@@ -52,6 +53,7 @@ interface PreviewErrorState {
   reason: WorkflowFailureReason;
   title: string;
   message: string;
+  diagnosticInfo?: WorkflowDiagnosticInfo;
 }
 
 export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrchestratorProps>(
@@ -159,6 +161,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           reason: WorkflowFailureReason.GOOGLE_DRIVE_AUTH_EXPIRED,
           title: 'Reconnect Drive to continue',
           message: ERROR_MESSAGES.GOOGLE_DRIVE_AUTH_ERROR,
+          diagnosticInfo: error.diagnosticInfo,
         });
         return;
       }
@@ -203,6 +206,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         reason: WorkflowFailureReason.GENERIC,
         title: 'Unable to generate preview',
         message: ERROR_MESSAGES.GENERIC_ERROR,
+        diagnosticInfo: error instanceof WorkflowRunError ? error.diagnosticInfo : undefined,
       });
     };
 
@@ -368,6 +372,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           secondaryActionLabel: 'Close',
           onSecondaryAction: closePreviewErrorAndReset,
           isPrimaryActionLoading: isReconnectPending && isOAuthBusy,
+          diagnosticInfo: previewErrorState.diagnosticInfo,
         };
       }
 
@@ -377,6 +382,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         primaryActionLabel: 'Close',
         onPrimaryAction: closePreviewErrorAndReset,
         isPrimaryActionLoading: false,
+        diagnosticInfo: previewErrorState?.diagnosticInfo,
       };
     }, [
       closePreviewErrorAndReset,
