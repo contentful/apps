@@ -40,7 +40,8 @@ export const SelectTabsModal = ({
 
   const isTooManyTabsSelected = selectedTabs.length > MAX_TABS_SELECTION;
   const isInvalidSelection = useMemo(
-    () => useAllTabs === null || (!useAllTabs && selectedTabs.length === 0) || isTooManyTabsSelected,
+    () =>
+      useAllTabs === null || (!useAllTabs && selectedTabs.length === 0) || isTooManyTabsSelected,
     [useAllTabs, selectedTabs, isTooManyTabsSelected]
   );
   const hasNoRadioSelected = useAllTabs === null;
