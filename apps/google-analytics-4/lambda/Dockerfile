@@ -1,5 +1,6 @@
 # pull official base image
-FROM node:20-buster-slim
+ARG NODE_VERSION
+FROM node:${NODE_VERSION}-buster-slim
 
 # set working directory
 WORKDIR /usr/src/app
