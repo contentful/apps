@@ -139,6 +139,10 @@ const getBackendWorkflowFailureReason = (runData: AgentRunData): WorkflowFailure
     return WorkflowFailureReason.DOCUMENT_TOO_COMPLEX;
   }
 
+  if (workflowFailure.code === WorkflowFailureReason.OUT_OF_DOMAIN) {
+    return WorkflowFailureReason.OUT_OF_DOMAIN;
+  }
+
   if (workflowFailure.code === WorkflowFailureReason.GENERIC) {
     return WorkflowFailureReason.GENERIC;
   }
@@ -172,6 +176,10 @@ const getWorkflowFailureMessage = (
 
   if (failureReason === WorkflowFailureReason.PROCESSING_TIMEOUT) {
     return ERROR_MESSAGES.PROCESSING_TIMEOUT;
+  }
+
+  if (failureReason === WorkflowFailureReason.OUT_OF_DOMAIN) {
+    return ERROR_MESSAGES.OUT_OF_DOMAIN;
   }
 
   return getRunErrorMessage(runData);

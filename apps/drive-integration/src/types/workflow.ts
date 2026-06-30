@@ -18,6 +18,7 @@ export enum WorkflowFailureReason {
   APP_NOT_INSTALLED = 'app-not-installed',
   DOCUMENT_TOO_COMPLEX = 'document-too-complex',
   PROCESSING_TIMEOUT = 'processing-timeout',
+  OUT_OF_DOMAIN = 'out-of-domain',
 }
 
 export interface WorkflowFailure {
