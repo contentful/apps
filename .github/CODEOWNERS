@@ -16,6 +16,10 @@ examples/native-external-references-mockshop @contentful/team-entity-architectur
 examples/native-external-references-tmdb @contentful/team-entity-architecture
 function-examples/external-references @contentful/team-entity-architecture
 
+# 10pines solely owns google-docs so they can approve each other's PRs without requiring team-extensibility or team-marketplace
+
+apps/google-docs @contentful/team-10-pines
+
 # package.json and package-lock.json should be unowned so that dependabot can automatically update dependencies
 
 **/package.json
