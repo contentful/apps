@@ -40,6 +40,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      # NODE_VERSION is sourced from .nvmrc: NODE_VERSION=$(cat .nvmrc) docker compose build
+      args:
+        NODE_VERSION: ${NODE_VERSION}
     volumes:
       - '.:/usr/src/app'
     ports:
