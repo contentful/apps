@@ -82,7 +82,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const [includeImages, setIncludeImages] = useState<boolean | null>(null);
     const [requiresImageSelection, setRequiresImageSelection] = useState(false);
     const [activeRunId, setActiveRunId] = useState<string | null>(null);
-    const [inspectResult, setInspectResult] = useState<DocumentScopeConfig | null>(null);
     const { startWorkflow, resumeWorkflow } = useWorkflowAgent({
       sdk,
       documentId,
@@ -107,7 +106,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setUseAllTabs(null);
       setIncludeImages(null);
       setRequiresImageSelection(false);
-      setInspectResult(null);
     };
 
     const resetProgress = () => {
@@ -321,7 +319,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
-      setInspectResult(result);
       setAvailableTabs(
         result.tabs.map((tab) => ({ tabId: tab.id, tabTitle: tab.title }))
       );
