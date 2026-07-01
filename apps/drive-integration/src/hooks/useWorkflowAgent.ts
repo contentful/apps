@@ -35,7 +35,10 @@ interface UseWorkflowParams {
 
 interface WorkflowHook {
   isAnalyzing: boolean;
-  startWorkflow: (contentTypeIds: string[], documentScope?: DocumentScope) => Promise<WorkflowRunResult>;
+  startWorkflow: (
+    contentTypeIds: string[],
+    documentScope?: DocumentScope
+  ) => Promise<WorkflowRunResult>;
   resumeWorkflow: (runId: string, resumePayload: ResumePayload) => Promise<WorkflowRunResult>;
 }
 
@@ -310,7 +313,7 @@ export const useWorkflowAgent = ({
         setIsAnalyzing(false);
       }
     },
-    [sdk, documentId, oauthToken] // eslint-disable-line react-hooks/exhaustive-deps
+    [sdk, documentId, oauthToken]
   );
 
   const resumeWorkflow = useCallback(

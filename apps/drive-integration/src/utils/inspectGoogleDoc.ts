@@ -83,8 +83,7 @@ function getDocumentScope(rawDocJson: unknown): DocumentScopeConfig {
 
 function classifyAuthFailure(status: number, body: GoogleDocsErrorBody): boolean {
   if (status !== 401) return false;
-  const googleStatus = body?.error?.status;
-  return googleStatus === 'UNAUTHENTICATED' || googleStatus === 'PERMISSION_DENIED';
+  return body?.error?.status === 'UNAUTHENTICATED';
 }
 
 /**
@@ -104,7 +103,7 @@ export async function fetchDocumentScope(
   });
 
   if (!response.ok) {
-    const body = await response.json().catch(() => ({})) as GoogleDocsErrorBody;
+    const body = (await response.json().catch(() => ({}))) as GoogleDocsErrorBody;
 
     if (classifyAuthFailure(response.status, body)) {
       throw new WorkflowRunError(
@@ -113,7 +112,7 @@ export async function fetchDocumentScope(
       );
     }
 
-    if (response.status === 404) {
+    if (response.status === 404 || body?.error?.status === 'PERMISSION_DENIED') {
       throw new WorkflowRunError(
         'Google Doc not found. Make sure the document exists and your Google account has access to it.',
         WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND
