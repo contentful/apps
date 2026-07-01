@@ -61,6 +61,7 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 const defaultProps = {
   sdk: mockSdk,
   oauthToken: 'mock-oauth-token',
+  isOAuthConnected: true,
   onMappingReviewReady: vi.fn(),
   onResetToMain: vi.fn(),
 };

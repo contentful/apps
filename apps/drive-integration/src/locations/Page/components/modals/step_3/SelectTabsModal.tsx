@@ -14,6 +14,7 @@ import { modalControls, multiselect, pillsContainer } from './SelectTabsModal.st
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
 import { DocumentTabProps } from '@types';
 import { truncateLabel } from '../../../../../utils/utils';
+import { MAX_TABS_SELECTION } from '@constants/agent';
 
 interface SelectTabsModalProps {
   onContinue: (selectedTabs: DocumentTabProps[]) => void;
@@ -37,14 +38,16 @@ export const SelectTabsModal = ({
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false);
   const multiselectListRef = useMultiselectScrollReflow(selectedTabs);
 
+  const isTooManyTabsSelected = selectedTabs.length > MAX_TABS_SELECTION;
   const isInvalidSelection = useMemo(
-    () => useAllTabs === null || (!useAllTabs && selectedTabs.length === 0),
-    [useAllTabs, selectedTabs]
+    () =>
+      useAllTabs === null || (!useAllTabs && selectedTabs.length === 0) || isTooManyTabsSelected,
+    [useAllTabs, selectedTabs, isTooManyTabsSelected]
   );
   const hasNoRadioSelected = useAllTabs === null;
   const isInvalidSelectionError = useMemo(
-    () => isInvalidSelection && hasAttemptedSubmit,
-    [isInvalidSelection, hasAttemptedSubmit]
+    () => isInvalidSelection && hasAttemptedSubmit && !isTooManyTabsSelected,
+    [isInvalidSelection, hasAttemptedSubmit, isTooManyTabsSelected]
   );
   const showNoRadioSelectedError = hasNoRadioSelected && hasAttemptedSubmit;
 
@@ -116,6 +119,12 @@ export const SelectTabsModal = ({
                   {isInvalidSelectionError && (
                     <FormControl.ValidationMessage>
                       You must select at least one tab.
+                    </FormControl.ValidationMessage>
+                  )}
+                  {isTooManyTabsSelected && (
+                    <FormControl.ValidationMessage>
+                      You can select up to {MAX_TABS_SELECTION} tabs at a time. Deselect some tabs
+                      or choose &quot;Import all tabs&quot; and split large documents into sections.
                     </FormControl.ValidationMessage>
                   )}
                 </FormControl>
