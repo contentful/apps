@@ -14,6 +14,11 @@ const AGENTS_API_HEADERS = {
   'x-contentful-enable-alpha-feature': 'agents-api',
 };
 
+export interface DocumentScope {
+  includeImages?: boolean;
+  selectedTabIds?: string[];
+}
+
 export interface AgentGeneratePayload {
   messages: Array<{
     role: 'user';
@@ -26,6 +31,7 @@ export interface AgentGeneratePayload {
     documentId: string;
     contentTypeIds: string[];
     oauthToken: string;
+    documentScope?: DocumentScope;
   };
   threadId: string;
 }
@@ -214,3 +220,4 @@ export async function resumeWorkflowRun(
     throw normalizeAiAccessError(error);
   }
 }
+

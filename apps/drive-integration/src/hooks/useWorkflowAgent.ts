@@ -19,6 +19,7 @@ import {
 import {
   AgentGeneratePayload,
   AgentRunData,
+  DocumentScope,
   getWorkflowRun,
   resumeWorkflowRun,
   startAgentRun,
@@ -34,7 +35,7 @@ interface UseWorkflowParams {
 
 interface WorkflowHook {
   isAnalyzing: boolean;
-  startWorkflow: (contentTypeIds: string[]) => Promise<WorkflowRunResult>;
+  startWorkflow: (contentTypeIds: string[], documentScope?: DocumentScope) => Promise<WorkflowRunResult>;
   resumeWorkflow: (runId: string, resumePayload: ResumePayload) => Promise<WorkflowRunResult>;
 }
 
@@ -269,7 +270,7 @@ export const useWorkflowAgent = ({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const startWorkflow = useCallback(
-    async (contentTypeIds: string[]) => {
+    async (contentTypeIds: string[], documentScope?: DocumentScope) => {
       setIsAnalyzing(true);
 
       const spaceId = sdk.ids.space;
@@ -294,6 +295,7 @@ export const useWorkflowAgent = ({
           documentId,
           contentTypeIds,
           oauthToken,
+          ...(documentScope ? { documentScope } : {}),
         },
         threadId,
       };
@@ -308,7 +310,7 @@ export const useWorkflowAgent = ({
         setIsAnalyzing(false);
       }
     },
-    [sdk, documentId, oauthToken]
+    [sdk, documentId, oauthToken] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const resumeWorkflow = useCallback(

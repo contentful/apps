@@ -7,7 +7,6 @@ import { ErrorModal, type ErrorModalConfig } from '../modals/ErrorModal';
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
 import { LoadingModal } from '../modals/LoadingModal';
 import { ERROR_MESSAGES } from '@constants/messages';
-import { CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS } from '@constants/agent';
 import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 import {
   DocumentTabProps,
@@ -23,6 +22,8 @@ import {
 import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
 import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
 import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
+import { DocumentScope } from '../../../../services/agents-api';
+import { fetchDocumentScope, DocumentScopeConfig } from '../../../../utils/inspectGoogleDoc';
 import { isAiAccessDeniedError } from '../../../../utils/aiAccess';
 
 export interface ModalOrchestratorHandle {
@@ -81,6 +82,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const [includeImages, setIncludeImages] = useState<boolean | null>(null);
     const [requiresImageSelection, setRequiresImageSelection] = useState(false);
     const [activeRunId, setActiveRunId] = useState<string | null>(null);
+    const [inspectResult, setInspectResult] = useState<DocumentScopeConfig | null>(null);
     const { startWorkflow, resumeWorkflow } = useWorkflowAgent({
       sdk,
       documentId,
@@ -105,6 +107,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setUseAllTabs(null);
       setIncludeImages(null);
       setRequiresImageSelection(false);
+      setInspectResult(null);
     };
 
     const resetProgress = () => {
@@ -298,32 +301,53 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       handleWorkflowResult(workflowRun);
     };
 
-    const startWorkflowWithDelayedLoading = async (contentTypeIds: string[]) => {
-      let isStartPending = true;
-      const loadingModalTimeout = window.setTimeout(() => {
-        if (isStartPending) {
-          setFlowStep(FlowStep.LOADING);
-        }
-      }, CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS);
-
-      try {
-        return await startWorkflow(contentTypeIds);
-      } finally {
-        isStartPending = false;
-        window.clearTimeout(loadingModalTimeout);
-      }
+    const startWorkflowWithScope = async (
+      contentTypeIds: string[],
+      documentScope?: DocumentScope
+    ) => {
+      setFlowStep(FlowStep.LOADING);
+      const result = await startWorkflow(contentTypeIds, documentScope);
+      handleWorkflowResult(result);
     };
 
     const handleContentTypeContinue = async (contentTypeIds: string[]) => {
+      setFlowStep(FlowStep.LOADING);
+
+      let result: DocumentScopeConfig;
       try {
-        handleWorkflowResult(await startWorkflowWithDelayedLoading(contentTypeIds));
+        result = await fetchDocumentScope(documentId, oauthToken);
+      } catch (error) {
+        handleWorkflowError(error);
+        return;
+      }
+
+      setInspectResult(result);
+      setAvailableTabs(
+        result.tabs.map((tab) => ({ tabId: tab.id, tabTitle: tab.title }))
+      );
+      const requiresTabSelection = result.tabs.length > 1;
+      const requiresImages = result.imageCount > 0;
+      setRequiresImageSelection(requiresImages);
+
+      if (requiresTabSelection) {
+        setFlowStep(FlowStep.SELECT_TABS);
+        return;
+      }
+
+      if (requiresImages) {
+        setFlowStep(FlowStep.INCLUDE_IMAGES);
+        return;
+      }
+
+      try {
+        await startWorkflowWithScope(contentTypeIds);
       } catch (error) {
         handleWorkflowError(error);
       }
     };
 
-    const handleSelectTabsContinue = async (selectedTabs: DocumentTabProps[]) => {
-      setSelectedTabs(selectedTabs);
+    const handleSelectTabsContinue = async (nextSelectedTabs: DocumentTabProps[]) => {
+      setSelectedTabs(nextSelectedTabs);
 
       if (requiresImageSelection) {
         setFlowStep(FlowStep.INCLUDE_IMAGES);
@@ -331,17 +355,26 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       }
 
       try {
-        await continueWorkflow({ selectedTabIds: selectedTabs.map((tab) => tab.tabId) });
+        await startWorkflowWithScope(
+          selectedContentTypes.map((ct) => ct.sys.id),
+          { selectedTabIds: nextSelectedTabs.map((tab) => tab.tabId) }
+        );
       } catch (error) {
         handleWorkflowError(error);
       }
     };
 
-    const handleIncludeImagesContinue = async (includeImages: boolean) => {
-      setIncludeImages(includeImages);
+    const handleIncludeImagesContinue = async (nextIncludeImages: boolean) => {
+      setIncludeImages(nextIncludeImages);
 
       try {
-        await continueWorkflow({ includeImages });
+        await startWorkflowWithScope(
+          selectedContentTypes.map((ct) => ct.sys.id),
+          {
+            ...(selectedTabs.length > 0 ? { selectedTabIds: selectedTabs.map((tab) => tab.tabId) } : {}),
+            includeImages: nextIncludeImages,
+          }
+        );
       } catch (error) {
         handleWorkflowError(error);
       }
