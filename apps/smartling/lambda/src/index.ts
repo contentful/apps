@@ -51,7 +51,7 @@ export function makeApp(fetchFn: any, issuer: any) {
 
     try {
       const params = client.callbackParams(req);
-      const data = await client.callback('', params);
+      const data = await client.oauthCallback('', params);
 
       res.redirect(
         `/frontend/index.html?access_token=${data.access_token}&refresh_token=${data.refresh_token}`
