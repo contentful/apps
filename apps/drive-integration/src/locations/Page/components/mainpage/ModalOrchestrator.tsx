@@ -223,6 +223,18 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
+      if (
+        error instanceof WorkflowRunError &&
+        error.reason === WorkflowFailureReason.OUT_OF_DOMAIN
+      ) {
+        setPreviewErrorState({
+          reason: WorkflowFailureReason.OUT_OF_DOMAIN,
+          title: 'Document not supported',
+          message: ERROR_MESSAGES.OUT_OF_DOMAIN,
+        });
+        return;
+      }
+
       setPreviewErrorState({
         reason: WorkflowFailureReason.GENERIC,
         title: 'Unable to generate preview',
