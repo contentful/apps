@@ -135,6 +135,7 @@ const getBackendWorkflowFailureReason = (runData: AgentRunData): WorkflowFailure
     return WorkflowFailureReason.APP_NOT_INSTALLED;
   }
 
+  // document-too-complex is not yet emitted by the backend; handler is in place for when it ships.
   if (workflowFailure.code === WorkflowFailureReason.DOCUMENT_TOO_COMPLEX) {
     return WorkflowFailureReason.DOCUMENT_TOO_COMPLEX;
   }

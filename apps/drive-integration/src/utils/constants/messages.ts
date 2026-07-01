@@ -17,7 +17,7 @@ export const ERROR_MESSAGES = {
   DOCUMENT_TOO_COMPLEX:
     'This document is too large to import in one go. Try splitting it into smaller sections or reducing the number of tabs selected.',
   PROCESSING_TIMEOUT:
-    'The import took too long to complete. Try a simpler document, reduce the number of tabs selected, or split the document into smaller sections.',
+    'The import took too long to complete. Try a simpler document or split it into smaller sections.',
 } as const;
 
 export const SUCCESS_MESSAGES = {
