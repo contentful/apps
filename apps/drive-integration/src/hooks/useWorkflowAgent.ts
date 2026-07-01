@@ -112,78 +112,31 @@ const getRunErrorMessage = (runData: AgentRunData): string => {
   return 'Workflow failed';
 };
 
+const KNOWN_FAILURE_REASONS = new Set<string>(Object.values(WorkflowFailureReason));
+
 const getBackendWorkflowFailureReason = (runData: AgentRunData): WorkflowFailureReason | null => {
   const workflowFailure = runData.metadata?.workflowFailure;
+  if (!workflowFailure) return null;
+  return KNOWN_FAILURE_REASONS.has(workflowFailure.code)
+    ? (workflowFailure.code as WorkflowFailureReason)
+    : null;
+};
 
-  if (!workflowFailure) {
-    return null;
-  }
-
-  if (workflowFailure.code === WorkflowFailureReason.GOOGLE_DRIVE_AUTH_EXPIRED) {
-    return WorkflowFailureReason.GOOGLE_DRIVE_AUTH_EXPIRED;
-  }
-
-  if (workflowFailure.code === WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND) {
-    return WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND;
-  }
-
-  if (workflowFailure.code === WorkflowFailureReason.AI_SERVICE_UNAVAILABLE) {
-    return WorkflowFailureReason.AI_SERVICE_UNAVAILABLE;
-  }
-
-  if (workflowFailure.code === WorkflowFailureReason.APP_NOT_INSTALLED) {
-    return WorkflowFailureReason.APP_NOT_INSTALLED;
-  }
-
-  if (workflowFailure.code === WorkflowFailureReason.DOCUMENT_TOO_COMPLEX) {
-    return WorkflowFailureReason.DOCUMENT_TOO_COMPLEX;
-  }
-
-  if (workflowFailure.code === WorkflowFailureReason.OUT_OF_DOMAIN) {
-    return WorkflowFailureReason.OUT_OF_DOMAIN;
-  }
-
-  if (workflowFailure.code === WorkflowFailureReason.GENERIC) {
-    return WorkflowFailureReason.GENERIC;
-  }
-
-  return null;
+// document-too-complex and out-of-domain are not yet emitted by the backend; handlers are in place for when they ship.
+const FAILURE_REASON_MESSAGES: Partial<Record<WorkflowFailureReason, string>> = {
+  [WorkflowFailureReason.GOOGLE_DRIVE_AUTH_EXPIRED]: ERROR_MESSAGES.GOOGLE_DRIVE_AUTH_ERROR,
+  [WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND]: ERROR_MESSAGES.GOOGLE_DOCS_NOT_FOUND,
+  [WorkflowFailureReason.AI_SERVICE_UNAVAILABLE]: ERROR_MESSAGES.AI_SERVICE_UNAVAILABLE,
+  [WorkflowFailureReason.APP_NOT_INSTALLED]: ERROR_MESSAGES.APP_NOT_INSTALLED,
+  [WorkflowFailureReason.DOCUMENT_TOO_COMPLEX]: ERROR_MESSAGES.DOCUMENT_TOO_COMPLEX,
+  [WorkflowFailureReason.PROCESSING_TIMEOUT]: ERROR_MESSAGES.PROCESSING_TIMEOUT,
+  [WorkflowFailureReason.OUT_OF_DOMAIN]: ERROR_MESSAGES.OUT_OF_DOMAIN,
 };
 
 const getWorkflowFailureMessage = (
   runData: AgentRunData,
   failureReason: WorkflowFailureReason
-): string => {
-  if (failureReason === WorkflowFailureReason.GOOGLE_DRIVE_AUTH_EXPIRED) {
-    return ERROR_MESSAGES.GOOGLE_DRIVE_AUTH_ERROR;
-  }
-
-  if (failureReason === WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND) {
-    return ERROR_MESSAGES.GOOGLE_DOCS_NOT_FOUND;
-  }
-
-  if (failureReason === WorkflowFailureReason.AI_SERVICE_UNAVAILABLE) {
-    return ERROR_MESSAGES.AI_SERVICE_UNAVAILABLE;
-  }
-
-  if (failureReason === WorkflowFailureReason.APP_NOT_INSTALLED) {
-    return ERROR_MESSAGES.APP_NOT_INSTALLED;
-  }
-
-  if (failureReason === WorkflowFailureReason.DOCUMENT_TOO_COMPLEX) {
-    return ERROR_MESSAGES.DOCUMENT_TOO_COMPLEX;
-  }
-
-  if (failureReason === WorkflowFailureReason.PROCESSING_TIMEOUT) {
-    return ERROR_MESSAGES.PROCESSING_TIMEOUT;
-  }
-
-  if (failureReason === WorkflowFailureReason.OUT_OF_DOMAIN) {
-    return ERROR_MESSAGES.OUT_OF_DOMAIN;
-  }
-
-  return getRunErrorMessage(runData);
-};
+): string => FAILURE_REASON_MESSAGES[failureReason] ?? getRunErrorMessage(runData);
 
 const getSuspendPayload = (
   runData: AgentRunData
