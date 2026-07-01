@@ -27,7 +27,7 @@ class Client {
     return { code: '1234' };
   }
 
-  async callback() {
+  async oauthCallback() {
     return {
       access_token: 'access-123',
       refresh_token: 'refresh_token-123',
