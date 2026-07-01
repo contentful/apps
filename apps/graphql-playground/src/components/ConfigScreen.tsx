@@ -161,7 +161,7 @@ export default class Config extends Component<ConfigProps, ConfigState> {
         },
       };
     } catch (error) {
-      console.error(error);
+      console.error('Failed to configure app:', error instanceof Error ? error.message : 'Unknown error');
     }
   };
 
