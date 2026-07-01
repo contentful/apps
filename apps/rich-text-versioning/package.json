@@ -13,6 +13,7 @@
     "@contentful/rich-text-html-renderer": "^17.1.0",
     "@contentful/rich-text-react-renderer": "^16.1.0",
     "@contentful/rich-text-types": "^16.1.0",
+    "@tanstack/react-query": "4.44.0",
     "contentful": "^11.7.15",
     "contentful-management": "11.54.4",
     "dompurify": "^3.0.8",
