@@ -13,11 +13,11 @@ import {
   RunStatus,
 } from '@types';
 import { mockSdk } from '../../../../mocks';
-import { DocumentScopeConfig } from '../../../../../src/utils/fetchDocumentScope';
+import { DocumentSelectionConfig } from '../../../../../src/utils/fetchDocumentSelection';
 
 const mockStartWorkflow = vi.fn();
 const mockResumeWorkflow = vi.fn();
-const mockFetchDocumentScope = vi.fn();
+const mockFetchDocumentSelection = vi.fn();
 
 const mockWorkflowPayload = {
   entries: [],
@@ -25,7 +25,7 @@ const mockWorkflowPayload = {
   referenceGraph: {},
 } satisfies CompletedWorkflowPayload;
 
-const mockDocumentScope: DocumentScopeConfig = {
+const mockDocumentSelectionConfig: DocumentSelectionConfig = {
   tabs: [
     { id: 'tab-1', title: 'Introduction', index: 0 },
     { id: 'tab-2', title: 'Appendix', index: 1 },
@@ -59,8 +59,8 @@ vi.mock('@hooks/useWorkflowAgent', () => ({
   }),
 }));
 
-vi.mock('../../../../../src/utils/fetchDocumentScope', () => ({
-  fetchDocumentScope: (...args: unknown[]) => mockFetchDocumentScope(...args),
+vi.mock('../../../../../src/utils/fetchDocumentSelection', () => ({
+  fetchDocumentSelection: (...args: unknown[]) => mockFetchDocumentSelection(...args),
 }));
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
@@ -162,7 +162,7 @@ describe('ModalOrchestrator', () => {
     vi.clearAllMocks();
     defaultProps.onMappingReviewReady.mockReset();
     defaultProps.onResetToMain.mockReset();
-    mockFetchDocumentScope.mockResolvedValue(mockDocumentScope);
+    mockFetchDocumentSelection.mockResolvedValue(mockDocumentSelectionConfig);
     vi.mocked(mockSdk.cma.contentType.getMany).mockResolvedValue({
       items: mockContentTypes,
       total: mockContentTypes.length,
@@ -346,10 +346,10 @@ describe('ModalOrchestrator', () => {
     await selectContentTypeAndNext();
 
     await waitFor(() => {
-      expect(mockFetchDocumentScope).toHaveBeenCalledWith('mock-doc-id-123', 'mock-oauth-token');
+      expect(mockFetchDocumentSelection).toHaveBeenCalledWith('mock-doc-id-123', 'mock-oauth-token');
     });
 
-    // Tabs shown because fetchDocumentScope returned 2 tabs
+    // Tabs shown because fetchDocumentSelection returned 2 tabs
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'Document tabs' })).toBeTruthy();
     });
@@ -375,13 +375,13 @@ describe('ModalOrchestrator', () => {
   });
 
   it('skips image step and starts workflow directly when document has no images', async () => {
-    mockFetchDocumentScope.mockResolvedValue({
+    mockFetchDocumentSelection.mockResolvedValue({
       tabs: [
         { id: 'tab-1', title: 'Intro', index: 0 },
         { id: 'tab-2', title: 'Appendix', index: 1 },
       ],
       imageCount: 0,
-    } satisfies DocumentScopeConfig);
+    } satisfies DocumentSelectionConfig);
 
     const ref = createRef<ModalOrchestratorHandle>();
     render(<ModalOrchestrator ref={ref} {...defaultProps} />);
@@ -405,10 +405,10 @@ describe('ModalOrchestrator', () => {
   });
 
   it('skips tab and image steps and starts workflow directly for a single-tab doc with no images', async () => {
-    mockFetchDocumentScope.mockResolvedValue({
+    mockFetchDocumentSelection.mockResolvedValue({
       tabs: [{ id: 'tab-1', title: 'Main', index: 0 }],
       imageCount: 0,
-    } satisfies DocumentScopeConfig);
+    } satisfies DocumentSelectionConfig);
 
     const ref = createRef<ModalOrchestratorHandle>();
     render(<ModalOrchestrator ref={ref} {...defaultProps} />);

@@ -1,6 +1,6 @@
 import { WorkflowRunError, WorkflowFailureReason } from '@types';
 
-export interface DocumentScopeConfig {
+export interface DocumentSelectionConfig {
   tabs: Array<{ id: string; title: string; index: number }>;
   imageCount: number;
 }
@@ -55,7 +55,7 @@ function countObjects(value: Record<string, unknown> | undefined): number {
   return value ? Object.keys(value).length : 0;
 }
 
-function getDocumentScope(rawDocJson: unknown): DocumentScopeConfig {
+function getDocumentSelectionConfig(rawDocJson: unknown): DocumentSelectionConfig {
   const rawDoc = (rawDocJson ?? {}) as GoogleDocument;
   const flattenedTabs = flattenTabs(rawDoc.tabs);
 
@@ -87,15 +87,15 @@ function classifyAuthFailure(status: number, body: GoogleDocsErrorBody): boolean
 }
 
 /**
- * Fetches a Google Doc directly from the browser and returns the scope config
+ * Fetches a Google Doc directly from the browser and returns the selection config
  * needed for the pre-flight tab/image selection UI.
  *
  * @throws {WorkflowRunError} On auth failure, 404, or any non-OK response.
  */
-export async function fetchDocumentScope(
+export async function fetchDocumentSelection(
   documentId: string,
   oauthToken: string
-): Promise<DocumentScopeConfig> {
+): Promise<DocumentSelectionConfig> {
   const url = `https://docs.googleapis.com/v1/documents/${documentId}?includeTabsContent=true`;
 
   const response = await fetch(url, {
@@ -126,5 +126,5 @@ export async function fetchDocumentScope(
   }
 
   const rawDocJson = await response.json();
-  return getDocumentScope(rawDocJson);
+  return getDocumentSelectionConfig(rawDocJson);
 }

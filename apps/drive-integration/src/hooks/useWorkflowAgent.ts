@@ -18,7 +18,7 @@ import {
 import {
   AgentGeneratePayload,
   AgentRunData,
-  DocumentScope,
+  DocumentSelection,
   getWorkflowRun,
   resumeWorkflowRun,
   startAgentRun,
@@ -36,7 +36,7 @@ interface WorkflowHook {
   isAnalyzing: boolean;
   startWorkflow: (
     contentTypeIds: string[],
-    documentScope: DocumentScope
+    documentSelection: DocumentSelection
   ) => Promise<WorkflowRunResult>;
   resumeWorkflow: (runId: string, resumePayload: ResumePayload) => Promise<WorkflowRunResult>;
 }
@@ -270,7 +270,7 @@ export const useWorkflowAgent = ({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const startWorkflow = useCallback(
-    async (contentTypeIds: string[], documentScope: DocumentScope) => {
+    async (contentTypeIds: string[], documentSelection: DocumentSelection) => {
       setIsAnalyzing(true);
 
       const spaceId = sdk.ids.space;
@@ -295,7 +295,7 @@ export const useWorkflowAgent = ({
           documentId,
           contentTypeIds,
           oauthToken,
-          documentScope,
+          documentSelection,
         },
         threadId,
       };

@@ -19,8 +19,8 @@ import {
 import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
 import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
 import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
-import { DocumentScope } from '../../../../services/agents-api';
-import { fetchDocumentScope, DocumentScopeConfig } from '../../../../utils/fetchDocumentScope';
+import { DocumentSelection } from '../../../../services/agents-api';
+import { fetchDocumentSelection, DocumentSelectionConfig } from '../../../../utils/fetchDocumentSelection';
 import { isAiAccessDeniedError } from '../../../../utils/aiAccess';
 
 export interface ModalOrchestratorHandle {
@@ -97,7 +97,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       },
     }));
 
-    const resetDocumentScopeReview = () => {
+    const resetDocumentSelection = () => {
       setAvailableTabs([]);
       setSelectedTabs([]);
       setUseAllTabs(null);
@@ -108,7 +108,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const resetProgress = () => {
       setDocumentId('');
       setSelectedContentTypes([]);
-      resetDocumentScopeReview();
+      resetDocumentSelection();
       setActiveRunId(null);
       setFlowStep(null);
       setIsUploadModalOpen(false);
@@ -235,13 +235,13 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       showDiscardConfirmation();
     };
 
-    const showDocumentScopeReview = (
-      scopeConfig: DocumentScopeConfig,
+    const showDocumentSelectionReview = (
+      selectionConfig: DocumentSelectionConfig,
       contentTypeIds: string[]
     ) => {
-      setAvailableTabs(scopeConfig.tabs.map((tab) => ({ tabId: tab.id, tabTitle: tab.title })));
-      const requiresTabSelection = scopeConfig.tabs.length > 1;
-      const requiresImages = scopeConfig.imageCount > 0;
+      setAvailableTabs(selectionConfig.tabs.map((tab) => ({ tabId: tab.id, tabTitle: tab.title })));
+      const requiresTabSelection = selectionConfig.tabs.length > 1;
+      const requiresImages = selectionConfig.imageCount > 0;
       setRequiresImageSelection(requiresImages);
 
       if (requiresTabSelection) {
@@ -274,23 +274,23 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
     const startWorkflowWithScope = async (
       contentTypeIds: string[],
-      documentScope: DocumentScope
+      documentSelection: DocumentSelection
     ) => {
       setFlowStep(FlowStep.LOADING);
-      const result = await startWorkflow(contentTypeIds, documentScope);
+      const result = await startWorkflow(contentTypeIds, documentSelection);
       handleWorkflowResult(result);
     };
 
     const handleContentTypeContinue = async (contentTypeIds: string[]) => {
-      let scopeConfig: DocumentScopeConfig;
+      let selectionConfig: DocumentSelectionConfig;
       try {
-        scopeConfig = await fetchDocumentScope(documentId, oauthToken);
+        selectionConfig = await fetchDocumentSelection(documentId, oauthToken);
       } catch (error) {
         handleWorkflowError(error);
         return;
       }
 
-      showDocumentScopeReview(scopeConfig, contentTypeIds);
+      showDocumentSelectionReview(selectionConfig, contentTypeIds);
     };
 
     const handleSelectTabsContinue = async (nextSelectedTabs: DocumentTabProps[]) => {

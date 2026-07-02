@@ -13,7 +13,7 @@ const AGENTS_API_HEADERS = {
   'x-contentful-enable-alpha-feature': 'agents-api',
 };
 
-export interface DocumentScope {
+export interface DocumentSelection {
   includeImages: boolean;
   selectedTabIds: string[];
 }
@@ -30,7 +30,7 @@ export interface AgentGeneratePayload {
     documentId: string;
     contentTypeIds: string[];
     oauthToken: string;
-    documentScope: DocumentScope;
+    documentSelection: DocumentSelection;
   };
   threadId: string;
 }

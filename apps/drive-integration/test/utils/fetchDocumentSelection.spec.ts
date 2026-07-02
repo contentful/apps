@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fetchDocumentScope } from '../../src/utils/fetchDocumentScope';
+import { fetchDocumentSelection } from '../../src/utils/fetchDocumentSelection';
 import { WorkflowRunError, WorkflowFailureReason } from '@types';
 
 const DOC_ID = 'doc-abc-123';
@@ -15,12 +15,12 @@ function mockFetchResponse(status: number, body: unknown) {
   });
 }
 
-describe('fetchDocumentScope', () => {
+describe('fetchDocumentSelection', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
 
-  describe('getDocumentScope — tab flattening and image counting', () => {
+  describe('getDocumentSelectionConfig — tab flattening and image counting', () => {
     it('returns a single tab with no images for a flat single-tab doc', async () => {
       vi.stubGlobal(
         'fetch',
@@ -34,7 +34,7 @@ describe('fetchDocumentScope', () => {
         })
       );
 
-      const result = await fetchDocumentScope(DOC_ID, TOKEN);
+      const result = await fetchDocumentSelection(DOC_ID, TOKEN);
       expect(result.tabs).toEqual([{ id: 'tab-1', title: 'Main', index: 0 }]);
       expect(result.imageCount).toBe(0);
     });
@@ -62,7 +62,7 @@ describe('fetchDocumentScope', () => {
         })
       );
 
-      const result = await fetchDocumentScope(DOC_ID, TOKEN);
+      const result = await fetchDocumentSelection(DOC_ID, TOKEN);
       expect(result.tabs).toHaveLength(3);
       expect(result.tabs.map((t) => t.id)).toEqual(['parent', 'child-1', 'child-2']);
     });
@@ -89,7 +89,7 @@ describe('fetchDocumentScope', () => {
         })
       );
 
-      const result = await fetchDocumentScope(DOC_ID, TOKEN);
+      const result = await fetchDocumentSelection(DOC_ID, TOKEN);
       expect(result.imageCount).toBe(4);
     });
 
@@ -102,7 +102,7 @@ describe('fetchDocumentScope', () => {
         })
       );
 
-      const result = await fetchDocumentScope(DOC_ID, TOKEN);
+      const result = await fetchDocumentSelection(DOC_ID, TOKEN);
       expect(result.tabs).toHaveLength(0);
       expect(result.imageCount).toBe(3);
     });
@@ -115,7 +115,7 @@ describe('fetchDocumentScope', () => {
         })
       );
 
-      const result = await fetchDocumentScope(DOC_ID, TOKEN);
+      const result = await fetchDocumentSelection(DOC_ID, TOKEN);
       expect(result.tabs[0].id).toBe('tab-1');
       expect(result.tabs[0].title).toBe('Tab 1');
     });
@@ -133,17 +133,17 @@ describe('fetchDocumentScope', () => {
         })
       );
 
-      const result = await fetchDocumentScope(DOC_ID, TOKEN);
+      const result = await fetchDocumentSelection(DOC_ID, TOKEN);
       expect(result.tabs[0].title).toBe('Introduction');
     });
   });
 
-  describe('fetchDocumentScope — HTTP behavior', () => {
+  describe('fetchDocumentSelection — HTTP behavior', () => {
     it('sends the auth header with the provided oauth token', async () => {
       const mockFetch = mockFetchResponse(200, { tabs: [] });
       vi.stubGlobal('fetch', mockFetch);
 
-      await fetchDocumentScope(DOC_ID, TOKEN);
+      await fetchDocumentSelection(DOC_ID, TOKEN);
 
       expect(mockFetch).toHaveBeenCalledWith(EXPECTED_URL, {
         headers: { Authorization: `Bearer ${TOKEN}` },
@@ -156,7 +156,7 @@ describe('fetchDocumentScope', () => {
         mockFetchResponse(401, { error: { code: 401, status: 'UNAUTHENTICATED' } })
       );
 
-      await expect(fetchDocumentScope(DOC_ID, TOKEN)).rejects.toSatisfy(
+      await expect(fetchDocumentSelection(DOC_ID, TOKEN)).rejects.toSatisfy(
         (e: unknown) =>
           e instanceof WorkflowRunError &&
           e.reason === WorkflowFailureReason.GOOGLE_DRIVE_AUTH_EXPIRED
@@ -166,7 +166,7 @@ describe('fetchDocumentScope', () => {
     it('throws GOOGLE_DOCS_NOT_FOUND for 404', async () => {
       vi.stubGlobal('fetch', mockFetchResponse(404, { error: { code: 404 } }));
 
-      await expect(fetchDocumentScope(DOC_ID, TOKEN)).rejects.toSatisfy(
+      await expect(fetchDocumentSelection(DOC_ID, TOKEN)).rejects.toSatisfy(
         (e: unknown) =>
           e instanceof WorkflowRunError && e.reason === WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND
       );
@@ -178,7 +178,7 @@ describe('fetchDocumentScope', () => {
         mockFetchResponse(403, { error: { code: 403, status: 'PERMISSION_DENIED' } })
       );
 
-      await expect(fetchDocumentScope(DOC_ID, TOKEN)).rejects.toSatisfy(
+      await expect(fetchDocumentSelection(DOC_ID, TOKEN)).rejects.toSatisfy(
         (e: unknown) =>
           e instanceof WorkflowRunError && e.reason === WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND
       );
@@ -191,7 +191,7 @@ describe('fetchDocumentScope', () => {
         mockFetchResponse(401, { error: { code: 401, status: 'PERMISSION_DENIED' } })
       );
 
-      await expect(fetchDocumentScope(DOC_ID, TOKEN)).rejects.toSatisfy(
+      await expect(fetchDocumentSelection(DOC_ID, TOKEN)).rejects.toSatisfy(
         (e: unknown) =>
           e instanceof WorkflowRunError && e.reason === WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND
       );
@@ -200,7 +200,7 @@ describe('fetchDocumentScope', () => {
     it('throws GENERIC for unexpected non-OK status', async () => {
       vi.stubGlobal('fetch', mockFetchResponse(500, { error: { code: 500 } }));
 
-      await expect(fetchDocumentScope(DOC_ID, TOKEN)).rejects.toSatisfy(
+      await expect(fetchDocumentSelection(DOC_ID, TOKEN)).rejects.toSatisfy(
         (e: unknown) => e instanceof WorkflowRunError && e.reason === WorkflowFailureReason.GENERIC
       );
     });
@@ -215,7 +215,7 @@ describe('fetchDocumentScope', () => {
         })
       );
 
-      await expect(fetchDocumentScope(DOC_ID, TOKEN)).rejects.toSatisfy(
+      await expect(fetchDocumentSelection(DOC_ID, TOKEN)).rejects.toSatisfy(
         (e: unknown) => e instanceof WorkflowRunError && e.reason === WorkflowFailureReason.GENERIC
       );
     });
