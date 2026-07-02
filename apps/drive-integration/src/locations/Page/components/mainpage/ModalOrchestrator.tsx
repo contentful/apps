@@ -256,20 +256,13 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       handleWorkflowResult(result);
     };
 
-    const handleContentTypeContinue = async (contentTypeIds: string[]) => {
-      setFlowStep(FlowStep.LOADING);
-
-      let result: DocumentScopeConfig;
-      try {
-        result = await fetchDocumentScope(documentId, oauthToken);
-      } catch (error) {
-        handleWorkflowError(error);
-        return;
-      }
-
-      setAvailableTabs(result.tabs.map((tab) => ({ tabId: tab.id, tabTitle: tab.title })));
-      const requiresTabSelection = result.tabs.length > 1;
-      const requiresImages = result.imageCount > 0;
+    const showDocumentScopeReview = (
+      scopeConfig: DocumentScopeConfig,
+      contentTypeIds: string[]
+    ) => {
+      setAvailableTabs(scopeConfig.tabs.map((tab) => ({ tabId: tab.id, tabTitle: tab.title })));
+      const requiresTabSelection = scopeConfig.tabs.length > 1;
+      const requiresImages = scopeConfig.imageCount > 0;
       setRequiresImageSelection(requiresImages);
 
       if (requiresTabSelection) {
@@ -282,11 +275,21 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
+      void startWorkflowWithScope(contentTypeIds).catch(handleWorkflowError);
+    };
+
+    const handleContentTypeContinue = async (contentTypeIds: string[]) => {
+      setFlowStep(FlowStep.LOADING);
+
+      let scopeConfig: DocumentScopeConfig;
       try {
-        await startWorkflowWithScope(contentTypeIds);
+        scopeConfig = await fetchDocumentScope(documentId, oauthToken);
       } catch (error) {
         handleWorkflowError(error);
+        return;
       }
+
+      showDocumentScopeReview(scopeConfig, contentTypeIds);
     };
 
     const handleSelectTabsContinue = async (nextSelectedTabs: DocumentTabProps[]) => {
