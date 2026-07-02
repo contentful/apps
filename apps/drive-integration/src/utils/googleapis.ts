@@ -12,7 +12,9 @@ export function loadGapi(): Promise<void> {
     const script = document.createElement('script');
     script.src = 'https://apis.google.com/js/api.js';
     script.async = true;
-    script.onload = () => resolve();
+    script.onload = () => {
+      (window as any).gapi.load('client:auth2', () => resolve());
+    };
     script.onerror = () => reject(new Error('Failed to load gapi'));
     document.body.appendChild(script);
   });
@@ -21,18 +23,22 @@ export function loadGapi(): Promise<void> {
 
 export function loadPickerApi(): Promise<void> {
   if (pickerLoaded) return pickerLoaded;
-  pickerLoaded = loadGapi().then(
-    () =>
-      new Promise<void>((resolve, reject) => {
-        if ((window as any).google?.picker) {
-          resolve();
-          return;
-        }
-        (window as any).gapi.load('picker', {
-          callback: () => resolve(),
-          onerror: () => reject(new Error('Failed to load picker API')),
-        });
-      })
-  );
+  pickerLoaded = new Promise((resolve, reject) => {
+    if ((window as any).google && (window as any).google.picker) {
+      resolve();
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://apis.google.com/js/api.js?onload=__pickerOnLoad';
+    script.async = true;
+
+    (window as any).__pickerOnLoad = () => {
+      (window as any).gapi.load('picker', () => resolve());
+    };
+
+    script.onerror = () => reject(new Error('Failed to load file picker'));
+    document.body.appendChild(script);
+  });
   return pickerLoaded;
 }
