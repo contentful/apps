@@ -11,9 +11,6 @@ import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 import {
   DocumentTabProps,
   MappingReviewSuspendPayload,
-  CompletedWorkflowPayload,
-  ResumePayload,
-  TabsImagesSuspendPayload,
   RunStatus,
   WorkflowRunResult,
   WorkflowFailureReason,
@@ -23,7 +20,7 @@ import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal'
 import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
 import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
 import { DocumentScope } from '../../../../services/agents-api';
-import { fetchDocumentScope, DocumentScopeConfig } from '../../../../utils/inspectGoogleDoc';
+import { fetchDocumentScope, DocumentScopeConfig } from '../../../../utils/fetchDocumentScope';
 import { isAiAccessDeniedError } from '../../../../utils/aiAccess';
 
 export interface ModalOrchestratorHandle {
@@ -238,65 +235,16 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       showDiscardConfirmation();
     };
 
-    const showDocumentScopeReview = (suspendPayload?: TabsImagesSuspendPayload) => {
-      setAvailableTabs(
-        (suspendPayload?.tabs ?? []).map((tab) => ({
-          tabId: tab.id ?? '',
-          tabTitle: tab.title ?? '',
-        }))
-      );
-      setSelectedTabs([]);
-      setUseAllTabs(null);
-      setIncludeImages(null);
-      setRequiresImageSelection(Boolean(suspendPayload?.requiresImageSelection));
-
-      if (suspendPayload?.requiresTabSelection) {
-        setFlowStep(FlowStep.SELECT_TABS);
-        return;
-      }
-
-      if (suspendPayload?.requiresImageSelection) {
-        setFlowStep(FlowStep.INCLUDE_IMAGES);
-        return;
-      }
-
-      setFlowStep(null);
-    };
-
     const handleWorkflowResult = (workflowRun: WorkflowRunResult) => {
       setActiveRunId(workflowRun.runId);
 
       if (workflowRun.status === RunStatus.PENDING_REVIEW) {
-        if (workflowRun.suspendPayload.suspendStepId === 'mapping-review') {
-          setFlowStep(null);
-          onMappingReviewReady(workflowRun.suspendPayload, workflowRun.runId);
-          return;
-        }
-
-        showDocumentScopeReview(workflowRun.suspendPayload);
+        setFlowStep(null);
+        onMappingReviewReady(workflowRun.suspendPayload, workflowRun.runId);
         return;
       }
 
       setFlowStep(null);
-    };
-
-    const continueWorkflow = async (resumePayloadOverrides?: Partial<ResumePayload>) => {
-      if (!activeRunId) {
-        throw new Error('Workflow run id is missing for resume.');
-      }
-
-      const resumePayload: ResumePayload = {
-        ...(selectedTabs.length > 0
-          ? { selectedTabIds: selectedTabs.map((tab) => tab.tabId) }
-          : {}),
-        ...(includeImages !== null ? { includeImages } : {}),
-        ...resumePayloadOverrides,
-      };
-
-      setFlowStep(FlowStep.LOADING);
-
-      const workflowRun = await resumeWorkflow(activeRunId, resumePayload);
-      handleWorkflowResult(workflowRun);
     };
 
     const startWorkflowWithScope = async (
@@ -319,9 +267,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
-      setAvailableTabs(
-        result.tabs.map((tab) => ({ tabId: tab.id, tabTitle: tab.title }))
-      );
+      setAvailableTabs(result.tabs.map((tab) => ({ tabId: tab.id, tabTitle: tab.title })));
       const requiresTabSelection = result.tabs.length > 1;
       const requiresImages = result.imageCount > 0;
       setRequiresImageSelection(requiresImages);
@@ -368,7 +314,9 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         await startWorkflowWithScope(
           selectedContentTypes.map((ct) => ct.sys.id),
           {
-            ...(selectedTabs.length > 0 ? { selectedTabIds: selectedTabs.map((tab) => tab.tabId) } : {}),
+            ...(selectedTabs.length > 0
+              ? { selectedTabIds: selectedTabs.map((tab) => tab.tabId) }
+              : {}),
             includeImages: nextIncludeImages,
           }
         );
