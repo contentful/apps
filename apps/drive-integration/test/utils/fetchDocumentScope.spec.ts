@@ -168,8 +168,7 @@ describe('fetchDocumentScope', () => {
 
       await expect(fetchDocumentScope(DOC_ID, TOKEN)).rejects.toSatisfy(
         (e: unknown) =>
-          e instanceof WorkflowRunError &&
-          e.reason === WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND
+          e instanceof WorkflowRunError && e.reason === WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND
       );
     });
 
@@ -181,8 +180,7 @@ describe('fetchDocumentScope', () => {
 
       await expect(fetchDocumentScope(DOC_ID, TOKEN)).rejects.toSatisfy(
         (e: unknown) =>
-          e instanceof WorkflowRunError &&
-          e.reason === WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND
+          e instanceof WorkflowRunError && e.reason === WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND
       );
     });
 
@@ -195,8 +193,7 @@ describe('fetchDocumentScope', () => {
 
       await expect(fetchDocumentScope(DOC_ID, TOKEN)).rejects.toSatisfy(
         (e: unknown) =>
-          e instanceof WorkflowRunError &&
-          e.reason === WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND
+          e instanceof WorkflowRunError && e.reason === WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND
       );
     });
 
@@ -204,8 +201,7 @@ describe('fetchDocumentScope', () => {
       vi.stubGlobal('fetch', mockFetchResponse(500, { error: { code: 500 } }));
 
       await expect(fetchDocumentScope(DOC_ID, TOKEN)).rejects.toSatisfy(
-        (e: unknown) =>
-          e instanceof WorkflowRunError && e.reason === WorkflowFailureReason.GENERIC
+        (e: unknown) => e instanceof WorkflowRunError && e.reason === WorkflowFailureReason.GENERIC
       );
     });
 
@@ -220,8 +216,7 @@ describe('fetchDocumentScope', () => {
       );
 
       await expect(fetchDocumentScope(DOC_ID, TOKEN)).rejects.toSatisfy(
-        (e: unknown) =>
-          e instanceof WorkflowRunError && e.reason === WorkflowFailureReason.GENERIC
+        (e: unknown) => e instanceof WorkflowRunError && e.reason === WorkflowFailureReason.GENERIC
       );
     });
   });
