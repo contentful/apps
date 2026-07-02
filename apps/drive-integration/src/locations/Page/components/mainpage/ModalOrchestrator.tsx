@@ -279,8 +279,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     };
 
     const handleContentTypeContinue = async (contentTypeIds: string[]) => {
-      setFlowStep(FlowStep.LOADING);
-
       let scopeConfig: DocumentScopeConfig;
       try {
         scopeConfig = await fetchDocumentScope(documentId, oauthToken);
