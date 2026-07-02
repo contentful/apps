@@ -13,15 +13,25 @@ import {
   RunStatus,
 } from '@types';
 import { mockSdk } from '../../../../mocks';
+import { DocumentScopeConfig } from '../../../../../src/utils/fetchDocumentScope';
 
 const mockStartWorkflow = vi.fn();
 const mockResumeWorkflow = vi.fn();
+const mockFetchDocumentScope = vi.fn();
 
 const mockWorkflowPayload = {
   entries: [],
   assets: [],
   referenceGraph: {},
 } satisfies CompletedWorkflowPayload;
+
+const mockDocumentScope: DocumentScopeConfig = {
+  tabs: [
+    { id: 'tab-1', title: 'Introduction', index: 0 },
+    { id: 'tab-2', title: 'Appendix', index: 1 },
+  ],
+  imageCount: 2,
+};
 
 vi.mock('../../../../../src/locations/Page/components/modals/step_1/SelectDocumentModal', () => ({
   __esModule: true,
@@ -49,14 +59,18 @@ vi.mock('@hooks/useWorkflowAgent', () => ({
   }),
 }));
 
-const mockContentTypes = [
-  { sys: { id: 'ct-1' }, name: 'Blog Post' },
-  { sys: { id: 'ct-2' }, name: 'Article' },
-];
+vi.mock('../../../../../src/utils/fetchDocumentScope', () => ({
+  fetchDocumentScope: (...args: unknown[]) => mockFetchDocumentScope(...args),
+}));
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
+
+const mockContentTypes = [
+  { sys: { id: 'ct-1' }, name: 'Blog Post' },
+  { sys: { id: 'ct-2' }, name: 'Article' },
+];
 
 const defaultProps = {
   sdk: mockSdk,
@@ -92,30 +106,72 @@ const mappingReviewSuspendPayload: MappingReviewSuspendPayload = {
   contentTypes: [],
 };
 
+// Helper: pick a document and reach the content type picker
+async function pickDocument(ref: React.RefObject<ModalOrchestratorHandle>) {
+  await act(async () => {
+    ref.current?.startFlow();
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'Pick document' }));
+  await waitFor(() => {
+    expect(screen.getByRole('heading', { name: 'Select content type(s)' })).toBeTruthy();
+  });
+}
+
+// Helper: select ct-1 in the multiselect and click Next
+async function selectContentTypeAndNext() {
+  const multiselectToggle = screen.getByRole('button', { name: /toggle multiselect/i });
+  fireEvent.click(multiselectToggle);
+  await waitFor(() => {
+    expect(document.querySelector('[data-test-id="cf-multiselect-list-item-ct-1"]')).toBeTruthy();
+  });
+  const optionInput = document
+    .querySelector('[data-test-id="cf-multiselect-list-item-ct-1"]')
+    ?.closest('label')
+    ?.querySelector('input') as HTMLInputElement;
+  if (optionInput) fireEvent.click(optionInput);
+  fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+}
+
+// Helper: go through pre-flight tab + image selection
+async function completePreflight(options: { useAllTabs: boolean; includeImages: boolean }) {
+  await waitFor(() => {
+    expect(screen.getByRole('heading', { name: 'Document tabs' })).toBeTruthy();
+  });
+
+  if (options.useAllTabs) {
+    fireEvent.click(screen.getByLabelText('No, import all tabs'));
+  } else {
+    fireEvent.click(screen.getByLabelText('Yes, let me pick'));
+  }
+  fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+
+  await waitFor(() => {
+    expect(screen.getByRole('heading', { name: 'Images' })).toBeTruthy();
+  });
+
+  if (options.includeImages) {
+    fireEvent.click(screen.getByLabelText('Yes, include images'));
+  } else {
+    fireEvent.click(screen.getByLabelText('No, skip images'));
+  }
+  fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+}
+
 describe('ModalOrchestrator', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     defaultProps.onMappingReviewReady.mockReset();
     defaultProps.onResetToMain.mockReset();
+    mockFetchDocumentScope.mockResolvedValue(mockDocumentScope);
+    vi.mocked(mockSdk.cma.contentType.getMany).mockResolvedValue({
+      items: mockContentTypes,
+      total: mockContentTypes.length,
+    });
     mockStartWorkflow.mockResolvedValue({
-      status: RunStatus.PENDING_REVIEW,
+      status: RunStatus.COMPLETED,
       runId: 'run-123',
       messages: [],
-      suspendPayload: {
-        suspendStepId: 'select-tabs-images-step',
-        reason: 'Needs document scope review',
-        documentId: 'mock-doc-id-123',
-        requiresImageSelection: true,
-        requiresTabSelection: true,
-        imageCount: 2,
-        inlineObjectCount: 2,
-        positionedObjectCount: 0,
-        tabCount: 2,
-        tabs: [
-          { id: 'tab-1', title: 'Introduction', index: 0 },
-          { id: 'tab-2', title: 'Appendix', index: 1 },
-        ],
-      },
+      googleDocPayload: mockWorkflowPayload,
     } satisfies WorkflowRunResult);
     mockResumeWorkflow.mockResolvedValue({
       status: RunStatus.COMPLETED,
@@ -123,12 +179,6 @@ describe('ModalOrchestrator', () => {
       messages: [],
       googleDocPayload: mockWorkflowPayload,
     } satisfies WorkflowRunResult);
-    vi.mocked(mockSdk.cma.space.get).mockResolvedValue({ sys: { id: 'test-space-id' } });
-    vi.mocked(mockSdk.cma.environment.get).mockResolvedValue({ sys: { id: 'test-env-id' } });
-    vi.mocked(mockSdk.cma.contentType.getMany).mockResolvedValue({
-      items: mockContentTypes,
-      total: mockContentTypes.length,
-    });
   });
 
   it('shows ContentTypePickerModal after document is picked', async () => {
@@ -261,34 +311,12 @@ describe('ModalOrchestrator', () => {
     });
   });
 
-  it('resumes suspended workflow as cancelled when confirming discard', async () => {
+  it('discards at pre-flight tab step without calling resumeWorkflow', async () => {
     const ref = createRef<ModalOrchestratorHandle>();
     render(<ModalOrchestrator ref={ref} {...defaultProps} />);
 
-    await act(async () => {
-      ref.current?.startFlow();
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Pick document' }));
-
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Select content type(s)' })).toBeTruthy();
-    });
-
-    const multiselectToggle = screen.getByRole('button', { name: /toggle multiselect/i });
-    fireEvent.click(multiselectToggle);
-
-    await waitFor(() => {
-      const option = document.querySelector('[data-test-id="cf-multiselect-list-item-ct-1"]');
-      expect(option).toBeTruthy();
-    });
-
-    const optionInput = document
-      .querySelector('[data-test-id="cf-multiselect-list-item-ct-1"]')
-      ?.closest('label')
-      ?.querySelector('input') as HTMLInputElement;
-    if (optionInput) fireEvent.click(optionInput);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    await pickDocument(ref);
+    await selectContentTypeAndNext();
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'Document tabs' })).toBeTruthy();
@@ -304,71 +332,62 @@ describe('ModalOrchestrator', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cancel without creating' }));
 
     await waitFor(() => {
-      expect(mockResumeWorkflow).toHaveBeenCalledWith('run-123', { cancelled: true });
+      // No active workflow run exists yet — nothing to resume as cancelled
+      expect(mockResumeWorkflow).not.toHaveBeenCalled();
+      expect(screen.queryByRole('heading', { name: 'Document tabs' })).toBeNull();
     });
   });
 
-  it('starts the workflow after selecting content types and shows the document scope review steps', async () => {
-    let resolveStartWorkflow: ((value: WorkflowRunResult) => void) | undefined;
-    mockStartWorkflow.mockImplementation(
-      () =>
-        new Promise<WorkflowRunResult>((resolve) => {
-          resolveStartWorkflow = resolve;
-        })
-    );
+  it('fetches document scope pre-flight and routes through tab and image selection before starting workflow', async () => {
+    const ref = createRef<ModalOrchestratorHandle>();
+    render(<ModalOrchestrator ref={ref} {...defaultProps} />);
+
+    await pickDocument(ref);
+    await selectContentTypeAndNext();
+
+    await waitFor(() => {
+      expect(mockFetchDocumentScope).toHaveBeenCalledWith('mock-doc-id-123', 'mock-oauth-token');
+    });
+
+    // Tabs shown because fetchDocumentScope returned 2 tabs
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Document tabs' })).toBeTruthy();
+    });
+
+    // "No, import all tabs" = useAllTabs=true → onContinue called with all available tabs
+    fireEvent.click(screen.getByLabelText('No, import all tabs'));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+
+    // Images shown because imageCount > 0
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Images' })).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByLabelText('Yes, include images'));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+
+    await waitFor(() => {
+      expect(mockStartWorkflow).toHaveBeenCalledWith(['ct-1'], {
+        selectedTabIds: ['tab-1', 'tab-2'],
+        includeImages: true,
+      });
+    });
+  });
+
+  it('skips image step and starts workflow directly when document has no images', async () => {
+    mockFetchDocumentScope.mockResolvedValue({
+      tabs: [
+        { id: 'tab-1', title: 'Intro', index: 0 },
+        { id: 'tab-2', title: 'Appendix', index: 1 },
+      ],
+      imageCount: 0,
+    } satisfies DocumentScopeConfig);
 
     const ref = createRef<ModalOrchestratorHandle>();
     render(<ModalOrchestrator ref={ref} {...defaultProps} />);
 
-    await act(async () => {
-      ref.current?.startFlow();
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Pick document' }));
-
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Select content type(s)' })).toBeTruthy();
-    });
-
-    const multiselectToggle = screen.getByRole('button', { name: /toggle multiselect/i });
-    fireEvent.click(multiselectToggle);
-
-    await waitFor(() => {
-      const option = document.querySelector('[data-test-id="cf-multiselect-list-item-ct-1"]');
-      expect(option).toBeTruthy();
-    });
-
-    const optionInput = document
-      .querySelector('[data-test-id="cf-multiselect-list-item-ct-1"]')
-      ?.closest('label')
-      ?.querySelector('input') as HTMLInputElement;
-    if (optionInput) fireEvent.click(optionInput);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
-
-    await waitFor(() => {
-      expect(mockStartWorkflow).toHaveBeenCalledWith(['ct-1']);
-    });
-
-    resolveStartWorkflow?.({
-      status: RunStatus.PENDING_REVIEW,
-      runId: 'run-123',
-      messages: [],
-      suspendPayload: {
-        suspendStepId: 'select-tabs-images-step',
-        reason: 'Needs document scope review',
-        documentId: 'mock-doc-id-123',
-        requiresImageSelection: true,
-        requiresTabSelection: true,
-        imageCount: 2,
-        inlineObjectCount: 2,
-        positionedObjectCount: 0,
-        tabCount: 2,
-        tabs: [
-          { id: 'tab-1', title: 'Introduction', index: 0 },
-          { id: 'tab-2', title: 'Appendix', index: 1 },
-        ],
-      },
-    });
+    await pickDocument(ref);
+    await selectContentTypeAndNext();
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'Document tabs' })).toBeTruthy();
@@ -378,24 +397,35 @@ describe('ModalOrchestrator', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Images' })).toBeTruthy();
-    });
-
-    fireEvent.click(screen.getByLabelText('Yes, include images'));
-    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
-
-    await waitFor(() => {
-      expect(mockResumeWorkflow).toHaveBeenCalledWith('run-123', {
-        includeImages: true,
+      expect(mockStartWorkflow).toHaveBeenCalledWith(['ct-1'], {
         selectedTabIds: ['tab-1', 'tab-2'],
       });
-      expect(screen.queryByRole('heading', { name: 'Preparing your preview' })).toBeNull();
-      expect(defaultProps.onMappingReviewReady).not.toHaveBeenCalled();
     });
   });
 
-  it('routes mapping-review suspends to onMappingReviewReady after document scope review', async () => {
-    mockResumeWorkflow.mockResolvedValueOnce({
+  it('skips tab and image steps and starts workflow directly for a single-tab doc with no images', async () => {
+    mockFetchDocumentScope.mockResolvedValue({
+      tabs: [{ id: 'tab-1', title: 'Main', index: 0 }],
+      imageCount: 0,
+    } satisfies DocumentScopeConfig);
+
+    const ref = createRef<ModalOrchestratorHandle>();
+    render(<ModalOrchestrator ref={ref} {...defaultProps} />);
+
+    await pickDocument(ref);
+    await selectContentTypeAndNext();
+
+    await waitFor(() => {
+      expect(mockStartWorkflow).toHaveBeenCalledWith(['ct-1'], undefined);
+    });
+
+    // No tab or image modal shown
+    expect(screen.queryByRole('heading', { name: 'Document tabs' })).toBeNull();
+    expect(screen.queryByRole('heading', { name: 'Images' })).toBeNull();
+  });
+
+  it('routes mapping-review suspend to onMappingReviewReady after pre-flight selection', async () => {
+    mockStartWorkflow.mockResolvedValue({
       status: RunStatus.PENDING_REVIEW,
       runId: 'run-123',
       messages: [],
@@ -405,52 +435,9 @@ describe('ModalOrchestrator', () => {
     const ref = createRef<ModalOrchestratorHandle>();
     render(<ModalOrchestrator ref={ref} {...defaultProps} />);
 
-    await act(async () => {
-      ref.current?.startFlow();
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Pick document' }));
-
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Select content type(s)' })).toBeTruthy();
-    });
-
-    const multiselectToggle = screen.getByRole('button', { name: /toggle multiselect/i });
-    fireEvent.click(multiselectToggle);
-
-    await waitFor(() => {
-      const option = document.querySelector('[data-test-id="cf-multiselect-list-item-ct-1"]');
-      expect(option).toBeTruthy();
-    });
-
-    const optionInput = document
-      .querySelector('[data-test-id="cf-multiselect-list-item-ct-1"]')
-      ?.closest('label')
-      ?.querySelector('input') as HTMLInputElement;
-    if (optionInput) fireEvent.click(optionInput);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
-
-    await waitFor(() => {
-      expect(mockStartWorkflow).toHaveBeenCalledWith(['ct-1']);
-    });
-
-    await act(async () => {
-      // use the default pending review response configured in beforeEach
-    });
-
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Document tabs' })).toBeTruthy();
-    });
-
-    fireEvent.click(screen.getByLabelText('No, import all tabs'));
-    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
-
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Images' })).toBeTruthy();
-    });
-
-    fireEvent.click(screen.getByLabelText('Yes, include images'));
-    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    await pickDocument(ref);
+    await selectContentTypeAndNext();
+    await completePreflight({ useAllTabs: true, includeImages: true });
 
     await waitFor(() => {
       expect(defaultProps.onMappingReviewReady).toHaveBeenCalledWith(
