@@ -254,7 +254,10 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
-      void startWorkflowWithScope(contentTypeIds, { selectedTabIds: [], includeImages: false }).catch(handleWorkflowError);
+      void startWorkflowWithScope(contentTypeIds, {
+        selectedTabIds: [],
+        includeImages: false,
+      }).catch(handleWorkflowError);
     };
 
     const handleWorkflowResult = (workflowRun: WorkflowRunResult) => {

@@ -168,9 +168,7 @@ const getWorkflowFailureMessage = (
   return getRunErrorMessage(runData);
 };
 
-const getSuspendPayload = (
-  runData: AgentRunData
-): MappingReviewSuspendPayload | undefined => {
+const getSuspendPayload = (runData: AgentRunData): MappingReviewSuspendPayload | undefined => {
   return runData.metadata?.suspendPayload;
 };
 
