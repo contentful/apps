@@ -6,7 +6,6 @@ import {
   MappingReviewSuspendPayload,
   ResumePayload,
   RunStatus,
-  TabsImagesSuspendPayload,
   WorkflowFailure,
 } from '@types';
 
@@ -15,8 +14,8 @@ const AGENTS_API_HEADERS = {
 };
 
 export interface DocumentScope {
-  includeImages?: boolean;
-  selectedTabIds?: string[];
+  includeImages: boolean;
+  selectedTabIds: string[];
 }
 
 export interface AgentGeneratePayload {
@@ -31,7 +30,7 @@ export interface AgentGeneratePayload {
     documentId: string;
     contentTypeIds: string[];
     oauthToken: string;
-    documentScope?: DocumentScope;
+    documentScope: DocumentScope;
   };
   threadId: string;
 }
@@ -45,7 +44,7 @@ export interface AgentRunData {
     status?: RunStatus;
     workflowId?: string;
     workflowRunId?: string;
-    suspendPayload?: TabsImagesSuspendPayload | MappingReviewSuspendPayload;
+    suspendPayload?: MappingReviewSuspendPayload;
     workflowFailure?: WorkflowFailure;
     googleDocPayload?: Record<string, unknown>;
   };

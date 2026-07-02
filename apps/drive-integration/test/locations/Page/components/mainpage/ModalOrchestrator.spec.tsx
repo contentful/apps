@@ -399,6 +399,7 @@ describe('ModalOrchestrator', () => {
     await waitFor(() => {
       expect(mockStartWorkflow).toHaveBeenCalledWith(['ct-1'], {
         selectedTabIds: ['tab-1', 'tab-2'],
+        includeImages: false,
       });
     });
   });
@@ -416,7 +417,7 @@ describe('ModalOrchestrator', () => {
     await selectContentTypeAndNext();
 
     await waitFor(() => {
-      expect(mockStartWorkflow).toHaveBeenCalledWith(['ct-1'], undefined);
+      expect(mockStartWorkflow).toHaveBeenCalledWith(['ct-1'], { selectedTabIds: [], includeImages: false });
     });
 
     // No tab or image modal shown

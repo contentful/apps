@@ -9,7 +9,7 @@ import {
 import {
   MappingReviewSuspendPayload,
   ResumePayload,
-  TabsImagesSuspendPayload,
+
   CompletedWorkflowPayload,
   WorkflowRunResult,
   RunStatus,
@@ -37,7 +37,7 @@ interface WorkflowHook {
   isAnalyzing: boolean;
   startWorkflow: (
     contentTypeIds: string[],
-    documentScope?: DocumentScope
+    documentScope: DocumentScope
   ) => Promise<WorkflowRunResult>;
   resumeWorkflow: (runId: string, resumePayload: ResumePayload) => Promise<WorkflowRunResult>;
 }
@@ -171,7 +171,7 @@ const getWorkflowFailureMessage = (
 
 const getSuspendPayload = (
   runData: AgentRunData
-): TabsImagesSuspendPayload | MappingReviewSuspendPayload | undefined => {
+): MappingReviewSuspendPayload | undefined => {
   return runData.metadata?.suspendPayload;
 };
 
@@ -273,7 +273,7 @@ export const useWorkflowAgent = ({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const startWorkflow = useCallback(
-    async (contentTypeIds: string[], documentScope?: DocumentScope) => {
+    async (contentTypeIds: string[], documentScope: DocumentScope) => {
       setIsAnalyzing(true);
 
       const spaceId = sdk.ids.space;
@@ -298,7 +298,7 @@ export const useWorkflowAgent = ({
           documentId,
           contentTypeIds,
           oauthToken,
-          ...(documentScope ? { documentScope } : {}),
+          documentScope,
         },
         threadId,
       };

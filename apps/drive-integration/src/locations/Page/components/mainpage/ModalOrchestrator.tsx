@@ -254,7 +254,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
-      void startWorkflowWithScope(contentTypeIds).catch(handleWorkflowError);
+      void startWorkflowWithScope(contentTypeIds, { selectedTabIds: [], includeImages: false }).catch(handleWorkflowError);
     };
 
     const handleWorkflowResult = (workflowRun: WorkflowRunResult) => {
@@ -271,7 +271,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
     const startWorkflowWithScope = async (
       contentTypeIds: string[],
-      documentScope?: DocumentScope
+      documentScope: DocumentScope
     ) => {
       setFlowStep(FlowStep.LOADING);
       const result = await startWorkflow(contentTypeIds, documentScope);
@@ -303,7 +303,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       try {
         await startWorkflowWithScope(
           selectedContentTypes.map((ct) => ct.sys.id),
-          { selectedTabIds: nextSelectedTabs.map((tab) => tab.tabId) }
+          { selectedTabIds: nextSelectedTabs.map((tab) => tab.tabId), includeImages: false }
         );
       } catch (error) {
         handleWorkflowError(error);
@@ -317,9 +317,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         await startWorkflowWithScope(
           selectedContentTypes.map((ct) => ct.sys.id),
           {
-            ...(selectedTabs.length > 0
-              ? { selectedTabIds: selectedTabs.map((tab) => tab.tabId) }
-              : {}),
+            selectedTabIds: selectedTabs.map((tab) => tab.tabId),
             includeImages: nextIncludeImages,
           }
         );
