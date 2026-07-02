@@ -20,7 +20,10 @@ import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal'
 import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
 import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
 import { DocumentSelection } from '../../../../services/agents-api';
-import { fetchDocumentSelection, DocumentSelectionConfig } from '../../../../utils/fetchDocumentSelection';
+import {
+  fetchDocumentSelection,
+  DocumentSelectionConfig,
+} from '../../../../utils/fetchDocumentSelection';
 import { isAiAccessDeniedError } from '../../../../utils/aiAccess';
 
 export interface ModalOrchestratorHandle {

@@ -346,7 +346,10 @@ describe('ModalOrchestrator', () => {
     await selectContentTypeAndNext();
 
     await waitFor(() => {
-      expect(mockFetchDocumentSelection).toHaveBeenCalledWith('mock-doc-id-123', 'mock-oauth-token');
+      expect(mockFetchDocumentSelection).toHaveBeenCalledWith(
+        'mock-doc-id-123',
+        'mock-oauth-token'
+      );
     });
 
     // Tabs shown because fetchDocumentSelection returned 2 tabs
