@@ -247,15 +247,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setFlowStep(null);
     };
 
-    const startWorkflowWithScope = async (
-      contentTypeIds: string[],
-      documentScope?: DocumentScope
-    ) => {
-      setFlowStep(FlowStep.LOADING);
-      const result = await startWorkflow(contentTypeIds, documentScope);
-      handleWorkflowResult(result);
-    };
-
     const showDocumentScopeReview = (
       scopeConfig: DocumentScopeConfig,
       contentTypeIds: string[]
@@ -276,6 +267,15 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       }
 
       void startWorkflowWithScope(contentTypeIds).catch(handleWorkflowError);
+    };
+
+    const startWorkflowWithScope = async (
+      contentTypeIds: string[],
+      documentScope?: DocumentScope
+    ) => {
+      setFlowStep(FlowStep.LOADING);
+      const result = await startWorkflow(contentTypeIds, documentScope);
+      handleWorkflowResult(result);
     };
 
     const handleContentTypeContinue = async (contentTypeIds: string[]) => {
