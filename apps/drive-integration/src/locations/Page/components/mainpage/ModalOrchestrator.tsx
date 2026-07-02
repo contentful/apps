@@ -235,18 +235,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       showDiscardConfirmation();
     };
 
-    const handleWorkflowResult = (workflowRun: WorkflowRunResult) => {
-      setActiveRunId(workflowRun.runId);
-
-      if (workflowRun.status === RunStatus.PENDING_REVIEW) {
-        setFlowStep(null);
-        onMappingReviewReady(workflowRun.suspendPayload, workflowRun.runId);
-        return;
-      }
-
-      setFlowStep(null);
-    };
-
     const showDocumentScopeReview = (
       scopeConfig: DocumentScopeConfig,
       contentTypeIds: string[]
@@ -267,6 +255,18 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       }
 
       void startWorkflowWithScope(contentTypeIds).catch(handleWorkflowError);
+    };
+
+    const handleWorkflowResult = (workflowRun: WorkflowRunResult) => {
+      setActiveRunId(workflowRun.runId);
+
+      if (workflowRun.status === RunStatus.PENDING_REVIEW) {
+        setFlowStep(null);
+        onMappingReviewReady(workflowRun.suspendPayload, workflowRun.runId);
+        return;
+      }
+
+      setFlowStep(null);
     };
 
     const startWorkflowWithScope = async (
