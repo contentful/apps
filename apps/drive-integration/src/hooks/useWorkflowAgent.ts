@@ -9,7 +9,6 @@ import {
 import {
   MappingReviewSuspendPayload,
   ResumePayload,
-
   CompletedWorkflowPayload,
   WorkflowRunResult,
   RunStatus,
