@@ -141,7 +141,7 @@ export type WorkflowRunResult =
       status: RunStatus.PENDING_REVIEW;
       runId: string;
       messages: AgentRunMessage[];
-      suspendPayload: TabsImagesSuspendPayload | MappingReviewSuspendPayload;
+      suspendPayload: MappingReviewSuspendPayload;
     }
   | {
       status: RunStatus.COMPLETED;

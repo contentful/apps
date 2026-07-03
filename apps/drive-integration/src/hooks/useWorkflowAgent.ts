@@ -9,7 +9,6 @@ import {
 import {
   MappingReviewSuspendPayload,
   ResumePayload,
-  TabsImagesSuspendPayload,
   CompletedWorkflowPayload,
   WorkflowRunResult,
   RunStatus,
@@ -19,6 +18,7 @@ import {
 import {
   AgentGeneratePayload,
   AgentRunData,
+  DocumentSelection,
   getWorkflowRun,
   resumeWorkflowRun,
   startAgentRun,
@@ -34,7 +34,10 @@ interface UseWorkflowParams {
 
 interface WorkflowHook {
   isAnalyzing: boolean;
-  startWorkflow: (contentTypeIds: string[]) => Promise<WorkflowRunResult>;
+  startWorkflow: (
+    contentTypeIds: string[],
+    documentSelection: DocumentSelection
+  ) => Promise<WorkflowRunResult>;
   resumeWorkflow: (runId: string, resumePayload: ResumePayload) => Promise<WorkflowRunResult>;
 }
 
@@ -138,9 +141,7 @@ const getWorkflowFailureMessage = (
   failureReason: WorkflowFailureReason
 ): string => FAILURE_REASON_MESSAGES[failureReason] ?? getRunErrorMessage(runData);
 
-const getSuspendPayload = (
-  runData: AgentRunData
-): TabsImagesSuspendPayload | MappingReviewSuspendPayload | undefined => {
+const getSuspendPayload = (runData: AgentRunData): MappingReviewSuspendPayload | undefined => {
   return runData.metadata?.suspendPayload;
 };
 
@@ -245,7 +246,7 @@ export const useWorkflowAgent = ({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const startWorkflow = useCallback(
-    async (contentTypeIds: string[]) => {
+    async (contentTypeIds: string[], documentSelection: DocumentSelection) => {
       setIsAnalyzing(true);
 
       const spaceId = sdk.ids.space;
@@ -270,6 +271,7 @@ export const useWorkflowAgent = ({
           documentId,
           contentTypeIds,
           oauthToken,
+          documentSelection,
         },
         threadId,
       };
