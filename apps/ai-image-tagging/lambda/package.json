@@ -1,7 +1,7 @@
 {
   "name": "@contentful/ai-image-tagging-lambda",
   "private": true,
-  "version": "1.4.25",
+  "version": "1.4.26",
   "author": "Contentful GmbH",
   "license": "MIT",
   "scripts": {

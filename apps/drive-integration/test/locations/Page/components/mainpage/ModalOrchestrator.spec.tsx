@@ -75,6 +75,7 @@ const mockContentTypes = [
 const defaultProps = {
   sdk: mockSdk,
   oauthToken: 'mock-oauth-token',
+  isOAuthConnected: true,
   onMappingReviewReady: vi.fn(),
   onResetToMain: vi.fn(),
 };

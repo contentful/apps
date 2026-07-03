@@ -26,7 +26,7 @@ custom:
 
 provider:
   name: aws
-  runtime: nodejs18.x
+  runtime: nodejs22.x
   stage: ${opt:stage, 'dev'}
   region: ${self:custom.awsRegion}
   timeout: 30
