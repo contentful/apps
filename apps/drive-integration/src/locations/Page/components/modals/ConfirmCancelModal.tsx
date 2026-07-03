@@ -4,9 +4,15 @@ interface ConfirmCancelModalProps {
   isOpen: boolean;
   onConfirm: () => void;
   onCancel: () => void;
+  isConfirming?: boolean;
 }
 
-export const ConfirmCancelModal = ({ isOpen, onConfirm, onCancel }: ConfirmCancelModalProps) => {
+export const ConfirmCancelModal = ({
+  isOpen,
+  onConfirm,
+  onCancel,
+  isConfirming = false,
+}: ConfirmCancelModalProps) => {
   return (
     <Modal isShown={isOpen} onClose={onCancel} size="medium" shouldCloseOnOverlayClick={false}>
       {() => (
@@ -16,10 +22,14 @@ export const ConfirmCancelModal = ({ isOpen, onConfirm, onCancel }: ConfirmCance
             <Paragraph>No entries will be created and you'll need to start over.</Paragraph>
           </Modal.Content>
           <Modal.Controls>
-            <Button onClick={onCancel} variant="secondary">
+            <Button onClick={onCancel} variant="secondary" isDisabled={isConfirming}>
               Keep creating
             </Button>
-            <Button onClick={onConfirm} variant="primary">
+            <Button
+              onClick={onConfirm}
+              variant="primary"
+              isLoading={isConfirming}
+              isDisabled={isConfirming}>
               Cancel without creating
             </Button>
           </Modal.Controls>

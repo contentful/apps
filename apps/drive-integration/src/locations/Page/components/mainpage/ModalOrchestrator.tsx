@@ -134,17 +134,8 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       onResetToMain();
     }, [onResetToMain]);
 
-    const handleConfirmCancel = async () => {
+    const handleConfirmCancel = () => {
       setIsConfirmCancelModalOpen(false);
-
-      if (activeRunId) {
-        try {
-          await resumeWorkflow(activeRunId, { cancelled: true });
-        } catch (error) {
-          console.error(error);
-        }
-      }
-
       resetProgress();
       onResetToMain();
     };
