@@ -72,7 +72,7 @@ const CommonGenerator = () => {
       const userMessage = featureConfig[feature].prompt(inputText, localeName);
       await generateMessage(userMessage, localeName);
     } catch (error) {
-      console.error('An error occurred. Please try again.');
+      console.error('Failed to generate content.');
     }
   };
 
