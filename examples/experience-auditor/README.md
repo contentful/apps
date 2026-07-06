@@ -2,13 +2,13 @@
 
 A polished, real-world example app for the **Experience Editor toolbar** — the
 `experience-toolbar` location introduced in
-[`@contentful/app-sdk@4.58.0`](https://www.npmjs.com/package/@contentful/app-sdk).
+[`@contentful/app-sdk@4.60.0`](https://www.npmjs.com/package/@contentful/app-sdk).
 
-Experience Auditor runs alongside the Experience Orchestration (ExO) editor and
-continuously audits the experience you are editing for **accessibility, SEO, and
+Experience Auditor runs alongside the Experience Editor and continuously audits
+the experience you are editing for **accessibility, SEO, and
 content-completeness** issues. It demonstrates the standout capability of the
-toolbar location: **live, selection-aware tooling that reads _and_ mutates the
-experience tree as the author works.**
+toolbar location: **live, selection-aware tooling that reads the experience tree
+as the author works and surfaces actionable, advisory fixes.**
 
 > Looking for the bare-bones starter instead? See the
 > [`experience-toolbar`](../experience-toolbar) example, which demonstrates the
@@ -26,9 +26,11 @@ experience tree as the author works.**
   `selection.set(nodeId)` + `selection.highlight(nodeId, { flash, scrollIntoView })`
   to jump straight to the offending component (visual mode only, and only where
   the host backs the selection surface — see _Capability-aware behavior_).
-- **One-click fixes** — findings can carry a fix that writes back via
-  `getNode().setContentProperty()`, permission-checked with `sdk.access.can()`
-  and confirmed through `sdk.notifier`. Fixes come in two kinds (see below).
+- **Advisory fixes** — findings can carry a derived fix that is surfaced as
+  read-only advice for the author to apply manually. The current app-sdk surface
+  exposes no host call to write a node's content properties, so the auditor
+  computes the suggestion but does not write it. Fixes come in two kinds (see
+  below).
 - **Pre-publish gate** — `experience.publish()` is blocked while any error-level
   finding remains.
 
@@ -52,24 +54,26 @@ functions over a SDK-independent `CollectedNode` shape, so they are fully
 unit-tested without a live SDK. Adding a per-node rule is a matter of dropping
 another `AuditRule` into `AUDIT_RULES`.
 
-### One-click fixes
+### Advisory fixes
 
-A finding can offer a fix, and there are two kinds — the distinction matters
-because one is safe to apply blindly and the other is not:
+A finding can offer a fix, and there are two kinds — the distinction shapes how
+the suggestion is presented, since one is unambiguous and the other is a
+judgement call:
 
-- **Deterministic** — exactly one correct result, applied immediately on click.
-  Examples: trimming surrounding whitespace from alt text, or setting a skipped
-  heading to the level that keeps the outline sequential. There is nothing to
-  review, so the app just writes the value.
-- **Suggested** — a proposed value the author reviews and edits _before_ it is
-  written. Example: deriving an SEO meta value from the component's heading. The
-  app pre-fills the suggestion with its provenance, and the author can accept it
-  as-is or change it. **A suggested value is never written silently** — the
-  write only happens after the author confirms.
+- **Deterministic** — exactly one correct result. Examples: trimming surrounding
+  whitespace from alt text, or the level that keeps a skipped heading's outline
+  sequential. The app surfaces the corrected value directly as a hint.
+- **Suggested** — a proposed value the author should review before using.
+  Example: deriving an SEO meta value from the component's heading. The app
+  shows the suggestion with its provenance so the author can judge it.
 
-The fix shapes are modelled as a discriminated union in
-[`src/audit/types.ts`](src/audit/types.ts) (`AutoFix`), so the toolbar can route
-each kind to the right UI and the rules stay declarative about what they offer.
+In both cases the value is **surfaced as read-only advice** — the current
+app-sdk surface has no host call to write a node's content properties, so the
+author applies the change manually in the editor. The fix shapes are modelled as
+a discriminated union in [`src/audit/types.ts`](src/audit/types.ts) (`AutoFix`),
+so the toolbar can route each kind to the right UI and the rules stay
+declarative about what they offer. If a content-write surface lands later, this
+is where a one-click apply path would attach.
 
 ### Capability-aware behavior
 
@@ -168,15 +172,21 @@ pointing the app at `http://localhost:3000`.
 
 ## A note on verification
 
-This app is built against the published `@contentful/app-sdk@4.58.0` types,
+This app is built against the published `@contentful/app-sdk@4.60.0` types,
 which are the contract for the toolbar location. The host renderer that serves
 `sdk.experiences` at runtime is still rolling out, so the app is **type-verified and
-unit-tested against a mocked SDK** — 40 tests cover the audit rules, scoring,
+unit-tested against a mocked SDK** — 37 tests cover the audit rules, scoring,
 the collector and its binding resolution, capability detection, the suggested-
 fix derivation, and the toolbar's locate / fix / publish-gate behavior. It is
-not yet verified end-to-end inside a live ExO editor; that live verification is
-tracked separately as the host renderer rolls out. The API shapes used here
-match the published types exactly.
+not yet verified end-to-end inside a live Experience Editor; that live
+verification is tracked separately as the host renderer rolls out. The API
+shapes used here match the published types exactly.
+
+> **Note on `getRootNodes()`.** The audit traversal starts from
+> `sdk.experiences.experience.getRootNodes()`, which currently resolves to an
+> empty list until the host wires up experience-tree sync. Against a live host
+> today the audit will report no findings; the demo mode below exercises the full
+> loop against a seeded in-memory experience.
 
 ## Available scripts
 
