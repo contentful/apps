@@ -4,7 +4,6 @@
   "private": true,
   "lavamoat": {
     "allowScripts": {
-      "@lavamoat/preinstall-always-fail": false,
       "vite>esbuild": true
     }
   },
@@ -20,8 +19,7 @@
     "jsdom": "^25.0.1",
     "source-map-explorer": "^2.5.0",
     "typescript": "^3.9.7",
-    "@lavamoat/allow-scripts": "^3.4.3",
-    "@lavamoat/preinstall-always-fail": "^1.0.0"
+    "@lavamoat/allow-scripts": "^3.4.3"
   },
   "dependencies": {
     "@contentful/app-sdk": "4.23.0",
