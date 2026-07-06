@@ -2,8 +2,8 @@
 
 A minimal starter for an app that renders in the **Experience Editor toolbar** —
 the new `experience-toolbar` location introduced in
-[`@contentful/app-sdk@4.58.0`](https://www.npmjs.com/package/@contentful/app-sdk).
-Toolbar apps run alongside the Experience Orchestration (ExO) editor and use the
+[`@contentful/app-sdk@4.60.0`](https://www.npmjs.com/package/@contentful/app-sdk).
+Toolbar apps run alongside the Experience Editor and use the
 `sdk.experiences` namespace to read and react to the experience the user is editing.
 
 This example is intentionally small. It demonstrates the core building blocks of
@@ -91,11 +91,11 @@ button is disabled there and enabled only in `visual` mode.
 
 ## A note on verification
 
-This example is built against the published `@contentful/app-sdk@4.58.0` types,
+This example is built against the published `@contentful/app-sdk@4.60.0` types,
 which are the contract for the toolbar location. At the time of writing, the host
 renderer that serves `sdk.experiences` at runtime is still rolling out, so the example is
 **type-verified and unit-tested against a mocked SDK**, but not yet verified
-end-to-end inside a live ExO editor. The API shapes used here match the published
+end-to-end inside a live Experience Editor. The API shapes used here match the published
 types exactly.
 
 ## Available Scripts
