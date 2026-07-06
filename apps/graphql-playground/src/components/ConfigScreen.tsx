@@ -161,7 +161,7 @@ export default class Config extends Component<ConfigProps, ConfigState> {
         },
       };
     } catch (error) {
-      console.error('Failed to save app configuration:', error instanceof Error ? error.message : String(error));
+      console.error('Failed to save app configuration.');
     }
   };
 
