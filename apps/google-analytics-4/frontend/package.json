@@ -62,5 +62,8 @@
     "vite": "^6.4.1",
     "vitest": "^2.1.8"
   },
-  "homepage": "."
+  "homepage": ".",
+  "overrides": {
+    "form-data": "^4.0.4"
+  }
 }

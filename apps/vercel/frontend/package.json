@@ -37,5 +37,8 @@
     "typescript": "5.1.6",
     "vite": "4.5.14",
     "vitest": "0.34.6"
+  },
+  "overrides": {
+    "form-data": "^4.0.4"
   }
 }
