@@ -55,7 +55,7 @@ const RewriteGenerator = () => {
       const userMessage = featureConfig[feature].prompt(inputText, rewritePromptData);
       await generateMessage(userMessage, localeName);
     } catch (error) {
-      console.error('Failed to generate content.');
+      console.error('Failed to generate content:', error instanceof Error ? error.message : String(error));
     }
   };
 
