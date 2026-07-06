@@ -2,6 +2,12 @@
   "name": "@contentful/graphql-playground",
   "version": "0.2.11",
   "private": true,
+  "lavamoat": {
+    "allowScripts": {
+      "@lavamoat/preinstall-always-fail": false,
+      "vite>esbuild": true
+    }
+  },
   "devDependencies": {
     "@contentful/app-scripts": "1.33.2",
     "@testing-library/jest-dom": "^5.11.5",
@@ -13,7 +19,9 @@
     "@types/react-redux": "^7.1.11",
     "jsdom": "^25.0.1",
     "source-map-explorer": "^2.5.0",
-    "typescript": "^3.9.7"
+    "typescript": "^3.9.7",
+    "@lavamoat/allow-scripts": "^3.4.3",
+    "@lavamoat/preinstall-always-fail": "^1.0.0"
   },
   "dependencies": {
     "@contentful/app-sdk": "4.23.0",
@@ -31,6 +39,7 @@
     "vitest": "^2.1.9"
   },
   "scripts": {
+    "allow-scripts": "allow-scripts run",
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "vite",
     "build": "vite build",
