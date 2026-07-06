@@ -36,7 +36,7 @@ commands:
       - run:
           name: Run allow-scripts (lifecycle scripts for whitelisted packages)
           command: |
-            for pkg in apps/bedrock-content-generator apps/ai-content-generator; do
+            for pkg in apps/bedrock-content-generator; do
               if [ -f "$pkg/package.json" ] && grep -q '"allow-scripts"' "$pkg/package.json" && [ -d "$pkg/node_modules/@lavamoat/allow-scripts" ]; then
                 (cd "$pkg" && npm run allow-scripts)
               fi

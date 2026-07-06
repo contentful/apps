@@ -19,7 +19,6 @@
     "usehooks-ts": "^2.9.1"
   },
   "scripts": {
-    "allow-scripts": "allow-scripts run",
     "start": "vite",
     "start:dev": "NODE_ENV='development' && npm start",
     "start:preview": "npm run build && vite preview",
@@ -45,16 +44,7 @@
       "last 1 safari version"
     ]
   },
-  "lavamoat": {
-    "allowScripts": {
-      "@lavamoat/preinstall-always-fail": false,
-      "@originjs/vite-plugin-commonjs>esbuild": true,
-      "vite>esbuild": true
-    }
-  },
   "devDependencies": {
-    "@lavamoat/allow-scripts": "^3.4.3",
-    "@lavamoat/preinstall-always-fail": "^1.0.0",
     "@originjs/vite-plugin-commonjs": "^1.0.3",
     "@testing-library/react": "14.0.0",
     "@types/node": "18.0.3",
