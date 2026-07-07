@@ -4,8 +4,6 @@
 > This app is used by the Applied AI Solutions team to score Drive Integration agent runs during development and manual QA. It is not published to the Contentful Marketplace and should not be treated as a customer-facing product.
 >
 > **Ownership:** Applied AI Solutions team (10pines)
-> **AWS account:** `017078452822` (`cf-proddev-apps-production`)
-> **Deployed Lambda:** `google-docs-eval.api.ctf-apps.com` (prod), `google-docs-eval-test.api.ctf-apps.com` (test)
 
 An internal Contentful app that lists completed Drive Integration agent runs and scores them using automated eval scorers.
 
@@ -18,7 +16,7 @@ Contentful space (frontend app)
   └── Page: lists completed runs via sdk.cma.agentRun.getMany
   └── "Score" button → POST /score to Lambda
 
-Scoring Lambda (AWS, account 017078452822)
+Scoring Lambda (AWS)
   ├── 3 deterministic scorers (no LLM):
   │     json-structure, referential-integrity, context-leak
   └── 4 LLM-judge scorers (AWS Bedrock, Claude):
@@ -34,16 +32,14 @@ The Lambda invokes Bedrock using its **IAM execution role** — no API keys anyw
 
 ### 1. Enable Claude in Bedrock
 
-In the AWS console for account `017078452822` (`cf-proddev-apps-production`):
+In the AWS console (ask the Applied AI Solutions team for account details):
 
 1. Go to **Amazon Bedrock → Model access**
 2. Ensure **Claude 3.5 Sonnet** is enabled
 
 ### 2. Attach this IAM policy to the Lambda execution role
 
-The Lambda's execution role needs permission to invoke the Marketplace team's cross-account Bedrock inference profile (in account `193685726012`).
-
-Create an inline policy on the role with:
+The Lambda's execution role needs permission to invoke the Marketplace team's cross-account Bedrock inference profile. Ask the Core AI Platform team for the correct ARNs for your environment, then create an inline policy on the Lambda role:
 
 ```json
 {
@@ -53,21 +49,19 @@ Create an inline policy on the role with:
       "Effect": "Allow",
       "Action": "bedrock:InvokeModel",
       "Resource": [
-        "arn:aws:bedrock:us-east-1:193685726012:application-inference-profile/hg5gx07uftvv",
-        "arn:aws:bedrock:us-east-1:193685726012:application-inference-profile/ldnf79uqf5g3"
+        "<sonnet-inference-profile-arn>",
+        "<haiku-inference-profile-arn>"
       ]
     }
   ]
 }
 ```
 
-> The first ARN is the Marketplace team Sonnet profile, the second is Haiku.
-> Both are in account `193685726012` (`cf-core-ai-platform`).
-> See the [Bedrock ARN list in Confluence](https://contentful.atlassian.net/wiki/spaces/ENG/pages/6301581406) for the full team list.
+> See the Bedrock ARN list in Confluence for the full team list.
 
 ### 3. Trust policy on the Bedrock account side (if cross-account)
 
-If Bedrock cross-account invocation requires a resource-based trust, the `cf-core-ai-platform` account admin may need to add a trust statement allowing the Lambda role from `017078452822` to invoke the profile. Check with the Core AI team if you get a 403 on inference.
+If Bedrock cross-account invocation requires a resource-based trust, the Core AI Platform team may need to add a trust statement allowing the Lambda role to invoke the profile. Check with them if you get a 403 on inference.
 
 ---
 
@@ -76,8 +70,8 @@ If Bedrock cross-account invocation requires a resource-based trust, the `cf-cor
 ```bash
 cd lambda
 npm install
-STAGE=test npm run deploy:test   # deploys to google-docs-eval-test.api.ctf-apps.com
-STAGE=prod npm run deploy        # deploys to google-docs-eval.api.ctf-apps.com
+STAGE=test npm run deploy:test
+STAGE=prod npm run deploy
 ```
 
 Prerequisites: AWS CLI authenticated, Serverless Framework installed, custom domain already created.
@@ -98,7 +92,7 @@ npm run build
 
 After installing the app in a space, go to **App Configuration** and set:
 
-- **Scoring Lambda URL**: the base URL of your deployed Lambda, e.g. `https://google-docs-eval-test.api.ctf-apps.com`
+- **Scoring Lambda URL**: the base URL of your deployed Lambda (ask the team for the correct URL for your environment)
 
 ---
 
