@@ -13,6 +13,9 @@
     "deploy:test": "npm run deploy",
     "start": "npm run build && serverless offline --httpPort 3000"
   },
+  "overrides": {
+    "form-data": "^2.5.6"
+  },
   "dependencies": {
     "aws-sdk": "^2.1693.0",
     "node-fetch": "^2.7.0"
