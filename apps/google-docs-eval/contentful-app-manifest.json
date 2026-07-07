@@ -1,0 +1,20 @@
+{
+  "name": "Google Docs Eval",
+  "description": "Eval tool for the Google Drive Integration app. Lists completed agent runs and scores them using 7 automated eval scorers (3 deterministic + 4 LLM-judge via AWS Bedrock).",
+  "id": "google-docs-eval",
+  "category": "Productivity",
+  "version": "0.1.0",
+  "locations": [
+    {
+      "location": "app-config",
+      "component": "ConfigScreen"
+    },
+    {
+      "location": "page",
+      "navigationItem": {
+        "name": "Eval",
+        "path": "/eval"
+      }
+    }
+  ]
+}
