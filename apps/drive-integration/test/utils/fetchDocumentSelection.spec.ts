@@ -138,6 +138,98 @@ describe('fetchDocumentSelection', () => {
     });
   });
 
+  describe('getDocumentSelectionConfig — tab sorting', () => {
+    it('sorts childTabs by index so parent appears before children in DFS order', async () => {
+      vi.stubGlobal(
+        'fetch',
+        mockFetchResponse(200, {
+          tabs: [
+            {
+              tabProperties: { tabId: 'parent', title: 'Tab 2', index: 0, nestingLevel: 0 },
+              documentTab: {},
+              childTabs: [
+                {
+                  tabProperties: { tabId: 'child-b', title: 'Tab 4', index: 1, nestingLevel: 1 },
+                  documentTab: {},
+                },
+                {
+                  tabProperties: { tabId: 'child-a', title: 'Tab 3', index: 0, nestingLevel: 1 },
+                  documentTab: {},
+                },
+              ],
+            },
+          ],
+        })
+      );
+
+      const result = await fetchDocumentSelection(DOC_ID, TOKEN);
+      expect(result.tabs).toHaveLength(3);
+      expect(result.tabs.map((t) => t.title)).toEqual(['Tab 2', 'Tab 3', 'Tab 4']);
+      expect(result.tabs.map((t) => t.id)).toEqual(['parent', 'child-a', 'child-b']);
+    });
+
+    it('sorts multiple root tabs and their children by index at each level', async () => {
+      vi.stubGlobal(
+        'fetch',
+        mockFetchResponse(200, {
+          tabs: [
+            {
+              tabProperties: { tabId: 't1', title: 'Tab 1', index: 0, nestingLevel: 0 },
+              documentTab: {},
+            },
+            {
+              tabProperties: { tabId: 't2', title: 'Tab 2', index: 1, nestingLevel: 0 },
+              documentTab: {},
+              childTabs: [
+                {
+                  tabProperties: { tabId: 't4', title: 'Tab 4', index: 1, nestingLevel: 1 },
+                  documentTab: {},
+                },
+                {
+                  tabProperties: { tabId: 't3', title: 'Tab 3', index: 0, nestingLevel: 1 },
+                  documentTab: {},
+                },
+              ],
+            },
+          ],
+        })
+      );
+
+      const result = await fetchDocumentSelection(DOC_ID, TOKEN);
+      expect(result.tabs.map((t) => t.title)).toEqual(['Tab 1', 'Tab 2', 'Tab 3', 'Tab 4']);
+      expect(result.tabs.map((t) => t.id)).toEqual(['t1', 't2', 't3', 't4']);
+    });
+
+    it('sorts a flat tabs array by nestingLevel then index when childTabs are absent', async () => {
+      vi.stubGlobal(
+        'fetch',
+        mockFetchResponse(200, {
+          tabs: [
+            {
+              tabProperties: { tabId: 't3', title: 'Tab 3', index: 0, nestingLevel: 1 },
+              documentTab: {},
+            },
+            {
+              tabProperties: { tabId: 't1', title: 'Tab 1', index: 0, nestingLevel: 0 },
+              documentTab: {},
+            },
+            {
+              tabProperties: { tabId: 't4', title: 'Tab 4', index: 1, nestingLevel: 1 },
+              documentTab: {},
+            },
+            {
+              tabProperties: { tabId: 't2', title: 'Tab 2', index: 1, nestingLevel: 0 },
+              documentTab: {},
+            },
+          ],
+        })
+      );
+
+      const result = await fetchDocumentSelection(DOC_ID, TOKEN);
+      expect(result.tabs.map((t) => t.title)).toEqual(['Tab 1', 'Tab 2', 'Tab 3', 'Tab 4']);
+    });
+  });
+
   describe('fetchDocumentSelection — HTTP behavior', () => {
     it('sends the auth header with the provided oauth token', async () => {
       const mockFetch = mockFetchResponse(200, { tabs: [] });
