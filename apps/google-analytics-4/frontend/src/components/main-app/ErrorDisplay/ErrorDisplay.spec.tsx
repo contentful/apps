@@ -2,7 +2,7 @@ import ErrorDisplay from './ErrorDisplay';
 import { render, screen } from '@testing-library/react';
 import { mockSdk } from '../../../../test/mocks';
 import {
-  DEFAULT_ERR_MSG,
+  ANALYTICS_DATA_LOAD_ERROR_MSG,
   INVALID_ARGUMENT_MSG,
   INVALID_SERVICE_ACCOUNT,
   PERMISSION_DENIED_MSG,
@@ -72,7 +72,9 @@ describe('ErrorDisplay', () => {
       />
     );
 
-    const warningMsg = await findByText(DEFAULT_ERR_MSG.replace(HYPER_LINK_COPY, '').trim());
+    const warningMsg = await findByText(
+      ANALYTICS_DATA_LOAD_ERROR_MSG.replace(HYPER_LINK_COPY, '').trim()
+    );
     const hyperLink = getByTestId('cf-ui-text-link');
 
     expect(warningMsg).toBeVisible();
@@ -127,7 +129,8 @@ describe('ErrorDisplay', () => {
     expect(hyperLink).toBeVisible();
   });
 
-  it('mounts with correct msg when error is of ApiError class but not an Error type explicitely handled', async () => {
+  it('shows a user-facing support message for unhandled API errors', async () => {
+    const HYPER_LINK_COPY = 'contact support.';
     const INTERNAL_ERR_MSG = 'Internal Server Error';
     render(
       <ErrorDisplay
@@ -142,17 +145,28 @@ describe('ErrorDisplay', () => {
       />
     );
 
-    const warningMsg = await findByText(INTERNAL_ERR_MSG);
+    const warningMsg = await findByText(
+      ANALYTICS_DATA_LOAD_ERROR_MSG.replace(HYPER_LINK_COPY, '').trim()
+    );
+    const hyperLink = getByTestId('cf-ui-text-link');
 
     expect(warningMsg).toBeVisible();
+    expect(hyperLink).toBeVisible();
+    expect(screen.queryByText(INTERNAL_ERR_MSG)).toBeNull();
   });
 
-  it('mounts with correct msg when error is not a specified Api Error Type ', async () => {
-    const ERR_MSG = 'random error';
+  it('shows a user-facing support message for unexpected errors', async () => {
+    const HYPER_LINK_COPY = 'contact support.';
+    const ERR_MSG = 'Request does not have a valid request signature.';
     render(<ErrorDisplay error={new Error(ERR_MSG)} />);
 
-    const warningMsg = await findByText(ERR_MSG);
+    const warningMsg = await findByText(
+      ANALYTICS_DATA_LOAD_ERROR_MSG.replace(HYPER_LINK_COPY, '').trim()
+    );
+    const hyperLink = getByTestId('cf-ui-text-link');
 
     expect(warningMsg).toBeVisible();
+    expect(hyperLink).toBeVisible();
+    expect(screen.queryByText(ERR_MSG)).toBeNull();
   });
 });

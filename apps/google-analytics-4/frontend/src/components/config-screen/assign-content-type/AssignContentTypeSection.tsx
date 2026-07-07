@@ -18,19 +18,67 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import {
   AllContentTypes,
   AllContentTypeEntries,
-  ContentTypeEntries,
+  ContentTypeRule,
+  ContentTypeRules,
   ContentTypes,
-  ContentTypeValue,
+  LocaleOption,
 } from 'types';
 import AssignContentTypeCard from 'components/config-screen/assign-content-type/AssignContentTypeCard';
 import { sortAndFormatAllContentTypes } from 'helpers/contentTypeHelpers/contentTypeHelpers';
+import {
+  createDefaultRule,
+  getDuplicateRuleIds,
+  getUniqueContentTypeIds,
+  normalizeContentTypeRules,
+} from 'helpers/contentTypeRules/contentTypeRules';
+import {
+  getContentTypeValuePathPatterns,
+  getMissingSelectedPatternTokens,
+  getUnknownPatternTokens,
+} from 'utils/contentTypeMatching';
+
 interface Props {
   mergeSdkParameters: Function;
   onIsValidContentTypeAssignment: Function;
   parameters: KeyValueMap;
   currentEditorInterface: Partial<EditorInterface>;
   originalContentTypes: ContentTypes;
+  originalContentTypeRules: ContentTypeRules;
+  showPatternValidation: boolean;
 }
+
+const getSortedLocaleOptions = (locales?: {
+  available?: string[];
+  names?: Record<string, string>;
+}): LocaleOption[] =>
+  [...(locales?.available || [])]
+    .map((code) => ({
+      code,
+      label: locales?.names?.[code] ? `${locales.names[code]} (${code})` : code,
+    }))
+    .sort((left, right) => left.label.localeCompare(right.label));
+
+const getRuleUnknownPatternTokens = (rule: ContentTypeRule) =>
+  Array.from(
+    new Set(
+      getContentTypeValuePathPatterns(rule)
+        .filter((pathPattern) => pathPattern.trim())
+        .flatMap((pathPattern) =>
+          getUnknownPatternTokens(pathPattern, rule.additionalFieldIds, rule.slugField)
+        )
+    )
+  );
+
+const getRuleMissingSelectedPatternTokens = (rule: ContentTypeRule) =>
+  Array.from(
+    new Set(
+      getContentTypeValuePathPatterns(rule)
+        .filter((pathPattern) => pathPattern.trim())
+        .flatMap((pathPattern) =>
+          getMissingSelectedPatternTokens(pathPattern, rule.additionalFieldIds)
+        )
+    )
+  );
 
 const AssignContentTypeSection = (props: Props) => {
   const {
@@ -39,17 +87,18 @@ const AssignContentTypeSection = (props: Props) => {
     parameters,
     currentEditorInterface,
     originalContentTypes,
+    originalContentTypeRules,
+    showPatternValidation,
   } = props;
 
   const [forceTrailingSlash, setForceTrailingSlash] = useState<boolean>(false);
 
-  // Content type state
-  const [contentTypes, setContentTypes] = useState<ContentTypes>({} as ContentTypes);
+  // Content type rules state
+  const [contentTypeRules, setContentTypeRules] = useState<ContentTypeRules>(
+    [] as ContentTypeRules
+  );
   const [loadingContentTypes, setLoadingContentTypes] = useState<boolean>(true);
   const [hasContentTypes, setHasContentTypes] = useState<boolean>(false);
-  const [contentTypeEntries, setContentTypeEntries] = useState<ContentTypeEntries>(
-    [] as ContentTypeEntries
-  );
   const [hasIncompleteContentTypes, setHasIncompleteContentTypes] = useState<boolean>(false);
 
   // All content type state
@@ -60,21 +109,58 @@ const AssignContentTypeSection = (props: Props) => {
   const [loadingAllContentTypes, setLoadingAllContentTypes] = useState<boolean>(true);
 
   const sdk = useSDK<KnownAppSDK>();
+  const localeOptions = getSortedLocaleOptions(sdk.locales);
 
   useEffect(() => {
     setLoadingContentTypes(true);
     if (parameters.forceTrailingSlash) setForceTrailingSlash(parameters.forceTrailingSlash);
-    if (parameters.contentTypes) setContentTypes(parameters.contentTypes);
+    setContentTypeRules(
+      normalizeContentTypeRules(
+        parameters.contentTypeRules as ContentTypeRules | undefined,
+        parameters.contentTypes as ContentTypes | undefined
+      )
+    );
     setLoadingContentTypes(false);
-  }, [parameters.contentTypes, parameters.forceTrailingSlash]);
+  }, [parameters.contentTypeRules, parameters.contentTypes, parameters.forceTrailingSlash]);
 
   useEffect(() => {
-    setHasContentTypes(Object.keys(contentTypes).length ? true : false);
-    setContentTypeEntries(Object.entries(contentTypes));
-    setHasIncompleteContentTypes(
-      Object.entries(contentTypes).some(([contentTypeId]) => !contentTypeId)
-    );
-  }, [contentTypes]);
+    setHasContentTypes(contentTypeRules.length > 0);
+    setHasIncompleteContentTypes(contentTypeRules.some((rule) => !rule.contentTypeId));
+  }, [contentTypeRules]);
+
+  const rulesMissingPattern = new Set(
+    contentTypeRules
+      .filter(
+        (rule) => rule.enableAdvancedMatching && rule.contentTypeId && !rule.pathPattern?.trim()
+      )
+      .map((rule) => rule.id)
+  );
+
+  const rulesWithUnknownPatternTokens = new Map(
+    contentTypeRules
+      .filter((rule) => rule.enableAdvancedMatching)
+      .map((rule) => [rule.id, getRuleUnknownPatternTokens(rule)] as const)
+      .filter(([, unknownTokens]) => unknownTokens.length > 0)
+  );
+
+  const rulesWithMissingSelectedPatternTokens = new Map(
+    contentTypeRules
+      .filter((rule) => rule.enableAdvancedMatching)
+      .map((rule) => [rule.id, getRuleMissingSelectedPatternTokens(rule)] as const)
+      .filter(([, missingTokens]) => missingTokens.length > 0)
+  );
+
+  const duplicateRuleIds = getDuplicateRuleIds(contentTypeRules);
+
+  const isContentTypeAssignmentValid =
+    rulesMissingPattern.size === 0 &&
+    rulesWithUnknownPatternTokens.size === 0 &&
+    rulesWithMissingSelectedPatternTokens.size === 0 &&
+    duplicateRuleIds.size === 0;
+
+  useEffect(() => {
+    onIsValidContentTypeAssignment(isContentTypeAssignmentValid);
+  }, [isContentTypeAssignmentValid, onIsValidContentTypeAssignment]);
 
   const fetchAllContentTypes = async (sdk: KnownAppSDK): Promise<ContentTypeProps[]> => {
     const cma = createClient({ apiAdapter: sdk.cmaAdapter });
@@ -116,61 +202,65 @@ const AssignContentTypeSection = (props: Props) => {
   const trailingSlashHandler = () => {
     setForceTrailingSlash(!forceTrailingSlash);
     mergeSdkParameters({ forceTrailingSlash: !forceTrailingSlash });
-    onIsValidContentTypeAssignment(true);
   };
 
-  const contentTypeHandler = (newContentTypes: ContentTypes) => {
-    setContentTypes(newContentTypes);
-    const _parameters = { contentTypes: newContentTypes };
+  const contentTypeRulesHandler = (newContentTypeRules: ContentTypeRules) => {
+    setContentTypeRules(newContentTypeRules);
+    const _parameters = { contentTypeRules: newContentTypeRules };
     mergeSdkParameters(_parameters);
-    // We always want the user to be able to save the configuration, even if there are errors or warnings
-    onIsValidContentTypeAssignment(true);
   };
 
-  const handleContentTypeChange = (prevKey: string, newKey: string) => {
-    const newContentTypes: ContentTypes = {};
+  const handleContentTypeChange = (ruleId: string, newContentTypeId: string) => {
+    const newContentTypeRules = contentTypeRules.map((rule) =>
+      rule.id === ruleId
+        ? {
+            ...rule,
+            contentTypeId: newContentTypeId,
+            slugField: '',
+            additionalFieldIds: [],
+          }
+        : rule
+    );
 
-    for (const [prop, value] of Object.entries(contentTypes)) {
-      if (prop === prevKey) {
-        newContentTypes[newKey as keyof typeof contentTypes] = {
-          slugField: '',
-          urlPrefix: value.urlPrefix,
-        };
-      } else {
-        newContentTypes[prop] = value;
-      }
-    }
-
-    contentTypeHandler(newContentTypes);
+    contentTypeRulesHandler(newContentTypeRules);
   };
 
-  const handleContentTypeFieldChange = (key: string, field: string, value: string) => {
-    const currentContentTypeFields: ContentTypeValue = contentTypes[key];
-    const newContentTypes: ContentTypes = {
-      ...contentTypes,
-      [key]: {
-        ...currentContentTypeFields,
-        [field]: value,
-      },
-    };
+  const handleContentTypeFieldChange = (
+    ruleId: string,
+    field: string,
+    value: string | boolean | string[]
+  ) => {
+    const newContentTypeRules = contentTypeRules.map((rule) =>
+      rule.id === ruleId
+        ? {
+            ...rule,
+            [field]: value,
+          }
+        : rule
+    );
 
-    contentTypeHandler(newContentTypes);
+    contentTypeRulesHandler(newContentTypeRules);
+  };
+
+  const handleContentTypeRuleChange = (ruleId: string, updates: Partial<ContentTypeRule>) => {
+    const newContentTypeRules = contentTypeRules.map((rule) =>
+      rule.id === ruleId
+        ? {
+            ...rule,
+            ...updates,
+          }
+        : rule
+    );
+
+    contentTypeRulesHandler(newContentTypeRules);
   };
 
   const handleAddContentType = () => {
-    const newContentTypes: ContentTypes = {
-      ...contentTypes,
-      '': { slugField: '', urlPrefix: '' },
-    };
-
-    contentTypeHandler(newContentTypes);
+    contentTypeRulesHandler([...contentTypeRules, createDefaultRule()]);
   };
 
-  const handleRemoveContentType = (key: string) => {
-    const newContentTypes = { ...contentTypes };
-    delete newContentTypes[key];
-
-    contentTypeHandler(newContentTypes);
+  const handleRemoveContentType = (ruleId: string) => {
+    contentTypeRulesHandler(contentTypeRules.filter((rule) => rule.id !== ruleId));
   };
 
   return (
@@ -178,12 +268,10 @@ const AssignContentTypeSection = (props: Props) => {
       <Box>
         <Subheading marginBottom="spacingXs">Content type configuration</Subheading>
         <Paragraph>
-          Configure content types below that are connected to pages on your website where you're
-          tracking Google Analytics data. You'll need to specify the "slug" field used to generate
-          the page path in your website's URL, and optionally a "prefix" if one exists in front of
-          the URL page path. Additionally, you can check the box below to append a trailing slash to
-          all URLs if needed. The app will automatically be added to the sidebar of associated
-          content types on save of the configuration.
+          Configure the content types whose entries should show Google Analytics data in the editor
+          sidebar. For each content type, define how the app should match the entry to a page path:
+          use a slug field and optional prefix for standard paths, or enable advanced matching to
+          build a custom path pattern with entry field values, a locale, and wildcards.
         </Paragraph>
         <Paragraph>
           <TextLink
@@ -199,8 +287,12 @@ const AssignContentTypeSection = (props: Props) => {
           id="use-trailing-slash"
           isChecked={forceTrailingSlash}
           onChange={trailingSlashHandler}>
-          Use trailing slash for all page paths
+          Append a trailing slash to all page paths
         </Checkbox>
+        <Paragraph marginTop="spacing2Xs" marginBottom="none">
+          Trailing slash applies to standard configurations only. Advanced patterns are used exactly
+          as written.
+        </Paragraph>
       </Box>
       {!loadingContentTypes && !loadingAllContentTypes ? (
         <>
@@ -208,18 +300,24 @@ const AssignContentTypeSection = (props: Props) => {
             <AssignContentTypeCard
               allContentTypes={allContentTypes}
               allContentTypeEntries={allContentTypeEntries}
-              contentTypes={contentTypes}
-              contentTypeEntries={contentTypeEntries}
+              contentTypeRules={contentTypeRules}
               onContentTypeChange={handleContentTypeChange}
               onContentTypeFieldChange={handleContentTypeFieldChange}
+              onContentTypeRuleChange={handleContentTypeRuleChange}
               onRemoveContentType={handleRemoveContentType}
               currentEditorInterface={currentEditorInterface}
-              originalContentTypes={originalContentTypes}
+              originalContentTypeRules={originalContentTypeRules}
+              localeOptions={localeOptions}
+              rulesMissingPattern={rulesMissingPattern}
+              rulesWithUnknownPatternTokens={rulesWithUnknownPatternTokens}
+              rulesWithMissingSelectedPatternTokens={rulesWithMissingSelectedPatternTokens}
+              duplicateRuleIds={duplicateRuleIds}
+              showPatternValidation={showPatternValidation}
             />
           )}
-          {Object.keys(contentTypes).length < Object.keys(allContentTypes).length && (
+          {contentTypeRules.length < Object.keys(allContentTypes).length * 5 && (
             <Button onClick={handleAddContentType} isDisabled={hasIncompleteContentTypes}>
-              Add a content type
+              Add a rule
             </Button>
           )}
         </>

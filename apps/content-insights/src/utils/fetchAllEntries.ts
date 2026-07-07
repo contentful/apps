@@ -21,6 +21,10 @@ export async function fetchAllEntries(sdk: BaseAppSDK): Promise<FetchAllEntriesR
         query: {
           skip: batchSkip,
           limit: batchSize,
+          // sys-only projection -- strips fields and metadata from the
+          // response, shrinking payload 10-50x. Titles are lazy-loaded
+          // per visible page via useEntryTitlesForIds.
+          select: 'sys',
         },
       });
 

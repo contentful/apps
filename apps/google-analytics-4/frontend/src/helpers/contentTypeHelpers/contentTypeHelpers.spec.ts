@@ -76,9 +76,7 @@ describe('contentTypeHelpers', () => {
     const fields = result['layout'].fields;
 
     expect(Object.keys(result).length).toEqual(1);
-    // Fields that are not short text or short text list should be removed
-    expect(fields.length).toEqual(3);
-    // Fields should be sorted alphabetically
-    expect(fields[0].id).toEqual('slug');
+    // Fields that cannot be represented in URLs should be removed
+    expect(fields.map((field) => field.id)).toEqual(['duration', 'slug', 'tags', 'title']);
   });
 });

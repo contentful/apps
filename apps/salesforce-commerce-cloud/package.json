@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@contentful/app-scripts": "^1.29.0",
+    "@contentful/app-scripts": "^2.5.11",
     "@contentful/app-sdk": "^4.17.1",
     "@contentful/f36-components": "4.67.0",
     "@contentful/f36-layout": "5.0.0-alpha.18",
@@ -14,7 +14,6 @@
     "@emotion/react": "^11.13.3",
     "@tanstack/react-query": "^4.29.7",
     "@vitejs/plugin-react": "^4.3.1",
-    "axios": "^1.7.7",
     "commerce-sdk": "^2.15.0",
     "contentful-management": "^11.35.1",
     "react": "17.0.2",
@@ -25,12 +24,14 @@
   },
   "scripts": {
     "start": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build && contentful-app-scripts build-functions --ci",
+    "build:staging": "tsc && vite build --mode staging && contentful-app-scripts build-functions --ci",
     "test": "vitest",
-    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEFINITIONS_ORG_ID} --definition-id 1O8njPYTGO44VueSJNBrdZ --token ${CONTENTFUL_CMA_TOKEN}",
-    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEV_TESTING_ORG_ID} --definition-id 66J3nYAMa13A1O7E8MDDMu --token ${TEST_CMA_TOKEN}"
+    "deploy": "npm run build && contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 1O8njPYTGO44VueSJNBrdZ --token ${CONTENTFUL_CMA_TOKEN} && contentful-app-scripts upsert-actions --ci --organization-id ${DEFINITIONS_ORG_ID} --definition-id 1O8njPYTGO44VueSJNBrdZ --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:test": "npm run build:staging && contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 66J3nYAMa13A1O7E8MDDMu --token ${TEST_CMA_TOKEN} && contentful-app-scripts upsert-actions --ci --organization-id ${DEV_TESTING_ORG_ID} --definition-id 66J3nYAMa13A1O7E8MDDMu --token ${TEST_CMA_TOKEN}"
   },
   "devDependencies": {
+    "@contentful/node-apps-toolkit": "^3.16.1",
     "@testing-library/react": "12.1.5",
     "@types/node": "18.0.3",
     "@types/react": "17.0.47",

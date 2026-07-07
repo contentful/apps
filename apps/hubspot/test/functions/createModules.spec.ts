@@ -1,7 +1,7 @@
 import { handler } from '../../functions/createModules';
 import type { SelectedSdkField } from '../../src/utils/fieldsProcessing';
 import {
-  META_JSON_TEMPLATE,
+  getMetaJsonTemplate,
   TEXT_FIELD_TEMPLATE,
   TEXT_MODULE_TEMPLATE,
   RICH_TEXT_FIELD_TEMPLATE,
@@ -19,6 +19,9 @@ import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { expect, vi } from 'vitest';
 import ConfigEntryService from '../../src/utils/ConfigEntryService';
 import { ConnectedField, EntryConnectedFields } from '../../src/utils/utils';
+
+const DEFAULT_META_JSON_TEMPLATE = getMetaJsonTemplate(false);
+const EMAIL_META_JSON_TEMPLATE = getMetaJsonTemplate(true);
 
 // Mock fetch globally
 global.fetch = vi.fn();
@@ -56,14 +59,21 @@ describe('createModules', () => {
     return mockFetch;
   };
 
-  const mockedContext = (token: string) => ({
+  const mockedContext = (token: string, enableEmailModules = false) => ({
     appInstallationParameters: {
       hubspotAccessToken: token,
+      enableEmailModules,
     },
     cmaClientOptions: {},
     spaceId: 'test-space',
     environmentId: 'test-env',
   });
+
+  const getUploadedFileText = async (callIndex: number) => {
+    const formData = vi.mocked(fetch).mock.calls[callIndex]?.[1]?.body as FormData;
+    const file = formData.get('file') as Blob;
+    return await file.text();
+  };
 
   it('should create three files for a module', async () => {
     // Mock successful fetch responses
@@ -109,6 +119,7 @@ describe('createModules', () => {
         },
       })
     );
+    expect(JSON.parse(await getUploadedFileText(0))).toEqual(DEFAULT_META_JSON_TEMPLATE);
 
     // Verify the second call (fields.json)
     expect(mockFetch).toHaveBeenNthCalledWith(
@@ -185,6 +196,30 @@ describe('createModules', () => {
         },
       })
     );
+  });
+
+  it('should create email-compatible modules when email mode is enabled', async () => {
+    const mockFetch = mockedFetch();
+
+    const mockField: SelectedSdkField = {
+      type: 'Text',
+      id: 'test-field-id',
+      uniqueId: 'test-module',
+      name: 'Test Field',
+      supported: true,
+      value: 'Hello World',
+      moduleName: 'Entry title - Test Field',
+    };
+
+    const mockEvent = {
+      body: {
+        fields: JSON.stringify([mockField]),
+      },
+    };
+
+    await handler(mockEvent as any, mockedContext('test-token', true) as any);
+
+    expect(JSON.parse(await getUploadedFileText(0))).toEqual(EMAIL_META_JSON_TEMPLATE);
   });
 
   it('should handle API errors when the token is invalid', async () => {
@@ -307,7 +342,7 @@ describe('createModules', () => {
     const firstFile = firstFormData.get('file') as Blob;
     expect(firstFile.type).toBe('application/json');
     const firstContent = await firstFile.text();
-    expect(JSON.parse(firstContent)).toEqual(META_JSON_TEMPLATE);
+    expect(JSON.parse(firstContent)).toEqual(DEFAULT_META_JSON_TEMPLATE);
 
     // Check fields.json content - Text fields use RICH_TEXT_FIELD_TEMPLATE
     const secondFormData = secondCall[1]?.body as FormData;
@@ -368,7 +403,7 @@ describe('createModules', () => {
     const firstFormData = firstCall[1]?.body as FormData;
     const firstFile = firstFormData.get('file') as Blob;
     const firstContent = await firstFile.text();
-    expect(JSON.parse(firstContent)).toEqual(META_JSON_TEMPLATE);
+    expect(JSON.parse(firstContent)).toEqual(DEFAULT_META_JSON_TEMPLATE);
 
     // Check fields.json content - Text fields use RICH_TEXT_FIELD_TEMPLATE
     const secondFormData = secondCall[1]?.body as FormData;
@@ -427,7 +462,7 @@ describe('createModules', () => {
     const firstFormData = firstCall[1]?.body as FormData;
     const firstFile = firstFormData.get('file') as Blob;
     const firstContent = await firstFile.text();
-    expect(JSON.parse(firstContent)).toEqual(META_JSON_TEMPLATE);
+    expect(JSON.parse(firstContent)).toEqual(DEFAULT_META_JSON_TEMPLATE);
 
     // Check fields.json content - Text fields use RICH_TEXT_FIELD_TEMPLATE with processed multi-line value
     const secondFormData = secondCall[1]?.body as FormData;
@@ -505,7 +540,7 @@ describe('createModules', () => {
     const firstFormData = firstCall[1]?.body as FormData;
     const firstFile = firstFormData.get('file') as Blob;
     const firstContent = await firstFile.text();
-    expect(JSON.parse(firstContent)).toEqual(META_JSON_TEMPLATE);
+    expect(JSON.parse(firstContent)).toEqual(DEFAULT_META_JSON_TEMPLATE);
 
     // Check fields.json content for RichText
     const secondFormData = secondCall[1]?.body as FormData;
@@ -564,7 +599,7 @@ describe('createModules', () => {
     const firstFormData = firstCall[1]?.body as FormData;
     const firstFile = firstFormData.get('file') as Blob;
     const firstContent = await firstFile.text();
-    expect(JSON.parse(firstContent)).toEqual(META_JSON_TEMPLATE);
+    expect(JSON.parse(firstContent)).toEqual(DEFAULT_META_JSON_TEMPLATE);
 
     // Check fields.json content for Number
     const secondFormData = secondCall[1]?.body as FormData;
@@ -623,7 +658,7 @@ describe('createModules', () => {
     const firstFormData = firstCall[1]?.body as FormData;
     const firstFile = firstFormData.get('file') as Blob;
     const firstContent = await firstFile.text();
-    expect(JSON.parse(firstContent)).toEqual(META_JSON_TEMPLATE);
+    expect(JSON.parse(firstContent)).toEqual(DEFAULT_META_JSON_TEMPLATE);
 
     // Check fields.json content for Date
     const secondFormData = secondCall[1]?.body as FormData;
@@ -682,7 +717,7 @@ describe('createModules', () => {
     const firstFormData = firstCall[1]?.body as FormData;
     const firstFile = firstFormData.get('file') as Blob;
     const firstContent = await firstFile.text();
-    expect(JSON.parse(firstContent)).toEqual(META_JSON_TEMPLATE);
+    expect(JSON.parse(firstContent)).toEqual(DEFAULT_META_JSON_TEMPLATE);
 
     // Check fields.json content for DateTime
     const secondFormData = secondCall[1]?.body as FormData;
@@ -744,7 +779,7 @@ describe('createModules', () => {
     const firstFormData = firstCall[1]?.body as FormData;
     const firstFile = firstFormData.get('file') as Blob;
     const firstContent = await firstFile.text();
-    expect(JSON.parse(firstContent)).toEqual(META_JSON_TEMPLATE);
+    expect(JSON.parse(firstContent)).toEqual(DEFAULT_META_JSON_TEMPLATE);
 
     // Check fields.json content for Location
     const secondFormData = secondCall[1]?.body as FormData;
@@ -808,7 +843,7 @@ describe('createModules', () => {
     const firstFormData = firstCall[1]?.body as FormData;
     const firstFile = firstFormData.get('file') as Blob;
     const firstContent = await firstFile.text();
-    expect(JSON.parse(firstContent)).toEqual(META_JSON_TEMPLATE);
+    expect(JSON.parse(firstContent)).toEqual(DEFAULT_META_JSON_TEMPLATE);
 
     // Check fields.json content for Location
     const secondFormData = secondCall[1]?.body as FormData;

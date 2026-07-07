@@ -1,6 +1,6 @@
 import React from 'react';
 import Dialog from './Dialog';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { mockCma, mockSdk } from '../../test/mocks';
 import { vi } from 'vitest';
 
@@ -10,9 +10,18 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 describe('Dialog component', () => {
-  it('Component text exists', () => {
-    const { getByText } = render(<Dialog />);
+  it('renders custom date range controls', () => {
+    mockSdk.parameters.invocation = {
+      mode: 'customDateRange',
+      startDate: '2026-4-3',
+      endDate: '2026-4-10',
+    };
 
-    expect(getByText('Hello Dialog Component (AppId: test-app)')).toBeInTheDocument();
+    render(<Dialog />);
+
+    expect(screen.getByText('From')).toBeInTheDocument();
+    expect(screen.getByText('To')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Apply' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
   });
 });

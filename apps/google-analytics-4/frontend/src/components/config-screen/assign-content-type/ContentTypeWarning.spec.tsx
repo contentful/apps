@@ -14,6 +14,7 @@ describe('Content Type Warning for Config Screen', () => {
       <ContentTypeWarning
         contentTypeId={'test'}
         slugField={'slug'}
+        requiresSlugField={true}
         isSaved={false}
         isInSidebar={false}
         isContentTypeInOptions={true}
@@ -30,6 +31,7 @@ describe('Content Type Warning for Config Screen', () => {
       <ContentTypeWarning
         contentTypeId={'test'}
         slugField={'slug'}
+        requiresSlugField={true}
         isSaved={true}
         isInSidebar={false}
         isContentTypeInOptions={false}
@@ -50,6 +52,7 @@ describe('Content Type Warning for Config Screen', () => {
       <ContentTypeWarning
         contentTypeId={'test'}
         slugField={''}
+        requiresSlugField={true}
         isSaved={false}
         isInSidebar={true}
         isContentTypeInOptions={true}
@@ -70,6 +73,7 @@ describe('Content Type Warning for Config Screen', () => {
       <ContentTypeWarning
         contentTypeId={'test'}
         slugField={'slug'}
+        requiresSlugField={true}
         isSaved={true}
         isInSidebar={true}
         isContentTypeInOptions={true}
@@ -92,6 +96,7 @@ describe('Content Type Warning for Config Screen Flakey', () => {
       <ContentTypeWarning
         contentTypeId={'test'}
         slugField={'slug'}
+        requiresSlugField={true}
         isSaved={true}
         isInSidebar={false}
         isContentTypeInOptions={true}
@@ -103,5 +108,21 @@ describe('Content Type Warning for Config Screen Flakey', () => {
     await user.hover(screen.getByTestId('cf-ui-icon'));
 
     expect(screen.getByRole('tooltip').textContent).toBe(REMOVED_FROM_SIDEBAR_WARNING_MSG);
+  });
+
+  it('does not warn about a missing slug field when advanced matching does not use {slug}', () => {
+    render(
+      <ContentTypeWarning
+        contentTypeId={'test'}
+        slugField={''}
+        requiresSlugField={false}
+        isSaved={false}
+        isInSidebar={true}
+        isContentTypeInOptions={true}
+        isSlugFieldInOptions={false}
+      />
+    );
+
+    expect(screen.getByTestId('noStatus')).toBeInTheDocument();
   });
 });

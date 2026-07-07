@@ -3,7 +3,7 @@ import { css } from '@emotion/react';
 import { useQueries } from '@tanstack/react-query';
 
 import { FieldAppSDK } from '@contentful/app-sdk';
-import { useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK, useCMA } from '@contentful/react-apps-toolkit';
 
 import { Flex, Button } from '@contentful/f36-components';
 import { ShoppingCartIcon } from '@contentful/f36-icons';
@@ -12,7 +12,6 @@ import tokens from '@contentful/f36-tokens';
 import { AppInstanceParameters } from '../../locations/Field';
 import logo from '../../Salesforce_Corporate_Logo_RGB.png';
 import SfccClient from '../../utils/Sfcc';
-import { AppInstallationParameters } from '../../locations/ConfigScreen';
 import { DialogInvocationParameters } from '../../locations/Dialog';
 
 const logoStyle = css`
@@ -24,9 +23,9 @@ const logoStyle = css`
 
 const SelectItemAction = (props: { fieldValue?: string | string[] }) => {
   const sdk = useSDK<FieldAppSDK>();
+  const cma = useCMA();
   const selectMultiple = sdk.field.type === 'Array';
   const { fieldType } = sdk.parameters.instance as AppInstanceParameters;
-  const installParameters = sdk.parameters.installation as AppInstallationParameters;
   const [currentData, setCurrentData] = useState<any[]>([]);
 
   const queryArray: string[] = [];
@@ -36,7 +35,7 @@ const SelectItemAction = (props: { fieldValue?: string | string[] }) => {
       : queryArray.push(props.fieldValue);
   }
 
-  const client = new SfccClient(installParameters);
+  const client = new SfccClient(cma, sdk.ids);
   const currentItemQueries = useQueries({
     queries: queryArray.map((id: string) => {
       const [itemId, catalogId] = id.split(':');

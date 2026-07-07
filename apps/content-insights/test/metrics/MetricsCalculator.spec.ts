@@ -254,5 +254,61 @@ describe('MetricsCalculator', () => {
 
       expect(metric?.value).toBe('1');
     });
+
+    it('filters by content type when needsUpdateContentTypes is set', () => {
+      const entries: EntryProps[] = [
+        {
+          sys: {
+            updatedAt: daysAgo(200),
+            contentType: { sys: { id: 'blogPost' } },
+          },
+        } as unknown as EntryProps,
+        {
+          sys: {
+            updatedAt: daysAgo(200),
+            contentType: { sys: { id: 'navigationItem' } },
+          },
+        } as unknown as EntryProps,
+        {
+          sys: {
+            updatedAt: daysAgo(200),
+            contentType: { sys: { id: 'blogPost' } },
+          },
+        } as unknown as EntryProps,
+      ];
+
+      const calculator = new MetricsCalculator(entries, [], {
+        needsUpdateMonths: 6,
+        needsUpdateContentTypes: ['blogPost'],
+      });
+      const metric = calculator.getAllMetrics().find((m) => m.title === 'Needs update');
+
+      expect(metric?.value).toBe('2');
+    });
+
+    it('includes all content types when needsUpdateContentTypes is empty', () => {
+      const entries: EntryProps[] = [
+        {
+          sys: {
+            updatedAt: daysAgo(200),
+            contentType: { sys: { id: 'blogPost' } },
+          },
+        } as unknown as EntryProps,
+        {
+          sys: {
+            updatedAt: daysAgo(200),
+            contentType: { sys: { id: 'navigationItem' } },
+          },
+        } as unknown as EntryProps,
+      ];
+
+      const calculator = new MetricsCalculator(entries, [], {
+        needsUpdateMonths: 6,
+        needsUpdateContentTypes: [],
+      });
+      const metric = calculator.getAllMetrics().find((m) => m.title === 'Needs update');
+
+      expect(metric?.value).toBe('2');
+    });
   });
 });

@@ -4,6 +4,11 @@ import { vi } from 'vitest';
 import { mockSdk } from '../mocks';
 import Page from '@/components/locations/Page';
 
+const triggerVisibilityChange = (state: DocumentVisibilityState) => {
+  Object.defineProperty(document, 'visibilityState', { value: state, configurable: true });
+  document.dispatchEvent(new Event('visibilitychange'));
+};
+
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
@@ -73,6 +78,10 @@ describe('Page component', () => {
 
   it('renders scanned links in the page table', async () => {
     render(<Page />);
+    fireEvent.click(screen.getByRole('button', { name: 'Find links' }));
+
+    await screen.findByText('https://example.invalid/not-found');
+
     fireEvent.click(screen.getByRole('button', { name: 'Run scan' }));
 
     await screen.findByText('https://example.invalid/not-found');
@@ -135,9 +144,12 @@ describe('Page component', () => {
     };
 
     render(<Page />);
-    fireEvent.click(screen.getByRole('button', { name: 'Run scan' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Find links' }));
 
     await screen.findByText('/help');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Run scan' }));
+
     await screen.findByText(/not on allow list/i);
     expect(screen.getByText(/resolves to https:\/\/contentful.com\/help/i)).toBeInTheDocument();
     expect(mockSdk.cma.appActionCall.createWithResponse).not.toHaveBeenCalled();
@@ -172,7 +184,7 @@ describe('Page component', () => {
     };
 
     render(<Page />);
-    fireEvent.click(screen.getByRole('button', { name: 'Run scan' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Find links' }));
 
     await screen.findByText(
       /do not contain any supported Symbol, Text, Rich Text, or matching list fields/i
@@ -241,12 +253,125 @@ describe('Page component', () => {
     };
 
     render(<Page />);
+    fireEvent.click(screen.getByRole('button', { name: 'Find links' }));
+
+    await screen.findByText('https://contentful.com.evil.test/path');
+
     fireEvent.click(screen.getByRole('button', { name: 'Run scan' }));
 
     await screen.findByText(/not on allow list/i);
     await waitFor(() => {
       expect(createWithResponse).not.toHaveBeenCalled();
     });
+  });
+
+  it('reloads when installation parameters have changed on visibility restored', async () => {
+    const reload = vi.fn();
+    Object.defineProperty(window, 'location', {
+      value: { reload },
+      configurable: true,
+      writable: true,
+    });
+
+    mockSdk.cma.appInstallation = {
+      getForOrganization: vi.fn().mockResolvedValue({
+        items: [
+          {
+            sys: {
+              space: { sys: { id: mockSdk.ids.space } },
+              environment: { sys: { id: mockSdk.ids.environment } },
+            },
+            parameters: {
+              selectedContentTypeIds: ['article'],
+              allowedUrlPatterns: 'new-domain.com',
+            },
+          },
+        ],
+      }),
+    };
+
+    render(<Page />);
+
+    triggerVisibilityChange('hidden');
+    triggerVisibilityChange('visible');
+
+    await waitFor(() => {
+      expect(reload).toHaveBeenCalled();
+    });
+  });
+
+  it('does not reload when installation parameters are unchanged on visibility restored', async () => {
+    const reload = vi.fn();
+    Object.defineProperty(window, 'location', {
+      value: { reload },
+      configurable: true,
+      writable: true,
+    });
+
+    mockSdk.parameters.installation = { selectedContentTypeIds: ['article'] };
+
+    mockSdk.cma.appInstallation = {
+      getForOrganization: vi.fn().mockResolvedValue({
+        items: [
+          {
+            sys: {
+              space: { sys: { id: mockSdk.ids.space } },
+              environment: { sys: { id: mockSdk.ids.environment } },
+            },
+            parameters: { selectedContentTypeIds: ['article'] },
+          },
+        ],
+      }),
+    };
+
+    render(<Page />);
+
+    triggerVisibilityChange('hidden');
+    triggerVisibilityChange('visible');
+
+    await waitFor(() => {
+      expect(mockSdk.cma.appInstallation.getForOrganization).toHaveBeenCalled();
+    });
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  it('does not reload when installation parameters match but CMA returns keys in different order', async () => {
+    const reload = vi.fn();
+    Object.defineProperty(window, 'location', {
+      value: { reload },
+      configurable: true,
+      writable: true,
+    });
+
+    mockSdk.parameters.installation = {
+      allowedUrlPatterns: 'example.com',
+      selectedContentTypeIds: ['article'],
+    };
+
+    mockSdk.cma.appInstallation = {
+      getForOrganization: vi.fn().mockResolvedValue({
+        items: [
+          {
+            sys: {
+              space: { sys: { id: mockSdk.ids.space } },
+              environment: { sys: { id: mockSdk.ids.environment } },
+            },
+            // Same values, different key order — must not trigger spurious reload
+            parameters: { selectedContentTypeIds: ['article'], allowedUrlPatterns: 'example.com' },
+          },
+        ],
+      }),
+    };
+
+    render(<Page />);
+
+    triggerVisibilityChange('hidden');
+    triggerVisibilityChange('visible');
+
+    await waitFor(() => {
+      expect(mockSdk.cma.appInstallation.getForOrganization).toHaveBeenCalled();
+    });
+    expect(reload).not.toHaveBeenCalled();
   });
 
   it('checks www URLs as absolute https URLs instead of resolving them against the current domain', async () => {
@@ -312,9 +437,12 @@ describe('Page component', () => {
     };
 
     render(<Page />);
-    fireEvent.click(screen.getByRole('button', { name: 'Run scan' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Find links' }));
 
     await screen.findByRole('link', { name: 'https://www.example.com/help' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Run scan' }));
+
     expect(screen.getByRole('link', { name: 'https://www.example.com/help' })).toHaveAttribute(
       'href',
       'https://www.example.com/help'

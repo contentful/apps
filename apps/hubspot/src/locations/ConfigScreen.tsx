@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
   Box,
+  Checkbox,
   Collapse,
   Flex,
   Form,
@@ -42,6 +43,7 @@ const ConfigScreen = () => {
   const [hubspotTokenError, setHubspotTokenError] = useState<string | null>(null);
   const [parameters, setParameters] = useState<AppInstallationParameters>({
     hubspotAccessToken: '',
+    enableEmailModules: false,
   });
   const [selectedContentTypes, setSelectedContentTypes] = useState<ContentType[]>([]);
 
@@ -102,7 +104,10 @@ const ConfigScreen = () => {
       const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
 
       if (currentParameters && currentParameters.hubspotAccessToken) {
-        setParameters(currentParameters);
+        setParameters({
+          hubspotAccessToken: currentParameters.hubspotAccessToken,
+          enableEmailModules: Boolean(currentParameters.enableEmailModules),
+        });
       }
       sdk.app.setReady();
     })();
@@ -147,6 +152,20 @@ const ConfigScreen = () => {
                 {hubspotTokenError}
               </FormControl.ValidationMessage>
             )}
+            <Box marginTop="spacingM">
+              <Checkbox
+                id="enableEmailModules"
+                isChecked={parameters.enableEmailModules}
+                onChange={(e) =>
+                  setParameters({ ...parameters, enableEmailModules: e.target.checked })
+                }>
+                Enable email module compatibility
+              </Checkbox>
+              <Paragraph marginTop="spacing2Xs" marginBottom="none" fontColor="gray600">
+                Turn this on only if your HubSpot plan supports email modules. If disabled, synced
+                modules will be created for page usage instead.
+              </Paragraph>
+            </Box>
           </Form>
         </Box>
         <Splitter marginBottom="spacing2Xs" />

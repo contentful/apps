@@ -18,9 +18,14 @@ export interface ServiceAccountKeyId {
   clientId: string;
 }
 
+export type GAMatchDimension = 'unifiedPagePathScreen' | 'pagePathPlusQueryString';
+export type GAStringMatchType = 'EXACT' | 'PARTIAL_REGEXP';
+
 export interface RunReportParamsType {
   propertyId: string;
   slug: string;
+  matchDimension?: GAMatchDimension;
+  matchType?: GAStringMatchType;
   startDate: string;
   endDate: string;
   dimensions: string | string[];

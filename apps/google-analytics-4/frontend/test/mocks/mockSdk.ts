@@ -44,9 +44,14 @@ const mockSdk: any = {
   notifier: {
     error: vi.fn(),
   },
+  dialogs: {
+    openCurrentApp: vi.fn(),
+  },
+  close: vi.fn(),
   parameters: {
     installation: {},
     instance: {},
+    invocation: {},
   },
   location: {
     is: vi.fn().mockReturnValue(true),

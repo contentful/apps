@@ -4,7 +4,7 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-import { META_JSON_TEMPLATE } from './templates';
+import { getMetaJsonTemplate } from './templates';
 import { SelectedSdkField } from '../src/utils/fieldsProcessing';
 import { EntryConnectedFields } from '../src/utils/utils';
 import { PlainClientAPI } from 'contentful-management';
@@ -59,6 +59,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   context: FunctionEventContext
 ) => {
   const cma = initContentfulManagementClient(context);
+  const enableEmailModules = Boolean(context.appInstallationParameters.enableEmailModules);
 
   const successFields: SelectedSdkField[] = [];
   const failedFields: SelectedSdkField[] = [];
@@ -66,7 +67,11 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   let missingScopes = false;
   for (const field of JSON.parse(event.body.fields)) {
     try {
-      await createModule(field, context.appInstallationParameters.hubspotAccessToken);
+      await createModule(
+        field,
+        context.appInstallationParameters.hubspotAccessToken,
+        enableEmailModules
+      );
       successFields.push(field);
     } catch (error) {
       if (error instanceof InvalidHubspotTokenError) {
@@ -93,10 +98,15 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   };
 };
 
-const createModule = async (field: SelectedSdkField, token: string) => {
+const createModule = async (
+  field: SelectedSdkField,
+  token: string,
+  enableEmailModules: boolean
+) => {
   const { fieldsFile, moduleFile } = getFiles(field.type, field.value);
   const moduleName = field.moduleName;
-  await createModuleFile(JSON.stringify(META_JSON_TEMPLATE), 'meta.json', moduleName, token);
+  const metaJson = getMetaJsonTemplate(enableEmailModules);
+  await createModuleFile(JSON.stringify(metaJson), 'meta.json', moduleName, token);
   await createModuleFile(fieldsFile, 'fields.json', moduleName, token);
   await createModuleFile(moduleFile, 'module.html', moduleName, token);
 };

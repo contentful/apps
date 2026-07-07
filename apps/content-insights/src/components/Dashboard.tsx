@@ -49,6 +49,7 @@ const Dashboard = () => {
 
   const metricsCalculator = new MetricsCalculator(entries, scheduledActions, {
     needsUpdateMonths: installation.needsUpdateMonths,
+    needsUpdateContentTypes: installation.needsUpdateContentTypes,
     recentlyPublishedDays: installation.recentlyPublishedDays,
     timeToPublishDays: installation.timeToPublishDays,
   });

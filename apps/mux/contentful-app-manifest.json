@@ -11,11 +11,20 @@
     },
     {
       "id": "getSignedUrlTokens",
-      "name": "Get signed URL tokens",
+      "name": "getSignedUrlTokens",
       "description": "This action returns signed JWT tokens for securing Mux video playback.",
       "path": "functions/src/getSignedUrlTokens.js",
       "entryFile": "functions/src/getSignedUrlTokens.ts",
       "allowNetworks": ["api.contentful.com", "https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "muxProxy",
+      "name": "muxProxy",
+      "description": "Generic proxy for Mux REST API calls. Accepts method, path, and optional body.",
+      "path": "functions/src/muxProxy.js",
+      "entryFile": "functions/src/muxProxy.ts",
+      "allowNetworks": ["https://api.mux.com"],
       "accepts": ["appaction.call"]
     }
   ]

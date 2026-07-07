@@ -68,6 +68,7 @@ describe('Hubspot Config Screen ', () => {
       ).toBeTruthy();
       expect(screen.getByLabelText(/Private app access token/i)).toBeTruthy();
       expect(screen.getByPlaceholderText(/Enter your access token/i)).toBeTruthy();
+      expect(screen.getByLabelText(/Enable email module compatibility/i)).toBeTruthy();
     });
 
     it('shows a toast error if the hubspot api key is not set', async () => {
@@ -198,6 +199,39 @@ describe('Hubspot Config Screen ', () => {
 
       expect(result).not.toBe(false);
       expect(mockSdk.notifier.error).not.toHaveBeenCalled();
+    });
+
+    it('saves with email modules disabled by default', async () => {
+      render(<ConfigScreen />);
+      expect(await screen.findByPlaceholderText(/Enter your access token/i)).toBeTruthy();
+      const user = userEvent.setup();
+
+      await fillInHubspotAccessToken(user, 'valid-token');
+      const result = await act(async () => {
+        return await saveAppInstallation();
+      });
+
+      expect(result.parameters).toEqual({
+        hubspotAccessToken: 'valid-token',
+        enableEmailModules: false,
+      });
+    });
+
+    it('saves with email modules enabled when the toggle is checked', async () => {
+      render(<ConfigScreen />);
+      expect(await screen.findByPlaceholderText(/Enter your access token/i)).toBeTruthy();
+      const user = userEvent.setup();
+
+      await fillInHubspotAccessToken(user, 'valid-token');
+      await user.click(screen.getByLabelText(/Enable email module compatibility/i));
+      const result = await act(async () => {
+        return await saveAppInstallation();
+      });
+
+      expect(result.parameters).toEqual({
+        hubspotAccessToken: 'valid-token',
+        enableEmailModules: true,
+      });
     });
   });
 

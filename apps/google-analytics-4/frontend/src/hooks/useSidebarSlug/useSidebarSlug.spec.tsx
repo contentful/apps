@@ -209,4 +209,35 @@ describe('useSidebarSlug hook', () => {
     expect(getByText('slugFieldValue: /fieldValue')).toBeVisible();
     expect(getByText('isContentTypeWarning: false')).toBeVisible();
   });
+
+  it('uses the path pattern when configured', () => {
+    mockInstallationParams.parameters.installation.forceTrailingSlash = false;
+
+    vi.spyOn(useSDK, 'useSDK').mockImplementation(
+      () =>
+        ({
+          ...mockInstallationParams,
+          ...vi.importActual('@contentful/react-apps-toolkit'),
+          entry: {
+            ...vi.importActual('@contentful/react-apps-toolkit'),
+            fields: { slugField: {} },
+            onSysChanged: vi.fn((cb) =>
+              cb({
+                publishedAt: '2020202',
+              } as unknown as EntrySys)
+            ),
+          },
+        } as any)
+    );
+    vi.spyOn(getFieldValue, 'default').mockImplementation(() => 'fieldValue');
+    const slugFieldInfo = {
+      slugField: 'slugField',
+      urlPrefix: '/en-US',
+      pathPattern: '/blog/{slug}',
+    };
+
+    render(<TestComponent slugFieldInfo={slugFieldInfo} />);
+
+    expect(getByText('reportSlug: /blog/fieldValue')).toBeVisible();
+  });
 });

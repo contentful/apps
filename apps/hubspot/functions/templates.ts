@@ -1,9 +1,9 @@
-export const META_JSON_TEMPLATE = {
+export const getMetaJsonTemplate = (enableEmailModules = false) => ({
   global: false,
-  content_types: ['EMAIL'],
+  content_types: [enableEmailModules ? 'EMAIL' : 'PAGE'],
   host_template_types: ['PAGE', 'BLOG_LISTING', 'BLOG_POST'],
   is_available_for_new_content: true,
-};
+});
 
 export const TEXT_FIELD_TEMPLATE = [
   {

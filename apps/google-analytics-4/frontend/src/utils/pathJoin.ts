@@ -1,11 +1,15 @@
-const trimAndRemoveSlashes = (item: string) => {
-  return item.trim().replace(/(^[/]*|[/]*$)/g, '');
+const trimAndRemoveSlashes = (item: string | number) => {
+  return String(item)
+    .trim()
+    .replace(/(^[/]*|[/]*$)/g, '');
 };
 
-const handlePartsByType = (part: string | object | undefined) => {
+type PathPart = string | number | object | undefined;
+
+const handlePartsByType = (part: PathPart) => {
   let result = '';
 
-  if (typeof part === 'string') {
+  if (typeof part === 'string' || typeof part === 'number') {
     result = trimAndRemoveSlashes(part);
   }
 
@@ -16,7 +20,7 @@ const handlePartsByType = (part: string | object | undefined) => {
   return result;
 };
 
-export const pathJoin = (...parts: (string | object | undefined)[]): string => {
+export const pathJoin = (...parts: PathPart[]): string => {
   return parts
     .map(handlePartsByType)
     .filter((part) => part.length)

@@ -1,7 +1,7 @@
 {
   "name": "slack-lambda",
   "private": true,
-  "version": "1.1.9",
+  "version": "1.1.10",
   "main": "index.js",
   "scripts": {
     "build": "rimraf build && tsc",
@@ -49,7 +49,7 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
-    "@contentful/node-apps-toolkit": "^2.8.2",
+    "@contentful/node-apps-toolkit": "^4.0.1",
     "@slack/events-api": "3.0.1",
     "@slack/web-api": "^6.13.0",
     "@types/cors": "^2.8.19",
@@ -61,5 +61,13 @@
     "cors": "^2.8.5",
     "express": "^4.22.1",
     "serverless-http": "^3.1.0"
+  },
+  "overrides": {
+    "axios": ">=1.16.0",
+    "form-data": "^2.5.6",
+    "lodash": ">=4.18.0",
+    "minimatch": ">=5.1.8",
+    "simple-git": ">=3.36.0",
+    "tar": ">=7.5.11"
   }
 }

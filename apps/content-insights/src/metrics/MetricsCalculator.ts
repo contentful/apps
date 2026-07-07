@@ -12,6 +12,7 @@ export class MetricsCalculator {
   private readonly scheduledActions: ReadonlyArray<ScheduledActionProps>;
   private readonly now: Date; // to maintain all the metrics consistent at the same current time
   private readonly needsUpdateMonths: number;
+  private readonly needsUpdateContentTypeSet: ReadonlySet<string>;
   private readonly recentlyPublishedDays: number;
   private readonly timeToPublishDays: number;
 
@@ -20,6 +21,7 @@ export class MetricsCalculator {
     scheduledActions: ReadonlyArray<ScheduledActionProps>,
     options?: {
       needsUpdateMonths?: number;
+      needsUpdateContentTypes?: string[];
       recentlyPublishedDays?: number;
       timeToPublishDays?: number;
     }
@@ -28,6 +30,7 @@ export class MetricsCalculator {
     this.scheduledActions = scheduledActions;
     this.now = new Date();
     this.needsUpdateMonths = options?.needsUpdateMonths ?? NEEDS_UPDATE_MONTHS_RANGE.min;
+    this.needsUpdateContentTypeSet = new Set(options?.needsUpdateContentTypes ?? []);
     this.recentlyPublishedDays =
       options?.recentlyPublishedDays ?? RECENTLY_PUBLISHED_DAYS_RANGE.min;
     this.timeToPublishDays = options?.timeToPublishDays ?? TIME_TO_PUBLISH_DAYS_RANGE.min;
@@ -167,9 +170,14 @@ export class MetricsCalculator {
     for (const entry of this.entries) {
       const updatedAt = parseDate(entry?.sys?.updatedAt);
       if (!updatedAt) continue;
-      if (updatedAt.getTime() < cutoff.getTime()) {
-        count += 1;
+      if (updatedAt.getTime() >= cutoff.getTime()) continue;
+
+      if (this.needsUpdateContentTypeSet.size > 0) {
+        const contentTypeId = entry.sys.contentType?.sys?.id;
+        if (!contentTypeId || !this.needsUpdateContentTypeSet.has(contentTypeId)) continue;
       }
+
+      count += 1;
     }
 
     return {

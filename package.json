@@ -42,5 +42,8 @@
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
+  },
+  "overrides": {
+    "form-data": "^4.0.4"
   }
 }

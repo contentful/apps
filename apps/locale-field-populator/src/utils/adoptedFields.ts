@@ -8,6 +8,11 @@ export interface ReferencedEntryData {
   fieldId: string;
   fieldName: string;
   isSelfReference: boolean;
+  depth: number;
+  // True when this entry id has already been rendered earlier in the preview list.
+  // The first occurrence owns the localization UI; later occurrences are shown as
+  // pointers back to it so the same entry isn't presented as if it had no fields.
+  isAlreadyIncluded?: boolean;
 }
 
 export function hasAnyAdoptedFields(adoptedFieldsMap: AdoptedFieldsMap): boolean {

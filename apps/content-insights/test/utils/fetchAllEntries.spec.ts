@@ -42,6 +42,7 @@ describe('fetchAllEntries', () => {
       query: {
         skip: 0,
         limit: 1000,
+        select: 'sys',
       },
     });
   });
@@ -70,12 +71,14 @@ describe('fetchAllEntries', () => {
       query: {
         skip: 0,
         limit: 1000,
+        select: 'sys',
       },
     });
     expect(mockCma.entry.getMany).toHaveBeenNthCalledWith(2, {
       query: {
         skip: 1000,
         limit: 1000,
+        select: 'sys',
       },
     });
   });
@@ -121,12 +124,14 @@ describe('fetchAllEntries', () => {
       query: {
         skip: 0,
         limit: 1000,
+        select: 'sys',
       },
     });
     expect(mockCma.entry.getMany).toHaveBeenNthCalledWith(2, {
       query: {
         skip: 0,
         limit: 500, // Reduced batch size
+        select: 'sys',
       },
     });
   });

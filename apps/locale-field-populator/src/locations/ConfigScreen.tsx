@@ -1,12 +1,19 @@
 import { ConfigAppSDK, AppState } from '@contentful/app-sdk';
-import { Flex, Heading, Paragraph, FormControl } from '@contentful/f36-components';
+import { Flex, Heading, Paragraph, FormControl, TextInput } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
 import { ContentTypeProps } from 'contentful-management';
 import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
+import {
+  MAX_REFERENCE_DEPTH,
+  MAX_REFERENCE_DEPTH_OPTION,
+  MIN_REFERENCE_DEPTH_OPTION,
+} from '../utils/entry';
 import { styles } from './ConfigScreen.styles';
 
-export type AppInstallationParameters = Record<string, unknown>;
+export interface AppInstallationParameters {
+  maxReferenceDepth?: number;
+}
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
@@ -134,6 +141,40 @@ const ConfigScreen = () => {
               onSelectionChange={setSelectedContentTypes}
               isDisabled={allContentTypes.length === 0}
             />
+          </FormControl>
+        </Flex>
+        <Flex flexDirection="column" alignItems="flex-start" marginTop="spacing2Xl">
+          <Heading as="h3" marginBottom="spacingXs">
+            Reference depth
+          </Heading>
+          <Paragraph marginBottom="spacingL">
+            Control how many levels of nested references are included when populating locales. A
+            depth of 1 includes only direct references. Higher values traverse deeper into the
+            content graph.
+          </Paragraph>
+          <FormControl id="maxReferenceDepth">
+            <FormControl.Label>Maximum reference depth</FormControl.Label>
+            <TextInput
+              id="maxReferenceDepth"
+              name="maxReferenceDepth"
+              type="number"
+              min={MIN_REFERENCE_DEPTH_OPTION}
+              max={MAX_REFERENCE_DEPTH_OPTION}
+              step={1}
+              value={String(parameters.maxReferenceDepth ?? MAX_REFERENCE_DEPTH)}
+              onChange={(e) => {
+                const parsed = Number(e.target.value);
+                if (!Number.isFinite(parsed)) return;
+                const clamped = Math.min(
+                  MAX_REFERENCE_DEPTH_OPTION,
+                  Math.max(MIN_REFERENCE_DEPTH_OPTION, Math.trunc(parsed))
+                );
+                setParameters({ ...parameters, maxReferenceDepth: clamped });
+              }}
+            />
+            <FormControl.HelpText>
+              {`Choose a value between ${MIN_REFERENCE_DEPTH_OPTION} and ${MAX_REFERENCE_DEPTH_OPTION}. Default is ${MAX_REFERENCE_DEPTH}. Higher depths may increase loading time for entries with many references.`}
+            </FormControl.HelpText>
           </FormControl>
         </Flex>
       </Flex>

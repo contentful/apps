@@ -19,10 +19,7 @@ export function Field() {
       const entry = getEntry(sdk);
       const newErrors: string[] = [];
 
-      if ((entry.fields.slug ?? '').startsWith(`${entry.fields.date}-`)) {
-        sdk.entry.fields['slug'].getForLocale(sdk.locales.default).setInvalid(false);
-      } else {
-        sdk.entry.fields['slug'].getForLocale(sdk.locales.default).setInvalid(true);
+      if (!(entry.fields.slug ?? '').startsWith(`${entry.fields.date}-`)) {
         newErrors.push(`Slug must start with "${entry.fields.date}-"`);
       }
 

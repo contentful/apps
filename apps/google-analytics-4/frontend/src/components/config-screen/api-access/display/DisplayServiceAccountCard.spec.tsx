@@ -1,22 +1,26 @@
 import { render, screen } from '@testing-library/react';
 import { mockSdk, mockCma, validServiceKeyId } from '../../../../../test/mocks';
 import DisplayServiceAccountCard from 'components/config-screen/api-access/display/DisplayServiceAccountCard';
-import { config } from '../../../../../src/config';
 import { vi } from 'vitest';
-
-const apiRoot = config.backendApiUrl;
+const listAccountSummaries = vi.fn().mockResolvedValue([]);
+const runReports = vi.fn().mockResolvedValue({});
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
 }));
 
-export const apiPath = (path: string) => {
-  return new URL(path, apiRoot).toString();
-};
+vi.mock('hooks/useApi', () => ({
+  useApi: () => ({
+    listAccountSummaries,
+    runReports,
+  }),
+}));
 
 describe('Installed Service Account Card', () => {
   beforeEach(() => {
+    listAccountSummaries.mockClear();
+    runReports.mockClear();
     mockSdk.app.getParameters.mockReturnValue({
       serviceAccountKeyId: validServiceKeyId,
     });
@@ -25,7 +29,7 @@ describe('Installed Service Account Card', () => {
   it('is the active happy path', () => {
     render(
       <DisplayServiceAccountCard
-        isSavingConfiguration={false}
+        isSavingConfiguration={true}
         serviceAccountKeyId={validServiceKeyId}
         parameters={{}}
         onInEditModeChange={() => {}}

@@ -4,7 +4,7 @@ import { ContentTypeProps, EntryProps } from 'contentful-management';
 import { useMemo } from 'react';
 import { isEntryArrayField, isEntryField } from '../../utils/fieldTypes';
 import PreviewFieldRow from './PreviewFieldRow';
-import { styles } from './ReferenceEntrySection.styles';
+import { depthIndent, styles } from './ReferenceEntrySection.styles';
 import { ArrowSquareOutIcon } from '@contentful/f36-icons';
 
 interface ReferenceEntrySectionProps {
@@ -17,8 +17,10 @@ interface ReferenceEntrySectionProps {
   onAdoptedFieldChange: (fieldId: string, adopted: boolean) => void;
   onAdoptAllChange: (adopted: boolean) => void;
   isSelfReference: boolean;
+  isAlreadyIncluded?: boolean;
   baseUrl: string;
   isDisabled?: boolean;
+  depth?: number;
 }
 
 const getEntryTitle = (
@@ -47,8 +49,10 @@ const ReferenceEntrySection = ({
   onAdoptedFieldChange,
   onAdoptAllChange,
   isSelfReference,
+  isAlreadyIncluded = false,
   baseUrl,
   isDisabled = false,
+  depth = 1,
 }: ReferenceEntrySectionProps) => {
   const localizedFields = useMemo(() => {
     return (contentType.fields as ContentTypeField[]).filter(
@@ -70,14 +74,35 @@ const ReferenceEntrySection = ({
     return entry.fields[fieldId]?.[locale];
   };
 
-  if (isSelfReference) {
+  if (isAlreadyIncluded) {
     return (
-      <Box marginTop="spacingM" className={styles.accordionContainer}>
+      <Box className={`${styles.accordionContainer} ${depthIndent(depth)}`}>
         <Accordion>
           <Accordion.Item
             title={
               <Flex className={styles.accordionHeader}>
-                <Text fontSize="fontSizeL" fontWeight="fontWeightDemiBold" fontColor="gray900">
+                <Text fontSize="fontSizeM" fontWeight="fontWeightDemiBold" fontColor="gray900">
+                  {fieldName}: {entryTitle}
+                </Text>
+              </Flex>
+            }>
+            <Note variant="neutral" className={styles.noteNeutral}>
+              This entry is already included above and will be updated once.
+            </Note>
+          </Accordion.Item>
+        </Accordion>
+      </Box>
+    );
+  }
+
+  if (isSelfReference) {
+    return (
+      <Box marginTop="spacingM" className={`${styles.accordionContainer} ${depthIndent(depth)}`}>
+        <Accordion>
+          <Accordion.Item
+            title={
+              <Flex className={styles.accordionHeader}>
+                <Text fontSize="fontSizeM" fontWeight="fontWeightDemiBold" fontColor="gray900">
                   {fieldName}: {entryTitle}
                 </Text>
               </Flex>
@@ -94,12 +119,12 @@ const ReferenceEntrySection = ({
 
   if (fieldCount === 0) {
     return (
-      <Box className={styles.accordionContainer}>
+      <Box className={`${styles.accordionContainer} ${depthIndent(depth)}`}>
         <Accordion>
           <Accordion.Item
             title={
               <Flex className={styles.accordionHeader}>
-                <Text fontSize="fontSizeL" fontWeight="fontWeightDemiBold" fontColor="gray900">
+                <Text fontSize="fontSizeM" fontWeight="fontWeightDemiBold" fontColor="gray900">
                   {fieldName}: {entryTitle}
                 </Text>
               </Flex>
@@ -114,7 +139,7 @@ const ReferenceEntrySection = ({
   }
 
   return (
-    <Box className={styles.accordionContainer}>
+    <Box className={`${styles.accordionContainer} ${depthIndent(depth)}`}>
       <Accordion>
         <Accordion.Item
           title={

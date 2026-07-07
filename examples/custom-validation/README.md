@@ -53,7 +53,9 @@ The app itself can be built in many different ways. The approach taken in this e
 
 When the Field app renders, it listens to any change (`sys`, `fields`, `metadata`) of the entry and creates an object of the full entry. Now, the custom validation logic can access every single field to determine whether the entry is valid or not. If the entry is not valid, the app calls `sdk.field.setValue('false')` which updates the field to an invalid state, and publishing is blocked. Once all issues are resolved, the app runs `sdk.field.setValue('true')`.
 
-As we are building custom validation logic, we cannot rely on Contentful's built-in way of showing validation errors. Therefore, it is important to give hints to the current editor, that fields are currently in the wrong shape. This can be either done by rendering a list of error messages and/or by calling `sdk.entry.fields[...].getForLocale(...).setInvalid(true)` to highlight the error state of a specific field.
+As we are building custom validation logic, we cannot rely on Contentful's built-in way of showing validation errors. Therefore, it is important to give hints to the current editor that fields are currently in the wrong shape. This can be done by rendering a list of error messages. You can also call `sdk.field.setInvalid(true)` to add a visual red error bar to the field your app is assigned to.
+
+> **Note:** `setInvalid` is a **visual indicator only** — it does not prevent publishing. Additionally, it only works on the field the app is assigned to; calling it on a different field via `sdk.entry.fields['otherField'].getForLocale(...).setInvalid()` has no effect. To actually prevent publishing, this example uses the `sdk.field.setValue('false')` approach described above.
 
 ## Result
 

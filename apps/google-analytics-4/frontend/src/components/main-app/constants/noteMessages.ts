@@ -1,5 +1,7 @@
 export const DEFAULT_ERR_MSG =
   'An unknown error has occurred. Please try again or contact support.';
+export const ANALYTICS_DATA_LOAD_ERROR_MSG =
+  "We couldn't load Google Analytics data. Please try again, or contact support.";
 export const EMPTY_DATA_MSG =
   'There are no page views to show for this range. If this is not expected, ensure the URL prefix and slug value accurately reflect a page path within your Google Analytics account.';
 export const INVALID_ARGUMENT_MSG =

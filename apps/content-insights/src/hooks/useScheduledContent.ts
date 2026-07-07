@@ -5,6 +5,7 @@ import { ScheduledContentItem } from '../utils/types';
 import { getCreatorFromEntry } from '../utils/UserUtils';
 import { getEntryStatus, getEntryTitle, getUniqueUserIdsFromEntries } from '../utils/EntryUtils';
 import { useUsers } from './useUsers';
+import { useEntryTitlesForIds } from './useEntryTitlesForIds';
 import { ITEMS_PER_PAGE } from '../utils/consts';
 
 interface UseScheduledContentResult {
@@ -41,18 +42,40 @@ export function useScheduledContent(
     error: fetchingUsersError,
   } = useUsers(userIds);
 
-  const scheduledItems = useMemo(() => {
-    const items: ScheduledContentItem[] = [];
-
+  // Unlike useNeedsUpdateContent / useRecentlyPublishedContent, ordering
+  // is driven by scheduledActions (not by entries). Build the
+  // action->entry pair list in action order, then paginate, so titles
+  // are only fetched for the visible page.
+  const orderedPairs = useMemo(() => {
+    const pairs: { entry: EntryProps; action: ScheduledActionProps }[] = [];
     scheduledActions.forEach((action) => {
       const entry = scheduledEntries.find((e) => e.sys.id === action.entity.sys.id);
-      if (!entry) return;
+      if (entry) {
+        pairs.push({ entry, action });
+      }
+    });
+    return pairs;
+  }, [scheduledActions, scheduledEntries]);
 
+  const visiblePairs = useMemo(
+    () => orderedPairs.slice(skip, skip + ITEMS_PER_PAGE),
+    [orderedPairs, skip]
+  );
+  const visibleIds = useMemo(() => visiblePairs.map((p) => p.entry.sys.id), [visiblePairs]);
+
+  const {
+    titlesMap,
+    isFetching: isFetchingTitles,
+    refetch: refetchTitles,
+    error: titlesError,
+  } = useEntryTitlesForIds(visibleIds);
+
+  const scheduledItems = useMemo(() => {
+    return visiblePairs.map<ScheduledContentItem>(({ entry, action }) => {
       const contentType = contentTypes.get(entry.sys.contentType?.sys?.id || '');
-
-      items.push({
+      return {
         id: entry.sys.id,
-        title: getEntryTitle(entry, contentType, defaultLocale),
+        title: getEntryTitle(titlesMap.get(entry.sys.id) ?? entry, contentType, defaultLocale),
         contentType: contentType?.name || '',
         creator: getCreatorFromEntry(entry, usersMap),
         publishedDate: entry.sys.publishedAt || null,
@@ -61,31 +84,31 @@ export function useScheduledContent(
           datetime: action.scheduledFor.datetime,
           timezone: action.scheduledFor.timezone,
         },
-      });
+      };
     });
-
-    return items;
-  }, [scheduledActions, scheduledEntries, contentTypes, usersMap, defaultLocale]);
+  }, [visiblePairs, contentTypes, usersMap, defaultLocale, titlesMap]);
 
   if (!scheduledActions.length) {
     return {
       items: [],
       total: 0,
-      isFetching: isFetchingUsers,
+      isFetching: isFetchingUsers || isFetchingTitles,
       error: null,
       refetch: () => {
         refetchUsers();
+        refetchTitles();
       },
     };
   }
 
   return {
-    items: scheduledItems.slice(skip, skip + ITEMS_PER_PAGE),
-    total: scheduledItems.length,
-    isFetching: isFetchingUsers,
-    error: fetchingUsersError ?? null,
+    items: scheduledItems,
+    total: orderedPairs.length,
+    isFetching: isFetchingUsers || isFetchingTitles,
+    error: fetchingUsersError ?? titlesError ?? null,
     refetch: () => {
       refetchUsers();
+      refetchTitles();
     },
   };
 }

@@ -4,6 +4,9 @@ import { defineConfig } from 'vite';
 
 export default defineConfig(() => ({
   base: '', // relative paths
+  build: {
+    outDir: 'build',
+  },
   server: {
     port: 3000,
   },

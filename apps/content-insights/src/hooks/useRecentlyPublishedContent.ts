@@ -1,4 +1,5 @@
 import { useUsers } from './useUsers';
+import { useEntryTitlesForIds } from './useEntryTitlesForIds';
 import { ITEMS_PER_PAGE } from '../utils/consts';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
 import { isWithin, parseDate } from '../utils/dateUtils';
@@ -31,13 +32,15 @@ export function useRecentlyPublishedContent(
   contentTypes: Map<string, ContentTypeProps>
 ): UseRecentlyPublishedResult {
   const skip = page * ITEMS_PER_PAGE;
-  const now = new Date();
 
-  const recentlyPublishedEntries = entries.filter((entry) => {
-    const publishedAt = parseDate(entry?.sys?.publishedAt);
-    if (!publishedAt) return false;
-    return isWithin(publishedAt, recentlyPublishedDate, now);
-  });
+  const recentlyPublishedEntries = useMemo(() => {
+    const now = new Date();
+    return entries.filter((entry) => {
+      const publishedAt = parseDate(entry?.sys?.publishedAt);
+      if (!publishedAt) return false;
+      return isWithin(publishedAt, recentlyPublishedDate, now);
+    });
+  }, [entries, recentlyPublishedDate]);
 
   const userIds = getUniqueUserIdsFromEntries(recentlyPublishedEntries);
 
@@ -48,32 +51,40 @@ export function useRecentlyPublishedContent(
     error: usersError,
   } = useUsers(userIds);
 
-  const recentlyPublishedItems = useMemo(() => {
-    const items: RecentlyPublishedItem[] = [];
-    recentlyPublishedEntries.forEach((entry) => {
-      const contentType = contentTypes.get(entry.sys.contentType?.sys?.id || '');
+  const visibleEntries = useMemo(
+    () => recentlyPublishedEntries.slice(skip, skip + ITEMS_PER_PAGE),
+    [recentlyPublishedEntries, skip]
+  );
+  const visibleIds = useMemo(() => visibleEntries.map((e) => e.sys.id), [visibleEntries]);
 
-      items.push({
+  const {
+    titlesMap,
+    isFetching: isFetchingTitles,
+    refetch: refetchTitles,
+    error: titlesError,
+  } = useEntryTitlesForIds(visibleIds);
+
+  const recentlyPublishedItems = useMemo(() => {
+    return visibleEntries.map<RecentlyPublishedItem>((entry) => {
+      const contentType = contentTypes.get(entry.sys.contentType?.sys?.id || '');
+      return {
         id: entry.sys.id,
-        title: getEntryTitle(entry, contentType, defaultLocale),
+        title: getEntryTitle(titlesMap.get(entry.sys.id) ?? entry, contentType, defaultLocale),
         contentType: contentType?.name || '',
         creator: getCreatorFromEntry(entry, usersMap),
         publishedDate: entry.sys.publishedAt || null,
-      });
+      };
     });
-
-    return items;
-  }, [recentlyPublishedEntries, contentTypes, usersMap, defaultLocale]);
-
-  const isFetching = isFetchingUsers;
+  }, [visibleEntries, contentTypes, usersMap, defaultLocale, titlesMap]);
 
   return {
-    items: recentlyPublishedItems.slice(skip, skip + ITEMS_PER_PAGE),
-    total: recentlyPublishedItems.length,
-    isFetching,
+    items: recentlyPublishedItems,
+    total: recentlyPublishedEntries.length,
+    isFetching: isFetchingUsers || isFetchingTitles,
     refetch: () => {
       refetchUsers();
+      refetchTitles();
     },
-    error: usersError ?? null,
+    error: usersError ?? titlesError ?? null,
   };
 }

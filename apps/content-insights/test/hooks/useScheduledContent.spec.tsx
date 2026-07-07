@@ -32,6 +32,17 @@ vi.mock('../../src/hooks/useUsers', () => ({
   useUsers: (userIds: string[]) => mockUseUsers(userIds),
 }));
 
+const mockRefetchTitles = vi.fn();
+
+vi.mock('../../src/hooks/useEntryTitlesForIds', () => ({
+  useEntryTitlesForIds: () => ({
+    titlesMap: new Map(),
+    isFetching: false,
+    refetch: mockRefetchTitles,
+    error: null,
+  }),
+}));
+
 describe('useScheduledContent', () => {
   beforeEach(() => {
     vi.clearAllMocks();
