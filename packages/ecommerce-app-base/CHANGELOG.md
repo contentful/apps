@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.4](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.1.3...@contentful/ecommerce-app-base@4.1.4) (2026-07-07)
+
+### Bug Fixes
+
+- **security:** upgrade form-data to patch CVE-2025-7783 [STAFF-1149] ([#11052](https://github.com/contentful/apps/issues/11052)) ([746e8fd](https://github.com/contentful/apps/commit/746e8fd77175f553caa49b0c3949fd079dffb229))
+
 ## [4.1.3](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.1.2...@contentful/ecommerce-app-base@4.1.3) (2026-06-18)
 
 ### Bug Fixes
