@@ -1,4 +1,4 @@
-import { render, waitFor, screen, queryByRole } from '@testing-library/react';
+import { render, screen, queryByRole } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { mockCma, MockSdk } from '../../../../test/mocks';
 import TextCounter from './TextCounter';
@@ -53,22 +53,22 @@ describe('Text Counter', () => {
     unmount();
   });
 
-  it('updates the text count when the text changes', async () => {
+  it('updates the text count when the text changes', () => {
     const { rerender, unmount } = render(<TextCounter text="test" />);
     expect(getByText('4 characters')).toBeTruthy();
 
     rerender(<TextCounter text="testestest" />);
-    await waitFor(() => expect(getByText('10 characters')).toBeTruthy());
+    expect(getByText('10 characters')).toBeTruthy();
 
     unmount();
   });
 
-  it('updates the error message when the min length changes', async () => {
+  it('updates the error message when the min length changes', () => {
     const { rerender, unmount } = render(<TextCounter text="test" minLength={5} />);
     expect(getByTestId('error-icon')).toBeTruthy();
 
     rerender(<TextCounter text="test" minLength={3} />);
-    await waitFor(() => expect(getByText('Requires at least 3 characters')).toBeTruthy());
+    expect(getByText('Requires at least 3 characters')).toBeTruthy();
 
     const textCounter = getByTestId('text-counter');
     expect(queryByRole(textCounter, 'img', { hidden: true })).toBeNull;
@@ -76,12 +76,12 @@ describe('Text Counter', () => {
     unmount();
   });
 
-  it('updates the error message when the max length changes', async () => {
+  it('updates the error message when the max length changes', () => {
     const { rerender, unmount } = render(<TextCounter text="test" maxLength={3} />);
     expect(getByTestId('error-icon')).toBeTruthy();
 
     rerender(<TextCounter text="test" maxLength={5} />);
-    await waitFor(() => expect(getByText('4 characters')).toBeTruthy());
+    expect(getByText('4 characters')).toBeTruthy();
 
     const textCounter = getByTestId('text-counter');
     expect(queryByRole(textCounter, 'img', { hidden: true })).toBeNull;
