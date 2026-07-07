@@ -1,6 +1,13 @@
 # Google Docs Eval App
 
-An internal Contentful marketplace app that lists completed Google Drive Integration agent runs and scores them using automated eval scorers.
+> **Internal tool — not for customers.**
+> This app is used by the Applied AI Solutions team to score Drive Integration agent runs during development and manual QA. It is not published to the Contentful Marketplace and should not be treated as a customer-facing product.
+>
+> **Ownership:** Applied AI Solutions team (10pines)
+> **AWS account:** `017078452822` (`cf-proddev-apps-production`)
+> **Deployed Lambda:** `google-docs-eval.api.ctf-apps.com` (prod), `google-docs-eval-test.api.ctf-apps.com` (test)
+
+An internal Contentful app that lists completed Drive Integration agent runs and scores them using automated eval scorers.
 
 Install this app alongside the Google Drive Integration app in any space where your team does manual testing. After running a workflow in the Google Docs app, switch to the **Eval** page in this app to score the run.
 
