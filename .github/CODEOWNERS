@@ -16,7 +16,7 @@ examples/native-external-references-mockshop @contentful/team-entity-architectur
 examples/native-external-references-tmdb @contentful/team-entity-architecture
 function-examples/external-references @contentful/team-entity-architecture
 
-# package.json and package-lock.json should be unowned so that dependabot can automatically update dependencies
+# package.json and package-lock.json should be unowned so that Renovate can automatically update dependencies
 
 **/package.json
 **/package-lock.json
