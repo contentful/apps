@@ -4,7 +4,6 @@ import type {
   ExperienceContext,
   ExperienceNodeType,
   ExperienceEditorToolbarAppSDK,
-  UiMode,
 } from '@contentful/app-sdk';
 import {
   Badge,
@@ -33,7 +32,6 @@ interface Selection {
  * patterns a toolbar app is built on:
  *
  *  - reading `sdk.experiences.context` to tell experience vs. fragment editing apart
- *  - reacting to `sdk.experiences.onUiModeChanged()` (form vs. visual mode)
  *  - subscribing to `sdk.experiences.experience.selection.onChange()`
  *  - resolving the selected node with `sdk.experiences.experience.getNode(nodeId)` and
  *    reading its properties
@@ -47,7 +45,6 @@ const ExperienceToolbar = () => {
   const sdk = useSDK<ExperienceEditorToolbarAppSDK>();
 
   const [context, setContext] = useState<ExperienceContext>(() => sdk.experiences.context);
-  const [uiMode, setUiMode] = useState<UiMode>(() => sdk.experiences.getUiMode());
   const [selection, setSelection] = useState<Selection>(() =>
     sdk.experiences.experience.selection.get()
   );
@@ -57,13 +54,6 @@ const ExperienceToolbar = () => {
   // Keep the editing context (experience vs. fragment) in sync.
   useEffect(() => {
     return sdk.experiences.onContextChanged(setContext);
-  }, [sdk]);
-
-  // Keep the UI mode (form vs. visual) in sync. In `form` mode, canvas
-  // affordances like selection highlighting are no-ops, so apps should degrade
-  // gracefully — here we just surface the current mode.
-  useEffect(() => {
-    return sdk.experiences.onUiModeChanged(setUiMode);
   }, [sdk]);
 
   // Track the canvas selection.
@@ -132,8 +122,7 @@ const ExperienceToolbar = () => {
 
   // Drive the canvas from the toolbar: highlight (and scroll to) the selected
   // node. This is the outbound counterpart to the selection.onChange subscription
-  // above — the app directing the canvas, not just reading from it. In form mode
-  // the host treats highlight as a no-op, so the button is disabled there.
+  // above — the app directing the canvas, not just reading from it.
   const handleHighlight = () => {
     if (!selection.nodeId) {
       return;
@@ -152,19 +141,11 @@ const ExperienceToolbar = () => {
           <Badge variant={context.type === 'experience' ? 'primary' : 'secondary'}>
             {context.type}
           </Badge>
-          <Badge variant={uiMode === 'visual' ? 'positive' : 'warning'}>{uiMode} mode</Badge>
         </Flex>
 
         <Text fontColor="gray600" data-test-id="entity-id">
           Editing <code>{context.type}</code> <code>{context.entityId}</code>
         </Text>
-
-        {uiMode === 'form' && (
-          <Note variant="warning">
-            You are in <strong>form</strong> mode. Canvas selection and highlighting are disabled —
-            switch to <strong>visual</strong> mode to select components on the canvas.
-          </Note>
-        )}
 
         <Box>
           <Subheading marginBottom="spacingXs">Selected component</Subheading>
@@ -172,7 +153,6 @@ const ExperienceToolbar = () => {
             selection={selection}
             properties={properties}
             loading={loadingProperties}
-            uiMode={uiMode}
             onHighlight={handleHighlight}
           />
         </Box>
@@ -185,17 +165,10 @@ interface SelectedNodeProps {
   selection: Selection;
   properties: ComponentPropertyDescriptor[] | null;
   loading: boolean;
-  uiMode: UiMode;
   onHighlight: () => void;
 }
 
-const SelectedNode = ({
-  selection,
-  properties,
-  loading,
-  uiMode,
-  onHighlight,
-}: SelectedNodeProps) => {
+const SelectedNode = ({ selection, properties, loading, onHighlight }: SelectedNodeProps) => {
   if (!selection.nodeId) {
     return (
       <Note variant="neutral" data-test-id="empty-state">
@@ -204,24 +177,16 @@ const SelectedNode = ({
     );
   }
 
-  const canHighlight = uiMode === 'visual';
-
   return (
     <Stack flexDirection="column" alignItems="flex-start" spacing="spacingS">
       <Flex alignItems="center" gap="spacingXs" flexWrap="wrap">
         <Text fontColor="gray600">
           <code>{selection.nodeType ?? 'Node'}</code> &middot; <code>{selection.nodeId}</code>
         </Text>
-        <Tooltip
-          content={
-            canHighlight
-              ? 'Flash and scroll to this component on the canvas'
-              : 'Switch to visual mode to highlight components on the canvas'
-          }>
+        <Tooltip content="Flash and scroll to this component on the canvas">
           <Button
             size="small"
             variant="secondary"
-            isDisabled={!canHighlight}
             onClick={onHighlight}
             testId="highlight-button">
             Highlight on canvas

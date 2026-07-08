@@ -12,14 +12,12 @@ describe('ExperienceToolbar', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSdk.experiences.context = { type: 'experience', entityId: 'experience-123' };
-    mockSdk.experiences.getUiMode.mockReturnValue('visual');
     mockSdk.experiences.experience.selection.get.mockReturnValue({ nodeId: null });
   });
 
-  it('renders the editing context and ui mode', () => {
-    const { getByText, getByTestId } = render(<ExperienceToolbar />);
+  it('renders the editing context', () => {
+    const { getByTestId } = render(<ExperienceToolbar />);
 
-    expect(getByText('visual mode')).toBeInTheDocument();
     expect(getByTestId('entity-id')).toHaveTextContent('Editing experience experience-123');
   });
 
@@ -29,21 +27,11 @@ describe('ExperienceToolbar', () => {
     expect(getByTestId('empty-state')).toBeInTheDocument();
   });
 
-  it('subscribes to context, ui mode, and selection changes', () => {
+  it('subscribes to context and selection changes', () => {
     render(<ExperienceToolbar />);
 
     expect(mockSdk.experiences.onContextChanged).toHaveBeenCalledOnce();
-    expect(mockSdk.experiences.onUiModeChanged).toHaveBeenCalledOnce();
     expect(mockSdk.experiences.experience.selection.onChange).toHaveBeenCalledOnce();
-  });
-
-  it('warns when in form mode', () => {
-    mockSdk.experiences.getUiMode.mockReturnValue('form');
-
-    const { getByText } = render(<ExperienceToolbar />);
-
-    expect(getByText('form mode')).toBeInTheDocument();
-    expect(getByText(/Canvas selection and highlighting are disabled/)).toBeInTheDocument();
   });
 
   it('resolves the selected node and renders its properties', async () => {
@@ -144,9 +132,7 @@ describe('ExperienceToolbar', () => {
     });
   });
 
-  it('highlights the selected node on the canvas in visual mode', async () => {
-    mockSdk.experiences.getUiMode.mockReturnValue('visual');
-
+  it('highlights the selected node on the canvas', async () => {
     const { getByTestId } = render(<ExperienceToolbar />);
     const onSelectionChange = mockSdk.experiences.experience.selection.onChange.mock.calls[0][0];
     act(() => {
@@ -160,21 +146,5 @@ describe('ExperienceToolbar', () => {
       flash: true,
       scrollIntoView: true,
     });
-  });
-
-  it('disables the highlight button in form mode', async () => {
-    mockSdk.experiences.getUiMode.mockReturnValue('form');
-
-    const { getByTestId } = render(<ExperienceToolbar />);
-    const onSelectionChange = mockSdk.experiences.experience.selection.onChange.mock.calls[0][0];
-    act(() => {
-      onSelectionChange({ nodeId: 'node-1', nodeType: 'Component' });
-    });
-
-    const button = await waitFor(() => getByTestId('highlight-button'));
-    expect(button).toBeDisabled();
-
-    fireEvent.click(button);
-    expect(mockSdk.experiences.experience.selection.highlight).not.toHaveBeenCalled();
   });
 });

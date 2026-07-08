@@ -12,7 +12,6 @@ a toolbar app:
 - **Location detection** via `sdk.location.is(locations.LOCATION_EXPERIENCE_TOOLBAR)`
 - **Context awareness** — reading `sdk.experiences.context` to tell whether the user is
   editing an `experience` or a `fragment`
-- **UI mode** — reacting to `sdk.experiences.onUiModeChanged()` (`form` vs. `visual`)
 - **Selection** — subscribing to `sdk.experiences.experience.selection.onChange()`
 - **Node inspection** — resolving the selected node with
   `sdk.experiences.experience.getNode(nodeId)` and reading its properties

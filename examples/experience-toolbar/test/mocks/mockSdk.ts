@@ -3,7 +3,7 @@ import { vi } from 'vitest';
 /**
  * A minimal mock of the `ExperienceEditorToolbarAppSDK` surface used by the
  * example. Subscription methods record their callback so tests can drive
- * changes (selection, ui mode, context) and assert the UI reacts. Each
+ * changes (selection, context) and assert the UI reacts. Each
  * subscription returns an unsubscribe spy.
  */
 const noopUnsubscribe = vi.fn();
@@ -35,8 +35,6 @@ const mockSdk: any = {
   experiences: {
     context: { type: 'experience', entityId: 'experience-123' },
     onContextChanged: vi.fn().mockReturnValue(noopUnsubscribe),
-    getUiMode: vi.fn().mockReturnValue('visual'),
-    onUiModeChanged: vi.fn().mockReturnValue(noopUnsubscribe),
     experience: {
       getNode: vi.fn().mockReturnValue(mockNode),
       getRootNodes: vi.fn().mockReturnValue([mockNode]),
