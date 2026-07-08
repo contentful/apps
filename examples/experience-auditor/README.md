@@ -24,8 +24,8 @@ as the author works and surfaces actionable, advisory fixes.**
   counts.
 - **Locate on canvas** — clicking **Locate** calls
   `selection.set(nodeId)` + `selection.highlight(nodeId, { flash, scrollIntoView })`
-  to jump straight to the offending component (visual mode only, and only where
-  the host backs the selection surface — see _Capability-aware behavior_).
+  to jump straight to the offending component (only where the host backs the
+  selection surface — see _Capability-aware behavior_).
 - **Advisory fixes** — findings can carry a derived fix that is surfaced as
   read-only advice for the author to apply manually. The current app-sdk surface
   exposes no host call to write a node's content properties, so the auditor
@@ -175,7 +175,7 @@ pointing the app at `http://localhost:3000`.
 This app is built against the published `@contentful/app-sdk@4.60.0` types,
 which are the contract for the toolbar location. The host renderer that serves
 `sdk.experiences` at runtime is still rolling out, so the app is **type-verified and
-unit-tested against a mocked SDK** — 37 tests cover the audit rules, scoring,
+unit-tested against a mocked SDK** — 36 tests cover the audit rules, scoring,
 the collector and its binding resolution, capability detection, the suggested-
 fix derivation, and the toolbar's locate / fix / publish-gate behavior. It is
 not yet verified end-to-end inside a live Experience Editor; that live

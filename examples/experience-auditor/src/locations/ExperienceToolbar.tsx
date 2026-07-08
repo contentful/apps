@@ -1,16 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import type { ExperienceContext, ExperienceEditorToolbarAppSDK, UiMode } from '@contentful/app-sdk';
-import {
-  Badge,
-  Box,
-  Button,
-  Flex,
-  Heading,
-  Note,
-  Spinner,
-  Stack,
-  Text,
-} from '@contentful/f36-components';
+import type { ExperienceContext, ExperienceEditorToolbarAppSDK } from '@contentful/app-sdk';
+import { Badge, Box, Button, Flex, Heading, Spinner, Stack, Text } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 
 import { collectNodes } from '../audit/collect';
@@ -36,7 +26,6 @@ const ExperienceToolbar = () => {
   const sdk = useSDK<ExperienceEditorToolbarAppSDK>();
 
   const [context, setContext] = useState<ExperienceContext>(() => sdk.experiences.context);
-  const [uiMode, setUiMode] = useState<UiMode>(() => sdk.experiences.getUiMode());
   const [report, setReport] = useState<AuditReport | null>(null);
   const [auditing, setAuditing] = useState(true);
   const [publishing, setPublishing] = useState(false);
@@ -64,9 +53,8 @@ const ExperienceToolbar = () => {
     }
   }, [sdk]);
 
-  // Keep context and ui mode in sync.
+  // Keep context in sync.
   useEffect(() => sdk.experiences.onContextChanged(setContext), [sdk]);
-  useEffect(() => sdk.experiences.onUiModeChanged(setUiMode), [sdk]);
 
   // Initial audit + re-audit whenever the experience changes.
   // Simplification for the example: every onChange triggers a full traversal.
@@ -82,7 +70,6 @@ const ExperienceToolbar = () => {
   const handleLocate = useCallback(
     (finding: AuditFinding) => {
       sdk.experiences.experience.selection.set(finding.nodeId);
-      // Highlight is a no-op in form mode; the button is disabled there anyway.
       sdk.experiences.experience.selection.highlight(finding.nodeId, {
         flash: true,
         scrollIntoView: true,
@@ -111,7 +98,7 @@ const ExperienceToolbar = () => {
   }, [sdk, report]);
 
   const blocked = report ? hasBlockingErrors(report) : false;
-  const canLocate = uiMode === 'visual' && capabilities.selection;
+  const canLocate = capabilities.selection;
 
   return (
     <Box padding="spacingM">
@@ -131,13 +118,6 @@ const ExperienceToolbar = () => {
             Re-run audit
           </Button>
         </Flex>
-
-        {uiMode === 'form' && (
-          <Note variant="neutral">
-            You are in <strong>form</strong> mode. Findings still update live, but locating a
-            component on the canvas requires <strong>visual</strong> mode.
-          </Note>
-        )}
 
         {report && <ScoreSummary report={report} />}
 

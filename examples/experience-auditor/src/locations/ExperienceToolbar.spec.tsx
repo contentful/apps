@@ -12,7 +12,6 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 describe('ExperienceToolbar (Experience Auditor)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSdk.experiences.getUiMode.mockReturnValue('visual');
     mockSdk.access.can.mockResolvedValue(true);
     mockSdk.experiences.experience.selection = {
       get: vi.fn().mockReturnValue({ nodeId: null }),
@@ -58,16 +57,6 @@ describe('ExperienceToolbar (Experience Auditor)', () => {
         scrollIntoView: true,
       }
     );
-  });
-
-  it('disables locate in form mode', async () => {
-    mockSdk.experiences.getUiMode.mockReturnValue('form');
-    const { getAllByTestId } = render(<ExperienceToolbar />);
-
-    await waitFor(() => expect(getAllByTestId('finding').length).toBeGreaterThan(0));
-
-    const locateButton = within(getAllByTestId('finding')[0]).getByText('Locate').closest('button');
-    expect(locateButton).toBeDisabled();
   });
 
   it('surfaces a deterministic fix as read-only advice (no write path on 4.59)', async () => {

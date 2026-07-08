@@ -49,8 +49,6 @@ const mockSdk: any = {
   experiences: {
     context: { type: 'experience', entityId: 'experience-123' },
     onContextChanged: vi.fn().mockReturnValue(noopUnsubscribe),
-    getUiMode: vi.fn().mockReturnValue('visual'),
-    onUiModeChanged: vi.fn().mockReturnValue(noopUnsubscribe),
     experience: {
       get: vi.fn(),
       onChange: vi.fn().mockReturnValue(noopUnsubscribe),

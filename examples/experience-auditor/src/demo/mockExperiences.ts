@@ -58,8 +58,6 @@ export const demoSdk = {
   experiences: {
     context: { type: 'experience' as const, entityId: 'demo-experience' },
     onContextChanged: () => () => {},
-    getUiMode: () => 'visual' as const,
-    onUiModeChanged: () => () => {},
     experience: {
       get: () => ({ sys: { id: 'demo-experience' } }),
       onChange: () => () => {},
