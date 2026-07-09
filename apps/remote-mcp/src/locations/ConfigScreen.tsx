@@ -4,6 +4,8 @@ import { Stack } from '@contentful/f36-components';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
 import { PermissionsSection } from '../components/access-config';
 import { usePermissions } from '../hooks/usePermissions';
+import { useSpaceType } from '../hooks/useSpaceType';
+import { getVisibleEntities } from '../utils/spaceType';
 import { FormHeader } from '../components/form-header/FormHeader';
 import { Setup } from '../components/set-up/Setup';
 import { RolesPermissionsFooter } from '../components/roles-permissions-footer';
@@ -11,7 +13,7 @@ import {
   createAppInstallationParameters,
   parseAppInstallationParameters,
 } from '../utils/parameters';
-import { AppInstallationParameters } from '../components/types/config';
+import { AppInstallationParameters, ALL_ENTITIES, EXO_ENTITIES } from '../components/types/config';
 
 const ConfigScreen = () => {
   const [expandedAccordions, setExpandedAccordions] = useState({
@@ -36,11 +38,8 @@ const ConfigScreen = () => {
   } = usePermissions();
 
   const sdk = useSDK<ConfigAppSDK>();
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
+  const { disposition } = useSpaceType();
+  const visibleEntities = getVisibleEntities(disposition, ALL_ENTITIES, EXO_ENTITIES);
 
   const onConfigure = useCallback(async () => {
     // This method will be called when a user clicks on "Install"
@@ -110,6 +109,7 @@ const ConfigScreen = () => {
       <FormHeader />
       <PermissionsSection
         contentLifecyclePermissions={contentLifecyclePermissions}
+        visibleEntities={visibleEntities}
         otherFeaturesPermissions={otherFeaturesPermissions}
         migrationPermissions={migrationPermissions}
         expandedAccordions={expandedAccordions}
