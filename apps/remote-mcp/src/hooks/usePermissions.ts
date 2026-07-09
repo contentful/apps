@@ -2,12 +2,10 @@ import { useState } from 'react';
 import type {
   ContentLifecyclePermissions,
   OtherFeaturesPermissions,
-  MigrationPermissions,
   EntityPermissions,
   ContentLifecycleEntityKey,
   EntityActionKey,
 } from '../components/types/config';
-import { ALL_ENTITIES } from '../components/types/config';
 import {
   createEmptyEntityPermissions,
   createEntityPermissions,
@@ -15,7 +13,7 @@ import {
   isActionAvailable,
 } from '../utils/permissions';
 
-export const usePermissions = (visibleEntities: ContentLifecycleEntityKey[] = ALL_ENTITIES) => {
+export const usePermissions = () => {
   const [contentLifecyclePermissions, setContentLifecyclePermissions] =
     useState<ContentLifecyclePermissions>({
       selectAll: false,
@@ -43,16 +41,16 @@ export const usePermissions = (visibleEntities: ContentLifecycleEntityKey[] = AL
       runAIActions: false,
     });
 
-  const [migrationPermissions, setMigrationPermissions] = useState<MigrationPermissions>({
-    migrateWithinSpace: false,
-    migrateBetweenSpaces: false,
-  });
-
-  const handleSelectAllToggle = () => {
-    const newValue = !contentLifecyclePermissions.selectAll;
+  const handleSelectAllToggle = (entities: ContentLifecycleEntityKey[]) => {
+    // Derive the new value from the section's own entities: if every one is
+    // already fully enabled, this toggles the section off; otherwise on.
+    const allChecked = entities.every((entity) =>
+      areAllAvailablePermissionsChecked(entity, contentLifecyclePermissions[entity])
+    );
+    const newValue = !allChecked;
     setContentLifecyclePermissions((prev) => {
-      const updates: Partial<ContentLifecyclePermissions> = { selectAll: newValue };
-      for (const entity of visibleEntities) {
+      const updates: Partial<ContentLifecyclePermissions> = {};
+      for (const entity of entities) {
         updates[entity] = createEntityPermissions(entity, newValue);
       }
       return { ...prev, ...updates };
@@ -66,15 +64,14 @@ export const usePermissions = (visibleEntities: ContentLifecycleEntityKey[] = AL
         ...prev[entity],
         [action]: !prev[entity][action as keyof EntityPermissions],
       },
-      selectAll: false,
     }));
   };
 
-  const handleColumnToggle = (action: EntityActionKey) => {
-    // Find all visible entities that support this action
-    const entitiesWithAction = visibleEntities.filter((entity) => isActionAvailable(entity, action));
+  const handleColumnToggle = (entities: ContentLifecycleEntityKey[], action: EntityActionKey) => {
+    // Find all entities in this section that support this action
+    const entitiesWithAction = entities.filter((entity) => isActionAvailable(entity, action));
 
-    // Check if all visible entities that support this action currently have it enabled
+    // Check if all of them currently have it enabled
     const allChecked = entitiesWithAction.every(
       (entity) => contentLifecyclePermissions[entity][action]
     );
@@ -82,7 +79,7 @@ export const usePermissions = (visibleEntities: ContentLifecycleEntityKey[] = AL
 
     setContentLifecyclePermissions((prev) => {
       const updates: Partial<ContentLifecyclePermissions> = {};
-      for (const entity of visibleEntities) {
+      for (const entity of entities) {
         // Only update entities that support this action
         if (isActionAvailable(entity, action)) {
           updates[entity] = { ...prev[entity], [action]: newValue };
@@ -91,7 +88,6 @@ export const usePermissions = (visibleEntities: ContentLifecycleEntityKey[] = AL
       return {
         ...prev,
         ...updates,
-        selectAll: false,
       };
     });
   };
@@ -108,7 +104,6 @@ export const usePermissions = (visibleEntities: ContentLifecycleEntityKey[] = AL
     setContentLifecyclePermissions((prev) => ({
       ...prev,
       [entity]: entityPermissions,
-      selectAll: false,
     }));
   };
 
@@ -119,25 +114,15 @@ export const usePermissions = (visibleEntities: ContentLifecycleEntityKey[] = AL
     }));
   };
 
-  const handleMigrationToggle = (permission: keyof MigrationPermissions) => {
-    setMigrationPermissions((prev) => ({
-      ...prev,
-      [permission]: !prev[permission],
-    }));
-  };
-
   return {
     contentLifecyclePermissions,
     otherFeaturesPermissions,
-    migrationPermissions,
     setContentLifecyclePermissions,
     setOtherFeaturesPermissions,
-    setMigrationPermissions,
     handleSelectAllToggle,
     handleEntityActionToggle,
     handleColumnToggle,
     handleRowToggle,
     handleOtherFeatureToggle,
-    handleMigrationToggle,
   };
 };

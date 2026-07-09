@@ -24,8 +24,6 @@ export const createAppInstallationParameters = (
     dataAssemblies: JSON.stringify(parameters.contentLifecyclePermissions.dataAssemblies),
     fragments: JSON.stringify(parameters.contentLifecyclePermissions.fragments),
     runAIActions: parameters.otherFeaturesPermissions.runAIActions,
-    migrateWithinSpace: parameters.migrationPermissions.migrateWithinSpace,
-    migrateBetweenSpaces: parameters.migrationPermissions.migrateBetweenSpaces,
   };
 };
 
@@ -62,10 +60,6 @@ export const parseAppInstallationParameters = (
       fragments: parameters.fragments
         ? JSON.parse(parameters.fragments)
         : createEmptyEntityPermissions(),
-    },
-    migrationPermissions: {
-      migrateWithinSpace: parameters.migrateWithinSpace,
-      migrateBetweenSpaces: parameters.migrateBetweenSpaces,
     },
     otherFeaturesPermissions: {
       runAIActions: parameters.runAIActions,

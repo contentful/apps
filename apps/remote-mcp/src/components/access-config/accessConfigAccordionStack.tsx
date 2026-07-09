@@ -1,42 +1,35 @@
 import { type FC } from 'react';
-import { Stack, Heading, Text, Accordion } from '@contentful/f36-components';
+import { Stack, Heading, Text, Accordion, Note } from '@contentful/f36-components';
 import { ContentLifecyclePermissionsTable } from './ContentLifecyclePermissionsTable';
 import { OtherFeaturesPermissions } from './OtherFeaturesPermissions';
-import { MigrationPermissions } from './MigrationPermissions';
+import { CLASSIC_ENTITIES, EXO_ENTITIES } from '../types/config';
 import type {
   ContentLifecyclePermissions,
   OtherFeaturesPermissions as OtherFeaturesPermissionsType,
-  MigrationPermissions as MigrationPermissionsType,
   OtherFeaturesPermissionKey,
-  MigrationPermissionKey,
   ContentLifecycleEntityKey,
   EntityActionKey,
 } from '../types/config';
 
 interface PermissionsSectionProps {
   contentLifecyclePermissions: ContentLifecyclePermissions;
-  visibleEntities: ContentLifecycleEntityKey[];
   otherFeaturesPermissions: OtherFeaturesPermissionsType;
-  migrationPermissions: MigrationPermissionsType;
   expandedAccordions: {
     contentLifecycle: boolean;
+    experienceOrchestration: boolean;
     otherFeatures: boolean;
-    migration: boolean;
   };
   onAccordionToggle: (section: string, expanded: boolean) => void;
-  onSelectAllToggle: () => void;
+  onSelectAllToggle: (entities: ContentLifecycleEntityKey[]) => void;
   onEntityActionToggle: (entity: ContentLifecycleEntityKey, action: EntityActionKey) => void;
-  onColumnToggle: (action: EntityActionKey) => void;
+  onColumnToggle: (entities: ContentLifecycleEntityKey[], action: EntityActionKey) => void;
   onRowToggle: (entity: ContentLifecycleEntityKey) => void;
   onOtherFeatureToggle: (permission: OtherFeaturesPermissionKey) => void;
-  onMigrationToggle: (permission: MigrationPermissionKey) => void;
 }
 
 export const PermissionsSection: FC<PermissionsSectionProps> = ({
   contentLifecyclePermissions,
-  visibleEntities,
   otherFeaturesPermissions,
-  migrationPermissions,
   expandedAccordions,
   onAccordionToggle,
   onSelectAllToggle,
@@ -44,7 +37,6 @@ export const PermissionsSection: FC<PermissionsSectionProps> = ({
   onColumnToggle,
   onRowToggle,
   onOtherFeatureToggle,
-  onMigrationToggle,
 }) => (
   <Stack
     flexDirection="column"
@@ -72,7 +64,34 @@ export const PermissionsSection: FC<PermissionsSectionProps> = ({
           }}>
           <ContentLifecyclePermissionsTable
             permissions={contentLifecyclePermissions}
-            visibleEntities={visibleEntities}
+            visibleEntities={CLASSIC_ENTITIES}
+            onSelectAllToggle={onSelectAllToggle}
+            onEntityActionToggle={onEntityActionToggle}
+            onColumnToggle={onColumnToggle}
+            onRowToggle={onRowToggle}
+          />
+        </div>
+      </Accordion.Item>
+
+      <Accordion.Item
+        title="Experience orchestration actions"
+        isExpanded={expandedAccordions.experienceOrchestration}
+        onExpand={() => onAccordionToggle('experienceOrchestration', true)}
+        onCollapse={() => onAccordionToggle('experienceOrchestration', false)}>
+        <div
+          style={{
+            marginTop: '-12px',
+            boxSizing: 'border-box',
+            paddingRight: '16px',
+          }}>
+          <Note variant="neutral" style={{ marginBottom: '16px' }}>
+            These tools are only available in Experience Orchestration (ExO) compatible spaces. If
+            your space is not ExO compatible, enabling these permissions has no effect and the
+            corresponding tools will not be available.
+          </Note>
+          <ContentLifecyclePermissionsTable
+            permissions={contentLifecyclePermissions}
+            visibleEntities={EXO_ENTITIES}
             onSelectAllToggle={onSelectAllToggle}
             onEntityActionToggle={onEntityActionToggle}
             onColumnToggle={onColumnToggle}
@@ -95,24 +114,6 @@ export const PermissionsSection: FC<PermissionsSectionProps> = ({
           <OtherFeaturesPermissions
             permissions={otherFeaturesPermissions}
             onPermissionToggle={onOtherFeatureToggle}
-          />
-        </div>
-      </Accordion.Item>
-
-      <Accordion.Item
-        title="Migration permissions"
-        isExpanded={expandedAccordions.migration}
-        onExpand={() => onAccordionToggle('migration', true)}
-        onCollapse={() => onAccordionToggle('migration', false)}>
-        <div
-          style={{
-            marginTop: '-12px',
-            boxSizing: 'border-box',
-            paddingRight: '16px',
-          }}>
-          <MigrationPermissions
-            permissions={migrationPermissions}
-            onPermissionToggle={onMigrationToggle}
           />
         </div>
       </Accordion.Item>

@@ -3,14 +3,14 @@ import { Stack, Text, Checkbox, Table, Flex, Box } from '@contentful/f36-compone
 import type { ContentLifecyclePermissions } from '../types/config';
 import type { ContentLifecycleEntityKey, EntityActionKey } from '../types/config';
 import { ENTITY_AVAILABLE_ACTIONS, STANDARD_ACTIONS, ALL_ENTITIES } from '../types/config';
-import { isActionAvailable } from '../../utils/permissions';
+import { isActionAvailable, areAllAvailablePermissionsChecked } from '../../utils/permissions';
 
 interface ContentLifecyclePermissionsTableProps {
   permissions: ContentLifecyclePermissions;
   visibleEntities?: ContentLifecycleEntityKey[];
-  onSelectAllToggle: () => void;
+  onSelectAllToggle: (entities: ContentLifecycleEntityKey[]) => void;
   onEntityActionToggle: (entity: ContentLifecycleEntityKey, action: EntityActionKey) => void;
-  onColumnToggle: (action: EntityActionKey) => void;
+  onColumnToggle: (entities: ContentLifecycleEntityKey[], action: EntityActionKey) => void;
   onRowToggle: (entity: ContentLifecycleEntityKey) => void;
 }
 
@@ -21,14 +21,21 @@ export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTab
   onEntityActionToggle,
   onColumnToggle,
   onRowToggle,
-}) => (
+}) => {
+  // Select-all is derived per-table from this table's own entities, so
+  // independent sections (classic vs. ExO) each track their own state.
+  const isSelectAllChecked = visibleEntities.every((entity) =>
+    areAllAvailablePermissionsChecked(entity, permissions[entity])
+  );
+
+  return (
   <Stack flexDirection="column" spacing="spacing2Xs" alignItems="flex-start">
     <Text>
       Allow the MCP server to read, edit, create, delete, publish, un-publish, archive, unarchive,
       or invoke entities within Contentful.
     </Text>
     <Box marginTop="spacingS">
-      <Checkbox isChecked={permissions.selectAll} onChange={onSelectAllToggle}>
+      <Checkbox isChecked={isSelectAllChecked} onChange={() => onSelectAllToggle(visibleEntities)}>
         Select all entities and actions in the table below
       </Checkbox>
     </Box>
@@ -56,7 +63,7 @@ export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTab
                     </Text>
                     <Checkbox
                       isChecked={isColumnChecked}
-                      onChange={() => onColumnToggle(action as EntityActionKey)}
+                      onChange={() => onColumnToggle(visibleEntities, action as EntityActionKey)}
                     />
                   </Flex>
                 </Table.Cell>
@@ -123,4 +130,5 @@ export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTab
       </Table>
     </div>
   </Stack>
-);
+  );
+};

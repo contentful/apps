@@ -1,6 +1,6 @@
 import ConfigScreen from './ConfigScreen';
 import { render, waitFor } from '@testing-library/react';
-import { mockCma, mockSdk } from '../../test/mocks';
+import { mockSdk } from '../../test/mocks';
 import { vi } from 'vitest';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
@@ -41,26 +41,14 @@ describe('Config Screen component', () => {
     expect(getByText('Content lifecycle actions')).toBeInTheDocument();
   });
 
-  it('hides ExO permission rows in a classic space', async () => {
-    mockCma.componentType.getMany.mockResolvedValue({ total: 0, items: [] });
-    mockCma.contentType.getMany.mockResolvedValue({ total: 3, items: [] });
-
-    const { queryByText, getByText } = render(<ConfigScreen />);
+  it('renders the Experience orchestration section', async () => {
+    const { getByText } = render(<ConfigScreen />);
     await waitFor(() => expect(mockSdk.app.setReady).toHaveBeenCalled());
 
-    // Classic entities still render...
-    expect(getByText('Entries')).toBeInTheDocument();
-    // ...ExO rows do not.
-    await waitFor(() => {
-      expect(queryByText('Component types')).not.toBeInTheDocument();
-      expect(queryByText('Experiences')).not.toBeInTheDocument();
-    });
+    expect(getByText('Experience orchestration actions')).toBeInTheDocument();
   });
 
-  it('shows ExO permission rows in an ExO-enabled space', async () => {
-    mockCma.componentType.getMany.mockResolvedValue({ total: 2, items: [] });
-    mockCma.contentType.getMany.mockResolvedValue({ total: 5, items: [] });
-
+  it('always renders the ExO permission rows (detection is not possible from within an app)', async () => {
     const { findByText } = render(<ConfigScreen />);
     await waitFor(() => expect(mockSdk.app.setReady).toHaveBeenCalled());
 
@@ -69,5 +57,12 @@ describe('Config Screen component', () => {
     expect(await findByText('Data assemblies')).toBeInTheDocument();
     expect(await findByText('Fragments')).toBeInTheDocument();
     expect(await findByText('Templates')).toBeInTheDocument();
+  });
+
+  it('does not render the migration section', async () => {
+    const { queryByText } = render(<ConfigScreen />);
+    await waitFor(() => expect(mockSdk.app.setReady).toHaveBeenCalled());
+
+    expect(queryByText('Migration permissions')).not.toBeInTheDocument();
   });
 });

@@ -37,15 +37,9 @@ export interface OtherFeaturesPermissions {
   runAIActions: boolean;
 }
 
-export interface MigrationPermissions {
-  migrateWithinSpace: boolean;
-  migrateBetweenSpaces: boolean;
-}
-
 export interface InstallParameters {
   contentLifecyclePermissions: ContentLifecyclePermissions;
   otherFeaturesPermissions: OtherFeaturesPermissions;
-  migrationPermissions: MigrationPermissions;
 }
 
 export interface AppInstallationParameters {
@@ -68,12 +62,9 @@ export interface AppInstallationParameters {
   dataAssemblies: string;
   fragments: string;
   runAIActions: boolean;
-  migrateWithinSpace: boolean;
-  migrateBetweenSpaces: boolean;
 }
 
 export type OtherFeaturesPermissionKey = keyof OtherFeaturesPermissions;
-export type MigrationPermissionKey = keyof MigrationPermissions;
 export type ContentLifecycleEntityKey = Exclude<keyof ContentLifecyclePermissions, 'selectAll'>;
 export type EntityActionKey = keyof EntityPermissions;
 
@@ -107,7 +98,14 @@ export const ENTITY_AVAILABLE_ACTIONS: Record<
 /** All entity keys derived from ENTITY_AVAILABLE_ACTIONS */
 export const ALL_ENTITIES = Object.keys(ENTITY_AVAILABLE_ACTIONS) as ContentLifecycleEntityKey[];
 
-/** ExO-only entities, gated by space type on the config screen (AIS-187). */
+/**
+ * ExO (Experience Orchestration) entities. Rendered in their own
+ * "Experience orchestration actions" section on the config screen. These tools
+ * only function in ExO-compatible spaces; the section note calls this out.
+ * ExO-compatibility can't be detected from within an app (the App SDK CMA
+ * blocks reads of ExO entity types), so we always show the section rather than
+ * gate it. See AIS-187.
+ */
 export const EXO_ENTITIES: ContentLifecycleEntityKey[] = [
   'componentTypes',
   'experiences',
@@ -115,6 +113,11 @@ export const EXO_ENTITIES: ContentLifecycleEntityKey[] = [
   'dataAssemblies',
   'fragments',
 ];
+
+/** Classic (non-ExO) entities, rendered in the "Content lifecycle actions" section. */
+export const CLASSIC_ENTITIES: ContentLifecycleEntityKey[] = ALL_ENTITIES.filter(
+  (entity) => !EXO_ENTITIES.includes(entity)
+);
 
 /** All actions shown in table columns */
 export const STANDARD_ACTIONS: EntityActionKey[] = [

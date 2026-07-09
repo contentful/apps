@@ -4,8 +4,6 @@ import { Stack } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { PermissionsSection } from '../components/access-config';
 import { usePermissions } from '../hooks/usePermissions';
-import { useSpaceType } from '../hooks/useSpaceType';
-import { getVisibleEntities } from '../utils/spaceType';
 import { FormHeader } from '../components/form-header/FormHeader';
 import { Setup } from '../components/set-up/Setup';
 import { RolesPermissionsFooter } from '../components/roles-permissions-footer';
@@ -13,33 +11,29 @@ import {
   createAppInstallationParameters,
   parseAppInstallationParameters,
 } from '../utils/parameters';
-import { AppInstallationParameters, ALL_ENTITIES, EXO_ENTITIES } from '../components/types/config';
+import { AppInstallationParameters } from '../components/types/config';
 
 const ConfigScreen = () => {
   const [expandedAccordions, setExpandedAccordions] = useState({
     contentLifecycle: true,
+    experienceOrchestration: false,
     otherFeatures: false,
     migration: false,
   });
 
   const sdk = useSDK<ConfigAppSDK>();
-  const { disposition } = useSpaceType();
-  const visibleEntities = getVisibleEntities(disposition, ALL_ENTITIES, EXO_ENTITIES);
 
   const {
     contentLifecyclePermissions,
     otherFeaturesPermissions,
-    migrationPermissions,
     setContentLifecyclePermissions,
     setOtherFeaturesPermissions,
-    setMigrationPermissions,
     handleSelectAllToggle,
     handleEntityActionToggle,
     handleColumnToggle,
     handleRowToggle,
     handleOtherFeatureToggle,
-    handleMigrationToggle,
-  } = usePermissions(visibleEntities);
+  } = usePermissions();
 
   const onConfigure = useCallback(async () => {
     // This method will be called when a user clicks on "Install"
@@ -53,7 +47,6 @@ const ConfigScreen = () => {
     const parameters = createAppInstallationParameters({
       contentLifecyclePermissions,
       otherFeaturesPermissions,
-      migrationPermissions,
     });
     return {
       // Parameters to be persisted as the app configuration.
@@ -62,7 +55,7 @@ const ConfigScreen = () => {
       // locations, you can just pass the currentState as is
       targetState: currentState,
     };
-  }, [contentLifecyclePermissions, otherFeaturesPermissions, migrationPermissions, sdk]);
+  }, [contentLifecyclePermissions, otherFeaturesPermissions, sdk]);
 
   useEffect(() => {
     // `onConfigure` allows to configure a callback to be
@@ -83,14 +76,13 @@ const ConfigScreen = () => {
 
         setContentLifecyclePermissions(parsedParameters.contentLifecyclePermissions);
         setOtherFeaturesPermissions(parsedParameters.otherFeaturesPermissions);
-        setMigrationPermissions(parsedParameters.migrationPermissions);
       }
 
       // Once preparation has finished, call `setReady` to hide
       // the loading screen and present the app to a user.
       sdk.app.setReady();
     })();
-  }, [sdk, setContentLifecyclePermissions, setOtherFeaturesPermissions, setMigrationPermissions]);
+  }, [sdk, setContentLifecyclePermissions, setOtherFeaturesPermissions]);
 
   const handleAccordionToggle = (section: string, expanded: boolean) => {
     setExpandedAccordions((prev) => ({
@@ -109,9 +101,7 @@ const ConfigScreen = () => {
       <FormHeader />
       <PermissionsSection
         contentLifecyclePermissions={contentLifecyclePermissions}
-        visibleEntities={visibleEntities}
         otherFeaturesPermissions={otherFeaturesPermissions}
-        migrationPermissions={migrationPermissions}
         expandedAccordions={expandedAccordions}
         onAccordionToggle={handleAccordionToggle}
         onSelectAllToggle={handleSelectAllToggle}
@@ -119,7 +109,6 @@ const ConfigScreen = () => {
         onColumnToggle={handleColumnToggle}
         onRowToggle={handleRowToggle}
         onOtherFeatureToggle={handleOtherFeatureToggle}
-        onMigrationToggle={handleMigrationToggle}
       />
       <Setup />
       <RolesPermissionsFooter />
