@@ -184,11 +184,7 @@ const SelectedNode = ({ selection, properties, loading, onHighlight }: SelectedN
           <code>{selection.nodeType ?? 'Node'}</code> &middot; <code>{selection.nodeId}</code>
         </Text>
         <Tooltip content="Flash and scroll to this component on the canvas">
-          <Button
-            size="small"
-            variant="secondary"
-            onClick={onHighlight}
-            testId="highlight-button">
+          <Button size="small" variant="secondary" onClick={onHighlight} testId="highlight-button">
             Highlight on canvas
           </Button>
         </Tooltip>
