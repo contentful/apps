@@ -24,6 +24,13 @@ export interface ContentLifecyclePermissions {
   tags: EntityPermissions;
   concepts: EntityPermissions;
   conceptSchemes: EntityPermissions;
+  // ExO (Experience Orchestration) entities. Shown on the config screen only
+  // in ExO-enabled or empty spaces. See AIS-187.
+  componentTypes: EntityPermissions;
+  experiences: EntityPermissions;
+  templates: EntityPermissions;
+  dataAssemblies: EntityPermissions;
+  fragments: EntityPermissions;
 }
 
 export interface OtherFeaturesPermissions {
@@ -55,6 +62,11 @@ export interface AppInstallationParameters {
   tags: string;
   concepts: string;
   conceptSchemes: string;
+  componentTypes: string;
+  experiences: string;
+  templates: string;
+  dataAssemblies: string;
+  fragments: string;
   runAIActions: boolean;
   migrateWithinSpace: boolean;
   migrateBetweenSpaces: boolean;
@@ -85,10 +97,24 @@ export const ENTITY_AVAILABLE_ACTIONS: Record<
   tags: ['read', 'create'],
   orgs: ['read'],
   spaces: ['read'],
+  componentTypes: ['read'],
+  experiences: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish'],
+  templates: ['read'],
+  dataAssemblies: ['read'],
+  fragments: ['read', 'edit', 'create', 'delete'],
 } as const;
 
 /** All entity keys derived from ENTITY_AVAILABLE_ACTIONS */
 export const ALL_ENTITIES = Object.keys(ENTITY_AVAILABLE_ACTIONS) as ContentLifecycleEntityKey[];
+
+/** ExO-only entities, gated by space type on the config screen (AIS-187). */
+export const EXO_ENTITIES: ContentLifecycleEntityKey[] = [
+  'componentTypes',
+  'experiences',
+  'templates',
+  'dataAssemblies',
+  'fragments',
+];
 
 /** All actions shown in table columns */
 export const STANDARD_ACTIONS: EntityActionKey[] = [
