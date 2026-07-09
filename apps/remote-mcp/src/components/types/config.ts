@@ -131,3 +131,10 @@ export const STANDARD_ACTIONS: EntityActionKey[] = [
   'unarchive',
   'invoke',
 ];
+
+/** Actions relevant to ExO entities — STANDARD_ACTIONS trimmed to those used by at least one ExO entity. */
+export const EXO_ACTIONS: EntityActionKey[] = STANDARD_ACTIONS.filter((action) =>
+  EXO_ENTITIES.some((entity) =>
+    (ENTITY_AVAILABLE_ACTIONS[entity] as readonly EntityActionKey[]).includes(action)
+  )
+);

@@ -2,7 +2,7 @@ import { type FC } from 'react';
 import { Stack, Heading, Text, Accordion, Note } from '@contentful/f36-components';
 import { ContentLifecyclePermissionsTable } from './ContentLifecyclePermissionsTable';
 import { OtherFeaturesPermissions } from './OtherFeaturesPermissions';
-import { CLASSIC_ENTITIES, EXO_ENTITIES } from '../types/config';
+import { CLASSIC_ENTITIES, EXO_ENTITIES, EXO_ACTIONS } from '../types/config';
 import type {
   ContentLifecyclePermissions,
   OtherFeaturesPermissions as OtherFeaturesPermissionsType,
@@ -84,7 +84,7 @@ export const PermissionsSection: FC<PermissionsSectionProps> = ({
             boxSizing: 'border-box',
             paddingRight: '16px',
           }}>
-          <Note variant="neutral" style={{ marginBottom: '16px' }}>
+          <Note variant="neutral" style={{ marginTop: '12px', marginBottom: '16px' }}>
             These tools are only available in Experience Orchestration (ExO) compatible spaces. If
             your space is not ExO compatible, enabling these permissions has no effect and the
             corresponding tools will not be available.
@@ -92,6 +92,7 @@ export const PermissionsSection: FC<PermissionsSectionProps> = ({
           <ContentLifecyclePermissionsTable
             permissions={contentLifecyclePermissions}
             visibleEntities={EXO_ENTITIES}
+            visibleActions={EXO_ACTIONS}
             onSelectAllToggle={onSelectAllToggle}
             onEntityActionToggle={onEntityActionToggle}
             onColumnToggle={onColumnToggle}

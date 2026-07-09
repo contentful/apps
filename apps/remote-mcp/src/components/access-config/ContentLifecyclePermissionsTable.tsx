@@ -8,6 +8,7 @@ import { isActionAvailable, areAllAvailablePermissionsChecked } from '../../util
 interface ContentLifecyclePermissionsTableProps {
   permissions: ContentLifecyclePermissions;
   visibleEntities?: ContentLifecycleEntityKey[];
+  visibleActions?: EntityActionKey[];
   onSelectAllToggle: (entities: ContentLifecycleEntityKey[]) => void;
   onEntityActionToggle: (entity: ContentLifecycleEntityKey, action: EntityActionKey) => void;
   onColumnToggle: (entities: ContentLifecycleEntityKey[], action: EntityActionKey) => void;
@@ -17,6 +18,7 @@ interface ContentLifecyclePermissionsTableProps {
 export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTableProps> = ({
   permissions,
   visibleEntities = ALL_ENTITIES,
+  visibleActions = STANDARD_ACTIONS,
   onSelectAllToggle,
   onEntityActionToggle,
   onColumnToggle,
@@ -45,7 +47,7 @@ export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTab
         <Table.Head>
           <Table.Row>
             <Table.Cell></Table.Cell>
-            {STANDARD_ACTIONS.map((action) => {
+            {visibleActions.map((action) => {
               // Get all VISIBLE entities that support this action
               const entitiesWithAction = visibleEntities.filter((entity) =>
                 isActionAvailable(entity, action)
@@ -107,7 +109,7 @@ export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTab
                     {displayNames[entity]}
                   </Checkbox>
                 </Table.Cell>
-                {STANDARD_ACTIONS.map((action) => {
+                {visibleActions.map((action) => {
                   const isAvailable = isActionAvailable(entity, action);
                   return (
                     <Table.Cell key={action}>
