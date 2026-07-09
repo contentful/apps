@@ -15,6 +15,7 @@ import type {
 
 interface PermissionsSectionProps {
   contentLifecyclePermissions: ContentLifecyclePermissions;
+  visibleEntities: ContentLifecycleEntityKey[];
   otherFeaturesPermissions: OtherFeaturesPermissionsType;
   migrationPermissions: MigrationPermissionsType;
   expandedAccordions: {
@@ -33,6 +34,7 @@ interface PermissionsSectionProps {
 
 export const PermissionsSection: FC<PermissionsSectionProps> = ({
   contentLifecyclePermissions,
+  visibleEntities,
   otherFeaturesPermissions,
   migrationPermissions,
   expandedAccordions,
@@ -70,6 +72,7 @@ export const PermissionsSection: FC<PermissionsSectionProps> = ({
           }}>
           <ContentLifecyclePermissionsTable
             permissions={contentLifecyclePermissions}
+            visibleEntities={visibleEntities}
             onSelectAllToggle={onSelectAllToggle}
             onEntityActionToggle={onEntityActionToggle}
             onColumnToggle={onColumnToggle}
