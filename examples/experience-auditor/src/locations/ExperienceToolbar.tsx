@@ -1,6 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { ExperienceContext, ExperienceEditorToolbarAppSDK } from '@contentful/app-sdk';
-import { Badge, Box, Button, Flex, Heading, Spinner, Stack, Text } from '@contentful/f36-components';
+import {
+  Badge,
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Spinner,
+  Stack,
+  Text,
+} from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 
 import { collectNodes } from '../audit/collect';
