@@ -85,8 +85,7 @@ The toolbar can also **drive the canvas**, not just read from it. The "Highlight
 on canvas" button calls `sdk.experiences.experience.selection.highlight(nodeId, { flash:
 true, scrollIntoView: true })` to flash and scroll to the selected component —
 the outbound counterpart to the `selection.onChange` subscription the panel reads
-from. Canvas affordances like highlighting are no-ops in `form` mode, so the
-button is disabled there and enabled only in `visual` mode.
+from.
 
 ## A note on verification
 
