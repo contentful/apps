@@ -7,6 +7,7 @@ import EmptyState from './EmptyState';
 
 interface FindingListProps {
   findings: AuditFinding[];
+  nodeCount: number;
   canLocate: boolean;
   onLocate: (finding: AuditFinding) => void;
 }
@@ -24,8 +25,8 @@ const SEVERITY_LABEL: Record<Severity, string> = {
   info: 'Info',
 };
 
-const FindingList = ({ findings, canLocate, onLocate }: FindingListProps) => {
-  if (findings.length === 0) return <EmptyState />;
+const FindingList = ({ findings, nodeCount, canLocate, onLocate }: FindingListProps) => {
+  if (findings.length === 0) return <EmptyState nodeCount={nodeCount} />;
 
   return (
     <Stack flexDirection="column" alignItems="stretch" spacing="spacingM" fullWidth>

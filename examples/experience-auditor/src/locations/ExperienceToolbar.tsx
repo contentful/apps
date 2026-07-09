@@ -137,7 +137,12 @@ const ExperienceToolbar = () => {
         )}
 
         {report && (
-          <FindingList findings={report.findings} canLocate={canLocate} onLocate={handleLocate} />
+          <FindingList
+            findings={report.findings}
+            nodeCount={report.nodeCount}
+            canLocate={canLocate}
+            onLocate={handleLocate}
+          />
         )}
 
         <Flex flexDirection="column" gap="spacingXs">

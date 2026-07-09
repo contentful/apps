@@ -46,7 +46,6 @@ describe('audit rules', () => {
     expect(finding?.fix).toEqual({
       kind: 'deterministic',
       label: 'Trim whitespace',
-      propertyKey: 'altText',
       value: 'spaced',
     });
   });
@@ -132,7 +131,6 @@ describe('audit rules', () => {
     expect(finding?.fix).toEqual({
       kind: 'deterministic',
       label: 'Set to H3',
-      propertyKey: 'headingLevel',
       value: 3,
     });
   });
@@ -156,7 +154,6 @@ describe('audit rules', () => {
     expect(finding?.fix).toEqual({
       kind: 'suggested',
       label: 'Use heading as meta',
-      propertyKey: 'metaTitle',
       suggestedValue: 'Spring Sale',
       source: 'the heading on this component',
     });
@@ -174,7 +171,6 @@ describe('audit rules', () => {
     expect(finding?.fix).toEqual({
       kind: 'suggested',
       label: 'Use heading as meta',
-      propertyKey: 'metaTitle',
       suggestedValue: 'Spring Sale',
       source: 'the heading on this component',
     });

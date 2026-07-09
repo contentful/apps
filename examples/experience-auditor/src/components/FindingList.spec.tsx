@@ -17,7 +17,6 @@ function suggestedFinding(suggestedValue: string): AuditFinding {
     fix: {
       kind: 'suggested',
       label: 'Use heading as meta',
-      propertyKey: 'metaTitle',
       suggestedValue,
       source: 'the heading on this component',
     },
@@ -27,6 +26,7 @@ function suggestedFinding(suggestedValue: string): AuditFinding {
 describe('FindingList suggested-fix display', () => {
   it('renders the derived suggestion as read-only advice', () => {
     const props = {
+      nodeCount: 1,
       canLocate: false,
       onLocate: vi.fn(),
     };

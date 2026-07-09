@@ -59,10 +59,16 @@ describe('ExperienceToolbar (Experience Auditor)', () => {
     );
   });
 
-  it('surfaces a deterministic fix as read-only advice (no write path on 4.59)', async () => {
+  it('shows a no-tree-data state when the host returns no root nodes', async () => {
+    mockSdk.experiences.experience.getRootNodes.mockReturnValue([]);
+    const { getByTestId } = render(<ExperienceToolbar />);
+    await waitFor(() => expect(getByTestId('no-tree-data')).toBeInTheDocument());
+  });
+
+  it('surfaces a deterministic fix as read-only advice', async () => {
     // A node whose alt text has stray whitespace yields a finding with a
-    // "Trim whitespace" fix. The 4.59 surface has no setContentProperty, so the
-    // fix is advisory: the trimmed value is shown, not applied.
+    // "Trim whitespace" fix. The app-sdk surface has no content-write call, so
+    // the fix is advisory: the trimmed value is shown, not applied.
     const fixNode = makeMockNode('hero', 'Component', [
       { key: 'image', area: 'content', value: { sys: { id: 'asset-1' } } },
       { key: 'altText', area: 'content', value: '  spaced alt  ' },

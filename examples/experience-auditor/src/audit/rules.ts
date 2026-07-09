@@ -108,7 +108,6 @@ const altTextRule: AuditRule = {
           fix: {
             kind: 'deterministic',
             label: 'Trim whitespace',
-            propertyKey: alt.key,
             value: alt.value.trim(),
           },
         }),
@@ -172,7 +171,6 @@ const seoMetaRule: AuditRule = {
             ? {
                 kind: 'suggested',
                 label: 'Use heading as meta',
-                propertyKey: meta.key,
                 suggestedValue: suggestion,
                 source: 'the heading on this component',
               }
@@ -205,7 +203,7 @@ const brokenBindingRule: AuditRule = {
             propertyKey: property.key,
             severity: 'error',
             title: 'Broken entry binding',
-            detail: `"${property.key}" is bound to an entry, but the reference does not resolve.`,
+            detail: `"${property.key}" is bound to an entry but has no entryId.`,
           })
         );
       }
@@ -243,7 +241,6 @@ export function evaluateHeadingOrder(nodes: CollectedNode[]): AuditFinding[] {
           fix: {
             kind: 'deterministic',
             label: `Set to H${expected}`,
-            propertyKey: key,
             value: expected,
           },
         })

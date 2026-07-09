@@ -41,7 +41,7 @@ as the author works and surfaces actionable, advisory fixes.**
 | `a11y/image-alt-text`    | error / warning | Images must have non-empty alt text; trims stray whitespace           |
 | `content/required-empty` | warning         | Headings/titles should not be empty                                   |
 | `seo/missing-meta`       | info            | SEO meta fields should be populated                                   |
-| `content/broken-binding` | error           | Entry-bound properties must resolve via the host's binding resolution |
+| `content/broken-binding` | error           | Entry-bound properties must include an `entryId` |
 | `a11y/heading-order`     | warning         | Heading levels should not skip (e.g. H2 → H4)                         |
 
 Most rules are **per-node**: they look at a single component's properties in
@@ -103,7 +103,7 @@ src/
   components/
     ScoreSummary.tsx
     FindingList.tsx   Groups findings by severity; renders locate + fix affordances
-    SuggestedFix.tsx  Review-and-edit step for suggested fixes
+    SuggestedFix.tsx  Read-only display for suggested fixes
     EmptyState.tsx
   demo/
     DemoProvider.tsx  Dev-only: renders the toolbar against the seeded mock (?demo)
@@ -150,7 +150,7 @@ http://localhost:3000/?demo
 ```
 
 The `?demo` flag renders the toolbar against a seeded, in-memory experience so
-you can click an audit, accept or edit a suggested fix, and watch the score
+you can click through findings, review a suggested fix, and watch the score
 update. It is a **dev-only convenience with no live canvas** — because there is
 no real selection surface behind it, **Locate is disabled in the demo** (an
 illustration of the capability-aware behavior described above). The demo
@@ -185,8 +185,9 @@ shapes used here match the published types exactly.
 > **Note on `getRootNodes()`.** The audit traversal starts from
 > `sdk.experiences.experience.getRootNodes()`, which currently resolves to an
 > empty list until the host wires up experience-tree sync. Against a live host
-> today the audit will report no findings; the demo mode below exercises the full
-> loop against a seeded in-memory experience.
+> today the toolbar shows a distinct "no components to audit yet" state rather
+> than the all-clear celebration; demo mode (`/?demo`) exercises the full loop
+> against a seeded in-memory experience.
 
 ## Available scripts
 
