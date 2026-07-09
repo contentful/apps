@@ -41,4 +41,34 @@ describe('Config Screen component', () => {
     // Check for PermissionsSection - at least one permission category
     expect(getByText('Content lifecycle actions')).toBeInTheDocument();
   });
+
+  it('hides ExO permission rows in a classic space', async () => {
+    mockCma.componentType.getMany.mockResolvedValue({ total: 0, items: [] });
+    mockCma.contentType.getMany.mockResolvedValue({ total: 3, items: [] });
+
+    const { queryByText, getByText } = render(<ConfigScreen />);
+    await waitFor(() => expect(mockSdk.app.setReady).toHaveBeenCalled());
+
+    // Classic entities still render...
+    expect(getByText('Entries')).toBeInTheDocument();
+    // ...ExO rows do not.
+    await waitFor(() => {
+      expect(queryByText('Component types')).not.toBeInTheDocument();
+      expect(queryByText('Experiences')).not.toBeInTheDocument();
+    });
+  });
+
+  it('shows ExO permission rows in an ExO-enabled space', async () => {
+    mockCma.componentType.getMany.mockResolvedValue({ total: 2, items: [] });
+    mockCma.contentType.getMany.mockResolvedValue({ total: 5, items: [] });
+
+    const { findByText } = render(<ConfigScreen />);
+    await waitFor(() => expect(mockSdk.app.setReady).toHaveBeenCalled());
+
+    expect(await findByText('Component types')).toBeInTheDocument();
+    expect(await findByText('Experiences')).toBeInTheDocument();
+    expect(await findByText('Data assemblies')).toBeInTheDocument();
+    expect(await findByText('Fragments')).toBeInTheDocument();
+    expect(await findByText('Templates')).toBeInTheDocument();
+  });
 });
