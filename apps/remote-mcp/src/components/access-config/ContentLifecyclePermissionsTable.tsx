@@ -7,6 +7,7 @@ import { isActionAvailable } from '../../utils/permissions';
 
 interface ContentLifecyclePermissionsTableProps {
   permissions: ContentLifecyclePermissions;
+  visibleEntities?: ContentLifecycleEntityKey[];
   onSelectAllToggle: () => void;
   onEntityActionToggle: (entity: ContentLifecycleEntityKey, action: EntityActionKey) => void;
   onColumnToggle: (action: EntityActionKey) => void;
@@ -15,6 +16,7 @@ interface ContentLifecyclePermissionsTableProps {
 
 export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTableProps> = ({
   permissions,
+  visibleEntities = ALL_ENTITIES,
   onSelectAllToggle,
   onEntityActionToggle,
   onColumnToggle,
@@ -37,8 +39,8 @@ export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTab
           <Table.Row>
             <Table.Cell></Table.Cell>
             {STANDARD_ACTIONS.map((action) => {
-              // Get all entities that support this action
-              const entitiesWithAction = ALL_ENTITIES.filter((entity) =>
+              // Get all VISIBLE entities that support this action
+              const entitiesWithAction = visibleEntities.filter((entity) =>
                 isActionAvailable(entity, action)
               );
               // Column is checked if all entities that support this action have it enabled
@@ -63,7 +65,7 @@ export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTab
           </Table.Row>
         </Table.Head>
         <Table.Body>
-          {ALL_ENTITIES.map((entity) => {
+          {visibleEntities.map((entity) => {
             const displayNames: Record<ContentLifecycleEntityKey, string> = {
               entries: 'Entries',
               assets: 'Assets',
@@ -77,6 +79,11 @@ export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTab
               tags: 'Tags',
               concepts: 'Concepts',
               conceptSchemes: 'Concept schemes',
+              componentTypes: 'Component types',
+              experiences: 'Experiences',
+              templates: 'Templates',
+              dataAssemblies: 'Data assemblies',
+              fragments: 'Fragments',
             };
 
             // Get available actions for this entity
