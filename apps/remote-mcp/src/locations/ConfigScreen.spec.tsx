@@ -5,7 +5,6 @@ import { vi } from 'vitest';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
-  useCMA: () => mockCma,
 }));
 
 describe('Config Screen component', () => {

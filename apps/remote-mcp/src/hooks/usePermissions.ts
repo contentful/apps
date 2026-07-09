@@ -15,7 +15,7 @@ import {
   isActionAvailable,
 } from '../utils/permissions';
 
-export const usePermissions = () => {
+export const usePermissions = (visibleEntities: ContentLifecycleEntityKey[] = ALL_ENTITIES) => {
   const [contentLifecyclePermissions, setContentLifecyclePermissions] =
     useState<ContentLifecyclePermissions>({
       selectAll: false,
@@ -50,25 +50,12 @@ export const usePermissions = () => {
 
   const handleSelectAllToggle = () => {
     const newValue = !contentLifecyclePermissions.selectAll;
-    setContentLifecyclePermissions({
-      selectAll: newValue,
-      entries: createEntityPermissions('entries', newValue),
-      assets: createEntityPermissions('assets', newValue),
-      contentTypes: createEntityPermissions('contentTypes', newValue),
-      aiActions: createEntityPermissions('aiActions', newValue),
-      editorInterfaces: createEntityPermissions('editorInterfaces', newValue),
-      environments: createEntityPermissions('environments', newValue),
-      locales: createEntityPermissions('locales', newValue),
-      orgs: createEntityPermissions('orgs', newValue),
-      spaces: createEntityPermissions('spaces', newValue),
-      tags: createEntityPermissions('tags', newValue),
-      concepts: createEntityPermissions('concepts', newValue),
-      conceptSchemes: createEntityPermissions('conceptSchemes', newValue),
-      componentTypes: createEntityPermissions('componentTypes', newValue),
-      experiences: createEntityPermissions('experiences', newValue),
-      templates: createEntityPermissions('templates', newValue),
-      dataAssemblies: createEntityPermissions('dataAssemblies', newValue),
-      fragments: createEntityPermissions('fragments', newValue),
+    setContentLifecyclePermissions((prev) => {
+      const updates: Partial<ContentLifecyclePermissions> = { selectAll: newValue };
+      for (const entity of visibleEntities) {
+        updates[entity] = createEntityPermissions(entity, newValue);
+      }
+      return { ...prev, ...updates };
     });
   };
 
@@ -84,10 +71,10 @@ export const usePermissions = () => {
   };
 
   const handleColumnToggle = (action: EntityActionKey) => {
-    // Find all entities that support this action
-    const entitiesWithAction = ALL_ENTITIES.filter((entity) => isActionAvailable(entity, action));
+    // Find all visible entities that support this action
+    const entitiesWithAction = visibleEntities.filter((entity) => isActionAvailable(entity, action));
 
-    // Check if all entities that support this action currently have it enabled
+    // Check if all visible entities that support this action currently have it enabled
     const allChecked = entitiesWithAction.every(
       (entity) => contentLifecyclePermissions[entity][action]
     );
@@ -95,7 +82,7 @@ export const usePermissions = () => {
 
     setContentLifecyclePermissions((prev) => {
       const updates: Partial<ContentLifecyclePermissions> = {};
-      for (const entity of ALL_ENTITIES) {
+      for (const entity of visibleEntities) {
         // Only update entities that support this action
         if (isActionAvailable(entity, action)) {
           updates[entity] = { ...prev[entity], [action]: newValue };

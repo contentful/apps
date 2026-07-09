@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { Stack } from '@contentful/f36-components';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import { PermissionsSection } from '../components/access-config';
 import { usePermissions } from '../hooks/usePermissions';
 import { useSpaceType } from '../hooks/useSpaceType';
@@ -22,6 +22,10 @@ const ConfigScreen = () => {
     migration: false,
   });
 
+  const sdk = useSDK<ConfigAppSDK>();
+  const { disposition } = useSpaceType();
+  const visibleEntities = getVisibleEntities(disposition, ALL_ENTITIES, EXO_ENTITIES);
+
   const {
     contentLifecyclePermissions,
     otherFeaturesPermissions,
@@ -35,11 +39,7 @@ const ConfigScreen = () => {
     handleRowToggle,
     handleOtherFeatureToggle,
     handleMigrationToggle,
-  } = usePermissions();
-
-  const sdk = useSDK<ConfigAppSDK>();
-  const { disposition } = useSpaceType();
-  const visibleEntities = getVisibleEntities(disposition, ALL_ENTITIES, EXO_ENTITIES);
+  } = usePermissions(visibleEntities);
 
   const onConfigure = useCallback(async () => {
     // This method will be called when a user clicks on "Install"
