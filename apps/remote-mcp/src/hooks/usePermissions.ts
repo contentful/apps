@@ -31,6 +31,11 @@ export const usePermissions = () => {
       tags: createEmptyEntityPermissions(),
       concepts: createEmptyEntityPermissions(),
       conceptSchemes: createEmptyEntityPermissions(),
+      componentTypes: createEmptyEntityPermissions(),
+      experiences: createEmptyEntityPermissions(),
+      templates: createEmptyEntityPermissions(),
+      dataAssemblies: createEmptyEntityPermissions(),
+      fragments: createEmptyEntityPermissions(),
     });
 
   const [otherFeaturesPermissions, setOtherFeaturesPermissions] =
@@ -59,6 +64,11 @@ export const usePermissions = () => {
       tags: createEntityPermissions('tags', newValue),
       concepts: createEntityPermissions('concepts', newValue),
       conceptSchemes: createEntityPermissions('conceptSchemes', newValue),
+      componentTypes: createEntityPermissions('componentTypes', newValue),
+      experiences: createEntityPermissions('experiences', newValue),
+      templates: createEntityPermissions('templates', newValue),
+      dataAssemblies: createEntityPermissions('dataAssemblies', newValue),
+      fragments: createEntityPermissions('fragments', newValue),
     });
   };
 
