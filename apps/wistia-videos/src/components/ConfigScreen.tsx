@@ -60,6 +60,7 @@ const Config = (props: ConfigProps) => {
           setRequiredMessage(error.message);
         }
       }
+      setLoadingStatus(false);
     }
   }, [parameters.apiBearerToken]);
 
