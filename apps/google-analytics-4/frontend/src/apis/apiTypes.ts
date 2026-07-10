@@ -52,13 +52,16 @@ export const ZRunReportData = z.object({
   minimums: z.array(ZRow),
   rowCount: z.number(),
   metadata: z.object({
-    currencyCode: z.string(),
+    // currencyCode is an optional proto3 field — absent from JSON when not set (non-ecommerce properties)
+    currencyCode: z.string().optional(),
     dataLossFromOtherRow: z.boolean(),
-    timeZone: z.string(),
-    _currencyCode: z.string(),
-    _timeZone: z.string(),
+    timeZone: z.string().optional(),
+    // _currencyCode/_timeZone are protobuf oneof discriminators — absent from JSON when field is not set
+    _currencyCode: z.string().optional(),
+    _timeZone: z.string().optional(),
   }),
-  propertyQuota: z.null(),
+  // null when quota tracking is disabled; object when property has quota data
+  propertyQuota: z.unknown(),
   kind: z.string(),
 });
 
