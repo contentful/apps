@@ -4,7 +4,12 @@
   "private": true,
   "lavamoat": {
     "allowScripts": {
-      "vite>esbuild": true
+      "vite>esbuild": true,
+      "@contentful/app-scripts>esbuild": true,
+      "@testing-library/react>@testing-library/dom>aria-query>@babel/runtime-corejs3>core-js-pure": false,
+      "graphql-playground-react>react-sortable-hoc>babel-runtime>core-js": false,
+      "graphql-playground-react>styled-components": false,
+      "graphql-playground-react>webpack-bundle-analyzer>ejs": false
     }
   },
   "devDependencies": {
