@@ -1,0 +1,8 @@
+node_modules
+build
+.env
+.env.local
+*_accessKeys.csv
+contentful-audit-*.json
+# GCP service-account keys — never commit
+coffee-review-*.json
