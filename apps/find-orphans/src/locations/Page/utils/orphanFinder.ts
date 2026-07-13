@@ -2,11 +2,13 @@ import { ContentTypeProps, EntryProps, QueryOptions } from 'contentful-managemen
 import { CmaClient, OrphanResult, ScanOutcome, ScanProgress } from '../types';
 import { CONTENT_TYPE_PAGE_LIMIT, PAGE_LIMIT, TEXT_FIELD_TYPES } from './constants';
 
-/** Scan limits, sourced from installation parameters (see src/parameters.ts). */
-export interface ScanLimits {
+/** Scan settings, sourced from installation parameters (see src/parameters.ts). */
+export interface ScanOptions {
   maxCandidates: number;
   /** Concurrent CMA entry queries while scanning. */
   batchSize: number;
+  /** Only flag drafts never saved after creation (sys.version === 1). */
+  untouchedOnly: boolean;
 }
 
 export const fetchAllContentTypes = async (cma: CmaClient): Promise<ContentTypeProps[]> => {
@@ -164,27 +166,38 @@ const fetchDraftCandidates = async (
  * archived, and with no value in their display (title) field in the default
  * locale. Content types whose display field is not a text field are skipped —
  * their entries cannot be missing a title.
+ *
+ * With `untouchedOnly` set, an untitled draft is only flagged when it was
+ * never saved after creation, which filters out work-in-progress drafts that
+ * simply have not been given a title yet.
  */
 export const findOrphanedEntries = async (
   cma: CmaClient,
   contentTypes: ContentTypeProps[],
   defaultLocale: string,
   onProgress: (progress: ScanProgress) => void,
-  limits: ScanLimits
+  options: ScanOptions
 ): Promise<ScanOutcome> => {
   const scannableTypes = contentTypes.filter((ct) => getTextDisplayFieldId(ct) !== undefined);
 
   const { candidates, truncated } = await fetchDraftCandidates(
     cma,
     scannableTypes,
-    limits.maxCandidates,
-    limits.batchSize,
+    options.maxCandidates,
+    options.batchSize,
     onProgress
   );
 
-  const results: OrphanResult[] = candidates.filter(
-    ({ entry, contentType }) => getEntryTitle(entry, contentType, defaultLocale) === undefined
-  );
+  const results: OrphanResult[] = candidates.filter(({ entry, contentType }) => {
+    if (getEntryTitle(entry, contentType, defaultLocale) !== undefined) return false;
+    // The CMA bumps sys.version on every write (updates, but also publish,
+    // unpublish, archive and unarchive). Publish and archive states are
+    // already excluded by the draft query, so on a candidate version 1 can
+    // only mean the entry was never saved after creation. This check must
+    // stay client-side: sys.version is not a queryable attribute in CMA
+    // entry searches.
+    return !options.untouchedOnly || entry.sys.version === 1;
+  });
 
   return { results, truncated };
 };

@@ -14,7 +14,7 @@ import {
 } from './mocks';
 
 const noProgress = vi.fn();
-const limits = { maxCandidates: 500, batchSize: 5 };
+const options = { maxCandidates: 500, batchSize: 5, untouchedOnly: true };
 
 describe('getTextDisplayFieldId', () => {
   it('returns the display field id when it is a text field', () => {
@@ -92,7 +92,7 @@ describe('findOrphanedEntries', () => {
       [mockArticleContentType],
       'en-US',
       noProgress,
-      limits
+      options
     );
 
     expect(outcome.truncated).toBe(false);
@@ -109,10 +109,40 @@ describe('findOrphanedEntries', () => {
       [mockArticleContentType],
       'en-US',
       noProgress,
-      limits
+      options
     );
 
     expect(outcome.results.map((r) => r.entry.sys.id)).toEqual(['blank']);
+  });
+
+  it('excludes untitled drafts that were edited after creation when untouchedOnly is set', async () => {
+    // sys.version increments on every save, so version > 1 means someone has
+    // worked on the entry — likely a work-in-progress, not an orphan.
+    const untouched = makeMockEntry('untouched', 'article');
+    const edited = makeMockEntry('edited', 'article', {}, '2026-06-01T00:00:00Z', 4);
+    const { cma } = createMockCma({ entriesByContentType: { article: [untouched, edited] } });
+
+    const outcome = await findOrphanedEntries(
+      cma,
+      [mockArticleContentType],
+      'en-US',
+      noProgress,
+      options
+    );
+
+    expect(outcome.results.map((r) => r.entry.sys.id)).toEqual(['untouched']);
+  });
+
+  it('includes edited untitled drafts when untouchedOnly is off', async () => {
+    const edited = makeMockEntry('edited', 'article', {}, '2026-06-01T00:00:00Z', 4);
+    const { cma } = createMockCma({ entriesByContentType: { article: [edited] } });
+
+    const outcome = await findOrphanedEntries(cma, [mockArticleContentType], 'en-US', noProgress, {
+      ...options,
+      untouchedOnly: false,
+    });
+
+    expect(outcome.results.map((r) => r.entry.sys.id)).toEqual(['edited']);
   });
 
   it('skips content types without a text display field', async () => {
@@ -127,7 +157,7 @@ describe('findOrphanedEntries', () => {
       [mockNumericDisplayContentType],
       'en-US',
       noProgress,
-      limits
+      options
     );
 
     expect(outcome.results).toHaveLength(0);
@@ -139,8 +169,8 @@ describe('findOrphanedEntries', () => {
     const { cma } = createMockCma({ entriesByContentType: { article: entries } });
 
     const outcome = await findOrphanedEntries(cma, [mockArticleContentType], 'en-US', noProgress, {
+      ...options,
       maxCandidates: 1,
-      batchSize: 5,
     });
 
     expect(outcome.truncated).toBe(true);
@@ -168,7 +198,7 @@ describe('findOrphanedEntries', () => {
       [articleType, noteType],
       'en-US',
       noProgress,
-      limits
+      options
     );
 
     expect(outcome.results.map((r) => r.entry.sys.id)).toEqual(
@@ -183,7 +213,7 @@ describe('findOrphanedEntries', () => {
     const orphan = makeMockEntry('orphan', 'article');
     const { cma } = createMockCma({ entriesByContentType: { article: [orphan] } });
 
-    await findOrphanedEntries(cma, [mockArticleContentType], 'en-US', onProgress, limits);
+    await findOrphanedEntries(cma, [mockArticleContentType], 'en-US', onProgress, options);
 
     expect(onProgress).toHaveBeenCalledWith({
       current: 1,

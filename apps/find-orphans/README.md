@@ -10,6 +10,14 @@ The app scans the current environment for **draft entries** (never published, no
 whose **display (title) field has no value** in the default locale — including whitespace-only
 values, which the entry editor also renders as "Untitled".
 
+By default the scan additionally requires that the entry was **never edited after creation**
+(`sys.version === 1`). The CMA bumps `sys.version` on every save — and on publish, unpublish,
+archive and unarchive, but those states are already excluded by the draft scope — so on a
+candidate, version 1 can only mean the entry was created and then abandoned untouched. This
+keeps untitled work-in-progress drafts (body started, title not yet filled in) out of the
+results. The filter can be turned off via the `untouchedOnly` installation parameter, which is
+useful when apps or scripts write to entries on creation and bump every entry past version 1.
+
 This is something the regular Contentful search cannot do in one query: field filters only work
 for one content type at a time, and every content type defines its own display field. The app
 automates that per-content-type check across the whole content model. Content types whose
@@ -39,7 +47,10 @@ flowchart TD
     Pages --> More{More content types<br/>and budget left?}
     More -- yes --> Chunk
     More -- no --> Check[Client-side check: display field empty,<br/>whitespace-only, or fields object absent<br/>in the default locale]
-    Check --> Results[Results table<br/>+ truncation warning if capped]
+    Check --> Untouched{untouchedOnly<br/>enabled?}
+    Untouched -- yes --> Version[Keep only entries never edited<br/>after creation: sys.version == 1]
+    Untouched -- no --> Results[Results table<br/>+ truncation warning if capped]
+    Version --> Results
     Results --> Archive([User selects rows and confirms Archive])
     Archive --> Batches[Archive entries in batches of batchSize]
     Batches --> Done[Archived rows leave the list;<br/>failed ones stay listed and selected for retry]
@@ -48,7 +59,9 @@ flowchart TD
 The empty-title check runs client-side rather than via the API's `[exists]` operator for two
 reasons: `[exists]` misses whitespace-only titles, and entries with no value in any selected
 field come back from the CMA with no `fields` object at all — both shapes must count as
-orphans.
+orphans. The version check is also client-side by necessity: `sys.version` is not a queryable
+attribute in CMA entry searches, but it is part of every returned `sys` object, so the check
+costs no extra API traffic.
 
 ## Configuration
 
@@ -60,8 +73,9 @@ registering the app definition, create the parameter definitions with exactly th
 |--------------|----|------|----------|---------------|-------------|
 | Maximum entries per scan | `maxCandidates` | Number | Yes | `500` | The scan stops after this many draft entries, to stay friendly to API rate limits. |
 | Concurrent API requests | `batchSize` | Number | Yes | `5` | How many CMA requests run at once while scanning and archiving. Must be between 1 and 7, the CMA rate limit per second. |
+| Only include entries that were never edited | `untouchedOnly` | Boolean | Yes | `true` | Only flag drafts still at version 1, i.e. never saved after creation. Turn off to also catch untitled drafts that were edited and then abandoned. |
 
-Both parameters are required and their defaults are set on the parameter definition, so a fresh
+All parameters are required and their defaults are set on the parameter definition, so a fresh
 install starts with the values above. The config screen shows the same defaults as input
 placeholders, and its save validation rejects empty, non-positive, or out-of-range values. As a
 safety net, `resolveParameters()` still falls back to the defaults at scan time if the stored

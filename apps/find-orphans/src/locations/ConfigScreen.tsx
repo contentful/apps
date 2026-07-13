@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import {
   Box,
+  Checkbox,
   Flex,
   Form,
   FormControl,
@@ -13,13 +14,17 @@ import {
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { AppInstallationParameters, DEFAULT_PARAMETERS } from '../parameters';
 
+// The numeric parameters share the parse-and-validate save path below; the
+// boolean parameter is a checkbox and needs no validation.
+type NumberParameterId = 'maxCandidates' | 'batchSize';
+
 interface NumberFieldProps {
-  id: keyof AppInstallationParameters;
+  id: NumberParameterId;
   label: string;
   helpText: string;
   placeholder: string;
   value: string;
-  onChange: (id: keyof AppInstallationParameters, value: string) => void;
+  onChange: (id: NumberParameterId, value: string) => void;
 }
 
 const NumberField = ({ id, label, helpText, placeholder, value, onChange }: NumberFieldProps) => (
@@ -40,13 +45,21 @@ const NumberField = ({ id, label, helpText, placeholder, value, onChange }: Numb
   </FormControl>
 );
 
-type FormValues = Record<keyof AppInstallationParameters, string>;
+// Number inputs are kept as strings while editing (so a cleared field stays
+// cleared instead of snapping to 0); the checkbox is a real boolean.
+interface FormValues {
+  maxCandidates: string;
+  batchSize: string;
+  untouchedOnly: boolean;
+}
 
 // Human-readable names for validation messages, keyed by parameter id.
-const FIELD_LABELS: Record<keyof AppInstallationParameters, string> = {
+const FIELD_LABELS: Record<NumberParameterId, string> = {
   maxCandidates: 'Maximum entries per scan',
   batchSize: 'Concurrent API requests',
 };
+
+const NUMBER_PARAMETER_IDS: NumberParameterId[] = ['maxCandidates', 'batchSize'];
 
 // Stored parameters may be partial (e.g. the app was installed before a
 // parameter existed), so each missing value falls back to its default. This
@@ -54,6 +67,7 @@ const FIELD_LABELS: Record<keyof AppInstallationParameters, string> = {
 const toFormValues = (parameters: Partial<AppInstallationParameters>): FormValues => ({
   maxCandidates: String(parameters.maxCandidates ?? DEFAULT_PARAMETERS.maxCandidates),
   batchSize: String(parameters.batchSize ?? DEFAULT_PARAMETERS.batchSize),
+  untouchedOnly: parameters.untouchedOnly ?? DEFAULT_PARAMETERS.untouchedOnly,
 });
 
 const ConfigScreen = () => {
@@ -65,12 +79,9 @@ const ConfigScreen = () => {
   // Called by Contentful when the user clicks "Save" on the app configuration
   // screen. Returning false aborts the save and keeps the dialog open.
   const onConfigure = useCallback(async () => {
-    const parsed = {} as Record<keyof AppInstallationParameters, number>;
-    for (const [key, value] of Object.entries(values) as [
-      keyof AppInstallationParameters,
-      string
-    ][]) {
-      const parsedValue = Number.parseInt(value, 10);
+    const parsed = {} as Record<NumberParameterId, number>;
+    for (const key of NUMBER_PARAMETER_IDS) {
+      const parsedValue = Number.parseInt(values[key], 10);
       // Empty fields fail this check too: the parameters are required, so
       // there is no silent fallback to defaults on save.
       if (Number.isNaN(parsedValue) || parsedValue < 1) {
@@ -85,7 +96,10 @@ const ConfigScreen = () => {
       sdk.notifier.error(`"${FIELD_LABELS.batchSize}" must be between 1 and 7.`);
       return false;
     }
-    const parameters: AppInstallationParameters = parsed;
+    const parameters: AppInstallationParameters = {
+      ...parsed,
+      untouchedOnly: values.untouchedOnly,
+    };
     // Preserve the current location assignments (EditorInterface state)
     // instead of resetting them on every save.
     const currentState = await sdk.app.getCurrentState();
@@ -110,7 +124,7 @@ const ConfigScreen = () => {
     initialize();
   }, [sdk]);
 
-  const handleChange = (id: keyof AppInstallationParameters, value: string) => {
+  const handleChange = (id: NumberParameterId, value: string) => {
     setValues((previous) => ({ ...previous, [id]: value }));
   };
 
@@ -153,6 +167,22 @@ const ConfigScreen = () => {
             value={values.batchSize}
             onChange={handleChange}
           />
+          <FormControl id="untouchedOnly">
+            <Checkbox
+              isChecked={values.untouchedOnly}
+              onChange={(event) =>
+                setValues((previous) => ({ ...previous, untouchedOnly: event.target.checked }))
+              }
+              testId="untouched-only">
+              Only include entries that were never edited
+            </Checkbox>
+            <FormControl.HelpText>
+              Contentful bumps an entry&apos;s version on every save, so an untitled draft still at
+              version 1 was abandoned right after creation. Turn this off to also flag untitled
+              drafts that were edited at least once — for example when other apps or scripts write
+              to entries on creation.
+            </FormControl.HelpText>
+          </FormControl>
         </Form>
 
         <Subheading marginTop="spacingXl" marginBottom="spacing2Xs">

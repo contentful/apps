@@ -84,6 +84,7 @@ const Page = () => {
         {
           maxCandidates: parameters.maxCandidates,
           batchSize: parameters.batchSize,
+          untouchedOnly: parameters.untouchedOnly,
         }
       );
       setResults(outcome.results);
@@ -171,6 +172,10 @@ const Page = () => {
         Finds draft entries with no value in their display (title) field — the signature of an entry
         created by mistake, for example by adding a new entry on a reference field instead of
         linking an existing one.
+        {/* Whether the never-edited filter applies is decided in the app
+            configuration, so the description must reflect the actual scan. */}
+        {parameters.untouchedOnly &&
+          ' Only entries that were never edited after creation are included.'}
       </Paragraph>
 
       <Flex flexDirection="column" gap="spacingL">
