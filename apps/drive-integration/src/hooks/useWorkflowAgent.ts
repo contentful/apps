@@ -134,6 +134,7 @@ const FAILURE_REASON_MESSAGES: Partial<Record<WorkflowFailureReason, string>> = 
   [WorkflowFailureReason.DOCUMENT_TOO_COMPLEX]: ERROR_MESSAGES.DOCUMENT_TOO_COMPLEX,
   [WorkflowFailureReason.PROCESSING_TIMEOUT]: ERROR_MESSAGES.PROCESSING_TIMEOUT,
   [WorkflowFailureReason.OUT_OF_DOMAIN]: ERROR_MESSAGES.OUT_OF_DOMAIN,
+  [WorkflowFailureReason.MISSING_PARAMETER]: ERROR_MESSAGES.MISSING_PARAMETER,
 };
 
 const getWorkflowFailureMessage = (

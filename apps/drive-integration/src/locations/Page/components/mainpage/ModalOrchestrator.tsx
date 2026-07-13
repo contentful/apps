@@ -227,6 +227,18 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
+      if (
+        error instanceof WorkflowRunError &&
+        error.reason === WorkflowFailureReason.MISSING_PARAMETER
+      ) {
+        setPreviewErrorState({
+          reason: WorkflowFailureReason.MISSING_PARAMETER,
+          title: 'Missing parameter',
+          message: ERROR_MESSAGES.MISSING_PARAMETER,
+        });
+        return;
+      }
+
       setPreviewErrorState({
         reason: WorkflowFailureReason.GENERIC,
         title: 'Unable to generate preview',

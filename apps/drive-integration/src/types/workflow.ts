@@ -19,6 +19,7 @@ export enum WorkflowFailureReason {
   DOCUMENT_TOO_COMPLEX = 'document-too-complex',
   PROCESSING_TIMEOUT = 'processing-timeout',
   OUT_OF_DOMAIN = 'out-of-domain',
+  MISSING_PARAMETER = 'missing-parameter',
 }
 
 export interface WorkflowFailure {
