@@ -62,12 +62,12 @@ npm install
 npm run dev
 ```
 
-The app will be available at `http://localhost:5173`
+The app will be available at `http://localhost:3000`
 
 4. **Configure in Contentful**
    - Go to **Settings** > **Apps** > **Manage apps** > **Create app**
    - Choose **App hosted by you**
-   - Set the app URL to `http://localhost:5173`
+   - Set the app URL to `http://localhost:3000`
    - Enable these locations:
      - **App configuration screen**
      - **Page**
