@@ -1,17 +1,9 @@
 {
-  "name": "se-bulk-exporter",
+  "name": "bulk-exporter",
   "version": "1.0.0",
-  "description": "Export unlimited Contentful entries to CSV, JSON, XLSX, XML, or YAML with advanced filtering, smart field selection, and reorderable columns",
-  "author": "Contentful Solution Engineering",
+  "description": "Search, filter, and export Contentful entries to CSV, JSON, XLSX, XML, or YAML",
+  "author": "Contentful",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/contentful-labs/se-bulk-exporter.git"
-  },
-  "homepage": "https://github.com/contentful-labs/se-bulk-exporter#readme",
-  "bugs": {
-    "url": "https://github.com/contentful-labs/se-bulk-exporter/issues"
-  },
   "keywords": [
     "contentful",
     "contentful-app",
@@ -20,13 +12,14 @@
     "bulk-export",
     "content-management"
   ],
-  "private": false,
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "upload": "contentful-app-scripts upload --bundle-dir ./dist --comment \"Production build\" --ci",
+    "deploy": "contentful-app-scripts upload --bundle-dir ./dist --ci --organization-id ${DEFINITIONS_ORG_ID} --definition-id TODO_PROD_APP_DEF_ID --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:test": "contentful-app-scripts upload --bundle-dir ./dist --ci --organization-id ${DEV_TESTING_ORG_ID} --definition-id TODO_TEST_APP_DEF_ID --token ${TEST_CMA_TOKEN}",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
@@ -37,15 +30,14 @@
     "@contentful/app-sdk": "^4.32.0",
     "@contentful/f36-components": "^6.12.0",
     "@contentful/f36-icons": "^6.12.0",
-    "@contentful/f36-tokens": "^5.1.0",
+    "@contentful/f36-tokens": "^6.1.0",
     "@contentful/react-apps-toolkit": "^1.2.16",
     "@emotion/css": "^11.13.5",
-    "emotion": "^11.0.0",
+    "exceljs": "^4.4.0",
     "js-yaml": "^4.1.1",
     "papaparse": "^5.4.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "xlsx": "^0.18.5",
     "xml-js": "^1.6.11"
   },
   "devDependencies": {
