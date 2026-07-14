@@ -1,21 +1,8 @@
-# Bulk Entry CSV Exporter for Contentful
+# Entry Exporter for Contentful
 
-A powerful Contentful App that allows you to export unlimited entries from any content type to **5 different formats** (CSV, JSON, XLSX, XML, YAML), bypassing the 40-entry limitation of the Contentful web interface.
-
-## One-Click Install
-
-Already a Contentful user? Install the hosted app directly into your space — no clone, build, or upload required:
-
-**[Install Bulk Entry CSV Exporter in Contentful](https://app.contentful.com/deeplink?link=apps&id=79UvsbUCbJnMSGgk7GxrbN)**
-
-After clicking, choose the space you want to install it into and follow Contentful's prompts. The app will appear under **Apps** in your space's navigation.
-
----
+A Contentful App that allows you to export unlimited entries from any content type to **5 different formats** (CSV, JSON, XLSX, XML, YAML), bypassing the 40-entry limitation of the Contentful web interface.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
-[![Install in Contentful](https://img.shields.io/badge/Install-Contentful-2478CC?logo=contentful&logoColor=white)](https://app.contentful.com/deeplink?link=apps&id=79UvsbUCbJnMSGgk7GxrbN)
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/contentful-labs/se-bulk-exporter)
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/contentful-labs/se-bulk-exporter)
 
 ## Features
 
@@ -57,16 +44,12 @@ After clicking, choose the space you want to install it into and follow Contentf
 
 ## Quick Start
 
-### Option A: One-Click Install (Recommended)
-
-[Install Bulk Entry CSV Exporter in Contentful](https://app.contentful.com/deeplink?link=apps&id=79UvsbUCbJnMSGgk7GxrbN) — pick your space and follow the prompts. You're done in under a minute.
-
-### Option B: Local Development / Self-Hosted
+### Local Development
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/contentful-labs/se-bulk-exporter.git
-cd se-bulk-exporter
+git clone https://github.com/contentful/apps.git
+cd apps/apps/bulk-exporter
 ```
 
 2. **Install dependencies**
@@ -92,16 +75,16 @@ The app will be available at `http://localhost:5173`
 
 ### Deploy to Production
 
-#### Option 1: Upload to Contentful (Hosted by Contentful)
+#### Upload to Contentful (Hosted by Contentful)
 
-Contentful can host your app directly. This is the simplest deployment method.
+Contentful can host your app directly.
 
 **Requirements:**
 - Max bundle size: 10MB (this app is ~1.6MB)
 - Max files: 500 (this app has 2 files)
 - Must include `index.html` at the root level
 
-**Manual Upload (Recommended):**
+**Manual Upload:**
 
 1. **Build the app**
    ```bash
@@ -109,72 +92,34 @@ Contentful can host your app directly. This is the simplest deployment method.
    ```
 
 2. **Open your app in Contentful**
-   - Go to https://app.contentful.com/deeplink?link=app-definition-list
-   - Find your "Bulk Entry CSV Exporter" app
+   - Go to your app definition in the Contentful web app
    - Click to open the app details
 
 3. **Upload the bundle**
-   - Click on the **"Bundles"** tab (NOT the "Hosting" tab)
-   - You'll see a drop zone for uploading files
-   - **IMPORTANT**: Open your `dist/` folder locally and **select BOTH files**:
+   - Click on the **"Bundles"** tab
+   - **Select BOTH files** from your `dist/` folder:
      - `index.html`
      - `bundle.js`
    - **Drag and drop these 2 files** directly into the drop zone
-   - Do NOT drag the `dist/` folder itself - only the files inside it
-   - The upload will automatically create a new AppBundle
    - Add a comment when prompted (e.g., "Production release v1.0")
 
 4. **Activate the bundle**
    - After upload completes, click **"Activate"** next to your newly created bundle
-   - Your app is now live!
 
-**CLI Upload (Alternative):**
+**CLI Upload:**
 
 ```bash
-npm run upload -- --organization-id YOUR_ORG_ID --definition-id YOUR_APP_DEF_ID --token YOUR_CMA_TOKEN
+npm run deploy -- --organization-id YOUR_ORG_ID --definition-id YOUR_APP_DEF_ID --token YOUR_CMA_TOKEN
 ```
 
 **Finding your IDs:**
 - **Organization ID**: Found in your Contentful organization settings URL
-- **App Definition ID**: Found in your app's URL in Contentful (the ID in the app management page URL)
+- **App Definition ID**: Found in your app's URL in Contentful
 - **CMA Token**: Create one at https://app.contentful.com/account/profile/cma_tokens
 
 **Troubleshooting:**
 - If the app doesn't load, ensure `index.html` is at the root level (not in a subfolder)
-- Make sure you uploaded the files FROM inside `dist/`, not the `dist/` folder itself
 - The build must use relative paths (already configured with `base: './'` in `vite.config.ts`)
-
-#### Option 2: Deploy to Vercel
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/contentful-labs/se-bulk-exporter)
-
-1. Click the button above or manually:
-```bash
-npm install -g vercel
-npm run build
-vercel --prod
-```
-
-2. Update your Contentful app definition with the Vercel URL
-
-#### Option 2: Deploy to Netlify
-
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/contentful-labs/se-bulk-exporter)
-
-1. Click the button above or manually:
-```bash
-npm run build
-# Upload the dist/ folder to Netlify
-```
-
-#### Option 3: Other Hosting
-
-Build the app and deploy the `dist` folder to any static hosting provider:
-
-```bash
-npm run build
-# Deploy the dist/ folder
-```
 
 ## Usage
 
@@ -199,7 +144,7 @@ npm run build
 ### Search & Preview
 
 1. Navigate to **Apps** in the Contentful web UI main menu
-2. Select **Bulk Entry CSV Exporter**
+2. Select **Entry Exporter**
 3. Use the tabbed interface to build your query:
 
 #### Filter Tab
@@ -228,26 +173,7 @@ npm run build
    - Use "Select All" to select all visible results
    - Click "Export Selected" button to export only checked entries
 6. Click **Estimate Count** to see the total number of matching entries
-7. Click **Export to CSV** to download all matching entries
-
-### Workflow Options
-
-**Option 1: Select and Export Specific Entries**
-1. Search for entries
-2. Review the results
-3. Check the entries you want
-4. Click "Export Selected (X)" button
-
-**Option 2: Export All Matching Entries**
-1. Configure your filters
-2. Select locales and fields in Output tab
-3. Click "Export to CSV" to export all matching results
-
-**Option 3: Quick Export Without Preview**
-1. Configure your filters
-2. Select locales and fields
-3. Skip the search preview
-4. Click "Export to CSV" directly
+7. Click **Export** to download all matching entries
 
 ## Export Formats
 
@@ -280,7 +206,7 @@ All 5 formats use clean, human-readable formatting with **consistent data struct
 - **Dates**: YYYY-MM-DD format
 - **Rich Text**: Plain text extraction when possible
 - **Objects**: JSON strings for complex data
-- **User Names**: Resolved to full names (e.g., "Miles Stauffer") instead of IDs
+- **User Names**: Resolved to full names instead of IDs
 
 ### Format-Specific Features
 
@@ -310,7 +236,7 @@ All 5 formats use clean, human-readable formatting with **consistent data struct
 **Example CSV output:**
 ```csv
 Entry ID,Created,Updated,Last Updated By,Status,Content Type,Title (en-US),Author,Tags
-abc123,2024-01-01,2024-01-02,Miles Stauffer,Published,Blog Post,Hello World,author456,tech; blog; tips
+abc123,2024-01-01,2024-01-02,Jane Smith,Published,Blog Post,Hello World,author456,tech; blog; tips
 ```
 
 ## Rate Limits
@@ -336,7 +262,7 @@ The Contentful web UI limits CSV exports to 40 entries. This app uses the Conten
 2. **Paginate Efficiently**: Fetch entries at 1000 per page using `skip`/`limit`, then switch to cursor-based pagination (`sys.createdAt[gt]`) after 9000 entries
 3. **Respect Rate Limits**: Throttle requests to ~8 req/s (paid tier) with 4 concurrent in-flight requests
 4. **Retry on Failures**: Automatically retry on `429` responses with exponential backoff (max 3 retries), respecting `X-Contentful-RateLimit-Reset` header
-5. **Flatten Complex Data**: Transform all entry fields (including localized fields, references, rich text, and arrays) into flat CSV rows with clean formatting
+5. **Flatten Complex Data**: Transform all entry fields (including localized fields, references, rich text, and arrays) into flat rows with clean formatting
 
 ## Technical Details
 
@@ -346,6 +272,7 @@ The Contentful web UI limits CSV exports to 40 entries. This app uses the Conten
 - **UI**: Forma 36 (Contentful's design system)
 - **SDK**: Contentful App SDK + React Apps Toolkit
 - **CSV**: PapaParse for serialization
+- **Excel**: ExcelJS for XLSX generation
 - **Testing**: Vitest + React Testing Library
 
 ### Project Structure
@@ -464,26 +391,6 @@ npm run test:coverage
 - Hard refresh your browser (Cmd+Shift+R on Mac, Ctrl+Shift+R on Windows)
 - This clears the cached version and loads the latest code
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
 ## License
 
 MIT
-
-## Support
-
-For issues or questions:
-- Open an issue on [GitHub](https://github.com/contentful-labs/se-bulk-exporter/issues)
-- Check the [Troubleshooting](#troubleshooting) section above
-
-## Acknowledgments
-
-Built with the [Contentful App Framework](https://www.contentful.com/developers/docs/extensibility/app-framework/) and [Forma 36](https://f36.contentful.com/).
