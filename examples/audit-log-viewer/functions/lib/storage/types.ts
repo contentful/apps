@@ -11,7 +11,6 @@ export interface ListResult {
   truncated: boolean;
 }
 
-/** Seam for a future second storage provider (Azure/GCS) — S3 is the only impl for now. */
 export interface LogStorageProvider {
   listLogFiles(startDate: string, endDate: string): Promise<ListResult>;
 }

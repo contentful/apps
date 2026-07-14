@@ -19,8 +19,14 @@ const URL_TTL_SECONDS = 900;
 
 /**
  * Contentful Functions do not support node:http/https — every client must use
- * the fetch-based handler. forcePathStyle keeps S3 hostnames bucket-independent
- * so the manifest allowNetworks list stays static.
+ * the fetch-based handler.
+ *
+ * forcePathStyle keeps S3 hostnames bucket-independent so the manifest
+ * allowNetworks wildcard ("*.amazonaws.com") stays static. Note: path-style
+ * addressing is deprecated by AWS for buckets created after Sep 2020 and is
+ * unsupported in some newer opt-in regions. If you encounter NoSuchBucket or
+ * endpoint errors, remove forcePathStyle and add your bucket's regional
+ * hostname to allowNetworks in contentful-app-manifest.json instead.
  */
 export async function createS3Client(cfg: StorageConfig): Promise<S3Client> {
   let credentials: { accessKeyId: string; secretAccessKey: string; sessionToken?: string } = {
