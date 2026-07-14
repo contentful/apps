@@ -76,7 +76,7 @@ const Page = () => {
             load(startDate, endDate);
           }}
         >
-          Apply
+          Load logs
         </Button>
       </Flex>
 
