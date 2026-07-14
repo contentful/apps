@@ -1,3 +1,5 @@
+import type { Document, Block, Inline, Text } from '@contentful/rich-text-types';
+
 export interface Entry {
   sys: {
     id: string;
@@ -43,10 +45,10 @@ export interface ContentType {
 export interface FlattenOptions {
   contentType: ContentType;
   locales: string[];
-  fields?: string[]; // Optional field filter
-  resolveReferences?: boolean; // Whether to resolve entry/asset references to names
-  includeContentTypeName?: boolean; // Whether to add content type name column
-  userMap?: Record<string, string>; // Map of user IDs to names
+  fields?: string[];
+  resolveReferences?: boolean;
+  includeContentTypeName?: boolean;
+  userMap?: Record<string, string>;
 }
 
 export interface FlatRow {
@@ -65,10 +67,10 @@ export function flattenEntry(
   options: FlattenOptions
 ): FlatRow {
   const { contentType, locales, fields, includeContentTypeName = true, userMap = {} } = options;
-  
+
   const updatedByUserId = entry.sys.updatedBy?.sys.id;
   const updatedByName = updatedByUserId ? (userMap[updatedByUserId] || updatedByUserId) : 'Unknown';
-  
+
   const row: FlatRow = {
     'Entry ID': entry.sys.id,
     'Created': formatDate(entry.sys.createdAt),
@@ -77,13 +79,10 @@ export function flattenEntry(
     'Status': entry.sys.publishedVersion ? 'Published' : 'Draft',
   };
 
-  // Add content type name if requested
   if (includeContentTypeName) {
     row['Content Type'] = contentType.name || contentType.sys.id;
   }
 
-  // Filter and order fields. When `fields` is provided, follow the user's
-  // chosen column order; otherwise fall back to the content type's order.
   const fieldsToProcess = fields && fields.length > 0
     ? (fields
         .map(id => contentType.fields.find(f => f.id === id))
@@ -122,8 +121,7 @@ export function flattenEntry(
 }
 
 function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toISOString().split('T')[0]; // YYYY-MM-DD format
+  return new Date(dateString).toISOString().split('T')[0];
 }
 
 function formatFieldValue(
@@ -141,11 +139,9 @@ function formatFieldValue(
   if (field.type === 'Array') {
     if (Array.isArray(value)) {
       if (field.items?.type === 'Link') {
-        // Join multiple links with semicolon for better CSV readability
         return value.map(formatLink).filter(Boolean).join('; ');
       }
       if (field.items?.type === 'Symbol') {
-        // Join simple arrays with semicolon
         return value.join('; ');
       }
       return JSON.stringify(value);
@@ -154,9 +150,8 @@ function formatFieldValue(
   }
 
   if (field.type === 'RichText') {
-    // Extract plain text from rich text if possible
     if (typeof value === 'object' && value !== null) {
-      const doc = value as any;
+      const doc = value as Document;
       if (doc.content && Array.isArray(doc.content)) {
         const text = extractTextFromRichText(doc);
         return text || JSON.stringify(value);
@@ -182,10 +177,8 @@ function formatFieldValue(
   }
 
   if (field.type === 'Date') {
-    // Format dates consistently
     try {
-      const date = new Date(String(value));
-      return date.toISOString().split('T')[0];
+      return new Date(String(value)).toISOString().split('T')[0];
     } catch {
       return String(value);
     }
@@ -194,22 +187,21 @@ function formatFieldValue(
   return String(value);
 }
 
-function extractTextFromRichText(doc: any): string {
-  if (!doc.content || !Array.isArray(doc.content)) {
-    return '';
-  }
-  
+function extractTextFromRichText(doc: Document): string {
   const texts: string[] = [];
-  for (const node of doc.content) {
-    if (node.nodeType === 'paragraph' && node.content) {
-      for (const textNode of node.content) {
-        if (textNode.nodeType === 'text' && textNode.value) {
-          texts.push(textNode.value);
-        }
+
+  function walk(nodes: (Block | Inline | Text)[]): void {
+    for (const node of nodes) {
+      if (node.nodeType === 'text') {
+        const textNode = node as Text;
+        if (textNode.value) texts.push(textNode.value);
+      } else if ('content' in node && Array.isArray(node.content)) {
+        walk(node.content);
       }
     }
   }
-  
+
+  walk(doc.content);
   return texts.join(' ').trim();
 }
 
@@ -224,8 +216,6 @@ function formatLink(value: unknown): string {
     };
 
     if (link.sys?.type === 'Link' && link.sys.linkType && link.sys.id) {
-      // More readable format: just show the ID for now
-      // In a future enhancement, we could resolve these to actual entry names
       return link.sys.id;
     }
   }
