@@ -103,6 +103,8 @@ describe('Throttler', () => {
     });
 
     const promise = throttler.execute(fn);
+    // suppress unhandled rejection until we await below
+    promise.catch(() => {});
 
     await vi.advanceTimersByTimeAsync(5000);
 

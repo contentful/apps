@@ -68,7 +68,8 @@ describe('queryBuilder', () => {
       const result = buildQuery(data);
       expect(result['sys.publishedAt[exists]']).toBe(true);
       expect(result['sys.archivedAt[exists]']).toBe(false);
-      expect(result['sys.publishedVersion[ne]']).toBe('sys.version');
+      // changed status is post-filtered client-side; no server-side publishedVersion filter
+      expect(result['sys.publishedVersion[ne]']).toBeUndefined();
     });
 
     it('should filter for archived entries', () => {
