@@ -55,9 +55,8 @@ archive, unarchive and (for assets) file processing, but those states are alread
 the draft scope — so version 1 can only mean the item was created and then abandoned untouched.
 Narrowing the view also narrows the selection, so the archive action can never touch a hidden
 row, and when the filter hides every result a note says so instead of showing an empty table.
-The `untouchedOnly` installation parameter only sets the filter's starting state on the
-untitled tab (the unreferenced tab always starts unfiltered); filtering is instant and
-client-side, never a re-scan.
+The untitled tab starts on the "Never edited" view — the confident-junk subset — with "All" one
+click away; filtering is instant and client-side, never a re-scan.
 
 **Why the two lists can differ**: an "Untitled" row in the unreferenced results that the
 untitled tab does not show is not a bug — it is one of two documented cases. Either the draft
@@ -117,7 +116,7 @@ flowchart TD
     Check --> Resolve
     Criterion -- unreferenced --> RefCount[One links_to_entry / links_to_asset<br/>count query per candidate, batched batchSize<br/>at a time; keep items with 0 references]
     RefCount --> Resolve[Resolve creator names from sys.createdBy:<br/>batched space-users lookup, tolerant of failure]
-    Resolve --> Results[Results table, cached per tab,<br/>with a visible Never edited filter<br/>sys.version == 1, default from untouchedOnly<br/>+ truncation warning if capped]
+    Resolve --> Results[Results table, cached per tab,<br/>with a visible Never edited view switch<br/>on the untitled tab: sys.version == 1<br/>+ truncation warning if capped]
     Results --> Archive([User selects rows and confirms Archive])
     Archive --> Batches[Archive in batches of batchSize,<br/>entries and assets each via their endpoint]
     Batches --> Done[Archived rows leave the list;<br/>failed ones stay listed and selected for retry]
@@ -135,15 +134,32 @@ extra API traffic.
 
 ## Configuration
 
-The app configuration screen (space settings, Apps) exposes installation parameters. When
-registering the app definition, create the parameter definitions with exactly these values
-(the IDs must match `AppInstallationParameters` in `src/parameters.ts`):
+The app configuration screen (space settings, Apps) exposes installation parameters. The
+parameter definitions on the app definition must use exactly these values (the IDs must match
+`AppInstallationParameters` in `src/parameters.ts`):
 
 | Display name | ID | Type | Required | Default value | Description |
 |--------------|----|------|----------|---------------|-------------|
 | Maximum entries per scan | `maxCandidates` | Number | Yes | `500` | The scan stops after this many draft entries and assets, to stay friendly to API rate limits. |
 | Concurrent API requests | `batchSize` | Number | Yes | `5` | How many CMA requests run at once while scanning and archiving. Must be between 1 and 7, the CMA rate limit per second. |
-| Start results filtered to never-edited items | `untouchedOnly` | Boolean | Yes | `true` | Whether the untitled tab's results open with the "Never edited" filter already on. Scans always find every untitled draft; the filter only narrows the view (version 1 = never saved after creation). The unreferenced tab always starts unfiltered. |
+
+(A third parameter, `untouchedOnly`, existed briefly and was retired: it only chose the
+untitled tab's starting view, which the visible "All / Never edited" switch makes a per-user,
+one-click choice. `resolveParameters()` ignores it if an installation still stores it.)
+
+Rather than maintaining these by hand in the web UI, sync them with the bundled script — the
+definitions above live in `scripts/update-app-parameters.mjs` as the single source of truth,
+and the script replaces the app definition's installation parameters wholesale via the CMA:
+
+```bash
+CONTENTFUL_ACCESS_TOKEN=<cma token with org access> \
+CONTENTFUL_ORG_ID=<organization id> \
+CONTENTFUL_APP_DEF_ID=<app definition id> \
+npm run update-app-parameters
+```
+
+Run it whenever a parameter is added or its wording changes (the org and app definition ids are
+under Organization settings → Apps in the web app).
 
 All parameters are required and their defaults are set on the parameter definition, so a fresh
 install starts with the values above. The config screen shows the same defaults as input

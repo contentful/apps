@@ -10,11 +10,11 @@ describe('resolveParameters', () => {
 
   it('keeps valid values and coerces numeric strings', () => {
     const resolved = resolveParameters({ maxCandidates: 1000, batchSize: '3' });
-    expect(resolved).toEqual({ maxCandidates: 1000, batchSize: 3, untouchedOnly: true });
+    expect(resolved).toEqual({ maxCandidates: 1000, batchSize: 3 });
   });
 
   it('falls back to defaults for invalid values', () => {
-    const resolved = resolveParameters({ maxCandidates: -5, batchSize: 'many', untouchedOnly: 1 });
+    const resolved = resolveParameters({ maxCandidates: -5, batchSize: 'many' });
     expect(resolved).toEqual(DEFAULT_PARAMETERS);
   });
 
@@ -22,10 +22,10 @@ describe('resolveParameters', () => {
     expect(resolveParameters({ batchSize: 50 }).batchSize).toBe(7);
   });
 
-  it('accepts booleans and boolean strings for untouchedOnly', () => {
-    expect(resolveParameters({ untouchedOnly: false }).untouchedOnly).toBe(false);
-    // Hand-edited parameters may store booleans as strings.
-    expect(resolveParameters({ untouchedOnly: 'false' }).untouchedOnly).toBe(false);
-    expect(resolveParameters({ untouchedOnly: 'true' }).untouchedOnly).toBe(true);
+  it('ignores parameters from retired definitions', () => {
+    // Installations saved before a parameter was removed may still store it
+    // (e.g. untouchedOnly, defaultStaleDays); unknown keys must be dropped.
+    const resolved = resolveParameters({ untouchedOnly: true, defaultStaleDays: 30 });
+    expect(resolved).toEqual(DEFAULT_PARAMETERS);
   });
 });

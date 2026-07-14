@@ -21,6 +21,7 @@
     "test:ci": "vitest run",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "add-locations": "contentful-app-scripts add-locations",
+    "update-app-parameters": "node scripts/update-app-parameters.mjs",
     "upload": "contentful-app-scripts upload --bundle-dir ./build"
   },
   "eslintConfig": {

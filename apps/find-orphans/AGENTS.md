@@ -13,9 +13,10 @@ criteria, each in its own tab with its own scan button and its own cached result
 Scans are broad: edit history NEVER excludes results at scan time. Every result carries a
 `neverEdited` flag (`sys.version === 1`) and the UNTITLED tab's results header has a segmented
 view switch — "Show: All (N) / Never edited (M)" ToggleButton pills, exactly one always
-pressed, clicking the active pill is a no-op — with `untouchedOnly` setting its starting view.
-The unreferenced tab has NO never-edited switch at all (decided 2026-07-13: edit history says
-nothing about referenced-ness). Keep it this way: silent scan-time
+pressed, clicking the active pill is a no-op — starting on Never edited (hardcoded; the
+`untouchedOnly` parameter that once set this default is retired). The unreferenced tab has NO
+never-edited switch at all (decided 2026-07-13: edit history says nothing about
+referenced-ness). Keep it this way: silent scan-time
 exclusion was tried first and read as "the scan is broken" when rows appeared in one tab and
 not the other, and a single on/off toggle was tried next and read as ambiguous.
 
@@ -44,10 +45,16 @@ runs with missing or invalid settings.
 |--------------|------|----------|---------|---------|
 | `maxCandidates` | Number | Yes | 500 | Hard cap on candidate entries per scan |
 | `batchSize` | Number | Yes | 5 (max 7) | Concurrent CMA requests (scan queries, archiving) |
-| `untouchedOnly` | Boolean | Yes | true | Default state of the untitled tab's "Never edited" results filter (`sys.version === 1`) |
 
-Parameter definitions on the app definition must use these exact IDs and types; the README
-documents the full table (including descriptions) for the app definition setup.
+Retired parameters (do not reintroduce): `defaultStaleDays`, `referenceBatchSize` (pre-2026-07-09
+design) and `untouchedOnly` (2026-07-13, briefly the never-edited default; retired because the
+visible "All / Never edited" switch made an admin-level default pointless). Old installations
+may still store their values — `resolveParameters()` ignores unknown keys.
+
+Parameter definitions on the app definition must use these exact IDs and types. They are
+scripted: `npm run update-app-parameters` (scripts/update-app-parameters.mjs) replaces the app
+definition's installation parameters via the CMA — keep that script, `src/parameters.ts`, and
+the README table in sync when parameters change.
 
 ## Key Dependencies
 

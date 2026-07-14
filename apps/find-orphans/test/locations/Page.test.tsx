@@ -171,8 +171,8 @@ describe('Page', () => {
     await scan();
     await waitFor(() => expect(screen.getByTestId('orphan-table')).toBeInTheDocument());
 
-    // untouchedOnly defaults on, so the never-edited view starts active —
-    // the edited draft is hidden, but visibly: both pills carry counts.
+    // The untitled tab starts on the never-edited view — the edited draft
+    // is hidden, but visibly: both pills carry counts.
     expect(screen.getByTestId('result-count')).toHaveTextContent('1 entry found');
     expect(screen.getByTestId('filter-all')).toHaveTextContent('All (2)');
     expect(screen.getByTestId('filter-never-edited')).toHaveTextContent('Never edited (1)');

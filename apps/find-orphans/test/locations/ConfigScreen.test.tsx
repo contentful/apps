@@ -54,12 +54,12 @@ describe('ConfigScreen', () => {
 
     const result = await getSaveCallback(sdk)();
     expect(result).toMatchObject({
-      parameters: { maxCandidates: 500, batchSize: 5, untouchedOnly: true },
+      parameters: { maxCandidates: 500, batchSize: 5 },
     });
   });
 
   it('loads previously stored parameters', async () => {
-    const sdk = createMockConfigSdk({ maxCandidates: 100, untouchedOnly: false });
+    const sdk = createMockConfigSdk({ maxCandidates: 100 });
     mocks.sdk = sdk;
 
     render(<ConfigScreen />);
@@ -67,24 +67,6 @@ describe('ConfigScreen', () => {
     await waitFor(() => expect(screen.getByLabelText(/Maximum entries per scan/)).toHaveValue(100));
     // A parameter missing from storage falls back to its default.
     expect(screen.getByLabelText(/Concurrent API requests/)).toHaveValue(5);
-    expect(screen.getByLabelText(/Start results filtered to never-edited items/)).not.toBeChecked();
-  });
-
-  it('saves the toggled never-edited filter', async () => {
-    const sdk = createMockConfigSdk(null);
-    mocks.sdk = sdk;
-
-    render(<ConfigScreen />);
-    await waitFor(() => expect(sdk.app.setReady).toHaveBeenCalled());
-
-    const checkbox = screen.getByLabelText(/Start results filtered to never-edited items/);
-    expect(checkbox).toBeChecked();
-    fireEvent.click(checkbox);
-
-    const result = await getSaveCallback(sdk)();
-    expect(result).toMatchObject({
-      parameters: { maxCandidates: 500, batchSize: 5, untouchedOnly: false },
-    });
   });
 
   it('saves the entered parameters on configure', async () => {

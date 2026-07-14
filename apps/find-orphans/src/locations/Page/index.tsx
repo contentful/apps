@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import {
   Box,
@@ -87,7 +87,8 @@ const CRITERIA: Record<
   {
     tabLabel: string;
     scanLabel: string;
-    description: string;
+    /** Rendered inside gray Text; JSX so key caveats can carry emphasis. */
+    description: ReactNode;
     icon: JSX.Element;
     emptyNote: string;
   }
@@ -95,16 +96,33 @@ const CRITERIA: Record<
   untitled: {
     tabLabel: 'Untitled drafts',
     scanLabel: 'Scan for untitled drafts',
-    description:
-      'Untitled items are the signature of something created by accident — for example by adding a new entry on a reference field instead of linking an existing one — and abandoned.',
+    description: (
+      <Text as="p" fontColor="gray600">
+        Untitled items are the signature of something created by accident — for example by adding a
+        new entry on a reference field instead of linking an existing one — and abandoned.
+      </Text>
+    ),
     icon: <MagnifyingGlassIcon />,
     emptyNote: 'No orphans found — every scanned draft has a title.',
   },
   unreferenced: {
     tabLabel: 'Unreferenced drafts',
     scanLabel: 'Scan for unreferenced drafts',
-    description:
-      'Checking references cannot be done in bulk — this scan makes one network request per draft, so it can take several minutes on large spaces. It finds items that no entry links to: not proof of junk, since top-level content like landing pages is often never referenced yet perfectly valid, but a good lead when hunting for possibly unused content.',
+    description: (
+      <>
+        <Text as="p" fontColor="gray600" marginBottom="spacingS">
+          Checking references cannot be done in bulk — this scan makes one network request per
+          draft, so it can take several minutes on large spaces. It finds items that no entry links
+          to.
+        </Text>
+        {/* The caveat gets its own paragraph so it cannot be skimmed past. */}
+        <Text as="p" fontColor="gray600">
+          <strong>Being unreferenced is not proof of junk</strong> — top-level content like landing
+          pages is often never referenced yet perfectly valid — so treat these results as leads for
+          possibly unused content and review each one before archiving.
+        </Text>
+      </>
+    ),
     icon: <LinkBreakIcon />,
     emptyNote: 'No orphans found — every scanned draft is referenced by at least one entry.',
   },
@@ -128,13 +146,13 @@ const Page = () => {
   const [activeTab, setActiveTab] = useState<ScanCriterion>('untitled');
   // One cached state per criterion tab; `results: null` means "this tab has
   // not scanned yet" and renders the placeholder instead of a table. The
-  // untitled tab's filter defaults from the untouchedOnly parameter; the
-  // unreferenced tab always starts broad (edit history says nothing about
-  // whether something is referenced).
-  const [tabStates, setTabStates] = useState<Record<ScanCriterion, TabState>>(() => ({
-    untitled: { ...SCAN_RESET, neverEditedOnly: parameters.untouchedOnly },
+  // untitled tab starts on the strict never-edited view (the confident-junk
+  // subset; "All" is one visible click away); the unreferenced tab always
+  // starts broad (edit history says nothing about referenced-ness).
+  const [tabStates, setTabStates] = useState<Record<ScanCriterion, TabState>>({
+    untitled: { ...SCAN_RESET, neverEditedOnly: true },
     unreferenced: { ...SCAN_RESET, neverEditedOnly: false },
-  }));
+  });
   // Per-run scan scope, shared by both tabs. Both on by default; the entry
   // fan-out is the slow part, so unchecking "Entries" gives a fast
   // assets-only pass.
@@ -390,12 +408,10 @@ const Page = () => {
         {/* The criterion's full explanation lives here, inside its tab; the
             page subtitle stays general and the tab-label tooltips carry the
             short form. */}
-        {/* The never-edited distinction is no longer part of the scan — it
-            is the visible "Never edited" filter on the results, so the
-            description does not need to mention configuration state. */}
-        <Text as="p" fontColor="gray600">
-          {chrome.description}
-        </Text>
+        {/* Descriptions bring their own <Text> paragraphs (the unreferenced
+            one is two, so its caveat stands alone); the Box keeps their
+            internal spacing out of this column's larger gap. */}
+        <Box>{chrome.description}</Box>
         <Flex alignItems="center" gap="spacingM">
           <Button
             variant="primary"

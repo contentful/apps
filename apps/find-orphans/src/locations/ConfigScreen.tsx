@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import {
   Box,
-  Checkbox,
   Flex,
   Form,
   FormControl,
@@ -14,8 +13,6 @@ import {
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { AppInstallationParameters, DEFAULT_PARAMETERS } from '../parameters';
 
-// The numeric parameters share the parse-and-validate save path below; the
-// boolean parameter is a checkbox and needs no validation.
 type NumberParameterId = 'maxCandidates' | 'batchSize';
 
 interface NumberFieldProps {
@@ -45,12 +42,11 @@ const NumberField = ({ id, label, helpText, placeholder, value, onChange }: Numb
   </FormControl>
 );
 
-// Number inputs are kept as strings while editing (so a cleared field stays
-// cleared instead of snapping to 0); the checkbox is a real boolean.
+// Number inputs are kept as strings while editing, so a cleared field stays
+// cleared instead of snapping to 0.
 interface FormValues {
   maxCandidates: string;
   batchSize: string;
-  untouchedOnly: boolean;
 }
 
 // Human-readable names for validation messages, keyed by parameter id.
@@ -67,7 +63,6 @@ const NUMBER_PARAMETER_IDS: NumberParameterId[] = ['maxCandidates', 'batchSize']
 const toFormValues = (parameters: Partial<AppInstallationParameters>): FormValues => ({
   maxCandidates: String(parameters.maxCandidates ?? DEFAULT_PARAMETERS.maxCandidates),
   batchSize: String(parameters.batchSize ?? DEFAULT_PARAMETERS.batchSize),
-  untouchedOnly: parameters.untouchedOnly ?? DEFAULT_PARAMETERS.untouchedOnly,
 });
 
 const ConfigScreen = () => {
@@ -96,10 +91,7 @@ const ConfigScreen = () => {
       sdk.notifier.error(`"${FIELD_LABELS.batchSize}" must be between 1 and 7.`);
       return false;
     }
-    const parameters: AppInstallationParameters = {
-      ...parsed,
-      untouchedOnly: values.untouchedOnly,
-    };
+    const parameters: AppInstallationParameters = parsed;
     // Preserve the current location assignments (EditorInterface state)
     // instead of resetting them on every save.
     const currentState = await sdk.app.getCurrentState();
@@ -166,23 +158,6 @@ const ConfigScreen = () => {
             value={values.batchSize}
             onChange={handleChange}
           />
-          <FormControl id="untouchedOnly">
-            <Checkbox
-              isChecked={values.untouchedOnly}
-              onChange={(event) =>
-                setValues((previous) => ({ ...previous, untouchedOnly: event.target.checked }))
-              }
-              testId="untouched-only">
-              Start results filtered to never-edited items
-            </Checkbox>
-            <FormControl.HelpText>
-              Scans always find every untitled draft; this only decides whether the results open
-              with the &ldquo;Never edited&rdquo; filter already on. Contentful bumps an item&apos;s
-              version on every save, so an untitled draft still at version 1 was abandoned right
-              after creation. Applies to the untitled tab; the unreferenced tab always starts
-              unfiltered.
-            </FormControl.HelpText>
-          </FormControl>
         </Form>
 
         <Subheading marginTop="spacingXl" marginBottom="spacing2Xs">

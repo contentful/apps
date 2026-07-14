@@ -21,15 +21,6 @@ export const MAX_CANDIDATES = 500;
 export const BATCH_SIZE = 5;
 
 /**
- * Default for the `untouchedOnly` installation parameter: only flag drafts
- * that were never saved after creation (sys.version === 1). On by default
- * because a version-1 untitled draft is the purest orphan signature — the
- * entry was created (e.g. from a reference field) and then abandoned without
- * a single edit.
- */
-export const UNTOUCHED_ONLY = true;
-
-/**
  * Chunk size for the creator-name lookup: ids per `sys.id[in]` users query.
  * Keeps each request's id list comfortably inside query-string limits.
  */
