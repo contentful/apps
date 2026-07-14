@@ -8,12 +8,12 @@ export interface ExportOptions {
   contentType: ContentType | null;
   contentTypeId: string;
   locales: string[];
-  fields?: string[]; // Optional field filter
+  fields?: string[];
   filters?: Record<string, unknown>;
   filename?: string;
-  format?: ExportFormat; // Export format (csv, json, xlsx, xml, yaml)
-  userMap?: Record<string, string>; // Map of user IDs to names
-  contentTypeMap?: Record<string, ContentType>; // Map of content type IDs to schemas
+  format?: ExportFormat;
+  userMap?: Record<string, string>;
+  contentTypeMap?: Record<string, ContentType>;
   /**
    * Optional in-memory sort applied to all rows after fetching, before the
    * file is written. Driven by the user clicking a column header in the
@@ -34,7 +34,6 @@ function sortRowsByColumn<T extends Record<string, string | number | boolean | n
     const av = a[column];
     const bv = b[column];
 
-    // null/undefined always sort to the end regardless of direction
     if (av == null && bv == null) return 0;
     if (av == null) return 1;
     if (bv == null) return -1;
@@ -92,22 +91,12 @@ export class Exporter {
       );
 
       if (this.cancelled) {
-        onProgress({
-          fetched: 0,
-          total,
-          status: 'cancelled',
-          message: 'Export cancelled',
-        });
+        onProgress({ fetched: 0, total, status: 'cancelled', message: 'Export cancelled' });
         return;
       }
 
       if (total === 0) {
-        onProgress({
-          fetched: 0,
-          total: 0,
-          status: 'complete',
-          message: 'No entries found',
-        });
+        onProgress({ fetched: 0, total: 0, status: 'complete', message: 'No entries found' });
         return;
       }
 
@@ -132,12 +121,7 @@ export class Exporter {
 
       for await (const batch of paginator) {
         if (this.cancelled) {
-          onProgress({
-            fetched,
-            total,
-            status: 'cancelled',
-            message: 'Export cancelled',
-          });
+          onProgress({ fetched, total, status: 'cancelled', message: 'Export cancelled' });
           return;
         }
 
@@ -145,10 +129,8 @@ export class Exporter {
           ? (batch as Entry[]).filter(options.statusPostFilter)
           : (batch as Entry[]);
 
-        // Flatten entries using schema-aware path for all entries
         let rows: Array<Record<string, string | number | boolean | null>>;
         if (options.contentType) {
-          // Single content type export - use the standard path
           rows = flattenEntries(filteredBatch, {
             contentType: options.contentType,
             locales: options.locales,
@@ -156,13 +138,11 @@ export class Exporter {
             userMap: options.userMap,
           });
         } else if (options.contentTypeMap) {
-          // Mixed content type export - look up each entry's content type
           rows = filteredBatch.map((entry) => {
             const contentTypeId = entry.sys.contentType.sys.id;
             const contentType = options.contentTypeMap![contentTypeId];
-            
+
             if (contentType) {
-              // Use the schema-aware flatten for clean columns
               return flattenEntry(entry, {
                 contentType,
                 locales: options.locales,
@@ -170,10 +150,9 @@ export class Exporter {
                 userMap: options.userMap,
               });
             } else {
-              // Fallback for missing content type (rare) - still use clean column names
               const updatedByUserId = entry.sys.updatedBy?.sys.id;
               const updatedByName = updatedByUserId ? (options.userMap?.[updatedByUserId] || updatedByUserId) : 'Unknown';
-              
+
               const row: Record<string, string | number | boolean | null> = {
                 'Entry ID': entry.sys.id,
                 'Created': new Date(entry.sys.createdAt).toISOString().split('T')[0],
@@ -182,23 +161,21 @@ export class Exporter {
                 'Status': entry.sys.publishedVersion ? 'Published' : 'Draft',
                 'Content Type': contentTypeId,
               };
-              
-              // Add all fields as JSON strings since we don't have the schema
+
               if (entry.fields) {
                 for (const [fieldId, fieldValue] of Object.entries(entry.fields)) {
                   row[fieldId] = JSON.stringify(fieldValue);
                 }
               }
-              
+
               return row;
             }
           });
         } else {
-          // No content type map provided - shouldn't happen, but fallback
           rows = filteredBatch.map((entry) => {
             const updatedByUserId = entry.sys.updatedBy?.sys.id;
             const updatedByName = updatedByUserId ? (options.userMap?.[updatedByUserId] || updatedByUserId) : 'Unknown';
-            
+
             return {
               'Entry ID': entry.sys.id,
               'Created': new Date(entry.sys.createdAt).toISOString().split('T')[0],
@@ -222,12 +199,7 @@ export class Exporter {
       }
 
       if (this.cancelled) {
-        onProgress({
-          fetched,
-          total,
-          status: 'cancelled',
-          message: 'Export cancelled',
-        });
+        onProgress({ fetched, total, status: 'cancelled', message: 'Export cancelled' });
         return;
       }
 
@@ -249,7 +221,7 @@ export class Exporter {
         ? sortRowsByColumn(allRows, options.sortByColumn.column, options.sortByColumn.direction)
         : allRows;
 
-      exportData({ rows: finalRows, filename }, format);
+      await exportData({ rows: finalRows, filename }, format);
 
       onProgress({
         fetched,
