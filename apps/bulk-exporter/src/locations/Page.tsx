@@ -8,7 +8,6 @@ import { Exporter, type ExportProgress } from '../lib/exporter';
 import { getEntryCount } from '../lib/paginate';
 import { buildQuery, getStatusPostFilter, type EntryStatus } from '../lib/queryBuilder';
 import type { ContentType, Entry } from '../lib/flatten';
-import { MOCK_CONCEPTS } from '../lib/mockConcepts';
 
 interface Locale {
   code: string;
@@ -38,6 +37,18 @@ interface SearchResult {
     publishedAt?: string;
   };
   fields?: Record<string, Record<string, unknown>>;
+}
+
+interface CmaUser {
+  sys: { id: string };
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+}
+
+interface CmaWithExtras {
+  concept: { getMany: (opts: { query: Record<string, unknown> }) => Promise<{ items: Concept[] }> };
+  user: { getManyForSpace: (opts: { spaceId: string }) => Promise<{ items: CmaUser[] }> };
 }
 
 const Page = () => {
@@ -116,15 +127,10 @@ const Page = () => {
         );
         setContentTypes(ctItems);
 
-        // Build content type map with names and display fields (for UI)
         const ctMap: Record<string, { name: string; displayField?: string }> = {};
-        // Build content type schema map (for export)
         const ctSchemaMap: Record<string, ContentType> = {};
         for (const ct of ctItems) {
-          ctMap[ct.sys.id] = {
-            name: ct.name || ct.sys.id,
-            displayField: ct.displayField,
-          };
+          ctMap[ct.sys.id] = { name: ct.name || ct.sys.id, displayField: ct.displayField };
           ctSchemaMap[ct.sys.id] = ct;
         }
         setContentTypeMap(ctMap);
@@ -137,7 +143,6 @@ const Page = () => {
           }))
         );
 
-        // Load tags (gracefully handle errors)
         try {
           const tagsResponse = await sdk.cma.tag.getMany({ query: { limit: 1000 } });
           setTags(tagsResponse.items as unknown as Tag[]);
@@ -146,27 +151,26 @@ const Page = () => {
           setTags([]);
         }
 
-        // Load concepts (gracefully handle errors for spaces without taxonomy)
         if (import.meta.env.VITE_MOCK_CONCEPTS === 'true') {
+          const { MOCK_CONCEPTS } = await import('../lib/mockConcepts');
           setConcepts(MOCK_CONCEPTS);
         } else {
           try {
-            const conceptsResponse = await (cma as any).concept.getMany({
-              query: { limit: 1000 },
-            });
-            setConcepts(conceptsResponse.items as unknown as Concept[]);
+            const cmaExtras = cma as unknown as CmaWithExtras;
+            const conceptsResponse = await cmaExtras.concept.getMany({ query: { limit: 1000 } });
+            setConcepts(conceptsResponse.items);
           } catch (error) {
             console.warn('Concepts/taxonomy not available:', error);
             setConcepts([]);
           }
         }
 
-        // Load users to map IDs to names
         try {
           const spaceId = sdk.ids.space;
-          const usersResponse = await (cma as any).user.getManyForSpace({ spaceId });
+          const cmaExtras = cma as unknown as CmaWithExtras;
+          const usersResponse = await cmaExtras.user.getManyForSpace({ spaceId });
           const uMap: Record<string, string> = {};
-          for (const user of usersResponse.items as any[]) {
+          for (const user of usersResponse.items) {
             const firstName = user.firstName || '';
             const lastName = user.lastName || '';
             const fullName = `${firstName} ${lastName}`.trim() || user.email || user.sys.id;
@@ -191,7 +195,7 @@ const Page = () => {
   const handleEstimate = async (data: ExportFormData) => {
     try {
       setEstimatedCount(null);
-      
+
       const query = buildQuery({
         contentTypeId: data.contentTypeId,
         search: data.search,
@@ -207,7 +211,7 @@ const Page = () => {
         conceptsMatchAll: data.conceptsMatchAll,
         fieldFilters: data.fieldFilters,
       });
-      
+
       const { content_type, ...filters } = query;
       const count = await getEntryCount(sdk.cma, content_type as string | undefined, filters);
       setEstimatedCount(count);
@@ -223,8 +227,8 @@ const Page = () => {
       setSearchResults([]);
       setSelectedEntryIds([]);
       setActivePage(0);
-      setLastFormData(data); // Save form data for exports
-      
+      setLastFormData(data);
+
       const query = buildQuery({
         contentTypeId: data.contentTypeId,
         search: data.search,
@@ -254,8 +258,7 @@ const Page = () => {
 
       setSearchResults(items);
       setEstimatedCount(response.items.length >= response.total ? items.length : response.total);
-      
-      // Smooth scroll to results
+
       setTimeout(() => {
         const resultsElement = document.querySelector('[data-results-list]');
         if (resultsElement) {
@@ -280,34 +283,19 @@ const Page = () => {
         message: `Exporting ${selectedIds.length} selected entries...`,
       });
 
-      // Fetch the full entries for selected IDs
-      const entries: SearchResult[] = [];
-      for (const id of selectedIds) {
-        const entry = await sdk.cma.entry.get({ entryId: id });
-        entries.push(entry as unknown as SearchResult);
-      }
-
-      // Get the form data to determine content type and fields
-      const firstEntry = entries[0];
-      const contentTypeId = firstEntry.sys.contentType.sys.id;
-      
-      // For selected entries, use the exporter with pre-fetched data
       const exporter = new Exporter(sdk.cma);
       exporterRef.current = exporter;
 
-      // We'll need to modify the exporter to accept pre-fetched entries
-      // For now, use the standard export with sys.id[in] filter
-      const formData = {
-        contentType: contentTypes.find(ct => ct.sys.id === contentTypeId) || null,
-        contentTypeId,
-        locales: locales.map(l => l.code),
-      };
+      // Fetch all selected entries in one API call using sys.id[in] instead of
+      // per-entry requests, which avoids rate-limit issues at large selection sizes.
+      const firstEntry = searchResults.find(r => r.sys.id === selectedIds[0]);
+      const contentTypeId = firstEntry?.sys.contentType.sys.id ?? '';
 
       await exporter.start(
         {
-          contentType: formData.contentType,
+          contentType: contentTypes.find(ct => ct.sys.id === contentTypeId) || null,
           contentTypeId: contentTypeId || 'selected',
-          locales: formData.locales,
+          locales: locales.map(l => l.code),
           userMap: userMap,
           contentTypeMap: contentTypeSchemaMap,
           format,
@@ -362,7 +350,7 @@ const Page = () => {
 
   const handleExport = async (data: ExportFormData) => {
     try {
-      setLastFormData(data); // Save form data
+      setLastFormData(data);
       setIsExporting(true);
       setProgress({
         fetched: 0,
@@ -428,7 +416,6 @@ const Page = () => {
       exporterRef.current = null;
     }
   };
-
 
   if (loading) {
     return (
@@ -524,7 +511,7 @@ const Page = () => {
               ? contentTypeSchemaMap[lastFormData.contentTypeId] ?? null
               : null
           }
-locales={lastFormData?.locales ?? []}
+          locales={lastFormData?.locales ?? []}
         />
 
       </Flex>
