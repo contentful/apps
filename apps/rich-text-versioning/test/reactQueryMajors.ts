@@ -84,7 +84,11 @@ export function findReactQueryPackages(nodeModulesRoot: string): ReactQueryCopy[
         continue;
       }
 
-      if (entry.name === 'node_modules' || dir.endsWith(`${path.sep}node_modules`) || entry.name.startsWith('@')) {
+      if (
+        entry.name === 'node_modules' ||
+        dir.endsWith(`${path.sep}node_modules`) ||
+        entry.name.startsWith('@')
+      ) {
         walk(full, depth + 1);
         continue;
       }

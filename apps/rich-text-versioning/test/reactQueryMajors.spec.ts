@@ -1,10 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import {
-  analyzeReactQueryMajors,
-  findReactQueryPackages,
-} from './reactQueryMajors';
+import { analyzeReactQueryMajors, findReactQueryPackages } from './reactQueryMajors';
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
