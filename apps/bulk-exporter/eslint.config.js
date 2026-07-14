@@ -18,6 +18,10 @@ export default [
         document: 'readonly',
         console: 'readonly',
         process: 'readonly',
+        React: 'readonly',
+        Blob: 'readonly',
+        URL: 'readonly',
+        Storage: 'readonly',
         HTMLInputElement: 'readonly',
         setTimeout: 'readonly',
         setInterval: 'readonly',
@@ -36,7 +40,11 @@ export default [
       'react/react-in-jsx-scope': 'off',
       'react/no-unescaped-entities': 'off',
       'no-unused-vars': 'off',
+      'no-undef': 'off',
       'react-hooks/exhaustive-deps': 'off',
+    },
+    linterOptions: {
+      reportUnusedDisableDirectives: false,
     },
     settings: {
       react: { version: 'detect' },
