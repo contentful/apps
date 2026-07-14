@@ -14,6 +14,8 @@ export type CloneReferenceNode = {
 class EntryCloner {
   private references: ReferenceMap = {};
   private clones: ReferenceMap = {};
+  private failedCloneIds: string[] = [];
+  private failedUpdateIds: string[] = [];
   private referenceChildren: ReferenceChildrenMap = {};
   private contentTypes: { [id: string]: ContentTypeProps } = {};
   private updates: number = 0;
@@ -49,8 +51,19 @@ class EntryCloner {
       this.setReferencesCount(Object.keys(this.references).length);
     }
     await this.createClones();
+    if (this.failedCloneIds.length > 0) {
+      throw new Error(
+        `Failed to clone ${this.failedCloneIds.length} ${
+          this.failedCloneIds.length === 1 ? 'entry' : 'entries'
+        }. The clone operation was aborted to prevent a partially-cloned structure.`
+      );
+    }
     await this.updateReferenceTree();
     return this.clones[this.entryId] as EntryProps;
+  }
+
+  getFailedUpdateIds(): string[] {
+    return this.failedUpdateIds;
   }
 
   async getReferencesQty(): Promise<number> {
@@ -109,6 +122,7 @@ class EntryCloner {
         this.setClonesCount(Object.keys(this.clones).length);
       } catch (error) {
         console.warn('Error creating clone', error);
+        this.failedCloneIds.push(entryId);
       }
     });
 
@@ -148,6 +162,7 @@ class EntryCloner {
               latestClone = await this.cma.entry.get({ entryId: clone.sys.id });
             } else {
               console.warn('Error updating clone.', error);
+              this.failedUpdateIds.push(clone.sys.id);
               break;
             }
           }

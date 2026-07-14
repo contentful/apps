@@ -50,5 +50,8 @@
     "jsdom": "^25.0.1",
     "typescript": "4.8.4"
   },
-  "homepage": "."
+  "homepage": ".",
+  "overrides": {
+    "form-data": "^4.0.4"
+  }
 }

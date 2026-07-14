@@ -14,7 +14,14 @@
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
+  "lavamoat": {
+    "allowScripts": {
+      "@lavamoat/preinstall-always-fail": false,
+      "vite>esbuild": true
+    }
+  },
   "scripts": {
+    "allow-scripts": "allow-scripts run",
     "start": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --max-warnings 0",
@@ -22,6 +29,8 @@
     "test:ci": "vitest"
   },
   "devDependencies": {
+    "@lavamoat/allow-scripts": "^3.4.3",
+    "@lavamoat/preinstall-always-fail": "^1.0.0",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "^14.5.2",
     "@types/lodash": "^4.17.0",
@@ -37,5 +46,8 @@
     "typescript": "5.1.6",
     "vite": "4.5.14",
     "vitest": "0.34.6"
+  },
+  "overrides": {
+    "form-data": "^4.0.4"
   }
 }

@@ -4,6 +4,11 @@ import { vi } from 'vitest';
 import { mockSdk } from '../mocks';
 import Page from '@/components/locations/Page';
 
+const triggerVisibilityChange = (state: DocumentVisibilityState) => {
+  Object.defineProperty(document, 'visibilityState', { value: state, configurable: true });
+  document.dispatchEvent(new Event('visibilitychange'));
+};
+
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
@@ -258,6 +263,115 @@ describe('Page component', () => {
     await waitFor(() => {
       expect(createWithResponse).not.toHaveBeenCalled();
     });
+  });
+
+  it('reloads when installation parameters have changed on visibility restored', async () => {
+    const reload = vi.fn();
+    Object.defineProperty(window, 'location', {
+      value: { reload },
+      configurable: true,
+      writable: true,
+    });
+
+    mockSdk.cma.appInstallation = {
+      getForOrganization: vi.fn().mockResolvedValue({
+        items: [
+          {
+            sys: {
+              space: { sys: { id: mockSdk.ids.space } },
+              environment: { sys: { id: mockSdk.ids.environment } },
+            },
+            parameters: {
+              selectedContentTypeIds: ['article'],
+              allowedUrlPatterns: 'new-domain.com',
+            },
+          },
+        ],
+      }),
+    };
+
+    render(<Page />);
+
+    triggerVisibilityChange('hidden');
+    triggerVisibilityChange('visible');
+
+    await waitFor(() => {
+      expect(reload).toHaveBeenCalled();
+    });
+  });
+
+  it('does not reload when installation parameters are unchanged on visibility restored', async () => {
+    const reload = vi.fn();
+    Object.defineProperty(window, 'location', {
+      value: { reload },
+      configurable: true,
+      writable: true,
+    });
+
+    mockSdk.parameters.installation = { selectedContentTypeIds: ['article'] };
+
+    mockSdk.cma.appInstallation = {
+      getForOrganization: vi.fn().mockResolvedValue({
+        items: [
+          {
+            sys: {
+              space: { sys: { id: mockSdk.ids.space } },
+              environment: { sys: { id: mockSdk.ids.environment } },
+            },
+            parameters: { selectedContentTypeIds: ['article'] },
+          },
+        ],
+      }),
+    };
+
+    render(<Page />);
+
+    triggerVisibilityChange('hidden');
+    triggerVisibilityChange('visible');
+
+    await waitFor(() => {
+      expect(mockSdk.cma.appInstallation.getForOrganization).toHaveBeenCalled();
+    });
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  it('does not reload when installation parameters match but CMA returns keys in different order', async () => {
+    const reload = vi.fn();
+    Object.defineProperty(window, 'location', {
+      value: { reload },
+      configurable: true,
+      writable: true,
+    });
+
+    mockSdk.parameters.installation = {
+      allowedUrlPatterns: 'example.com',
+      selectedContentTypeIds: ['article'],
+    };
+
+    mockSdk.cma.appInstallation = {
+      getForOrganization: vi.fn().mockResolvedValue({
+        items: [
+          {
+            sys: {
+              space: { sys: { id: mockSdk.ids.space } },
+              environment: { sys: { id: mockSdk.ids.environment } },
+            },
+            // Same values, different key order — must not trigger spurious reload
+            parameters: { selectedContentTypeIds: ['article'], allowedUrlPatterns: 'example.com' },
+          },
+        ],
+      }),
+    };
+
+    render(<Page />);
+
+    triggerVisibilityChange('hidden');
+    triggerVisibilityChange('visible');
+
+    await waitFor(() => {
+      expect(mockSdk.cma.appInstallation.getForOrganization).toHaveBeenCalled();
+    });
+    expect(reload).not.toHaveBeenCalled();
   });
 
   it('checks www URLs as absolute https URLs instead of resolving them against the current domain', async () => {

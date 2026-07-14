@@ -25,3 +25,7 @@ export const createMockCMA = () => {
     },
   };
 };
+
+const mockCma: any = createMockCMA();
+
+export { mockCma };

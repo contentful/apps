@@ -10,6 +10,7 @@ import {
   validServiceAccountKeyIdBase64,
 } from '../test/mocks/googleApi';
 import app from './app';
+import { config } from './config';
 import { DynamoDBService } from './services/dynamoDbService';
 import { GoogleApiService } from './services/googleApiService';
 
@@ -17,8 +18,28 @@ chai.use(chaiHttp);
 
 const sandbox = sinon.createSandbox();
 
-const serviceAccountKeyHeaders = {
-  'X-Contentful-ServiceAccountKeyId': validServiceAccountKeyIdBase64,
+const signingSecret = 'x'.repeat(64);
+
+// Headers the /api/* middleware expects on every signed request.
+const contentfulHeaders: Record<string, string> = {
+  'x-contentful-serviceaccountkeyid': validServiceAccountKeyIdBase64,
+  'x-contentful-space-id': 'spaceId',
+};
+
+// Produce a genuinely-signed header set so requests pass verifySignedRequestMiddleware.
+// node-apps-toolkit v4 exposes verifyRequest as a read-only binding, so it can no longer
+// be stubbed in place — signing for real is both possible and more faithful to production.
+const buildSignedHeaders = (
+  method: NodeAppsToolkit.CanonicalRequest['method'],
+  path: string,
+  body?: string
+): Record<string, string> => {
+  const signatureHeaders = NodeAppsToolkit.signRequest(
+    signingSecret,
+    { method, path, headers: contentfulHeaders, body },
+    Date.now()
+  );
+  return { ...contentfulHeaders, ...signatureHeaders };
 };
 
 describe('app', () => {
@@ -26,10 +47,9 @@ describe('app', () => {
   let mockDataClient: SinonStubbedInstance<BetaAnalyticsDataClient>;
 
   beforeEach(() => {
-    // TODO: set headers and fully test signature verification later
-    sandbox.stub(NodeAppsToolkit, 'verifyRequest').get(() => {
-      return () => true;
-    });
+    // stage 'test' makes the middleware sign the bare request path (no stage prefix)
+    sandbox.stub(config, 'stage').value('test');
+    sandbox.stub(config, 'signingSecret').value(signingSecret);
   });
 
   afterEach(() => {
@@ -57,8 +77,13 @@ describe('app', () => {
           const response = await chai
             .request(app)
             .put('/api/service_account_key_file')
-            .set(serviceAccountKeyHeaders)
-            .set('X-Contentful-Space-Id', 'spaceId')
+            .set(
+              buildSignedHeaders(
+                'PUT',
+                '/api/service_account_key_file',
+                JSON.stringify(validServiceAccountKeyFile)
+              )
+            )
             .send(validServiceAccountKeyFile);
           expect(response).to.have.status(200);
         });
@@ -75,8 +100,13 @@ describe('app', () => {
           const response = await chai
             .request(app)
             .put('/api/service_account_key_file')
-            .set(serviceAccountKeyHeaders)
-            .set('X-Contentful-Space-Id', 'spaceId')
+            .set(
+              buildSignedHeaders(
+                'PUT',
+                '/api/service_account_key_file',
+                JSON.stringify(validServiceAccountKeyFile)
+              )
+            )
             .send(validServiceAccountKeyFile);
           expect(response).to.have.status(200);
         });
@@ -102,8 +132,7 @@ describe('app', () => {
       const response = await chai
         .request(app)
         .get('/api/account_summaries')
-        .set(serviceAccountKeyHeaders)
-        .set('X-Contentful-Space-Id', 'spaceId');
+        .set(buildSignedHeaders('GET', '/api/account_summaries'));
       expect(response).to.have.status(200);
     });
 
@@ -111,8 +140,7 @@ describe('app', () => {
       const response = await chai
         .request(app)
         .get('/api/account_summaries')
-        .set(serviceAccountKeyHeaders)
-        .set('X-Contentful-Space-Id', 'spaceId');
+        .set(buildSignedHeaders('GET', '/api/account_summaries'));
       expect(response.body[0]).to.have.property('propertySummaries');
     });
   });

@@ -11,3 +11,7 @@ export const CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS = 30000; // 30 seconds to wait
 // Agents-api writes PENDING_REVIEW status before the suspendPayload metadata flushes.
 // Allow this many consecutive PENDING_REVIEW polls with no suspendPayload before giving up.
 export const MAX_PENDING_REVIEW_MISSING_PAYLOAD_RETRIES = 5; // 5 × 10s = 50s max wait
+
+// Hard cap on tab selection to prevent oversized payloads and single-LLM-call timeouts.
+// Revisit once parallel per-entry mappers (M7) ship.
+export const MAX_TABS_SELECTION = 20;

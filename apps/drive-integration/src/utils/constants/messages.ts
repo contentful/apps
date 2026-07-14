@@ -12,6 +12,14 @@ export const ERROR_MESSAGES = {
     'Google Doc not found. Make sure the document exists and your Google account has access to it.',
   AI_SERVICE_UNAVAILABLE:
     'The AI service is temporarily unavailable. Please try again in a few minutes.',
+  APP_NOT_INSTALLED:
+    'The Drive Integration app is not installed in this environment. Install it via Apps > Manage apps and try again.',
+  DOCUMENT_TOO_COMPLEX:
+    'This document is too large to import in one go. Try splitting it into smaller sections or reducing the number of tabs selected.',
+  PROCESSING_TIMEOUT:
+    'The import took too long to complete. Try a simpler document or split it into smaller sections.',
+  OUT_OF_DOMAIN:
+    'This document or content type combination is outside the supported range for import. Try a different document or content type.',
 } as const;
 
 export const SUCCESS_MESSAGES = {

@@ -1,5 +1,5 @@
 import AnalyticsApp from 'components/main-app/AnalyticsApp/AnalyticsApp';
-import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import { SidebarExtensionSDK } from '@contentful/app-sdk';
 import { useMemo } from 'react';
 import { Skeleton } from '@contentful/f36-components';
@@ -13,7 +13,6 @@ import { contentfulContext } from 'helpers/contentfulContext';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarExtensionSDK>();
-  const cma = useCMA();
   const installationParameters = sdk.parameters.installation as
     | AppInstallationParameters
     | undefined;
@@ -26,8 +25,8 @@ const Sidebar = () => {
     (rule) => rule.contentTypeId === currentContentType
   );
   const api = useMemo(
-    () => new Api(contentfulContext(sdk), cma, serviceAccountKeyId),
-    [cma, sdk, serviceAccountKeyId]
+    () => new Api(contentfulContext(sdk), sdk.cma, serviceAccountKeyId),
+    [sdk, serviceAccountKeyId]
   );
 
   const hasInstallationParams = serviceAccountKeyId && propertyId;

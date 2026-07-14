@@ -93,5 +93,12 @@ export const fetchVideos = async (
   );
   // Flatten array of arrays
   const videos = mappedProjects.flat(1);
-  return videos;
+  // Deduplicate by video ID — pagination fetches can return the same video twice
+  // when Wistia ignores the page param and returns all medias on every page
+  const seen = new Set<number>();
+  return videos.filter((v) => {
+    if (seen.has(v.id)) return false;
+    seen.add(v.id);
+    return true;
+  });
 };

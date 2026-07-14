@@ -13,7 +13,7 @@ import {
 } from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
-import { BLOCKS, Document, INLINES } from '@contentful/rich-text-types';
+import { BLOCKS, Document, INLINES, TopLevelBlock } from '@contentful/rich-text-types';
 import { useState, useEffect } from 'react';
 import { styles } from './Dialog.styles';
 import HtmlDiffViewer from '../components/HtmlDiffViewer';
@@ -47,11 +47,14 @@ const Dialog = () => {
 
   const getReferenceIdsFromDocument = (doc: Document, types: string[]): Set<string> => {
     const ids: Set<string> = new Set();
-    const getEntryIdsFromNode = (node: any) => {
+    const getEntryIdsFromNode = (node: TopLevelBlock | TopLevelBlock['content'][number]) => {
       if (types.includes(node.nodeType)) {
-        ids.add(node.data.target.sys.id);
+        const targetId = node.data?.target?.sys?.id;
+        if (targetId) {
+          ids.add(targetId);
+        }
       }
-      if ('content' in node) {
+      if ('content' in node && Array.isArray(node.content)) {
         node.content.forEach(getEntryIdsFromNode);
       }
     };
@@ -116,13 +119,23 @@ const Dialog = () => {
         setEntriesFromPublished(fetchedEntriesFromPublished);
 
         try {
-          const allEntries = [...entriesFromCurrent, ...entriesFromPublished];
-          const fetchedContentTypes = await sdk.cma.contentType.getMany({
-            query: {
-              'sys.id[in]': allEntries.map((entry) => entry.sys.contentType.sys.id),
-            },
-          });
-          setEntryContentTypes(fetchedContentTypes.items);
+          const allEntries = [...fetchedEntriesFromCurrent, ...fetchedEntriesFromPublished];
+          const contentTypeIds = [
+            ...new Set(
+              allEntries
+                .map((entry) => entry.sys.contentType?.sys?.id)
+                .filter((contentTypeId): contentTypeId is string => Boolean(contentTypeId))
+            ),
+          ];
+
+          if (contentTypeIds.length > 0) {
+            const fetchedContentTypes = await sdk.cma.contentType.getMany({
+              query: {
+                'sys.id[in]': contentTypeIds.join(','),
+              },
+            });
+            setEntryContentTypes(fetchedContentTypes.items);
+          }
         } catch (error) {
           console.error('Error fetching content types:', error);
         }

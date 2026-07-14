@@ -77,5 +77,8 @@
     "vitest": "^2.1.9",
     "webpack": "^5.88.2"
   },
-  "homepage": "."
+  "homepage": ".",
+  "overrides": {
+    "form-data": "^4.0.4"
+  }
 }

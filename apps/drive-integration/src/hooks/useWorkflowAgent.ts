@@ -9,7 +9,6 @@ import {
 import {
   MappingReviewSuspendPayload,
   ResumePayload,
-  TabsImagesSuspendPayload,
   CompletedWorkflowPayload,
   WorkflowRunResult,
   RunStatus,
@@ -19,6 +18,7 @@ import {
 import {
   AgentGeneratePayload,
   AgentRunData,
+  DocumentSelection,
   getWorkflowRun,
   resumeWorkflowRun,
   startAgentRun,
@@ -34,7 +34,10 @@ interface UseWorkflowParams {
 
 interface WorkflowHook {
   isAnalyzing: boolean;
-  startWorkflow: (contentTypeIds: string[]) => Promise<WorkflowRunResult>;
+  startWorkflow: (
+    contentTypeIds: string[],
+    documentSelection: DocumentSelection
+  ) => Promise<WorkflowRunResult>;
   resumeWorkflow: (runId: string, resumePayload: ResumePayload) => Promise<WorkflowRunResult>;
 }
 
@@ -101,54 +104,33 @@ const getRunErrorMessage = (runData: AgentRunData): string => {
   return 'Workflow failed';
 };
 
+const KNOWN_FAILURE_REASONS = new Set<string>(Object.values(WorkflowFailureReason));
+
 const getBackendWorkflowFailureReason = (runData: AgentRunData): WorkflowFailureReason | null => {
   const workflowFailure = runData.metadata?.workflowFailure;
+  if (!workflowFailure) return null;
+  return KNOWN_FAILURE_REASONS.has(workflowFailure.code)
+    ? (workflowFailure.code as WorkflowFailureReason)
+    : null;
+};
 
-  if (!workflowFailure) {
-    return null;
-  }
-
-  if (workflowFailure.code === WorkflowFailureReason.GOOGLE_DRIVE_AUTH_EXPIRED) {
-    return WorkflowFailureReason.GOOGLE_DRIVE_AUTH_EXPIRED;
-  }
-
-  if (workflowFailure.code === WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND) {
-    return WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND;
-  }
-
-  if (workflowFailure.code === WorkflowFailureReason.AI_SERVICE_UNAVAILABLE) {
-    return WorkflowFailureReason.AI_SERVICE_UNAVAILABLE;
-  }
-
-  if (workflowFailure.code === WorkflowFailureReason.GENERIC) {
-    return WorkflowFailureReason.GENERIC;
-  }
-
-  return null;
+// document-too-complex and out-of-domain are not yet emitted by the backend; handlers are in place for when they ship.
+const FAILURE_REASON_MESSAGES: Partial<Record<WorkflowFailureReason, string>> = {
+  [WorkflowFailureReason.GOOGLE_DRIVE_AUTH_EXPIRED]: ERROR_MESSAGES.GOOGLE_DRIVE_AUTH_ERROR,
+  [WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND]: ERROR_MESSAGES.GOOGLE_DOCS_NOT_FOUND,
+  [WorkflowFailureReason.AI_SERVICE_UNAVAILABLE]: ERROR_MESSAGES.AI_SERVICE_UNAVAILABLE,
+  [WorkflowFailureReason.APP_NOT_INSTALLED]: ERROR_MESSAGES.APP_NOT_INSTALLED,
+  [WorkflowFailureReason.DOCUMENT_TOO_COMPLEX]: ERROR_MESSAGES.DOCUMENT_TOO_COMPLEX,
+  [WorkflowFailureReason.PROCESSING_TIMEOUT]: ERROR_MESSAGES.PROCESSING_TIMEOUT,
+  [WorkflowFailureReason.OUT_OF_DOMAIN]: ERROR_MESSAGES.OUT_OF_DOMAIN,
 };
 
 const getWorkflowFailureMessage = (
   runData: AgentRunData,
   failureReason: WorkflowFailureReason
-): string => {
-  if (failureReason === WorkflowFailureReason.GOOGLE_DRIVE_AUTH_EXPIRED) {
-    return ERROR_MESSAGES.GOOGLE_DRIVE_AUTH_ERROR;
-  }
+): string => FAILURE_REASON_MESSAGES[failureReason] ?? getRunErrorMessage(runData);
 
-  if (failureReason === WorkflowFailureReason.GOOGLE_DOCS_NOT_FOUND) {
-    return ERROR_MESSAGES.GOOGLE_DOCS_NOT_FOUND;
-  }
-
-  if (failureReason === WorkflowFailureReason.AI_SERVICE_UNAVAILABLE) {
-    return ERROR_MESSAGES.AI_SERVICE_UNAVAILABLE;
-  }
-
-  return getRunErrorMessage(runData);
-};
-
-const getSuspendPayload = (
-  runData: AgentRunData
-): TabsImagesSuspendPayload | MappingReviewSuspendPayload | undefined => {
+const getSuspendPayload = (runData: AgentRunData): MappingReviewSuspendPayload | undefined => {
   return runData.metadata?.suspendPayload;
 };
 
@@ -235,7 +217,10 @@ const pollAgentRun = async (
   }
 
   console.error(`✗ Run [${runId}] timed out after ${elapsedSec(startMs)}`);
-  throw new Error('Workflow polling timeout');
+  throw new WorkflowRunError(
+    ERROR_MESSAGES.PROCESSING_TIMEOUT,
+    WorkflowFailureReason.PROCESSING_TIMEOUT
+  );
 };
 
 export const useWorkflowAgent = ({
@@ -246,11 +231,11 @@ export const useWorkflowAgent = ({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const startWorkflow = useCallback(
-    async (contentTypeIds: string[]) => {
+    async (contentTypeIds: string[], documentSelection: DocumentSelection) => {
       setIsAnalyzing(true);
 
       const spaceId = sdk.ids.space;
-      const environmentId = sdk.ids.environment;
+      const environmentId = sdk.ids.environmentAlias ?? sdk.ids.environment;
       const threadId = [crypto.randomUUID(), WORKFLOW_AGENT_ID].join('-');
 
       const payload: AgentGeneratePayload = {
@@ -271,6 +256,7 @@ export const useWorkflowAgent = ({
           documentId,
           contentTypeIds,
           oauthToken,
+          documentSelection,
         },
         threadId,
       };
@@ -293,7 +279,7 @@ export const useWorkflowAgent = ({
       setIsAnalyzing(true);
 
       const spaceId = sdk.ids.space;
-      const environmentId = sdk.ids.environment;
+      const environmentId = sdk.ids.environmentAlias ?? sdk.ids.environment;
 
       try {
         await resumeWorkflowRun(sdk, spaceId, environmentId, runId, resumePayload);

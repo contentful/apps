@@ -291,6 +291,7 @@ export const ReviewPage = ({
         isOpen={isConfirmCancelModalOpen}
         onConfirm={() => void handleConfirmCancel()}
         onCancel={() => !isCancelling && setIsConfirmCancelModalOpen(false)}
+        isConfirming={isCancelling}
       />
       <SummaryModal
         isOpen={isSummaryModalOpen}
