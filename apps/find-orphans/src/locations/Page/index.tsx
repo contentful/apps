@@ -6,32 +6,36 @@ import {
   Checkbox,
   Flex,
   Heading,
-  IconButton,
   ModalConfirm,
   Note,
   Notification,
-  Popover,
   SkeletonRow,
   Spinner,
   Table,
+  Tabs,
   Text,
   TextLink,
   ToggleButton,
   Tooltip,
 } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import { InfoIcon, TrayArrowDownIcon, MagnifyingGlassIcon } from '@contentful/f36-icons';
+import {
+  InfoIcon,
+  LinkBreakIcon,
+  TrayArrowDownIcon,
+  MagnifyingGlassIcon,
+} from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ContentTypeProps } from 'contentful-management';
 import { resolveParameters } from '../../parameters';
 import { OrphanTable } from './components/OrphanTable';
-import { OrphanKind, OrphanResult, ScanProgress } from './types';
+import { OrphanKind, OrphanResult, ScanCriterion, ScanProgress } from './types';
 import { archiveOrphans, ArchiveProgress } from './utils/entryActions';
 import { fetchAllContentTypes, findOrphans } from './utils/orphanFinder';
 
 // Name what is being checked right now, e.g.
 // "Checking Article, Author… (5/51)". Steps are content types plus the
-// media-library pass, so the label does not say "content types".
+// media-library pass (or reference counts), so the label stays generic.
 const progressLabel = (progress: ScanProgress): string =>
   `Checking ${progress.stepNames.join(', ')}… (${progress.current}/${progress.total})`;
 
@@ -52,6 +56,60 @@ const describeCounts = ({ entries, assets }: { entries: number; assets: number }
   return parts.length > 0 ? parts.join(' and ') : '0 items';
 };
 
+/**
+ * Everything one criterion's tab remembers. Each tab keeps its own results,
+ * selection, and filter, so switching between the untitled and unreferenced
+ * tabs never discards or re-runs a scan.
+ */
+interface TabState {
+  results: OrphanResult[] | null;
+  truncated: boolean;
+  selectedIds: string[];
+  /**
+   * The "Never edited" results filter. The scan is always broad; this only
+   * narrows what is displayed (and selectable), so nothing is ever silently
+   * excluded — the toggle shows how many results it is holding back.
+   */
+  neverEditedOnly: boolean;
+}
+
+/** Reset applied when a scan starts: results clear, the filter persists. */
+const SCAN_RESET = { results: null, truncated: false, selectedIds: [] };
+
+/**
+ * Static per-criterion UI copy and chrome. The description is shown inside
+ * the tab's panel above its scan button, so it is always visible before the
+ * scan can be started — switching tabs is free (results are cached), which
+ * is also why the tab labels carry no explainer of their own.
+ */
+const CRITERIA: Record<
+  ScanCriterion,
+  {
+    tabLabel: string;
+    scanLabel: string;
+    description: string;
+    icon: JSX.Element;
+    emptyNote: string;
+  }
+> = {
+  untitled: {
+    tabLabel: 'Untitled drafts',
+    scanLabel: 'Scan for untitled drafts',
+    description:
+      'Untitled items are the signature of something created by accident — for example by adding a new entry on a reference field instead of linking an existing one — and abandoned.',
+    icon: <MagnifyingGlassIcon />,
+    emptyNote: 'No orphans found — every scanned draft has a title.',
+  },
+  unreferenced: {
+    tabLabel: 'Unreferenced drafts',
+    scanLabel: 'Scan for unreferenced drafts',
+    description:
+      'Checking references cannot be done in bulk — this scan makes one network request per draft, so it can take several minutes on large spaces. It finds items that no entry links to: not proof of junk, since top-level content like landing pages is often never referenced yet perfectly valid, but a good lead when hunting for possibly unused content.',
+    icon: <LinkBreakIcon />,
+    emptyNote: 'No orphans found — every scanned draft is referenced by at least one entry.',
+  },
+};
+
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
   // Installation parameters may be empty (fresh install, or the app was
@@ -62,24 +120,32 @@ const Page = () => {
   );
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
   const [contentTypesLoading, setContentTypesLoading] = useState(true);
-  const [scanning, setScanning] = useState(false);
+  // Which scan is currently running (null = none). Scans are exclusive:
+  // both buttons disable while one runs, and the spinner shows on the
+  // running one.
+  const [activeScan, setActiveScan] = useState<ScanCriterion | null>(null);
   const [progress, setProgress] = useState<ScanProgress | null>(null);
-  // null means "no scan has run yet", which hides the results section
-  // entirely; an empty array renders the positive empty state instead.
-  const [results, setResults] = useState<OrphanResult[] | null>(null);
-  const [truncated, setTruncated] = useState(false);
-  // Per-run scan scope. Both on by default; the entry fan-out is the slow
-  // part, so unchecking "Entries" gives a fast assets-only pass.
+  const [activeTab, setActiveTab] = useState<ScanCriterion>('untitled');
+  // One cached state per criterion tab; `results: null` means "this tab has
+  // not scanned yet" and renders the placeholder instead of a table. The
+  // untitled tab's filter defaults from the untouchedOnly parameter; the
+  // unreferenced tab always starts broad (edit history says nothing about
+  // whether something is referenced).
+  const [tabStates, setTabStates] = useState<Record<ScanCriterion, TabState>>(() => ({
+    untitled: { ...SCAN_RESET, neverEditedOnly: parameters.untouchedOnly },
+    unreferenced: { ...SCAN_RESET, neverEditedOnly: false },
+  }));
+  // Per-run scan scope, shared by both tabs. Both on by default; the entry
+  // fan-out is the slow part, so unchecking "Entries" gives a fast
+  // assets-only pass.
   const [scanEntries, setScanEntries] = useState(true);
   const [scanAssets, setScanAssets] = useState(true);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [archiving, setArchiving] = useState(false);
   const [archiveProgress, setArchiveProgress] = useState<ArchiveProgress | null>(null);
   const [confirmArchiveOpen, setConfirmArchiveOpen] = useState(false);
-  const [archiveInfoOpen, setArchiveInfoOpen] = useState(false);
 
   // Deep links into the web app's archived views — permanent deletion only
-  // exists there, so the archive-info popover hands users the destination.
+  // exists there, so the archive confirmation hands users the destination.
   // environmentAlias keeps the link on the alias the user is browsing under.
   // The filter uses the web app's shareable-view format: indexed key/op/val
   // triplets against the "__status" pseudo-field (empty op = equals).
@@ -94,12 +160,34 @@ const Page = () => {
     };
   }, [sdk]);
 
+  const scanning = activeScan !== null;
   const busy = scanning || archiving;
-  const resultCounts = useMemo(() => countByKind(results ?? []), [results]);
-  const selectedCounts = useMemo(
-    () => countByKind((results ?? []).filter((result) => selectedIds.includes(result.id))),
-    [results, selectedIds]
+  const currentTab = tabStates[activeTab];
+  // What the table (and every selection action) actually operates on: the
+  // tab's results narrowed by the scope checkboxes (which double as live
+  // client-side filters on cached results) and the "Never edited" view.
+  const displayedResults = useMemo(
+    () =>
+      (currentTab.results ?? []).filter(
+        (result) =>
+          (result.kind === 'entry' ? scanEntries : scanAssets) &&
+          (!currentTab.neverEditedOnly || result.neverEdited)
+      ),
+    [currentTab.results, currentTab.neverEditedOnly, scanEntries, scanAssets]
   );
+  const resultCounts = useMemo(() => countByKind(displayedResults), [displayedResults]);
+  const selectedCounts = useMemo(
+    () =>
+      countByKind(displayedResults.filter((result) => currentTab.selectedIds.includes(result.id))),
+    [displayedResults, currentTab.selectedIds]
+  );
+
+  const patchTab = useCallback((criterion: ScanCriterion, patch: Partial<TabState>) => {
+    setTabStates((previous) => ({
+      ...previous,
+      [criterion]: { ...previous[criterion], ...patch },
+    }));
+  }, []);
 
   // Content types are loaded once up front: the scan needs their display
   // field definitions, and the list rarely changes within a session.
@@ -117,33 +205,35 @@ const Page = () => {
     loadContentTypes();
   }, [sdk.cma]);
 
-  const runScan = useCallback(async () => {
-    setScanning(true);
-    setResults(null);
-    setTruncated(false);
-    // A new scan invalidates any previous selection.
-    setSelectedIds([]);
-    try {
-      const outcome = await findOrphans(sdk.cma, contentTypes, sdk.locales.default, setProgress, {
-        maxCandidates: parameters.maxCandidates,
-        batchSize: parameters.batchSize,
-        untouchedOnly: parameters.untouchedOnly,
-        includeEntries: scanEntries,
-        includeAssets: scanAssets,
-      });
-      setResults(outcome.results);
-      setTruncated(outcome.truncated);
-    } catch (error) {
-      // CMA calls run through the app bridge in the parent window, so a
-      // failure here may leave no trace in the iframe's network tab; this
-      // log is the only place the underlying error is visible.
-      console.error('Orphan scan failed:', error);
-      Notification.error('The scan failed. Please try again.');
-    } finally {
-      setScanning(false);
-      setProgress(null);
-    }
-  }, [sdk, contentTypes, parameters, scanEntries, scanAssets]);
+  const runScan = useCallback(
+    async (criterion: ScanCriterion) => {
+      setActiveScan(criterion);
+      // A new scan replaces this tab's results and invalidates its
+      // selection; the tab's filter and the other tab's cache are untouched.
+      patchTab(criterion, SCAN_RESET);
+      try {
+        const outcome = await findOrphans(sdk.cma, contentTypes, sdk.locales.default, setProgress, {
+          criterion,
+          maxCandidates: parameters.maxCandidates,
+          batchSize: parameters.batchSize,
+          untouchedOnly: parameters.untouchedOnly,
+          includeEntries: scanEntries,
+          includeAssets: scanAssets,
+        });
+        patchTab(criterion, { results: outcome.results, truncated: outcome.truncated });
+      } catch (error) {
+        // CMA calls run through the app bridge in the parent window, so a
+        // failure here may leave no trace in the iframe's network tab; this
+        // log is the only place the underlying error is visible.
+        console.error('Orphan scan failed:', error);
+        Notification.error('The scan failed. Please try again.');
+      } finally {
+        setActiveScan(null);
+        setProgress(null);
+      }
+    },
+    [sdk, contentTypes, parameters, scanEntries, scanAssets, patchTab]
+  );
 
   const openResult = useCallback(
     (result: OrphanResult) => {
@@ -158,40 +248,73 @@ const Page = () => {
     [sdk]
   );
 
-  const toggleResult = useCallback((resultId: string) => {
-    setSelectedIds((previous) =>
-      previous.includes(resultId)
-        ? previous.filter((id) => id !== resultId)
-        : [...previous, resultId]
-    );
-  }, []);
-
-  const toggleKind = useCallback(
-    // Kind-scoped select-all with checkbox semantics: toggling on selects
-    // every result of the kind (keeping any other-kind selection), toggling
-    // off deselects exactly those again. "Archive all entries" is one click
-    // and never sweeps assets along.
-    (kind: OrphanKind) => {
-      const kindIds = (results ?? [])
-        .filter((result) => result.kind === kind)
-        .map((result) => result.id);
-      setSelectedIds((previous) => {
-        const allOfKindSelected =
-          kindIds.length > 0 && kindIds.every((id) => previous.includes(id));
-        const withoutKind = previous.filter((id) => !kindIds.includes(id));
-        return allOfKindSelected ? withoutKind : [...withoutKind, ...kindIds];
+  const toggleResult = useCallback(
+    (resultId: string) => {
+      patchTab(activeTab, {
+        selectedIds: currentTab.selectedIds.includes(resultId)
+          ? currentTab.selectedIds.filter((id) => id !== resultId)
+          : [...currentTab.selectedIds, resultId],
       });
     },
-    [results]
+    [activeTab, currentTab.selectedIds, patchTab]
   );
 
   const toggleAll = useCallback(() => {
     // Header checkbox: everything selected clears the selection, anything
-    // less (none or partial) selects all visible results.
-    setSelectedIds((previous) =>
-      results !== null && previous.length < results.length ? results.map((result) => result.id) : []
-    );
-  }, [results]);
+    // less (none or partial) selects all displayed results.
+    patchTab(activeTab, {
+      selectedIds:
+        currentTab.selectedIds.length < displayedResults.length
+          ? displayedResults.map((result) => result.id)
+          : [],
+    });
+  }, [activeTab, currentTab, displayedResults, patchTab]);
+
+  const setScope = useCallback(
+    // The scope checkboxes are dual-purpose: they decide what the next scan
+    // fetches AND live-filter already-scanned results. Unchecking a kind
+    // hides its rows, so — like every view change — it must deselect them,
+    // in both tabs, since the scope is shared.
+    (kind: OrphanKind, checked: boolean) => {
+      if (kind === 'entry') {
+        setScanEntries(checked);
+      } else {
+        setScanAssets(checked);
+      }
+      if (!checked) {
+        setTabStates((previous) => {
+          const prune = (tab: TabState): TabState => ({
+            ...tab,
+            selectedIds: tab.selectedIds.filter((id) =>
+              (tab.results ?? []).some((result) => result.id === id && result.kind !== kind)
+            ),
+          });
+          return { untitled: prune(previous.untitled), unreferenced: prune(previous.unreferenced) };
+        });
+      }
+    },
+    []
+  );
+
+  const setNeverEditedFilter = useCallback(
+    // The two view pills act like radios: clicking the already-active one
+    // is a no-op, never an off-switch, so the current view is always the
+    // pressed pill.
+    (neverEditedOnly: boolean) => {
+      if (neverEditedOnly === currentTab.neverEditedOnly) return;
+      patchTab(activeTab, {
+        neverEditedOnly,
+        // Narrowing the view must narrow the selection too — otherwise
+        // "Archive selected" could archive rows the user can no longer see.
+        selectedIds: neverEditedOnly
+          ? currentTab.selectedIds.filter((id) =>
+              (currentTab.results ?? []).some((result) => result.id === id && result.neverEdited)
+            )
+          : currentTab.selectedIds,
+      });
+    },
+    [activeTab, currentTab, patchTab]
+  );
 
   const runArchive = useCallback(async () => {
     setConfirmArchiveOpen(false);
@@ -199,8 +322,8 @@ const Page = () => {
     try {
       // The archive endpoint differs per kind, so selection ids are resolved
       // back to results to recover whether each is an entry or an asset.
-      const targets = (results ?? [])
-        .filter((result) => selectedIds.includes(result.id))
+      const targets = (currentTab.results ?? [])
+        .filter((result) => currentTab.selectedIds.includes(result.id))
         .map((result) => ({ id: result.id, kind: result.kind }));
       const outcome = await archiveOrphans(
         sdk.cma,
@@ -210,10 +333,11 @@ const Page = () => {
       );
       // Archived items leave the result list; failed ones stay visible and
       // selected so the user can retry them.
-      setResults(
-        (previous) => previous?.filter((result) => !outcome.archivedIds.includes(result.id)) ?? null
-      );
-      setSelectedIds(outcome.failedIds);
+      patchTab(activeTab, {
+        results:
+          currentTab.results?.filter((result) => !outcome.archivedIds.includes(result.id)) ?? null,
+        selectedIds: outcome.failedIds,
+      });
       if (outcome.archivedIds.length > 0) {
         Notification.success(
           `Archived ${outcome.archivedIds.length} ${pluralize(outcome.archivedIds.length)}.`
@@ -232,71 +356,74 @@ const Page = () => {
       setArchiving(false);
       setArchiveProgress(null);
     }
-  }, [sdk, selectedIds, parameters, results]);
+  }, [sdk, activeTab, currentTab, parameters, patchTab]);
 
-  return (
-    // Full width: page apps get the whole main column, and the results table
-    // benefits from every pixel of it.
-    <Box padding="spacingXl">
-      <Flex flexDirection="column" gap="spacingL">
-        <Box>
-          <Flex alignItems="center" gap="spacing2Xs">
-            <Heading as="h1" marginBottom="none">
-              Find orphaned entries
-            </Heading>
-            {/* The why-does-this-app-exist rationale lives in a tooltip so
-                the header stays scannable; an IconButton (not a bare icon)
-                keeps it reachable by keyboard and screen readers. */}
-            <Tooltip
-              content="The regular Contentful search can only filter on the title field for one content type at a time, because each content type defines its own display field. This scan runs that check across every content type — and the media library — at once."
-              placement="right"
-              maxWidth={400}>
-              <IconButton
-                variant="transparent"
-                size="small"
-                icon={<InfoIcon />}
-                aria-label="Why this scan exists"
-                testId="scan-info"
-              />
-            </Tooltip>
-          </Flex>
-          <Text as="p" fontColor="gray600">
-            Finds untitled draft entries and media assets — usually created by accident from a
-            reference field.
-            {/* Whether the never-edited filter applies is decided in the app
-                configuration, so the description must reflect the actual scan. */}
-            {parameters.untouchedOnly && ' Only items never edited after creation are included.'}
-          </Text>
-        </Box>
+  // Tab labels carry the cached result count so users can see at a glance
+  // which scans have run and what they found without switching tabs. The
+  // criterion explanations live inside each panel (always visible above the
+  // scan button), so the labels stay clean.
+  const tabLabel = (criterion: ScanCriterion) => {
+    const { results } = tabStates[criterion];
+    return `${CRITERIA[criterion].tabLabel}${results !== null ? ` (${results.length})` : ''}`;
+  };
 
+  /**
+   * One criterion's whole panel: scan controls plus that tab's cached
+   * results. Both panels share the scope checkboxes (per-run setting) and
+   * the archive machinery; only the state behind them is per-tab.
+   */
+  const renderPanel = (criterion: ScanCriterion) => {
+    const tab = tabStates[criterion];
+    const chrome = CRITERIA[criterion];
+    // Computed per criterion (not from the activeTab-level memos): React
+    // evaluates both panels' JSX even though only one is mounted. The scope
+    // checkboxes filter first, the never-edited view second, so the view
+    // pills count within the current scope.
+    const scopeVisible = (tab.results ?? []).filter((result) =>
+      result.kind === 'entry' ? scanEntries : scanAssets
+    );
+    const displayed = scopeVisible.filter((result) => !tab.neverEditedOnly || result.neverEdited);
+    const displayedCounts = countByKind(displayed);
+    const neverEditedCount = scopeVisible.filter((result) => result.neverEdited).length;
+    return (
+      <Flex flexDirection="column" gap="spacingL" marginTop="spacingL">
+        {/* The criterion's full explanation lives here, inside its tab; the
+            page subtitle stays general and the tab-label tooltips carry the
+            short form. */}
+        {/* The never-edited distinction is no longer part of the scan — it
+            is the visible "Never edited" filter on the results, so the
+            description does not need to mention configuration state. */}
+        <Text as="p" fontColor="gray600">
+          {chrome.description}
+        </Text>
         <Flex alignItems="center" gap="spacingM">
           <Button
             variant="primary"
-            startIcon={<MagnifyingGlassIcon />}
-            onClick={runScan}
+            startIcon={chrome.icon}
+            onClick={() => runScan(criterion)}
             isDisabled={contentTypesLoading || busy || (!scanEntries && !scanAssets)}
-            isLoading={scanning}
-            testId="scan-button">
-            {scanning ? 'Scanning…' : 'Scan for orphans'}
+            isLoading={activeScan === criterion}
+            testId={`scan-${criterion}-button`}>
+            {activeScan === criterion ? 'Scanning…' : chrome.scanLabel}
           </Button>
-          {/* Per-run scope: the entry fan-out (one query per content type)
-              is the slow part of a scan, so these let a user run a quick
-              assets-only pass — or skip assets they do not care about. */}
+          {/* Dual-purpose scope: decides what the next scan fetches AND
+              live-filters already-scanned results (the entry fan-out is the
+              slow part of a scan, so an assets-only pass is quick). */}
           <Checkbox
             isChecked={scanEntries}
-            onChange={(event) => setScanEntries(event.target.checked)}
+            onChange={(event) => setScope('entry', event.target.checked)}
             isDisabled={busy}
             testId="scope-entries">
             Entries
           </Checkbox>
           <Checkbox
             isChecked={scanAssets}
-            onChange={(event) => setScanAssets(event.target.checked)}
+            onChange={(event) => setScope('asset', event.target.checked)}
             isDisabled={busy}
             testId="scope-assets">
             Media assets
           </Checkbox>
-          {scanning && progress && (
+          {activeScan === criterion && progress && (
             <Flex alignItems="center" gap="spacingXs">
               <Spinner size="small" />
               <Text fontColor="gray600">{progressLabel(progress)}</Text>
@@ -304,14 +431,9 @@ const Page = () => {
           )}
         </Flex>
 
-        {/* Separator between the scan controls and the results area, which
-            below this line always renders something: placeholder, skeleton,
-            empty note, or the results table. */}
-        <Box style={{ borderBottom: `1px solid ${tokens.gray200}` }} />
-
-        {results === null && !scanning && (
-          // Fresh-open state: without this the area below the separator would
-          // be blank until the first scan, which reads as something missing.
+        {tab.results === null && activeScan !== criterion && (
+          // Fresh tab: without this the area below the controls would be
+          // blank until the first scan, which reads as something missing.
           <Flex
             flexDirection="column"
             alignItems="center"
@@ -325,13 +447,12 @@ const Page = () => {
             <MagnifyingGlassIcon size="large" variant="muted" />
             <Text fontWeight="fontWeightDemiBold">No scan has run yet</Text>
             <Text fontColor="gray600">
-              Click “Scan for orphans” to check every content type and the media library for
-              untitled drafts.
+              Run a scan to check every content type and the media library for orphaned drafts.
             </Text>
           </Flex>
         )}
 
-        {scanning && (
+        {activeScan === criterion && (
           // Placeholder rows keep the results area occupied while the scan
           // runs; the row count is arbitrary, it only suggests a table.
           <Table testId="scan-skeleton">
@@ -341,52 +462,73 @@ const Page = () => {
           </Table>
         )}
 
-        {truncated && (
+        {tab.truncated && (
           <Note variant="warning">
             The scan stopped after {parameters.maxCandidates} draft items. Archive or clean up some
             of the results and scan again, or raise the limit in the app configuration.
           </Note>
         )}
 
-        {results !== null &&
-          (results.length === 0 ? (
+        {tab.results !== null &&
+          (tab.results.length === 0 ? (
             <Note variant="positive" testId="empty-note">
-              No orphans found — every scanned draft has a title.
+              {chrome.emptyNote}
             </Note>
           ) : (
             <>
               <Flex alignItems="center" justifyContent="space-between">
                 <Flex alignItems="center" gap="spacingM">
                   <Text fontWeight="fontWeightDemiBold" testId="result-count">
-                    {describeCounts(resultCounts)} found
-                    {selectedIds.length > 0 ? ` — ${selectedIds.length} selected` : ''}
+                    {describeCounts(displayedCounts)} found
+                    {tab.selectedIds.length > 0 ? ` — ${tab.selectedIds.length} selected` : ''}
                   </Text>
-                  {/* Kind-scoped select-all, only useful (and only shown)
-                      when the results actually mix entries and assets. The
-                      pressed state mirrors the real selection, so the
-                      buttons also read as "everything of this kind is
-                      selected" and toggle off to undo exactly that. */}
-                  {resultCounts.entries > 0 && resultCounts.assets > 0 && (
+                  {/* The scan is broad; these two pills switch between the
+                      broad view and the stricter never-edited one. Exactly
+                      one is always pressed, and both carry their counts, so
+                      the current view — and what clicking the other pill
+                      does — is never ambiguous. Untitled tab only: edit
+                      history is a junk signal for untitled drafts, but says
+                      nothing about whether something is referenced. */}
+                  {criterion === 'untitled' && (
                     <Flex alignItems="center" gap="spacingXs">
-                      <Text fontColor="gray600">Select all</Text>
+                      <Text fontColor="gray600">Show</Text>
                       <ToggleButton
                         size="small"
-                        isActive={selectedCounts.entries === resultCounts.entries}
-                        onToggle={() => toggleKind('entry')}
+                        isActive={!tab.neverEditedOnly}
+                        onToggle={() => setNeverEditedFilter(false)}
                         isDisabled={busy}
-                        testId="select-entries">
-                        Entries ({resultCounts.entries})
+                        testId="filter-all">
+                        All ({scopeVisible.length})
                       </ToggleButton>
-                      <ToggleButton
-                        size="small"
-                        isActive={selectedCounts.assets === resultCounts.assets}
-                        onToggle={() => toggleKind('asset')}
-                        isDisabled={busy}
-                        testId="select-assets">
-                        Assets ({resultCounts.assets})
-                      </ToggleButton>
+                      {/* "Never edited" is a term of art (sys.version === 1),
+                        so it gets a tooltip — including the archive gotcha:
+                        unarchiving counts as an edit, so restored orphans
+                        only show under "All". */}
+                      <Tooltip
+                        content="Items never saved after creation — the strictest orphan signal, since even a single edit suggests someone worked on the item. Note that archiving and unarchiving counts as editing, so orphans that were archived and restored appear only under “All” — where you may still want to archive them again."
+                        placement="top"
+                        maxWidth={360}>
+                        <ToggleButton
+                          size="small"
+                          isActive={tab.neverEditedOnly}
+                          onToggle={() => setNeverEditedFilter(true)}
+                          isDisabled={busy}
+                          testId="filter-never-edited">
+                          {/* Trailing info icon as the there-is-a-tooltip cue;
+                            ToggleButton's icon prop is leading-only, so it
+                            rides along in the children. */}
+                          <Flex as="span" alignItems="center" gap="spacing2Xs">
+                            Never edited ({neverEditedCount})
+                            <InfoIcon size="tiny" variant="muted" />
+                          </Flex>
+                        </ToggleButton>
+                      </Tooltip>
                     </Flex>
                   )}
+                  {/* No kind-scoped select-all here: the scope checkboxes
+                      above already hide (and deselect) a kind, so "select
+                      only entries" is uncheck-assets + select-all, and the
+                      archive confirmation still itemizes by kind. */}
                 </Flex>
                 <Flex alignItems="center" gap="spacingM">
                   {archiving && archiveProgress && (
@@ -397,74 +539,86 @@ const Page = () => {
                       </Text>
                     </Flex>
                   )}
-                  <Button
-                    variant="negative"
-                    startIcon={<TrayArrowDownIcon />}
-                    isDisabled={selectedIds.length === 0 || busy}
-                    isLoading={archiving}
-                    onClick={() => setConfirmArchiveOpen(true)}
-                    testId="archive-button">
-                    Archive selected
-                  </Button>
                   {/* Archiving reads as scary-destructive next to a negative
-                      button; this spells out that it is reversible and links
-                      straight to where actual deletion lives. A click
-                      Popover, not a Tooltip: a hover tooltip closes before
-                      its links can be clicked. */}
-                  <Popover
-                    isOpen={archiveInfoOpen}
-                    onClose={() => setArchiveInfoOpen(false)}
-                    placement="top-end">
-                    <Popover.Trigger>
-                      <IconButton
-                        variant="transparent"
-                        size="small"
-                        icon={<InfoIcon />}
-                        aria-label="What archiving does"
-                        onClick={() => setArchiveInfoOpen((previous) => !previous)}
-                        testId="archive-info"
-                      />
-                    </Popover.Trigger>
-                    <Popover.Content>
-                      <Box padding="spacingM" style={{ maxWidth: '340px' }}>
-                        <Text as="p" marginBottom="spacingS">
-                          Archiving is not deleting: archived items just leave the content list and
-                          media library, and can be unarchived at any time.
-                        </Text>
-                        <Text as="p">
-                          To delete them permanently, open the{' '}
-                          <TextLink
-                            href={archivedListUrls.entries}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            testId="archived-entries-link">
-                            archived entries
-                          </TextLink>{' '}
-                          or{' '}
-                          <TextLink
-                            href={archivedListUrls.assets}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            testId="archived-assets-link">
-                            archived assets
-                          </TextLink>{' '}
-                          list (opens in a new tab), select the items, and delete them there.
-                        </Text>
-                      </Box>
-                    </Popover.Content>
-                  </Popover>
+                      button; the tooltip says it is reversible, and the
+                      confirmation dialog carries the deep links to where
+                      actual deletion lives. */}
+                  <Tooltip
+                    content="Archiving is not deleting: archived items just leave the content list and media library, and can be unarchived at any time. The confirmation links to where archived items can be permanently deleted."
+                    placement="top"
+                    maxWidth={340}>
+                    <Button
+                      variant="negative"
+                      startIcon={<TrayArrowDownIcon />}
+                      endIcon={<InfoIcon />}
+                      isDisabled={tab.selectedIds.length === 0 || busy}
+                      isLoading={archiving}
+                      onClick={() => setConfirmArchiveOpen(true)}
+                      testId="archive-button">
+                      Archive selected
+                    </Button>
+                  </Tooltip>
                 </Flex>
               </Flex>
-              <OrphanTable
-                results={results}
-                selectedIds={selectedIds}
-                onToggleResult={toggleResult}
-                onToggleAll={toggleAll}
-                onOpenResult={openResult}
-                isDisabled={busy}
-              />
+              {displayed.length === 0 ? (
+                // Filters are hiding every result: say which one, instead
+                // of showing an empty table — the control to widen the view
+                // is right above.
+                <Note variant="neutral" testId="filtered-empty-note">
+                  {scopeVisible.length === 0
+                    ? `All ${tab.results.length} ${pluralize(
+                        tab.results.length
+                      )} are hidden by the Entries / Media assets checkboxes above.`
+                    : `All ${scopeVisible.length} ${pluralize(
+                        scopeVisible.length
+                      )} in scope were edited after creation — switch the view above to “All” to show them.`}
+                </Note>
+              ) : (
+                <OrphanTable
+                  results={displayed}
+                  selectedIds={tab.selectedIds}
+                  onToggleResult={toggleResult}
+                  onToggleAll={toggleAll}
+                  onOpenResult={openResult}
+                  isDisabled={busy}
+                />
+              )}
             </>
           ))}
+      </Flex>
+    );
+  };
+
+  return (
+    // Full width: page apps get the whole main column, and the results table
+    // benefits from every pixel of it.
+    <Box padding="spacingXl">
+      <Flex flexDirection="column" gap="spacingL">
+        <Box>
+          <Heading as="h1" marginBottom="none">
+            Find orphaned entries
+          </Heading>
+          <Text as="p" fontColor="gray600">
+            Finds orphaned draft entries and media assets, so they can be reviewed and archived from
+            one place. Each tab covers a different definition of “orphaned”.
+          </Text>
+        </Box>
+
+        {/* Each criterion is a tab holding its own cached results, so
+            running one scan, checking the other, and switching back never
+            re-runs anything. */}
+        <Tabs currentTab={activeTab} onTabChange={(tab) => setActiveTab(tab as ScanCriterion)}>
+          <Tabs.List>
+            <Tabs.Tab panelId="untitled" testId="tab-untitled">
+              {tabLabel('untitled')}
+            </Tabs.Tab>
+            <Tabs.Tab panelId="unreferenced" testId="tab-unreferenced">
+              {tabLabel('unreferenced')}
+            </Tabs.Tab>
+          </Tabs.List>
+          <Tabs.Panel id="untitled">{renderPanel('untitled')}</Tabs.Panel>
+          <Tabs.Panel id="unreferenced">{renderPanel('unreferenced')}</Tabs.Panel>
+        </Tabs>
       </Flex>
 
       <ModalConfirm
@@ -477,10 +631,29 @@ const Page = () => {
         // the button before anything is archived.
         confirmLabel={`Archive ${describeCounts(selectedCounts)}`}
         cancelLabel="Cancel">
-        <Text>
+        <Text as="p" marginBottom="spacingS">
           The selected {describeCounts(selectedCounts)} will be archived and disappear from the
           content list and media library. Archiving is reversible: anything archived can be
           unarchived from its editor at any time.
+        </Text>
+        <Text as="p">
+          To delete archived items permanently, open the{' '}
+          <TextLink
+            href={archivedListUrls.entries}
+            target="_blank"
+            rel="noopener noreferrer"
+            testId="archived-entries-link">
+            archived entries
+          </TextLink>{' '}
+          or{' '}
+          <TextLink
+            href={archivedListUrls.assets}
+            target="_blank"
+            rel="noopener noreferrer"
+            testId="archived-assets-link">
+            archived assets
+          </TextLink>{' '}
+          list (opens in a new tab), select the items, and delete them there.
         </Text>
       </ModalConfirm>
     </Box>

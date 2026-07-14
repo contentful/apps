@@ -1,5 +1,12 @@
 import { AssetProps, ContentTypeProps, EntryProps, QueryOptions } from 'contentful-management';
-import { CmaClient, OrphanResult, ScanOutcome, ScanProgress } from '../types';
+import {
+  CmaClient,
+  OrphanKind,
+  OrphanResult,
+  ScanCriterion,
+  ScanOutcome,
+  ScanProgress,
+} from '../types';
 import {
   CONTENT_TYPE_PAGE_LIMIT,
   PAGE_LIMIT,
@@ -9,15 +16,15 @@ import {
 
 /**
  * Scan settings. The limits and the untouched filter come from installation
- * parameters (see src/parameters.ts); the two scope flags are a per-run
- * choice made on the page.
+ * parameters (see src/parameters.ts); the criterion and the two scope flags
+ * are a per-run choice made on the page.
  */
 export interface ScanOptions {
+  /** What "orphan" means for this scan: untitled or unreferenced drafts. */
+  criterion: ScanCriterion;
   maxCandidates: number;
   /** Concurrent CMA entry queries while scanning. */
   batchSize: number;
-  /** Only flag drafts never saved after creation (sys.version === 1). */
-  untouchedOnly: boolean;
   /** Scan entries of all content types. */
   includeEntries: boolean;
   /** Scan media-library assets. */
@@ -263,16 +270,72 @@ const fetchDraftCandidates = async (
 };
 
 /**
- * Scans the environment for orphaned drafts: never published, not archived,
- * and with no title value in the default locale. For entries the title is
- * the content type's display field, and content types whose display field is
- * not a text field are skipped — their entries cannot be missing a title.
- * Assets always have a title field, so the whole media library is one scan
- * step.
+ * One draft candidate, flattened to what both criteria and the result
+ * mapping need, so entries and assets flow through the same filters.
+ */
+interface Candidate {
+  kind: OrphanKind;
+  id: string;
+  typeName: string;
+  createdAt: string;
+  title: string | undefined;
+  version: number;
+  creator: CreatorLink | undefined;
+}
+
+/**
+ * Keeps only candidates that no entry links to. Referenced-ness cannot be
+ * queried in bulk — links_to_entry / links_to_asset filter by ONE target id
+ * per query — so this is one count request per candidate (limit: 0 returns
+ * just the total), batched `batchSize` at a time. This makes the
+ * unreferenced criterion by far the more expensive scan: budget one request
+ * per draft, on top of the candidate paging.
+ */
+const filterUnreferenced = async (
+  cma: CmaClient,
+  candidates: Candidate[],
+  batchSize: number,
+  onProgress: (progress: ScanProgress) => void
+): Promise<Candidate[]> => {
+  const unreferenced: Candidate[] = [];
+  for (let i = 0; i < candidates.length; i += batchSize) {
+    const batch = candidates.slice(i, i + batchSize);
+    onProgress({
+      current: Math.min(i + batch.length, candidates.length),
+      total: candidates.length,
+      stepNames: ['references'],
+    });
+    const totals = await Promise.all(
+      batch.map((candidate) =>
+        cma.entry
+          .getMany({
+            query: {
+              [candidate.kind === 'entry' ? 'links_to_entry' : 'links_to_asset']: candidate.id,
+              limit: 0,
+            },
+          })
+          .then((response) => response.total)
+      )
+    );
+    unreferenced.push(...batch.filter((_, index) => totals[index] === 0));
+  }
+  return unreferenced;
+};
+
+/**
+ * Scans the environment for orphaned drafts (never published, not archived)
+ * matching the chosen criterion:
  *
- * With `untouchedOnly` set, an untitled draft is only flagged when it was
- * never saved after creation, which filters out work-in-progress drafts that
- * simply have not been given a title yet.
+ * - "untitled": no title value in the default locale. For entries the title
+ *   is the content type's display field, and content types whose display
+ *   field is not a text field are skipped — their entries cannot be missing
+ *   a title.
+ * - "unreferenced": no entry links to the item. Every content type
+ *   participates (any entry can be a link target) and titles are irrelevant.
+ *
+ * Both scans are broad with respect to edit history: every result carries a
+ * `neverEdited` flag and the UI filters on it visibly instead of the scan
+ * excluding anything silently.
  */
 export const findOrphans = async (
   cma: CmaClient,
@@ -282,7 +345,9 @@ export const findOrphans = async (
   options: ScanOptions
 ): Promise<ScanOutcome> => {
   const scannableTypes = options.includeEntries
-    ? contentTypes.filter((ct) => getTextDisplayFieldId(ct) !== undefined)
+    ? options.criterion === 'untitled'
+      ? contentTypes.filter((ct) => getTextDisplayFieldId(ct) !== undefined)
+      : contentTypes
     : [];
   const progressTotal = scannableTypes.length + (options.includeAssets ? 1 : 0);
 
@@ -310,35 +375,50 @@ export const findOrphans = async (
     }
   }
 
-  // The CMA bumps sys.version on every write (updates, but also publish,
-  // unpublish, archive and unarchive — and for assets, file processing).
-  // Publish and archive states are already excluded by the draft queries, so
-  // on a candidate version 1 can only mean it was never saved after
-  // creation. This check must stay client-side: sys.version is not a
-  // queryable attribute in CMA searches.
-  const passesUntouchedFilter = (version: number) => !options.untouchedOnly || version === 1;
+  // Entries and assets are flattened into one candidate list so both
+  // criteria filter the same shape. Titles ride along: the untitled
+  // criterion filters on them, the unreferenced one displays them (an
+  // unreferenced entry usually has a real title).
+  const allCandidates: Candidate[] = [
+    ...candidates.map(({ entry, contentType }) => ({
+      kind: 'entry' as const,
+      id: entry.sys.id,
+      typeName: contentType.name,
+      createdAt: entry.sys.createdAt,
+      title: getEntryTitle(entry, contentType, defaultLocale),
+      version: entry.sys.version,
+      creator: toCreatorLink(entry.sys),
+    })),
+    ...assetCandidates.map((asset) => ({
+      kind: 'asset' as const,
+      id: asset.sys.id,
+      typeName: 'Asset',
+      createdAt: asset.sys.createdAt,
+      title: getAssetTitle(asset, defaultLocale),
+      version: asset.sys.version,
+      creator: toCreatorLink(asset.sys),
+    })),
+  ];
 
-  const entryOrphans = candidates.filter(
-    ({ entry, contentType }) =>
-      getEntryTitle(entry, contentType, defaultLocale) === undefined &&
-      passesUntouchedFilter(entry.sys.version)
-  );
-  const assetOrphans = assetCandidates.filter(
-    (asset) =>
-      getAssetTitle(asset, defaultLocale) === undefined && passesUntouchedFilter(asset.sys.version)
-  );
+  // The scan itself is deliberately broad — the "never edited" distinction
+  // is carried on each result (see neverEdited below) and applied as a
+  // visible filter in the UI, never as a silent scan-time exclusion.
+  let orphans: Candidate[];
+  if (options.criterion === 'unreferenced') {
+    orphans = await filterUnreferenced(cma, allCandidates, options.batchSize, onProgress);
+  } else {
+    orphans = allCandidates.filter((candidate) => candidate.title === undefined);
+  }
 
   // sys.createdBy only carries a link, so creators are resolved to names in
   // one batched users lookup per USER_PAGE_LIMIT unique ids — the "who
   // created this" column is often the fastest way to find the person or
-  // workflow that produces orphans.
-  const creatorLinks = [
-    ...entryOrphans.map(({ entry }) => toCreatorLink(entry.sys)),
-    ...assetOrphans.map((asset) => toCreatorLink(asset.sys)),
-  ];
+  // workflow that produces orphans. Resolution runs after filtering so only
+  // actual orphans' creators are looked up.
   const userIds = [
     ...new Set(
-      creatorLinks
+      orphans
+        .map((orphan) => orphan.creator)
         .filter((link): link is CreatorLink => link !== undefined && link.linkType === 'User')
         .map((link) => link.id)
     ),
@@ -351,22 +431,21 @@ export const findOrphans = async (
     return (link && names[link.id]) || 'Unknown user';
   };
 
-  const results: OrphanResult[] = [
-    ...entryOrphans.map(({ entry, contentType }) => ({
-      kind: 'entry' as const,
-      id: entry.sys.id,
-      typeName: contentType.name,
-      createdAt: entry.sys.createdAt,
-      createdBy: creatorName(toCreatorLink(entry.sys)),
-    })),
-    ...assetOrphans.map((asset) => ({
-      kind: 'asset' as const,
-      id: asset.sys.id,
-      typeName: 'Asset',
-      createdAt: asset.sys.createdAt,
-      createdBy: creatorName(toCreatorLink(asset.sys)),
-    })),
-  ];
+  const results: OrphanResult[] = orphans.map((orphan) => ({
+    kind: orphan.kind,
+    id: orphan.id,
+    typeName: orphan.typeName,
+    title: orphan.title,
+    createdAt: orphan.createdAt,
+    createdBy: creatorName(orphan.creator),
+    // The CMA bumps sys.version on every write (updates, but also publish,
+    // unpublish, archive and unarchive — and for assets, file processing).
+    // Publish and archive states are excluded by the draft queries, so
+    // version 1 can only mean the item was never saved after creation. The
+    // check must be client-side anyway: sys.version is not a queryable
+    // attribute in CMA searches.
+    neverEdited: orphan.version === 1,
+  }));
 
   return { results, truncated };
 };

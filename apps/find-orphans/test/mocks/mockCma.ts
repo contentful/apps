@@ -18,6 +18,11 @@ export interface MockCmaOptions {
   assets?: AssetProps[];
   /** Space users returned for the creator-name lookup. */
   users?: UserProps[];
+  /**
+   * Incoming-reference totals for links_to_entry / links_to_asset count
+   * queries, keyed by target id. Ids absent here count as unreferenced.
+   */
+  referenceCounts?: Record<string, number>;
   /** Entry/asset ids whose archive call should reject. */
   failArchiveIds?: string[];
 }
@@ -27,12 +32,18 @@ export const createMockCma = ({
   entriesByContentType = {},
   assets = [],
   users = [],
+  referenceCounts = {},
   failArchiveIds = [],
 }: MockCmaOptions = {}) => {
   const contentTypeGetMany = vi.fn().mockResolvedValue(collection(contentTypes));
   const entryGetMany = vi
     .fn()
     .mockImplementation(({ query }: { query: Record<string, unknown> }) => {
+      // Reference-count queries (limit: 0) only read the collection total.
+      if ('links_to_entry' in query || 'links_to_asset' in query) {
+        const targetId = (query.links_to_entry ?? query.links_to_asset) as string;
+        return Promise.resolve(collection([], referenceCounts[targetId] ?? 0));
+      }
       const entries = entriesByContentType[query.content_type as string] ?? [];
       if (query.skip && (query.skip as number) >= entries.length) {
         return Promise.resolve(collection([], entries.length));

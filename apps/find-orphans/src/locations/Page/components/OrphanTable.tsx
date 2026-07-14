@@ -69,10 +69,14 @@ export const OrphanTable = ({
               />
             </Table.Cell>
             <Table.Cell>
-              {/* The scan only lists items with an empty title, so this is
-                  always the editor's "Untitled" placeholder, mirroring what
-                  the content list and media library show for them. */}
-              <Text fontColor="gray600">Untitled</Text>
+              {/* Untitled-scan results never have a title; unreferenced ones
+                  usually do. The gray "Untitled" placeholder mirrors what
+                  the content list and media library show for titleless items. */}
+              {result.title !== undefined ? (
+                <Text>{result.title}</Text>
+              ) : (
+                <Text fontColor="gray600">Untitled</Text>
+              )}
             </Table.Cell>
             <Table.Cell>{result.typeName}</Table.Cell>
             <Table.Cell>

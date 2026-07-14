@@ -40,6 +40,30 @@ export const mockArticleContentType: ContentTypeProps = {
   ],
 };
 
+/**
+ * Content type with no display field configured at all — common for
+ * component types (banners, teasers) where nobody marks an entry title.
+ * Every entry of such a type renders as "Untitled" in Contentful.
+ */
+export const mockNoDisplayFieldContentType: ContentTypeProps = {
+  sys: baseSys('banner'),
+  name: 'Basic Promotional Banner',
+  description: '',
+  displayField: null as unknown as string,
+  fields: [
+    {
+      id: 'cta',
+      name: 'Call to action',
+      type: 'Symbol',
+      localized: false,
+      required: false,
+      disabled: false,
+      omitted: false,
+      validations: [],
+    },
+  ],
+};
+
 /** Content type whose display field is not a text field (edge case: no scannable title). */
 export const mockNumericDisplayContentType: ContentTypeProps = {
   sys: baseSys('counter'),

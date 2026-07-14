@@ -136,10 +136,9 @@ const ConfigScreen = () => {
         style={{ maxWidth: '768px', width: '100%' }}>
         <Heading marginBottom="spacingS">Set up Find Orphans</Heading>
         <Paragraph>
-          Find Orphans scans this space for draft entries and media assets with no title — the
-          signature of an item created by mistake, for example by adding a new entry on a reference
-          field instead of linking an existing one — and lets you review or archive them from one
-          page.
+          Find Orphans scans this space for orphaned draft entries and media assets — items with no
+          title (the signature of an entry created by mistake from a reference field) or items that
+          no entry references — and lets you review or archive them from one page.
         </Paragraph>
 
         <Subheading marginTop="spacingXl" marginBottom="spacing2Xs">
@@ -174,13 +173,14 @@ const ConfigScreen = () => {
                 setValues((previous) => ({ ...previous, untouchedOnly: event.target.checked }))
               }
               testId="untouched-only">
-              Only include entries that were never edited
+              Start results filtered to never-edited items
             </Checkbox>
             <FormControl.HelpText>
-              Contentful bumps an item&apos;s version on every save, so an untitled draft still at
-              version 1 was abandoned right after creation. Turn this off to also flag untitled
-              drafts that were edited at least once — for example when other apps or scripts write
-              to entries on creation.
+              Scans always find every untitled draft; this only decides whether the results open
+              with the &ldquo;Never edited&rdquo; filter already on. Contentful bumps an item&apos;s
+              version on every save, so an untitled draft still at version 1 was abandoned right
+              after creation. Applies to the untitled tab; the unreferenced tab always starts
+              unfiltered.
             </FormControl.HelpText>
           </FormControl>
         </Form>

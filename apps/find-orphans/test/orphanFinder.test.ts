@@ -14,14 +14,15 @@ import {
   makeMockEntry,
   makeMockUser,
   mockArticleContentType,
+  mockNoDisplayFieldContentType,
   mockNumericDisplayContentType,
 } from './mocks';
 
 const noProgress = vi.fn();
 const options = {
+  criterion: 'untitled' as const,
   maxCandidates: 500,
   batchSize: 5,
-  untouchedOnly: true,
   includeEntries: true,
   includeAssets: true,
 };
@@ -203,9 +204,10 @@ describe('findOrphans', () => {
     expect(outcome.results[0].createdAt).toBe('2026-03-05T00:00:00Z');
   });
 
-  it('excludes untitled drafts that were edited after creation when untouchedOnly is set', async () => {
-    // sys.version increments on every save, so version > 1 means someone has
-    // worked on the item — likely a work-in-progress, not an orphan.
+  it('includes edited untitled drafts and marks never-edited ones with a flag', async () => {
+    // The scan is deliberately broad: edit history never excludes a result.
+    // sys.version increments on every save, so version 1 = never edited —
+    // carried as a flag for the UI's "Never edited" filter.
     const untouched = makeMockEntry('untouched', 'article');
     const edited = makeMockEntry('edited', 'article', {}, '2026-06-01T00:00:00Z', 4);
     const { cma } = createMockCma({
@@ -215,22 +217,12 @@ describe('findOrphans', () => {
 
     const outcome = await findOrphans(cma, [mockArticleContentType], 'en-US', noProgress, options);
 
-    expect(outcome.results.map((r) => r.id)).toEqual(['untouched']);
-  });
-
-  it('includes edited untitled drafts when untouchedOnly is off', async () => {
-    const edited = makeMockEntry('edited', 'article', {}, '2026-06-01T00:00:00Z', 4);
-    const { cma } = createMockCma({
-      entriesByContentType: { article: [edited] },
-      assets: [makeMockAsset('touched-asset', undefined, '2026-06-01T00:00:00Z', 3)],
+    const flags = Object.fromEntries(outcome.results.map((r) => [r.id, r.neverEdited]));
+    expect(flags).toEqual({
+      untouched: true,
+      edited: false,
+      'touched-asset': false,
     });
-
-    const outcome = await findOrphans(cma, [mockArticleContentType], 'en-US', noProgress, {
-      ...options,
-      untouchedOnly: false,
-    });
-
-    expect(outcome.results.map((r) => r.id)).toEqual(['edited', 'touched-asset']);
   });
 
   it('skips entries or assets when their scope is off', async () => {
@@ -253,6 +245,58 @@ describe('findOrphans', () => {
     });
     expect(assetsOnly.results.map((r) => r.id)).toEqual(['orphan-asset']);
     expect(entryGetMany).not.toHaveBeenCalled();
+  });
+
+  it('finds untitled never-edited drafts under both criteria', async () => {
+    // Cross-criterion consistency: a version-1 untitled draft that nothing
+    // references is an orphan by either definition, so it must appear in
+    // both scans' results.
+    const orphan = makeMockEntry('orphan', 'article');
+    const { cma } = createMockCma({ entriesByContentType: { article: [orphan] } });
+
+    const untitled = await findOrphans(cma, [mockArticleContentType], 'en-US', noProgress, options);
+    const unreferenced = await findOrphans(cma, [mockArticleContentType], 'en-US', noProgress, {
+      ...options,
+      criterion: 'unreferenced',
+    });
+
+    expect(untitled.results.map((r) => r.id)).toEqual(['orphan']);
+    expect(unreferenced.results.map((r) => r.id)).toEqual(['orphan']);
+  });
+
+  it('skips content types with no display field configured (unreferenced-scan-only territory)', async () => {
+    // Component types (banners, teasers) often have no entry title at all;
+    // their entries always render as "Untitled" in Contentful, but the
+    // untitled scan deliberately skips them — flagging every draft of such
+    // types would sweep in legitimate work-in-progress. They still surface
+    // in the unreferenced scan, which is why an "Untitled" row can appear
+    // there and not here. Pinned so the discrepancy is documented behavior.
+    const bannerDraft = makeMockEntry('banner-1', 'banner');
+    const { cma, entryGetMany } = createMockCma({
+      entriesByContentType: { banner: [bannerDraft] },
+    });
+
+    const outcome = await findOrphans(cma, [mockNoDisplayFieldContentType], 'en-US', noProgress, {
+      ...options,
+      includeAssets: false,
+    });
+
+    expect(outcome.results).toHaveLength(0);
+    expect(entryGetMany).not.toHaveBeenCalled();
+
+    // The same type IS scanned under the unreferenced criterion.
+    const unreferenced = await findOrphans(
+      cma,
+      [mockNoDisplayFieldContentType],
+      'en-US',
+      noProgress,
+      {
+        ...options,
+        criterion: 'unreferenced',
+        includeAssets: false,
+      }
+    );
+    expect(unreferenced.results.map((r) => r.id)).toEqual(['banner-1']);
   });
 
   it('skips content types without a text display field', async () => {
@@ -332,6 +376,86 @@ describe('findOrphans', () => {
       current: 2,
       total: 2,
       stepNames: ['Media assets'],
+    });
+  });
+});
+
+describe('findOrphans (unreferenced criterion)', () => {
+  const unreferencedOptions = { ...options, criterion: 'unreferenced' as const };
+
+  it('keeps only drafts that no entry links to, with their titles', async () => {
+    const linked = makeMockEntry('linked', 'article', { title: { 'en-US': 'Linked' } });
+    const unlinked = makeMockEntry('unlinked', 'article', { title: { 'en-US': 'Unlinked' } });
+    const { cma } = createMockCma({
+      entriesByContentType: { article: [linked, unlinked] },
+      assets: [makeMockAsset('used-asset', 'Hero'), makeMockAsset('unused-asset', 'Spare')],
+      referenceCounts: { linked: 3, 'used-asset': 1 },
+    });
+
+    const outcome = await findOrphans(
+      cma,
+      [mockArticleContentType],
+      'en-US',
+      noProgress,
+      unreferencedOptions
+    );
+
+    expect(outcome.results.map((r) => r.id).sort()).toEqual(['unlinked', 'unused-asset']);
+    // Unreferenced results keep their real titles for display.
+    expect(outcome.results.find((r) => r.id === 'unlinked')?.title).toBe('Unlinked');
+  });
+
+  it('includes content types without a text display field', async () => {
+    // Any entry can be a link target, so the untitled-scan restriction to
+    // text display fields does not apply here.
+    const { cma } = createMockCma({
+      entriesByContentType: { counter: [makeMockEntry('c1', 'counter')] },
+    });
+
+    const outcome = await findOrphans(cma, [mockNumericDisplayContentType], 'en-US', noProgress, {
+      ...unreferencedOptions,
+      includeAssets: false,
+    });
+
+    expect(outcome.results.map((r) => r.id)).toEqual(['c1']);
+  });
+
+  it('includes edited drafts, carrying the neverEdited flag', async () => {
+    // An unreferenced entry is worth flagging no matter how often it was
+    // edited; the flag still rides along for the UI filter.
+    const edited = makeMockEntry(
+      'edited',
+      'article',
+      { title: { 'en-US': 'Edited' } },
+      '2026-01-01T00:00:00Z',
+      7
+    );
+    const { cma } = createMockCma({ entriesByContentType: { article: [edited] } });
+
+    const outcome = await findOrphans(cma, [mockArticleContentType], 'en-US', noProgress, {
+      ...unreferencedOptions,
+      includeAssets: false,
+    });
+
+    expect(outcome.results.map((r) => r.id)).toEqual(['edited']);
+    expect(outcome.results[0].neverEdited).toBe(false);
+  });
+
+  it('reports reference-count progress after the candidate phases', async () => {
+    const onProgress = vi.fn();
+    const { cma } = createMockCma({
+      entriesByContentType: { article: [makeMockEntry('e1', 'article')] },
+    });
+
+    await findOrphans(cma, [mockArticleContentType], 'en-US', onProgress, {
+      ...unreferencedOptions,
+      includeAssets: false,
+    });
+
+    expect(onProgress).toHaveBeenLastCalledWith({
+      current: 1,
+      total: 1,
+      stepNames: ['references'],
     });
   });
 });

@@ -1,13 +1,26 @@
 # Agent Guide — find-orphans
 
 ## What This App Does
-Full-page app that scans an environment for "orphaned" draft entries and media assets —
-typically empty items accidentally created from a reference field when the user meant to link
-an existing one. An orphan is a draft (never published, not archived) with no title value in
-the default locale; with the `untouchedOnly` parameter (default on) it must also never have
-been saved after creation (`sys.version === 1`). The scan scope (entries and/or assets) is a
-per-run checkbox choice next to the scan button, both on by default. Results deep-link into the
-matching editor and can be archived in bulk.
+Full-page app that scans an environment for "orphaned" draft entries and media assets. Two
+criteria, each in its own tab with its own scan button and its own cached results:
+
+- **Untitled**: a draft (never published, not archived) with no title value in the default
+  locale — typically created by accident from a reference field. These are confident junk.
+- **Unreferenced**: a draft that no entry links to (`links_to_entry` / `links_to_asset` count
+  is 0). A review lead, NOT proof of junk — top-level content (landing pages) is legitimately
+  unreferenced. Copy must never claim these are safe to delete.
+
+Scans are broad: edit history NEVER excludes results at scan time. Every result carries a
+`neverEdited` flag (`sys.version === 1`) and the UNTITLED tab's results header has a segmented
+view switch — "Show: All (N) / Never edited (M)" ToggleButton pills, exactly one always
+pressed, clicking the active pill is a no-op — with `untouchedOnly` setting its starting view.
+The unreferenced tab has NO never-edited switch at all (decided 2026-07-13: edit history says
+nothing about referenced-ness). Keep it this way: silent scan-time
+exclusion was tried first and read as "the scan is broken" when rows appeared in one tab and
+not the other, and a single on/off toggle was tried next and read as ambiguous.
+
+The scan scope (entries and/or assets) is a per-run checkbox choice, both on by default.
+Results deep-link into the matching editor and can be archived in bulk.
 
 ## Archetype
 Standard Vite app. Page location plus an app-config screen for installation parameters.
@@ -31,7 +44,7 @@ runs with missing or invalid settings.
 |--------------|------|----------|---------|---------|
 | `maxCandidates` | Number | Yes | 500 | Hard cap on candidate entries per scan |
 | `batchSize` | Number | Yes | 5 (max 7) | Concurrent CMA requests (scan queries, archiving) |
-| `untouchedOnly` | Boolean | Yes | true | Only flag drafts never saved after creation (`sys.version === 1`) |
+| `untouchedOnly` | Boolean | Yes | true | Default state of the untitled tab's "Never edited" results filter (`sys.version === 1`) |
 
 Parameter definitions on the app definition must use these exact IDs and types; the README
 documents the full table (including descriptions) for the app definition setup.
@@ -79,8 +92,22 @@ src/
   `sys.version`.
 - **Default-locale only**: the missing-title check and title rendering use `sdk.locales.default`.
   Localized titles in other locales are not considered.
-- **Content types without a text display field are skipped entirely** — their entries cannot be
-  missing a title, so querying them would waste API calls.
+- **Content types without a text display field are skipped by the untitled scan** — including
+  types with NO display field configured (component types): their entries always render as
+  "Untitled", but flagging every draft of them would sweep in legitimate work-in-progress.
+  This, plus the "Never edited" filter (and the fact that archive→unarchive round-trips bump
+  `sys.version`), is why an "Untitled" row can appear in unreferenced results and not on the
+  untitled tab. That divergence is BY DESIGN and pinned in tests — investigated 2026-07-13
+  after it was mistaken for a regression; do not "fix" it without Shanon deciding to change
+  the criteria.
+- **Every view-narrowing control must narrow the selection too** — the "Never edited" pills
+  (`setNeverEditedFilter`) and the scope checkboxes (`setScope`, which live-filter cached
+  results client-side as well as scoping the next scan; unchecking prunes selections in BOTH
+  tabs since scope is shared). Otherwise "Archive selected" could archive rows the user can no
+  longer see. When filters hide every result, render the explanatory `filtered-empty-note`
+  naming the responsible filter, never a bare empty table.
+- **No header info tooltip**: the page heading is plain (removed 2026-07-13); the app explains
+  itself via the general subtitle and each tab's visible description.
 - **One entry query per content type is unavoidable** (entry queries require a single
   `content_type`), so the scan runs those queries `batchSize` at a time in parallel chunks. A
   chunk shares one remaining-budget snapshot and can overshoot `maxCandidates`; the result is
@@ -89,6 +116,27 @@ src/
   library is a single scan step that runs after the entry phase and spends whatever remains of
   the `maxCandidates` budget. This is why one scan button with scope checkboxes beats separate
   entry/asset CTAs: the asset step is marginal next to the entry fan-out.
+- **Reference counting is N+1 and must stay batched**: the CMA filters `links_to_entry` /
+  `links_to_asset` by ONE target id per query, so the unreferenced criterion costs one
+  `limit: 0` count request per candidate, run `batchSize` at a time (`filterUnreferenced`).
+  Never fan these out unbatched, and keep the cost warning in the unreferenced button's
+  tooltip. The
+  untitled criterion's content-type restriction (text display fields only) does NOT apply to
+  the unreferenced scan — any entry can be a link target.
+- **One criterion per scan, each criterion is a tab** (chosen 2026-07-13, evolving radio →
+  two buttons → tabs; the OR-combined design was removed on 2026-07-09): results always have a
+  single unambiguous meaning, only unreferenced scans pay the reference-count cost, and
+  separate tabs keep the confident-junk vs review-lead expectations apart.
+- **Per-tab state is cached and must survive tab switches** (`tabStates: Record<ScanCriterion,
+  TabState>` — results, truncation, selection): switching tabs NEVER clears results or re-runs
+  a scan; tab labels show the cached counts. Scans are exclusive (one `activeScan` at a time)
+  and the scope checkboxes are shared across tabs.
+- **Criterion explanations are visible text inside each tab's panel**, above the scan button —
+  NOT tooltips on the tab labels (tried and removed 2026-07-13: they duplicated the adjacent
+  visible description). The unreferenced description must lead with the one-request-per-draft
+  cost warning. The archive button keeps its tooltip with an `InfoIcon` end-icon as the hover
+  cue; the archive deep links live in the confirmation modal (a hover tooltip cannot hold
+  clickable links).
 - **`maxCandidates` caps each scan across both scopes** — the UI shows a truncation warning.
   Keep the cap or replace it with real pagination, but never scan unbounded.
 - **Creator names are best-effort**: `resolveCreatorNames` batches `user.getManyForSpace`
@@ -99,11 +147,12 @@ src/
 - **Archiving routes by kind**: `archiveOrphans` calls `cma.entry.archive` or
   `cma.asset.archive` per target — `OrphanResult.kind` must survive any refactor of the result
   shape, and preview likewise routes to `openEntry`/`openAsset`.
-- **Mixed-kind selection is guarded twice, keep both**: kind-scoped ToggleButtons ("Entries
-  (N)" / "Assets (N)", shown only when results mix kinds, pressed state derived from the
-  selection, toggle off to deselect that kind) and an archive confirmation that itemizes the
-  selection by kind ("Archive 19 entries and 4 assets"). This is the agreed alternative to
-  splitting the results into per-kind tables — select-all deliberately spans both kinds.
+- **Mixed-kind selection is guarded twice, keep both**: the scope checkboxes (hide AND
+  deselect a kind, so "archive only entries" = uncheck assets + select-all) and an archive
+  confirmation that itemizes the selection by kind ("Archive 19 entries and 4 assets").
+  Kind-scoped select-all ToggleButtons existed but were removed 2026-07-13 as redundant once
+  the scope checkboxes became live filters — select-all deliberately spans every displayed
+  kind, and per-kind result tables were also considered and rejected.
 - **Pagination order needs the `sys.id` tiebreaker**: entries sharing an `updatedAt` (bulk
   imports) sort non-deterministically otherwise, and skip-based paging can drop or duplicate
   them.

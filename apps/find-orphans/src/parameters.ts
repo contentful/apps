@@ -6,10 +6,10 @@ export interface AppInstallationParameters {
   /** Concurrent CMA requests while scanning and archiving. */
   batchSize: number;
   /**
-   * When true, only flag drafts that were never saved after creation
-   * (sys.version === 1). Filters out untitled drafts someone has actually
-   * worked on, at the cost of missing abandoned drafts that got one stray
-   * edit.
+   * Default state of the untitled tab's "Never edited" results filter (the
+   * unreferenced tab always starts with it off). The scan itself is always
+   * broad; this only decides whether results open pre-narrowed to drafts
+   * never saved after creation (sys.version === 1).
    */
   untouchedOnly: boolean;
 }

@@ -67,7 +67,7 @@ describe('ConfigScreen', () => {
     await waitFor(() => expect(screen.getByLabelText(/Maximum entries per scan/)).toHaveValue(100));
     // A parameter missing from storage falls back to its default.
     expect(screen.getByLabelText(/Concurrent API requests/)).toHaveValue(5);
-    expect(screen.getByLabelText(/Only include entries that were never edited/)).not.toBeChecked();
+    expect(screen.getByLabelText(/Start results filtered to never-edited items/)).not.toBeChecked();
   });
 
   it('saves the toggled never-edited filter', async () => {
@@ -77,7 +77,7 @@ describe('ConfigScreen', () => {
     render(<ConfigScreen />);
     await waitFor(() => expect(sdk.app.setReady).toHaveBeenCalled());
 
-    const checkbox = screen.getByLabelText(/Only include entries that were never edited/);
+    const checkbox = screen.getByLabelText(/Start results filtered to never-edited items/);
     expect(checkbox).toBeChecked();
     fireEvent.click(checkbox);
 

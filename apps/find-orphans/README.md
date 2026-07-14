@@ -1,55 +1,99 @@
 # Find Orphans
 
-A Contentful App Framework **page app** that finds draft entries and media assets that were
-likely created by mistake — the classic case being clicking "Create new entry" (or "Add new
-media") on a reference field when you meant to link an existing item, leaving behind an empty,
-untitled draft.
+A Contentful App Framework **page app** that finds orphaned draft entries and media assets,
+under either of two definitions of "orphan":
+
+- **Untitled drafts** — items likely created by mistake, the classic case being clicking
+  "Create new entry" (or "Add new media") on a reference field when you meant to link an
+  existing item, leaving behind an empty, untitled draft. These are confident junk.
+- **Unreferenced drafts** — items that no entry links to. This is a *lead*, not a verdict:
+  top-level content such as landing pages is often never referenced yet perfectly valid, so
+  these results are for review, possibly-unused content.
 
 ## How it works
 
-The app scans the current environment for **draft entries and assets** (never published, not
-archived) whose **title has no value** in the default locale — including whitespace-only values,
-which the editors also render as "Untitled". For entries the title is the content type's display
-field; assets have a fixed shape, so their localized `title` field is checked directly and the
-whole media library is a single paged query. Two checkboxes next to the scan button control the
-scope per run (entries and/or assets, both on by default) — the per-content-type entry queries
-are the slow part of a scan, so an assets-only pass is quick.
+Each criterion lives in **its own tab** with its own scan button and its own cached results —
+separate scans because the two result sets carry different expectations (archive-freely junk
+versus review-first leads), and per-tab caching because comparing them should be free: run the
+untitled scan, switch to the unreferenced tab and scan there, switch back, and the first
+results are still sitting in their table, with the counts shown right on the tab labels. Every
+scan covers **drafts** (never published, not archived). The page subtitle stays general; each
+tab explains its own criterion with a description inside the panel, always visible above the
+scan button — the unreferenced one leads with the warning that reference checking is one
+network request per draft and can take several minutes on large spaces. (Tab labels carry only
+the name and cached result count; switching tabs is free, so the description is never more than
+a click away.) Two checkboxes control the scope (entries
+and/or assets, both on by default, shared across tabs) — they decide what the next scan fetches
+AND live-filter already-scanned results client-side, hiding (and deselecting) that kind's rows
+without a re-scan. The per-content-type entry queries are the slow part of candidate
+collection, so an assets-only pass is quick.
 
-By default the scan additionally requires that the item was **never edited after creation**
-(`sys.version === 1`). The CMA bumps `sys.version` on every save — and on publish, unpublish,
+**Untitled criterion**: flags drafts whose **title has no value** in the default locale —
+including whitespace-only values, which the editors also render as "Untitled". For entries the
+title is the content type's display field, and content types whose display field is not a
+`Symbol`/`Text` field are skipped, since their entries cannot be missing a title. Assets have a
+fixed shape, so their localized `title` field is checked directly and the whole media library
+is a single paged query.
+
+**Unreferenced criterion**: flags drafts that **no entry links to**, using one
+`links_to_entry` (or `links_to_asset`) count query per candidate — the CMA can only check
+referenced-ness for one target id per request, so this scan costs one extra API call per draft
+and is much slower on large spaces (its button's info tooltip says so). Every content type
+participates (any entry can be a link target), results keep their real titles, and the
+never-edited filter below does not apply — an unreferenced entry is worth flagging no matter
+how often it was edited.
+
+Scans are **broad first, strict on demand**: edit history never excludes anything at scan time.
+Instead, every result carries a never-edited flag and the untitled tab's results header has a
+segmented view switch — **Show: "All (N)" / "Never edited (M)"** — where exactly one pill is
+always pressed, so the current view and both counts are always visible. (The unreferenced tab
+has no such switch: edit history says nothing about whether something is referenced.) The strict view narrows the table to
+items never saved after creation (`sys.version === 1`); its pill carries a tooltip explaining
+the term — including that archiving and unarchiving counts as editing, so restored orphans
+appear only under "All", where they may still be worth archiving again. The CMA bumps `sys.version` on every save — and on publish, unpublish,
 archive, unarchive and (for assets) file processing, but those states are already excluded by
-the draft scope — so on a candidate, version 1 can only mean the item was created and then
-abandoned untouched. This keeps untitled work-in-progress drafts (body started, title not yet
-filled in) out of the results; uploaded assets get their title auto-filled from the filename, so
-untitled assets are almost always accidental creations. The filter can be turned off via the
-`untouchedOnly` installation parameter, which is useful when apps or scripts write to items on
-creation and bump every one past version 1.
+the draft scope — so version 1 can only mean the item was created and then abandoned untouched.
+Narrowing the view also narrows the selection, so the archive action can never touch a hidden
+row, and when the filter hides every result a note says so instead of showing an empty table.
+The `untouchedOnly` installation parameter only sets the filter's starting state on the
+untitled tab (the unreferenced tab always starts unfiltered); filtering is instant and
+client-side, never a re-scan.
 
-This is something the regular Contentful search cannot do in one query: field filters only work
-for one content type at a time, and every content type defines its own display field. The app
-automates that per-content-type check across the whole content model. Content types whose
-display field is not a `Symbol`/`Text` field are skipped, since their entries cannot be missing
-a title.
+**Why the two lists can differ**: an "Untitled" row in the unreferenced results that the
+untitled tab does not show is not a bug — it is one of two documented cases. Either the draft
+was edited after creation and the "Never edited" filter is hiding it (the toggle shows the
+count; note that **archiving and then unarchiving an item also bumps `sys.version`**, so
+orphans that were archived and restored no longer count as never-edited), or the entry belongs
+to a content type with **no display field configured** (common for component types like
+banners) — such entries always render as "Untitled" in Contentful, and the untitled scan skips
+those types deliberately, because flagging every draft of them would sweep in legitimate
+work-in-progress. Both cases are pinned in tests.
 
-Results are listed in one table with their type (the content type name, or "Asset"), creation
-date, and creator, and the result count spells out the split (e.g. "19 entries and 4 assets
-found"). The date shown is **created**, not last-updated — orphans were (by default) never
+Neither criterion is something the regular Contentful search can express: title filters only
+work for one content type at a time (every content type defines its own display field), and
+referenced-ness is not a searchable attribute at all. The app automates both checks across the
+whole content model.
+
+Results are listed in one table with their title (untitled-scan results show the editor's
+"Untitled" placeholder; unreferenced ones show their real titles), type (the content type name,
+or "Asset"), creation date, and creator, and the result count spells out the split (e.g. "19
+entries and 4 assets found"). The date shown is **created**, not last-updated — orphans were (by default) never
 edited after creation, so the creation moment is what identifies the mistake. The creator comes
 from `sys.createdBy`, resolved to names via one batched space-users lookup per scan; items
 created by apps or automations show "App", and creators who cannot be resolved (left the space,
 or the caller may not list users) show "Unknown user". Each row has an explicit "Preview"
 action that opens the matching editor in a slide-in for review.
 
-Rows can be selected individually, all at once, or per kind — when the results mix entries and
-assets, "Entries (N)" / "Assets (N)" toggle buttons select or deselect everything of one kind
-(the pressed state mirrors the selection), so archiving all entries never sweeps assets along.
-The selected items are archived in bulk after a confirmation dialog that itemizes the selection
-by kind ("Archive 19 entries and 4 assets"); archiving runs in rate-limit-friendly batches
+Rows can be selected individually or all at once; to act on one kind only, uncheck the other
+kind's scope checkbox — that hides and deselects its rows — and then select all, so archiving
+all entries never sweeps assets along. The selected items are archived in bulk after a
+confirmation dialog that itemizes the selection by kind ("Archive 19 entries and 4 assets"); archiving runs in rate-limit-friendly batches
 through the endpoint matching each item's kind, and items that fail to archive stay listed and
-selected for retry. Archiving is reversible from the editor; an info popover next to the
-archive button spells this out and deep-links (in a new tab) to the web app's archived-entries
-and archived-assets views — `…/views/entries?filters.0.key=__status&filters.0.op=&filters.0.val=archived`
-— where permanent deletion lives.
+selected for retry. Archiving is reversible from the editor; the archive button's tooltip (on
+its info end-icon) says so, and the confirmation dialog deep-links (in a new tab) to the web
+app's archived-entries and archived-assets views —
+`…/views/entries?filters.0.key=__status&filters.0.op=&filters.0.val=archived` — where permanent
+deletion lives.
 
 Scans are capped at a configurable number of draft items per run (500 by default, entries and
 assets sharing the one budget, see Configuration below) to stay friendly to CMA rate limits; a
@@ -60,20 +104,20 @@ warning is shown when the cap is hit.
 ```mermaid
 flowchart TD
     Load[App loads] --> FetchCT[Fetch all content types<br/>paged, 1000 per request]
-    FetchCT --> Scan([User clicks Scan with a scope:<br/>entries and/or media assets])
-    Scan --> Filter[Entries scope: keep content types whose<br/>display field is a Symbol or Text field]
+    FetchCT --> Scan([User runs a scan from its tab<br/>untitled or unreferenced<br/>with a scope: entries and/or assets])
+    Scan --> Filter[Entries scope: untitled scans keep content types<br/>with a Symbol/Text display field;<br/>unreferenced scans keep all]
     Filter --> Chunk[Take next batchSize content types]
     Chunk --> Query[Query draft entries per content type in parallel:<br/>never published, not archived,<br/>select sys + display field only]
     Query --> Pages[Page through results until exhausted<br/>or the maxCandidates budget is spent]
     Pages --> More{More content types<br/>and budget left?}
     More -- yes --> Chunk
     More -- no --> AssetStep[Assets scope: one paged draft-asset query<br/>spending the remaining budget,<br/>select sys + title only]
-    AssetStep --> Check[Client-side check: title empty,<br/>whitespace-only, or fields object absent<br/>in the default locale]
-    Check --> Untouched{untouchedOnly<br/>enabled?}
-    Untouched -- yes --> Version[Keep only items never edited<br/>after creation: sys.version == 1]
-    Untouched -- no --> Resolve
-    Version --> Resolve[Resolve creator names from sys.createdBy:<br/>batched space-users lookup, tolerant of failure]
-    Resolve --> Results[Results table<br/>+ truncation warning if capped]
+    AssetStep --> Criterion{Criterion?}
+    Criterion -- untitled --> Check[Client-side check: title empty,<br/>whitespace-only, or fields object absent<br/>in the default locale]
+    Check --> Resolve
+    Criterion -- unreferenced --> RefCount[One links_to_entry / links_to_asset<br/>count query per candidate, batched batchSize<br/>at a time; keep items with 0 references]
+    RefCount --> Resolve[Resolve creator names from sys.createdBy:<br/>batched space-users lookup, tolerant of failure]
+    Resolve --> Results[Results table, cached per tab,<br/>with a visible Never edited filter<br/>sys.version == 1, default from untouchedOnly<br/>+ truncation warning if capped]
     Results --> Archive([User selects rows and confirms Archive])
     Archive --> Batches[Archive in batches of batchSize,<br/>entries and assets each via their endpoint]
     Batches --> Done[Archived rows leave the list;<br/>failed ones stay listed and selected for retry]
@@ -99,7 +143,7 @@ registering the app definition, create the parameter definitions with exactly th
 |--------------|----|------|----------|---------------|-------------|
 | Maximum entries per scan | `maxCandidates` | Number | Yes | `500` | The scan stops after this many draft entries and assets, to stay friendly to API rate limits. |
 | Concurrent API requests | `batchSize` | Number | Yes | `5` | How many CMA requests run at once while scanning and archiving. Must be between 1 and 7, the CMA rate limit per second. |
-| Only include entries that were never edited | `untouchedOnly` | Boolean | Yes | `true` | Only flag drafts still at version 1, i.e. never saved after creation. Turn off to also catch untitled drafts that were edited and then abandoned. |
+| Start results filtered to never-edited items | `untouchedOnly` | Boolean | Yes | `true` | Whether the untitled tab's results open with the "Never edited" filter already on. Scans always find every untitled draft; the filter only narrows the view (version 1 = never saved after creation). The unreferenced tab always starts unfiltered. |
 
 All parameters are required and their defaults are set on the parameter definition, so a fresh
 install starts with the values above. The config screen shows the same defaults as input
@@ -126,5 +170,6 @@ npm run create-app-definition
 ## Learn more
 
 - [Contentful App Framework](https://www.contentful.com/developers/docs/extensibility/app-framework/)
+- [Links and incoming-link queries](https://www.contentful.com/developers/docs/references/content-delivery-api/links/#links-to-a-specific-item) — background on `links_to_entry`; the field-filter variant documented there needs the linking content type and field to be known, which is why the unreferenced scan uses one `links_to_entry`/`links_to_asset` count query per item instead
 - [Page location](https://www.contentful.com/developers/docs/extensibility/app-framework/locations/#page)
 - [Forma 36](https://f36.contentful.com/)
