@@ -3,9 +3,11 @@ import { PageAppSDK } from '@contentful/app-sdk';
 import {
   POLL_INTERVAL_MS,
   MAX_POLL_ATTEMPTS,
+  EXTENDED_MAX_POLL_ATTEMPTS,
   WORKFLOW_AGENT_ID,
   MAX_PENDING_REVIEW_MISSING_PAYLOAD_RETRIES,
 } from '../utils/constants/agent';
+import { useGoogleDocsAgentFlags } from './useGoogleDocsAgentFlags';
 import {
   MappingReviewSuspendPayload,
   ResumePayload,
@@ -198,13 +200,14 @@ const pollAgentRun = async (
   sdk: PageAppSDK,
   spaceId: string,
   environmentId: string,
-  runId: string
+  runId: string,
+  maxAttempts: number
 ): Promise<WorkflowRunResult> => {
   const startMs = Date.now();
   let pendingReviewMissingPayloadCount = 0;
   console.log(`⏳ Polling run [${runId}]`);
 
-  for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const runData = await getWorkflowRun(sdk, spaceId, environmentId, runId);
 
     if (!runData) {
@@ -244,6 +247,8 @@ export const useWorkflowAgent = ({
   oauthToken,
 }: UseWorkflowParams): WorkflowHook => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const { 'google-docs-agent-improvements': extendedTimeout } = useGoogleDocsAgentFlags();
+  const maxPollAttempts = extendedTimeout ? EXTENDED_MAX_POLL_ATTEMPTS : MAX_POLL_ATTEMPTS;
 
   const startWorkflow = useCallback(
     async (contentTypeIds: string[], documentSelection: DocumentSelection) => {
@@ -278,7 +283,7 @@ export const useWorkflowAgent = ({
 
       try {
         const runId = await startAgentRun(sdk, spaceId, environmentId, payload);
-        return await pollAgentRun(sdk, spaceId, environmentId, runId);
+        return await pollAgentRun(sdk, spaceId, environmentId, runId, maxPollAttempts);
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Workflow failed');
         throw error;
@@ -298,7 +303,7 @@ export const useWorkflowAgent = ({
 
       try {
         await resumeWorkflowRun(sdk, spaceId, environmentId, runId, resumePayload);
-        return await pollAgentRun(sdk, spaceId, environmentId, runId);
+        return await pollAgentRun(sdk, spaceId, environmentId, runId, maxPollAttempts);
       } catch (err) {
         console.error(`✗ resumeWorkflow [${runId}] failed`, err);
         const error = err instanceof Error ? err : new Error('Workflow failed');

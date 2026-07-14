@@ -17,6 +17,7 @@
     "contentful-management": "^11.76.0",
     "googleapis": "^166.0.0",
     "mammoth": "^1.11.0",
+    "launchdarkly-react-client-sdk": "^3.0.8",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
