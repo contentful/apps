@@ -1,0 +1,12 @@
+{
+  "id": "TODO_PROD_APP_DEF_ID",
+  "name": "Entry Exporter",
+  "locations": [
+    {
+      "location": "app-config"
+    },
+    {
+      "location": "page"
+    }
+  ]
+}
