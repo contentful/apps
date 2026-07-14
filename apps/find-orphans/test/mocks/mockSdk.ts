@@ -19,6 +19,7 @@ export const createMockSdk = (
   },
   navigator: {
     openEntry: vi.fn(),
+    openAsset: vi.fn(),
   },
   ids: {
     space: 'space-id',

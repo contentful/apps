@@ -29,5 +29,11 @@ export const BATCH_SIZE = 5;
  */
 export const UNTOUCHED_ONLY = true;
 
+/**
+ * Chunk size for the creator-name lookup: ids per `sys.id[in]` users query.
+ * Keeps each request's id list comfortably inside query-string limits.
+ */
+export const USER_PAGE_LIMIT = 100;
+
 /** Display field types that can hold a title. */
 export const TEXT_FIELD_TYPES = ['Symbol', 'Text'];

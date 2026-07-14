@@ -136,10 +136,10 @@ const ConfigScreen = () => {
         style={{ maxWidth: '768px', width: '100%' }}>
         <Heading marginBottom="spacingS">Set up Find Orphans</Heading>
         <Paragraph>
-          Find Orphans scans this space for draft entries with no value in their display (title)
-          field — the signature of an entry created by mistake, for example by adding a new entry on
-          a reference field instead of linking an existing one — and lets you review or archive them
-          from one page.
+          Find Orphans scans this space for draft entries and media assets with no title — the
+          signature of an item created by mistake, for example by adding a new entry on a reference
+          field instead of linking an existing one — and lets you review or archive them from one
+          page.
         </Paragraph>
 
         <Subheading marginTop="spacingXl" marginBottom="spacing2Xs">
@@ -154,7 +154,7 @@ const ConfigScreen = () => {
           <NumberField
             id="maxCandidates"
             label={FIELD_LABELS.maxCandidates}
-            helpText="The scan stops after this many draft entries, to stay friendly to API rate limits."
+            helpText="The scan stops after this many draft entries and assets, to stay friendly to API rate limits."
             placeholder={String(DEFAULT_PARAMETERS.maxCandidates)}
             value={values.maxCandidates}
             onChange={handleChange}
@@ -177,7 +177,7 @@ const ConfigScreen = () => {
               Only include entries that were never edited
             </Checkbox>
             <FormControl.HelpText>
-              Contentful bumps an entry&apos;s version on every save, so an untitled draft still at
+              Contentful bumps an item&apos;s version on every save, so an untitled draft still at
               version 1 was abandoned right after creation. Turn this off to also flag untitled
               drafts that were edited at least once — for example when other apps or scripts write
               to entries on creation.
