@@ -43,7 +43,7 @@ export function getSmartDefaults(contentType: ContentType): string[] {
     }
   }
 
-  return contentType.fields.filter(f => ids.has(f.id)).map(f => f.id);
+  return contentType.fields.filter((f) => ids.has(f.id)).map((f) => f.id);
 }
 
 /**
@@ -55,13 +55,13 @@ export function applyPreset(contentType: ContentType, preset: FieldPreset): stri
       return getSmartDefaults(contentType);
 
     case 'content':
-      return contentType.fields.filter(isTextField).map(f => f.id);
+      return contentType.fields.filter(isTextField).map((f) => f.id);
 
     case 'references':
-      return contentType.fields.filter(isLinkField).map(f => f.id);
+      return contentType.fields.filter(isLinkField).map((f) => f.id);
 
     case 'all':
-      return contentType.fields.map(f => f.id);
+      return contentType.fields.map((f) => f.id);
 
     case 'custom':
       return [];
@@ -81,23 +81,20 @@ export function groupFields(contentType: ContentType, searchTerm = ''): FieldGro
   const term = searchTerm.trim().toLowerCase();
   const matchesSearch = (field: Field): boolean => {
     if (!term) return true;
-    return (
-      field.name.toLowerCase().includes(term) ||
-      field.id.toLowerCase().includes(term)
-    );
+    return field.name.toLowerCase().includes(term) || field.id.toLowerCase().includes(term);
   };
 
   const titleField = contentType.displayField
-    ? contentType.fields.find(f => f.id === contentType.displayField)
+    ? contentType.fields.find((f) => f.id === contentType.displayField)
     : undefined;
 
   const required = contentType.fields
-    .filter(f => f.required && f.id !== contentType.displayField)
+    .filter((f) => f.required && f.id !== contentType.displayField)
     .filter(matchesSearch)
     .sort((a, b) => a.name.localeCompare(b.name));
 
   const optional = contentType.fields
-    .filter(f => !f.required && f.id !== contentType.displayField)
+    .filter((f) => !f.required && f.id !== contentType.displayField)
     .filter(matchesSearch)
     .sort((a, b) => a.name.localeCompare(b.name));
 
@@ -127,10 +124,7 @@ export function detectPreset(contentType: ContentType, selectedFields: string[])
 
   for (const preset of presets) {
     const presetFields = [...applyPreset(contentType, preset)].sort();
-    if (
-      presetFields.length === sorted.length &&
-      presetFields.every((id, i) => id === sorted[i])
-    ) {
+    if (presetFields.length === sorted.length && presetFields.every((id, i) => id === sorted[i])) {
       return preset;
     }
   }

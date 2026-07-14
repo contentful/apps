@@ -70,10 +70,15 @@ const Page = () => {
   const ITEMS_PER_PAGE = 50;
   const [lastFormData, setLastFormData] = useState<ExportFormData | null>(null);
   const [selectedEntryIds, setSelectedEntryIds] = useState<string[]>([]);
-  const [contentTypeMap, setContentTypeMap] = useState<Record<string, { name: string; displayField?: string }>>({});
+  const [contentTypeMap, setContentTypeMap] = useState<
+    Record<string, { name: string; displayField?: string }>
+  >({});
   const [contentTypeSchemaMap, setContentTypeSchemaMap] = useState<Record<string, ContentType>>({});
   const [userMap, setUserMap] = useState<Record<string, string>>({});
-  const [columnSort, setColumnSort] = useState<{ column: string; direction: 'asc' | 'desc' } | null>(null);
+  const [columnSort, setColumnSort] = useState<{
+    column: string;
+    direction: 'asc' | 'desc';
+  } | null>(null);
 
   const exporterRef = useRef<Exporter | null>(null);
 
@@ -93,7 +98,7 @@ const Page = () => {
       const ct = contentTypeId ? contentTypeSchemaMap[contentTypeId] : undefined;
       const displayFieldId = ct?.displayField;
       const displayField = displayFieldId
-        ? ct?.fields.find(f => f.id === displayFieldId)
+        ? ct?.fields.find((f) => f.id === displayFieldId)
         : undefined;
       if (displayField) {
         const colName = displayField.localized
@@ -253,7 +258,9 @@ const Page = () => {
 
       const postFilter = getStatusPostFilter(data.status as EntryStatus);
       const items = postFilter
-        ? (response.items as unknown as SearchResult[]).filter(postFilter as (e: SearchResult) => boolean)
+        ? (response.items as unknown as SearchResult[]).filter(
+            postFilter as (e: SearchResult) => boolean
+          )
         : (response.items as unknown as SearchResult[]);
 
       setSearchResults(items);
@@ -273,7 +280,11 @@ const Page = () => {
     }
   };
 
-  const handleExportSelected = async (selectedIds: string[], format: 'csv' | 'json' | 'xlsx' | 'xml' | 'yaml' = 'csv', filename = '') => {
+  const handleExportSelected = async (
+    selectedIds: string[],
+    format: 'csv' | 'json' | 'xlsx' | 'xml' | 'yaml' = 'csv',
+    filename = ''
+  ) => {
     try {
       setIsExporting(true);
       setProgress({
@@ -288,14 +299,14 @@ const Page = () => {
 
       // Fetch all selected entries in one API call using sys.id[in] instead of
       // per-entry requests, which avoids rate-limit issues at large selection sizes.
-      const firstEntry = searchResults.find(r => r.sys.id === selectedIds[0]);
+      const firstEntry = searchResults.find((r) => r.sys.id === selectedIds[0]);
       const contentTypeId = firstEntry?.sys.contentType.sys.id ?? '';
 
       await exporter.start(
         {
-          contentType: contentTypes.find(ct => ct.sys.id === contentTypeId) || null,
+          contentType: contentTypes.find((ct) => ct.sys.id === contentTypeId) || null,
           contentTypeId: contentTypeId || 'selected',
-          locales: locales.map(l => l.code),
+          locales: locales.map((l) => l.code),
           userMap: userMap,
           contentTypeMap: contentTypeSchemaMap,
           format,
@@ -336,7 +347,9 @@ const Page = () => {
 
       const postFilter = getStatusPostFilter(lastFormData?.status as EntryStatus);
       const items = postFilter
-        ? (response.items as unknown as SearchResult[]).filter(postFilter as (e: SearchResult) => boolean)
+        ? (response.items as unknown as SearchResult[]).filter(
+            postFilter as (e: SearchResult) => boolean
+          )
         : (response.items as unknown as SearchResult[]);
 
       setSearchResults(items);
@@ -392,10 +405,11 @@ const Page = () => {
           userMap: userMap,
           contentTypeMap: contentTypeSchemaMap,
           format: data.format || 'csv',
-          filename: data.customFilename ||
-            (data.contentTypeId ?
-              `${data.contentTypeId}-${new Date().toISOString().split('T')[0]}` :
-              `contentful-export-${new Date().toISOString().split('T')[0]}`),
+          filename:
+            data.customFilename ||
+            (data.contentTypeId
+              ? `${data.contentTypeId}-${new Date().toISOString().split('T')[0]}`
+              : `contentful-export-${new Date().toISOString().split('T')[0]}`),
           sortByColumn: buildSortByColumn(data.contentTypeId),
           statusPostFilter: exportStatusPostFilter as ((entry: Entry) => boolean) | undefined,
         },
@@ -424,8 +438,7 @@ const Page = () => {
         justifyContent="center"
         flexDirection="column"
         gap="spacingS"
-        style={{ minHeight: '60vh' }}
-      >
+        style={{ minHeight: '60vh' }}>
         <Spinner />
         <Text fontColor="gray600">Loading content types, locales, and tags...</Text>
       </Flex>
@@ -434,12 +447,7 @@ const Page = () => {
 
   return (
     <Box style={{ maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
-      <Flex
-        flexDirection="column"
-        alignItems="stretch"
-        gap="spacingL"
-        padding="spacingL"
-      >
+      <Flex flexDirection="column" alignItems="stretch" gap="spacingL" padding="spacingL">
         <Box style={{ width: '100%', maxWidth: '1040px' }}>
           <Heading marginBottom="spacingS">Entry Exporter</Heading>
           <Paragraph marginBottom="none" style={{ maxWidth: '700px' }}>
@@ -474,15 +482,17 @@ const Page = () => {
             style={{
               textAlign: 'center',
               padding: '48px 24px',
-            }}
-          >
+            }}>
             <Text fontColor="gray500">List results to export will appear here.</Text>
           </Box>
         )}
 
         {searchResults.length === 0 && !isSearching && lastSearchQuery && (
           <Box style={{ textAlign: 'center', padding: '48px 24px' }}>
-            <Text fontWeight="fontWeightDemiBold" marginBottom="spacingXs" style={{ display: 'block' }}>
+            <Text
+              fontWeight="fontWeightDemiBold"
+              marginBottom="spacingXs"
+              style={{ display: 'block' }}>
               No results.
             </Text>
             <Text fontColor="gray600">Try adjusting your filters and generating a list again.</Text>
@@ -513,7 +523,6 @@ const Page = () => {
           }
           locales={lastFormData?.locales ?? []}
         />
-
       </Flex>
     </Box>
   );

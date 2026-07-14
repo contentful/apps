@@ -42,7 +42,10 @@ function sortRowsByColumn<T extends Record<string, string | number | boolean | n
       return (av - bv) * factor;
     }
 
-    return String(av).localeCompare(String(bv), undefined, { numeric: true, sensitivity: 'base' }) * factor;
+    return (
+      String(av).localeCompare(String(bv), undefined, { numeric: true, sensitivity: 'base' }) *
+      factor
+    );
   });
 }
 
@@ -72,10 +75,7 @@ export class Exporter {
     this.cancelled = true;
   }
 
-  async start(
-    options: ExportOptions,
-    onProgress: ProgressCallback
-  ): Promise<void> {
+  async start(options: ExportOptions, onProgress: ProgressCallback): Promise<void> {
     this.cancelled = false;
 
     try {
@@ -87,7 +87,11 @@ export class Exporter {
       });
 
       const total = await this.throttler.execute(() =>
-        getEntryCount(this.cma, options.contentTypeId === 'all-content-types' ? undefined : options.contentTypeId, options.filters || {})
+        getEntryCount(
+          this.cma,
+          options.contentTypeId === 'all-content-types' ? undefined : options.contentTypeId,
+          options.filters || {}
+        )
       );
 
       if (this.cancelled) {
@@ -113,7 +117,8 @@ export class Exporter {
       const paginator = paginateEntries(
         this.cma,
         {
-          contentType: options.contentTypeId === 'all-content-types' ? undefined : options.contentTypeId,
+          contentType:
+            options.contentTypeId === 'all-content-types' ? undefined : options.contentTypeId,
           filters: options.filters || {},
         },
         <T>(fn: () => Promise<T>) => this.throttler.execute(fn)
@@ -151,14 +156,16 @@ export class Exporter {
               });
             } else {
               const updatedByUserId = entry.sys.updatedBy?.sys.id;
-              const updatedByName = updatedByUserId ? (options.userMap?.[updatedByUserId] || updatedByUserId) : 'Unknown';
+              const updatedByName = updatedByUserId
+                ? options.userMap?.[updatedByUserId] || updatedByUserId
+                : 'Unknown';
 
               const row: Record<string, string | number | boolean | null> = {
                 'Entry ID': entry.sys.id,
-                'Created': new Date(entry.sys.createdAt).toISOString().split('T')[0],
-                'Updated': new Date(entry.sys.updatedAt).toISOString().split('T')[0],
+                Created: new Date(entry.sys.createdAt).toISOString().split('T')[0],
+                Updated: new Date(entry.sys.updatedAt).toISOString().split('T')[0],
                 'Last Updated By': updatedByName,
-                'Status': entry.sys.publishedVersion ? 'Published' : 'Draft',
+                Status: entry.sys.publishedVersion ? 'Published' : 'Draft',
                 'Content Type': contentTypeId,
               };
 
@@ -174,14 +181,16 @@ export class Exporter {
         } else {
           rows = filteredBatch.map((entry) => {
             const updatedByUserId = entry.sys.updatedBy?.sys.id;
-            const updatedByName = updatedByUserId ? (options.userMap?.[updatedByUserId] || updatedByUserId) : 'Unknown';
+            const updatedByName = updatedByUserId
+              ? options.userMap?.[updatedByUserId] || updatedByUserId
+              : 'Unknown';
 
             return {
               'Entry ID': entry.sys.id,
-              'Created': new Date(entry.sys.createdAt).toISOString().split('T')[0],
-              'Updated': new Date(entry.sys.updatedAt).toISOString().split('T')[0],
+              Created: new Date(entry.sys.createdAt).toISOString().split('T')[0],
+              Updated: new Date(entry.sys.updatedAt).toISOString().split('T')[0],
               'Last Updated By': updatedByName,
-              'Status': entry.sys.publishedVersion ? 'Published' : 'Draft',
+              Status: entry.sys.publishedVersion ? 'Published' : 'Draft',
               'Content Type': entry.sys.contentType.sys.id,
             };
           });
@@ -215,7 +224,9 @@ export class Exporter {
 
       const baseFilename = options.filename || `${options.contentTypeId}-export`;
       const extension = getFileExtension(format);
-      const filename = baseFilename.endsWith(extension) ? baseFilename : `${baseFilename}${extension}`;
+      const filename = baseFilename.endsWith(extension)
+        ? baseFilename
+        : `${baseFilename}${extension}`;
 
       const finalRows = options.sortByColumn
         ? sortRowsByColumn(allRows, options.sortByColumn.column, options.sortByColumn.direction)

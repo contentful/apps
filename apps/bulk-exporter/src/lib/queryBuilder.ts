@@ -1,6 +1,6 @@
 export type EntryStatus = 'any' | 'published' | 'draft' | 'changed' | 'archived';
 
-export type FieldOperator = 
+export type FieldOperator =
   | 'equals'
   | 'not_equals'
   | 'contains'
@@ -182,7 +182,9 @@ export function getStatusPostFilter(
   if (status === 'changed') {
     return (entry) => {
       const { version, publishedVersion } = entry.sys;
-      return publishedVersion !== undefined && version !== undefined && version > publishedVersion + 1;
+      return (
+        publishedVersion !== undefined && version !== undefined && version > publishedVersion + 1
+      );
     };
   }
   return null;

@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { flattenEntry, flattenEntries, getColumnHeaders, type Entry, type ContentType } from '../flatten';
+import {
+  flattenEntry,
+  flattenEntries,
+  getColumnHeaders,
+  type Entry,
+  type ContentType,
+} from '../flatten';
 
 describe('flatten', () => {
   const mockContentType: ContentType = {
@@ -11,7 +17,13 @@ describe('flatten', () => {
       { id: 'body', name: 'Body', type: 'Text', localized: true },
       { id: 'author', name: 'Author', type: 'Link', localized: false, linkType: 'Entry' },
       { id: 'tags', name: 'Tags', type: 'Array', localized: false, items: { type: 'Symbol' } },
-      { id: 'relatedPosts', name: 'Related', type: 'Array', localized: false, items: { type: 'Link', linkType: 'Entry' } },
+      {
+        id: 'relatedPosts',
+        name: 'Related',
+        type: 'Array',
+        localized: false,
+        items: { type: 'Link', linkType: 'Entry' },
+      },
       { id: 'metadata', name: 'Metadata', type: 'Object', localized: false },
       { id: 'publishDate', name: 'Publish Date', type: 'Date', localized: false },
       { id: 'featured', name: 'Featured', type: 'Boolean', localized: false },
@@ -74,7 +86,7 @@ describe('flatten', () => {
       const result = flattenEntry(mockEntry, {
         contentType: mockContentType,
         locales: ['en-US', 'de-DE'],
-        userMap: { 'user123': 'John Doe' },
+        userMap: { user123: 'John Doe' },
       });
 
       expect(result['Entry ID']).toBe('entry123');

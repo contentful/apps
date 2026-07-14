@@ -18,14 +18,14 @@ root.render(
 
 function AppRouter() {
   const sdk = useSDK();
-  
+
   if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
     return <ConfigScreen />;
   }
-  
+
   if (sdk.location.is(locations.LOCATION_PAGE)) {
     return <Page />;
   }
-  
+
   return null;
 }

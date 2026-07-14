@@ -21,27 +21,27 @@ export async function* paginateEntries(
   throttledFetch: <T>(fn: () => Promise<T>) => Promise<T>
 ): AsyncGenerator<unknown[], void, unknown> {
   const { contentType, filters = {}, order = 'sys.createdAt' } = options;
-  
+
   let skip = 0;
   let total = Infinity;
-  
+
   const queryParams: Record<string, unknown> = {
     limit: PAGE_SIZE,
     skip,
     order,
     ...filters,
   };
-  
+
   if (contentType) {
     queryParams.content_type = contentType;
   }
 
   while (skip < total && skip < MAX_SKIP) {
     queryParams.skip = skip;
-    
-    const result = await throttledFetch(() =>
+
+    const result = (await throttledFetch(() =>
       cma.entry.getMany({ query: queryParams })
-    ) as PaginateResult;
+    )) as PaginateResult;
 
     if (result.items.length === 0) {
       break;
@@ -76,14 +76,14 @@ async function* paginateByCursor(
     order,
     ...filters,
   };
-  
+
   if (contentType) {
     queryParams.content_type = contentType;
   }
 
-  const firstCursorResult = await throttledFetch(() =>
+  const firstCursorResult = (await throttledFetch(() =>
     cma.entry.getMany({ query: queryParams })
-  ) as PaginateResult;
+  )) as PaginateResult;
 
   if (firstCursorResult.items.length === 0) {
     return;
@@ -104,14 +104,14 @@ async function* paginateByCursor(
       'sys.createdAt[gt]': lastItem.sys.createdAt,
       ...filters,
     };
-    
+
     if (contentType) {
       cursorQueryParams.content_type = contentType;
     }
-    
-    const result = await throttledFetch(() =>
+
+    const result = (await throttledFetch(() =>
       cma.entry.getMany({ query: cursorQueryParams })
-    ) as PaginateResult;
+    )) as PaginateResult;
 
     if (result.items.length === 0) {
       break;
@@ -135,14 +135,14 @@ export async function getEntryCount(
     limit: 0,
     ...filters,
   };
-  
+
   if (contentType) {
     queryParams.content_type = contentType;
   }
-  
-  const result = await cma.entry.getMany({
+
+  const result = (await cma.entry.getMany({
     query: queryParams,
-  }) as PaginateResult;
+  })) as PaginateResult;
 
   return result.total;
 }

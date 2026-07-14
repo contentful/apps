@@ -193,9 +193,7 @@ describe('queryBuilder', () => {
     it('should add equals filter', () => {
       const data: QueryFormData = {
         contentTypeId: 'blogPost',
-        fieldFilters: [
-          { fieldId: 'title', operator: 'equals', value: 'Hello' },
-        ],
+        fieldFilters: [{ fieldId: 'title', operator: 'equals', value: 'Hello' }],
       };
       const result = buildQuery(data);
       expect(result['fields.title']).toBe('Hello');
@@ -204,9 +202,7 @@ describe('queryBuilder', () => {
     it('should add not equals filter', () => {
       const data: QueryFormData = {
         contentTypeId: 'blogPost',
-        fieldFilters: [
-          { fieldId: 'status', operator: 'not_equals', value: 'draft' },
-        ],
+        fieldFilters: [{ fieldId: 'status', operator: 'not_equals', value: 'draft' }],
       };
       const result = buildQuery(data);
       expect(result['fields.status[ne]']).toBe('draft');
@@ -215,9 +211,7 @@ describe('queryBuilder', () => {
     it('should add contains filter', () => {
       const data: QueryFormData = {
         contentTypeId: 'blogPost',
-        fieldFilters: [
-          { fieldId: 'body', operator: 'contains', value: 'keyword' },
-        ],
+        fieldFilters: [{ fieldId: 'body', operator: 'contains', value: 'keyword' }],
       };
       const result = buildQuery(data);
       expect(result['fields.body[match]']).toBe('keyword');
@@ -239,9 +233,7 @@ describe('queryBuilder', () => {
     it('should add exists filter', () => {
       const data: QueryFormData = {
         contentTypeId: 'blogPost',
-        fieldFilters: [
-          { fieldId: 'featuredImage', operator: 'exists', value: 'true' },
-        ],
+        fieldFilters: [{ fieldId: 'featuredImage', operator: 'exists', value: 'true' }],
       };
       const result = buildQuery(data);
       expect(result['fields.featuredImage[exists]']).toBe(true);
@@ -263,9 +255,7 @@ describe('queryBuilder', () => {
     it('should add links_to filter', () => {
       const data: QueryFormData = {
         contentTypeId: 'blogPost',
-        fieldFilters: [
-          { fieldId: 'author', operator: 'links_to', value: 'author123' },
-        ],
+        fieldFilters: [{ fieldId: 'author', operator: 'links_to', value: 'author123' }],
       };
       const result = buildQuery(data);
       expect(result['fields.author.sys.id']).toBe('author123');
@@ -309,12 +299,10 @@ describe('queryBuilder', () => {
         tagsMatchAll: false,
         createdFrom: '2024-01-01',
         sort: '-sys.createdAt',
-        fieldFilters: [
-          { fieldId: 'category', operator: 'equals', value: 'programming' },
-        ],
+        fieldFilters: [{ fieldId: 'category', operator: 'equals', value: 'programming' }],
       };
       const result = buildQuery(data);
-      
+
       expect(result.content_type).toBe('blogPost');
       expect(result.query).toBe('react');
       expect(result['sys.publishedAt[exists]']).toBe(true);

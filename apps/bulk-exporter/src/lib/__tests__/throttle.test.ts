@@ -32,7 +32,7 @@ describe('Throttler', () => {
     const fn = vi.fn(async () => {
       activeCount++;
       maxActive = Math.max(maxActive, activeCount);
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       activeCount--;
       return 'success';
     });
@@ -52,7 +52,7 @@ describe('Throttler', () => {
 
   it('should retry on 429 with rate limit reset header', async () => {
     const throttler = new Throttler({ requestsPerSecond: 10, maxRetries: 3 });
-    
+
     let callCount = 0;
     const fn = vi.fn(async () => {
       callCount++;
@@ -66,7 +66,7 @@ describe('Throttler', () => {
     });
 
     const promise = throttler.execute(fn);
-    
+
     await vi.advanceTimersByTimeAsync(1500);
     const result = await promise;
 
@@ -76,7 +76,7 @@ describe('Throttler', () => {
 
   it('should use exponential backoff when rate limit reset header is missing', async () => {
     const throttler = new Throttler({ requestsPerSecond: 10, maxRetries: 3 });
-    
+
     let callCount = 0;
     const fn = vi.fn(async () => {
       callCount++;
@@ -87,7 +87,7 @@ describe('Throttler', () => {
     });
 
     const promise = throttler.execute(fn);
-    
+
     await vi.advanceTimersByTimeAsync(1500);
     const result = await promise;
 
@@ -97,15 +97,15 @@ describe('Throttler', () => {
 
   it('should fail after max retries', async () => {
     const throttler = new Throttler({ requestsPerSecond: 10, maxRetries: 2 });
-    
+
     const fn = vi.fn(async () => {
       throw { status: 429 };
     });
 
     const promise = throttler.execute(fn);
-    
+
     await vi.advanceTimersByTimeAsync(5000);
-    
+
     try {
       await promise;
       expect.fail('Should have thrown');
@@ -117,7 +117,7 @@ describe('Throttler', () => {
 
   it('should not retry non-429 errors', async () => {
     const throttler = new Throttler({ requestsPerSecond: 10, maxRetries: 3 });
-    
+
     const fn = vi.fn(async () => {
       throw new Error('Server error');
     });

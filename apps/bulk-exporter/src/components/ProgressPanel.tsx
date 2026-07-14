@@ -52,8 +52,7 @@ export function ProgressPanel({ progress, onCancel }: ProgressPanelProps) {
               backgroundColor: '#e5e8ed',
               borderRadius: '4px',
               overflow: 'hidden',
-            }}
-          >
+            }}>
             <Box
               style={{
                 width: `${percentage}%`,

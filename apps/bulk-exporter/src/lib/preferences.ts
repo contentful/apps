@@ -103,10 +103,7 @@ export function getSpacePreferences(spaceId: string): SpacePreferences {
   return safeRead<SpacePreferences>(spaceKey(spaceId)) ?? {};
 }
 
-export function saveSpacePreferences(
-  spaceId: string,
-  patch: Partial<SpacePreferences>
-): boolean {
+export function saveSpacePreferences(spaceId: string, patch: Partial<SpacePreferences>): boolean {
   if (!spaceId) return false;
   const current = getSpacePreferences(spaceId);
   return safeWrite(spaceKey(spaceId), { ...current, ...patch });

@@ -55,48 +55,41 @@ export interface FlatRow {
   [key: string]: string | number | boolean | null;
 }
 
-export function flattenEntries(
-  entries: Entry[],
-  options: FlattenOptions
-): FlatRow[] {
-  return entries.map(entry => flattenEntry(entry, options));
+export function flattenEntries(entries: Entry[], options: FlattenOptions): FlatRow[] {
+  return entries.map((entry) => flattenEntry(entry, options));
 }
 
-export function flattenEntry(
-  entry: Entry,
-  options: FlattenOptions
-): FlatRow {
+export function flattenEntry(entry: Entry, options: FlattenOptions): FlatRow {
   const { contentType, locales, fields, includeContentTypeName = true, userMap = {} } = options;
 
   const updatedByUserId = entry.sys.updatedBy?.sys.id;
-  const updatedByName = updatedByUserId ? (userMap[updatedByUserId] || updatedByUserId) : 'Unknown';
+  const updatedByName = updatedByUserId ? userMap[updatedByUserId] || updatedByUserId : 'Unknown';
 
   const row: FlatRow = {
     'Entry ID': entry.sys.id,
-    'Created': formatDate(entry.sys.createdAt),
-    'Updated': formatDate(entry.sys.updatedAt),
+    Created: formatDate(entry.sys.createdAt),
+    Updated: formatDate(entry.sys.updatedAt),
     'Last Updated By': updatedByName,
-    'Status': entry.sys.publishedVersion ? 'Published' : 'Draft',
+    Status: entry.sys.publishedVersion ? 'Published' : 'Draft',
   };
 
   if (includeContentTypeName) {
     row['Content Type'] = contentType.name || contentType.sys.id;
   }
 
-  const fieldsToProcess = fields && fields.length > 0
-    ? (fields
-        .map(id => contentType.fields.find(f => f.id === id))
-        .filter((f): f is ContentType['fields'][number] => Boolean(f)))
-    : contentType.fields;
+  const fieldsToProcess =
+    fields && fields.length > 0
+      ? fields
+          .map((id) => contentType.fields.find((f) => f.id === id))
+          .filter((f): f is ContentType['fields'][number] => Boolean(f))
+      : contentType.fields;
 
   for (const field of fieldsToProcess) {
     const fieldValues = entry.fields[field.id];
 
     if (!fieldValues) {
       for (const locale of locales) {
-        const columnName = field.localized
-          ? `${field.name} (${locale})`
-          : field.name;
+        const columnName = field.localized ? `${field.name} (${locale})` : field.name;
         if (!row[columnName]) {
           row[columnName] = null;
         }
@@ -229,23 +222,18 @@ export function getColumnHeaders(
   includeContentTypeName = true,
   fields?: string[]
 ): string[] {
-  const headers = [
-    'Entry ID',
-    'Created',
-    'Updated',
-    'Last Updated By',
-    'Status',
-  ];
+  const headers = ['Entry ID', 'Created', 'Updated', 'Last Updated By', 'Status'];
 
   if (includeContentTypeName) {
     headers.push('Content Type');
   }
 
-  const fieldsToInclude = fields && fields.length > 0
-    ? (fields
-        .map(id => contentType.fields.find(f => f.id === id))
-        .filter((f): f is ContentType['fields'][number] => Boolean(f)))
-    : contentType.fields;
+  const fieldsToInclude =
+    fields && fields.length > 0
+      ? fields
+          .map((id) => contentType.fields.find((f) => f.id === id))
+          .filter((f): f is ContentType['fields'][number] => Boolean(f))
+      : contentType.fields;
 
   for (const field of fieldsToInclude) {
     if (field.localized) {

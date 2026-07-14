@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  getSmartDefaults,
-  applyPreset,
-  groupFields,
-  detectPreset,
-} from '../fieldSelection';
+import { getSmartDefaults, applyPreset, groupFields, detectPreset } from '../fieldSelection';
 import type { ContentType } from '../flatten';
 
 const blogPost: ContentType = {
@@ -15,9 +10,30 @@ const blogPost: ContentType = {
     { id: 'title', name: 'Title', type: 'Symbol', localized: false, required: true },
     { id: 'slug', name: 'Slug', type: 'Symbol', localized: false, required: true },
     { id: 'body', name: 'Body', type: 'RichText', localized: false, required: false },
-    { id: 'author', name: 'Author', type: 'Link', linkType: 'Entry', localized: false, required: false },
-    { id: 'tags', name: 'Tags', type: 'Array', items: { type: 'Symbol' }, localized: false, required: false },
-    { id: 'related', name: 'Related', type: 'Array', items: { type: 'Link', linkType: 'Entry' }, localized: false, required: false },
+    {
+      id: 'author',
+      name: 'Author',
+      type: 'Link',
+      linkType: 'Entry',
+      localized: false,
+      required: false,
+    },
+    {
+      id: 'tags',
+      name: 'Tags',
+      type: 'Array',
+      items: { type: 'Symbol' },
+      localized: false,
+      required: false,
+    },
+    {
+      id: 'related',
+      name: 'Related',
+      type: 'Array',
+      items: { type: 'Link', linkType: 'Entry' },
+      localized: false,
+      required: false,
+    },
     { id: 'metadata', name: 'Metadata', type: 'Object', localized: false, required: false },
   ],
 };
@@ -78,25 +94,25 @@ describe('applyPreset', () => {
 describe('groupFields', () => {
   it('groups title, required, and optional fields', () => {
     const groups = groupFields(blogPost);
-    expect(groups.map(g => g.id)).toEqual(['title', 'required', 'optional']);
+    expect(groups.map((g) => g.id)).toEqual(['title', 'required', 'optional']);
     expect(groups[0].fields[0].id).toBe('title');
-    expect(groups[1].fields.map(f => f.id)).toEqual(['slug']);
-    expect(groups[2].fields.map(f => f.id).sort()).toEqual(
+    expect(groups[1].fields.map((f) => f.id)).toEqual(['slug']);
+    expect(groups[2].fields.map((f) => f.id).sort()).toEqual(
       ['author', 'body', 'metadata', 'related', 'tags'].sort()
     );
   });
 
   it('filters fields by search term across name and id', () => {
     const groups = groupFields(blogPost, 'tag');
-    const allIds = groups.flatMap(g => g.fields.map(f => f.id));
+    const allIds = groups.flatMap((g) => g.fields.map((f) => f.id));
     expect(allIds).toEqual(['tags']);
   });
 
   it('hides empty groups when search filters them out', () => {
     const groups = groupFields(blogPost, 'related');
-    expect(groups.find(g => g.id === 'title')).toBeUndefined();
-    expect(groups.find(g => g.id === 'required')).toBeUndefined();
-    expect(groups.find(g => g.id === 'optional')?.fields).toHaveLength(1);
+    expect(groups.find((g) => g.id === 'title')).toBeUndefined();
+    expect(groups.find((g) => g.id === 'required')).toBeUndefined();
+    expect(groups.find((g) => g.id === 'optional')?.fields).toHaveLength(1);
   });
 });
 

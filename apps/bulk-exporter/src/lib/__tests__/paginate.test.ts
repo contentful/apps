@@ -6,7 +6,8 @@ describe('paginate', () => {
     it('should paginate through all entries with skip', async () => {
       const mockCma = {
         entry: {
-          getMany: vi.fn()
+          getMany: vi
+            .fn()
             .mockResolvedValueOnce({
               items: Array(1000).fill({ sys: { id: '1' } }),
               total: 2500,
@@ -43,28 +44,27 @@ describe('paginate', () => {
     it('should switch to cursor pagination after skip 9000', async () => {
       const mockCma = {
         entry: {
-          getMany: vi.fn()
-            .mockImplementation(({ query }) => {
-              if (query.skip !== undefined && query.skip < 9000) {
-                return Promise.resolve({
-                  items: Array(1000).fill({ sys: { id: 'skip', createdAt: '2024-01-01' } }),
-                  total: 12000,
-                });
-              }
-              if (query.skip === 9000) {
-                return Promise.resolve({
-                  items: Array(1000).fill({ sys: { id: 'cursor1', createdAt: '2024-01-10' } }),
-                  total: 12000,
-                });
-              }
-              if (query['sys.createdAt[gt]']) {
-                return Promise.resolve({
-                  items: Array(1000).fill({ sys: { id: 'cursor2', createdAt: '2024-01-20' } }),
-                  total: 12000,
-                });
-              }
-              return Promise.resolve({ items: [], total: 12000 });
-            }),
+          getMany: vi.fn().mockImplementation(({ query }) => {
+            if (query.skip !== undefined && query.skip < 9000) {
+              return Promise.resolve({
+                items: Array(1000).fill({ sys: { id: 'skip', createdAt: '2024-01-01' } }),
+                total: 12000,
+              });
+            }
+            if (query.skip === 9000) {
+              return Promise.resolve({
+                items: Array(1000).fill({ sys: { id: 'cursor1', createdAt: '2024-01-10' } }),
+                total: 12000,
+              });
+            }
+            if (query['sys.createdAt[gt]']) {
+              return Promise.resolve({
+                items: Array(1000).fill({ sys: { id: 'cursor2', createdAt: '2024-01-20' } }),
+                total: 12000,
+              });
+            }
+            return Promise.resolve({ items: [], total: 12000 });
+          }),
         },
       };
 
@@ -81,20 +81,19 @@ describe('paginate', () => {
       }
 
       expect(batches.length).toBeGreaterThanOrEqual(10);
-      
+
       const calls = mockCma.entry.getMany.mock.calls;
-      const cursorCalls = calls.filter(call => call[0].query['sys.createdAt[gt]']);
+      const cursorCalls = calls.filter((call) => call[0].query['sys.createdAt[gt]']);
       expect(cursorCalls.length).toBeGreaterThan(0);
     });
 
     it('should stop when no more items', async () => {
       const mockCma = {
         entry: {
-          getMany: vi.fn()
-            .mockResolvedValueOnce({
-              items: Array(500).fill({ sys: { id: '1' } }),
-              total: 500,
-            }),
+          getMany: vi.fn().mockResolvedValueOnce({
+            items: Array(500).fill({ sys: { id: '1' } }),
+            total: 500,
+          }),
         },
       };
 

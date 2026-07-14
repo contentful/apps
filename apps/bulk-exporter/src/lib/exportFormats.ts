@@ -24,10 +24,8 @@ export function truncateForXlsx<T extends string | number | boolean | null>(valu
   return (value.slice(0, XLSX_TRUNCATE_AT) + XLSX_TRUNCATE_SUFFIX) as T;
 }
 
-function truncateRowsForXlsx(
-  rows: ExportData['rows']
-): ExportData['rows'] {
-  return rows.map(row => {
+function truncateRowsForXlsx(rows: ExportData['rows']): ExportData['rows'] {
+  return rows.map((row) => {
     const truncated: Record<string, string | number | boolean | null> = {};
     for (const [key, value] of Object.entries(row)) {
       truncated[key] = truncateForXlsx(value);
@@ -57,14 +55,14 @@ export async function exportToXlsx(data: ExportData): Promise<void> {
   if (safeRows.length > 0) {
     const headers = Object.keys(safeRows[0]);
 
-    worksheet.columns = headers.map(header => ({
+    worksheet.columns = headers.map((header) => ({
       header,
       key: header,
       width: Math.min(
         80,
         Math.max(
           header.length + 2,
-          ...safeRows.slice(0, 100).map(row => String(row[header] ?? '').length)
+          ...safeRows.slice(0, 100).map((row) => String(row[header] ?? '').length)
         )
       ),
     }));
@@ -90,7 +88,7 @@ export function exportToXml(data: ExportData): void {
       },
     },
     entries: {
-      entry: data.rows.map(row => {
+      entry: data.rows.map((row) => {
         const entryData: Record<string, { _text: string }> = {};
         for (const [key, value] of Object.entries(row)) {
           const xmlKey = key.replace(/[^a-zA-Z0-9_-]/g, '_');
@@ -149,22 +147,33 @@ export async function exportData(data: ExportData, format: ExportFormat): Promis
 
 export function getFileExtension(format: ExportFormat): string {
   switch (format) {
-    case 'csv': return '.csv';
-    case 'json': return '.json';
-    case 'xlsx': return '.xlsx';
-    case 'xml': return '.xml';
-    case 'yaml': return '.yaml';
-    default: return '';
+    case 'csv':
+      return '.csv';
+    case 'json':
+      return '.json';
+    case 'xlsx':
+      return '.xlsx';
+    case 'xml':
+      return '.xml';
+    case 'yaml':
+      return '.yaml';
+    default:
+      return '';
   }
 }
 
 export function getFormatName(format: ExportFormat): string {
   switch (format) {
-    case 'csv': return 'CSV';
-    case 'json': return 'JSON';
-    case 'xlsx': return 'Excel (XLSX)';
-    case 'xml': return 'XML';
-    case 'yaml': return 'YAML';
+    case 'csv':
+      return 'CSV';
+    case 'json':
+      return 'JSON';
+    case 'xlsx':
+      return 'Excel (XLSX)';
+    case 'xml':
+      return 'XML';
+    case 'yaml':
+      return 'YAML';
   }
 }
 

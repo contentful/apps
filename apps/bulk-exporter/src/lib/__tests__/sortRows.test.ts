@@ -21,7 +21,10 @@ function sortRowsByColumn<T extends Record<string, string | number | boolean | n
       return (av - bv) * factor;
     }
 
-    return String(av).localeCompare(String(bv), undefined, { numeric: true, sensitivity: 'base' }) * factor;
+    return (
+      String(av).localeCompare(String(bv), undefined, { numeric: true, sensitivity: 'base' }) *
+      factor
+    );
   });
 }
 
@@ -34,17 +37,17 @@ describe('sortRowsByColumn (mirror of exporter helper)', () => {
 
   it('sorts strings ascending case-insensitively', () => {
     const result = sortRowsByColumn(rows, 'Name', 'asc');
-    expect(result.map(r => r.Name)).toEqual(['alice', 'Bob', 'Charlie']);
+    expect(result.map((r) => r.Name)).toEqual(['alice', 'Bob', 'Charlie']);
   });
 
   it('sorts strings descending', () => {
     const result = sortRowsByColumn(rows, 'Name', 'desc');
-    expect(result.map(r => r.Name)).toEqual(['Charlie', 'Bob', 'alice']);
+    expect(result.map((r) => r.Name)).toEqual(['Charlie', 'Bob', 'alice']);
   });
 
   it('sorts dates ascending by string comparison (ISO format)', () => {
     const result = sortRowsByColumn(rows, 'Updated', 'asc');
-    expect(result.map(r => r.Updated)).toEqual(['2026-01-01', '2026-01-02', '2026-01-03']);
+    expect(result.map((r) => r.Updated)).toEqual(['2026-01-01', '2026-01-02', '2026-01-03']);
   });
 
   it('puts null/undefined values at the end regardless of direction', () => {
@@ -55,16 +58,16 @@ describe('sortRowsByColumn (mirror of exporter helper)', () => {
     ];
 
     const asc = sortRowsByColumn(withNulls, 'value', 'asc');
-    expect(asc.map(r => r.Name)).toEqual(['Gamma', 'Beta', 'Alpha']);
+    expect(asc.map((r) => r.Name)).toEqual(['Gamma', 'Beta', 'Alpha']);
 
     const desc = sortRowsByColumn(withNulls, 'value', 'desc');
-    expect(desc.map(r => r.Name)).toEqual(['Beta', 'Gamma', 'Alpha']);
+    expect(desc.map((r) => r.Name)).toEqual(['Beta', 'Gamma', 'Alpha']);
   });
 
   it('does not mutate the input array', () => {
-    const before = rows.map(r => r.Name);
+    const before = rows.map((r) => r.Name);
     sortRowsByColumn(rows, 'Name', 'asc');
-    expect(rows.map(r => r.Name)).toEqual(before);
+    expect(rows.map((r) => r.Name)).toEqual(before);
   });
 
   it('sorts numbers numerically (not lexically)', () => {
@@ -74,6 +77,6 @@ describe('sortRowsByColumn (mirror of exporter helper)', () => {
       { Name: 'c', count: 1 },
     ];
     const result = sortRowsByColumn(numbers, 'count', 'asc');
-    expect(result.map(r => r.count)).toEqual([1, 2, 10]);
+    expect(result.map((r) => r.count)).toEqual([1, 2, 10]);
   });
 });

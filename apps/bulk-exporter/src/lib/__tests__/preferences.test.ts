@@ -97,14 +97,21 @@ describe('preferences', () => {
     });
 
     it('rejects empty space or content type IDs gracefully', () => {
-      expect(saveFieldPreferences('', 'blogPost', { selectedFields: [], lastPreset: 'all' })).toBe(false);
-      expect(saveFieldPreferences('space1', '', { selectedFields: [], lastPreset: 'all' })).toBe(false);
+      expect(saveFieldPreferences('', 'blogPost', { selectedFields: [], lastPreset: 'all' })).toBe(
+        false
+      );
+      expect(saveFieldPreferences('space1', '', { selectedFields: [], lastPreset: 'all' })).toBe(
+        false
+      );
       expect(getFieldPreferences('', 'blogPost')).toBeNull();
       expect(getFieldPreferences('space1', '')).toBeNull();
     });
 
     it('handles malformed JSON in storage gracefully', () => {
-      window.localStorage.setItem('bulk-entry-exporter:v1:fields:space1:blogPost', 'not valid json');
+      window.localStorage.setItem(
+        'bulk-entry-exporter:v1:fields:space1:blogPost',
+        'not valid json'
+      );
       expect(getFieldPreferences('space1', 'blogPost')).toBeNull();
     });
   });

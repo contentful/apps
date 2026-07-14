@@ -1,6 +1,30 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Table, Card, Text, Badge, Button, Spinner, Checkbox, Tooltip, Flex, TextLink, Subheading, Pagination, Modal, FormControl, Select, TextInput, IconButton, Heading } from '@contentful/f36-components';
-import { ArrowSquareOutIcon, SortAscendingIcon, SortDescendingIcon, XIcon } from '@contentful/f36-icons';
+import {
+  Table,
+  Card,
+  Text,
+  Badge,
+  Button,
+  Spinner,
+  Checkbox,
+  Tooltip,
+  Flex,
+  TextLink,
+  Subheading,
+  Pagination,
+  Modal,
+  FormControl,
+  Select,
+  TextInput,
+  IconButton,
+  Heading,
+} from '@contentful/f36-components';
+import {
+  ArrowSquareOutIcon,
+  SortAscendingIcon,
+  SortDescendingIcon,
+  XIcon,
+} from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import type { ContentType } from '../lib/flatten';
 
@@ -22,11 +46,12 @@ function SortableHeader({ column, label, activeColumn, direction, onSort }: Sort
     <Tooltip
       content={
         isActive
-          ? `Sorted by ${label} (${direction === 'asc' ? 'ascending' : 'descending'}) — applies to your next export. Click to flip direction.`
+          ? `Sorted by ${label} (${
+              direction === 'asc' ? 'ascending' : 'descending'
+            }) — applies to your next export. Click to flip direction.`
           : `Sort by ${label}. Applies to the next export too.`
       }
-      placement="top"
-    >
+      placement="top">
       <Flex
         alignItems="center"
         gap="spacing2Xs"
@@ -46,14 +71,12 @@ function SortableHeader({ column, label, activeColumn, direction, onSort }: Sort
             e.preventDefault();
             onSort(column);
           }
-        }}
-      >
+        }}>
         <span
           style={{
             fontWeight: isActive ? 600 : 500,
             color: isActive ? 'var(--blue-600)' : 'inherit',
-          }}
-        >
+          }}>
           {label}
         </span>
         <Icon
@@ -121,7 +144,11 @@ export interface ResultsListProps {
   totalCount?: number;
   selectedIds?: string[];
   onSelectionChange?: (selectedIds: string[]) => void;
-  onExportSelected?: (selectedIds: string[], format: 'csv' | 'json' | 'xlsx' | 'xml' | 'yaml', filename: string) => void;
+  onExportSelected?: (
+    selectedIds: string[],
+    format: 'csv' | 'json' | 'xlsx' | 'xml' | 'yaml',
+    filename: string
+  ) => void;
   contentTypeMap?: ContentTypeMap;
   userMap?: UserMap;
   spaceId?: string;
@@ -228,10 +255,7 @@ function truncate(str: string): string {
   return str.length > TRUNCATE_AT ? str.slice(0, TRUNCATE_AT) + '…' : str;
 }
 
-function formatFieldValue(
-  field: SchemaField,
-  rawValue: unknown
-): string {
+function formatFieldValue(field: SchemaField, rawValue: unknown): string {
   if (rawValue === null || rawValue === undefined) return '—';
 
   switch (field.type) {
@@ -295,7 +319,11 @@ const STATUS_VARIANT: Record<string, 'primary' | 'positive' | 'warning' | 'negat
 
 function StatusBadge({ status }: { status: string }) {
   const variant = STATUS_VARIANT[status] ?? 'secondary';
-  return <Badge variant={variant as 'primary' | 'positive' | 'warning' | 'negative' | 'secondary'}>{status}</Badge>;
+  return (
+    <Badge variant={variant as 'primary' | 'positive' | 'warning' | 'negative' | 'secondary'}>
+      {status}
+    </Badge>
+  );
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -355,9 +383,7 @@ export function ResultsList({
   const displayColumns = useMemo(() => {
     if (fieldColumns.length === 0) return [];
     const activeLocales = locales.length > 0 ? locales : [''];
-    return fieldColumns.flatMap((field) =>
-      activeLocales.map((locale) => ({ field, locale }))
-    );
+    return fieldColumns.flatMap((field) => activeLocales.map((locale) => ({ field, locale })));
   }, [fieldColumns, locales]);
 
   const hasFieldColumns = displayColumns.length > 0;
@@ -390,7 +416,7 @@ export function ResultsList({
 
     const updatedByOf = (entry: SearchResult): string => {
       const id = entry.sys.updatedBy?.sys.id;
-      return id ? (userMap[id] || id) : 'Unknown';
+      return id ? userMap[id] || id : 'Unknown';
     };
 
     const statusOf = (entry: SearchResult): string => {
@@ -408,11 +434,16 @@ export function ResultsList({
 
     const accessor = (entry: SearchResult): string => {
       switch (sortColumn) {
-        case 'name': return titleOf(entry).toLowerCase();
-        case 'contentType': return contentTypeOf(entry).toLowerCase();
-        case 'updated': return entry.sys.updatedAt;
-        case 'updatedBy': return updatedByOf(entry).toLowerCase();
-        case 'status': return statusOf(entry);
+        case 'name':
+          return titleOf(entry).toLowerCase();
+        case 'contentType':
+          return contentTypeOf(entry).toLowerCase();
+        case 'updated':
+          return entry.sys.updatedAt;
+        case 'updatedBy':
+          return updatedByOf(entry).toLowerCase();
+        case 'status':
+          return statusOf(entry);
       }
     };
 
@@ -466,7 +497,8 @@ export function ResultsList({
   }
 
   const allCurrentIds = results.map((r) => r.sys.id);
-  const allSelected = allCurrentIds.length > 0 && allCurrentIds.every((id) => selectedIds.includes(id));
+  const allSelected =
+    allCurrentIds.length > 0 && allCurrentIds.every((id) => selectedIds.includes(id));
   const someSelected = selectedIds.length > 0 && !allSelected;
 
   const handleSelectAll = () => {
@@ -523,7 +555,7 @@ export function ResultsList({
     if (!entry.fields?.[field.id]) return '—';
     const localeMap = entry.fields[field.id];
     const value = locale
-      ? (localeMap[locale] ?? Object.values(localeMap)[0])
+      ? localeMap[locale] ?? Object.values(localeMap)[0]
       : Object.values(localeMap)[0];
     return formatFieldValue(field, value);
   };
@@ -547,20 +579,25 @@ export function ResultsList({
     <Card data-results-list style={{ overflow: 'hidden', padding: 0 }}>
       <Flex flexDirection="column">
         {/* Header */}
-        <Flex justifyContent="space-between" alignItems="flex-start" style={{ padding: '20px 24px 16px' }}>
+        <Flex
+          justifyContent="space-between"
+          alignItems="flex-start"
+          style={{ padding: '20px 24px 16px' }}>
           <Flex flexDirection="column" gap="spacing2Xs">
             <Subheading marginBottom="none">Search results</Subheading>
             <Flex gap="spacingS" alignItems="center">
               <Text fontSize="fontSizeS" fontColor="gray600">
-                {totalCount !== undefined ? `${totalCount.toLocaleString()} results` : `${results.length} results`}
+                {totalCount !== undefined
+                  ? `${totalCount.toLocaleString()} results`
+                  : `${results.length} results`}
               </Text>
-{sortColumn && (
+              {sortColumn && (
                 <Tooltip
                   content="This sort applies to your next export — the file rows will match the order shown below"
-                  placement="top"
-                >
+                  placement="top">
                   <Badge variant="secondary">
-                    Sorted by {sortColumnLabels[sortColumn]} ({sortDirection === 'asc' ? 'A→Z' : 'Z→A'})
+                    Sorted by {sortColumnLabels[sortColumn]} (
+                    {sortDirection === 'asc' ? 'A→Z' : 'Z→A'})
                   </Badge>
                 </Tooltip>
               )}
@@ -571,29 +608,27 @@ export function ResultsList({
         {/* Selection bar */}
         {selectedIds.length > 0 && (
           <div style={{ padding: '0 24px' }}>
-          <Flex
-            alignItems="center"
-            gap="spacingS"
-            style={{
-              padding: '12px 0',
-              borderTop: `1px solid ${tokens.gray200}`,
-              borderBottom: `1px solid ${tokens.gray200}`,
-            }}
-          >
-            <Text fontSize="fontSizeS" fontColor="gray700">
-              {selectedIds.length} {selectedIds.length === 1 ? 'entry' : 'entries'} selected:
-            </Text>
-            {onExportSelected && (
-              <Button
-                size="small"
-                variant="primary"
-                onClick={() => setExportModalOpen(true)}
-                isDisabled={isExporting}
-              >
-                Export
-              </Button>
-            )}
-          </Flex>
+            <Flex
+              alignItems="center"
+              gap="spacingS"
+              style={{
+                padding: '12px 0',
+                borderTop: `1px solid ${tokens.gray200}`,
+                borderBottom: `1px solid ${tokens.gray200}`,
+              }}>
+              <Text fontSize="fontSizeS" fontColor="gray700">
+                {selectedIds.length} {selectedIds.length === 1 ? 'entry' : 'entries'} selected:
+              </Text>
+              {onExportSelected && (
+                <Button
+                  size="small"
+                  variant="primary"
+                  onClick={() => setExportModalOpen(true)}
+                  isDisabled={isExporting}>
+                  Export
+                </Button>
+              )}
+            </Flex>
           </div>
         )}
 
@@ -602,169 +637,221 @@ export function ResultsList({
             left offsets are reliable pixel values. */}
         <div style={{ padding: `${selectedIds.length > 0 ? '24px' : '0'} 24px 24px` }}>
           <div style={{ border: '1px solid #E7EBEE', borderRadius: '6px', overflow: 'hidden' }}>
-          <div style={{ overflowX: 'auto', width: '100%' }}>
-          <Table style={{ borderCollapse: 'separate', borderSpacing: 0, tableLayout: 'fixed', width: '100%' }}>
-            <colgroup>
-              <col style={{ width: COL_CHECKBOX }} />
-              <col style={{ width: COL_NAME }} />
-              <col style={{ width: COL_STATUS }} />
-              {hasFieldColumns
-                ? displayColumns.map(({ field, locale }) => <col key={`${field.id}-${locale}`} style={{ width: COL_FIELD }} />)
-                : <>
-                    <col style={{ width: COL_FIELD }} />
-                    <col style={{ width: COL_FIELD }} />
-                    <col style={{ width: COL_FIELD }} />
-                  </>
-              }
-            </colgroup>
-            <Table.Head>
-              <Table.Row>
-                {/* Checkbox — sticky */}
-                <Table.Cell as="th" style={{ ...stickyHeaderCell(LEFT_CHECKBOX), borderRight: '1px solid #E7EBEE' }}>
-                  {onSelectionChange && (
-                    <Checkbox
-                      isChecked={allSelected}
-                      isIndeterminate={someSelected}
-                      onChange={handleSelectAll}
-                      aria-label="Select all entries on this page"
-                    />
+            <div style={{ overflowX: 'auto', width: '100%' }}>
+              <Table
+                style={{
+                  borderCollapse: 'separate',
+                  borderSpacing: 0,
+                  tableLayout: 'fixed',
+                  width: '100%',
+                }}>
+                <colgroup>
+                  <col style={{ width: COL_CHECKBOX }} />
+                  <col style={{ width: COL_NAME }} />
+                  <col style={{ width: COL_STATUS }} />
+                  {hasFieldColumns ? (
+                    displayColumns.map(({ field, locale }) => (
+                      <col key={`${field.id}-${locale}`} style={{ width: COL_FIELD }} />
+                    ))
+                  ) : (
+                    <>
+                      <col style={{ width: COL_FIELD }} />
+                      <col style={{ width: COL_FIELD }} />
+                      <col style={{ width: COL_FIELD }} />
+                    </>
                   )}
-                </Table.Cell>
-
-                {/* Name — sticky */}
-                <Table.Cell as="th" style={{ ...stickyHeaderCell(LEFT_NAME), minWidth: COL_NAME, borderRight: '1px solid #E7EBEE' }}>
-                  <SortableHeader
-                    column="name"
-                    label="Display name"
-                    activeColumn={sortColumn}
-                    direction={sortDirection}
-                    onSort={handleSortClick}
-                  />
-                </Table.Cell>
-
-                {/* Status — sticky, with shadow on right edge to separate sticky from scrolling */}
-                <Table.Cell as="th" style={{ ...stickyHeaderCell(LEFT_STATUS), minWidth: COL_STATUS, borderRight: '2px solid #CFD9E0', padding: '8px 12px' }}>
-                  <Text fontWeight="fontWeightMedium" fontSize="fontSizeS" fontColor="gray900">
-                    Status
-                  </Text>
-                </Table.Cell>
-
-                {hasFieldColumns ? (
-                  /* Dynamic field columns — one per field × locale */
-                  displayColumns.map(({ field, locale }) => (
-                    <Table.Cell as="th" key={`${field.id}-${locale}`} style={fieldHeaderCellStyle}>
-                      <Flex flexDirection="column" gap="spacing2Xs">
-                        <Text fontWeight="fontWeightMedium" fontSize="fontSizeS" fontColor="gray900">
-                          {locales.length > 1 ? `(${locale}) ${field.name}` : field.name}
-                        </Text>
-                        <Text fontSize="fontSizeS" fontColor="gray600" style={{ fontSize: '11px' }}>
-                          {getFieldTypeLabel(field)}
-                        </Text>
-                      </Flex>
-                    </Table.Cell>
-                  ))
-                ) : (
-                  /* Default metadata columns when no content type selected */
-                  <>
-                    <Table.Cell as="th" style={fixedHeaderCellStyle}>
-                      <SortableHeader
-                        column="contentType"
-                        label="Content Type"
-                        activeColumn={sortColumn}
-                        direction={sortDirection}
-                        onSort={handleSortClick}
-                      />
-                    </Table.Cell>
-                    <Table.Cell as="th" style={fixedHeaderCellStyle}>
-                      <SortableHeader
-                        column="updated"
-                        label="Updated"
-                        activeColumn={sortColumn}
-                        direction={sortDirection}
-                        onSort={handleSortClick}
-                      />
-                    </Table.Cell>
-                    <Table.Cell as="th" style={fixedHeaderCellStyle}>
-                      <SortableHeader
-                        column="updatedBy"
-                        label="Last updated by"
-                        activeColumn={sortColumn}
-                        direction={sortDirection}
-                        onSort={handleSortClick}
-                      />
-                    </Table.Cell>
-                  </>
-                )}
-
-              </Table.Row>
-            </Table.Head>
-
-            <Table.Body>
-              {sortedResults.map((entry) => {
-                const status = getStatus(entry);
-                const entryUrl = `https://app.contentful.com/spaces/${spaceId}/environments/${environmentId}/entries/${entry.sys.id}`;
-                return (
-                  <Table.Row key={entry.sys.id}>
+                </colgroup>
+                <Table.Head>
+                  <Table.Row>
                     {/* Checkbox — sticky */}
-                    <Table.Cell style={{ ...stickyBodyCell(LEFT_CHECKBOX), borderRight: '1px solid #E7EBEE' }}>
+                    <Table.Cell
+                      as="th"
+                      style={{
+                        ...stickyHeaderCell(LEFT_CHECKBOX),
+                        borderRight: '1px solid #E7EBEE',
+                      }}>
                       {onSelectionChange && (
                         <Checkbox
-                          isChecked={selectedIds.includes(entry.sys.id)}
-                          onChange={() => handleSelectOne(entry.sys.id)}
-                          aria-label={`Select ${getTitle(entry)}`}
+                          isChecked={allSelected}
+                          isIndeterminate={someSelected}
+                          onChange={handleSelectAll}
+                          aria-label="Select all entries on this page"
                         />
                       )}
                     </Table.Cell>
 
-                    {/* Display name — sticky, TextLink like Bulk Edit */}
-                    <Table.Cell style={{ ...stickyBodyCell(LEFT_NAME), minWidth: COL_NAME, borderRight: '1px solid #E7EBEE' }}>
-                      <TextLink
-                        href={entryUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        icon={<ArrowSquareOutIcon />}
-                        alignIcon="end"
-                        style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                      >
-                        {getTitle(entry)}
-                      </TextLink>
+                    {/* Name — sticky */}
+                    <Table.Cell
+                      as="th"
+                      style={{
+                        ...stickyHeaderCell(LEFT_NAME),
+                        minWidth: COL_NAME,
+                        borderRight: '1px solid #E7EBEE',
+                      }}>
+                      <SortableHeader
+                        column="name"
+                        label="Display name"
+                        activeColumn={sortColumn}
+                        direction={sortDirection}
+                        onSort={handleSortClick}
+                      />
                     </Table.Cell>
 
-                    {/* Status badge — sticky */}
-                    <Table.Cell style={{ ...stickyBodyCell(LEFT_STATUS), minWidth: COL_STATUS, borderRight: '2px solid #CFD9E0' }}>
-                      <StatusBadge status={status} />
+                    {/* Status — sticky, with shadow on right edge to separate sticky from scrolling */}
+                    <Table.Cell
+                      as="th"
+                      style={{
+                        ...stickyHeaderCell(LEFT_STATUS),
+                        minWidth: COL_STATUS,
+                        borderRight: '2px solid #CFD9E0',
+                        padding: '8px 12px',
+                      }}>
+                      <Text fontWeight="fontWeightMedium" fontSize="fontSizeS" fontColor="gray900">
+                        Status
+                      </Text>
                     </Table.Cell>
 
                     {hasFieldColumns ? (
-                      /* Field value cells — one per field × locale */
+                      /* Dynamic field columns — one per field × locale */
                       displayColumns.map(({ field, locale }) => (
-                        <Table.Cell key={`${field.id}-${locale}`} style={fieldBodyCellStyle}>
-                          <Text fontSize="fontSizeS" fontColor="gray700">
-                            {getFieldValue(entry, field, locale)}
-                          </Text>
+                        <Table.Cell
+                          as="th"
+                          key={`${field.id}-${locale}`}
+                          style={fieldHeaderCellStyle}>
+                          <Flex flexDirection="column" gap="spacing2Xs">
+                            <Text
+                              fontWeight="fontWeightMedium"
+                              fontSize="fontSizeS"
+                              fontColor="gray900">
+                              {locales.length > 1 ? `(${locale}) ${field.name}` : field.name}
+                            </Text>
+                            <Text
+                              fontSize="fontSizeS"
+                              fontColor="gray600"
+                              style={{ fontSize: '11px' }}>
+                              {getFieldTypeLabel(field)}
+                            </Text>
+                          </Flex>
                         </Table.Cell>
                       ))
                     ) : (
-                      /* Default metadata cells */
+                      /* Default metadata columns when no content type selected */
                       <>
-                        <Table.Cell>
-                          <Text fontSize="fontSizeS">{getContentTypeName(entry)}</Text>
+                        <Table.Cell as="th" style={fixedHeaderCellStyle}>
+                          <SortableHeader
+                            column="contentType"
+                            label="Content Type"
+                            activeColumn={sortColumn}
+                            direction={sortDirection}
+                            onSort={handleSortClick}
+                          />
                         </Table.Cell>
-                        <Table.Cell>
-                          <Text fontSize="fontSizeS">{formatDate(entry.sys.updatedAt)}</Text>
+                        <Table.Cell as="th" style={fixedHeaderCellStyle}>
+                          <SortableHeader
+                            column="updated"
+                            label="Updated"
+                            activeColumn={sortColumn}
+                            direction={sortDirection}
+                            onSort={handleSortClick}
+                          />
                         </Table.Cell>
-                        <Table.Cell>
-                          <Text fontSize="fontSizeS">{getLastUpdatedBy(entry)}</Text>
+                        <Table.Cell as="th" style={fixedHeaderCellStyle}>
+                          <SortableHeader
+                            column="updatedBy"
+                            label="Last updated by"
+                            activeColumn={sortColumn}
+                            direction={sortDirection}
+                            onSort={handleSortClick}
+                          />
                         </Table.Cell>
                       </>
                     )}
-
                   </Table.Row>
-                );
-              })}
-            </Table.Body>
-          </Table>
-          </div>
+                </Table.Head>
+
+                <Table.Body>
+                  {sortedResults.map((entry) => {
+                    const status = getStatus(entry);
+                    const entryUrl = `https://app.contentful.com/spaces/${spaceId}/environments/${environmentId}/entries/${entry.sys.id}`;
+                    return (
+                      <Table.Row key={entry.sys.id}>
+                        {/* Checkbox — sticky */}
+                        <Table.Cell
+                          style={{
+                            ...stickyBodyCell(LEFT_CHECKBOX),
+                            borderRight: '1px solid #E7EBEE',
+                          }}>
+                          {onSelectionChange && (
+                            <Checkbox
+                              isChecked={selectedIds.includes(entry.sys.id)}
+                              onChange={() => handleSelectOne(entry.sys.id)}
+                              aria-label={`Select ${getTitle(entry)}`}
+                            />
+                          )}
+                        </Table.Cell>
+
+                        {/* Display name — sticky, TextLink like Bulk Edit */}
+                        <Table.Cell
+                          style={{
+                            ...stickyBodyCell(LEFT_NAME),
+                            minWidth: COL_NAME,
+                            borderRight: '1px solid #E7EBEE',
+                          }}>
+                          <TextLink
+                            href={entryUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            icon={<ArrowSquareOutIcon />}
+                            alignIcon="end"
+                            style={{
+                              display: 'block',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}>
+                            {getTitle(entry)}
+                          </TextLink>
+                        </Table.Cell>
+
+                        {/* Status badge — sticky */}
+                        <Table.Cell
+                          style={{
+                            ...stickyBodyCell(LEFT_STATUS),
+                            minWidth: COL_STATUS,
+                            borderRight: '2px solid #CFD9E0',
+                          }}>
+                          <StatusBadge status={status} />
+                        </Table.Cell>
+
+                        {hasFieldColumns ? (
+                          /* Field value cells — one per field × locale */
+                          displayColumns.map(({ field, locale }) => (
+                            <Table.Cell key={`${field.id}-${locale}`} style={fieldBodyCellStyle}>
+                              <Text fontSize="fontSizeS" fontColor="gray700">
+                                {getFieldValue(entry, field, locale)}
+                              </Text>
+                            </Table.Cell>
+                          ))
+                        ) : (
+                          /* Default metadata cells */
+                          <>
+                            <Table.Cell>
+                              <Text fontSize="fontSizeS">{getContentTypeName(entry)}</Text>
+                            </Table.Cell>
+                            <Table.Cell>
+                              <Text fontSize="fontSizeS">{formatDate(entry.sys.updatedAt)}</Text>
+                            </Table.Cell>
+                            <Table.Cell>
+                              <Text fontSize="fontSizeS">{getLastUpdatedBy(entry)}</Text>
+                            </Table.Cell>
+                          </>
+                        )}
+                      </Table.Row>
+                    );
+                  })}
+                </Table.Body>
+              </Table>
+            </div>
           </div>
         </div>
 
@@ -780,7 +867,12 @@ export function ResultsList({
         )}
       </Flex>
 
-      <Modal isShown={exportModalOpen} onClose={() => { if (!isExporting) setExportModalOpen(false); }} size="medium">
+      <Modal
+        isShown={exportModalOpen}
+        onClose={() => {
+          if (!isExporting) setExportModalOpen(false);
+        }}
+        size="medium">
         <Modal.Content style={{ padding: 0 }}>
           {/* Header */}
           <Flex
@@ -789,9 +881,10 @@ export function ResultsList({
             style={{
               padding: '20px 24px',
               borderBottom: `1px solid ${tokens.gray200}`,
-            }}
-          >
-            <Heading as="h2" marginBottom="none">File export</Heading>
+            }}>
+            <Heading as="h2" marginBottom="none">
+              File export
+            </Heading>
             {!isExporting && (
               <IconButton
                 variant="transparent"
@@ -813,7 +906,11 @@ export function ResultsList({
               <>
                 <FormControl marginBottom="spacingL">
                   <FormControl.Label>File type</FormControl.Label>
-                  <Select value={exportFormat} onChange={(e) => setExportFormat(e.target.value as 'csv' | 'json' | 'xlsx' | 'xml' | 'yaml')}>
+                  <Select
+                    value={exportFormat}
+                    onChange={(e) =>
+                      setExportFormat(e.target.value as 'csv' | 'json' | 'xlsx' | 'xml' | 'yaml')
+                    }>
                     <Select.Option value="csv">CSV</Select.Option>
                     <Select.Option value="json">JSON</Select.Option>
                     <Select.Option value="xlsx">Excel (XLSX)</Select.Option>
@@ -847,10 +944,10 @@ export function ResultsList({
               isDisabled={isExporting}
               onClick={() => {
                 const today = new Date().toISOString().split('T')[0];
-                const resolvedFilename = exportFilename.trim() || `selected-${selectedIds.length}-entries-${today}`;
+                const resolvedFilename =
+                  exportFilename.trim() || `selected-${selectedIds.length}-entries-${today}`;
                 onExportSelected?.(selectedIds, exportFormat, resolvedFilename);
-              }}
-            >
+              }}>
               {isExporting ? 'Exporting' : 'Export'}
             </Button>
           </Flex>

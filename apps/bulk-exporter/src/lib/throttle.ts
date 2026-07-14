@@ -34,7 +34,7 @@ export class Throttler {
     const now = Date.now();
     const elapsed = (now - this.lastRefill) / 1000;
     const tokensToAdd = elapsed * this.requestsPerSecond;
-    
+
     if (tokensToAdd >= 1) {
       this.tokens = Math.min(this.requestsPerSecond, this.tokens + tokensToAdd);
       this.lastRefill = now;
@@ -42,7 +42,7 @@ export class Throttler {
   }
 
   private async sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private async processQueue(): Promise<void> {
@@ -77,18 +77,16 @@ export class Throttler {
       request.resolve(result);
     } catch (error) {
       const is429 = this.is429Error(error);
-      
+
       if (is429 && request.retries < this.maxRetries) {
         const resetSeconds = this.extractRateLimitReset(error);
-        const backoffMs = resetSeconds 
-          ? resetSeconds * 1000 
-          : Math.pow(2, request.retries) * 1000;
+        const backoffMs = resetSeconds ? resetSeconds * 1000 : Math.pow(2, request.retries) * 1000;
 
         await this.sleep(backoffMs);
-        
+
         request.retries += 1;
         this.queue.unshift(request);
-        
+
         if (!this.processing) {
           this.processQueue();
         }
@@ -108,15 +106,15 @@ export class Throttler {
 
   private extractRateLimitReset(error: unknown): number | null {
     if (typeof error === 'object' && error !== null) {
-      const err = error as { 
+      const err = error as {
         headers?: { 'x-contentful-ratelimit-reset'?: string };
         response?: { headers?: { 'x-contentful-ratelimit-reset'?: string } };
       };
-      
-      const resetHeader = 
+
+      const resetHeader =
         err.headers?.['x-contentful-ratelimit-reset'] ||
         err.response?.headers?.['x-contentful-ratelimit-reset'];
-      
+
       if (resetHeader) {
         const seconds = parseInt(resetHeader, 10);
         if (!isNaN(seconds)) {
