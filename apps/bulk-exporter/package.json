@@ -35,7 +35,7 @@
     "@contentful/react-apps-toolkit": "^1.2.16",
     "@emotion/css": "^11.13.5",
     "exceljs": "^4.4.0",
-    "js-yaml": "^4.1.1",
+    "js-yaml": "^4.3.0",
     "papaparse": "^5.4.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
