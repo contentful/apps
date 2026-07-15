@@ -2,8 +2,8 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { Layout } from '@contentful/f36-components';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PageAppSDK } from '@contentful/app-sdk';
+import { RunStatus, ValidationFindingSeverity } from '@types';
 import type { MappingReviewSuspendPayload } from '@types';
-import { RunStatus } from '@types';
 import { createMockSDK } from '../../../../mocks';
 import { ReviewPage } from '../../../../../src/locations/Page/components/review/ReviewPage';
 
@@ -138,7 +138,7 @@ describe('ReviewPage — block findings acknowledgement (INTEG-4383)', () => {
         {
           code: 'required-field-missing',
           message: 'title missing',
-          severity: 'block',
+          severity: ValidationFindingSeverity.Block,
           entryIndex: 0,
         },
       ],
@@ -155,7 +155,7 @@ describe('ReviewPage — block findings acknowledgement (INTEG-4383)', () => {
         {
           code: 'required-field-missing',
           message: 'title missing',
-          severity: 'block',
+          severity: ValidationFindingSeverity.Block,
           entryIndex: 0,
         },
       ],
@@ -174,7 +174,7 @@ describe('ReviewPage — block findings acknowledgement (INTEG-4383)', () => {
     const payload: MappingReviewSuspendPayload = {
       ...createPayload(),
       validationFindings: [
-        { code: 'displayField-blank', message: 'title blank', severity: 'warn', entryIndex: 0 },
+        { code: 'displayField-blank', message: 'title blank', severity: ValidationFindingSeverity.Warn, entryIndex: 0 },
       ],
     };
     renderReviewPage(payload);

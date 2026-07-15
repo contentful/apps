@@ -125,8 +125,10 @@ export interface TabsImagesSuspendPayload {
   tabs?: DocTabOption[];
 }
 
-/** Severity levels for validation findings produced by the validate-payload step. */
-export type ValidationFindingSeverity = 'block' | 'warn';
+export enum ValidationFindingSeverity {
+  Block = 'block',
+  Warn = 'warn',
+}
 
 /** A single validation finding from the validate-payload step. */
 export interface ValidationFinding {
@@ -151,7 +153,6 @@ export interface MappingReviewSuspendPayload {
   entryBlockGraph: EntryBlockGraph;
   referenceGraph: ReviewedReferenceGraph;
   contentTypes: WorkflowContentType[];
-  /** Present when the google-docs-agent-improvements flag is on; absent otherwise. */
   validationFindings?: ValidationFinding[];
 }
 

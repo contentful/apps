@@ -18,6 +18,8 @@ interface OverviewProps {
   isCtaLoading?: boolean;
   isCtaDisabled?: boolean;
   areEntrySelectionsDisabled?: boolean;
+  /** Whether any block-severity findings exist; drives the acknowledgement Note visibility. */
+  hasBlockFindings?: boolean;
   /** Called with `true` when the user checks the block-findings acknowledgement. */
   onBlockFindingsAcknowledged?: (acknowledged: boolean) => void;
   /** Whether the user has acknowledged block findings. */
@@ -35,6 +37,7 @@ const OverviewSection = ({
   isCtaLoading = false,
   isCtaDisabled = false,
   areEntrySelectionsDisabled = false,
+  hasBlockFindings = false,
   onBlockFindingsAcknowledged,
   blockFindingsAcknowledged = false,
 }: OverviewProps) => {
@@ -59,8 +62,6 @@ const OverviewSection = ({
     return map;
   }, [payload.validationFindings]);
 
-  const hasBlockFindings = (payload.validationFindings ?? []).some((f) => f.severity === 'block');
-
   return (
     <>
       <Box padding="spacingL" className={overviewSectionBox}>
@@ -72,7 +73,7 @@ const OverviewSection = ({
             </Flex>
             <Paragraph marginBottom="none">
               Review your content and associated entries below. Highlight text to make adjustments.
-              Select which entries you’d like to create.
+              Select which entries you'd like to create.
             </Paragraph>
           </Flex>
 

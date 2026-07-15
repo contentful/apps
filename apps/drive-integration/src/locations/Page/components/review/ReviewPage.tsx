@@ -271,6 +271,7 @@ export const ReviewPage = ({
               (!hasSelectedEntries || (hasBlockFindings && !blockFindingsAcknowledged))
             }
             areEntrySelectionsDisabled={isMappingDisabled}
+            hasBlockFindings={hasBlockFindings}
             blockFindingsAcknowledged={blockFindingsAcknowledged}
             onBlockFindingsAcknowledged={setBlockFindingsAcknowledged}
           />

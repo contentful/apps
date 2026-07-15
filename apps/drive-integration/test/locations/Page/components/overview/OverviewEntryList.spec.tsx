@@ -1,5 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ValidationFindingSeverity } from '@types';
 import type { ValidationFinding } from '@types';
 import type { EntryListRow } from '../../../../../src/utils/overviewEntryList';
 import { OverviewEntryList } from '../../../../../src/locations/Page/components/overview/OverviewEntryList';
@@ -36,7 +37,7 @@ describe('OverviewEntryList — validation finding badges (INTEG-4383)', () => {
       {
         code: 'required-field-missing',
         message: 'title missing',
-        severity: 'block',
+        severity: ValidationFindingSeverity.Block,
         entryIndex: 0,
       },
     ];
@@ -49,7 +50,7 @@ describe('OverviewEntryList — validation finding badges (INTEG-4383)', () => {
   it('renders a "Warning" badge for entries with only warn findings', () => {
     const rows = [makeRow(0, 'Entry A')];
     const findings: ValidationFinding[] = [
-      { code: 'displayField-blank', message: 'title blank', severity: 'warn', entryIndex: 0 },
+      { code: 'displayField-blank', message: 'title blank', severity: ValidationFindingSeverity.Warn, entryIndex: 0 },
     ];
     renderList(rows, new Map([[0, findings]]));
 
@@ -63,10 +64,10 @@ describe('OverviewEntryList — validation finding badges (INTEG-4383)', () => {
       {
         code: 'required-field-missing',
         message: 'title missing',
-        severity: 'block',
+        severity: ValidationFindingSeverity.Block,
         entryIndex: 0,
       },
-      { code: 'displayField-blank', message: 'title blank', severity: 'warn', entryIndex: 0 },
+      { code: 'displayField-blank', message: 'title blank', severity: ValidationFindingSeverity.Warn, entryIndex: 0 },
     ];
     renderList(rows, new Map([[0, findings]]));
 
@@ -88,7 +89,7 @@ describe('OverviewEntryList — validation finding badges (INTEG-4383)', () => {
       {
         code: 'required-field-missing',
         message: 'title missing',
-        severity: 'block',
+        severity: ValidationFindingSeverity.Block,
         entryIndex: 1,
       },
     ];

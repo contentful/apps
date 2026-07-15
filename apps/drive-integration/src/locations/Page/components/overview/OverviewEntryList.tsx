@@ -2,6 +2,7 @@ import { Badge, Box, Card, Checkbox, Flex, Paragraph, Text } from '@contentful/f
 import tokens from '@contentful/f36-tokens';
 import { cx } from '@emotion/css';
 import type { EntryListRow as OverviewEntryListRow } from '../../../../utils/overviewEntryList';
+import { ValidationFindingSeverity } from '@types';
 import type { ValidationFinding } from '@types';
 import {
   noMappedContentBadge,
@@ -49,8 +50,8 @@ function OverviewEntryRowCard({
   const isSelected = row.entryIndex === selectedEntryIndex;
   const isEntrySelectedForCreation = selectedEntryKeys.has(row.id);
   const entryFindings = findingsByEntryIndex?.get(row.entryIndex) ?? [];
-  const hasBlockFindings = entryFindings.some((f) => f.severity === 'block');
-  const hasWarnFindings = entryFindings.some((f) => f.severity === 'warn');
+  const hasBlockFindings = entryFindings.some((f) => f.severity === ValidationFindingSeverity.Block);
+  const hasWarnFindings = entryFindings.some((f) => f.severity === ValidationFindingSeverity.Warn);
 
   const treeLineClass =
     showTreeLines && cx(treeChildRowBase, isLastRow ? treeChildRowLast : treeChildRowNotLast);
