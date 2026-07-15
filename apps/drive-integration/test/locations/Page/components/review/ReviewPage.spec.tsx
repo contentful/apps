@@ -125,6 +125,62 @@ const renderReviewPage = (payload: MappingReviewSuspendPayload = createPayload()
     </Layout>
   );
 
+describe('ReviewPage — block findings acknowledgement (INTEG-4383)', () => {
+  beforeEach(() => {
+    sdk = createMockSDK() as PageAppSDK;
+    vi.clearAllMocks();
+  });
+
+  it('disables Create button when block findings are present and not acknowledged', () => {
+    const payload: MappingReviewSuspendPayload = {
+      ...createPayload(),
+      validationFindings: [
+        { code: 'required-field-missing', message: 'title missing', severity: 'block', entryIndex: 0 },
+      ],
+    };
+    renderReviewPage(payload);
+
+    expect(screen.getByRole('button', { name: 'Create selected entries' })).toBeDisabled();
+  });
+
+  it('enables Create button after user acknowledges block findings', () => {
+    const payload: MappingReviewSuspendPayload = {
+      ...createPayload(),
+      validationFindings: [
+        { code: 'required-field-missing', message: 'title missing', severity: 'block', entryIndex: 0 },
+      ],
+    };
+    renderReviewPage(payload);
+
+    const checkbox = screen.getByRole('checkbox', {
+      name: 'I have reviewed the issues and want to proceed',
+    });
+    fireEvent.click(checkbox);
+
+    expect(screen.getByRole('button', { name: 'Create selected entries' })).toBeEnabled();
+  });
+
+  it('does not disable Create button when only warn findings are present', () => {
+    const payload: MappingReviewSuspendPayload = {
+      ...createPayload(),
+      validationFindings: [
+        { code: 'displayField-blank', message: 'title blank', severity: 'warn', entryIndex: 0 },
+      ],
+    };
+    renderReviewPage(payload);
+
+    expect(screen.getByRole('button', { name: 'Create selected entries' })).toBeEnabled();
+  });
+
+  it('does not show acknowledgement note when there are no block findings', () => {
+    renderReviewPage();
+
+    expect(
+      screen.queryByText('I have reviewed the issues and want to proceed')
+    ).toBeNull();
+  });
+});
+
 describe('ReviewPage entry selection', () => {
   beforeEach(() => {
     sdk = createMockSDK() as PageAppSDK;

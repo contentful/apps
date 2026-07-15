@@ -2,6 +2,7 @@ import { Badge, Box, Card, Checkbox, Flex, Paragraph, Text } from '@contentful/f
 import tokens from '@contentful/f36-tokens';
 import { cx } from '@emotion/css';
 import type { EntryListRow as OverviewEntryListRow } from '../../../../utils/overviewEntryList';
+import type { ValidationFinding } from '@types';
 import {
   noMappedContentBadge,
   treeChildRowBase,
@@ -18,6 +19,8 @@ export interface OverviewEntryListProps {
   onSelect: (entryIndex: number) => void;
   onToggleEntrySelection: (entryKey: string, isSelected: boolean) => void;
   areEntrySelectionsDisabled?: boolean;
+  /** Validation findings keyed by entry index, for badge rendering. */
+  findingsByEntryIndex?: ReadonlyMap<number, ValidationFinding[]>;
 }
 
 interface OverviewEntryRowCardProps {
@@ -29,6 +32,7 @@ interface OverviewEntryRowCardProps {
   areEntrySelectionsDisabled: boolean;
   showTreeLines: boolean;
   isLastRow?: boolean;
+  findingsByEntryIndex?: ReadonlyMap<number, ValidationFinding[]>;
 }
 
 function OverviewEntryRowCard({
@@ -40,9 +44,13 @@ function OverviewEntryRowCard({
   areEntrySelectionsDisabled,
   showTreeLines,
   isLastRow = true,
+  findingsByEntryIndex,
 }: OverviewEntryRowCardProps) {
   const isSelected = row.entryIndex === selectedEntryIndex;
   const isEntrySelectedForCreation = selectedEntryKeys.has(row.id);
+  const entryFindings = findingsByEntryIndex?.get(row.entryIndex) ?? [];
+  const hasBlockFindings = entryFindings.some((f) => f.severity === 'block');
+  const hasWarnFindings = entryFindings.some((f) => f.severity === 'warn');
 
   const treeLineClass =
     showTreeLines && cx(treeChildRowBase, isLastRow ? treeChildRowLast : treeChildRowNotLast);
@@ -95,6 +103,16 @@ function OverviewEntryRowCard({
                   No mapped content
                 </Badge>
               )}
+              {hasBlockFindings && (
+                <Badge variant="negative" size="small" className={noMappedContentBadge}>
+                  Needs attention
+                </Badge>
+              )}
+              {!hasBlockFindings && hasWarnFindings && (
+                <Badge variant="warning" size="small" className={noMappedContentBadge}>
+                  Warning
+                </Badge>
+              )}
             </Paragraph>
           </button>
         </Flex>
@@ -112,6 +130,7 @@ function OverviewEntryRowCard({
               areEntrySelectionsDisabled={areEntrySelectionsDisabled}
               showTreeLines
               isLastRow={index === row.children.length - 1}
+              findingsByEntryIndex={findingsByEntryIndex}
             />
           ))}
         </Box>
@@ -137,6 +156,7 @@ export function OverviewEntryList({
   onSelect,
   onToggleEntrySelection,
   areEntrySelectionsDisabled = false,
+  findingsByEntryIndex,
 }: OverviewEntryListProps) {
   return (
     <Flex flexDirection="column" gap="spacingS">
@@ -150,6 +170,7 @@ export function OverviewEntryList({
           onToggleEntrySelection={onToggleEntrySelection}
           areEntrySelectionsDisabled={areEntrySelectionsDisabled}
           showTreeLines={false}
+          findingsByEntryIndex={findingsByEntryIndex}
         />
       ))}
     </Flex>
