@@ -50,7 +50,12 @@ describe('OverviewEntryList — validation finding badges (INTEG-4383)', () => {
   it('renders a "Warning" badge for entries with only warn findings', () => {
     const rows = [makeRow(0, 'Entry A')];
     const findings: ValidationFinding[] = [
-      { code: 'displayField-blank', message: 'title blank', severity: ValidationFindingSeverity.Warn, entryIndex: 0 },
+      {
+        code: 'displayField-blank',
+        message: 'title blank',
+        severity: ValidationFindingSeverity.Warn,
+        entryIndex: 0,
+      },
     ];
     renderList(rows, new Map([[0, findings]]));
 
@@ -67,7 +72,12 @@ describe('OverviewEntryList — validation finding badges (INTEG-4383)', () => {
         severity: ValidationFindingSeverity.Block,
         entryIndex: 0,
       },
-      { code: 'displayField-blank', message: 'title blank', severity: ValidationFindingSeverity.Warn, entryIndex: 0 },
+      {
+        code: 'displayField-blank',
+        message: 'title blank',
+        severity: ValidationFindingSeverity.Warn,
+        entryIndex: 0,
+      },
     ];
     renderList(rows, new Map([[0, findings]]));
 

@@ -50,7 +50,9 @@ function OverviewEntryRowCard({
   const isSelected = row.entryIndex === selectedEntryIndex;
   const isEntrySelectedForCreation = selectedEntryKeys.has(row.id);
   const entryFindings = findingsByEntryIndex?.get(row.entryIndex) ?? [];
-  const hasBlockFindings = entryFindings.some((f) => f.severity === ValidationFindingSeverity.Block);
+  const hasBlockFindings = entryFindings.some(
+    (f) => f.severity === ValidationFindingSeverity.Block
+  );
   const hasWarnFindings = entryFindings.some((f) => f.severity === ValidationFindingSeverity.Warn);
 
   const treeLineClass =

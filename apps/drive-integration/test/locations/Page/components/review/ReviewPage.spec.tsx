@@ -174,7 +174,12 @@ describe('ReviewPage — block findings acknowledgement (INTEG-4383)', () => {
     const payload: MappingReviewSuspendPayload = {
       ...createPayload(),
       validationFindings: [
-        { code: 'displayField-blank', message: 'title blank', severity: ValidationFindingSeverity.Warn, entryIndex: 0 },
+        {
+          code: 'displayField-blank',
+          message: 'title blank',
+          severity: ValidationFindingSeverity.Warn,
+          entryIndex: 0,
+        },
       ],
     };
     renderReviewPage(payload);
