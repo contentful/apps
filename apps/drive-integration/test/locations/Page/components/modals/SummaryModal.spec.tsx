@@ -1,5 +1,5 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import type { EntryProps } from 'contentful-management';
 import { SummaryModal } from '../../../../../src/locations/Page/components/modals/SummaryModal';
 import { createMockSDK } from '../../../../mocks';
@@ -35,6 +35,13 @@ describe('SummaryModal', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSdk = createMockSDK() as PageAppSDK;
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.runAllTimers();
+    vi.useRealTimers();
   });
 
   it('renders title and success message with entry count', async () => {

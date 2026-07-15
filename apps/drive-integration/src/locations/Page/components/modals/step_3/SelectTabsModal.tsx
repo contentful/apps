@@ -7,13 +7,19 @@ import {
   Modal,
   Paragraph,
   Pill,
-  Multiselect,
   Radio,
 } from '@contentful/f36-components';
-import { modalControls, multiselect, pillsContainer } from './SelectTabsModal.styles';
+import { Multiselect } from '@contentful/f36-multiselect';
+import {
+  modalControls,
+  multiselect,
+  multiselectContainer,
+  pillsContainer,
+} from './SelectTabsModal.styles';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
 import { DocumentTabProps } from '@types';
-import { truncateLabel } from '../../../../../utils/utils';
+import { truncateMiddle } from '../../../../../utils/utils';
+import { handleMultiselectKeyDown } from '../../../../../utils/keyboard';
 import { MAX_TABS_SELECTION } from '@constants/agent';
 
 interface SelectTabsModalProps {
@@ -96,25 +102,29 @@ export const SelectTabsModal = ({
                 <FormControl isRequired isInvalid={isInvalidSelectionError} marginBottom="none">
                   <FormControl.Label>Document tabs</FormControl.Label>
                   <Checkbox.Group name="document-tabs" value={selectedTabs.map((t) => t.tabId)}>
-                    <Multiselect
-                      className={multiselect}
-                      currentSelection={selectedTabs.map((tab) => tab.tabTitle)}
-                      placeholder={'Select one or more'}
-                      popoverProps={{
-                        listMaxHeight: 300,
-                        listRef: multiselectListRef,
-                      }}>
-                      {availableTabs.map((tab) => (
-                        <Multiselect.Option
-                          key={tab.tabId}
-                          value={tab.tabId}
-                          itemId={tab.tabId}
-                          isChecked={selectedTabs.some((selected) => selected.tabId === tab.tabId)}
-                          onSelectItem={handleSelectTab}>
-                          {tab.tabTitle}
-                        </Multiselect.Option>
-                      ))}
-                    </Multiselect>
+                    <div onKeyDown={handleMultiselectKeyDown} className={multiselectContainer}>
+                      <Multiselect
+                        className={multiselect}
+                        currentSelection={selectedTabs.map((tab) => tab.tabTitle)}
+                        placeholder={'Select one or more'}
+                        popoverProps={{
+                          listMaxHeight: 300,
+                          listRef: multiselectListRef,
+                        }}>
+                        {availableTabs.map((tab) => (
+                          <Multiselect.Option
+                            key={tab.tabId}
+                            value={tab.tabId}
+                            itemId={tab.tabId}
+                            isChecked={selectedTabs.some(
+                              (selected) => selected.tabId === tab.tabId
+                            )}
+                            onSelectItem={handleSelectTab}>
+                            {tab.tabTitle}
+                          </Multiselect.Option>
+                        ))}
+                      </Multiselect>
+                    </div>
                   </Checkbox.Group>
                   {isInvalidSelectionError && (
                     <FormControl.ValidationMessage>
@@ -133,7 +143,7 @@ export const SelectTabsModal = ({
                     {selectedTabs.map((tab) => (
                       <Pill
                         key={tab.tabId}
-                        label={truncateLabel(tab.tabTitle)}
+                        label={truncateMiddle(tab.tabTitle)}
                         onClose={() =>
                           setSelectedTabs(selectedTabs.filter((t) => t.tabId !== tab.tabId))
                         }

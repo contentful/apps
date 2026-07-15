@@ -57,7 +57,9 @@ export function useGoogleDocsPicker(
         .setOAuthToken(accessToken)
         .setDeveloperKey(GOOGLE_PICKER_API_KEY)
         .addView(docsView)
-        .setOrigin(`https://${sdk.hostnames.webapp}` || 'https://app.contentful.com');
+        .setOrigin(
+          sdk.hostnames.webapp ? `https://${sdk.hostnames.webapp}` : 'https://app.contentful.com'
+        );
 
       const picker = pickerBuilder.setCallback((data: any) => {
         if (data.action === google.picker.Action.PICKED) {

@@ -19,6 +19,7 @@ interface ReviewDocumentBodyProps {
   isViewMode: boolean;
   onSetHoveredMappingKeys: (keys: string[]) => void;
   onEditImage?: (sourceRef: ImageSourceRef, label: string) => void;
+  onRemoveImage?: (sourceRef: ImageSourceRef) => void;
 }
 
 export const NormalizedDocumentSection = ({
@@ -33,6 +34,7 @@ export const NormalizedDocumentSection = ({
   isViewMode,
   onSetHoveredMappingKeys,
   onEditImage,
+  onRemoveImage,
 }: ReviewDocumentBodyProps): JSX.Element => {
   return (
     <Box style={{ flex: 2 }}>
@@ -56,6 +58,7 @@ export const NormalizedDocumentSection = ({
               isViewMode={isViewMode}
               onSetHoveredMappingKeys={onSetHoveredMappingKeys}
               onEditImage={onEditImage}
+              onRemoveImage={onRemoveImage}
             />
           ) : (
             <BlockRenderer
@@ -70,6 +73,7 @@ export const NormalizedDocumentSection = ({
               isViewMode={isViewMode}
               onSetHoveredMappingKeys={onSetHoveredMappingKeys}
               onEditImage={onEditImage}
+              onRemoveImage={onRemoveImage}
             />
           )}
         </Box>

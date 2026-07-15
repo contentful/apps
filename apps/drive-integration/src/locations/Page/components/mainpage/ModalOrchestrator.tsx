@@ -81,8 +81,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const [useAllTabs, setUseAllTabs] = useState<boolean | null>(null);
     const [includeImages, setIncludeImages] = useState<boolean | null>(null);
     const [requiresImageSelection, setRequiresImageSelection] = useState(false);
-    const [activeRunId, setActiveRunId] = useState<string | null>(null);
-    const { startWorkflow, resumeWorkflow } = useWorkflowAgent({
+    const { startWorkflow } = useWorkflowAgent({
       sdk,
       documentId,
       oauthToken,
@@ -100,22 +99,21 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       },
     }));
 
-    const resetDocumentSelection = () => {
+    const resetDocumentSelection = useCallback(() => {
       setAvailableTabs([]);
       setSelectedTabs([]);
       setUseAllTabs(null);
       setIncludeImages(null);
       setRequiresImageSelection(false);
-    };
+    }, []);
 
-    const resetProgress = () => {
+    const resetProgress = useCallback(() => {
       setDocumentId('');
       setSelectedContentTypes([]);
       resetDocumentSelection();
-      setActiveRunId(null);
       setFlowStep(null);
       setIsUploadModalOpen(false);
-    };
+    }, [resetDocumentSelection]);
 
     const showDiscardConfirmation = () => {
       if (!hasProgressToLose) return;
@@ -132,7 +130,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setIsReconnectPending(false);
       resetProgress();
       onResetToMain();
-    }, [onResetToMain]);
+    }, [onResetToMain, resetProgress]);
 
     const handleConfirmCancel = () => {
       setIsConfirmCancelModalOpen(false);
@@ -242,16 +240,19 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       closePreviewErrorAndReset();
     }, [closePreviewErrorAndReset, isOAuthBusy, isOAuthConnected, isReconnectPending]);
 
-    const handleWorkflowError = (error: unknown) => {
-      if (isAiAccessDeniedError(error)) {
-        resetProgress();
-        onResetToMain();
-        onAiAccessDenied?.(error.message);
-        return;
-      }
+    const handleWorkflowError = useCallback(
+      (error: unknown) => {
+        if (isAiAccessDeniedError(error)) {
+          resetProgress();
+          onResetToMain();
+          onAiAccessDenied?.(error.message);
+          return;
+        }
 
-      showWorkflowError(error);
-    };
+        showWorkflowError(error);
+      },
+      [onAiAccessDenied, onResetToMain, resetProgress]
+    );
 
     const handleUploadModalCloseRequest = (docId?: string) => {
       if (docId) {
@@ -291,8 +292,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     };
 
     const handleWorkflowResult = (workflowRun: WorkflowRunResult) => {
-      setActiveRunId(workflowRun.runId);
-
       if (workflowRun.status === RunStatus.PENDING_REVIEW) {
         setFlowStep(null);
         onMappingReviewReady(workflowRun.suspendPayload, workflowRun.runId);
