@@ -183,6 +183,25 @@ To install into a space, create an app definition with a **Page** location:
 npm run create-app-definition
 ```
 
+### Seeding test data
+
+To exercise the scan against a space with many drafts, the seed script fills a
+test environment with known quantities of untitled drafts, titled unreferenced
+drafts, referenced drafts (linked from published container entries), fileless
+draft assets, and optional published filler. Copy `.env.seed.example` to
+`.env.seed`, point it at a **dedicated test space**, then:
+
+```bash
+npm run seed-test-data           # create the data (prints expected scan results)
+npm run seed-test-data:cleanup   # delete everything the script created
+```
+
+Everything is tagged `seedTestData` and typed `seedOrphanTest`, so cleanup is
+exact. Note that published volume adds no API calls to a scan — the draft
+filters are server-side — but it does grow the corpus the `links_to_entry`
+reference searches run over and counts toward the plan's record limit, which
+is what the `SEED_PUBLISHED_ENTRIES` knob is for.
+
 ## Learn more
 
 - [Contentful App Framework](https://www.contentful.com/developers/docs/extensibility/app-framework/)

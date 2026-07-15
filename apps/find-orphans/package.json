@@ -22,6 +22,8 @@
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "add-locations": "contentful-app-scripts add-locations",
     "update-app-parameters": "node scripts/update-app-parameters.mjs",
+    "seed-test-data": "node scripts/seed-test-data.mjs",
+    "seed-test-data:cleanup": "node scripts/seed-test-data.mjs --cleanup",
     "upload": "contentful-app-scripts upload --bundle-dir ./build"
   },
   "eslintConfig": {

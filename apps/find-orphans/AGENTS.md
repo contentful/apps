@@ -1,5 +1,8 @@
 # Agent Guide — find-orphans
 
+> Claude Code does not read AGENTS.md directly — the one-line `CLAUDE.md` beside this file
+> imports it (`@AGENTS.md`) so it loads automatically every session. Keep both files.
+
 ## What This App Does
 Full-page app that scans an environment for "orphaned" draft entries and media assets. Two
 criteria, each in its own tab with its own scan button and its own cached results:
@@ -25,6 +28,29 @@ Results deep-link into the matching editor and can be archived in bulk.
 
 ## Archetype
 Standard Vite app. Page location plus an app-config screen for installation parameters.
+
+## Command Run-book
+
+| Task | Command | Needs |
+|------|---------|-------|
+| Dev server (localhost:3000) | `npm start` | Install the app in a space pointing at localhost, or you get the LocalhostWarning |
+| Tests: watch / single run | `npm test` / `npm run test:ci` | — |
+| Production bundle | `npm run build` | — |
+| Upload bundle to the app definition | `npm run build && npm run upload` | `.env` |
+| Sync installation parameter definitions | `npm run update-app-parameters` | `.env`; run after editing the parameter list in `scripts/update-app-parameters.mjs` |
+| Seed test data / remove it | `npm run seed-test-data` / `npm run seed-test-data:cleanup` | `.env.seed` |
+
+## Credentials & Env Files
+
+| File | Holds | Git status |
+|------|-------|------------|
+| `.env` | `CONTENTFUL_ACCESS_TOKEN` (CMA token), `CONTENTFUL_ORG_ID`, `CONTENTFUL_APP_DEF_ID` — the app definition is "Orphan Finder" | ignored (repo-root `.gitignore`) |
+| `.env.seed` | `CONTENTFUL_SPACE_ID`, `CONTENTFUL_ENVIRONMENT_ID`, `SEED_*` knobs; token falls back to `.env` | ignored (this app's `.gitignore`) |
+| `.env.seed.example` | Documented template for `.env.seed` | committed |
+| `~/.contentfulrc.json` | `managementToken` from Contentful CLI login — fallback token source if `.env` is missing one | outside the repo |
+
+The CMA rate limit is 7 requests/second per space — Shanon's test spaces have unlimited
+entries but the STANDARD rate limit; never raise a concurrency knob past 7.
 
 ## Locations
 
@@ -55,6 +81,18 @@ Parameter definitions on the app definition must use these exact IDs and types. 
 scripted: `npm run update-app-parameters` (scripts/update-app-parameters.mjs) replaces the app
 definition's installation parameters via the CMA — keep that script, `src/parameters.ts`, and
 the README table in sync when parameters change.
+
+## Test Data Seeding
+
+`npm run seed-test-data` (scripts/seed-test-data.mjs) fills a test environment with known
+quantities of each orphan shape — untitled drafts, titled unreferenced drafts, referenced
+drafts linked from published containers, fileless draft assets, optional published filler —
+and prints the expected scan results per criterion at the end. Config lives in `.env.seed`
+(copy `.env.seed.example`; the CMA token falls back to `.env`). Everything it creates is
+tagged `seedTestData` under content type `seedOrphanTest`, so `npm run seed-test-data:cleanup`
+removes it exactly. The script is additive across runs; cleanup between runs for exact counts.
+Published filler adds no API calls to a scan (draft filters are server-side) — it exists to
+grow the corpus the `links_to_entry` searches run over.
 
 ## Key Dependencies
 
@@ -174,6 +212,29 @@ src/
 - **README (including the mermaid diagram) must track logic changes** — the scan criteria are
   documented in three places that must agree: README, the Page intro paragraph, and the
   ConfigScreen help texts.
+- **Docs are Shanon's run-book — update them unprompted**: whenever behavior, parameters, or
+  tooling (scripts, npm commands, env files) change, update README.md and this file in the
+  same change. Shanon relies on these to remember how things work and how to run them.
+
+## Change Checklist
+
+When you change one thing, these must move with it (Shanon relies on docs staying true):
+
+| Changed... | Also update... |
+|------------|----------------|
+| Scan logic or criteria | README (including the mermaid diagram), the Page intro/tab copy, this file |
+| Installation parameters | `scripts/update-app-parameters.mjs` (then RUN `npm run update-app-parameters`), `src/parameters.ts`, ConfigScreen, README table, the table above |
+| npm scripts, env files, tooling | README Development section, the Run-book and env tables above |
+| Any of the above | Claude's memory files (standing instruction — unprompted) |
+
+## Testing Notes
+
+- `orphanFinder.ts` and `entryActions.ts` are the pure, unit-tested core — new query or
+  archive logic gets tests there, not through the Page component.
+- f36 `Tabs` activate on **mousedown**, not click — use the `switchTab` helper in
+  `test/locations/Page.test.tsx` (fires both events) rather than a bare `fireEvent.click`.
+- The untitled-vs-unreferenced result divergence (see Sharp Edges) is pinned in tests on
+  purpose; a "failing" test there usually means the divergence rule was broken, not the test.
 
 ## Never / Always
 
