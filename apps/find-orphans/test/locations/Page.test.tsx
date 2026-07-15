@@ -352,6 +352,123 @@ describe('Page', () => {
     await waitFor(() => expect(screen.getByTestId('empty-note')).toBeInTheDocument());
   });
 
+  it('paginates results past 50 rows while select-all spans every page', async () => {
+    const entries = Array.from({ length: 120 }, (_, i) => makeMockEntry(`orphan-${i}`, 'article'));
+    const { cma } = createMockCma({
+      contentTypes: [mockArticleContentType],
+      entriesByContentType: { article: entries },
+    });
+    mocks.sdk = createMockSdk(cma);
+
+    render(<Page />);
+    await scan();
+    await waitFor(() => expect(screen.getByTestId('orphan-table')).toBeInTheDocument());
+
+    // Only the first page renders, but the counts describe the whole set.
+    expect(screen.getAllByTestId(/^orphan-row-/)).toHaveLength(50);
+    expect(screen.getByTestId('result-count')).toHaveTextContent('120 entries found');
+    expect(screen.getByTestId('results-pagination')).toBeInTheDocument();
+
+    // Select-all spans every page, not just the rendered one — "archive all
+    // 120" must be one click, with the count line spelling out the sweep.
+    fireEvent.click(screen.getByTestId('select-all'));
+    expect(screen.getByTestId('result-count')).toHaveTextContent('120 selected');
+
+    // Pagination is navigation, not a view-narrowing filter: rows on the
+    // next page arrive already selected, nothing was deselected by paging.
+    fireEvent.click(screen.getByText('Next'));
+    const secondPageRows = screen.getAllByTestId(/^orphan-row-/);
+    expect(secondPageRows).toHaveLength(50);
+    expect(within(secondPageRows[0]).getByRole('checkbox')).toBeChecked();
+
+    // Real view changes reset to the first page: deep pages of the previous
+    // view are meaningless coordinates in the reshaped list.
+    fireEvent.click(screen.getByText('Next'));
+    expect(screen.getAllByTestId(/^orphan-row-/)).toHaveLength(20);
+    fireEvent.click(screen.getByTestId('filter-all'));
+    expect(screen.getByTestId('orphan-row-orphan-0')).toBeInTheDocument();
+  });
+
+  it('exports every cached result to CSV, including rows hidden by the view filters', async () => {
+    const untouched = makeMockEntry('untouched', 'article');
+    const edited = makeMockEntry('edited', 'article', {}, '2026-06-01T00:00:00Z', 4);
+    const { cma } = createMockCma({
+      contentTypes: [mockArticleContentType],
+      entriesByContentType: { article: [untouched, edited] },
+    });
+    mocks.sdk = createMockSdk(cma);
+
+    // jsdom implements neither object URLs nor real downloads; capture the
+    // blob handed to the download anchor and read the CSV back out of it.
+    const originalCreate = URL.createObjectURL;
+    const originalRevoke = URL.revokeObjectURL;
+    const createObjectURL = vi.fn(() => 'blob:mock');
+    URL.createObjectURL = createObjectURL;
+    URL.revokeObjectURL = vi.fn();
+    try {
+      render(<Page />);
+      await scan();
+      await waitFor(() => expect(screen.getByTestId('orphan-table')).toBeInTheDocument());
+
+      // The default never-edited view hides the edited row from the table...
+      expect(screen.queryByTestId('orphan-row-edited')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('export-csv-button'));
+
+      const blob = createObjectURL.mock.calls[0][0] as Blob;
+      // jsdom's Blob has no .text(); FileReader is the API it does implement.
+      const csv = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsText(blob);
+      });
+      const lines = csv.split('\r\n');
+      // ...but the export is broad like the scan: both rows are in the
+      // file, distinguished by the "Edited after creation" column (positive
+      // phrasing, so never-edited items read "no"), with editor links.
+      const untouchedLine = lines.find((line) => line.includes('/entries/untouched'));
+      const editedLine = lines.find((line) => line.includes('/entries/edited'));
+      expect(untouchedLine).toContain(',no,');
+      expect(editedLine).toContain(',yes,');
+      expect(untouchedLine).toContain(
+        'https://app.contentful.com/spaces/space-id/environments/master/entries/untouched'
+      );
+      expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock');
+    } finally {
+      URL.createObjectURL = originalCreate;
+      URL.revokeObjectURL = originalRevoke;
+    }
+  });
+
+  it('clamps the page when archiving empties the last page', async () => {
+    const entries = Array.from({ length: 60 }, (_, i) => makeMockEntry(`orphan-${i}`, 'article'));
+    const { cma } = createMockCma({
+      contentTypes: [mockArticleContentType],
+      entriesByContentType: { article: entries },
+    });
+    mocks.sdk = createMockSdk(cma);
+
+    render(<Page />);
+    await scan();
+    await waitFor(() => expect(screen.getByTestId('orphan-table')).toBeInTheDocument());
+
+    // Select exactly the last page's 10 rows and archive them away.
+    fireEvent.click(screen.getByText('Next'));
+    const lastPageRows = screen.getAllByTestId(/^orphan-row-/);
+    expect(lastPageRows).toHaveLength(10);
+    for (const row of lastPageRows) {
+      fireEvent.click(within(row).getByRole('checkbox'));
+    }
+    fireEvent.click(screen.getByTestId('archive-button'));
+    fireEvent.click(await screen.findByText('Archive 10 entries'));
+
+    // The page the user was on no longer exists: the view clamps to the
+    // remaining single page instead of rendering an empty table, and the
+    // pagination control disappears at exactly one page.
+    await waitFor(() => expect(screen.getAllByTestId(/^orphan-row-/)).toHaveLength(50));
+    expect(screen.queryByTestId('results-pagination')).not.toBeInTheDocument();
+  });
+
   it('keeps entries that failed to archive listed and selected', async () => {
     const orphanA = makeMockEntry('orphan-a', 'article');
     const orphanB = makeMockEntry('orphan-b', 'article');

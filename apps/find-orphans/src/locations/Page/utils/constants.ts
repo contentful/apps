@@ -28,3 +28,11 @@ export const USER_PAGE_LIMIT = 100;
 
 /** Display field types that can hold a title. */
 export const TEXT_FIELD_TYPES = ['Symbol', 'Text'];
+
+/**
+ * Rows per page in the results table. Purely a rendering choice: a scan
+ * fetches every result up front, so paging costs no API calls — it only
+ * keeps the results header (counts, filters, archive button) within reach
+ * on large result sets.
+ */
+export const RESULTS_PAGE_SIZE = 50;

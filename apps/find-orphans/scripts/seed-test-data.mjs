@@ -299,17 +299,24 @@ const seed = async () => {
 
   // Untitled drafts: body only, no title. The first editedUntitled of them
   // get a second save; the rest stay at version 1 (never edited).
+  // Created counts are tracked right after each create succeeds, NOT from
+  // runPool's success count: a failed follow-up (edit, publish) still leaves
+  // a scannable draft in the environment, and the final summary must reflect
+  // what actually exists rather than what completed flawlessly.
   console.log(`Creating ${COUNTS.untitledDrafts} untitled drafts (${editedUntitled} edited)...`);
+  let untitledCreated = 0;
   await runPool(
     COUNTS.untitledDrafts,
     async (i) => {
       const entry = await createEntry({ body: { [locale]: `Untitled seed draft #${i + 1}` } });
+      untitledCreated += 1;
       if (i < editedUntitled) await editEntry(entry, locale);
     },
     'untitled drafts'
   );
 
   console.log(`Creating ${COUNTS.titledDrafts} titled unreferenced drafts (${editedTitled} edited)...`);
+  let titledCreated = 0;
   await runPool(
     COUNTS.titledDrafts,
     async (i) => {
@@ -317,6 +324,7 @@ const seed = async () => {
         title: { [locale]: `Seed draft ${i + 1}` },
         body: { [locale]: `Titled seed draft #${i + 1}, nothing links here.` },
       });
+      titledCreated += 1;
       if (i < editedTitled) await editEntry(entry, locale);
     },
     'titled drafts'
@@ -339,7 +347,9 @@ const seed = async () => {
   );
 
   console.log(`Creating ${COUNTS.draftAssets} untitled draft assets...`);
-  await runPool(
+  // The asset worker is a single create, so runPool's success count IS the
+  // created count here — no follow-up request can fail after the create.
+  const draftAssetsCreated = await runPool(
     COUNTS.draftAssets,
     // Description only — no title, no file. A fileless draft asset is exactly
     // the abandoned-upload shape the untitled asset scan is meant to catch.
@@ -373,27 +383,49 @@ const seed = async () => {
 
   const containers = [
     ...chunk(referencedEntryIds, LINKS_PER_CONTAINER).map((ids) => ({
-      relatedEntries: ids.map(entryLink),
+      kind: 'entry',
+      ids,
+      fields: { relatedEntries: ids.map(entryLink) },
     })),
     ...chunk(referencedAssetIds, LINKS_PER_CONTAINER).map((ids) => ({
-      relatedAssets: ids.map(assetLink),
+      kind: 'asset',
+      ids,
+      fields: { relatedAssets: ids.map(assetLink) },
     })),
   ];
+  // Ids whose container entry was at least created. The app's unreferenced
+  // scan counts links from drafts too (links_to_entry / links_to_asset have
+  // no publish filter), so a created-but-unpublished container still makes
+  // its targets referenced — only a failed CREATE leaves them unreferenced.
+  const referencedIdCount = { entry: 0, asset: 0 };
+  // Containers created but not published are themselves titled unreferenced
+  // drafts, so they show up on the unreferenced tab (+1 entry each).
+  let draftContainers = 0;
   if (containers.length > 0) {
     console.log(`Creating and publishing ${containers.length} container entries...`);
     await runPool(
       containers.length,
       async (i) => {
+        const { kind, ids, fields } = containers[i];
         const entry = await createEntry({
           title: { [locale]: `Seed container ${i + 1}` },
-          ...containers[i],
+          ...fields,
         });
-        await cma.entry.publish({ entryId: entry.sys.id }, entry);
+        referencedIdCount[kind] += ids.length;
+        try {
+          await cma.entry.publish({ entryId: entry.sys.id }, entry);
+        } catch (error) {
+          draftContainers += 1;
+          throw error; // Still counts as a failure in runPool's report.
+        }
       },
       'containers'
     );
   }
 
+  // Filler that was created but failed to publish is a titled unreferenced
+  // draft, same as a stalled container.
+  let draftFiller = 0;
   if (COUNTS.publishedEntries > 0) {
     console.log(`Creating and publishing ${COUNTS.publishedEntries} filler entries...`);
     await runPool(
@@ -403,22 +435,63 @@ const seed = async () => {
           title: { [locale]: `Published seed entry ${i + 1}` },
           body: { [locale]: 'Published filler to grow the total record count.' },
         });
-        await cma.entry.publish({ entryId: entry.sys.id }, entry);
+        try {
+          await cma.entry.publish({ entryId: entry.sys.id }, entry);
+        } catch (error) {
+          draftFiller += 1;
+          throw error;
+        }
       },
       'published entries'
     );
   }
 
-  console.log('\nDone. Expected scan results in this environment:');
+  // The summary is computed from what was actually created, not the
+  // configured counts, so partial failures never print misleading numbers.
+  // Assets never have a title here, so both asset groups count as untitled
+  // regardless of whether their container exists.
+  const untitledAssets = draftAssetsCreated + referencedAssetIds.length;
+  const unreferencedEntries =
+    untitledCreated +
+    titledCreated +
+    (referencedEntryIds.length - referencedIdCount.entry) +
+    draftContainers +
+    draftFiller;
+  const unreferencedAssets =
+    draftAssetsCreated + (referencedAssetIds.length - referencedIdCount.asset);
+
+  const asPlanned =
+    untitledCreated === COUNTS.untitledDrafts &&
+    titledCreated === COUNTS.titledDrafts &&
+    referencedEntryIds.length === COUNTS.referencedDrafts &&
+    draftAssetsCreated === COUNTS.draftAssets &&
+    referencedAssetIds.length === COUNTS.referencedAssets &&
+    referencedIdCount.entry === referencedEntryIds.length &&
+    referencedIdCount.asset === referencedAssetIds.length &&
+    draftContainers === 0 &&
+    draftFiller === 0;
+  console.log('\nDone.');
+  if (!asPlanned) {
+    console.warn(
+      'Warning: some creates failed, so the numbers below reflect what actually exists,'
+    );
+    console.warn('not the configured counts. Re-run after cleanup for exact planned counts.');
+    const strandedIds =
+      referencedEntryIds.length -
+      referencedIdCount.entry +
+      (referencedAssetIds.length - referencedIdCount.asset);
+    if (strandedIds > 0) {
+      console.warn(
+        `  ${strandedIds} "referenced" item(s) have no container linking to them and are` +
+          ' counted as unreferenced below — the links_to_entry/links_to_asset exclusion is' +
+          ' not fully exercised by this run.'
+      );
+    }
+  }
+  console.log('Expected scan results in this environment:');
+  console.log(`  untitled criterion:     ${untitledCreated} entries + ${untitledAssets} assets`);
   console.log(
-    `  untitled criterion:     ${COUNTS.untitledDrafts} entries + ${
-      COUNTS.draftAssets + COUNTS.referencedAssets
-    } assets`
-  );
-  console.log(
-    `  unreferenced criterion: ${COUNTS.untitledDrafts + COUNTS.titledDrafts} entries + ${
-      COUNTS.draftAssets
-    } assets`
+    `  unreferenced criterion: ${unreferencedEntries} entries + ${unreferencedAssets} assets`
   );
   console.log(`Remove everything with: npm run seed-test-data:cleanup`);
 };

@@ -9,6 +9,7 @@ import {
   ModalConfirm,
   Note,
   Notification,
+  Pagination,
   SkeletonRow,
   Spinner,
   Table,
@@ -20,6 +21,7 @@ import {
 } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import {
+  DownloadSimpleIcon,
   InfoIcon,
   LinkBreakIcon,
   TrayArrowDownIcon,
@@ -30,7 +32,9 @@ import { ContentTypeProps } from 'contentful-management';
 import { resolveParameters } from '../../parameters';
 import { OrphanTable } from './components/OrphanTable';
 import { OrphanKind, OrphanResult, ScanCriterion, ScanProgress } from './types';
+import { RESULTS_PAGE_SIZE } from './utils/constants';
 import { archiveOrphans, ArchiveProgress } from './utils/entryActions';
+import { buildOrphanCsv, downloadCsv } from './utils/exportCsv';
 import { fetchAllContentTypes, findOrphans } from './utils/orphanFinder';
 
 // Name what is being checked right now, e.g.
@@ -71,10 +75,18 @@ interface TabState {
    * excluded — the toggle shows how many results it is holding back.
    */
   neverEditedOnly: boolean;
+  /**
+   * Zero-based results-table page. Pagination is navigation, not a
+   * view-narrowing filter: rows on other pages stay selected and archivable.
+   * The page resets to 0 whenever the displayed set is reshaped (new scan,
+   * scope or never-edited change) and is clamped at render time when rows
+   * disappear underneath it (archiving).
+   */
+  page: number;
 }
 
 /** Reset applied when a scan starts: results clear, the filter persists. */
-const SCAN_RESET = { results: null, truncated: false, selectedIds: [] };
+const SCAN_RESET = { results: null, truncated: false, selectedIds: [], page: 0 };
 
 /**
  * Static per-criterion UI copy and chrome. The description is shown inside
@@ -234,7 +246,6 @@ const Page = () => {
           criterion,
           maxCandidates: parameters.maxCandidates,
           batchSize: parameters.batchSize,
-          untouchedOnly: parameters.untouchedOnly,
           includeEntries: scanEntries,
           includeAssets: scanAssets,
         });
@@ -279,7 +290,9 @@ const Page = () => {
 
   const toggleAll = useCallback(() => {
     // Header checkbox: everything selected clears the selection, anything
-    // less (none or partial) selects all displayed results.
+    // less (none or partial) selects all displayed results — across every
+    // page, not just the rendered one, so "archive all N" is one click. The
+    // count line and the archive confirmation spell out the full selection.
     patchTab(activeTab, {
       selectedIds:
         currentTab.selectedIds.length < displayedResults.length
@@ -299,17 +312,21 @@ const Page = () => {
       } else {
         setScanAssets(checked);
       }
-      if (!checked) {
-        setTabStates((previous) => {
-          const prune = (tab: TabState): TabState => ({
-            ...tab,
-            selectedIds: tab.selectedIds.filter((id) =>
-              (tab.results ?? []).some((result) => result.id === id && result.kind !== kind)
-            ),
-          });
-          return { untitled: prune(previous.untitled), unreferenced: prune(previous.unreferenced) };
+      // Any scope change reshapes the displayed list in both tabs (the scope
+      // is shared), so both go back to the first page; unchecking
+      // additionally deselects the kind's now-hidden rows.
+      setTabStates((previous) => {
+        const adjust = (tab: TabState): TabState => ({
+          ...tab,
+          page: 0,
+          selectedIds: checked
+            ? tab.selectedIds
+            : tab.selectedIds.filter((id) =>
+                (tab.results ?? []).some((result) => result.id === id && result.kind !== kind)
+              ),
         });
-      }
+        return { untitled: adjust(previous.untitled), unreferenced: adjust(previous.unreferenced) };
+      });
     },
     []
   );
@@ -322,6 +339,9 @@ const Page = () => {
       if (neverEditedOnly === currentTab.neverEditedOnly) return;
       patchTab(activeTab, {
         neverEditedOnly,
+        // Switching views reshapes the displayed list, so start it over
+        // from its first page.
+        page: 0,
         // Narrowing the view must narrow the selection too — otherwise
         // "Archive selected" could archive rows the user can no longer see.
         selectedIds: neverEditedOnly
@@ -332,6 +352,24 @@ const Page = () => {
       });
     },
     [activeTab, currentTab, patchTab]
+  );
+
+  const exportResults = useCallback(
+    (criterion: ScanCriterion) => {
+      // The export is broad like the scan: the tab's full cached results,
+      // including rows the scope checkboxes or the never-edited view are
+      // hiding — the CSV's Kind and Edited after creation columns carry
+      // those flags, so filtering happens visibly in the spreadsheet, never
+      // silently in the file. (The button's tooltip states this.)
+      const results = tabStates[criterion].results ?? [];
+      const csv = buildOrphanCsv(results, {
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
+      });
+      const date = new Date().toISOString().slice(0, 10);
+      downloadCsv(`orphans-${criterion}-${sdk.ids.space}-${date}.csv`, csv);
+    },
+    [tabStates, sdk]
   );
 
   const runArchive = useCallback(async () => {
@@ -403,6 +441,17 @@ const Page = () => {
     const displayed = scopeVisible.filter((result) => !tab.neverEditedOnly || result.neverEdited);
     const displayedCounts = countByKind(displayed);
     const neverEditedCount = scopeVisible.filter((result) => result.neverEdited).length;
+    // Client-side paging of the displayed results: everything is already in
+    // memory, so this is purely a rendering choice. The page is clamped here
+    // instead of written back to state — rows can vanish under the current
+    // page without a filter event (archiving the last page's rows), and
+    // clamping keeps the view valid without an effect.
+    const pageCount = Math.max(1, Math.ceil(displayed.length / RESULTS_PAGE_SIZE));
+    const activePage = Math.min(tab.page, pageCount - 1);
+    const pagedResults = displayed.slice(
+      activePage * RESULTS_PAGE_SIZE,
+      (activePage + 1) * RESULTS_PAGE_SIZE
+    );
     return (
       <Flex flexDirection="column" gap="spacingL" marginTop="spacingL">
         {/* The criterion's full explanation lives here, inside its tab; the
@@ -555,6 +604,25 @@ const Page = () => {
                       </Text>
                     </Flex>
                   )}
+                  {/* Same tooltip-with-visible-InfoIcon convention as the
+                      archive button. The export deliberately ignores the
+                      view filters (see exportResults), which is exactly the
+                      kind of behavior that must be announced, not
+                      discovered. */}
+                  <Tooltip
+                    content={`Downloads all ${tab.results.length} results from this scan as a CSV file — including rows hidden by the filters above, flagged in their own columns — with editor links for offline review.`}
+                    placement="top"
+                    maxWidth={340}>
+                    <Button
+                      variant="secondary"
+                      startIcon={<DownloadSimpleIcon />}
+                      endIcon={<InfoIcon />}
+                      isDisabled={busy}
+                      onClick={() => exportResults(criterion)}
+                      testId="export-csv-button">
+                      Export CSV
+                    </Button>
+                  </Tooltip>
                   {/* Archiving reads as scary-destructive next to a negative
                       button; the tooltip says it is reversible, and the
                       confirmation dialog carries the deep links to where
@@ -590,14 +658,28 @@ const Page = () => {
                       )} in scope were edited after creation — switch the view above to “All” to show them.`}
                 </Note>
               ) : (
-                <OrphanTable
-                  results={displayed}
-                  selectedIds={tab.selectedIds}
-                  onToggleResult={toggleResult}
-                  onToggleAll={toggleAll}
-                  onOpenResult={openResult}
-                  isDisabled={busy}
-                />
+                <>
+                  <OrphanTable
+                    results={pagedResults}
+                    totalResultCount={displayed.length}
+                    selectedIds={tab.selectedIds}
+                    onToggleResult={toggleResult}
+                    onToggleAll={toggleAll}
+                    onOpenResult={openResult}
+                    isDisabled={busy}
+                  />
+                  {displayed.length > RESULTS_PAGE_SIZE && (
+                    <Pagination
+                      activePage={activePage}
+                      onPageChange={(page) => patchTab(criterion, { page })}
+                      itemsPerPage={RESULTS_PAGE_SIZE}
+                      totalItems={displayed.length}
+                      pageLength={pagedResults.length}
+                      isLastPage={activePage === pageCount - 1}
+                      testId="results-pagination"
+                    />
+                  )}
+                </>
               )}
             </>
           ))}

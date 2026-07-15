@@ -2,7 +2,15 @@ import { Badge, Checkbox, Table, Text, TextLink } from '@contentful/f36-componen
 import { OrphanResult } from '../types';
 
 interface OrphanTableProps {
+  /** The rows to render — with pagination, just the current page. */
   results: OrphanResult[];
+  /**
+   * Selectable results across every page, not just the rendered slice.
+   * Pagination is navigation, not a view-narrowing filter, so the header
+   * checkbox reflects (and select-all acts on) the whole set — the count
+   * line and the archive confirmation spell out what is selected.
+   */
+  totalResultCount: number;
   selectedIds: string[];
   onToggleResult: (resultId: string) => void;
   onToggleAll: () => void;
@@ -20,13 +28,14 @@ const formatDate = (isoDate: string): string =>
 
 export const OrphanTable = ({
   results,
+  totalResultCount,
   selectedIds,
   onToggleResult,
   onToggleAll,
   onOpenResult,
   isDisabled,
 }: OrphanTableProps) => {
-  const allSelected = results.length > 0 && selectedIds.length === results.length;
+  const allSelected = totalResultCount > 0 && selectedIds.length === totalResultCount;
   const someSelected = selectedIds.length > 0 && !allSelected;
 
   return (
@@ -36,10 +45,10 @@ export const OrphanTable = ({
           <Table.Cell width="40px">
             <Checkbox
               testId="select-all"
-              aria-label="Select all results"
+              aria-label="Select all results across all pages"
               isChecked={allSelected}
               isIndeterminate={someSelected}
-              isDisabled={isDisabled || results.length === 0}
+              isDisabled={isDisabled || totalResultCount === 0}
               onChange={onToggleAll}
             />
           </Table.Cell>

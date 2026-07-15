@@ -24,7 +24,8 @@ exclusion was tried first and read as "the scan is broken" when rows appeared in
 not the other, and a single on/off toggle was tried next and read as ambiguous.
 
 The scan scope (entries and/or assets) is a per-run checkbox choice, both on by default.
-Results deep-link into the matching editor and can be archived in bulk.
+Results deep-link into the matching editor, can be archived in bulk, and can be exported to
+CSV (with editor-link column) for offline review.
 
 ## Archetype
 Standard Vite app. Page location plus an app-config screen for installation parameters.
@@ -87,7 +88,12 @@ the README table in sync when parameters change.
 `npm run seed-test-data` (scripts/seed-test-data.mjs) fills a test environment with known
 quantities of each orphan shape — untitled drafts, titled unreferenced drafts, referenced
 drafts linked from published containers, fileless draft assets, optional published filler —
-and prints the expected scan results per criterion at the end. Config lives in `.env.seed`
+and prints the expected scan results per criterion at the end. That summary is computed from
+actual successful creates, not the configured counts: on partial failure it warns and adjusts —
+notably, "referenced" items whose container failed to CREATE count as unreferenced, while a
+container that was created but failed to PUBLISH still references its targets (`links_to_entry`
+counts links from drafts) and itself appears as one extra unreferenced titled draft. Config
+lives in `.env.seed`
 (copy `.env.seed.example`; the CMA token falls back to `.env`). Everything it creates is
 tagged `seedTestData` under content type `seedOrphanTest`, so `npm run seed-test-data:cleanup`
 removes it exactly. The script is additive across runs; cleanup between runs for exact counts.
@@ -119,6 +125,7 @@ src/
         └── utils/
             ├── constants.ts     # Fallback defaults for parameters
             ├── entryActions.ts  # Batched bulk archive, kind-routed (pure, unit-tested)
+            ├── exportCsv.ts     # CSV building + download trigger (pure, unit-tested)
             └── orphanFinder.ts  # All CMA query logic, entries + assets (pure, unit-tested)
 ```
 
@@ -151,6 +158,30 @@ src/
   tabs since scope is shared). Otherwise "Archive selected" could archive rows the user can no
   longer see. When filters hide every result, render the explanatory `filtered-empty-note`
   naming the responsible filter, never a bare empty table.
+- **Pagination is navigation, NOT a view-narrowing control** (added 2026-07-15): the results
+  table pages client-side at `RESULTS_PAGE_SIZE` (50) via f36 `Pagination` — no API calls, all
+  results are already in memory. Select-all (the header checkbox) deliberately spans EVERY
+  page so "archive all N" is one click; the count line and the itemized archive confirmation
+  are the guards. Do not prune the selection on page change. The page index lives in
+  `TabState.page` (survives tab switches), resets to 0 whenever the displayed set is reshaped
+  (new scan via `SCAN_RESET`, scope change, never-edited switch), and is CLAMPED at render
+  time — not written back — so rows vanishing beneath the current page (bulk archive of the
+  last page) can never strand the view on an empty page. The control renders only when the
+  displayed set exceeds one page.
+- **The CSV export is broad ON PURPOSE and must say so** (added 2026-07-15): "Export CSV"
+  downloads the tab's FULL cached results — including rows hidden by the scope checkboxes and
+  the never-edited view — with `Kind` and `Edited after creation` as columns, so filtering
+  happens visibly in the spreadsheet, never silently in the file (same philosophy as the broad
+  scan). The edit-history column is deliberately positive-phrased (Shanon, 2026-07-15: a
+  "Never edited" yes/no column read as a confusing double negative); the UI's "Never edited"
+  view maps to `Edited after creation = no`. Keep cell values plain yes/no.
+  Because it ignores the visible filters, the button's tooltip must announce that; don't
+  quietly change the export to the displayed subset. Titles export as EMPTY cells (not an
+  "Untitled" placeholder) so blank-title spreadsheet filters match exactly the untitled
+  results. `exportCsv.ts` is pure (no React) and unit-tested; keep the RFC 4180 quoting, CRLF
+  line endings, the UTF-8 BOM (Excel mojibake otherwise), and the formula-injection guard
+  (leading `=`/`+`/`-`/`@` gets a literal-text apostrophe — titles are content-controlled).
+  Each row carries an Editor URL deep link (`…/entries/{id}` / `…/assets/{id}`, alias-aware).
 - **No header info tooltip**: the page heading is plain (removed 2026-07-13); the app explains
   itself via the general subtitle and each tab's visible description.
 - **One entry query per content type is unavoidable** (entry queries require a single

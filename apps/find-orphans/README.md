@@ -83,6 +83,27 @@ created by apps or automations show "App", and creators who cannot be resolved (
 or the caller may not list users) show "Unknown user". Each row has an explicit "Preview"
 action that opens the matching editor in a slide-in for review.
 
+Large result sets are paginated, 50 rows per page, so the results header (counts, view switch,
+archive button) stays within reach. Pagination is purely client-side navigation — all results
+are already in memory, so paging costs no API calls, and unlike the scope checkboxes and the
+never-edited switch it does NOT narrow the selection: select-all selects every result across
+all pages, so "archive all 300" stays one click (the count line and the itemized confirmation
+spell out the full sweep). The page resets to the first whenever the displayed set is reshaped
+(new scan, scope or view change) and clamps when rows vanish beneath it (archiving away the
+last page).
+
+Each tab's results can also be downloaded as a CSV file ("Export CSV" next to the archive
+button) for offline review. The export is broad like the scan: it always contains **every**
+result the scan found — including rows currently hidden by the scope checkboxes or the
+never-edited view, which is why the button's tooltip says so — with the flags in their own
+columns so filtering happens visibly in the spreadsheet. Columns: Kind, ID, Title (blank for
+untitled results, so a blank-title spreadsheet filter matches them), Type, Created, Created
+by, Edited after creation (positive phrasing — a "Never edited" column would make
+double-negative cells; the UI's "Never edited" view is this column filtered to "no"), and an
+Editor URL deep link that opens the entry or asset editor directly.
+Titles and creator names are quoted per RFC 4180 and leading `=`/`+`/`-`/`@` characters are
+neutralized so content cannot smuggle spreadsheet formulas into the file.
+
 Rows can be selected individually or all at once; to act on one kind only, uncheck the other
 kind's scope checkbox — that hides and deselects its rows — and then select all, so archiving
 all entries never sweeps assets along. The selected items are archived in bulk after a
@@ -116,7 +137,7 @@ flowchart TD
     Check --> Resolve
     Criterion -- unreferenced --> RefCount[One links_to_entry / links_to_asset<br/>count query per candidate, batched batchSize<br/>at a time; keep items with 0 references]
     RefCount --> Resolve[Resolve creator names from sys.createdBy:<br/>batched space-users lookup, tolerant of failure]
-    Resolve --> Results[Results table, cached per tab,<br/>with a visible Never edited view switch<br/>on the untitled tab: sys.version == 1<br/>+ truncation warning if capped]
+    Resolve --> Results[Results table, cached per tab, paged 50 per view,<br/>with a visible Never edited view switch<br/>on the untitled tab: sys.version == 1<br/>+ truncation warning if capped]
     Results --> Archive([User selects rows and confirms Archive])
     Archive --> Batches[Archive in batches of batchSize,<br/>entries and assets each via their endpoint]
     Batches --> Done[Archived rows leave the list;<br/>failed ones stay listed and selected for retry]
@@ -195,6 +216,14 @@ draft assets, and optional published filler. Copy `.env.seed.example` to
 npm run seed-test-data           # create the data (prints expected scan results)
 npm run seed-test-data:cleanup   # delete everything the script created
 ```
+
+The expected-results summary at the end is computed from what was actually
+created: if some requests fail (the script retries but a CMA outage can still
+lose items), it prints a warning and adjusted per-criterion counts instead of
+the configured ones — in particular, "referenced" items whose container entry
+failed to create are counted as unreferenced, since nothing links to them.
+The summary describes a single run into a clean environment; the script is
+additive, so run cleanup between runs to keep the counts exact.
 
 Everything is tagged `seedTestData` and typed `seedOrphanTest`, so cleanup is
 exact. Note that published volume adds no API calls to a scan — the draft
