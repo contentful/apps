@@ -36,6 +36,7 @@ Standard Vite app. Page location plus an app-config screen for installation para
 |------|---------|-------|
 | Dev server (localhost:3000) | `npm start` | Install the app in a space pointing at localhost, or you get the LocalhostWarning |
 | Tests: watch / single run | `npm test` / `npm run test:ci` | — |
+| Lint / lint with auto-fix | `npm run lint` / `npm run lint:fix` | ESLint 9 flat config (`eslint.config.mjs`); warnings fail the run |
 | Production bundle | `npm run build` | — |
 | Upload bundle to the app definition | `npm run build && npm run upload` | `.env` |
 | Sync installation parameter definitions | `npm run update-app-parameters` | `.env`; run after editing the parameter list in `scripts/update-app-parameters.mjs` |
@@ -257,6 +258,29 @@ When you change one thing, these must move with it (Shanon relies on docs stayin
 | Installation parameters | `scripts/update-app-parameters.mjs` (then RUN `npm run update-app-parameters`), `src/parameters.ts`, ConfigScreen, README table, the table above |
 | npm scripts, env files, tooling | README Development section, the Run-book and env tables above |
 | Any of the above | Claude's memory files (standing instruction — unprompted) |
+
+## Marketplace Submission (Standard Contribution)
+
+Source: "Field Team Guide - Requirements for building and submitting apps" (Confluence, by
+Jenny Dobner): <insert Confluence link>. Submission is a PR to the Marketplace Apps (MPA)
+repo with the app name in the PR title; after acceptance the Marketplace team owns the code
+(no ongoing contributor obligations). Status against the guide's requirements:
+
+| Requirement | Status |
+|-------------|--------|
+| TypeScript | Met — TS 5.9 throughout; `npx tsc --noEmit` is clean (2026-07-15) and must stay that way even though vite/vitest don't typecheck |
+| Lint script in package.json | Met (2026-07-15) — `npm run lint`, ESLint 9 flat config in `eslint.config.mjs` modeled on apps/auto-prefix plus react-hooks; `--max-warnings 0` |
+| Test script, no `--passWithNoTests` | Met — `npm test` (watch) / `npm run test:ci`, 69 real tests |
+| Build and start scripts | Met — `npm start` / `npm run build` |
+| README | Met — kept current per the Change Checklist above |
+| No boilerplate/placeholder code | Met — LocalhostWarning is the standard scaffold component |
+| OWASP basics / no hardcoded secrets | Met — tokens live in gitignored `.env`* files; CSV export even guards spreadsheet formula injection |
+| Dependencies up to date | Met within majors (2026-07-15) — in-range bumps applied, TS on 5.9, `npm audit` clean. Major upgrades deliberately deferred as real migrations: React 19, f36 v6, vite 8, vitest 4, react-apps-toolkit 2, contentful-management 12 |
+| Secret detection | Met — nothing sensitive committed; `.env` / `.env.seed` are gitignored |
+| Bundle size ≤ 10 MB | Met — production bundle ~1.7 MB |
+| Static site / no SSR | Met — plain Vite client-side build, uploadable via `npm run upload` |
+| Accessibility basics | Met — f36 components plus explicit aria-labels on icon-only controls |
+| App name in package.json | `find-orphans` — decide before the PR whether the marketplace name should match the app definition ("Orphan Finder") |
 
 ## Testing Notes
 

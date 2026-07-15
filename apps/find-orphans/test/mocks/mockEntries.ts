@@ -50,7 +50,9 @@ export const makeMockAsset = (
       updatedAt: createdAt,
     },
     ...(title !== undefined ? { fields: { title: { 'en-US': title } } } : {}),
-  } as AssetProps);
+    // Double cast: the mock sys carries only what the scan reads, which does
+    // not "sufficiently overlap" with the full AssetProps sys shape.
+  } as unknown as AssetProps);
 
 export const makeMockUser = (
   id: string,

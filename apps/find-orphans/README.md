@@ -195,6 +195,8 @@ npm install
 npm start        # dev server on http://localhost:3000
 npm test         # vitest watch mode
 npm run test:ci  # single test run
+npm run lint     # ESLint over the whole app, warnings fail (--max-warnings 0)
+npm run lint:fix # same, applying auto-fixes
 npm run build    # production bundle in ./build
 ```
 

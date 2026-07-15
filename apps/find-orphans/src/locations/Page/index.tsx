@@ -205,7 +205,6 @@ const Page = () => {
       ),
     [currentTab.results, currentTab.neverEditedOnly, scanEntries, scanAssets]
   );
-  const resultCounts = useMemo(() => countByKind(displayedResults), [displayedResults]);
   const selectedCounts = useMemo(
     () =>
       countByKind(displayedResults.filter((result) => currentTab.selectedIds.includes(result.id))),
@@ -509,7 +508,10 @@ const Page = () => {
               borderRadius: tokens.borderRadiusMedium,
             }}
             testId="pre-scan-placeholder">
-            <MagnifyingGlassIcon size="large" variant="muted" />
+            {/* "medium" is the largest size the f36-icons v5 IconSize union
+                allows; the "large" this previously claimed never existed and
+                silently fell back at runtime. */}
+            <MagnifyingGlassIcon size="medium" variant="muted" />
             <Text fontWeight="fontWeightDemiBold">No scan has run yet</Text>
             <Text fontColor="gray600">
               Run a scan to check every content type and the media library for orphaned drafts.

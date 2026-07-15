@@ -402,7 +402,7 @@ describe('Page', () => {
     // blob handed to the download anchor and read the CSV back out of it.
     const originalCreate = URL.createObjectURL;
     const originalRevoke = URL.revokeObjectURL;
-    const createObjectURL = vi.fn(() => 'blob:mock');
+    const createObjectURL = vi.fn((_blob: Blob) => 'blob:mock');
     URL.createObjectURL = createObjectURL;
     URL.revokeObjectURL = vi.fn();
     try {
@@ -414,7 +414,7 @@ describe('Page', () => {
       expect(screen.queryByTestId('orphan-row-edited')).not.toBeInTheDocument();
       fireEvent.click(screen.getByTestId('export-csv-button'));
 
-      const blob = createObjectURL.mock.calls[0][0] as Blob;
+      const blob = createObjectURL.mock.calls[0][0];
       // jsdom's Blob has no .text(); FileReader is the API it does implement.
       const csv = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
