@@ -454,7 +454,7 @@ const Page = () => {
         padding="spacingL"
       >
         <Box style={{ width: '100%', maxWidth: '1040px' }}>
-          <Heading marginBottom="spacingS">Entry Exporter</Heading>
+          <Heading marginBottom="spacingS">Content Exporter</Heading>
           <Paragraph marginBottom="none" style={{ maxWidth: '700px' }}>
             Search, preview, and export Contentful entries across one content type or the whole
             space. Use filters to narrow the result set, then export matching or selected entries.
