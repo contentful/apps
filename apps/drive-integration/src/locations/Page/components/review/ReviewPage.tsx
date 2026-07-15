@@ -267,7 +267,8 @@ export const ReviewPage = ({
             onCtaClick={handleCreateOrViewEntries}
             isCtaLoading={isCreatePending}
             isCtaDisabled={
-              !hasCreatedEntries && (!hasSelectedEntries || (hasBlockFindings && !blockFindingsAcknowledged))
+              !hasCreatedEntries &&
+              (!hasSelectedEntries || (hasBlockFindings && !blockFindingsAcknowledged))
             }
             areEntrySelectionsDisabled={isMappingDisabled}
             blockFindingsAcknowledged={blockFindingsAcknowledged}

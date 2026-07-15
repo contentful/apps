@@ -33,7 +33,12 @@ describe('OverviewEntryList — validation finding badges (INTEG-4383)', () => {
   it('renders a "Needs attention" badge for entries with block findings', () => {
     const rows = [makeRow(0, 'Entry A')];
     const findings: ValidationFinding[] = [
-      { code: 'required-field-missing', message: 'title missing', severity: 'block', entryIndex: 0 },
+      {
+        code: 'required-field-missing',
+        message: 'title missing',
+        severity: 'block',
+        entryIndex: 0,
+      },
     ];
     renderList(rows, new Map([[0, findings]]));
 
@@ -55,7 +60,12 @@ describe('OverviewEntryList — validation finding badges (INTEG-4383)', () => {
   it('renders "Needs attention" (not Warning) when entry has both block and warn findings', () => {
     const rows = [makeRow(0, 'Entry A')];
     const findings: ValidationFinding[] = [
-      { code: 'required-field-missing', message: 'title missing', severity: 'block', entryIndex: 0 },
+      {
+        code: 'required-field-missing',
+        message: 'title missing',
+        severity: 'block',
+        entryIndex: 0,
+      },
       { code: 'displayField-blank', message: 'title blank', severity: 'warn', entryIndex: 0 },
     ];
     renderList(rows, new Map([[0, findings]]));
@@ -75,7 +85,12 @@ describe('OverviewEntryList — validation finding badges (INTEG-4383)', () => {
   it('renders no finding badges for entries with no findings', () => {
     const rows = [makeRow(0, 'Entry A'), makeRow(1, 'Entry B')];
     const findings: ValidationFinding[] = [
-      { code: 'required-field-missing', message: 'title missing', severity: 'block', entryIndex: 1 },
+      {
+        code: 'required-field-missing',
+        message: 'title missing',
+        severity: 'block',
+        entryIndex: 1,
+      },
     ];
     renderList(rows, new Map([[1, findings]]));
 

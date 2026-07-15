@@ -135,7 +135,12 @@ describe('ReviewPage — block findings acknowledgement (INTEG-4383)', () => {
     const payload: MappingReviewSuspendPayload = {
       ...createPayload(),
       validationFindings: [
-        { code: 'required-field-missing', message: 'title missing', severity: 'block', entryIndex: 0 },
+        {
+          code: 'required-field-missing',
+          message: 'title missing',
+          severity: 'block',
+          entryIndex: 0,
+        },
       ],
     };
     renderReviewPage(payload);
@@ -147,7 +152,12 @@ describe('ReviewPage — block findings acknowledgement (INTEG-4383)', () => {
     const payload: MappingReviewSuspendPayload = {
       ...createPayload(),
       validationFindings: [
-        { code: 'required-field-missing', message: 'title missing', severity: 'block', entryIndex: 0 },
+        {
+          code: 'required-field-missing',
+          message: 'title missing',
+          severity: 'block',
+          entryIndex: 0,
+        },
       ],
     };
     renderReviewPage(payload);
@@ -175,9 +185,7 @@ describe('ReviewPage — block findings acknowledgement (INTEG-4383)', () => {
   it('does not show acknowledgement note when there are no block findings', () => {
     renderReviewPage();
 
-    expect(
-      screen.queryByText('I have reviewed the issues and want to proceed')
-    ).toBeNull();
+    expect(screen.queryByText('I have reviewed the issues and want to proceed')).toBeNull();
   });
 });
 

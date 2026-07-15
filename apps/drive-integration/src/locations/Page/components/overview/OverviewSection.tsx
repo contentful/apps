@@ -82,8 +82,8 @@ const OverviewSection = ({
             <Note variant="negative">
               <Flex flexDirection="column" gap="spacingXs">
                 <Text>
-                  Some entries have issues that may prevent the content from being created correctly.
-                  Review the highlighted entries before proceeding.
+                  Some entries have issues that may prevent the content from being created
+                  correctly. Review the highlighted entries before proceeding.
                 </Text>
                 <Checkbox
                   isChecked={blockFindingsAcknowledged}
