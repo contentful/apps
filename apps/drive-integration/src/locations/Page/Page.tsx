@@ -8,7 +8,7 @@ import {
 } from './components/mainpage/ModalOrchestrator';
 import { MainPageView } from './components/mainpage/MainPageView';
 import { ReviewPage } from './components/review/ReviewPage';
-import type { MappingReviewSuspendPayload } from '@types';
+import type { EntryBlockGraph, MappingReviewSuspendPayload } from '@types';
 import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
 import { useGoogleDriveOAuth } from '@hooks/useGoogleDriveOAuth';
 import { isAiAccessDeniedError } from '../../utils/aiAccess';
@@ -57,14 +57,14 @@ const Page = () => {
     handleReturnToMainPage();
   };
 
-  const handleCancelMappingReview = async () => {
+  const handleCancelMappingReview = async (graph: EntryBlockGraph) => {
     if (!mappingReviewState?.runId) {
       resetFlowAndReturnToMainPage();
       return;
     }
 
     try {
-      await resumeWorkflow(mappingReviewState.runId, { cancelled: true });
+      await resumeWorkflow(mappingReviewState.runId, { cancelled: true, entryBlockGraph: graph });
     } catch (error) {
       console.error(error);
     } finally {
