@@ -211,102 +211,162 @@ describe('AddEntryWizard', () => {
 
     describe('next() transitions', () => {
       it('ContentType → IsReference', () => {
-        expect(WIZARD_STEPS[WizardStep.ContentType].next(baseState, { needsReferenceFieldStep: true })).toBe(WizardStep.IsReference);
+        expect(
+          WIZARD_STEPS[WizardStep.ContentType].next(baseState, { needsReferenceFieldStep: true })
+        ).toBe(WizardStep.IsReference);
       });
 
       it('IsReference → SelectReference when isReference is true', () => {
         const state = makeState({ isReference: true });
-        expect(WIZARD_STEPS[WizardStep.IsReference].next(state, { needsReferenceFieldStep: true })).toBe(WizardStep.SelectReference);
+        expect(
+          WIZARD_STEPS[WizardStep.IsReference].next(state, { needsReferenceFieldStep: true })
+        ).toBe(WizardStep.SelectReference);
       });
 
       it('IsReference → SelectFields when isReference is false', () => {
         const state = makeState({ isReference: false });
-        expect(WIZARD_STEPS[WizardStep.IsReference].next(state, { needsReferenceFieldStep: true })).toBe(WizardStep.SelectFields);
+        expect(
+          WIZARD_STEPS[WizardStep.IsReference].next(state, { needsReferenceFieldStep: true })
+        ).toBe(WizardStep.SelectFields);
       });
 
       it('SelectReference → SelectReferenceField when needsReferenceFieldStep is true', () => {
-        expect(WIZARD_STEPS[WizardStep.SelectReference].next(baseState, { needsReferenceFieldStep: true })).toBe(WizardStep.SelectReferenceField);
+        expect(
+          WIZARD_STEPS[WizardStep.SelectReference].next(baseState, {
+            needsReferenceFieldStep: true,
+          })
+        ).toBe(WizardStep.SelectReferenceField);
       });
 
       it('SelectReference → SelectFields when needsReferenceFieldStep is false', () => {
-        expect(WIZARD_STEPS[WizardStep.SelectReference].next(baseState, { needsReferenceFieldStep: false })).toBe(WizardStep.SelectFields);
+        expect(
+          WIZARD_STEPS[WizardStep.SelectReference].next(baseState, {
+            needsReferenceFieldStep: false,
+          })
+        ).toBe(WizardStep.SelectFields);
       });
 
       it('SelectReferenceField → SelectFields', () => {
-        expect(WIZARD_STEPS[WizardStep.SelectReferenceField].next(baseState, { needsReferenceFieldStep: true })).toBe(WizardStep.SelectFields);
+        expect(
+          WIZARD_STEPS[WizardStep.SelectReferenceField].next(baseState, {
+            needsReferenceFieldStep: true,
+          })
+        ).toBe(WizardStep.SelectFields);
       });
 
       it('SelectFields next() stays on SelectFields (terminal step)', () => {
         const state = makeState({ step: WizardStep.SelectFields });
-        expect(WIZARD_STEPS[WizardStep.SelectFields].next(state, { needsReferenceFieldStep: true })).toBe(WizardStep.SelectFields);
+        expect(
+          WIZARD_STEPS[WizardStep.SelectFields].next(state, { needsReferenceFieldStep: true })
+        ).toBe(WizardStep.SelectFields);
       });
     });
 
     describe('back() transitions', () => {
       it('ContentType back() stays on ContentType (no previous step)', () => {
         const state = makeState({ step: WizardStep.ContentType });
-        expect(WIZARD_STEPS[WizardStep.ContentType].back(state, { needsReferenceFieldStep: true })).toBe(WizardStep.ContentType);
+        expect(
+          WIZARD_STEPS[WizardStep.ContentType].back(state, { needsReferenceFieldStep: true })
+        ).toBe(WizardStep.ContentType);
       });
 
       it('IsReference → ContentType', () => {
-        expect(WIZARD_STEPS[WizardStep.IsReference].back(baseState, { needsReferenceFieldStep: true })).toBe(WizardStep.ContentType);
+        expect(
+          WIZARD_STEPS[WizardStep.IsReference].back(baseState, { needsReferenceFieldStep: true })
+        ).toBe(WizardStep.ContentType);
       });
 
       it('SelectReference → IsReference', () => {
-        expect(WIZARD_STEPS[WizardStep.SelectReference].back(baseState, { needsReferenceFieldStep: true })).toBe(WizardStep.IsReference);
+        expect(
+          WIZARD_STEPS[WizardStep.SelectReference].back(baseState, {
+            needsReferenceFieldStep: true,
+          })
+        ).toBe(WizardStep.IsReference);
       });
 
       it('SelectReferenceField → SelectReference', () => {
-        expect(WIZARD_STEPS[WizardStep.SelectReferenceField].back(baseState, { needsReferenceFieldStep: true })).toBe(WizardStep.SelectReference);
+        expect(
+          WIZARD_STEPS[WizardStep.SelectReferenceField].back(baseState, {
+            needsReferenceFieldStep: true,
+          })
+        ).toBe(WizardStep.SelectReference);
       });
 
       it('SelectFields → SelectReferenceField when isReference and needsReferenceFieldStep', () => {
         const state = makeState({ isReference: true });
-        expect(WIZARD_STEPS[WizardStep.SelectFields].back(state, { needsReferenceFieldStep: true })).toBe(WizardStep.SelectReferenceField);
+        expect(
+          WIZARD_STEPS[WizardStep.SelectFields].back(state, { needsReferenceFieldStep: true })
+        ).toBe(WizardStep.SelectReferenceField);
       });
 
       it('SelectFields → SelectReference when isReference but not needsReferenceFieldStep', () => {
         const state = makeState({ isReference: true });
-        expect(WIZARD_STEPS[WizardStep.SelectFields].back(state, { needsReferenceFieldStep: false })).toBe(WizardStep.SelectReference);
+        expect(
+          WIZARD_STEPS[WizardStep.SelectFields].back(state, { needsReferenceFieldStep: false })
+        ).toBe(WizardStep.SelectReference);
       });
 
       it('SelectFields → IsReference when not isReference', () => {
         const state = makeState({ isReference: false });
-        expect(WIZARD_STEPS[WizardStep.SelectFields].back(state, { needsReferenceFieldStep: false })).toBe(WizardStep.IsReference);
+        expect(
+          WIZARD_STEPS[WizardStep.SelectFields].back(state, { needsReferenceFieldStep: false })
+        ).toBe(WizardStep.IsReference);
       });
     });
 
     describe('isDisabled()', () => {
       it('ContentType is disabled when contentTypeId is empty', () => {
-        expect(WIZARD_STEPS[WizardStep.ContentType].isDisabled(makeState({ contentTypeId: '' }))).toBe(true);
+        expect(
+          WIZARD_STEPS[WizardStep.ContentType].isDisabled(makeState({ contentTypeId: '' }))
+        ).toBe(true);
       });
 
       it('ContentType is enabled when contentTypeId is set', () => {
-        expect(WIZARD_STEPS[WizardStep.ContentType].isDisabled(makeState({ contentTypeId: 'article' }))).toBe(false);
+        expect(
+          WIZARD_STEPS[WizardStep.ContentType].isDisabled(makeState({ contentTypeId: 'article' }))
+        ).toBe(false);
       });
 
       it('IsReference is disabled when isReference is null', () => {
-        expect(WIZARD_STEPS[WizardStep.IsReference].isDisabled(makeState({ isReference: null }))).toBe(true);
+        expect(
+          WIZARD_STEPS[WizardStep.IsReference].isDisabled(makeState({ isReference: null }))
+        ).toBe(true);
       });
 
       it('IsReference is enabled when isReference is set', () => {
-        expect(WIZARD_STEPS[WizardStep.IsReference].isDisabled(makeState({ isReference: false }))).toBe(false);
+        expect(
+          WIZARD_STEPS[WizardStep.IsReference].isDisabled(makeState({ isReference: false }))
+        ).toBe(false);
       });
 
       it('SelectReference is disabled when referenceEntryId is empty', () => {
-        expect(WIZARD_STEPS[WizardStep.SelectReference].isDisabled(makeState({ referenceEntryId: '' }))).toBe(true);
+        expect(
+          WIZARD_STEPS[WizardStep.SelectReference].isDisabled(makeState({ referenceEntryId: '' }))
+        ).toBe(true);
       });
 
       it('SelectReference is enabled when referenceEntryId is set', () => {
-        expect(WIZARD_STEPS[WizardStep.SelectReference].isDisabled(makeState({ referenceEntryId: 'entry-1' }))).toBe(false);
+        expect(
+          WIZARD_STEPS[WizardStep.SelectReference].isDisabled(
+            makeState({ referenceEntryId: 'entry-1' })
+          )
+        ).toBe(false);
       });
 
       it('SelectReferenceField is disabled when referenceFieldId is empty', () => {
-        expect(WIZARD_STEPS[WizardStep.SelectReferenceField].isDisabled(makeState({ referenceFieldId: '' }))).toBe(true);
+        expect(
+          WIZARD_STEPS[WizardStep.SelectReferenceField].isDisabled(
+            makeState({ referenceFieldId: '' })
+          )
+        ).toBe(true);
       });
 
       it('SelectReferenceField is enabled when referenceFieldId is set', () => {
-        expect(WIZARD_STEPS[WizardStep.SelectReferenceField].isDisabled(makeState({ referenceFieldId: 'author' }))).toBe(false);
+        expect(
+          WIZARD_STEPS[WizardStep.SelectReferenceField].isDisabled(
+            makeState({ referenceFieldId: 'author' })
+          )
+        ).toBe(false);
       });
 
       it('SelectFields is never disabled', () => {
@@ -318,7 +378,9 @@ describe('AddEntryWizard', () => {
   describe('needsReferenceFieldStep = false path', () => {
     it('skips SelectReferenceField when navigating forward from SelectReference', () => {
       expect(
-        WIZARD_STEPS[WizardStep.SelectReference].next(makeState(), { needsReferenceFieldStep: false })
+        WIZARD_STEPS[WizardStep.SelectReference].next(makeState(), {
+          needsReferenceFieldStep: false,
+        })
       ).toBe(WizardStep.SelectFields);
     });
 
