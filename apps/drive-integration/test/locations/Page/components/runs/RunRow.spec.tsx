@@ -25,12 +25,26 @@ describe('RunRow', () => {
   });
 
   it('shows running badge for running status', () => {
-    render(<RunRow run={makeRun({ displayStatus: 'running' })} onReview={vi.fn()} onDismiss={vi.fn()} spaceId="sp-1" />);
+    render(
+      <RunRow
+        run={makeRun({ displayStatus: 'running' })}
+        onReview={vi.fn()}
+        onDismiss={vi.fn()}
+        spaceId="sp-1"
+      />
+    );
     expect(screen.getByText('Running')).toBeTruthy();
   });
 
   it('shows Needs Review badge for needs-review status', () => {
-    render(<RunRow run={makeRun({ displayStatus: 'needs-review' })} onReview={vi.fn()} onDismiss={vi.fn()} spaceId="sp-1" />);
+    render(
+      <RunRow
+        run={makeRun({ displayStatus: 'needs-review' })}
+        onReview={vi.fn()}
+        onDismiss={vi.fn()}
+        spaceId="sp-1"
+      />
+    );
     expect(screen.getByText('Needs Review')).toBeTruthy();
   });
 
@@ -59,7 +73,14 @@ describe('RunRow', () => {
   });
 
   it('shows Expired badge for expired status', () => {
-    render(<RunRow run={makeRun({ displayStatus: 'expired' })} onReview={vi.fn()} onDismiss={vi.fn()} spaceId="sp-1" />);
+    render(
+      <RunRow
+        run={makeRun({ displayStatus: 'expired' })}
+        onReview={vi.fn()}
+        onDismiss={vi.fn()}
+        spaceId="sp-1"
+      />
+    );
     expect(screen.getByText('Expired')).toBeTruthy();
   });
 
@@ -116,10 +137,7 @@ describe('RunRow', () => {
     );
     const links = screen.getAllByRole('link');
     expect(links.length).toBeGreaterThanOrEqual(2);
-    expect(links[0]).toHaveAttribute(
-      'href',
-      expect.stringContaining('entry-abc')
-    );
+    expect(links[0]).toHaveAttribute('href', expect.stringContaining('entry-abc'));
   });
 
   it('renders error message for failed runs', () => {
@@ -135,7 +153,14 @@ describe('RunRow', () => {
   });
 
   it('does not show Review or Dismiss for running status', () => {
-    render(<RunRow run={makeRun({ displayStatus: 'running' })} onReview={vi.fn()} onDismiss={vi.fn()} spaceId="sp-1" />);
+    render(
+      <RunRow
+        run={makeRun({ displayStatus: 'running' })}
+        onReview={vi.fn()}
+        onDismiss={vi.fn()}
+        spaceId="sp-1"
+      />
+    );
     expect(screen.queryByText('Review')).toBeNull();
     expect(screen.queryByText('Dismiss')).toBeNull();
   });

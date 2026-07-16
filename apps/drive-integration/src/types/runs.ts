@@ -20,7 +20,4 @@ export interface RunWithStatus extends RunRecord {
   errorMessage?: string;
 }
 
-export type AppView =
-  | { view: 'runs' }
-  | { view: 'import' }
-  | { view: 'review'; runId: string };
+export type AppView = { view: 'runs' } | { view: 'import' } | { view: 'review'; runId: string };

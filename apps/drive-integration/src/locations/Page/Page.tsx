@@ -29,7 +29,10 @@ const Page = () => {
   const spaceId = sdk.ids.space;
   const environmentId = sdk.ids.environmentAlias ?? sdk.ids.environment;
 
-  const { runs, addRun, removeRun, markCompleted, storageError } = useRunStorage(spaceId, environmentId);
+  const { runs, addRun, removeRun, markCompleted, storageError } = useRunStorage(
+    spaceId,
+    environmentId
+  );
 
   const { oauthToken, isOAuthConnected, isOAuthLoading, isOAuthBusy, startOAuth, disconnectOAuth } =
     useGoogleDriveOAuth(sdk);
@@ -172,10 +175,7 @@ const Page = () => {
       case 'review': {
         if (isLoadingReviewPayload || !pendingReviewPayload) {
           return (
-            <Flex
-              justifyContent="center"
-              alignItems="center"
-              style={{ minHeight: '300px' }}>
+            <Flex justifyContent="center" alignItems="center" style={{ minHeight: '300px' }}>
               <Spinner size="large" />
             </Flex>
           );

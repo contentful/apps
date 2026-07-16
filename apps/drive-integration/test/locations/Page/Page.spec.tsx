@@ -7,42 +7,38 @@ import Page from '../../../src/locations/Page/Page';
 
 const mockSdk = createMockSDK();
 
-const {
-  mockResumeAndPollWorkflow,
-  mockMarkCompleted,
-  mockResetFlow,
-  mappingReviewPayloadMock,
-} = vi.hoisted(() => {
-  const payload: MappingReviewSuspendPayload = {
-    suspendStepId: 'mapping-review',
-    reason: 'Mapping review required',
-    documentId: 'doc-test',
-    documentTitle: 'Document mapping review',
-    normalizedDocument: {
+const { mockResumeAndPollWorkflow, mockMarkCompleted, mockResetFlow, mappingReviewPayloadMock } =
+  vi.hoisted(() => {
+    const payload: MappingReviewSuspendPayload = {
+      suspendStepId: 'mapping-review',
+      reason: 'Mapping review required',
       documentId: 'doc-test',
-      title: 'Document mapping review',
-      designValues: [],
-      contentBlocks: [],
-      images: [],
-      tables: [],
-      assets: [],
-    },
-    entryBlockGraph: { entries: [], excludedSourceRefs: [] },
-    referenceGraph: {
-      edges: [],
-      creationOrder: [],
-      deferredFields: [],
-      hasCircularDependency: false,
-    },
-    contentTypes: [],
-  };
-  return {
-    mockResumeAndPollWorkflow: vi.fn(),
-    mockMarkCompleted: vi.fn(),
-    mockResetFlow: vi.fn(),
-    mappingReviewPayloadMock: payload,
-  };
-});
+      documentTitle: 'Document mapping review',
+      normalizedDocument: {
+        documentId: 'doc-test',
+        title: 'Document mapping review',
+        designValues: [],
+        contentBlocks: [],
+        images: [],
+        tables: [],
+        assets: [],
+      },
+      entryBlockGraph: { entries: [], excludedSourceRefs: [] },
+      referenceGraph: {
+        edges: [],
+        creationOrder: [],
+        deferredFields: [],
+        hasCircularDependency: false,
+      },
+      contentTypes: [],
+    };
+    return {
+      mockResumeAndPollWorkflow: vi.fn(),
+      mockMarkCompleted: vi.fn(),
+      mockResetFlow: vi.fn(),
+      mappingReviewPayloadMock: payload,
+    };
+  });
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -253,11 +249,9 @@ describe('Page component', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Trigger review cancel' }));
     await waitFor(() => {
-      expect(mockResumeAndPollWorkflow).toHaveBeenCalledWith(
-        expect.anything(),
-        'run-123',
-        { cancelled: true }
-      );
+      expect(mockResumeAndPollWorkflow).toHaveBeenCalledWith(expect.anything(), 'run-123', {
+        cancelled: true,
+      });
       expect(screen.getByText('Runs Page')).toBeTruthy();
     });
   });

@@ -16,12 +16,36 @@ const mockSdk = createMockSDK() as any;
 // Stable references — must NOT be created inside renderHook callbacks or they
 // change on every re-render, causing fetchAllStatuses to recreate and loop.
 const SINGLE_RUN: RunRecord[] = [
-  { runId: 'run-1', documentTitle: 'Test', documentId: 'doc-1', contentTypeIds: ['ct-1'], startedAt: '2026-01-01T00:00:00.000Z' },
+  {
+    runId: 'run-1',
+    documentTitle: 'Test',
+    documentId: 'doc-1',
+    contentTypeIds: ['ct-1'],
+    startedAt: '2026-01-01T00:00:00.000Z',
+  },
 ];
 const THREE_RUNS: RunRecord[] = [
-  { runId: 'run-1', documentTitle: 'Test', documentId: 'doc-1', contentTypeIds: ['ct-1'], startedAt: '2026-01-01T00:00:00.000Z' },
-  { runId: 'run-2', documentTitle: 'Test', documentId: 'doc-2', contentTypeIds: ['ct-1'], startedAt: '2026-01-01T00:00:00.000Z' },
-  { runId: 'run-3', documentTitle: 'Test', documentId: 'doc-3', contentTypeIds: ['ct-1'], startedAt: '2026-01-01T00:00:00.000Z' },
+  {
+    runId: 'run-1',
+    documentTitle: 'Test',
+    documentId: 'doc-1',
+    contentTypeIds: ['ct-1'],
+    startedAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    runId: 'run-2',
+    documentTitle: 'Test',
+    documentId: 'doc-2',
+    contentTypeIds: ['ct-1'],
+    startedAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    runId: 'run-3',
+    documentTitle: 'Test',
+    documentId: 'doc-3',
+    contentTypeIds: ['ct-1'],
+    startedAt: '2026-01-01T00:00:00.000Z',
+  },
 ];
 
 beforeEach(() => {

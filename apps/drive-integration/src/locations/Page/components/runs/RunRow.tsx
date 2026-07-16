@@ -58,7 +58,9 @@ export function RunRow({ run, spaceId, onReview, onDismiss }: RunRowProps) {
       <Flex justifyContent="space-between" alignItems="flex-start" gap="spacingM">
         {/* Left: metadata */}
         <Flex flexDirection="column" gap="spacing2Xs" style={{ flex: 1, minWidth: 0 }}>
-          <Text fontWeight="fontWeightMedium" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <Text
+            fontWeight="fontWeightMedium"
+            style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {run.documentTitle}
           </Text>
           <Text fontSize="fontSizeS" fontColor="gray600">
@@ -69,19 +71,21 @@ export function RunRow({ run, spaceId, onReview, onDismiss }: RunRowProps) {
           </Text>
 
           {/* Entry links for completed runs */}
-          {run.displayStatus === 'completed' && run.createdEntryIds && run.createdEntryIds.length > 0 && (
-            <Flex gap="spacingXs" flexWrap="wrap">
-              {run.createdEntryIds.map((entryId) => (
-                <TextLink
-                  key={entryId}
-                  href={`https://app.contentful.com/spaces/${spaceId}/entries/${entryId}`}
-                  target="_blank"
-                  rel="noopener noreferrer">
-                  {entryId}
-                </TextLink>
-              ))}
-            </Flex>
-          )}
+          {run.displayStatus === 'completed' &&
+            run.createdEntryIds &&
+            run.createdEntryIds.length > 0 && (
+              <Flex gap="spacingXs" flexWrap="wrap">
+                {run.createdEntryIds.map((entryId) => (
+                  <TextLink
+                    key={entryId}
+                    href={`https://app.contentful.com/spaces/${spaceId}/entries/${entryId}`}
+                    target="_blank"
+                    rel="noopener noreferrer">
+                    {entryId}
+                  </TextLink>
+                ))}
+              </Flex>
+            )}
 
           {/* Error message for failed runs */}
           {run.displayStatus === 'failed' && run.errorMessage && (

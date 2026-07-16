@@ -8,11 +8,7 @@ import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
 import { LoadingModal } from '../modals/LoadingModal';
 import { ERROR_MESSAGES } from '@constants/messages';
 import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
-import {
-  DocumentTabProps,
-  WorkflowFailureReason,
-  WorkflowRunError,
-} from '@types';
+import { DocumentTabProps, WorkflowFailureReason, WorkflowRunError } from '@types';
 import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
 import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
 import { useWorkflowAgent } from '@hooks/useWorkflowAgent';

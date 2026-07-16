@@ -13,7 +13,14 @@ interface RunsPageProps {
   onReviewRun: (runId: string) => void;
 }
 
-export function RunsPage({ sdk, runs, removeRun, storageError, onNewImport, onReviewRun }: RunsPageProps) {
+export function RunsPage({
+  sdk,
+  runs,
+  removeRun,
+  storageError,
+  onNewImport,
+  onReviewRun,
+}: RunsPageProps) {
   const spaceId = sdk.ids.space;
 
   const { statusMap, errorMap } = useRunsPolling(runs, sdk);

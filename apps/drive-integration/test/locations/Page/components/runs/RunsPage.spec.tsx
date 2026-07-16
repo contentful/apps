@@ -33,7 +33,9 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-function renderRunsPage(overrides: { onNewImport?: () => void; onReviewRun?: (id: string) => void } = {}) {
+function renderRunsPage(
+  overrides: { onNewImport?: () => void; onReviewRun?: (id: string) => void } = {}
+) {
   return render(
     <RunsPage
       sdk={mockSdk}

@@ -20,8 +20,7 @@ import {
 
 // ─── Helpers (shared between workflowService and useWorkflowAgent) ───────────
 
-const wait = async (ms: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+const wait = async (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const getRunStatus = (runData: AgentRunData): RunStatus | null =>
   runData.sys?.status ?? runData.metadata?.status ?? null;
@@ -37,7 +36,8 @@ const getAgentPayload = (runData: AgentRunData): string | null => {
 
 const previewPayloadFromCompletedRun = (runData: AgentRunData): CompletedWorkflowPayload => {
   const googleDocPayload = runData.metadata?.googleDocPayload;
-  if (googleDocPayload == null) throw new Error('Workflow completed but result payload was missing.');
+  if (googleDocPayload == null)
+    throw new Error('Workflow completed but result payload was missing.');
   if (
     typeof googleDocPayload === 'object' &&
     googleDocPayload !== null &&
@@ -84,9 +84,8 @@ const getWorkflowFailureMessage = (
   failureReason: WorkflowFailureReason
 ): string => FAILURE_REASON_MESSAGES[failureReason] ?? getRunErrorMessage(runData);
 
-export const getSuspendPayload = (
-  runData: AgentRunData
-): MappingReviewSuspendPayload | undefined => runData.metadata?.suspendPayload;
+export const getSuspendPayload = (runData: AgentRunData): MappingReviewSuspendPayload | undefined =>
+  runData.metadata?.suspendPayload;
 
 export const getWorkflowRunResult = (
   runData: AgentRunData,
@@ -172,7 +171,10 @@ export const pollAgentRun = async (
   }
 
   console.error(`✗ Run [${runId}] timed out after ${elapsedSec(startMs)}`);
-  throw new WorkflowRunError(ERROR_MESSAGES.PROCESSING_TIMEOUT, WorkflowFailureReason.PROCESSING_TIMEOUT);
+  throw new WorkflowRunError(
+    ERROR_MESSAGES.PROCESSING_TIMEOUT,
+    WorkflowFailureReason.PROCESSING_TIMEOUT
+  );
 };
 
 // ─── Public API ───────────────────────────────────────────────────────────────

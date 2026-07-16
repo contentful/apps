@@ -41,7 +41,9 @@ export function useRunStorage(spaceId: string, environmentId: string): UseRunSto
         setStorageError(null);
       } catch (err) {
         const msg =
-          err instanceof Error ? err.message : 'Unable to save import history. Storage may be full.';
+          err instanceof Error
+            ? err.message
+            : 'Unable to save import history. Storage may be full.';
         setStorageError(msg);
       }
       setRuns(next);

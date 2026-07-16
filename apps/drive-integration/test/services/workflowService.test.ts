@@ -43,7 +43,9 @@ describe('resumeAndPollWorkflow', () => {
       messages: [],
     });
 
-    await resumeAndPollWorkflow(mockSdk, 'run-1', { entryBlockGraph: { entries: [], excludedSourceRefs: [] } });
+    await resumeAndPollWorkflow(mockSdk, 'run-1', {
+      entryBlockGraph: { entries: [], excludedSourceRefs: [] },
+    });
 
     expect(mockResumeWorkflowRun).toHaveBeenCalledWith(
       mockSdk,
@@ -97,7 +99,9 @@ describe('resumeAndPollWorkflow', () => {
       messages: [],
     });
 
-    await expect(resumeAndPollWorkflow(mockSdk, 'run-1', {})).rejects.toBeInstanceOf(WorkflowRunError);
+    await expect(resumeAndPollWorkflow(mockSdk, 'run-1', {})).rejects.toBeInstanceOf(
+      WorkflowRunError
+    );
   });
 
   it('throws if resumeWorkflowRun itself throws', async () => {
