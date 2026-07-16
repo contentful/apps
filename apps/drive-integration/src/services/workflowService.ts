@@ -7,7 +7,6 @@ import {
   WorkflowRunError,
   MappingReviewSuspendPayload,
   CompletedWorkflowPayload,
-  AgentRunMessage,
 } from '@types';
 import { AgentRunData, getWorkflowRun, resumeWorkflowRun } from './agents-api';
 import { validatePayloadShape } from '../utils/createEntries';

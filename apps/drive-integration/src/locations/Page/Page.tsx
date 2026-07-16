@@ -80,7 +80,7 @@ const Page = () => {
     }
   };
 
-  const handleRunStarted = (_runId: string) => {
+  const handleRunStarted = () => {
     setAppView({ view: 'runs' });
   };
 

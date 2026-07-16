@@ -1,7 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useWorkflowAgent } from '../../src/hooks/useWorkflowAgent';
-import { RunStatus } from '@types';
 import { createMockSDK } from '../mocks';
 
 const mockStartAgentRun = vi.fn();
