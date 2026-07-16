@@ -1,29 +1,17 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createRef } from 'react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { Box, Button } from '@contentful/f36-components';
 import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
 } from '../../../../../src/locations/Page/components/mainpage/ModalOrchestrator';
-import {
-  MappingReviewSuspendPayload,
-  CompletedWorkflowPayload,
-  WorkflowRunResult,
-  RunStatus,
-} from '@types';
 import { mockSdk } from '../../../../mocks';
 import { DocumentSelectionConfig } from '../../../../../src/utils/fetchDocumentSelection';
 
 const mockStartWorkflow = vi.fn();
-const mockResumeWorkflow = vi.fn();
+const mockAddRun = vi.fn();
 const mockFetchDocumentSelection = vi.fn();
-
-const mockWorkflowPayload = {
-  entries: [],
-  assets: [],
-  referenceGraph: {},
-} satisfies CompletedWorkflowPayload;
 
 const mockDocumentSelectionConfig: DocumentSelectionConfig = {
   tabs: [
@@ -53,9 +41,7 @@ vi.mock('../../../../../src/locations/Page/components/modals/step_1/SelectDocume
 vi.mock('@hooks/useWorkflowAgent', () => ({
   useWorkflowAgent: () => ({
     isAnalyzing: false,
-    error: null,
     startWorkflow: mockStartWorkflow,
-    resumeWorkflow: mockResumeWorkflow,
   }),
 }));
 
@@ -76,35 +62,10 @@ const defaultProps = {
   sdk: mockSdk,
   oauthToken: 'mock-oauth-token',
   isOAuthConnected: true,
-  onMappingReviewReady: vi.fn(),
+  onRunStarted: vi.fn(),
   onResetToMain: vi.fn(),
-};
-
-const mappingReviewSuspendPayload: MappingReviewSuspendPayload = {
-  suspendStepId: 'mapping-review',
-  reason: 'Mapping review required before CMA payload generation continues',
-  documentId: 'mock-doc-id-123',
-  documentTitle: 'Mock Mapping Review',
-  normalizedDocument: {
-    documentId: 'mock-doc-id-123',
-    title: 'Mock Mapping Review',
-    designValues: [],
-    contentBlocks: [],
-    images: [],
-    tables: [],
-    assets: [],
-  },
-  entryBlockGraph: {
-    entries: [],
-    excludedSourceRefs: [],
-  },
-  referenceGraph: {
-    edges: [],
-    creationOrder: [],
-    deferredFields: [],
-    hasCircularDependency: false,
-  },
-  contentTypes: [],
+  addRun: mockAddRun,
+  storageError: null,
 };
 
 // Helper: pick a document and reach the content type picker
@@ -142,7 +103,7 @@ async function completePreflight(options: { useAllTabs: boolean; includeImages: 
   if (options.useAllTabs) {
     fireEvent.click(screen.getByLabelText('No, import all tabs'));
   } else {
-    fireEvent.click(screen.getByLabelText('Yes, let me pick'));
+    fireEvent.click(screen.getByLabelText('Yes, select specific tabs'));
   }
   fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 
@@ -153,46 +114,23 @@ async function completePreflight(options: { useAllTabs: boolean; includeImages: 
   if (options.includeImages) {
     fireEvent.click(screen.getByLabelText('Yes, include images'));
   } else {
-    fireEvent.click(screen.getByLabelText('No, skip images'));
+    fireEvent.click(screen.getByLabelText('No, do not include images'));
   }
   fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 }
 
 describe('ModalOrchestrator', () => {
   beforeEach(() => {
-    vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.clearAllMocks();
-    defaultProps.onMappingReviewReady.mockReset();
+    defaultProps.onRunStarted.mockReset();
     defaultProps.onResetToMain.mockReset();
     mockFetchDocumentSelection.mockResolvedValue(mockDocumentSelectionConfig);
     vi.mocked(mockSdk.cma.contentType.getMany).mockResolvedValue({
       items: mockContentTypes,
       total: mockContentTypes.length,
     });
-    mockStartWorkflow.mockResolvedValue({
-      status: RunStatus.COMPLETED,
-      runId: 'run-123',
-      messages: [],
-      googleDocPayload: mockWorkflowPayload,
-    } satisfies WorkflowRunResult);
-    mockResumeWorkflow.mockResolvedValue({
-      status: RunStatus.COMPLETED,
-      runId: 'run-123',
-      messages: [],
-      googleDocPayload: mockWorkflowPayload,
-    } satisfies WorkflowRunResult);
-    vi.mocked(mockSdk.cma.space.get).mockResolvedValue({ sys: { id: 'test-space-id' } } as any);
-    vi.mocked(mockSdk.cma.environment.get).mockResolvedValue({ sys: { id: 'test-env-id' } } as any);
-    vi.mocked(mockSdk.cma.contentType.getMany).mockResolvedValue({
-      items: mockContentTypes,
-      total: mockContentTypes.length,
-    } as any);
-  });
-
-  afterEach(() => {
-    cleanup();
-    vi.runAllTimers();
-    vi.useRealTimers();
+    // startWorkflow now returns just a runId string
+    mockStartWorkflow.mockResolvedValue('run-123');
   });
 
   it('shows ContentTypePickerModal after document is picked', async () => {
@@ -282,7 +220,6 @@ describe('ModalOrchestrator', () => {
       expect(
         screen.queryByRole('heading', { name: "You're about to lose your progress" })
       ).toBeNull();
-      expect(mockResumeWorkflow).not.toHaveBeenCalled();
     });
   });
 
@@ -325,7 +262,7 @@ describe('ModalOrchestrator', () => {
     });
   });
 
-  it('discards at pre-flight tab step without calling resumeWorkflow', async () => {
+  it('discards at pre-flight tab step without calling addRun', async () => {
     const ref = createRef<ModalOrchestratorHandle>();
     render(<ModalOrchestrator ref={ref} {...defaultProps} />);
 
@@ -346,8 +283,7 @@ describe('ModalOrchestrator', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cancel without creating' }));
 
     await waitFor(() => {
-      // No active workflow run exists yet — nothing to resume as cancelled
-      expect(mockResumeWorkflow).not.toHaveBeenCalled();
+      expect(mockAddRun).not.toHaveBeenCalled();
       expect(screen.queryByRole('heading', { name: 'Document tabs' })).toBeNull();
     });
   });
@@ -366,16 +302,13 @@ describe('ModalOrchestrator', () => {
       );
     });
 
-    // Tabs shown because fetchDocumentSelection returned 2 tabs
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'Document tabs' })).toBeTruthy();
     });
 
-    // "No, import all tabs" = useAllTabs=true → onContinue called with all available tabs
     fireEvent.click(screen.getByLabelText('No, import all tabs'));
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 
-    // Images shown because imageCount > 0
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'Images' })).toBeTruthy();
     });
@@ -389,6 +322,54 @@ describe('ModalOrchestrator', () => {
         includeImages: true,
       });
     });
+  });
+
+  it('calls addRun with correct RunRecord fields after startWorkflow resolves', async () => {
+    const ref = createRef<ModalOrchestratorHandle>();
+    render(<ModalOrchestrator ref={ref} {...defaultProps} />);
+
+    await pickDocument(ref);
+    await selectContentTypeAndNext();
+    await completePreflight({ useAllTabs: true, includeImages: false });
+
+    await waitFor(() => {
+      expect(mockAddRun).toHaveBeenCalledWith(
+        expect.objectContaining({
+          runId: 'run-123',
+          documentId: 'mock-doc-id-123',
+          contentTypeIds: ['ct-1'],
+        })
+      );
+    });
+  });
+
+  it('calls onRunStarted with runId after startWorkflow resolves', async () => {
+    const ref = createRef<ModalOrchestratorHandle>();
+    render(<ModalOrchestrator ref={ref} {...defaultProps} />);
+
+    await pickDocument(ref);
+    await selectContentTypeAndNext();
+    await completePreflight({ useAllTabs: true, includeImages: false });
+
+    await waitFor(() => {
+      expect(defaultProps.onRunStarted).toHaveBeenCalledWith('run-123');
+    });
+  });
+
+  it('does NOT call onMappingReviewReady (prop removed)', async () => {
+    // onMappingReviewReady is no longer a prop — verify the component still works after workflow
+    const ref = createRef<ModalOrchestratorHandle>();
+    const propsWithoutReviewReady = { ...defaultProps };
+    render(<ModalOrchestrator ref={ref} {...propsWithoutReviewReady} />);
+
+    await pickDocument(ref);
+    await selectContentTypeAndNext();
+    await completePreflight({ useAllTabs: true, includeImages: false });
+
+    await waitFor(() => {
+      expect(defaultProps.onRunStarted).toHaveBeenCalledWith('run-123');
+    });
+    // No crash, no review-ready call
   });
 
   it('skips image step and starts workflow directly when document has no images', async () => {
@@ -440,31 +421,7 @@ describe('ModalOrchestrator', () => {
       });
     });
 
-    // No tab or image modal shown
     expect(screen.queryByRole('heading', { name: 'Document tabs' })).toBeNull();
     expect(screen.queryByRole('heading', { name: 'Images' })).toBeNull();
-  });
-
-  it('routes mapping-review suspend to onMappingReviewReady after pre-flight selection', async () => {
-    mockStartWorkflow.mockResolvedValue({
-      status: RunStatus.PENDING_REVIEW,
-      runId: 'run-123',
-      messages: [],
-      suspendPayload: mappingReviewSuspendPayload,
-    } satisfies WorkflowRunResult);
-
-    const ref = createRef<ModalOrchestratorHandle>();
-    render(<ModalOrchestrator ref={ref} {...defaultProps} />);
-
-    await pickDocument(ref);
-    await selectContentTypeAndNext();
-    await completePreflight({ useAllTabs: true, includeImages: true });
-
-    await waitFor(() => {
-      expect(defaultProps.onMappingReviewReady).toHaveBeenCalledWith(
-        mappingReviewSuspendPayload,
-        'run-123'
-      );
-    });
   });
 });

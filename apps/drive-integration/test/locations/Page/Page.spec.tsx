@@ -7,32 +7,42 @@ import Page from '../../../src/locations/Page/Page';
 
 const mockSdk = createMockSDK();
 
-const mappingReviewPayloadMock: MappingReviewSuspendPayload = {
-  suspendStepId: 'mapping-review',
-  reason: 'Mapping review required before CMA payload generation continues',
-  documentId: 'doc-test',
-  documentTitle: 'Document mapping review',
-  normalizedDocument: {
+const {
+  mockResumeAndPollWorkflow,
+  mockMarkCompleted,
+  mockResetFlow,
+  mappingReviewPayloadMock,
+} = vi.hoisted(() => {
+  const payload: MappingReviewSuspendPayload = {
+    suspendStepId: 'mapping-review',
+    reason: 'Mapping review required',
     documentId: 'doc-test',
-    title: 'Document mapping review',
-    designValues: [],
-    contentBlocks: [],
-    images: [],
-    tables: [],
-    assets: [],
-  },
-  entryBlockGraph: {
-    entries: [],
-    excludedSourceRefs: [],
-  },
-  referenceGraph: {
-    edges: [],
-    creationOrder: [],
-    deferredFields: [],
-    hasCircularDependency: false,
-  },
-  contentTypes: [],
-};
+    documentTitle: 'Document mapping review',
+    normalizedDocument: {
+      documentId: 'doc-test',
+      title: 'Document mapping review',
+      designValues: [],
+      contentBlocks: [],
+      images: [],
+      tables: [],
+      assets: [],
+    },
+    entryBlockGraph: { entries: [], excludedSourceRefs: [] },
+    referenceGraph: {
+      edges: [],
+      creationOrder: [],
+      deferredFields: [],
+      hasCircularDependency: false,
+    },
+    contentTypes: [],
+  };
+  return {
+    mockResumeAndPollWorkflow: vi.fn(),
+    mockMarkCompleted: vi.fn(),
+    mockResetFlow: vi.fn(),
+    mappingReviewPayloadMock: payload,
+  };
+});
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -42,38 +52,65 @@ vi.mock('../../../src/locations/Page/components/mainpage/OAuthConnector', () => 
   OAuthConnector: () => <div>Mock OAuth Connector</div>,
 }));
 
-const { mockModalOrchestrator, mockResumeWorkflow, mockResetFlow } = vi.hoisted(() => ({
-  mockModalOrchestrator: vi.fn(),
-  mockResumeWorkflow: vi.fn(),
-  mockResetFlow: vi.fn(),
+vi.mock('../../../src/services/workflowService', () => ({
+  resumeAndPollWorkflow: (...args: unknown[]) => mockResumeAndPollWorkflow(...args),
 }));
 
-vi.mock('@hooks/useWorkflowAgent', () => ({
-  useWorkflowAgent: () => ({
-    resumeWorkflow: mockResumeWorkflow,
+vi.mock('../../../src/hooks/useRunStorage', () => ({
+  useRunStorage: () => ({
+    runs: [],
+    addRun: vi.fn(),
+    removeRun: vi.fn(),
+    markCompleted: mockMarkCompleted,
+    storageError: null,
+  }),
+}));
+
+vi.mock('../../../src/hooks/useRunsPolling', () => ({
+  useRunsPolling: () => ({
+    statusMap: new Map(),
+    errorMap: new Map(),
+  }),
+}));
+
+vi.mock('../../../src/services/agents-api', () => ({
+  getWorkflowRun: vi.fn().mockResolvedValue({
+    sys: { status: 'PENDING_REVIEW' },
+    metadata: { suspendPayload: mappingReviewPayloadMock },
   }),
 }));
 
 vi.mock('../../../src/locations/Page/components/review/ReviewPage', () => ({
   ReviewPage: ({
     payload,
+    runId,
     onCancelReview,
     onExitReview,
+    onRunCompleted,
   }: {
     payload: MappingReviewSuspendPayload;
+    runId: string;
     onCancelReview: () => Promise<void>;
     onExitReview: () => void;
+    onRunCompleted: (entryIds: string[]) => void;
   }) => (
     <div>
-      <div>{`Mock review page for ${payload.documentTitle}`}</div>
+      <div>{`Mock review page for ${payload.documentTitle} run:${runId}`}</div>
       <button onClick={() => void onCancelReview()} type="button">
         Trigger review cancel
       </button>
       <button onClick={onExitReview} type="button">
         Trigger review exit
       </button>
+      <button onClick={() => onRunCompleted(['entry-1', 'entry-2'])} type="button">
+        Trigger run completed
+      </button>
     </div>
   ),
+}));
+
+const { mockModalOrchestrator } = vi.hoisted(() => ({
+  mockModalOrchestrator: vi.fn(),
 }));
 
 vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () => ({
@@ -82,44 +119,53 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
     (
       props: {
         onAiAccessDenied: (message: string) => void;
-        onMappingReviewReady: (payload: MappingReviewSuspendPayload, runId: string) => void;
+        onRunStarted: (runId: string) => void;
         onResetToMain: () => void;
         oauthToken: string;
       },
-      ref: React.ForwardedRef<{
-        startFlow: () => void;
-        resetFlow: () => void;
-      }>
+      ref: React.ForwardedRef<{ startFlow: () => void; resetFlow: () => void }>
     ) => {
-      const handle = {
-        startFlow: vi.fn(),
-        resetFlow: mockResetFlow,
-      };
-      if (typeof ref === 'function') {
-        ref(handle);
-      } else if (ref) {
-        ref.current = handle;
-      }
+      const handle = { startFlow: vi.fn(), resetFlow: mockResetFlow };
+      if (typeof ref === 'function') ref(handle);
+      else if (ref) ref.current = handle;
 
       mockModalOrchestrator(props);
       return (
         <>
-          <button
-            onClick={() => props.onMappingReviewReady(mappingReviewPayloadMock, 'run-123')}
-            type="button">
-            Trigger Mapping Review Ready
+          <button onClick={() => props.onRunStarted('run-123')} type="button">
+            Trigger Run Started
           </button>
           <button onClick={props.onResetToMain} type="button">
             Trigger Reset To Main
           </button>
           <button
-            onClick={() => props.onAiAccessDenied?.('AI features are currently disabled')}
+            onClick={() => props.onAiAccessDenied('AI features are currently disabled')}
             type="button">
             Trigger Modal AI Access Denied
           </button>
         </>
       );
     }
+  ),
+}));
+
+vi.mock('../../../src/locations/Page/components/runs/RunsPage', () => ({
+  RunsPage: ({
+    onNewImport,
+    onReviewRun,
+  }: {
+    onNewImport: () => void;
+    onReviewRun: (runId: string) => void;
+  }) => (
+    <div>
+      <div>Runs Page</div>
+      <button onClick={onNewImport} type="button">
+        New Import
+      </button>
+      <button onClick={() => onReviewRun('run-123')} type="button">
+        Review run-123
+      </button>
+    </div>
   ),
 }));
 
@@ -130,94 +176,108 @@ describe('Page component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockResumeWorkflow.mockResolvedValue({});
+    mockResumeAndPollWorkflow.mockResolvedValue({});
   });
 
-  it('renders MainPageView by default', async () => {
+  it('renders RunsPage by default on mount', async () => {
     render(<Page />);
-
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
-      expect(screen.queryByText(/Create from document "Selected document"/)).toBeNull();
+      expect(screen.getByText('Runs Page')).toBeTruthy();
     });
   });
 
-  it('returns to main view when flow reset is requested by modal orchestrator', async () => {
+  it('onNewImport transitions to import view with MainPageView', async () => {
     render(<Page />);
-
+    fireEvent.click(screen.getByRole('button', { name: 'New Import' }));
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
     });
+  });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Trigger Mapping Review Ready' }));
+  it('onRunStarted callback transitions back to runs view', async () => {
+    render(<Page />);
+    // Go to import view first
+    fireEvent.click(screen.getByRole('button', { name: 'New Import' }));
+    await waitFor(() => screen.getByRole('heading', { name: 'Drive Integration' }));
+
+    // Run started → back to runs
+    fireEvent.click(screen.getByRole('button', { name: 'Trigger Run Started' }));
     await waitFor(() => {
-      expect(screen.getByText('Mock review page for Document mapping review')).toBeTruthy();
-    });
-
-    fireEvent.click(screen.getByRole('button', { name: 'Trigger Reset To Main' }));
-
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
-      expect(screen.queryByText(/Create from document "Selected document"/)).toBeNull();
+      expect(screen.getByText('Runs Page')).toBeTruthy();
     });
   });
 
-  it('switches to the mapping review screen when the workflow pauses for mapping review', async () => {
+  it('onReviewRun transitions to review view (loading spinner, then ReviewPage)', async () => {
     render(<Page />);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Trigger Mapping Review Ready' }));
-
+    fireEvent.click(screen.getByRole('button', { name: 'Review run-123' }));
     await waitFor(() => {
-      expect(screen.getByText('Mock review page for Document mapping review')).toBeTruthy();
-      expect(screen.queryByRole('heading', { name: 'Drive Integration' })).toBeNull();
+      expect(
+        screen.getByText('Mock review page for Document mapping review run:run-123')
+      ).toBeTruthy();
     });
   });
 
-  it('returns to the main view when exiting the review page after creation', async () => {
+  it('onExitReview callback transitions back to runs view', async () => {
     render(<Page />);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Trigger Mapping Review Ready' }));
-
-    await waitFor(() => {
-      expect(screen.getByText('Mock review page for Document mapping review')).toBeTruthy();
-    });
+    fireEvent.click(screen.getByRole('button', { name: 'Review run-123' }));
+    await waitFor(() =>
+      screen.getByText('Mock review page for Document mapping review run:run-123')
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Trigger review exit' }));
-
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
+      expect(screen.getByText('Runs Page')).toBeTruthy();
     });
-
-    expect(mockResumeWorkflow).not.toHaveBeenCalled();
-    expect(mockResetFlow).toHaveBeenCalledTimes(1);
+    expect(mockResetFlow).toHaveBeenCalled();
   });
 
-  it('cancels the workflow and returns to the main view when review cancel is triggered', async () => {
+  it('onRunCompleted calls markCompleted with correct args', async () => {
     render(<Page />);
+    fireEvent.click(screen.getByRole('button', { name: 'Review run-123' }));
+    await waitFor(() =>
+      screen.getByText('Mock review page for Document mapping review run:run-123')
+    );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Trigger Mapping Review Ready' }));
-
+    fireEvent.click(screen.getByRole('button', { name: 'Trigger run completed' }));
     await waitFor(() => {
-      expect(screen.getByText('Mock review page for Document mapping review')).toBeTruthy();
+      expect(mockMarkCompleted).toHaveBeenCalledWith('run-123', ['entry-1', 'entry-2']);
     });
+  });
+
+  it('onCancelReview calls resumeAndPollWorkflow and returns to runs', async () => {
+    render(<Page />);
+    fireEvent.click(screen.getByRole('button', { name: 'Review run-123' }));
+    await waitFor(() =>
+      screen.getByText('Mock review page for Document mapping review run:run-123')
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Trigger review cancel' }));
-
     await waitFor(() => {
-      expect(mockResumeWorkflow).toHaveBeenCalledWith('run-123', { cancelled: true });
-      expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
+      expect(mockResumeAndPollWorkflow).toHaveBeenCalledWith(
+        expect.anything(),
+        'run-123',
+        { cancelled: true }
+      );
+      expect(screen.getByText('Runs Page')).toBeTruthy();
     });
-
-    expect(mockResetFlow).toHaveBeenCalledTimes(1);
   });
 
-  it('renders a blocked state when AI access is denied from the workflow modal', async () => {
+  it('aiAccessDeniedMessage blocks all views with warning note', async () => {
     render(<Page />);
-
     fireEvent.click(screen.getByRole('button', { name: 'Trigger Modal AI Access Denied' }));
-
     await waitFor(() => {
       expect(screen.getByText(/AI features are currently disabled/)).toBeTruthy();
+    });
+  });
+
+  it('Trigger Reset To Main returns to runs view', async () => {
+    render(<Page />);
+    fireEvent.click(screen.getByRole('button', { name: 'New Import' }));
+    await waitFor(() => screen.getByRole('heading', { name: 'Drive Integration' }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Trigger Reset To Main' }));
+    await waitFor(() => {
+      expect(screen.getByText('Runs Page')).toBeTruthy();
     });
   });
 });

@@ -10,9 +10,6 @@ import { ERROR_MESSAGES } from '@constants/messages';
 import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 import {
   DocumentTabProps,
-  MappingReviewSuspendPayload,
-  RunStatus,
-  WorkflowRunResult,
   WorkflowFailureReason,
   WorkflowRunError,
 } from '@types';
@@ -25,6 +22,7 @@ import {
   DocumentSelectionConfig,
 } from '../../../../utils/fetchDocumentSelection';
 import { isAiAccessDeniedError } from '../../../../utils/aiAccess';
+import type { RunRecord } from '../../../../types/runs';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
@@ -45,8 +43,10 @@ interface ModalOrchestratorProps {
   isOAuthBusy?: boolean;
   onReconnectGoogleDrive?: () => Promise<void>;
   onAiAccessDenied?: (message: string) => void;
-  onMappingReviewReady: (payload: MappingReviewSuspendPayload, runId: string) => void;
+  onRunStarted: (runId: string) => void;
   onResetToMain: () => void;
+  addRun: (record: RunRecord) => void;
+  storageError: string | null;
 }
 
 interface PreviewErrorState {
@@ -63,9 +63,11 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       isOAuthConnected = false,
       isOAuthBusy = false,
       onReconnectGoogleDrive = async () => undefined,
-      onMappingReviewReady,
+      onRunStarted,
       onResetToMain,
       onAiAccessDenied,
+      addRun,
+      storageError,
     },
     ref
   ) => {
@@ -75,12 +77,14 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const [isReconnectPending, setIsReconnectPending] = useState(false);
     const [flowStep, setFlowStep] = useState<FlowStep | null>(null);
     const [documentId, setDocumentId] = useState<string>('');
+    const [documentTitle, setDocumentTitle] = useState<string>('Untitled Document');
     const [selectedContentTypes, setSelectedContentTypes] = useState<ContentTypeProps[]>([]);
     const [availableTabs, setAvailableTabs] = useState<DocumentTabProps[]>([]);
     const [selectedTabs, setSelectedTabs] = useState<DocumentTabProps[]>([]);
     const [useAllTabs, setUseAllTabs] = useState<boolean | null>(null);
     const [includeImages, setIncludeImages] = useState<boolean | null>(null);
     const [requiresImageSelection, setRequiresImageSelection] = useState(false);
+
     const { startWorkflow } = useWorkflowAgent({
       sdk,
       documentId,
@@ -109,6 +113,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
     const resetProgress = useCallback(() => {
       setDocumentId('');
+      setDocumentTitle('Untitled Document');
       setSelectedContentTypes([]);
       resetDocumentSelection();
       setFlowStep(null);
@@ -291,23 +296,39 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       }).catch(handleWorkflowError);
     };
 
-    const handleWorkflowResult = (workflowRun: WorkflowRunResult) => {
-      if (workflowRun.status === RunStatus.PENDING_REVIEW) {
-        setFlowStep(null);
-        onMappingReviewReady(workflowRun.suspendPayload, workflowRun.runId);
-        return;
-      }
-
-      setFlowStep(null);
-    };
-
     const startWorkflowWithScope = async (
       contentTypeIds: string[],
       documentSelection: DocumentSelection
     ) => {
       setFlowStep(FlowStep.LOADING);
-      const result = await startWorkflow(contentTypeIds, documentSelection);
-      handleWorkflowResult(result);
+      try {
+        const runId = await startWorkflow(contentTypeIds, documentSelection);
+
+        if (storageError) {
+          // Storage unavailable — surface error before proceeding
+          showWorkflowError(
+            new WorkflowRunError(
+              'Unable to track this import: browser storage is unavailable or full.',
+              WorkflowFailureReason.GENERIC
+            )
+          );
+          return;
+        }
+
+        addRun({
+          runId,
+          documentTitle,
+          documentId,
+          contentTypeIds,
+          startedAt: new Date().toISOString(),
+        });
+
+        setFlowStep(null);
+        resetProgress();
+        onRunStarted(runId);
+      } catch (err) {
+        handleWorkflowError(err);
+      }
     };
 
     const handleContentTypeContinue = async (contentTypeIds: string[]) => {
@@ -442,7 +463,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           return (
             <LoadingModal
               step="reviewingContentTypes"
-              title="Preparing your preview"
+              title="Starting import…"
               contentTypeCount={selectedContentTypes.length}
             />
           );

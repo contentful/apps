@@ -4,6 +4,7 @@ import { withLDProvider } from 'launchdarkly-react-client-sdk';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import LocalhostWarning from './locations/LocalhostWarning';
+import { FixtureHarness } from './fixtures/FixtureHarness';
 
 const AppWithLD = withLDProvider({
   clientSideID: import.meta.env.VITE_LD_CLIENT_ID ?? '',
@@ -34,7 +35,9 @@ if (window.location.search.includes('code=') && window.location.search.includes(
   handleOAuthCallback();
 }
 
-if (process.env.NODE_ENV === 'development' && window.self === window.top) {
+if (import.meta.env.VITE_ENABLE_MOCK_REVIEW_PAYLOAD === 'true') {
+  root.render(<FixtureHarness />);
+} else if (process.env.NODE_ENV === 'development' && window.self === window.top) {
   // You can remove this if block before deploying your app
   root.render(<LocalhostWarning />);
 } else {

@@ -1,0 +1,289 @@
+{
+  "suspendStepId": "mapping-review",
+  "documentId": "fixture-doc-001",
+  "documentTitle": "Product Launch Blog Post",
+  "referenceGraph": { "edges": [], "creationOrder": [] },
+  "validationFindings": [
+    {
+      "code": "REQUIRED_FIELD_EMPTY",
+      "message": "The required field \"Title\" has no mapped content. This entry cannot be created until it is assigned.",
+      "severity": "block",
+      "entryIndex": 0,
+      "fieldId": "title"
+    },
+    {
+      "code": "FIELD_TYPE_MISMATCH",
+      "message": "Field \"Body\" is a Rich Text field but the mapped content contains only plain text. Some formatting may be lost on publish.",
+      "severity": "warn",
+      "entryIndex": 0,
+      "fieldId": "body"
+    },
+    {
+      "code": "CONTENT_TRUNCATED",
+      "message": "Mapped content for \"Summary\" exceeds the field's character limit (500). It will be truncated on entry creation.",
+      "severity": "warn",
+      "entryIndex": 0,
+      "fieldId": "summary"
+    },
+    {
+      "code": "DUPLICATE_ENTRY",
+      "message": "An entry with the same content type and title already exists in this space. Creating this entry may result in a duplicate.",
+      "severity": "warn",
+      "entryIndex": 1
+    }
+  ],
+  "normalizedDocument": {
+    "documentId": "fixture-doc-001",
+    "title": "Product Launch Blog Post",
+    "contentBlocks": [
+      {
+        "id": "block-1",
+        "position": 0,
+        "type": "heading",
+        "headingLevel": 1,
+        "textRuns": [{ "text": "Introducing Our New Product" }],
+        "flattenedTextRuns": [{ "text": "Introducing Our New Product", "start": 0, "end": 27 }],
+        "designValueIds": [],
+        "imageIds": []
+      },
+      {
+        "id": "block-2",
+        "position": 1,
+        "type": "paragraph",
+        "textRuns": [
+          { "text": "We are thrilled to announce the launch of " },
+          { "text": "Contentful Studio", "styles": { "bold": true } },
+          { "text": ", the next generation content platform. This release brings powerful new tools for content teams everywhere." }
+        ],
+        "flattenedTextRuns": [
+          { "text": "We are thrilled to announce the launch of ", "start": 0, "end": 41 },
+          { "text": "Contentful Studio", "start": 41, "end": 58, "styles": { "bold": true } },
+          { "text": ", the next generation content platform. This release brings powerful new tools for content teams everywhere.", "start": 58, "end": 167 }
+        ],
+        "designValueIds": [],
+        "imageIds": []
+      },
+      {
+        "id": "block-3",
+        "position": 2,
+        "type": "paragraph",
+        "textRuns": [{ "text": "Available starting March 2025 for all Enterprise customers." }],
+        "flattenedTextRuns": [{ "text": "Available starting March 2025 for all Enterprise customers.", "start": 0, "end": 58 }],
+        "designValueIds": [],
+        "imageIds": []
+      },
+      {
+        "id": "block-4",
+        "position": 3,
+        "type": "heading",
+        "headingLevel": 2,
+        "textRuns": [{ "text": "Key Features" }],
+        "flattenedTextRuns": [{ "text": "Key Features", "start": 0, "end": 12 }],
+        "designValueIds": [],
+        "imageIds": []
+      },
+      {
+        "id": "block-5",
+        "position": 4,
+        "type": "listItem",
+        "bullet": { "nestingLevel": 0, "ordered": false },
+        "textRuns": [{ "text": "Visual content editing with live preview" }],
+        "flattenedTextRuns": [{ "text": "Visual content editing with live preview", "start": 0, "end": 40 }],
+        "designValueIds": [],
+        "imageIds": []
+      },
+      {
+        "id": "block-6",
+        "position": 5,
+        "type": "listItem",
+        "bullet": { "nestingLevel": 0, "ordered": false },
+        "textRuns": [{ "text": "AI-powered content suggestions" }],
+        "flattenedTextRuns": [{ "text": "AI-powered content suggestions", "start": 0, "end": 30 }],
+        "designValueIds": [],
+        "imageIds": []
+      },
+      {
+        "id": "block-7",
+        "position": 6,
+        "type": "listItem",
+        "bullet": { "nestingLevel": 0, "ordered": false },
+        "textRuns": [{ "text": "One-click multi-channel publishing" }],
+        "flattenedTextRuns": [{ "text": "One-click multi-channel publishing", "start": 0, "end": 34 }],
+        "designValueIds": [],
+        "imageIds": []
+      }
+    ],
+    "tables": [
+      {
+        "id": "table-1",
+        "position": 7,
+        "headers": ["Plan", "Price", "Users"],
+        "designValueIds": [],
+        "imageIds": [],
+        "rows": [
+          {
+            "id": "row-1",
+            "cells": [
+              {
+                "id": "cell-1-1",
+                "parts": [{ "id": "part-1-1-1", "type": "text", "textRuns": [{ "text": "Starter" }], "flattenedTextRuns": [{ "text": "Starter", "start": 0, "end": 7 }] }]
+              },
+              {
+                "id": "cell-1-2",
+                "parts": [{ "id": "part-1-2-1", "type": "text", "textRuns": [{ "text": "$99/mo" }], "flattenedTextRuns": [{ "text": "$99/mo", "start": 0, "end": 6 }] }]
+              },
+              {
+                "id": "cell-1-3",
+                "parts": [{ "id": "part-1-3-1", "type": "text", "textRuns": [{ "text": "Up to 5" }], "flattenedTextRuns": [{ "text": "Up to 5", "start": 0, "end": 7 }] }]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "images": []
+  },
+  "contentTypes": [
+    {
+      "sys": { "id": "blogPost" },
+      "name": "Blog Post",
+      "displayField": "title",
+      "fields": [
+        { "id": "title", "name": "Title", "type": "Symbol", "required": true },
+        { "id": "body", "name": "Body", "type": "RichText" },
+        { "id": "summary", "name": "Summary", "type": "Text" }
+      ]
+    },
+    {
+      "sys": { "id": "pricingTable" },
+      "name": "Pricing Table",
+      "displayField": "planName",
+      "fields": [
+        { "id": "planName", "name": "Plan Name", "type": "Symbol", "required": true },
+        { "id": "price", "name": "Price", "type": "Symbol" },
+        { "id": "userLimit", "name": "User Limit", "type": "Symbol" }
+      ]
+    }
+  ],
+  "entryBlockGraph": {
+    "excludedSourceRefs": [],
+    "entries": [
+      {
+        "contentTypeId": "blogPost",
+        "tempId": "entry-blog-1",
+        "fieldMappings": [
+          {
+            "fieldId": "body",
+            "fieldType": "RichText",
+            "confidence": 0.88,
+            "sourceRefs": [
+              {
+                "type": "blockText",
+                "blockId": "block-2",
+                "start": 0,
+                "end": 167,
+                "flattenedRuns": [
+                  { "text": "We are thrilled to announce the launch of ", "start": 0, "end": 41 },
+                  { "text": "Contentful Studio", "start": 41, "end": 58, "styles": { "bold": true } },
+                  { "text": ", the next generation content platform. This release brings powerful new tools for content teams everywhere.", "start": 58, "end": 167 }
+                ]
+              },
+              {
+                "type": "blockText",
+                "blockId": "block-5",
+                "start": 0,
+                "end": 40,
+                "flattenedRuns": [{ "text": "Visual content editing with live preview", "start": 0, "end": 40 }]
+              },
+              {
+                "type": "blockText",
+                "blockId": "block-6",
+                "start": 0,
+                "end": 30,
+                "flattenedRuns": [{ "text": "AI-powered content suggestions", "start": 0, "end": 30 }]
+              },
+              {
+                "type": "blockText",
+                "blockId": "block-7",
+                "start": 0,
+                "end": 34,
+                "flattenedRuns": [{ "text": "One-click multi-channel publishing", "start": 0, "end": 34 }]
+              }
+            ]
+          },
+          {
+            "fieldId": "summary",
+            "fieldType": "Text",
+            "confidence": 0.80,
+            "sourceRefs": [
+              {
+                "type": "blockText",
+                "blockId": "block-3",
+                "start": 0,
+                "end": 58,
+                "flattenedRuns": [{ "text": "Available starting March 2025 for all Enterprise customers.", "start": 0, "end": 58 }]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "contentTypeId": "pricingTable",
+        "tempId": "entry-pricing-1",
+        "fieldMappings": [
+          {
+            "fieldId": "planName",
+            "fieldType": "Symbol",
+            "confidence": 0.90,
+            "sourceRefs": [
+              {
+                "type": "tableText",
+                "tableId": "table-1",
+                "rowId": "row-1",
+                "cellId": "cell-1-1",
+                "partId": "part-1-1-1",
+                "start": 0,
+                "end": 7,
+                "flattenedRuns": [{ "text": "Starter", "start": 0, "end": 7 }]
+              }
+            ]
+          },
+          {
+            "fieldId": "price",
+            "fieldType": "Symbol",
+            "confidence": 0.90,
+            "sourceRefs": [
+              {
+                "type": "tableText",
+                "tableId": "table-1",
+                "rowId": "row-1",
+                "cellId": "cell-1-2",
+                "partId": "part-1-2-1",
+                "start": 0,
+                "end": 6,
+                "flattenedRuns": [{ "text": "$99/mo", "start": 0, "end": 6 }]
+              }
+            ]
+          },
+          {
+            "fieldId": "userLimit",
+            "fieldType": "Symbol",
+            "confidence": 0.90,
+            "sourceRefs": [
+              {
+                "type": "tableText",
+                "tableId": "table-1",
+                "rowId": "row-1",
+                "cellId": "cell-1-3",
+                "partId": "part-1-3-1",
+                "start": 0,
+                "end": 7,
+                "flattenedRuns": [{ "text": "Up to 5", "start": 0, "end": 7 }]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
