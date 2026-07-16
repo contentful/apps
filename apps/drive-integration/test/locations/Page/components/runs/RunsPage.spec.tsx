@@ -1,22 +1,6 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { RunRecord } from '../../../../../src/types/runs';
-
-const mockRuns: RunRecord[] = [];
-const mockAddRun = vi.fn();
-const mockRemoveRun = vi.fn();
-const mockMarkCompleted = vi.fn();
-let mockStorageError: string | null = null;
-
-vi.mock('../../../../../src/hooks/useRunStorage', () => ({
-  useRunStorage: () => ({
-    runs: mockRuns,
-    addRun: mockAddRun,
-    removeRun: mockRemoveRun,
-    markCompleted: mockMarkCompleted,
-    storageError: mockStorageError,
-  }),
-}));
 
 const mockStatusMap = new Map<string, string>();
 const mockErrorMap = new Map<string, string>();
@@ -36,24 +20,41 @@ import { RunsPage } from '../../../../../src/locations/Page/components/runs/Runs
 import { createMockSDK } from '../../../../mocks';
 
 const mockSdk = createMockSDK() as any;
+const mockRemoveRun = vi.fn();
+
+let mockRuns: RunRecord[] = [];
+let mockStorageError: string | null = null;
 
 beforeEach(() => {
-  mockRuns.length = 0;
+  mockRuns = [];
   mockStatusMap.clear();
   mockErrorMap.clear();
   mockStorageError = null;
   vi.clearAllMocks();
 });
 
+function renderRunsPage(overrides: { onNewImport?: () => void; onReviewRun?: (id: string) => void } = {}) {
+  return render(
+    <RunsPage
+      sdk={mockSdk}
+      runs={mockRuns}
+      removeRun={mockRemoveRun}
+      storageError={mockStorageError}
+      onNewImport={overrides.onNewImport ?? vi.fn()}
+      onReviewRun={overrides.onReviewRun ?? vi.fn()}
+    />
+  );
+}
+
 describe('RunsPage', () => {
   it('renders empty state when no runs', () => {
-    render(<RunsPage sdk={mockSdk} onNewImport={vi.fn()} onReviewRun={vi.fn()} />);
+    renderRunsPage();
     expect(screen.getByText(/no imports yet/i)).toBeTruthy();
   });
 
   it('shows New Import button and calls onNewImport', () => {
     const onNewImport = vi.fn();
-    render(<RunsPage sdk={mockSdk} onNewImport={onNewImport} onReviewRun={vi.fn()} />);
+    renderRunsPage({ onNewImport });
     fireEvent.click(screen.getByText('New Import'));
     expect(onNewImport).toHaveBeenCalled();
   });
@@ -78,7 +79,7 @@ describe('RunsPage', () => {
     mockStatusMap.set('run-1', 'running');
     mockStatusMap.set('run-2', 'completed');
 
-    render(<RunsPage sdk={mockSdk} onNewImport={vi.fn()} onReviewRun={vi.fn()} />);
+    renderRunsPage();
     expect(screen.getByText('Doc A')).toBeTruthy();
     expect(screen.getByText('Doc B')).toBeTruthy();
   });
@@ -94,7 +95,7 @@ describe('RunsPage', () => {
     mockStatusMap.set('run-review', 'needs-review');
 
     const onReviewRun = vi.fn();
-    render(<RunsPage sdk={mockSdk} onNewImport={vi.fn()} onReviewRun={onReviewRun} />);
+    renderRunsPage({ onReviewRun });
     fireEvent.click(screen.getByText('Review'));
     expect(onReviewRun).toHaveBeenCalledWith('run-review');
   });
@@ -110,14 +111,14 @@ describe('RunsPage', () => {
     mockStatusMap.set('run-fail', 'failed');
     mockErrorMap.set('run-fail', 'Timed out');
 
-    render(<RunsPage sdk={mockSdk} onNewImport={vi.fn()} onReviewRun={vi.fn()} />);
+    renderRunsPage();
     fireEvent.click(screen.getByText('Dismiss'));
     expect(mockRemoveRun).toHaveBeenCalledWith('run-fail');
   });
 
   it('shows storage error note when storageError is set', () => {
     mockStorageError = 'Storage full';
-    render(<RunsPage sdk={mockSdk} onNewImport={vi.fn()} onReviewRun={vi.fn()} />);
+    renderRunsPage();
     expect(screen.getByText(/storage full/i)).toBeTruthy();
   });
 
@@ -141,7 +142,7 @@ describe('RunsPage', () => {
     mockStatusMap.set('concurrent-1', 'running');
     mockStatusMap.set('concurrent-2', 'needs-review');
 
-    render(<RunsPage sdk={mockSdk} onNewImport={vi.fn()} onReviewRun={vi.fn()} />);
+    renderRunsPage();
 
     expect(screen.getByText('First Import')).toBeTruthy();
     expect(screen.getByText('Second Import')).toBeTruthy();
@@ -171,7 +172,7 @@ describe('RunsPage', () => {
     mockStatusMap.set('stable-run', 'completed');
     mockStatusMap.set('transitioning-run', 'running');
 
-    render(<RunsPage sdk={mockSdk} onNewImport={vi.fn()} onReviewRun={vi.fn()} />);
+    renderRunsPage();
 
     expect(screen.getByText('Completed')).toBeTruthy();
     expect(screen.getByText('Running')).toBeTruthy();

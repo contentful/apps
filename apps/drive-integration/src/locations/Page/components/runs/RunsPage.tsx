@@ -1,21 +1,21 @@
 import { Box, Button, Flex, Heading, Note, Text } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
-import { useRunStorage } from '../../../../hooks/useRunStorage';
 import { useRunsPolling } from '../../../../hooks/useRunsPolling';
-import type { RunWithStatus } from '../../../../types/runs';
+import type { RunRecord, RunWithStatus } from '../../../../types/runs';
 import { RunRow } from './RunRow';
 
 interface RunsPageProps {
   sdk: PageAppSDK;
+  runs: RunRecord[];
+  removeRun: (runId: string) => void;
+  storageError: string | null;
   onNewImport: () => void;
   onReviewRun: (runId: string) => void;
 }
 
-export function RunsPage({ sdk, onNewImport, onReviewRun }: RunsPageProps) {
+export function RunsPage({ sdk, runs, removeRun, storageError, onNewImport, onReviewRun }: RunsPageProps) {
   const spaceId = sdk.ids.space;
-  const environmentId = sdk.ids.environmentAlias ?? sdk.ids.environment;
 
-  const { runs, removeRun, storageError } = useRunStorage(spaceId, environmentId);
   const { statusMap, errorMap } = useRunsPolling(runs, sdk);
 
   const runsWithStatus: RunWithStatus[] = runs.map((r) => ({
