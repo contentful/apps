@@ -33,7 +33,7 @@ interface ReviewPageProps {
   sdk: PageAppSDK;
   payload: MappingReviewSuspendPayload;
   runId?: string;
-  onCancelReview: () => Promise<void>;
+  onCancelReview: (graph: EntryBlockGraph) => Promise<void>;
   onExitReview: () => void;
 }
 
@@ -175,12 +175,12 @@ export const ReviewPage = ({
     setIsCancelling(true);
 
     try {
-      await onCancelReview();
+      await onCancelReview(entryBlockGraph);
     } finally {
       setIsCancelling(false);
       setIsConfirmCancelModalOpen(false);
     }
-  }, [onCancelReview]);
+  }, [onCancelReview, entryBlockGraph]);
 
   const handleCreateOrViewEntries = useCallback(() => {
     if (hasCreatedEntries) {
