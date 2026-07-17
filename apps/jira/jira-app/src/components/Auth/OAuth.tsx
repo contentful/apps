@@ -28,7 +28,7 @@ export default class OAuth extends React.Component<Props> {
     const oauthWindow = window.open(url, 'Jira Contentful', 'left=150,top=10,width=800,height=900');
 
     window.addEventListener('message', (e) => {
-      if (e.source !== oauthWindow) {
+      if (e.source !== oauthWindow || e.origin !== window.location.origin) {
         return;
       }
 
