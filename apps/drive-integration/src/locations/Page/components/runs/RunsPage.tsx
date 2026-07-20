@@ -285,6 +285,7 @@ export function RunsPage({
                   <RunRow
                     key={run.runId}
                     run={run}
+                    sdk={sdk}
                     spaceId={spaceId}
                     webappHost={webappHost}
                     onReview={onReviewRun}
