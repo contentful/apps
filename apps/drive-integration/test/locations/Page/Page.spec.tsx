@@ -147,16 +147,16 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
 
 vi.mock('../../../src/locations/Page/components/runs/RunsPage', () => ({
   RunsPage: ({
-    onNewImport,
+    onStartImport,
     onReviewRun,
   }: {
-    onNewImport: () => void;
+    onStartImport: () => void;
     onReviewRun: (runId: string) => void;
   }) => (
     <div>
       <div>Runs Page</div>
-      <button onClick={onNewImport} type="button">
-        New Import
+      <button onClick={onStartImport} type="button">
+        Select file
       </button>
       <button onClick={() => onReviewRun('run-123')} type="button">
         Review run-123
@@ -182,21 +182,16 @@ describe('Page component', () => {
     });
   });
 
-  it('onNewImport transitions to import view with MainPageView', async () => {
+  it('onStartImport opens the modal flow (RunsPage remains visible)', async () => {
     render(<Page />);
-    fireEvent.click(screen.getByRole('button', { name: 'New Import' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Select file' }));
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Drive Integration' })).toBeTruthy();
+      expect(screen.getByText('Runs Page')).toBeTruthy();
     });
   });
 
-  it('onRunStarted callback transitions back to runs view', async () => {
+  it('onRunStarted callback keeps runs view visible', async () => {
     render(<Page />);
-    // Go to import view first
-    fireEvent.click(screen.getByRole('button', { name: 'New Import' }));
-    await waitFor(() => screen.getByRole('heading', { name: 'Drive Integration' }));
-
-    // Run started → back to runs
     fireEvent.click(screen.getByRole('button', { name: 'Trigger Run Started' }));
     await waitFor(() => {
       expect(screen.getByText('Runs Page')).toBeTruthy();
@@ -249,9 +244,11 @@ describe('Page component', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Trigger review cancel' }));
     await waitFor(() => {
-      expect(mockResumeAndPollWorkflow).toHaveBeenCalledWith(expect.anything(), 'run-123', {
-        cancelled: true,
-      });
+      expect(mockResumeAndPollWorkflow).toHaveBeenCalledWith(
+        expect.anything(),
+        'run-123',
+        expect.objectContaining({ cancelled: true })
+      );
       expect(screen.getByText('Runs Page')).toBeTruthy();
     });
   });
@@ -266,9 +263,6 @@ describe('Page component', () => {
 
   it('Trigger Reset To Main returns to runs view', async () => {
     render(<Page />);
-    fireEvent.click(screen.getByRole('button', { name: 'New Import' }));
-    await waitFor(() => screen.getByRole('heading', { name: 'Drive Integration' }));
-
     fireEvent.click(screen.getByRole('button', { name: 'Trigger Reset To Main' }));
     await waitFor(() => {
       expect(screen.getByText('Runs Page')).toBeTruthy();

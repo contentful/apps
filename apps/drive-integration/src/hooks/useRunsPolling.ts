@@ -32,7 +32,11 @@ export interface UseRunsPollingResult {
 }
 
 export function useRunsPolling(runs: RunRecord[], sdk: PageAppSDK): UseRunsPollingResult {
-  const [statusMap, setStatusMap] = useState<Map<string, DisplayStatus>>(new Map());
+  const [statusMap, setStatusMap] = useState<Map<string, DisplayStatus>>(() => {
+    const initial = new Map<string, DisplayStatus>();
+    for (const r of runs) initial.set(r.runId, DisplayStatus.LOADING);
+    return initial;
+  });
   const [errorMap, setErrorMap] = useState<Map<string, string>>(new Map());
   const [titleMap, setTitleMap] = useState<Map<string, string>>(new Map());
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);

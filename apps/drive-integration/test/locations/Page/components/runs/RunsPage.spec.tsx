@@ -1,19 +1,18 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { RunRecord } from '../../../../../src/types/runs';
+import { DisplayStatus } from '../../../../../src/types/runs';
 
-const mockStatusMap = new Map<string, string>();
+const mockStatusMap = new Map<string, DisplayStatus>();
 const mockErrorMap = new Map<string, string>();
+const mockTitleMap = new Map<string, string>();
 
 vi.mock('../../../../../src/hooks/useRunsPolling', () => ({
   useRunsPolling: () => ({
     statusMap: mockStatusMap,
     errorMap: mockErrorMap,
+    titleMap: mockTitleMap,
   }),
-}));
-
-vi.mock('@contentful/react-apps-toolkit', () => ({
-  useSDK: () => ({ ids: { space: 'sp-1', environment: 'env-1' } }),
 }));
 
 import { RunsPage } from '../../../../../src/locations/Page/components/runs/RunsPage';
@@ -29,12 +28,13 @@ beforeEach(() => {
   mockRuns = [];
   mockStatusMap.clear();
   mockErrorMap.clear();
+  mockTitleMap.clear();
   mockStorageError = null;
   vi.clearAllMocks();
 });
 
 function renderRunsPage(
-  overrides: { onNewImport?: () => void; onReviewRun?: (id: string) => void } = {}
+  overrides: { onStartImport?: () => void; onReviewRun?: (id: string) => void } = {}
 ) {
   return render(
     <RunsPage
@@ -42,8 +42,13 @@ function renderRunsPage(
       runs={mockRuns}
       removeRun={mockRemoveRun}
       storageError={mockStorageError}
-      onNewImport={overrides.onNewImport ?? vi.fn()}
+      onStartImport={overrides.onStartImport ?? vi.fn()}
       onReviewRun={overrides.onReviewRun ?? vi.fn()}
+      onRetryRun={vi.fn()}
+      isOAuthConnected={true}
+      isOAuthBusy={false}
+      onConnectGoogleDrive={vi.fn()}
+      onDisconnectGoogleDrive={vi.fn()}
     />
   );
 }
@@ -54,11 +59,9 @@ describe('RunsPage', () => {
     expect(screen.getByText(/no imports yet/i)).toBeTruthy();
   });
 
-  it('shows New Import button and calls onNewImport', () => {
-    const onNewImport = vi.fn();
-    renderRunsPage({ onNewImport });
-    fireEvent.click(screen.getByText('New Import'));
-    expect(onNewImport).toHaveBeenCalled();
+  it('shows Select file button', () => {
+    renderRunsPage();
+    expect(screen.getByText('Select file')).toBeTruthy();
   });
 
   it('renders a row per run', () => {
@@ -68,6 +71,7 @@ describe('RunsPage', () => {
         documentTitle: 'Doc A',
         documentId: 'd1',
         contentTypeIds: ['ct-1'],
+        documentSelection: { includeImages: false, selectedTabIds: [] },
         startedAt: new Date().toISOString(),
       },
       {
@@ -75,11 +79,12 @@ describe('RunsPage', () => {
         documentTitle: 'Doc B',
         documentId: 'd2',
         contentTypeIds: ['ct-2'],
+        documentSelection: { includeImages: false, selectedTabIds: [] },
         startedAt: new Date().toISOString(),
       }
     );
-    mockStatusMap.set('run-1', 'running');
-    mockStatusMap.set('run-2', 'completed');
+    mockStatusMap.set('run-1', DisplayStatus.RUNNING);
+    mockStatusMap.set('run-2', DisplayStatus.COMPLETED);
 
     renderRunsPage();
     expect(screen.getByText('Doc A')).toBeTruthy();
@@ -92,30 +97,15 @@ describe('RunsPage', () => {
       documentTitle: 'Review Me',
       documentId: 'd1',
       contentTypeIds: ['ct-1'],
+      documentSelection: { includeImages: false, selectedTabIds: [] },
       startedAt: new Date().toISOString(),
     });
-    mockStatusMap.set('run-review', 'needs-review');
+    mockStatusMap.set('run-review', DisplayStatus.NEEDS_REVIEW);
 
     const onReviewRun = vi.fn();
     renderRunsPage({ onReviewRun });
     fireEvent.click(screen.getByText('Review'));
     expect(onReviewRun).toHaveBeenCalledWith('run-review');
-  });
-
-  it('clicking Dismiss on a failed run calls removeRun', () => {
-    mockRuns.push({
-      runId: 'run-fail',
-      documentTitle: 'Failed Doc',
-      documentId: 'd1',
-      contentTypeIds: ['ct-1'],
-      startedAt: new Date().toISOString(),
-    });
-    mockStatusMap.set('run-fail', 'failed');
-    mockErrorMap.set('run-fail', 'Timed out');
-
-    renderRunsPage();
-    fireEvent.click(screen.getByText('Dismiss'));
-    expect(mockRemoveRun).toHaveBeenCalledWith('run-fail');
   });
 
   it('shows storage error note when storageError is set', () => {
@@ -131,6 +121,7 @@ describe('RunsPage', () => {
         documentTitle: 'First Import',
         documentId: 'd1',
         contentTypeIds: ['ct-1'],
+        documentSelection: { includeImages: false, selectedTabIds: [] },
         startedAt: new Date().toISOString(),
       },
       {
@@ -138,18 +129,19 @@ describe('RunsPage', () => {
         documentTitle: 'Second Import',
         documentId: 'd2',
         contentTypeIds: ['ct-2'],
+        documentSelection: { includeImages: false, selectedTabIds: [] },
         startedAt: new Date().toISOString(),
       }
     );
-    mockStatusMap.set('concurrent-1', 'running');
-    mockStatusMap.set('concurrent-2', 'needs-review');
+    mockStatusMap.set('concurrent-1', DisplayStatus.RUNNING);
+    mockStatusMap.set('concurrent-2', DisplayStatus.NEEDS_REVIEW);
 
     renderRunsPage();
 
     expect(screen.getByText('First Import')).toBeTruthy();
     expect(screen.getByText('Second Import')).toBeTruthy();
-    expect(screen.getByText('Running')).toBeTruthy();
-    expect(screen.getByText('Needs Review')).toBeTruthy();
+    expect(screen.getByText('In progress')).toBeTruthy();
+    expect(screen.getByText('Ready for review')).toBeTruthy();
     // Only the needs-review run has a Review button
     expect(screen.getAllByText('Review').length).toBe(1);
   });
@@ -161,6 +153,7 @@ describe('RunsPage', () => {
         documentTitle: 'Stable Doc',
         documentId: 'd1',
         contentTypeIds: ['ct-1'],
+        documentSelection: { includeImages: false, selectedTabIds: [] },
         startedAt: new Date().toISOString(),
       },
       {
@@ -168,18 +161,18 @@ describe('RunsPage', () => {
         documentTitle: 'Transitioning Doc',
         documentId: 'd2',
         contentTypeIds: ['ct-2'],
+        documentSelection: { includeImages: false, selectedTabIds: [] },
         startedAt: new Date().toISOString(),
       }
     );
-    mockStatusMap.set('stable-run', 'completed');
-    mockStatusMap.set('transitioning-run', 'running');
+    mockStatusMap.set('stable-run', DisplayStatus.COMPLETED);
+    mockStatusMap.set('transitioning-run', DisplayStatus.RUNNING);
 
     renderRunsPage();
 
-    expect(screen.getByText('Completed')).toBeTruthy();
-    expect(screen.getByText('Running')).toBeTruthy();
-    // Stable run has no action buttons (completed, no entries)
-    expect(screen.queryByText('Dismiss')).toBeNull();
+    expect(screen.getByText(/Complete/)).toBeTruthy();
+    expect(screen.getByText('In progress')).toBeTruthy();
+    // No Review or Retry buttons for these states
     expect(screen.queryByText('Review')).toBeNull();
   });
 });
