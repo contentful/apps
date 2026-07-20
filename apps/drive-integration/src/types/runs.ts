@@ -3,6 +3,7 @@ export interface RunRecord {
   documentTitle: string;
   documentId: string;
   contentTypeIds: string[];
+  documentSelection: { includeImages: boolean; selectedTabIds: string[] };
   startedAt: string;
   createdEntryIds?: string[];
 }
@@ -20,4 +21,4 @@ export interface RunWithStatus extends RunRecord {
   errorMessage?: string;
 }
 
-export type AppView = { view: 'runs' } | { view: 'import' } | { view: 'review'; runId: string };
+export type AppView = { view: 'runs' } | { view: 'review'; runId: string };

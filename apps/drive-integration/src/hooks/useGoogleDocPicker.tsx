@@ -71,7 +71,7 @@ export function useGoogleDocsPicker(
 
           const docs: PickerCallbackData[] = pickedItems.map((doc: any) => ({
             id: doc.id,
-            name: doc.name,
+            name: doc.name ?? doc.title ?? 'Untitled Document',
             mimeType: doc.mimeType,
             url: doc.url,
           }));

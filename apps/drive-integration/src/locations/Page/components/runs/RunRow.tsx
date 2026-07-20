@@ -1,117 +1,180 @@
-import { Badge, Box, Button, Flex, Spinner, Text, TextLink } from '@contentful/f36-components';
+import { useState } from 'react';
+import { Badge, Button, Flex, TableCell, TableRow, Text, TextLink, Tooltip } from '@contentful/f36-components';
 import type { RunWithStatus } from '../../../../types/runs';
 
 interface RunRowProps {
   run: RunWithStatus;
   spaceId: string;
   onReview: (runId: string) => void;
-  onDismiss: (runId: string) => void;
+  onRetry: (runId: string) => Promise<void>;
 }
 
 function formatDate(iso: string): string {
   const date = new Date(iso);
-  const now = Date.now();
-  const diffMs = now - date.getTime();
-  const diffMinutes = Math.floor(diffMs / 60_000);
-  const diffHours = Math.floor(diffMs / 3_600_000);
-  const diffDays = Math.floor(diffMs / 86_400_000);
-
-  if (diffMinutes < 1) return 'just now';
-  if (diffMinutes < 60) return `${diffMinutes}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString();
+  return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-function StatusBadge({ status }: { status: RunWithStatus['displayStatus'] }) {
+
+function StatusBadge({ status, errorMessage }: { status: RunWithStatus['displayStatus']; errorMessage?: string }) {
   switch (status) {
     case 'loading':
-      return <Spinner size="small" />;
+      return (
+        <Badge
+          variant="secondary"
+          style={{ background: '#F0F2F5', color: '#536171', border: 'none' }}>
+          Loading
+        </Badge>
+      );
     case 'running':
       return (
-        <Flex alignItems="center" gap="spacing2Xs">
-          <Badge variant="primary">Running</Badge>
-          <Spinner size="small" />
-        </Flex>
+        <Badge
+          variant="primary"
+          style={{ background: '#EAF0FB', color: '#0059C8', border: 'none', fontWeight: 500 }}>
+          In progress
+        </Badge>
       );
     case 'needs-review':
-      return <Badge variant="warning">Needs Review</Badge>;
+      return (
+        <Badge
+          variant="positive"
+          style={{ background: '#EAF7EC', color: '#1B7230', border: 'none', fontWeight: 500 }}>
+          Ready for review
+        </Badge>
+      );
     case 'completed':
-      return <Badge variant="positive">Completed</Badge>;
-    case 'failed':
-      return <Badge variant="negative">Failed</Badge>;
+      return (
+        <Badge
+          variant="secondary"
+          style={{ background: '#F0F2F5', color: '#536171', border: 'none', fontWeight: 500 }}>
+          Complete
+        </Badge>
+      );
+    case 'failed': {
+      const badge = (
+        <Badge
+          variant="negative"
+          style={{ background: '#FDECEA', color: '#C0392B', border: 'none', fontWeight: 500 }}>
+          Failed
+        </Badge>
+      );
+      return errorMessage ? (
+        <Tooltip content={errorMessage} placement="top">
+          {badge}
+        </Tooltip>
+      ) : badge;
+    }
     case 'expired':
-      return <Badge variant="secondary">Expired</Badge>;
+      return (
+        <Badge
+          variant="secondary"
+          style={{ background: '#F0F2F5', color: '#536171', border: 'none', fontWeight: 500 }}>
+          Expired
+        </Badge>
+      );
   }
 }
 
-export function RunRow({ run, spaceId, onReview, onDismiss }: RunRowProps) {
-  const contentTypesLabel =
-    run.contentTypeIds.length <= 3
-      ? run.contentTypeIds.join(', ')
-      : `${run.contentTypeIds.slice(0, 3).join(', ')} +${run.contentTypeIds.length - 3} more`;
+export function RunRow({ run, spaceId, onReview, onRetry }: RunRowProps) {
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  const handleRetry = async () => {
+    setIsRetrying(true);
+    try {
+      await onRetry(run.runId);
+    } finally {
+      setIsRetrying(false);
+    }
+  };
 
   return (
-    <Box
-      padding="spacingM"
-      style={{ borderBottom: '1px solid var(--color-element-light)', background: '#fff' }}>
-      <Flex justifyContent="space-between" alignItems="flex-start" gap="spacingM">
-        {/* Left: metadata */}
-        <Flex flexDirection="column" gap="spacing2Xs" style={{ flex: 1, minWidth: 0 }}>
-          <Text
-            fontWeight="fontWeightMedium"
-            style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {run.documentTitle}
-          </Text>
-          <Text fontSize="fontSizeS" fontColor="gray600">
-            {contentTypesLabel}
-          </Text>
-          <Text fontSize="fontSizeS" fontColor="gray500">
-            {formatDate(run.startedAt)}
-          </Text>
+    <TableRow>
+      {/* Name */}
+      <TableCell>
+        <Text fontWeight="fontWeightMedium">{run.documentTitle}</Text>
 
-          {/* Entry links for completed runs */}
-          {run.displayStatus === 'completed' &&
-            run.createdEntryIds &&
-            run.createdEntryIds.length > 0 && (
-              <Flex gap="spacingXs" flexWrap="wrap">
-                {run.createdEntryIds.map((entryId) => (
-                  <TextLink
-                    key={entryId}
-                    href={`https://app.contentful.com/spaces/${spaceId}/entries/${entryId}`}
-                    target="_blank"
-                    rel="noopener noreferrer">
-                    {entryId}
-                  </TextLink>
-                ))}
-              </Flex>
-            )}
-
-          {/* Error message for failed runs */}
-          {run.displayStatus === 'failed' && run.errorMessage && (
-            <Text fontSize="fontSizeS" fontColor="red600">
-              {run.errorMessage}
-            </Text>
-          )}
-        </Flex>
-
-        {/* Right: status + actions */}
-        <Flex flexDirection="column" alignItems="flex-end" gap="spacingXs">
-          <StatusBadge status={run.displayStatus} />
-
-          {run.displayStatus === 'needs-review' && (
-            <Button variant="secondary" size="small" onClick={() => onReview(run.runId)}>
-              Review
-            </Button>
+        {/* Entry links for completed runs */}
+        {run.displayStatus === 'completed' &&
+          run.createdEntryIds &&
+          run.createdEntryIds.length > 0 && (
+            <Flex gap="spacingXs" flexWrap="wrap" marginTop="spacing2Xs">
+              {run.createdEntryIds.map((entryId, index) => (
+                <TextLink
+                  key={entryId}
+                  href={`https://app.contentful.com/spaces/${spaceId}/entries/${entryId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ fontSize: '12px' }}>
+                  {run.createdEntryIds!.length === 1 ? 'View entry' : `Entry ${index + 1}`}
+                </TextLink>
+              ))}
+            </Flex>
           )}
 
-          {(run.displayStatus === 'failed' || run.displayStatus === 'expired') && (
-            <Button variant="secondary" size="small" onClick={() => onDismiss(run.runId)}>
-              Dismiss
-            </Button>
-          )}
-        </Flex>
-      </Flex>
-    </Box>
+      </TableCell>
+
+      {/* Created date */}
+      <TableCell>
+        <Text fontSize="fontSizeS" fontColor="gray600">
+          {formatDate(run.startedAt)}
+        </Text>
+      </TableCell>
+
+      {/* Status badge */}
+      <TableCell style={{ verticalAlign: 'middle' }}>
+        <StatusBadge status={run.displayStatus} errorMessage={run.errorMessage} />
+      </TableCell>
+
+      {/* Action */}
+      <TableCell style={{ verticalAlign: 'middle' }}>
+        {run.displayStatus === 'running' && (
+          <Flex gap="spacing2Xs" alignItems="center">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                style={{
+                  width: '5px',
+                  height: '5px',
+                  borderRadius: '50%',
+                  background: '#536171',
+                  animation: `driveDotBounce 1.2s ease-in-out ${i * 0.2}s infinite`,
+                }}
+              />
+            ))}
+            <style>{`
+              @keyframes driveDotBounce {
+                0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+                40% { transform: translateY(-5px); opacity: 1; }
+              }
+            `}</style>
+          </Flex>
+        )}
+        {run.displayStatus === 'needs-review' && (
+          <Button variant="secondary" size="small" onClick={() => onReview(run.runId)}>
+            Review
+          </Button>
+        )}
+        {run.displayStatus === 'completed' && run.createdEntryIds?.length === 1 && (
+          <Button
+            as="a"
+            variant="secondary"
+            size="small"
+            href={`https://app.contentful.com/spaces/${spaceId}/entries/${run.createdEntryIds[0]}`}
+            target="_blank"
+            rel="noopener noreferrer">
+            View
+          </Button>
+        )}
+        {(run.displayStatus === 'failed' || run.displayStatus === 'expired') && (
+          <Button
+            variant="secondary"
+            size="small"
+            onClick={() => void handleRetry()}
+            isLoading={isRetrying}
+            isDisabled={isRetrying}>
+            Retry
+          </Button>
+        )}
+      </TableCell>
+    </TableRow>
   );
 }

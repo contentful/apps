@@ -6,7 +6,6 @@ import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
 } from './components/mainpage/ModalOrchestrator';
-import { MainPageView } from './components/mainpage/MainPageView';
 import { ReviewPage } from './components/review/ReviewPage';
 import { RunsPage } from './components/runs/RunsPage';
 import type { AppView, MappingReviewSuspendPayload } from '@types';
@@ -14,7 +13,8 @@ import { useGoogleDriveOAuth } from '@hooks/useGoogleDriveOAuth';
 import { isAiAccessDeniedError } from '../../utils/aiAccess';
 import { resumeAndPollWorkflow } from '../../services/workflowService';
 import { useRunStorage } from '../../hooks/useRunStorage';
-import { getWorkflowRun } from '../../services/agents-api';
+import { getWorkflowRun, startAgentRun } from '../../services/agents-api';
+import { WORKFLOW_AGENT_ID } from '../../utils/constants/agent';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -29,12 +29,12 @@ const Page = () => {
   const spaceId = sdk.ids.space;
   const environmentId = sdk.ids.environmentAlias ?? sdk.ids.environment;
 
-  const { runs, addRun, removeRun, markCompleted, storageError } = useRunStorage(
+  const { runs, addRun, removeRun, retryRun, markCompleted, storageError } = useRunStorage(
     spaceId,
     environmentId
   );
 
-  const { oauthToken, isOAuthConnected, isOAuthLoading, isOAuthBusy, startOAuth, disconnectOAuth } =
+  const { oauthToken, isOAuthConnected, isOAuthBusy, startOAuth, disconnectOAuth } =
     useGoogleDriveOAuth(sdk);
 
   // When navigating to the review view, fetch the suspend payload from the backend
@@ -109,6 +109,40 @@ const Page = () => {
     setAppView({ view: 'runs' });
   };
 
+  const handleRetryRun = async (runId: string) => {
+    const record = runs.find((r) => r.runId === runId);
+    if (!record) return;
+
+    const threadId = [crypto.randomUUID(), WORKFLOW_AGENT_ID].join('-');
+    const newRunId = await startAgentRun(sdk, spaceId, environmentId, {
+      messages: [
+        {
+          role: 'user',
+          parts: [
+            {
+              type: 'text',
+              text: `Analyze the following google docs document ${record.documentId} and extract the Contentful entries and assets for the following content types: ${record.contentTypeIds.join(', ')}`,
+            },
+          ],
+        },
+      ],
+      metadata: {
+        documentId: record.documentId,
+        contentTypeIds: record.contentTypeIds,
+        oauthToken,
+        documentSelection: record.documentSelection,
+      },
+      threadId,
+    });
+
+    retryRun(runId, {
+      ...record,
+      runId: newRunId,
+      startedAt: new Date().toISOString(),
+      createdEntryIds: undefined,
+    });
+  };
+
   const handleConnectGoogleDrive = async () => {
     handleAiAccessRestored();
     try {
@@ -154,21 +188,13 @@ const Page = () => {
             runs={runs}
             removeRun={removeRun}
             storageError={storageError}
-            onNewImport={() => setAppView({ view: 'import' })}
+            onStartImport={handleSelectFile}
             onReviewRun={handleReviewRun}
-          />
-        );
-
-      case 'import':
-        return (
-          <MainPageView
-            oauthToken={oauthToken}
+            onRetryRun={handleRetryRun}
             isOAuthConnected={isOAuthConnected}
-            isOAuthLoading={isOAuthLoading}
             isOAuthBusy={isOAuthBusy}
             onConnectGoogleDrive={handleConnectGoogleDrive}
             onDisconnectGoogleDrive={handleDisconnectGoogleDrive}
-            onSelectFile={handleSelectFile}
           />
         );
 

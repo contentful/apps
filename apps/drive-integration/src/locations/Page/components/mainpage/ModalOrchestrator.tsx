@@ -255,9 +255,10 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       [onAiAccessDenied, onResetToMain, resetProgress]
     );
 
-    const handleUploadModalCloseRequest = (docId?: string) => {
+    const handleUploadModalCloseRequest = (docId?: string, docTitle?: string) => {
       if (docId) {
         setDocumentId(docId);
+        setDocumentTitle(docTitle ?? 'Untitled Document');
         setIsUploadModalOpen(false);
         setFlowStep(FlowStep.CONTENT_TYPE_PICKER);
         return;
@@ -316,6 +317,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           documentTitle,
           documentId,
           contentTypeIds,
+          documentSelection,
           startedAt: new Date().toISOString(),
         });
 

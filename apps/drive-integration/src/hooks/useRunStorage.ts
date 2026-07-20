@@ -25,6 +25,7 @@ export interface UseRunStorage {
   runs: RunRecord[];
   addRun(record: RunRecord): void;
   removeRun(runId: string): void;
+  retryRun(oldRunId: string, newRecord: RunRecord): void;
   markCompleted(runId: string, entryIds: string[]): void;
   storageError: string | null;
 }
@@ -84,6 +85,17 @@ export function useRunStorage(spaceId: string, environmentId: string): UseRunSto
     [persist]
   );
 
+  const retryRun = useCallback(
+    (oldRunId: string, newRecord: RunRecord) => {
+      setRuns((current) => {
+        const next = current.map((r) => (r.runId === oldRunId ? newRecord : r));
+        persist(next);
+        return next;
+      });
+    },
+    [persist]
+  );
+
   const markCompleted = useCallback(
     (runId: string, entryIds: string[]) => {
       setRuns((current) => {
@@ -97,5 +109,5 @@ export function useRunStorage(spaceId: string, environmentId: string): UseRunSto
     [persist]
   );
 
-  return { runs, addRun, removeRun, markCompleted, storageError };
+  return { runs, addRun, removeRun, retryRun, markCompleted, storageError };
 }
