@@ -52,7 +52,6 @@ interface RunsPageProps {
 export function RunsPage({
   sdk,
   runs,
-  removeRun,
   storageError,
   onStartImport,
   onReviewRun,
