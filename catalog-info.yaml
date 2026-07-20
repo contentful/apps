@@ -58,6 +58,25 @@ spec:
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
+  name: aem-assets
+  annotations:
+    github.com/project-slug: contentful/apps/aem-assets
+    contentful.com/service-tier: '2'
+    contentful.com/ci-alert-slack: prd-marketplace-bots
+  tags:
+    - node
+    - service
+    - sast-enabled
+    - tier-2
+spec:
+  type: service
+  lifecycle: production
+  owner: group:team-marketplace
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
   name: aws-amplify
   annotations:
     github.com/project-slug: contentful/apps/aws-amplify
