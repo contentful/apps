@@ -21,7 +21,7 @@ import type {
   EditModalNewLocation,
   SourceRef,
   TableTextSourceRef,
-  AddEntryWizardParams,
+  AddEntryFormParams,
   ReviewedReferenceGraph,
 } from '@types';
 import {
@@ -424,7 +424,7 @@ export const MappingView = ({
     [entryBlockGraph.entries, payload.contentTypes]
   );
 
-  const existingEntriesForWizard = useMemo(
+  const existingEntriesForAddEntry = useMemo(
     () =>
       entryBlockGraph.entries.map((entry, idx) => {
         const contentType = payload.contentTypes.find((ct) => ct.sys.id === entry.contentTypeId);
@@ -438,7 +438,7 @@ export const MappingView = ({
     [entryBlockGraph.entries, payload.contentTypes]
   );
 
-  const handleAddEntry = (params: AddEntryWizardParams) => {
+  const handleAddEntry = (params: AddEntryFormParams) => {
     const { contentTypeId, fieldIds } = params;
     const isLinkedReference = params.isReference && !!params.referenceEntryId;
     const contentType = payload.contentTypes.find((ct) => ct.sys.id === contentTypeId);
@@ -1175,9 +1175,8 @@ export const MappingView = ({
         title={editModalState.title}
         primaryButtonLabel={editModalState.primaryButtonLabel}
         contentTypes={payload.contentTypes}
-        existingEntries={existingEntriesForWizard}
+        existingEntries={existingEntriesForAddEntry}
         onAddEntry={handleAddEntry}
-        newEntryIndex={entryBlockGraph.entries.length}
         additionalContent={(() => {
           if (!pendingPreviewSourceRefs.length && !pendingPreviewHasTableContent) return undefined;
           const allTableText = pendingPreviewSourceRefs.every(isTableTextSourceRef);

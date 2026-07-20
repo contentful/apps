@@ -49,7 +49,7 @@ export interface EditModalContent {
   newLocations: EditModalNewLocation[];
 }
 
-export interface AddEntryWizardParams {
+export interface AddEntryFormParams {
   contentTypeId: string;
   isReference: boolean;
   referenceEntryId: string | null;

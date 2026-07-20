@@ -1,13 +1,8 @@
 import { useEffect, useMemo, useState, useCallback, type ReactNode } from 'react';
 import { Box, Button, Grid, Modal, Flex, Text, TextInput } from '@contentful/f36-components';
 import { PlusIcon } from '@contentful/f36-icons';
-import {
-  type EditModalContent,
-  type AddEntryWizardParams,
-  type EditModalNewLocation,
-} from '@types';
+import { type EditModalContent, type AddEntryFormParams } from '@types';
 import type { WorkflowContentType } from '@types';
-import { buildFieldOptionsForContentType, isEntryReferenceField } from '../fieldFormatting';
 
 import {
   locationsContainer,
@@ -18,13 +13,13 @@ import {
 } from './EditModal.styles';
 import { FieldSelectionDropdown } from './FieldSelectionDropdown';
 import {
-  AddEntryWizard,
-  INITIAL_WIZARD_STATE,
-  WizardStep,
-  type Wizard,
+  AddEntryForm,
+  INITIAL_ADD_ENTRY_FORM_STATE,
+  type AddEntryFormState,
   type ExistingEntryOption,
-  WIZARD_STEPS,
-} from './AddEntryWizard';
+  isAddEntrySaveDisabled,
+  toAddEntryFormParams,
+} from './AddEntryForm';
 import { truncateMiddle } from '../../../../../../utils/utils';
 
 const CURRENT_LOCATION_MAX_LENGTH = 20;
@@ -40,8 +35,7 @@ interface EditModalProps {
   onConfirmPrimary?: (selections: Record<string, string[]>) => void;
   contentTypes?: WorkflowContentType[];
   existingEntries?: ExistingEntryOption[];
-  onAddEntry?: (params: AddEntryWizardParams) => void;
-  newEntryIndex?: number;
+  onAddEntry?: (params: AddEntryFormParams) => void;
 }
 
 export const EditModal = ({
@@ -55,10 +49,9 @@ export const EditModal = ({
   contentTypes = [],
   existingEntries = [],
   onAddEntry,
-  newEntryIndex = 0,
 }: EditModalProps) => {
-  const [wizardState, setWizard] = useState<Wizard | null>(null);
-  const showWizard = wizardState !== null;
+  const [addEntryFormState, setAddEntryFormState] = useState<AddEntryFormState | null>(null);
+  const showAddEntryForm = addEntryFormState !== null;
 
   const [selectedFieldIdsByEntry, setSelectedFieldIdsByEntry] = useState<Record<string, string[]>>(
     () => Object.fromEntries(viewModel.newLocations.map((loc) => [loc.id, loc.initialFieldIds]))
@@ -88,7 +81,7 @@ export const EditModal = ({
     );
     setDestinationFieldStateByEntry({});
     setEntrySearch('');
-    setWizard(null);
+    setAddEntryFormState(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sync from props only on open / location set change
   }, [isOpen, newLocationIdsKey]);
 
@@ -123,63 +116,14 @@ export const EditModal = ({
     onConfirmPrimary?.({ ...selectedFieldIdsByEntry });
   };
 
-  const referenceFieldOptions = useMemo(() => {
-    if (!wizardState?.contentTypeId) return [];
-    const contentType = contentTypes.find((ct) => ct.sys.id === wizardState.contentTypeId);
-    const referenceFields = (contentType?.fields ?? []).filter(isEntryReferenceField);
-    return buildFieldOptionsForContentType({
-      ...contentType,
-      fields: referenceFields,
-    } as typeof contentType);
-  }, [wizardState?.contentTypeId, contentTypes]);
-
-  const buildNewLocationForContentType = (contentTypeId: string): EditModalNewLocation => {
-    const contentType = contentTypes.find((ct) => ct.sys.id === contentTypeId);
-    return {
-      id: `new-${contentTypeId}`,
-      entryIndex: newEntryIndex,
-      title: contentType?.name ?? contentTypeId,
-      fieldOptions: buildFieldOptionsForContentType(contentType),
-      fieldMappings: [],
-      initialFieldIds: [],
-    };
+  const handleAddEntrySave = () => {
+    if (!addEntryFormState) return;
+    onAddEntry?.(toAddEntryFormParams(addEntryFormState, contentTypes));
+    setAddEntryFormState(null);
   };
 
-  const needsReferenceFieldStep = referenceFieldOptions.length > 1;
-  const wizardCtx = { needsReferenceFieldStep };
-
-  const handleWizardNext = () => {
-    if (!wizardState) return;
-    setWizard({
-      ...wizardState,
-      step: WIZARD_STEPS[wizardState.step].next(wizardState, wizardCtx),
-    });
-  };
-
-  const handleWizardBack = () => {
-    if (!wizardState) return;
-    setWizard({
-      ...wizardState,
-      step: WIZARD_STEPS[wizardState.step].back(wizardState, wizardCtx),
-    });
-  };
-
-  const handleWizardSave = () => {
-    if (!wizardState) return;
-    onAddEntry?.({
-      contentTypeId: wizardState.contentTypeId,
-      isReference: wizardState.isReference ?? false,
-      referenceEntryId: wizardState.isReference ? wizardState.referenceEntryId || null : null,
-      referenceFieldId: wizardState.isReference
-        ? wizardState.referenceFieldId || referenceFieldOptions[0]?.id || null
-        : null,
-      fieldIds: wizardState.selectedFieldIds,
-    });
-    setWizard(null);
-  };
-
-  const isWizardNextDisabled = () =>
-    !wizardState || WIZARD_STEPS[wizardState.step].isDisabled(wizardState);
+  const isAddEntryFormSaveDisabled =
+    !addEntryFormState || isAddEntrySaveDisabled(addEntryFormState, contentTypes);
 
   const previewSectionTitle = viewModel.previewSectionTitle ?? 'Selected content';
   const previewText = (viewModel.contentPreview ?? viewModel.selectedText).trim();
@@ -304,16 +248,16 @@ export const EditModal = ({
               {/* New location */}
               <Grid.Item>
                 <Flex flexDirection="column" gap="spacingS" padding="spacingS">
-                  {showWizard && wizardState ? (
-                    <AddEntryWizard
-                      state={wizardState}
-                      onChange={(next) => setWizard((prev) => (prev ? { ...prev, ...next } : prev))}
+                  {addEntryFormState ? (
+                    <AddEntryForm
+                      state={addEntryFormState}
+                      onChange={(next) =>
+                        setAddEntryFormState((prev) => (prev ? { ...prev, ...next } : prev))
+                      }
                       contentTypes={contentTypes}
                       existingEntries={existingEntries}
-                      referenceFieldOptions={referenceFieldOptions}
                       selectedText={viewModel.selectedText}
                       isImageContent={viewModel.isImageContent}
-                      buildNewLocation={buildNewLocationForContentType}
                     />
                   ) : (
                     <>
@@ -329,7 +273,9 @@ export const EditModal = ({
                             variant="transparent"
                             size="small"
                             startIcon={<PlusIcon />}
-                            onClick={() => setWizard({ ...INITIAL_WIZARD_STATE })}>
+                            onClick={() =>
+                              setAddEntryFormState({ ...INITIAL_ADD_ENTRY_FORM_STATE })
+                            }>
                             Add entry
                           </Button>
                         )}
@@ -399,35 +345,18 @@ export const EditModal = ({
             </Grid>
           </Modal.Content>
           <Modal.Controls>
-            {showWizard ? (
+            {showAddEntryForm ? (
               <>
-                <Button
-                  onClick={
-                    wizardState?.step === WizardStep.ContentType
-                      ? () => setWizard(null)
-                      : handleWizardBack
-                  }
-                  size="small"
-                  variant="secondary">
+                <Button onClick={() => setAddEntryFormState(null)} size="small" variant="secondary">
                   Back
                 </Button>
-                {wizardState?.step === WizardStep.SelectFields ? (
-                  <Button
-                    onClick={handleWizardSave}
-                    size="small"
-                    variant="primary"
-                    isDisabled={!wizardState.selectedFieldIds.length}>
-                    Save
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={handleWizardNext}
-                    size="small"
-                    variant="primary"
-                    isDisabled={isWizardNextDisabled()}>
-                    Next
-                  </Button>
-                )}
+                <Button
+                  onClick={handleAddEntrySave}
+                  size="small"
+                  variant="primary"
+                  isDisabled={isAddEntryFormSaveDisabled}>
+                  Save
+                </Button>
               </>
             ) : (
               <>

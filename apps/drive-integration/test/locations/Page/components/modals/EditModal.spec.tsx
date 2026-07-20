@@ -1,9 +1,41 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { EditModal } from '../../../../../src/locations/Page/components/review/mapping/edit-modals/EditModal';
 import React from 'react';
 
 const onClose = vi.fn();
+const onAddEntry = vi.fn();
+
+const contentTypes = [
+  {
+    sys: { id: 'article' },
+    name: 'Article',
+    fields: [
+      {
+        id: 'relatedArticles',
+        name: 'Related articles',
+        type: 'Array',
+        items: { type: 'Link', linkType: 'Entry' },
+      },
+      {
+        id: 'author',
+        name: 'Author',
+        type: 'Link',
+        linkType: 'Entry',
+      },
+    ],
+  },
+  {
+    sys: { id: 'page' },
+    name: 'Page',
+    fields: [{ id: 'title', name: 'Title', type: 'Symbol' }],
+  },
+];
+
+const existingEntries = [
+  { tempId: 'entry-1', label: 'Blog post' },
+  { tempId: 'entry-2', label: 'Landing page' },
+];
 
 const baseNewLocation = {
   id: 'page-event-detail',
@@ -37,6 +69,21 @@ const baseViewModel = {
   newLocations: [baseNewLocation],
 };
 
+const renderEditModal = (overrides: Record<string, unknown> = {}) =>
+  render(
+    <EditModal
+      isOpen={true}
+      onClose={onClose}
+      viewModel={baseViewModel}
+      title="Edit content mapping"
+      primaryButtonLabel="Save"
+      contentTypes={contentTypes as any}
+      existingEntries={existingEntries}
+      onAddEntry={onAddEntry}
+      {...overrides}
+    />
+  );
+
 describe('EditModal', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -50,15 +97,7 @@ describe('EditModal', () => {
   });
 
   it('renders the provided title and button label', async () => {
-    render(
-      <EditModal
-        isOpen={true}
-        onClose={onClose}
-        viewModel={baseViewModel}
-        title="Edit content mapping"
-        primaryButtonLabel="Save"
-      />
-    );
+    renderEditModal();
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'Edit content mapping' })).toBeTruthy();
@@ -67,15 +106,7 @@ describe('EditModal', () => {
   });
 
   it('renders the new location section when newLocations is non-empty', async () => {
-    render(
-      <EditModal
-        isOpen={true}
-        onClose={onClose}
-        viewModel={baseViewModel}
-        title="Edit content mapping"
-        primaryButtonLabel="Save"
-      />
-    );
+    renderEditModal();
 
     await waitFor(() => {
       expect(screen.getByText('New location')).toBeTruthy();
@@ -84,15 +115,7 @@ describe('EditModal', () => {
   });
 
   it('primary button is disabled when no changes have been made', async () => {
-    render(
-      <EditModal
-        isOpen={true}
-        onClose={onClose}
-        viewModel={baseViewModel}
-        title="Edit content mapping"
-        primaryButtonLabel="Save"
-      />
-    );
+    renderEditModal();
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
@@ -100,18 +123,12 @@ describe('EditModal', () => {
   });
 
   it('renders an empty new location list when newLocations is empty', async () => {
-    render(
-      <EditModal
-        isOpen={true}
-        onClose={onClose}
-        viewModel={{
-          ...baseViewModel,
-          newLocations: [],
-        }}
-        title="Edit content mapping"
-        primaryButtonLabel="Save"
-      />
-    );
+    renderEditModal({
+      viewModel: {
+        ...baseViewModel,
+        newLocations: [],
+      },
+    });
 
     await waitFor(() => {
       expect(screen.queryByText('Event detail')).toBeNull();
@@ -136,22 +153,86 @@ describe('EditModal', () => {
       initialFieldIds: [],
     };
 
-    render(
-      <EditModal
-        isOpen={true}
-        onClose={onClose}
-        viewModel={{
-          ...baseViewModel,
-          newLocations: [baseNewLocation, secondLocation],
-        }}
-        title="Edit content mapping"
-        primaryButtonLabel="Save"
-      />
-    );
+    renderEditModal({
+      viewModel: {
+        ...baseViewModel,
+        newLocations: [baseNewLocation, secondLocation],
+      },
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Event detail')).toBeTruthy();
       expect(screen.getByText('Resource detail hero')).toBeTruthy();
+    });
+  });
+
+  describe('Add entry form', () => {
+    const openAddEntryForm = async () => {
+      renderEditModal();
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /add entry/i })).toBeTruthy();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /add entry/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText('Add entry')).toBeTruthy();
+      });
+    };
+
+    it('opens as a single screen with content type select and Save (no Next)', async () => {
+      await openAddEntryForm();
+
+      expect(screen.getByText('Select content type')).toBeTruthy();
+      expect(screen.getByRole('button', { name: 'Back' })).toBeTruthy();
+      expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+      expect(screen.queryByRole('button', { name: 'Next' })).toBeNull();
+      expect(screen.queryByText('Should this entry be a reference entry?')).toBeNull();
+    });
+
+    it('shows radios and field multiselect together after content type is selected', async () => {
+      await openAddEntryForm();
+
+      fireEvent.change(screen.getByRole('combobox'), { target: { value: 'page' } });
+
+      await waitFor(() => {
+        expect(screen.getByText('Should this entry be a reference entry?')).toBeTruthy();
+        expect(screen.getByLabelText('Yes')).toBeTruthy();
+        expect(screen.getByLabelText('No')).toBeTruthy();
+        expect(screen.getByText('Select the field(s) the content should map to')).toBeTruthy();
+      });
+
+      expect(screen.queryByText('Select the entry this should reference')).toBeNull();
+    });
+
+    it('shows reference entry select when Yes is chosen', async () => {
+      await openAddEntryForm();
+
+      fireEvent.change(screen.getByRole('combobox'), { target: { value: 'article' } });
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('Yes')).toBeTruthy();
+      });
+
+      fireEvent.click(screen.getByLabelText('Yes'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Select the entry this should reference')).toBeTruthy();
+        expect(screen.getByText('Blog post')).toBeTruthy();
+      });
+    });
+
+    it('exits the form when Back is clicked', async () => {
+      await openAddEntryForm();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+
+      await waitFor(() => {
+        expect(screen.getByText('New location')).toBeTruthy();
+        expect(screen.queryByText('Select content type')).toBeNull();
+        expect(screen.getByRole('button', { name: /add entry/i })).toBeTruthy();
+      });
     });
   });
 });
