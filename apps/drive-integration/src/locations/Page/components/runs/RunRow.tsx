@@ -28,9 +28,11 @@ function formatDate(iso: string): string {
 function StatusBadge({
   status,
   errorMessage,
+  entryCount,
 }: {
   status: RunWithStatus['displayStatus'];
   errorMessage?: string;
+  entryCount?: number;
 }) {
   switch (status) {
     case DisplayStatus.LOADING:
@@ -57,14 +59,19 @@ function StatusBadge({
           Ready for review
         </Badge>
       );
-    case DisplayStatus.COMPLETED:
+    case DisplayStatus.COMPLETED: {
+      const label =
+        entryCount === undefined
+          ? 'Complete'
+          : `Complete - ${entryCount} ${entryCount === 1 ? 'entry' : 'entries'}`;
       return (
         <Badge
           variant="secondary"
           style={{ background: '#F0F2F5', color: '#536171', border: 'none', fontWeight: 500 }}>
-          Complete
+          {label}
         </Badge>
       );
+    }
     case DisplayStatus.FAILED: {
       const badge = (
         <Badge
@@ -138,7 +145,11 @@ export function RunRow({ run, spaceId, webappHost, onReview, onRetry }: RunRowPr
 
       {/* Status badge */}
       <TableCell style={{ verticalAlign: 'middle' }}>
-        <StatusBadge status={run.displayStatus} errorMessage={run.errorMessage} />
+        <StatusBadge
+          status={run.displayStatus}
+          errorMessage={run.errorMessage}
+          entryCount={run.createdEntryIds?.length}
+        />
       </TableCell>
 
       {/* Action */}
