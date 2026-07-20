@@ -44,9 +44,7 @@ export function useRunsPolling(runs: RunRecord[], sdk: PageAppSDK): UseRunsPolli
     const environmentId = sdk.ids.environmentAlias ?? sdk.ids.environment;
 
     const results = await Promise.all(
-      runs.map((r) =>
-        getWorkflowRun(sdk, spaceId, environmentId, r.runId).catch(() => null)
-      )
+      runs.map((r) => getWorkflowRun(sdk, spaceId, environmentId, r.runId).catch(() => null))
     );
 
     const nextStatus = new Map<string, DisplayStatus>();

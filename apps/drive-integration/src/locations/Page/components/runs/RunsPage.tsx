@@ -92,7 +92,11 @@ export function RunsPage({
     errorMessage: errorMap.get(r.runId),
   }));
 
-  const activeStatuses = new Set([DisplayStatus.LOADING, DisplayStatus.RUNNING, DisplayStatus.NEEDS_REVIEW]);
+  const activeStatuses = new Set([
+    DisplayStatus.LOADING,
+    DisplayStatus.RUNNING,
+    DisplayStatus.NEEDS_REVIEW,
+  ]);
   const statusGroup = (s: RunWithStatus) => (activeStatuses.has(s.displayStatus) ? 0 : 1);
 
   const filtered = runsWithStatus
@@ -158,7 +162,11 @@ export function RunsPage({
       {runs.length > 0 && (
         <>
           {/* Status label + filters */}
-          <Flex flexDirection="column" alignItems="flex-start" gap="spacingS" marginBottom="spacingS">
+          <Flex
+            flexDirection="column"
+            alignItems="flex-start"
+            gap="spacingS"
+            marginBottom="spacingS">
             <Text fontWeight="fontWeightMedium">Status</Text>
             <Flex gap="spacingS">
               <Popover isOpen={filterOpen} onClose={() => setFilterOpen(false)}>
@@ -179,7 +187,11 @@ export function RunsPage({
                       fontSize: '14px',
                       gap: '8px',
                     }}>
-                    <span>{isFiltered ? `Showing ${visibleStatuses.size} of ${ALL_STATUSES.size}` : 'View all'}</span>
+                    <span>
+                      {isFiltered
+                        ? `Showing ${visibleStatuses.size} of ${ALL_STATUSES.size}`
+                        : 'View all'}
+                    </span>
                     <CaretDownIcon size="small" />
                   </button>
                 </Popover.Trigger>
@@ -216,7 +228,11 @@ export function RunsPage({
                       color: '#536171',
                       fontSize: '14px',
                     }}>
-                    {sortOrder === 'newest' ? <SortDescendingIcon size="small" /> : <SortAscendingIcon size="small" />}
+                    {sortOrder === 'newest' ? (
+                      <SortDescendingIcon size="small" />
+                    ) : (
+                      <SortAscendingIcon size="small" />
+                    )}
                     <span>Sort by</span>
                     <CaretDownIcon size="small" />
                   </button>
@@ -226,7 +242,10 @@ export function RunsPage({
                     {(['newest', 'oldest'] as SortOrder[]).map((value) => (
                       <button
                         key={value}
-                        onClick={() => { setSortOrder(value); setSortOpen(false); }}
+                        onClick={() => {
+                          setSortOrder(value);
+                          setSortOpen(false);
+                        }}
                         style={{
                           padding: '10px 16px',
                           background: sortOrder === value ? '#F7F9FA' : '#fff',

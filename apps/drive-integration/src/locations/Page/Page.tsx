@@ -122,7 +122,11 @@ const Page = () => {
           parts: [
             {
               type: 'text',
-              text: `Analyze the following google docs document ${record.documentId} and extract the Contentful entries and assets for the following content types: ${record.contentTypeIds.join(', ')}`,
+              text: `Analyze the following google docs document ${
+                record.documentId
+              } and extract the Contentful entries and assets for the following content types: ${record.contentTypeIds.join(
+                ', '
+              )}`,
             },
           ],
         },

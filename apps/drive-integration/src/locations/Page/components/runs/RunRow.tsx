@@ -1,5 +1,14 @@
 import { useState } from 'react';
-import { Badge, Button, Flex, TableCell, TableRow, Text, TextLink, Tooltip } from '@contentful/f36-components';
+import {
+  Badge,
+  Button,
+  Flex,
+  TableCell,
+  TableRow,
+  Text,
+  TextLink,
+  Tooltip,
+} from '@contentful/f36-components';
 import { DisplayStatus } from '../../../../types/runs';
 import type { RunWithStatus } from '../../../../types/runs';
 
@@ -16,8 +25,13 @@ function formatDate(iso: string): string {
   return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-
-function StatusBadge({ status, errorMessage }: { status: RunWithStatus['displayStatus']; errorMessage?: string }) {
+function StatusBadge({
+  status,
+  errorMessage,
+}: {
+  status: RunWithStatus['displayStatus'];
+  errorMessage?: string;
+}) {
   switch (status) {
     case DisplayStatus.LOADING:
       return (
@@ -63,7 +77,9 @@ function StatusBadge({ status, errorMessage }: { status: RunWithStatus['displayS
         <Tooltip content={errorMessage} placement="top">
           {badge}
         </Tooltip>
-      ) : badge;
+      ) : (
+        badge
+      );
     }
     case DisplayStatus.EXPIRED:
       return (
@@ -111,7 +127,6 @@ export function RunRow({ run, spaceId, webappHost, onReview, onRetry }: RunRowPr
               ))}
             </Flex>
           )}
-
       </TableCell>
 
       {/* Created date */}
@@ -166,7 +181,8 @@ export function RunRow({ run, spaceId, webappHost, onReview, onRetry }: RunRowPr
             View
           </Button>
         )}
-        {(run.displayStatus === DisplayStatus.FAILED || run.displayStatus === DisplayStatus.EXPIRED) && (
+        {(run.displayStatus === DisplayStatus.FAILED ||
+          run.displayStatus === DisplayStatus.EXPIRED) && (
           <Button
             variant="secondary"
             size="small"
