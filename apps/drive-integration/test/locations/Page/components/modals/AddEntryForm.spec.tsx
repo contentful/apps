@@ -39,6 +39,11 @@ const contentTypes = [
       { id: 'title', name: 'Title', type: 'Symbol' },
     ],
   },
+  {
+    sys: { id: 'tag' },
+    name: 'Tag',
+    fields: [{ id: 'label', name: 'Label', type: 'Symbol' }],
+  },
 ];
 
 const existingEntries = [
@@ -207,6 +212,15 @@ describe('AddEntryForm', () => {
       expect(screen.queryByText('Which field should connect to this reference?')).toBeNull();
     });
 
+    it('disables Yes radio when content type has no reference fields', async () => {
+      renderForm(makeState({ contentTypeId: 'tag' }));
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('Yes')).toBeDisabled();
+        expect(screen.getByLabelText('No')).not.toBeDisabled();
+      });
+    });
+
     it('hides entry and reference field selects when No is selected', async () => {
       renderForm(
         makeState({
@@ -355,6 +369,20 @@ describe('AddEntryForm', () => {
           contentTypes as any
         )
       ).toBe(false);
+    });
+
+    it('is disabled when Yes but content type has no reference fields', () => {
+      expect(
+        isAddEntrySaveDisabled(
+          makeState({
+            contentTypeId: 'tag',
+            isReference: true,
+            referenceEntryId: 'entry-1',
+            selectedFieldIds: ['label'],
+          }),
+          contentTypes as any
+        )
+      ).toBe(true);
     });
   });
 

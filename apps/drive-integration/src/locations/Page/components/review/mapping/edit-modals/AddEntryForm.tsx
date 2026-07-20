@@ -46,8 +46,9 @@ export const isAddEntrySaveDisabled = (
   if (!state.contentTypeId) return true;
   if (state.isReference === null) return true;
   if (state.isReference) {
-    if (!state.referenceEntryId) return true;
     const referenceFieldOptions = getReferenceFieldOptions(contentTypes, state.contentTypeId);
+    if (referenceFieldOptions.length === 0) return true;
+    if (!state.referenceEntryId) return true;
     if (referenceFieldOptions.length > 1 && !state.referenceFieldId) return true;
   }
   return state.selectedFieldIds.length === 0;
@@ -100,6 +101,7 @@ export const AddEntryForm = ({
     [contentTypes, state.contentTypeId]
   );
   const showReferenceFieldSelect = referenceFieldOptions.length > 1;
+  const canBeReference = referenceFieldOptions.length > 0;
   const hasContentType = Boolean(state.contentTypeId);
 
   const handleContentTypeChange = (contentTypeId: string) => {
@@ -156,6 +158,7 @@ export const AddEntryForm = ({
                 name="is-reference"
                 value="yes"
                 isChecked={state.isReference === true}
+                isDisabled={!canBeReference}
                 onChange={() => handleReferenceChange(true)}>
                 Yes
               </Radio>
