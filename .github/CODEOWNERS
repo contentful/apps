@@ -1,11 +1,11 @@
 # team marketplace, extensibility, and 10 pines own all code in this repository by default
 
-* @contentful/team-extensibility @contentful/team-marketplace @contentful/team-10-pines
+* @contentful/group-applied-ai-solutions @contentful/team-10-pines
 
 # team tundra co-owns examples and function examples
 
-examples @contentful/team-extensibility @contentful/team-marketplace @contentful/team-10-pines
-function-examples @contentful/team-extensibility
+examples @contentful/group-applied-ai-solutions @contentful/team-10-pines
+function-examples @contentful/group-applied-ai-solutions
 
 # team entity-architecture co-owns delivery function examples
 
