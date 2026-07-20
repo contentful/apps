@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Badge, Button, Flex, TableCell, TableRow, Text, TextLink, Tooltip } from '@contentful/f36-components';
+import { DisplayStatus } from '../../../../types/runs';
 import type { RunWithStatus } from '../../../../types/runs';
 
 interface RunRowProps {
   run: RunWithStatus;
   spaceId: string;
+  webappHost: string;
   onReview: (runId: string) => void;
   onRetry: (runId: string) => Promise<void>;
 }
@@ -17,7 +19,7 @@ function formatDate(iso: string): string {
 
 function StatusBadge({ status, errorMessage }: { status: RunWithStatus['displayStatus']; errorMessage?: string }) {
   switch (status) {
-    case 'loading':
+    case DisplayStatus.LOADING:
       return (
         <Badge
           variant="secondary"
@@ -25,7 +27,7 @@ function StatusBadge({ status, errorMessage }: { status: RunWithStatus['displayS
           Loading
         </Badge>
       );
-    case 'running':
+    case DisplayStatus.RUNNING:
       return (
         <Badge
           variant="primary"
@@ -33,7 +35,7 @@ function StatusBadge({ status, errorMessage }: { status: RunWithStatus['displayS
           In progress
         </Badge>
       );
-    case 'needs-review':
+    case DisplayStatus.NEEDS_REVIEW:
       return (
         <Badge
           variant="positive"
@@ -41,7 +43,7 @@ function StatusBadge({ status, errorMessage }: { status: RunWithStatus['displayS
           Ready for review
         </Badge>
       );
-    case 'completed':
+    case DisplayStatus.COMPLETED:
       return (
         <Badge
           variant="secondary"
@@ -49,7 +51,7 @@ function StatusBadge({ status, errorMessage }: { status: RunWithStatus['displayS
           Complete
         </Badge>
       );
-    case 'failed': {
+    case DisplayStatus.FAILED: {
       const badge = (
         <Badge
           variant="negative"
@@ -63,7 +65,7 @@ function StatusBadge({ status, errorMessage }: { status: RunWithStatus['displayS
         </Tooltip>
       ) : badge;
     }
-    case 'expired':
+    case DisplayStatus.EXPIRED:
       return (
         <Badge
           variant="secondary"
@@ -74,7 +76,7 @@ function StatusBadge({ status, errorMessage }: { status: RunWithStatus['displayS
   }
 }
 
-export function RunRow({ run, spaceId, onReview, onRetry }: RunRowProps) {
+export function RunRow({ run, spaceId, webappHost, onReview, onRetry }: RunRowProps) {
   const [isRetrying, setIsRetrying] = useState(false);
 
   const handleRetry = async () => {
@@ -93,14 +95,14 @@ export function RunRow({ run, spaceId, onReview, onRetry }: RunRowProps) {
         <Text fontWeight="fontWeightMedium">{run.documentTitle}</Text>
 
         {/* Entry links for completed runs */}
-        {run.displayStatus === 'completed' &&
+        {run.displayStatus === DisplayStatus.COMPLETED &&
           run.createdEntryIds &&
           run.createdEntryIds.length > 0 && (
             <Flex gap="spacingXs" flexWrap="wrap" marginTop="spacing2Xs">
               {run.createdEntryIds.map((entryId, index) => (
                 <TextLink
                   key={entryId}
-                  href={`https://app.contentful.com/spaces/${spaceId}/entries/${entryId}`}
+                  href={`https://${webappHost}/spaces/${spaceId}/entries/${entryId}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ fontSize: '12px' }}>
@@ -126,7 +128,7 @@ export function RunRow({ run, spaceId, onReview, onRetry }: RunRowProps) {
 
       {/* Action */}
       <TableCell style={{ verticalAlign: 'middle' }}>
-        {run.displayStatus === 'running' && (
+        {run.displayStatus === DisplayStatus.RUNNING && (
           <Flex gap="spacing2Xs" alignItems="center">
             {[0, 1, 2].map((i) => (
               <div
@@ -148,23 +150,23 @@ export function RunRow({ run, spaceId, onReview, onRetry }: RunRowProps) {
             `}</style>
           </Flex>
         )}
-        {run.displayStatus === 'needs-review' && (
+        {run.displayStatus === DisplayStatus.NEEDS_REVIEW && (
           <Button variant="secondary" size="small" onClick={() => onReview(run.runId)}>
             Review
           </Button>
         )}
-        {run.displayStatus === 'completed' && run.createdEntryIds?.length === 1 && (
+        {run.displayStatus === DisplayStatus.COMPLETED && run.createdEntryIds?.length === 1 && (
           <Button
             as="a"
             variant="secondary"
             size="small"
-            href={`https://app.contentful.com/spaces/${spaceId}/entries/${run.createdEntryIds[0]}`}
+            href={`https://${webappHost}/spaces/${spaceId}/entries/${run.createdEntryIds[0]}`}
             target="_blank"
             rel="noopener noreferrer">
             View
           </Button>
         )}
-        {(run.displayStatus === 'failed' || run.displayStatus === 'expired') && (
+        {(run.displayStatus === DisplayStatus.FAILED || run.displayStatus === DisplayStatus.EXPIRED) && (
           <Button
             variant="secondary"
             size="small"

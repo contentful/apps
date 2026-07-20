@@ -2,30 +2,27 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { RunStatus } from '@types';
 import { getWorkflowRun, AgentRunData } from '../services/agents-api';
-import type { DisplayStatus, RunRecord } from '../types/runs';
+import { DisplayStatus } from '../types/runs';
+import type { RunRecord } from '../types/runs';
 
 const POLL_INTERVAL_MS = 10_000;
 
+const RUN_STATUS_TO_DISPLAY: Partial<Record<RunStatus, DisplayStatus>> = {
+  [RunStatus.IN_PROGRESS]: DisplayStatus.RUNNING,
+  [RunStatus.DRAFT]: DisplayStatus.RUNNING,
+  [RunStatus.PENDING_REVIEW]: DisplayStatus.NEEDS_REVIEW,
+  [RunStatus.COMPLETED]: DisplayStatus.COMPLETED,
+  [RunStatus.FAILED]: DisplayStatus.FAILED,
+};
+
 function toDisplayStatus(runData: AgentRunData | null): DisplayStatus {
-  if (!runData) return 'expired';
+  if (!runData) return DisplayStatus.EXPIRED;
   const status = runData.sys?.status ?? runData.metadata?.status;
-  switch (status) {
-    case RunStatus.IN_PROGRESS:
-    case RunStatus.DRAFT:
-      return 'running';
-    case RunStatus.PENDING_REVIEW:
-      return 'needs-review';
-    case RunStatus.COMPLETED:
-      return 'completed';
-    case RunStatus.FAILED:
-      return 'failed';
-    default:
-      return 'expired';
-  }
+  return (status && RUN_STATUS_TO_DISPLAY[status]) ?? DisplayStatus.EXPIRED;
 }
 
 function extractErrorMessage(runData: AgentRunData | null): string | undefined {
-  return runData?.metadata?.workflowFailure?.message ?? undefined;
+  return runData?.metadata?.workflowFailure?.message;
 }
 
 export interface UseRunsPollingResult {
@@ -35,9 +32,7 @@ export interface UseRunsPollingResult {
 }
 
 export function useRunsPolling(runs: RunRecord[], sdk: PageAppSDK): UseRunsPollingResult {
-  const [statusMap, setStatusMap] = useState<Map<string, DisplayStatus>>(
-    () => new Map(runs.map((r) => [r.runId, 'loading' as DisplayStatus]))
-  );
+  const [statusMap, setStatusMap] = useState<Map<string, DisplayStatus>>(new Map());
   const [errorMap, setErrorMap] = useState<Map<string, string>>(new Map());
   const [titleMap, setTitleMap] = useState<Map<string, string>>(new Map());
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -74,20 +69,10 @@ export function useRunsPolling(runs: RunRecord[], sdk: PageAppSDK): UseRunsPolli
     return nextStatus;
   }, [runs, sdk]);
 
-  // Initial fetch + reactive refetch when run list changes
   useEffect(() => {
-    // Reset new runs to 'loading'
-    setStatusMap((prev) => {
-      const next = new Map(prev);
-      for (const r of runs) {
-        if (!next.has(r.runId)) next.set(r.runId, 'loading');
-      }
-      return next;
-    });
-
     void fetchAllStatuses().then((nextStatus) => {
       if (!nextStatus) return;
-      const hasRunning = [...nextStatus.values()].some((s) => s === 'running');
+      const hasRunning = [...nextStatus.values()].some((s) => s === DisplayStatus.RUNNING);
 
       if (intervalRef.current) clearInterval(intervalRef.current);
 
@@ -95,7 +80,7 @@ export function useRunsPolling(runs: RunRecord[], sdk: PageAppSDK): UseRunsPolli
         intervalRef.current = setInterval(() => {
           void fetchAllStatuses().then((updated) => {
             if (!updated) return;
-            const stillRunning = [...updated.values()].some((s) => s === 'running');
+            const stillRunning = [...updated.values()].some((s) => s === DisplayStatus.RUNNING);
             if (!stillRunning && intervalRef.current) {
               clearInterval(intervalRef.current);
               intervalRef.current = null;

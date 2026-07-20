@@ -18,18 +18,19 @@ import { CaretDownIcon, SortAscendingIcon, SortDescendingIcon } from '@contentfu
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useState } from 'react';
 import { useRunsPolling } from '../../../../hooks/useRunsPolling';
-import type { DisplayStatus, RunRecord, RunWithStatus } from '../../../../types/runs';
+import { DisplayStatus } from '../../../../types/runs';
+import type { RunRecord, RunWithStatus } from '../../../../types/runs';
 import { RunRow } from './RunRow';
 import { OAuthConnector } from '../mainpage/OAuthConnector';
 
 type SortOrder = 'newest' | 'oldest';
 
 const STATUS_OPTIONS: { value: DisplayStatus; label: string }[] = [
-  { value: 'running', label: 'In progress' },
-  { value: 'needs-review', label: 'Ready for review' },
-  { value: 'completed', label: 'Complete' },
-  { value: 'failed', label: 'Failed' },
-  { value: 'expired', label: 'Expired' },
+  { value: DisplayStatus.RUNNING, label: 'In progress' },
+  { value: DisplayStatus.NEEDS_REVIEW, label: 'Ready for review' },
+  { value: DisplayStatus.COMPLETED, label: 'Complete' },
+  { value: DisplayStatus.FAILED, label: 'Failed' },
+  { value: DisplayStatus.EXPIRED, label: 'Expired' },
 ];
 
 const ALL_STATUSES = new Set(STATUS_OPTIONS.map((o) => o.value));
@@ -62,6 +63,7 @@ export function RunsPage({
   onDisconnectGoogleDrive,
 }: RunsPageProps) {
   const spaceId = sdk.ids.space;
+  const webappHost = sdk.hostnames.webapp ?? 'app.contentful.com';
   const [visibleStatuses, setVisibleStatuses] = useState<Set<DisplayStatus>>(new Set(ALL_STATUSES));
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
@@ -86,11 +88,11 @@ export function RunsPage({
   const runsWithStatus: RunWithStatus[] = runs.map((r) => ({
     ...r,
     documentTitle: titleMap.get(r.runId) ?? r.documentTitle,
-    displayStatus: statusMap.get(r.runId) ?? 'loading',
+    displayStatus: statusMap.get(r.runId) ?? DisplayStatus.LOADING,
     errorMessage: errorMap.get(r.runId),
   }));
 
-  const activeStatuses = new Set(['loading', 'running', 'needs-review']);
+  const activeStatuses = new Set([DisplayStatus.LOADING, DisplayStatus.RUNNING, DisplayStatus.NEEDS_REVIEW]);
   const statusGroup = (s: RunWithStatus) => (activeStatuses.has(s.displayStatus) ? 0 : 1);
 
   const filtered = runsWithStatus
@@ -274,6 +276,7 @@ export function RunsPage({
                     key={run.runId}
                     run={run}
                     spaceId={spaceId}
+                    webappHost={webappHost}
                     onReview={onReviewRun}
                     onRetry={onRetryRun}
                   />

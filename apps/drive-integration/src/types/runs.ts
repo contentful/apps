@@ -8,17 +8,23 @@ export interface RunRecord {
   createdEntryIds?: string[];
 }
 
-export type DisplayStatus =
-  | 'loading'
-  | 'running'
-  | 'needs-review'
-  | 'completed'
-  | 'failed'
-  | 'expired';
+export enum DisplayStatus {
+  LOADING = 'loading',
+  RUNNING = 'running',
+  NEEDS_REVIEW = 'needs-review',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  EXPIRED = 'expired',
+}
 
 export interface RunWithStatus extends RunRecord {
   displayStatus: DisplayStatus;
   errorMessage?: string;
 }
 
-export type AppView = { view: 'runs' } | { view: 'review'; runId: string };
+export enum AppViewKind {
+  RUNS = 'runs',
+  REVIEW = 'review',
+}
+
+export type AppView = { view: AppViewKind.RUNS } | { view: AppViewKind.REVIEW; runId: string };

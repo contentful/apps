@@ -297,20 +297,19 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       contentTypeIds: string[],
       documentSelection: DocumentSelection
     ) => {
+      if (storageError) {
+        showWorkflowError(
+          new WorkflowRunError(
+            'Unable to track this import: browser storage is unavailable or full.',
+            WorkflowFailureReason.GENERIC
+          )
+        );
+        return;
+      }
+
       setFlowStep(FlowStep.LOADING);
       try {
         const runId = await startWorkflow(contentTypeIds, documentSelection);
-
-        if (storageError) {
-          // Storage unavailable — surface error before proceeding
-          showWorkflowError(
-            new WorkflowRunError(
-              'Unable to track this import: browser storage is unavailable or full.',
-              WorkflowFailureReason.GENERIC
-            )
-          );
-          return;
-        }
 
         addRun({
           runId,

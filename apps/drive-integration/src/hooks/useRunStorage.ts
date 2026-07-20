@@ -58,20 +58,11 @@ export function useRunStorage(spaceId: string, environmentId: string): UseRunSto
         if (current.some((r) => r.runId === record.runId)) return current;
         const next = [record, ...current];
         if (next.length > MAX_RUNS) next.splice(MAX_RUNS);
-        try {
-          writeToStorage(key, next);
-          setStorageError(null);
-        } catch (err) {
-          const msg =
-            err instanceof Error
-              ? err.message
-              : 'Unable to save import history. Storage may be full.';
-          setStorageError(msg);
-        }
+        persist(next);
         return next;
       });
     },
-    [key]
+    [persist]
   );
 
   const removeRun = useCallback(

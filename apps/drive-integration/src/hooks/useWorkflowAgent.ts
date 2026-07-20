@@ -1,7 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { WORKFLOW_AGENT_ID } from '../utils/constants/agent';
-import { WorkflowFailureReason } from '@types';
 import { AgentGeneratePayload, DocumentSelection, startAgentRun } from '../services/agents-api';
 
 interface UseWorkflowParams {
@@ -11,7 +10,6 @@ interface UseWorkflowParams {
 }
 
 interface WorkflowHook {
-  isAnalyzing: boolean;
   startWorkflow: (
     contentTypeIds: string[],
     documentSelection: DocumentSelection
@@ -23,12 +21,8 @@ export const useWorkflowAgent = ({
   documentId,
   oauthToken,
 }: UseWorkflowParams): WorkflowHook => {
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-
   const startWorkflow = useCallback(
     async (contentTypeIds: string[], documentSelection: DocumentSelection): Promise<string> => {
-      setIsAnalyzing(true);
-
       const spaceId = sdk.ids.space;
       const environmentId = sdk.ids.environmentAlias ?? sdk.ids.environment;
       const threadId = [crypto.randomUUID(), WORKFLOW_AGENT_ID].join('-');
@@ -59,17 +53,11 @@ export const useWorkflowAgent = ({
       try {
         return await startAgentRun(sdk, spaceId, environmentId, payload);
       } catch (err) {
-        const error = err instanceof Error ? err : new Error('Workflow failed');
-        throw error;
-      } finally {
-        setIsAnalyzing(false);
+        throw err instanceof Error ? err : new Error('Workflow failed');
       }
     },
     [sdk, documentId, oauthToken]
   );
 
-  return { isAnalyzing, startWorkflow };
+  return { startWorkflow };
 };
-
-// Re-export WorkflowFailureReason for backward compatibility with callers that imported it here
-export { WorkflowFailureReason };

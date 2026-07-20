@@ -9,6 +9,8 @@ import {
 import { ReviewPage } from './components/review/ReviewPage';
 import { RunsPage } from './components/runs/RunsPage';
 import type { AppView, MappingReviewSuspendPayload } from '@types';
+import { AppViewKind } from '../../types/runs';
+import type { EntryBlockGraph } from '../../types/entryBlockGraph';
 import { useGoogleDriveOAuth } from '@hooks/useGoogleDriveOAuth';
 import { isAiAccessDeniedError } from '../../utils/aiAccess';
 import { resumeAndPollWorkflow } from '../../services/workflowService';
@@ -21,7 +23,7 @@ const Page = () => {
   const modalOrchestratorRef = useRef<ModalOrchestratorHandle>(null);
 
   const [aiAccessDeniedMessage, setAiAccessDeniedMessage] = useState<string | null>(null);
-  const [appView, setAppView] = useState<AppView>({ view: 'runs' });
+  const [appView, setAppView] = useState<AppView>({ view: AppViewKind.RUNS });
   const [pendingReviewPayload, setPendingReviewPayload] =
     useState<MappingReviewSuspendPayload | null>(null);
   const [isLoadingReviewPayload, setIsLoadingReviewPayload] = useState(false);
@@ -39,8 +41,9 @@ const Page = () => {
 
   // When navigating to the review view, fetch the suspend payload from the backend
   useEffect(() => {
-    if (appView.view !== 'review') {
+    if (appView.view !== AppViewKind.REVIEW) {
       setPendingReviewPayload(null);
+      setIsLoadingReviewPayload(false);
       return;
     }
 
@@ -64,7 +67,7 @@ const Page = () => {
       isCancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-fetch when the runId changes
-  }, [appView.view === 'review' ? appView.runId : null]);
+  }, [appView.view === AppViewKind.REVIEW ? appView.runId : null]);
 
   const handleSelectFile = () => {
     modalOrchestratorRef.current?.startFlow();
@@ -81,32 +84,30 @@ const Page = () => {
   };
 
   const handleRunStarted = () => {
-    setAppView({ view: 'runs' });
+    setAppView({ view: AppViewKind.RUNS });
   };
 
   const handleReviewRun = (runId: string) => {
-    setAppView({ view: 'review', runId });
+    setAppView({ view: AppViewKind.REVIEW, runId });
   };
 
   const handleExitReview = () => {
     modalOrchestratorRef.current?.resetFlow();
-    setAppView({ view: 'runs' });
+    handleRunStarted();
   };
 
   const handleRunCompleted = (runId: string, entryIds: string[]) => {
     markCompleted(runId, entryIds);
   };
 
-  const handleCancelReview = async (runId?: string) => {
-    if (runId) {
-      try {
-        await resumeAndPollWorkflow(sdk, runId, { cancelled: true });
-      } catch (error) {
-        console.error(error);
-      }
+  const handleCancelReview = async (runId: string, entryBlockGraph: EntryBlockGraph) => {
+    try {
+      await resumeAndPollWorkflow(sdk, runId, { cancelled: true, entryBlockGraph });
+    } catch (error) {
+      console.error(error);
     }
     modalOrchestratorRef.current?.resetFlow();
-    setAppView({ view: 'runs' });
+    handleRunStarted();
   };
 
   const handleRetryRun = async (runId: string) => {
@@ -181,7 +182,7 @@ const Page = () => {
 
   const renderView = () => {
     switch (appView.view) {
-      case 'runs':
+      case AppViewKind.RUNS:
         return (
           <RunsPage
             sdk={sdk}
@@ -198,7 +199,7 @@ const Page = () => {
           />
         );
 
-      case 'review': {
+      case AppViewKind.REVIEW: {
         if (isLoadingReviewPayload || !pendingReviewPayload) {
           return (
             <Flex justifyContent="center" alignItems="center" style={{ minHeight: '300px' }}>
@@ -212,7 +213,7 @@ const Page = () => {
             sdk={sdk}
             payload={pendingReviewPayload}
             runId={appView.runId}
-            onCancelReview={() => handleCancelReview(appView.runId)}
+            onCancelReview={(graph) => handleCancelReview(appView.runId, graph)}
             onExitReview={handleExitReview}
             onRunCompleted={(entryIds) => handleRunCompleted(appView.runId, entryIds)}
           />
@@ -236,7 +237,7 @@ const Page = () => {
         onReconnectGoogleDrive={startOAuth}
         onAiAccessDenied={handleAiAccessDenied}
         onRunStarted={handleRunStarted}
-        onResetToMain={() => setAppView({ view: 'runs' })}
+        onResetToMain={handleRunStarted}
         addRun={addRun}
         storageError={storageError}
       />
