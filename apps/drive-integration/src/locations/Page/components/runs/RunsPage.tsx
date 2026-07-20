@@ -92,18 +92,9 @@ export function RunsPage({
     errorMessage: errorMap.get(r.runId),
   }));
 
-  const activeStatuses = new Set([
-    DisplayStatus.LOADING,
-    DisplayStatus.RUNNING,
-    DisplayStatus.NEEDS_REVIEW,
-  ]);
-  const statusGroup = (s: RunWithStatus) => (activeStatuses.has(s.displayStatus) ? 0 : 1);
-
   const filtered = runsWithStatus
     .filter((r) => visibleStatuses.has(r.displayStatus))
     .sort((a, b) => {
-      const groupDiff = statusGroup(a) - statusGroup(b);
-      if (groupDiff !== 0) return groupDiff;
       const diff = new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime();
       return sortOrder === 'newest' ? -diff : diff;
     });
