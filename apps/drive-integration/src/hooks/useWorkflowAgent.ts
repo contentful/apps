@@ -17,7 +17,6 @@ interface WorkflowHook {
   ) => Promise<string>;
 }
 
-
 export const useWorkflowAgent = ({
   sdk,
   documentId,
