@@ -1,106 +1,63 @@
 import { useEffect, useState } from 'react';
-import {
-  Badge,
-  Button,
-  Flex,
-  Modal,
-  Spinner,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  Text,
-  TextLink,
-} from '@contentful/f36-components';
+import { Button, EntryCard, Flex, Modal, Spinner } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
-
-interface EntryRow {
-  id: string;
-  title: string;
-  contentTypeName: string;
-  status: 'Draft' | 'Published' | 'Changed';
-}
+import type { EntryProps } from 'contentful-management';
+import { fetchContentTypesInfoByIds } from '../../../../services/contentTypeService';
+import type { ContentTypeDisplayInfoMap } from '../../../../utils/overviewEntryList';
+import { getEntryDisplayTitle } from '../../../../utils/getEntryDisplayTitle';
 
 interface EntriesCreatedModalProps {
   isOpen: boolean;
   onClose: () => void;
   sdk: PageAppSDK;
-  spaceId: string;
-  webappHost: string;
   entryIds: string[];
 }
 
-async function fetchEntryRows(
-  sdk: PageAppSDK,
-  spaceId: string,
-  entryIds: string[]
-): Promise<EntryRow[]> {
-  const environmentId = sdk.ids.environmentAlias ?? sdk.ids.environment;
-
-  const entries = await Promise.all(
-    entryIds.map((id) =>
-      sdk.cma.entry.get({ entryId: id, spaceId, environmentId }).catch(() => null)
-    )
-  );
-
-  const contentTypeIds = [
-    ...new Set(entries.filter(Boolean).map((e) => e!.sys.contentType.sys.id)),
-  ];
-  const contentTypes = await Promise.all(
-    contentTypeIds.map((ctId) =>
-      sdk.cma.contentType.get({ contentTypeId: ctId, spaceId, environmentId }).catch(() => null)
-    )
-  );
-  const ctMap = new Map(contentTypes.filter(Boolean).map((ct) => [ct!.sys.id, ct!]));
-
-  return entries
-    .map((entry, i) => {
-      if (!entry) return null;
-      const ct = ctMap.get(entry.sys.contentType.sys.id);
-      const displayField = ct?.displayField;
-      const locale = sdk.locales.default;
-      const title =
-        (displayField && String(entry.fields[displayField]?.[locale] ?? '')) || 'Untitled';
-      const contentTypeName = ct?.name ?? entry.sys.contentType.sys.id;
-
-      const isPublished = !!entry.sys.publishedAt;
-      const isDraft = !isPublished;
-      const isChanged = isPublished && entry.sys.version > (entry.sys.publishedVersion ?? 0) + 1;
-      const status: EntryRow['status'] = isChanged ? 'Changed' : isDraft ? 'Draft' : 'Published';
-
-      return { id: entryIds[i], title, contentTypeName, status };
-    })
-    .filter((r): r is EntryRow => r !== null);
+function resolveContentTypeLabel(contentTypeId: string, map?: ContentTypeDisplayInfoMap): string {
+  const name = map?.get(contentTypeId)?.name?.trim();
+  return name && name.length > 0 ? name : 'Content type';
 }
 
-const STATUS_STYLES: Record<EntryRow['status'], React.CSSProperties> = {
-  Draft: { background: '#FEF3C7', color: '#92400E', border: 'none' },
-  Published: { background: '#D1FAE5', color: '#065F46', border: 'none' },
-  Changed: { background: '#DBEAFE', color: '#1E40AF', border: 'none' },
-};
+function entryStatus(entry: EntryProps): 'draft' | 'published' | 'changed' {
+  if (!entry.sys.publishedAt) return 'draft';
+  if (entry.sys.version > (entry.sys.publishedVersion ?? 0) + 1) return 'changed';
+  return 'published';
+}
 
-export function EntriesCreatedModal({
-  isOpen,
-  onClose,
-  sdk,
-  spaceId,
-  webappHost,
-  entryIds,
-}: EntriesCreatedModalProps) {
-  const [rows, setRows] = useState<EntryRow[]>([]);
+export function EntriesCreatedModal({ isOpen, onClose, sdk, entryIds }: EntriesCreatedModalProps) {
+  const [entries, setEntries] = useState<EntryProps[]>([]);
+  const [ctMap, setCtMap] = useState<ContentTypeDisplayInfoMap>(new Map());
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (!isOpen || entryIds.length === 0) return;
+
     setIsLoading(true);
-    fetchEntryRows(sdk, spaceId, entryIds)
-      .then(setRows)
-      .catch(() => setRows([]))
+
+    const spaceId = sdk.ids.space;
+    const environmentId = sdk.ids.environmentAlias ?? sdk.ids.environment;
+
+    Promise.all(
+      entryIds.map((id) =>
+        sdk.cma.entry.get({ entryId: id, spaceId, environmentId }).catch(() => null)
+      )
+    )
+      .then((results) => {
+        const fetched = results.filter((e): e is EntryProps => e !== null);
+        setEntries(fetched);
+        const ctIds = fetched.map((e) => e.sys.contentType.sys.id);
+        return fetchContentTypesInfoByIds(sdk, ctIds).then(setCtMap);
+      })
+      .catch(() => {
+        setEntries([]);
+      })
       .finally(() => setIsLoading(false));
   }, [isOpen, entryIds.join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const defaultLocale = sdk.locales.default;
+
   return (
-    <Modal isShown={isOpen} onClose={onClose} size="large">
+    <Modal isShown={isOpen} onClose={onClose} size="large" shouldCloseOnEscapePress>
       {() => (
         <>
           <Modal.Header title="Entries created" onClose={onClose} />
@@ -110,27 +67,29 @@ export function EntriesCreatedModal({
                 <Spinner size="large" />
               </Flex>
             ) : (
-              <Table>
-                <TableBody>
-                  {rows.map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell>
-                        <TextLink
-                          href={`https://${webappHost}/spaces/${spaceId}/entries/${row.id}`}
-                          target="_blank"
-                          rel="noopener noreferrer">
-                          <Text fontWeight="fontWeightMedium">{row.title}</Text>
-                        </TextLink>
-                      </TableCell>
-                      <TableCell style={{ width: '140px', verticalAlign: 'middle' }}>
-                        <Badge variant="secondary" style={STATUS_STYLES[row.status]}>
-                          {row.status}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <Flex flexDirection="column" gap="spacingS">
+                {entries.map((entry) => {
+                  const contentTypeId = entry.sys.contentType.sys.id;
+                  const title = getEntryDisplayTitle(
+                    entry,
+                    defaultLocale,
+                    ctMap.get(contentTypeId)
+                  );
+                  const contentTypeLabel = resolveContentTypeLabel(contentTypeId, ctMap);
+                  return (
+                    <EntryCard
+                      key={entry.sys.id}
+                      contentType={contentTypeLabel}
+                      title={title}
+                      status={entryStatus(entry)}
+                      ariaLabel={`Open entry ${title} in Contentful`}
+                      onClick={() => {
+                        void sdk.navigator.openEntry(entry.sys.id, { slideIn: true });
+                      }}
+                    />
+                  );
+                })}
+              </Flex>
             )}
           </Modal.Content>
           <Modal.Controls>

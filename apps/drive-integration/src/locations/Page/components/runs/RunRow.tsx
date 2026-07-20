@@ -16,8 +16,6 @@ import { EntriesCreatedModal } from './EntriesCreatedModal';
 interface RunRowProps {
   run: RunWithStatus;
   sdk: PageAppSDK;
-  spaceId: string;
-  webappHost: string;
   onReview: (runId: string) => void;
   onRetry: (runId: string) => Promise<void>;
 }
@@ -101,7 +99,7 @@ function StatusBadge({
   }
 }
 
-export function RunRow({ run, sdk, spaceId, webappHost, onReview, onRetry }: RunRowProps) {
+export function RunRow({ run, sdk, onReview, onRetry }: RunRowProps) {
   const [isRetrying, setIsRetrying] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -193,8 +191,6 @@ export function RunRow({ run, sdk, spaceId, webappHost, onReview, onRetry }: Run
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           sdk={sdk}
-          spaceId={spaceId}
-          webappHost={webappHost}
           entryIds={run.createdEntryIds}
         />
       )}

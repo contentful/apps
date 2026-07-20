@@ -62,8 +62,6 @@ export function RunsPage({
   onConnectGoogleDrive,
   onDisconnectGoogleDrive,
 }: RunsPageProps) {
-  const spaceId = sdk.ids.space;
-  const webappHost = sdk.hostnames.webapp ?? 'app.contentful.com';
   const [visibleStatuses, setVisibleStatuses] = useState<Set<DisplayStatus>>(new Set(ALL_STATUSES));
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
@@ -286,8 +284,6 @@ export function RunsPage({
                     key={run.runId}
                     run={run}
                     sdk={sdk}
-                    spaceId={spaceId}
-                    webappHost={webappHost}
                     onReview={onReviewRun}
                     onRetry={onRetryRun}
                   />
