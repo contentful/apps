@@ -13,8 +13,7 @@ const SCRIPT_URL = `${ADOBE_EXPERIENCE_CLOUD_DOMAIN}/solutions/CQ-assets-selecto
 // customer's Adobe org, so it is not exposed as an app config field. If Adobe
 // ever changes this requirement, auth will start failing with an errorType of
 // 'invalid_scope' surfaced via the banner in renderDialog's onErrorReceived.
-const IMS_SCOPE =
-  'AdobeID,openid,additional_info.projectedProductContext,read_organizations';
+const IMS_SCOPE = 'AdobeID,openid,additional_info.projectedProductContext,read_organizations';
 const FIELDS_TO_PERSIST = [
   'id',
   'name',
@@ -31,8 +30,7 @@ const FIELDS_TO_PERSIST = [
 ];
 
 export function makeThumbnail(asset) {
-  const thumbRendition =
-    asset?.computedMetadata?._links[ASSET_RENDITIONS_KEY][1];
+  const thumbRendition = asset?.computedMetadata?._links[ASSET_RENDITIONS_KEY][1];
   const thumbnail = thumbRendition?.href || '';
   const url = typeof thumbnail === 'string' ? thumbnail : undefined;
   const alt = asset.name || asset.id || '';
@@ -90,8 +88,7 @@ function LogoutButton({ onLogout }) {
         } finally {
           setIsLoggingOut(false);
         }
-      }}
-    >
+      }}>
       Log out
     </Button>
   );
@@ -134,10 +131,7 @@ const IMS_CONFIG_STORAGE_KEY = 'aem-assets-app:ims-auth-config';
 
 function persistImsConfig({ imsClientId, imsOrg }) {
   try {
-    window.localStorage.setItem(
-      IMS_CONFIG_STORAGE_KEY,
-      JSON.stringify({ imsClientId, imsOrg }),
-    );
+    window.localStorage.setItem(IMS_CONFIG_STORAGE_KEY, JSON.stringify({ imsClientId, imsOrg }));
   } catch (e) {
     // localStorage unavailable (private mode, disabled storage, etc). The
     // popup redirect fix just won't have config to work with in that case -
@@ -180,7 +174,7 @@ function registerImsAuthServiceForPopupRedirect() {
         redirectUrl: window.location.href,
         modalMode: true,
       },
-      false,
+      false
     );
   });
   document.body.appendChild(script);
@@ -195,15 +189,8 @@ if (ENABLE_POPUP_AUTH_REDIRECT_FIX && !isEmbeddedInIframe()) {
 
 async function renderDialog(sdk) {
   const config = sdk.parameters.invocation;
-  const {
-    imsClientId,
-    imsOrg,
-    repositoryId,
-    aemTierType,
-    env,
-    hideUploadButton,
-    hideTreeNav,
-  } = config;
+  const { imsClientId, imsOrg, repositoryId, aemTierType, env, hideUploadButton, hideTreeNav } =
+    config;
 
   if (ENABLE_POPUP_AUTH_REDIRECT_FIX) {
     persistImsConfig({ imsClientId, imsOrg });
@@ -222,9 +209,7 @@ async function renderDialog(sdk) {
 
   let imsInstance = null;
 
-  const logoutContainer = document.getElementById(
-    'content-advisor-logout-container',
-  );
+  const logoutContainer = document.getElementById('content-advisor-logout-container');
   if (logoutContainer) {
     createRoot(logoutContainer).render(
       <LogoutButton
@@ -233,13 +218,13 @@ async function renderDialog(sdk) {
           try {
             await imsInstance.signOut();
             showAuthError(
-              'You have been logged out of Adobe. Close this dialog and reopen the asset selector to sign in again.',
+              'You have been logged out of Adobe. Close this dialog and reopen the asset selector to sign in again.'
             );
           } catch (error) {
             showAuthError(`Failed to log out of Adobe: ${error?.message || error}`);
           }
         }}
-      />,
+      />
     );
   }
 
@@ -250,12 +235,12 @@ async function renderDialog(sdk) {
     modalMode: true,
     onErrorReceived: (errorType, errorMessage) => {
       showAuthError(
-        `Adobe authentication failed (${errorType}). Check that the IMS Client ID and IMS Organization ID in the app configuration are still valid. If this persists after re-checking configuration, the Adobe Assets Selector's required auth scope may have changed and the app needs to be updated. Details: ${errorMessage}`,
+        `Adobe authentication failed (${errorType}). Check that the IMS Client ID and IMS Organization ID in the app configuration are still valid. If this persists after re-checking configuration, the Adobe Assets Selector's required auth scope may have changed and the app needs to be updated. Details: ${errorMessage}`
       );
     },
     onAccessTokenExpired: () => {
       showAuthError(
-        'Your Adobe session has expired. Close this dialog and try selecting assets again.',
+        'Your Adobe session has expired. Close this dialog and try selecting assets again.'
       );
     },
     onAccessTokenReceived: () => {
@@ -297,20 +282,18 @@ async function renderDialog(sdk) {
   }
 
   function registerImsAuthService() {
-    const registeredTokenService =
-      PureJSSelectors.registerContentAdvisorAuthService(imsAuthProps, false);
+    const registeredTokenService = PureJSSelectors.registerContentAdvisorAuthService(
+      imsAuthProps,
+      false
+    );
     imsInstance = registeredTokenService;
   }
 
   async function renderContentAdvisor() {
     const container = document.getElementById('content-advisor');
-    PureJSSelectors.renderContentAdvisorWithAuthFlow(
-      container,
-      contentAdvisorProps,
-      () => {
-        document.getElementById('content-advisor-dialog').showModal();
-      },
-    );
+    PureJSSelectors.renderContentAdvisorWithAuthFlow(container, contentAdvisorProps, () => {
+      document.getElementById('content-advisor-dialog').showModal();
+    });
   }
 
   script.addEventListener('load', () => {
@@ -360,8 +343,7 @@ setup({
       id: 'aemTierType',
       name: 'AEM Tier',
       type: 'Symbol',
-      description:
-        'Specifies the tier type [delivery, author] for the app (defaults to both)',
+      description: 'Specifies the tier type [delivery, author] for the app (defaults to both)',
       required: false,
       default: 'delivery,author',
     },
@@ -369,8 +351,7 @@ setup({
       id: 'env',
       name: 'Environment',
       type: 'Symbol',
-      description:
-        'Specifies the AEM repository environment [prod,stage] for the app',
+      description: 'Specifies the AEM repository environment [prod,stage] for the app',
       required: false,
     },
     {

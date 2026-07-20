@@ -7,9 +7,6 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "echo \"no tests yet\"",
-    "test:ci": "echo \"no tests yet\"",
-    "lint": "eslint src",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id ${AEM_ASSETS_APP_DEF_ID} --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id ${AEM_ASSETS_APP_DEF_ID_TEST} --token ${TEST_CMA_TOKEN}"
   },

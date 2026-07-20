@@ -19,25 +19,21 @@ export function getMetadata(asset, renditions) {
 }
 
 export function getRenditions(asset) {
-  const renditions = asset?.computedMetadata?._links[ASSET_RENDITIONS_KEY]?.map(
-    (r) => {
-      return {
-        href: r.href,
-        height: r.height,
-        width: r.width,
-        type: r.type,
-      };
-    },
-  );
+  const renditions = asset?.computedMetadata?._links[ASSET_RENDITIONS_KEY]?.map((r) => {
+    return {
+      href: r.href,
+      height: r.height,
+      width: r.width,
+      type: r.type,
+    };
+  });
   return renditions.sort((a, b) => a.width - b.width);
 }
 
 export function transformAssets(assets) {
   const transformedAssets = assets.map((asset) => {
     const renditions = getRenditions(asset);
-    const thumbUrl = renditions.find(
-      (r) => r.width >= 150 && r.width <= 400,
-    ).href;
+    const thumbUrl = renditions.find((r) => r.width >= 150 && r.width <= 400).href;
 
     const transformedAsset = {
       id: asset['repo:assetId'] || asset['repo:id'] || asset.id,
