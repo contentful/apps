@@ -64,7 +64,7 @@ export const demoSdk = {
       save: async () => {},
       publish: async () => {},
       getNode: (id: string) => nodes.find((n) => n.id === id) ?? null,
-      getRootNodes: () => nodes,
+      getRootNodes: async () => nodes,
       // selection intentionally omitted (see above)
     },
   },
