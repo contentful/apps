@@ -8,11 +8,6 @@ import { createMockSDK } from '../mocks';
 // Minimal valid googleDocPayload that passes validatePayloadShape
 const COMPLETED_PAYLOAD = { entries: [], assets: [], referenceGraph: {} };
 
-const TABS_SUSPEND_PAYLOAD = {
-  suspendStepId: 'select-tabs-images-step' as const,
-  documentId: 'doc-1',
-};
-
 const MAPPING_SUSPEND_PAYLOAD = {
   suspendStepId: 'mapping-review' as const,
   documentId: 'doc-1',
@@ -55,16 +50,10 @@ describe('useWorkflowAgent — workflow orchestration', () => {
 
   // Helper: renders the hook and kicks off startWorkflow, advancing timers
   // between each queued agentRun.get response.
-  async function drivePolling(
-    mockResponses: ReturnType<typeof makeRun>[],
-    opts: { runId?: string } = {}
-  ) {
+  async function drivePolling(mockResponses: ReturnType<typeof makeRun>[]) {
     const { result } = renderHook(() =>
       useWorkflowAgent({ sdk, documentId: 'doc-1', oauthToken: 'token-x' })
     );
-
-    const runId = opts.runId ?? 'run-123';
-    vi.mocked(sdk.cma.agent.generate).mockResolvedValue({ sys: { id: runId } } as any);
 
     let callIndex = 0;
     vi.mocked(sdk.cma.agentRun.get).mockImplementation(async () => {
@@ -91,6 +80,37 @@ describe('useWorkflowAgent — workflow orchestration', () => {
     return resultPromise!;
   }
 
+  async function driveResume(
+    runId: string,
+    resumePayload: Record<string, unknown>,
+    mockResponses: ReturnType<typeof makeRun>[]
+  ) {
+    const { result } = renderHook(() =>
+      useWorkflowAgent({ sdk, documentId: 'doc-1', oauthToken: 'token-x' })
+    );
+
+    let callIndex = 0;
+    vi.mocked(sdk.cma.agentRun.get).mockImplementation(async () => {
+      const response = mockResponses[Math.min(callIndex, mockResponses.length - 1)];
+      callIndex++;
+      return response as any;
+    });
+
+    let resultPromise: Promise<any>;
+    act(() => {
+      resultPromise = result.current.resumeWorkflow(runId, resumePayload);
+      void resultPromise.catch(() => {});
+    });
+
+    for (let i = 0; i < mockResponses.length; i++) {
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(10_000);
+      });
+    }
+
+    return resultPromise!;
+  }
+
   describe('startWorkflow', () => {
     it('polls until COMPLETED and returns the googleDocPayload', async () => {
       const responses = [
@@ -107,6 +127,10 @@ describe('useWorkflowAgent — workflow orchestration', () => {
     });
 
     it('polls through IN_PROGRESS and resolves on PENDING_REVIEW with suspendPayload', async () => {
+      const TABS_SUSPEND_PAYLOAD = {
+        suspendStepId: 'select-tabs-images-step' as const,
+        documentId: 'doc-1',
+      };
       const responses = [
         makeRun(RunStatus.IN_PROGRESS),
         makeRun(RunStatus.PENDING_REVIEW, { suspendPayload: TABS_SUSPEND_PAYLOAD }),
@@ -265,31 +289,13 @@ describe('useWorkflowAgent — workflow orchestration', () => {
     });
 
     it('resumes a run and polls to COMPLETED', async () => {
-      let callIndex = 0;
       const responses = [
         makeRun(RunStatus.IN_PROGRESS),
         makeRun(RunStatus.COMPLETED, { googleDocPayload: COMPLETED_PAYLOAD }),
       ];
-      vi.mocked(sdk.cma.agentRun.get).mockImplementation(async () => {
-        return responses[Math.min(callIndex++, responses.length - 1)] as any;
-      });
 
-      const { result } = renderHook(() =>
-        useWorkflowAgent({ sdk, documentId: 'doc-1', oauthToken: 'token-x' })
-      );
+      const workflowResult = await driveResume('run-123', { includeImages: true }, responses);
 
-      let resultPromise: Promise<any>;
-      act(() => {
-        resultPromise = result.current.resumeWorkflow('run-123', { includeImages: true });
-      });
-
-      for (let i = 0; i < 2; i++) {
-        await act(async () => {
-          await vi.advanceTimersByTimeAsync(10_000);
-        });
-      }
-
-      const workflowResult = await resultPromise!;
       expect(sdk.cma.agentRun.resume).toHaveBeenCalledWith(
         expect.objectContaining({ runId: 'run-123' }),
         { resumePayload: { includeImages: true } }
@@ -298,58 +304,28 @@ describe('useWorkflowAgent — workflow orchestration', () => {
     });
 
     it('resumes a mapping-review step and polls to a second PENDING_REVIEW with new suspendPayload', async () => {
-      let callIndex = 0;
       const responses = [
         makeRun(RunStatus.IN_PROGRESS),
         makeRun(RunStatus.PENDING_REVIEW, { suspendPayload: MAPPING_SUSPEND_PAYLOAD }),
       ];
-      vi.mocked(sdk.cma.agentRun.get).mockImplementation(async () => {
-        return responses[Math.min(callIndex++, responses.length - 1)] as any;
-      });
 
-      const { result } = renderHook(() =>
-        useWorkflowAgent({ sdk, documentId: 'doc-1', oauthToken: 'token-x' })
+      const workflowResult = await driveResume(
+        'run-123',
+        { entryBlockGraph: { entries: [], excludedSourceRefs: [] } },
+        responses
       );
 
-      let resultPromise: Promise<any>;
-      act(() => {
-        resultPromise = result.current.resumeWorkflow('run-123', {
-          entryBlockGraph: { entries: [], excludedSourceRefs: [] },
-        });
-      });
-
-      for (let i = 0; i < 2; i++) {
-        await act(async () => {
-          await vi.advanceTimersByTimeAsync(10_000);
-        });
-      }
-
-      const workflowResult = await resultPromise!;
       expect(workflowResult.status).toBe(RunStatus.PENDING_REVIEW);
       expect(workflowResult.suspendPayload).toEqual(MAPPING_SUSPEND_PAYLOAD);
     });
 
     it('handles cancellation resume payload and returns COMPLETED', async () => {
-      vi.mocked(sdk.cma.agentRun.get).mockResolvedValue(
-        makeRun(RunStatus.COMPLETED, {
-          googleDocPayload: { cancelled: true, documentId: 'doc-1' },
-        }) as any
-      );
+      const responses = [
+        makeRun(RunStatus.COMPLETED, { googleDocPayload: { cancelled: true, documentId: 'doc-1' } }),
+      ];
 
-      const { result } = renderHook(() =>
-        useWorkflowAgent({ sdk, documentId: 'doc-1', oauthToken: 'token-x' })
-      );
+      const workflowResult = await driveResume('run-123', { cancelled: true }, responses);
 
-      let resultPromise: Promise<any>;
-      act(() => {
-        resultPromise = result.current.resumeWorkflow('run-123', { cancelled: true });
-      });
-
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(10_000);
-      });
-
-      const workflowResult = await resultPromise!;
       expect(workflowResult.status).toBe(RunStatus.COMPLETED);
       // Cancelled runs produce an empty payload — no entries or assets
       expect(workflowResult.googleDocPayload.entries).toEqual([]);
@@ -358,22 +334,9 @@ describe('useWorkflowAgent — workflow orchestration', () => {
     it('throws if resume API call fails', async () => {
       vi.mocked(sdk.cma.agentRun.resume).mockRejectedValue(new Error('Resume rejected'));
 
-      const { result } = renderHook(() =>
-        useWorkflowAgent({ sdk, documentId: 'doc-1', oauthToken: 'token-x' })
-      );
-
-      let resultPromise: Promise<any>;
-      act(() => {
-        resultPromise = result.current.resumeWorkflow('run-123', { includeImages: false });
-        void resultPromise.catch(() => {});
-      });
-
-      // No timer advance needed — resume throws synchronously before polling starts
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(0);
-      });
-
-      await expect(resultPromise!).rejects.toThrow('Resume rejected');
+      await expect(
+        driveResume('run-123', { includeImages: false }, [makeRun(RunStatus.IN_PROGRESS)])
+      ).rejects.toThrow('Resume rejected');
     });
   });
 });
