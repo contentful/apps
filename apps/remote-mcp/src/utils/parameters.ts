@@ -18,8 +18,6 @@ export const createAppInstallationParameters = (
     concepts: JSON.stringify(parameters.contentLifecyclePermissions.concepts),
     conceptSchemes: JSON.stringify(parameters.contentLifecyclePermissions.conceptSchemes),
     runAIActions: parameters.otherFeaturesPermissions.runAIActions,
-    migrateWithinSpace: parameters.migrationPermissions.migrateWithinSpace,
-    migrateBetweenSpaces: parameters.migrationPermissions.migrateBetweenSpaces,
   };
 };
 
@@ -41,10 +39,6 @@ export const parseAppInstallationParameters = (
       tags: JSON.parse(parameters.tags),
       concepts: JSON.parse(parameters.concepts),
       conceptSchemes: JSON.parse(parameters.conceptSchemes),
-    },
-    migrationPermissions: {
-      migrateWithinSpace: parameters.migrateWithinSpace,
-      migrateBetweenSpaces: parameters.migrateBetweenSpaces,
     },
     otherFeaturesPermissions: {
       runAIActions: parameters.runAIActions,

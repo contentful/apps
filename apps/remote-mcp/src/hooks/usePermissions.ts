@@ -2,7 +2,6 @@ import { useState } from 'react';
 import type {
   ContentLifecyclePermissions,
   OtherFeaturesPermissions,
-  MigrationPermissions,
   EntityPermissions,
   ContentLifecycleEntityKey,
   EntityActionKey,
@@ -37,11 +36,6 @@ export const usePermissions = () => {
     useState<OtherFeaturesPermissions>({
       runAIActions: false,
     });
-
-  const [migrationPermissions, setMigrationPermissions] = useState<MigrationPermissions>({
-    migrateWithinSpace: false,
-    migrateBetweenSpaces: false,
-  });
 
   const handleSelectAllToggle = () => {
     const newValue = !contentLifecyclePermissions.selectAll;
@@ -122,25 +116,15 @@ export const usePermissions = () => {
     }));
   };
 
-  const handleMigrationToggle = (permission: keyof MigrationPermissions) => {
-    setMigrationPermissions((prev) => ({
-      ...prev,
-      [permission]: !prev[permission],
-    }));
-  };
-
   return {
     contentLifecyclePermissions,
     otherFeaturesPermissions,
-    migrationPermissions,
     setContentLifecyclePermissions,
     setOtherFeaturesPermissions,
-    setMigrationPermissions,
     handleSelectAllToggle,
     handleEntityActionToggle,
     handleColumnToggle,
     handleRowToggle,
     handleOtherFeatureToggle,
-    handleMigrationToggle,
   };
 };

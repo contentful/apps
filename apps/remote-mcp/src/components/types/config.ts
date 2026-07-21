@@ -30,15 +30,9 @@ export interface OtherFeaturesPermissions {
   runAIActions: boolean;
 }
 
-export interface MigrationPermissions {
-  migrateWithinSpace: boolean;
-  migrateBetweenSpaces: boolean;
-}
-
 export interface InstallParameters {
   contentLifecyclePermissions: ContentLifecyclePermissions;
   otherFeaturesPermissions: OtherFeaturesPermissions;
-  migrationPermissions: MigrationPermissions;
 }
 
 export interface AppInstallationParameters {
@@ -56,12 +50,9 @@ export interface AppInstallationParameters {
   concepts: string;
   conceptSchemes: string;
   runAIActions: boolean;
-  migrateWithinSpace: boolean;
-  migrateBetweenSpaces: boolean;
 }
 
 export type OtherFeaturesPermissionKey = keyof OtherFeaturesPermissions;
-export type MigrationPermissionKey = keyof MigrationPermissions;
 export type ContentLifecycleEntityKey = Exclude<keyof ContentLifecyclePermissions, 'selectAll'>;
 export type EntityActionKey = keyof EntityPermissions;
 

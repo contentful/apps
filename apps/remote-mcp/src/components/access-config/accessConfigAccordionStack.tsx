@@ -2,13 +2,10 @@ import { type FC } from 'react';
 import { Stack, Heading, Text, Accordion } from '@contentful/f36-components';
 import { ContentLifecyclePermissionsTable } from './ContentLifecyclePermissionsTable';
 import { OtherFeaturesPermissions } from './OtherFeaturesPermissions';
-import { MigrationPermissions } from './MigrationPermissions';
 import type {
   ContentLifecyclePermissions,
   OtherFeaturesPermissions as OtherFeaturesPermissionsType,
-  MigrationPermissions as MigrationPermissionsType,
   OtherFeaturesPermissionKey,
-  MigrationPermissionKey,
   ContentLifecycleEntityKey,
   EntityActionKey,
 } from '../types/config';
@@ -16,11 +13,9 @@ import type {
 interface PermissionsSectionProps {
   contentLifecyclePermissions: ContentLifecyclePermissions;
   otherFeaturesPermissions: OtherFeaturesPermissionsType;
-  migrationPermissions: MigrationPermissionsType;
   expandedAccordions: {
     contentLifecycle: boolean;
     otherFeatures: boolean;
-    migration: boolean;
   };
   onAccordionToggle: (section: string, expanded: boolean) => void;
   onSelectAllToggle: () => void;
@@ -28,13 +23,11 @@ interface PermissionsSectionProps {
   onColumnToggle: (action: EntityActionKey) => void;
   onRowToggle: (entity: ContentLifecycleEntityKey) => void;
   onOtherFeatureToggle: (permission: OtherFeaturesPermissionKey) => void;
-  onMigrationToggle: (permission: MigrationPermissionKey) => void;
 }
 
 export const PermissionsSection: FC<PermissionsSectionProps> = ({
   contentLifecyclePermissions,
   otherFeaturesPermissions,
-  migrationPermissions,
   expandedAccordions,
   onAccordionToggle,
   onSelectAllToggle,
@@ -42,14 +35,13 @@ export const PermissionsSection: FC<PermissionsSectionProps> = ({
   onColumnToggle,
   onRowToggle,
   onOtherFeatureToggle,
-  onMigrationToggle,
 }) => (
   <Stack
     flexDirection="column"
     spacing="spacing2Xs"
     alignItems="flex-start"
     style={{ width: '100%' }}>
-    <Heading as="h2" marginBottom="spacing2Xs">
+    <Heading as="h2" marginBottom="spacing2Xs" style={{ fontSize: '16px' }}>
       Configure Contentful access
     </Heading>
     <Text marginBottom="spacingM">
@@ -58,7 +50,7 @@ export const PermissionsSection: FC<PermissionsSectionProps> = ({
 
     <Accordion style={{ width: '100%', maxWidth: '100%' }}>
       <Accordion.Item
-        title="Content lifecycle actions"
+        title={<span style={{ fontSize: '14px' }}>Content lifecycle actions</span>}
         isExpanded={expandedAccordions.contentLifecycle}
         onExpand={() => onAccordionToggle('contentLifecycle', true)}
         onCollapse={() => onAccordionToggle('contentLifecycle', false)}>
@@ -79,7 +71,7 @@ export const PermissionsSection: FC<PermissionsSectionProps> = ({
       </Accordion.Item>
 
       <Accordion.Item
-        title="Actions on other features"
+        title={<span style={{ fontSize: '14px' }}>Actions on other features</span>}
         isExpanded={expandedAccordions.otherFeatures}
         onExpand={() => onAccordionToggle('otherFeatures', true)}
         onCollapse={() => onAccordionToggle('otherFeatures', false)}>
@@ -92,24 +84,6 @@ export const PermissionsSection: FC<PermissionsSectionProps> = ({
           <OtherFeaturesPermissions
             permissions={otherFeaturesPermissions}
             onPermissionToggle={onOtherFeatureToggle}
-          />
-        </div>
-      </Accordion.Item>
-
-      <Accordion.Item
-        title="Migration permissions"
-        isExpanded={expandedAccordions.migration}
-        onExpand={() => onAccordionToggle('migration', true)}
-        onCollapse={() => onAccordionToggle('migration', false)}>
-        <div
-          style={{
-            marginTop: '-12px',
-            boxSizing: 'border-box',
-            paddingRight: '16px',
-          }}>
-          <MigrationPermissions
-            permissions={migrationPermissions}
-            onPermissionToggle={onMigrationToggle}
           />
         </div>
       </Accordion.Item>
