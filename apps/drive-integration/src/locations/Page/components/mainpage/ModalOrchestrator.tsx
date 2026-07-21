@@ -5,7 +5,6 @@ import { ContentTypeProps } from 'contentful-management';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
 import { ErrorModal, type ErrorModalConfig } from '../modals/ErrorModal';
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
-import { LoadingModal } from '../modals/LoadingModal';
 import { ERROR_MESSAGES } from '@constants/messages';
 import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 import { DocumentTabProps, WorkflowFailureReason, WorkflowRunError } from '@types';
@@ -29,7 +28,6 @@ enum FlowStep {
   CONTENT_TYPE_PICKER = 'contentTypePicker',
   SELECT_TABS = 'selectTabs',
   INCLUDE_IMAGES = 'includeImages',
-  LOADING = 'loading',
 }
 
 interface ModalOrchestratorProps {
@@ -40,7 +38,6 @@ interface ModalOrchestratorProps {
   onReconnectGoogleDrive?: () => Promise<void>;
   onAiAccessDenied?: (message: string) => void;
   onRunStarted: (runId: string) => void;
-  onResetToMain: () => void;
   addRun: (record: RunRecord) => void;
   storageError: string | null;
 }
@@ -60,7 +57,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       isOAuthBusy = false,
       onReconnectGoogleDrive = async () => undefined,
       onRunStarted,
-      onResetToMain,
       onAiAccessDenied,
       addRun,
       storageError,
@@ -122,7 +118,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     };
 
     const handleFlowModalCloseRequest = () => {
-      if (flowStep === FlowStep.LOADING) return;
       showDiscardConfirmation();
     };
 
@@ -130,13 +125,11 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setPreviewErrorState(null);
       setIsReconnectPending(false);
       resetProgress();
-      onResetToMain();
-    }, [onResetToMain, resetProgress]);
+    }, [resetProgress]);
 
     const handleConfirmCancel = () => {
       setIsConfirmCancelModalOpen(false);
       resetProgress();
-      onResetToMain();
     };
 
     const showWorkflowError = (error?: unknown) => {
@@ -257,14 +250,13 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       (error: unknown) => {
         if (isAiAccessDeniedError(error)) {
           resetProgress();
-          onResetToMain();
           onAiAccessDenied?.(error.message);
           return;
         }
 
         showWorkflowError(error);
       },
-      [onAiAccessDenied, onResetToMain, resetProgress]
+      [onAiAccessDenied, resetProgress]
     );
 
     const handleUploadModalCloseRequest = (docId?: string, docTitle?: string) => {
@@ -319,7 +311,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
-      setFlowStep(FlowStep.LOADING);
       try {
         const runId = await startWorkflow(contentTypeIds, documentSelection);
 
@@ -332,7 +323,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           startedAt: new Date().toISOString(),
         });
 
-        setFlowStep(null);
         resetProgress();
         onRunStarted(runId);
       } catch (err) {
@@ -468,14 +458,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
               onClose={showDiscardConfirmation}
             />
           );
-        case FlowStep.LOADING:
-          return (
-            <LoadingModal
-              step="reviewingContentTypes"
-              title="Starting import…"
-              contentTypeCount={selectedContentTypes.length}
-            />
-          );
         default:
           return null;
       }
@@ -494,7 +476,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           onClose={handleFlowModalCloseRequest}
           size={'large'}
           shouldCloseOnOverlayClick={false}
-          shouldCloseOnEscapePress={flowStep !== FlowStep.LOADING}>
+          shouldCloseOnEscapePress={true}>
           {renderFlowStep}
         </Modal>
 

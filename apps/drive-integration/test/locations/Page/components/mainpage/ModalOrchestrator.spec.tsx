@@ -40,7 +40,6 @@ vi.mock('../../../../../src/locations/Page/components/modals/step_1/SelectDocume
 
 vi.mock('@hooks/useWorkflowAgent', () => ({
   useWorkflowAgent: () => ({
-    isAnalyzing: false,
     startWorkflow: mockStartWorkflow,
   }),
 }));
@@ -63,7 +62,6 @@ const defaultProps = {
   oauthToken: 'mock-oauth-token',
   isOAuthConnected: true,
   onRunStarted: vi.fn(),
-  onResetToMain: vi.fn(),
   addRun: mockAddRun,
   storageError: null,
 };
@@ -123,7 +121,6 @@ describe('ModalOrchestrator', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     defaultProps.onRunStarted.mockReset();
-    defaultProps.onResetToMain.mockReset();
     mockFetchDocumentSelection.mockResolvedValue(mockDocumentSelectionConfig);
     vi.mocked(mockSdk.cma.contentType.getMany).mockResolvedValue({
       items: mockContentTypes,

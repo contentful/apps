@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { Flex, Layout, Note, Spinner } from '@contentful/f36-components';
+import { Button, Flex, Layout, Note, Spinner } from '@contentful/f36-components';
 import {
   ModalOrchestrator,
   ModalOrchestratorHandle,
@@ -16,7 +16,11 @@ import { isAiAccessDeniedError } from '../../utils/aiAccess';
 import { resumeAndPollWorkflow } from '../../services/workflowService';
 import { useRunStorage } from '../../hooks/useRunStorage';
 import { getWorkflowRun, startAgentRun } from '../../services/agents-api';
-import { WORKFLOW_AGENT_ID } from '../../utils/constants/agent';
+import {
+  WORKFLOW_AGENT_ID,
+  MAX_PENDING_REVIEW_MISSING_PAYLOAD_RETRIES,
+  POLL_INTERVAL_MS,
+} from '../../utils/constants/agent';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -27,6 +31,7 @@ const Page = () => {
   const [pendingReviewPayload, setPendingReviewPayload] =
     useState<MappingReviewSuspendPayload | null>(null);
   const [isLoadingReviewPayload, setIsLoadingReviewPayload] = useState(false);
+  const [reviewPayloadFailed, setReviewPayloadFailed] = useState(false);
 
   const spaceId = sdk.ids.space;
   const environmentId = sdk.ids.environmentAlias ?? sdk.ids.environment;
@@ -39,29 +44,53 @@ const Page = () => {
   const { oauthToken, isOAuthConnected, isOAuthBusy, startOAuth, disconnectOAuth } =
     useGoogleDriveOAuth(sdk);
 
-  // When navigating to the review view, fetch the suspend payload from the backend
+  // When navigating to the review view, fetch the suspend payload from the backend.
+  // Retries up to MAX_PENDING_REVIEW_MISSING_PAYLOAD_RETRIES times because the backend
+  // writes PENDING_REVIEW status before the suspendPayload metadata flushes (~50s window).
   useEffect(() => {
     if (appView.view !== AppViewKind.REVIEW) {
       setPendingReviewPayload(null);
       setIsLoadingReviewPayload(false);
+      setReviewPayloadFailed(false);
       return;
     }
 
     let isCancelled = false;
+    let attempt = 0;
     setIsLoadingReviewPayload(true);
+    setReviewPayloadFailed(false);
 
-    void getWorkflowRun(sdk, spaceId, environmentId, appView.runId)
-      .then((runData) => {
-        if (isCancelled) return;
-        const payload = runData?.metadata?.suspendPayload ?? null;
-        setPendingReviewPayload(payload);
-      })
-      .catch(() => {
-        if (!isCancelled) setPendingReviewPayload(null);
-      })
-      .finally(() => {
-        if (!isCancelled) setIsLoadingReviewPayload(false);
-      });
+    const tryFetch = () => {
+      void getWorkflowRun(sdk, spaceId, environmentId, appView.runId)
+        .then((runData) => {
+          if (isCancelled) return;
+          const payload = runData?.metadata?.suspendPayload ?? null;
+          if (payload) {
+            setPendingReviewPayload(payload);
+            setIsLoadingReviewPayload(false);
+            return;
+          }
+          attempt++;
+          if (attempt < MAX_PENDING_REVIEW_MISSING_PAYLOAD_RETRIES) {
+            setTimeout(tryFetch, POLL_INTERVAL_MS);
+          } else {
+            setIsLoadingReviewPayload(false);
+            setReviewPayloadFailed(true);
+          }
+        })
+        .catch(() => {
+          if (isCancelled) return;
+          attempt++;
+          if (attempt < MAX_PENDING_REVIEW_MISSING_PAYLOAD_RETRIES) {
+            setTimeout(tryFetch, POLL_INTERVAL_MS);
+          } else {
+            setIsLoadingReviewPayload(false);
+            setReviewPayloadFailed(true);
+          }
+        });
+    };
+
+    tryFetch();
 
     return () => {
       isCancelled = true;
@@ -204,6 +233,23 @@ const Page = () => {
         );
 
       case AppViewKind.REVIEW: {
+        if (reviewPayloadFailed) {
+          return (
+            <Flex
+              flexDirection="column"
+              alignItems="center"
+              gap="spacingM"
+              style={{ minHeight: '300px', justifyContent: 'center' }}>
+              <Note variant="warning">
+                Could not load the review data. The import may still be processing.
+              </Note>
+              <Button variant="secondary" onClick={handleExitReview}>
+                Back to runs
+              </Button>
+            </Flex>
+          );
+        }
+
         if (isLoadingReviewPayload || !pendingReviewPayload) {
           return (
             <Flex justifyContent="center" alignItems="center" style={{ minHeight: '300px' }}>
@@ -241,7 +287,6 @@ const Page = () => {
         onReconnectGoogleDrive={startOAuth}
         onAiAccessDenied={handleAiAccessDenied}
         onRunStarted={handleRunStarted}
-        onResetToMain={handleRunStarted}
         addRun={addRun}
         storageError={storageError}
       />

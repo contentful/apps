@@ -59,38 +59,6 @@ describe('useWorkflowAgent', () => {
     expect(mockPollAgentRun).not.toHaveBeenCalled();
   });
 
-  it('isAnalyzing is true during startWorkflow and false after', async () => {
-    let resolveRun: (v: string) => void;
-    mockStartAgentRun.mockReturnValue(
-      new Promise<string>((resolve) => {
-        resolveRun = resolve;
-      })
-    );
-
-    const { result } = renderHook(() =>
-      useWorkflowAgent({ sdk: mockSdk, documentId: 'doc-1', oauthToken: 'token' })
-    );
-
-    expect(result.current.isAnalyzing).toBe(false);
-
-    let workflowPromise: Promise<string>;
-    act(() => {
-      workflowPromise = result.current.startWorkflow(['ct-1'], {
-        includeImages: false,
-        selectedTabIds: [],
-      });
-    });
-
-    expect(result.current.isAnalyzing).toBe(true);
-
-    await act(async () => {
-      resolveRun!('run-xyz');
-      await workflowPromise!;
-    });
-
-    expect(result.current.isAnalyzing).toBe(false);
-  });
-
   it('startWorkflow throws if startAgentRun throws', async () => {
     mockStartAgentRun.mockRejectedValue(new Error('Network error'));
 
@@ -103,7 +71,5 @@ describe('useWorkflowAgent', () => {
         result.current.startWorkflow(['ct-1'], { includeImages: false, selectedTabIds: [] })
       )
     ).rejects.toThrow('Network error');
-
-    expect(result.current.isAnalyzing).toBe(false);
   });
 });

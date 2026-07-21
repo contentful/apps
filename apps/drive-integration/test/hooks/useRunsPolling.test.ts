@@ -1,5 +1,5 @@
-import { renderHook, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useRunsPolling } from '../../src/hooks/useRunsPolling';
 import { RunStatus } from '@types';
 import { createMockSDK } from '../mocks';
@@ -53,10 +53,10 @@ beforeEach(() => {
 });
 
 describe('useRunsPolling', () => {
-  it('initialises all runIds as loading', () => {
+  it('statusMap is empty before first fetch resolves', () => {
     mockGetWorkflowRun.mockResolvedValue({ sys: { status: RunStatus.COMPLETED } });
     const { result } = renderHook(() => useRunsPolling(SINGLE_RUN, mockSdk));
-    expect(result.current.statusMap.get('run-1')).toBe('loading');
+    expect(result.current.statusMap.size).toBe(0);
   });
 
   it('maps IN_PROGRESS to running', async () => {
@@ -94,10 +94,30 @@ describe('useRunsPolling', () => {
     await waitFor(() => expect(result.current.statusMap.get('run-1')).toBe('failed'));
   });
 
-  it('maps null response (404) to expired', async () => {
+  it('maps null response to expired only after MAX_CONSECUTIVE_NULLS consecutive misses', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     mockGetWorkflowRun.mockResolvedValue(null);
-    const { result } = renderHook(() => useRunsPolling(SINGLE_RUN, mockSdk));
+
+    const { result, unmount } = renderHook(() => useRunsPolling(SINGLE_RUN, mockSdk));
+
+    // Let first fetch resolve (1 miss, not yet expired)
+    await act(() => vi.runAllTicks());
+    await act(() => Promise.resolve());
+    expect(result.current.statusMap.get('run-1')).toBeUndefined();
+
+    // Drive 4 more ticks (total 5 = MAX_CONSECUTIVE_NULLS)
+    for (let i = 0; i < 4; i++) {
+      await act(async () => {
+        vi.advanceTimersByTime(10_000);
+        await vi.runAllTicks();
+        await Promise.resolve();
+      });
+    }
+
     await waitFor(() => expect(result.current.statusMap.get('run-1')).toBe('expired'));
+
+    unmount();
+    vi.useRealTimers();
   });
 
   it('populates errorMap for failed runs', async () => {

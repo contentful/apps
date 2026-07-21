@@ -66,6 +66,7 @@ vi.mock('../../../src/hooks/useRunsPolling', () => ({
   useRunsPolling: () => ({
     statusMap: new Map(),
     errorMap: new Map(),
+    titleMap: new Map(),
   }),
 }));
 
@@ -116,7 +117,6 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
       props: {
         onAiAccessDenied: (message: string) => void;
         onRunStarted: (runId: string) => void;
-        onResetToMain: () => void;
         oauthToken: string;
       },
       ref: React.ForwardedRef<{ startFlow: () => void; resetFlow: () => void }>
@@ -131,7 +131,7 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
           <button onClick={() => props.onRunStarted('run-123')} type="button">
             Trigger Run Started
           </button>
-          <button onClick={props.onResetToMain} type="button">
+          <button onClick={() => props.onRunStarted('reset')} type="button">
             Trigger Reset To Main
           </button>
           <button
