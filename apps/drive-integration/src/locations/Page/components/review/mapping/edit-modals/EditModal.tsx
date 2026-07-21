@@ -118,12 +118,12 @@ export const EditModal = ({
 
   const handleAddEntrySave = () => {
     if (!addEntryFormState) return;
-    onAddEntry?.(toAddEntryFormParams(addEntryFormState, contentTypes));
+    onAddEntry?.(toAddEntryFormParams(addEntryFormState, contentTypes, existingEntries));
     setAddEntryFormState(null);
   };
 
   const isAddEntryFormSaveDisabled =
-    !addEntryFormState || isAddEntrySaveDisabled(addEntryFormState, contentTypes);
+    !addEntryFormState || isAddEntrySaveDisabled(addEntryFormState, contentTypes, existingEntries);
 
   const previewSectionTitle = viewModel.previewSectionTitle ?? 'Selected content';
   const previewText = (viewModel.contentPreview ?? viewModel.selectedText).trim();

@@ -7,7 +7,9 @@ import { FieldSelectionDropdown } from './FieldSelectionDropdown';
 export interface AddEntryFormState {
   contentTypeId: string;
   isReference: boolean | null;
+  /** Parent entry tempId when linking as a child reference. */
   referenceEntryId: string;
+  /** Reference field on the parent content type. */
   referenceFieldId: string;
   selectedFieldIds: string[];
 }
@@ -23,6 +25,7 @@ export const INITIAL_ADD_ENTRY_FORM_STATE: AddEntryFormState = {
 export interface ExistingEntryOption {
   tempId: string;
   label: string;
+  contentTypeId: string;
 }
 
 const getReferenceFieldOptions = (
@@ -38,17 +41,35 @@ const getReferenceFieldOptions = (
   });
 };
 
+const getParentContentTypeId = (
+  state: AddEntryFormState,
+  existingEntries: ExistingEntryOption[]
+): string =>
+  existingEntries.find((entry) => entry.tempId === state.referenceEntryId)?.contentTypeId ?? '';
+
+/** True when at least one existing entry's content type can accept a child reference. */
+export const canLinkAsChildReference = (
+  contentTypes: WorkflowContentType[],
+  existingEntries: ExistingEntryOption[]
+): boolean =>
+  existingEntries.some(
+    (entry) => getReferenceFieldOptions(contentTypes, entry.contentTypeId).length > 0
+  );
+
 /** Returns true when the form lacks enough input to save. */
 export const isAddEntrySaveDisabled = (
   state: AddEntryFormState,
-  contentTypes: WorkflowContentType[]
+  contentTypes: WorkflowContentType[],
+  existingEntries: ExistingEntryOption[] = []
 ): boolean => {
   if (!state.contentTypeId) return true;
   if (state.isReference === null) return true;
   if (state.isReference) {
-    const referenceFieldOptions = getReferenceFieldOptions(contentTypes, state.contentTypeId);
-    if (referenceFieldOptions.length === 0) return true;
+    // Child link lives on the parent — require a parent, then its reference field when ambiguous.
     if (!state.referenceEntryId) return true;
+    const parentContentTypeId = getParentContentTypeId(state, existingEntries);
+    const referenceFieldOptions = getReferenceFieldOptions(contentTypes, parentContentTypeId);
+    if (referenceFieldOptions.length === 0) return true;
     if (referenceFieldOptions.length > 1 && !state.referenceFieldId) return true;
   }
   return state.selectedFieldIds.length === 0;
@@ -57,9 +78,11 @@ export const isAddEntrySaveDisabled = (
 /** Maps form state to the payload expected by onAddEntry. */
 export const toAddEntryFormParams = (
   state: AddEntryFormState,
-  contentTypes: WorkflowContentType[]
+  contentTypes: WorkflowContentType[],
+  existingEntries: ExistingEntryOption[] = []
 ): AddEntryFormParams => {
-  const referenceFieldOptions = getReferenceFieldOptions(contentTypes, state.contentTypeId);
+  const parentContentTypeId = getParentContentTypeId(state, existingEntries);
+  const referenceFieldOptions = getReferenceFieldOptions(contentTypes, parentContentTypeId);
   return {
     contentTypeId: state.contentTypeId,
     isReference: state.isReference ?? false,
@@ -96,12 +119,21 @@ export const AddEntryForm = ({
     () => buildFieldOptionsForContentType(selectedContentType),
     [selectedContentType]
   );
-  const referenceFieldOptions = useMemo(
-    () => getReferenceFieldOptions(contentTypes, state.contentTypeId),
-    [contentTypes, state.contentTypeId]
+  const parentContentTypeId = useMemo(
+    () =>
+      existingEntries.find((entry) => entry.tempId === state.referenceEntryId)?.contentTypeId ?? '',
+    [existingEntries, state.referenceEntryId]
   );
-  const showReferenceFieldSelect = referenceFieldOptions.length > 1;
-  const canBeReference = referenceFieldOptions.length > 0;
+  const referenceFieldOptions = useMemo(
+    () => getReferenceFieldOptions(contentTypes, parentContentTypeId),
+    [contentTypes, parentContentTypeId]
+  );
+  const showReferenceFieldSelect =
+    Boolean(state.referenceEntryId) && referenceFieldOptions.length > 1;
+  const canBeReference = useMemo(
+    () => canLinkAsChildReference(contentTypes, existingEntries),
+    [contentTypes, existingEntries]
+  );
   const hasContentType = Boolean(state.contentTypeId);
 
   const handleContentTypeChange = (contentTypeId: string) => {
@@ -122,6 +154,13 @@ export const AddEntryForm = ({
     onChange({
       isReference: false,
       referenceEntryId: '',
+      referenceFieldId: '',
+    });
+  };
+
+  const handleParentEntryChange = (referenceEntryId: string) => {
+    onChange({
+      referenceEntryId,
       referenceFieldId: '',
     });
   };
@@ -151,7 +190,9 @@ export const AddEntryForm = ({
       {hasContentType && (
         <>
           <FormControl marginBottom="none">
-            <FormControl.Label>Should this entry be a reference entry?</FormControl.Label>
+            <FormControl.Label>
+              Should this new entry be a reference of an existing entry?
+            </FormControl.Label>
             <Flex flexDirection="column" gap="spacingXs">
               <Radio
                 id="ref-yes"
@@ -175,10 +216,12 @@ export const AddEntryForm = ({
 
           {state.isReference === true && (
             <FormControl marginBottom="none">
-              <FormControl.Label>Select the entry this should reference</FormControl.Label>
+              <FormControl.Label>
+                Which existing entry should this new entry be a reference to?
+              </FormControl.Label>
               <Select
                 value={state.referenceEntryId}
-                onChange={(e) => onChange({ referenceEntryId: e.target.value })}>
+                onChange={(e) => handleParentEntryChange(e.target.value)}>
                 <Select.Option value="" isDisabled>
                   Select an entry
                 </Select.Option>
@@ -193,7 +236,9 @@ export const AddEntryForm = ({
 
           {state.isReference === true && showReferenceFieldSelect && (
             <FormControl marginBottom="none">
-              <FormControl.Label>Which field should connect to this reference?</FormControl.Label>
+              <FormControl.Label>
+                Which field on the parent should link to this entry?
+              </FormControl.Label>
               <Select
                 value={state.referenceFieldId}
                 onChange={(e) => onChange({ referenceFieldId: e.target.value })}>
