@@ -321,7 +321,9 @@ describe('useWorkflowAgent — workflow orchestration', () => {
 
     it('handles cancellation resume payload and returns COMPLETED', async () => {
       const responses = [
-        makeRun(RunStatus.COMPLETED, { googleDocPayload: { cancelled: true, documentId: 'doc-1' } }),
+        makeRun(RunStatus.COMPLETED, {
+          googleDocPayload: { cancelled: true, documentId: 'doc-1' },
+        }),
       ];
 
       const workflowResult = await driveResume('run-123', { cancelled: true }, responses);
