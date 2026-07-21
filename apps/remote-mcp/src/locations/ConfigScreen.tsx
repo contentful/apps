@@ -17,22 +17,18 @@ const ConfigScreen = () => {
   const [expandedAccordions, setExpandedAccordions] = useState({
     contentLifecycle: true,
     otherFeatures: false,
-    migration: false,
   });
 
   const {
     contentLifecyclePermissions,
     otherFeaturesPermissions,
-    migrationPermissions,
     setContentLifecyclePermissions,
     setOtherFeaturesPermissions,
-    setMigrationPermissions,
     handleSelectAllToggle,
     handleEntityActionToggle,
     handleColumnToggle,
     handleRowToggle,
     handleOtherFeatureToggle,
-    handleMigrationToggle,
   } = usePermissions();
 
   const sdk = useSDK<ConfigAppSDK>();
@@ -54,7 +50,6 @@ const ConfigScreen = () => {
     const parameters = createAppInstallationParameters({
       contentLifecyclePermissions,
       otherFeaturesPermissions,
-      migrationPermissions,
     });
     return {
       // Parameters to be persisted as the app configuration.
@@ -63,7 +58,7 @@ const ConfigScreen = () => {
       // locations, you can just pass the currentState as is
       targetState: currentState,
     };
-  }, [contentLifecyclePermissions, otherFeaturesPermissions, migrationPermissions, sdk]);
+  }, [contentLifecyclePermissions, otherFeaturesPermissions, sdk]);
 
   useEffect(() => {
     // `onConfigure` allows to configure a callback to be
@@ -84,14 +79,13 @@ const ConfigScreen = () => {
 
         setContentLifecyclePermissions(parsedParameters.contentLifecyclePermissions);
         setOtherFeaturesPermissions(parsedParameters.otherFeaturesPermissions);
-        setMigrationPermissions(parsedParameters.migrationPermissions);
       }
 
       // Once preparation has finished, call `setReady` to hide
       // the loading screen and present the app to a user.
       sdk.app.setReady();
     })();
-  }, [sdk, setContentLifecyclePermissions, setOtherFeaturesPermissions, setMigrationPermissions]);
+  }, [sdk, setContentLifecyclePermissions, setOtherFeaturesPermissions]);
 
   const handleAccordionToggle = (section: string, expanded: boolean) => {
     setExpandedAccordions((prev) => ({
@@ -111,7 +105,6 @@ const ConfigScreen = () => {
       <PermissionsSection
         contentLifecyclePermissions={contentLifecyclePermissions}
         otherFeaturesPermissions={otherFeaturesPermissions}
-        migrationPermissions={migrationPermissions}
         expandedAccordions={expandedAccordions}
         onAccordionToggle={handleAccordionToggle}
         onSelectAllToggle={handleSelectAllToggle}
@@ -119,7 +112,6 @@ const ConfigScreen = () => {
         onColumnToggle={handleColumnToggle}
         onRowToggle={handleRowToggle}
         onOtherFeatureToggle={handleOtherFeatureToggle}
-        onMigrationToggle={handleMigrationToggle}
       />
       <Setup />
       <RolesPermissionsFooter />
