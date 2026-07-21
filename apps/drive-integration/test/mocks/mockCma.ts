@@ -23,6 +23,13 @@ export const createMockCMA = () => {
     appAction: {
       getManyForEnvironment: vi.fn().mockResolvedValue({ items: [] }),
     },
+    agent: {
+      generate: vi.fn(),
+    },
+    agentRun: {
+      get: vi.fn(),
+      resume: vi.fn(),
+    },
   };
 };
 
