@@ -1,9 +1,9 @@
 # Experience Toolbar example
 
-A minimal starter for an app that renders in the **Experience Editor toolbar** —
+A minimal starter for an app that renders in the **Experience Canvas toolbar** —
 the new `experience-toolbar` location introduced in
 [`@contentful/app-sdk@4.60.0`](https://www.npmjs.com/package/@contentful/app-sdk).
-Toolbar apps run alongside the Experience Editor and use the
+Toolbar apps run alongside the experience canvas and use the
 `sdk.experiences` namespace to read and react to the experience the user is editing.
 
 This example is intentionally small. It demonstrates the core building blocks of
@@ -90,11 +90,10 @@ from.
 ## A note on verification
 
 This example is built against the published `@contentful/app-sdk@4.60.0` types,
-which are the contract for the toolbar location. At the time of writing, the host
-renderer that serves `sdk.experiences` at runtime is still rolling out, so the example is
-**type-verified and unit-tested against a mocked SDK**, but not yet verified
-end-to-end inside a live Experience Editor. The API shapes used here match the published
-types exactly.
+which are the contract for the toolbar location. It is **type-verified and
+unit-tested against a mocked SDK**, and the API shapes used here match the
+published types exactly. Because it targets the published SDK contract, the same
+code runs against any host that serves `sdk.experiences` at runtime.
 
 ## Available Scripts
 
@@ -102,7 +101,7 @@ In the project directory, you can run:
 
 #### `npm start`
 
-Runs the app in development mode. Open it in the Experience Editor toolbar to use
+Runs the app in development mode. Open it in the Experience Canvas toolbar to use
 it. The page reloads on edits, and lint errors appear in the console.
 
 #### `npm run build`

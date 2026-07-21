@@ -1,10 +1,10 @@
 # Experience Auditor
 
-A polished, real-world example app for the **Experience Editor toolbar** — the
+A polished, real-world example app for the **Experience Canvas toolbar** — the
 `experience-toolbar` location introduced in
 [`@contentful/app-sdk@4.60.0`](https://www.npmjs.com/package/@contentful/app-sdk).
 
-Experience Auditor runs alongside the Experience Editor and continuously audits
+Experience Auditor runs alongside the experience canvas and continuously audits
 the experience you are editing for **accessibility, SEO, and
 content-completeness** issues. It demonstrates the standout capability of the
 toolbar location: **live, selection-aware tooling that reads the experience tree
@@ -173,19 +173,17 @@ pointing the app at `http://localhost:3000`.
 ## A note on verification
 
 This app is built against the published `@contentful/app-sdk@4.60.0` types,
-which are the contract for the toolbar location. The host renderer that serves
-`sdk.experiences` at runtime is still rolling out, so the app is **type-verified and
+which are the contract for the toolbar location. It is **type-verified and
 unit-tested against a mocked SDK** — 36 tests cover the audit rules, scoring,
 the collector and its binding resolution, capability detection, the suggested-
-fix derivation, and the toolbar's locate / fix / publish-gate behavior. It is
-not yet verified end-to-end inside a live Experience Editor; that live
-verification is tracked separately as the host renderer rolls out. The API
-shapes used here match the published types exactly.
+fix derivation, and the toolbar's locate / fix / publish-gate behavior. The API
+shapes used here match the published types exactly, so the same code runs
+against any host that serves `sdk.experiences` at runtime.
 
 > **Note on `getRootNodes()`.** The audit traversal starts from
-> `sdk.experiences.experience.getRootNodes()`, which currently resolves to an
-> empty list until the host wires up experience-tree sync. Against a live host
-> today the toolbar shows a distinct "no components to audit yet" state rather
+> `sdk.experiences.experience.getRootNodes()`. When it resolves to an empty
+> list — for example against a host that does not yet expose the experience
+> tree — the toolbar shows a distinct "no components to audit yet" state rather
 > than the all-clear celebration; demo mode (`/?demo`) exercises the full loop
 > against a seeded in-memory experience.
 

@@ -47,7 +47,7 @@ const ConfigScreen = () => {
       <Form>
         <Heading>Experience Toolbar example</Heading>
         <Paragraph>
-          This app renders in the Experience Editor toolbar. There is nothing to configure here —
+          This app renders in the Experience Canvas toolbar. There is nothing to configure here —
           once installed, make sure the <code>experience-toolbar</code> location is registered on
           your app definition and the toolbar app will appear when editing an experience.
         </Paragraph>

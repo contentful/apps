@@ -39,7 +39,7 @@ const ConfigScreen = () => {
       <Form>
         <Heading>Experience Auditor</Heading>
         <Paragraph>
-          Experience Auditor runs inside the Experience Editor toolbar and continuously checks the
+          Experience Auditor runs inside the Experience Canvas toolbar and continuously checks the
           experience you are editing for accessibility, SEO, and content-completeness issues.
         </Paragraph>
         <Note variant="primary">

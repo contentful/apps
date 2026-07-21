@@ -28,7 +28,7 @@ interface Selection {
 }
 
 /**
- * A minimal Experience Editor toolbar app. It demonstrates the core `sdk.experiences`
+ * A minimal Experience Canvas toolbar app. It demonstrates the core `sdk.experiences`
  * patterns a toolbar app is built on:
  *
  *  - reading `sdk.experiences.context` to tell experience vs. fragment editing apart

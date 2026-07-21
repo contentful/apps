@@ -83,7 +83,7 @@ const FindingList = ({ findings, nodeCount, canLocate, onLocate }: FindingListPr
                       title={
                         canLocate
                           ? undefined
-                          : 'Locate on canvas is not available — the experience editor does not expose selection yet'
+                          : 'Locate on canvas is not available — the experience canvas does not expose selection yet'
                       }>
                       Locate
                     </Button>
