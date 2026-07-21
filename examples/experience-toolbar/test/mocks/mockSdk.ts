@@ -32,6 +32,11 @@ const mockSdk: any = {
     setReady: vi.fn(),
     getCurrentState: vi.fn().mockResolvedValue(null),
   },
+  window: {
+    startAutoResizer: vi.fn(),
+    stopAutoResizer: vi.fn(),
+    updateHeight: vi.fn(),
+  },
   experiences: {
     context: { type: 'experience', entityId: 'experience-123' },
     onContextChanged: vi.fn().mockReturnValue(noopUnsubscribe),

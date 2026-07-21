@@ -170,22 +170,23 @@ npm run create-app-definition
 selecting the **App configuration screen** and **Experience toolbar** locations,
 pointing the app at `http://localhost:3000`.
 
-## A note on verification
+## Verification
 
-This app is built against the published `@contentful/app-sdk@4.60.0` types,
-which are the contract for the toolbar location. It is **type-verified and
-unit-tested against a mocked SDK** — 36 tests cover the audit rules, scoring,
+This app is verified working end-to-end against a live experience canvas — the
+host renderer serving `sdk.experiences` — in addition to being **type-checked
+and unit-tested against a mocked SDK**. 38 tests cover the audit rules, scoring,
 the collector and its binding resolution, capability detection, the suggested-
-fix derivation, and the toolbar's locate / fix / publish-gate behavior. The API
-shapes used here match the published types exactly, so the same code runs
-against any host that serves `sdk.experiences` at runtime.
+fix derivation, the auto-resize wiring, and the toolbar's locate / fix /
+publish-gate behavior. The API shapes used here match the published
+`@contentful/app-sdk` types exactly, so the audit you run against the canvas is
+the same code these tests exercise.
 
 > **Note on `getRootNodes()`.** The audit traversal starts from
-> `sdk.experiences.experience.getRootNodes()`. When it resolves to an empty
-> list — for example against a host that does not yet expose the experience
-> tree — the toolbar shows a distinct "no components to audit yet" state rather
-> than the all-clear celebration; demo mode (`/?demo`) exercises the full loop
-> against a seeded in-memory experience.
+> `sdk.experiences.experience.getRootNodes()`. When it returns an empty list
+> — an experience with nothing on the canvas yet — the toolbar shows a distinct
+> "no components to audit yet" state rather than the all-clear celebration;
+> demo mode (`/?demo`) exercises the full loop against a seeded in-memory
+> experience.
 
 ## Available scripts
 

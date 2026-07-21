@@ -19,10 +19,16 @@ describe('ExperienceToolbar (Experience Auditor)', () => {
       set: vi.fn(),
       highlight: vi.fn(),
     };
-    mockSdk.experiences.experience.getRootNodes.mockReturnValue(defaultNodes);
+    mockSdk.experiences.experience.getRootNodes.mockResolvedValue(defaultNodes);
     mockSdk.experiences.experience.getNode.mockImplementation(
       (id: string) => defaultNodes.find((n) => n.id === id) ?? null
     );
+  });
+
+  it('starts the auto resizer so the host sizes the toolbar panel', () => {
+    render(<ExperienceToolbar />);
+
+    expect(mockSdk.window.startAutoResizer).toHaveBeenCalledOnce();
   });
 
   it('runs an audit on mount and renders findings with a score', async () => {
@@ -60,7 +66,7 @@ describe('ExperienceToolbar (Experience Auditor)', () => {
   });
 
   it('shows a no-tree-data state when the host returns no root nodes', async () => {
-    mockSdk.experiences.experience.getRootNodes.mockReturnValue([]);
+    mockSdk.experiences.experience.getRootNodes.mockResolvedValue([]);
     const { getByTestId } = render(<ExperienceToolbar />);
     await waitFor(() => expect(getByTestId('no-tree-data')).toBeInTheDocument());
   });
@@ -73,7 +79,7 @@ describe('ExperienceToolbar (Experience Auditor)', () => {
       { key: 'image', area: 'content', value: { sys: { id: 'asset-1' } } },
       { key: 'altText', area: 'content', value: '  spaced alt  ' },
     ]);
-    mockSdk.experiences.experience.getRootNodes.mockReturnValue([fixNode]);
+    mockSdk.experiences.experience.getRootNodes.mockResolvedValue([fixNode]);
     mockSdk.experiences.experience.getNode.mockReturnValue(fixNode);
 
     const { getAllByTestId, getByTestId } = render(<ExperienceToolbar />);
@@ -92,7 +98,7 @@ describe('ExperienceToolbar (Experience Auditor)', () => {
       { key: 'heading', area: 'content', value: 'Spring Sale' },
       { key: 'metaTitle', area: 'content', value: '' },
     ]);
-    mockSdk.experiences.experience.getRootNodes.mockReturnValue([metaNode]);
+    mockSdk.experiences.experience.getRootNodes.mockResolvedValue([metaNode]);
     mockSdk.experiences.experience.getNode.mockReturnValue(metaNode);
 
     const { getByTestId, queryByText } = render(<ExperienceToolbar />);

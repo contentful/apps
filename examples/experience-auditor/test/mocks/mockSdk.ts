@@ -38,6 +38,11 @@ const mockSdk: any = {
     setReady: vi.fn(),
     getCurrentState: vi.fn().mockResolvedValue(null),
   },
+  window: {
+    startAutoResizer: vi.fn(),
+    stopAutoResizer: vi.fn(),
+    updateHeight: vi.fn(),
+  },
   access: {
     can: vi.fn().mockResolvedValue(true),
   },
@@ -55,7 +60,7 @@ const mockSdk: any = {
       save: vi.fn().mockResolvedValue(undefined),
       publish: vi.fn().mockResolvedValue(undefined),
       getNode: vi.fn((id: string) => defaultNodes.find((n) => n.id === id) ?? null),
-      getRootNodes: vi.fn().mockReturnValue(defaultNodes),
+      getRootNodes: vi.fn().mockResolvedValue(defaultNodes),
       selection: {
         get: vi.fn().mockReturnValue({ nodeId: null }),
         onChange: vi.fn().mockReturnValue(noopUnsubscribe),

@@ -87,13 +87,13 @@ true, scrollIntoView: true })` to flash and scroll to the selected component —
 the outbound counterpart to the `selection.onChange` subscription the panel reads
 from.
 
-## A note on verification
+## Verification
 
-This example is built against the published `@contentful/app-sdk@4.60.0` types,
-which are the contract for the toolbar location. It is **type-verified and
-unit-tested against a mocked SDK**, and the API shapes used here match the
-published types exactly. Because it targets the published SDK contract, the same
-code runs against any host that serves `sdk.experiences` at runtime.
+This example is verified working end-to-end against a live experience canvas —
+the host renderer serving `sdk.experiences` — in addition to being
+**type-checked and unit-tested against a mocked SDK**. The API shapes used here
+match the published `@contentful/app-sdk` types exactly, so what you see in the
+toolbar panel is what the host delivers at runtime.
 
 ## Available Scripts
 

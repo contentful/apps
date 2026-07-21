@@ -51,6 +51,17 @@ const ExperienceToolbar = () => {
   const [properties, setProperties] = useState<ComponentPropertyDescriptor[] | null>(null);
   const [loadingProperties, setLoadingProperties] = useState(false);
 
+  // Report the panel's height so the host sizes the toolbar app to its content
+  // in the stacked Apps panel. sdk.window on the toolbar location arrived in
+  // app-sdk 4.67.0; guard it so hosts that don't serve it degrade to a no-op.
+  useEffect(() => {
+    if (!sdk.window) {
+      return;
+    }
+    sdk.window.startAutoResizer();
+    return () => sdk.window.stopAutoResizer();
+  }, [sdk]);
+
   // Keep the editing context (experience vs. fragment) in sync.
   useEffect(() => {
     return sdk.experiences.onContextChanged(setContext);

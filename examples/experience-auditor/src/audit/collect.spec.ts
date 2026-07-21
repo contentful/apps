@@ -7,7 +7,7 @@ describe('collectNodes', () => {
     const experience: any = {
       getRootNodes: vi
         .fn()
-        .mockReturnValue([
+        .mockResolvedValue([
           makeMockNode('a', 'Component', [{ key: 'heading', area: 'content', value: 'Hi' }]),
           makeMockNode('b', 'Component', [{ key: 'body', area: 'content', value: 'There' }]),
         ]),
@@ -27,7 +27,7 @@ describe('collectNodes', () => {
     const experience: any = {
       getRootNodes: vi
         .fn()
-        .mockReturnValue([
+        .mockResolvedValue([
           broken,
           makeMockNode('ok', 'Component', [{ key: 'heading', area: 'content', value: 'Hi' }]),
         ]),
