@@ -16,7 +16,7 @@ const App = () => {
 
   useEffect(() => {
     if (!ldClient) return;
-    void ldClient.identify({ kind: 'user', key: sdk.user.sys.id });
+    void ldClient.identify({ kind: 'organization', key: sdk.ids.organization });
   }, [ldClient, sdk.user.sys.id]);
 
   const Component = useMemo(() => {
