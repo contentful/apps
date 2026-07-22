@@ -47,14 +47,20 @@ const getParentContentTypeId = (
 ): string =>
   existingEntries.find((entry) => entry.tempId === state.referenceEntryId)?.contentTypeId ?? '';
 
+/** Existing entries whose content type has at least one Entry reference field. */
+export const getParentEntriesThatAcceptChildren = (
+  contentTypes: WorkflowContentType[],
+  existingEntries: ExistingEntryOption[]
+): ExistingEntryOption[] =>
+  existingEntries.filter(
+    (entry) => getReferenceFieldOptions(contentTypes, entry.contentTypeId).length > 0
+  );
+
 /** True when at least one existing entry's content type can accept a child reference. */
 export const canLinkAsChildReference = (
   contentTypes: WorkflowContentType[],
   existingEntries: ExistingEntryOption[]
-): boolean =>
-  existingEntries.some(
-    (entry) => getReferenceFieldOptions(contentTypes, entry.contentTypeId).length > 0
-  );
+): boolean => getParentEntriesThatAcceptChildren(contentTypes, existingEntries).length > 0;
 
 /** Returns true when the form lacks enough input to save. */
 export const isAddEntrySaveDisabled = (
@@ -63,7 +69,9 @@ export const isAddEntrySaveDisabled = (
   existingEntries: ExistingEntryOption[] = []
 ): boolean => {
   if (!state.contentTypeId) return true;
-  if (state.isReference === null) return true;
+  const canBeReference = canLinkAsChildReference(contentTypes, existingEntries);
+  // Reference Yes/No is hidden when no parent can accept a child — treat as No.
+  if (canBeReference && state.isReference === null) return true;
   if (state.isReference) {
     // Child link lives on the parent — require a parent, then its reference field when ambiguous.
     if (!state.referenceEntryId) return true;
@@ -130,10 +138,11 @@ export const AddEntryForm = ({
   );
   const showReferenceFieldSelect =
     Boolean(state.referenceEntryId) && referenceFieldOptions.length > 1;
-  const canBeReference = useMemo(
-    () => canLinkAsChildReference(contentTypes, existingEntries),
+  const parentEntryOptions = useMemo(
+    () => getParentEntriesThatAcceptChildren(contentTypes, existingEntries),
     [contentTypes, existingEntries]
   );
+  const canBeReference = parentEntryOptions.length > 0;
   const hasContentType = Boolean(state.contentTypeId);
 
   const handleContentTypeChange = (contentTypeId: string) => {
@@ -189,32 +198,33 @@ export const AddEntryForm = ({
 
       {hasContentType && (
         <>
-          <FormControl marginBottom="none">
-            <FormControl.Label>
-              Should this new entry be a reference of an existing entry?
-            </FormControl.Label>
-            <Flex flexDirection="column" gap="spacingXs">
-              <Radio
-                id="ref-yes"
-                name="is-reference"
-                value="yes"
-                isChecked={state.isReference === true}
-                isDisabled={!canBeReference}
-                onChange={() => handleReferenceChange(true)}>
-                Yes
-              </Radio>
-              <Radio
-                id="ref-no"
-                name="is-reference"
-                value="no"
-                isChecked={state.isReference === false}
-                onChange={() => handleReferenceChange(false)}>
-                No
-              </Radio>
-            </Flex>
-          </FormControl>
+          {canBeReference && (
+            <FormControl marginBottom="none">
+              <FormControl.Label>
+                Should this new entry be a reference of an existing entry?
+              </FormControl.Label>
+              <Flex flexDirection="column" gap="spacingXs">
+                <Radio
+                  id="ref-yes"
+                  name="is-reference"
+                  value="yes"
+                  isChecked={state.isReference === true}
+                  onChange={() => handleReferenceChange(true)}>
+                  Yes
+                </Radio>
+                <Radio
+                  id="ref-no"
+                  name="is-reference"
+                  value="no"
+                  isChecked={state.isReference === false}
+                  onChange={() => handleReferenceChange(false)}>
+                  No
+                </Radio>
+              </Flex>
+            </FormControl>
+          )}
 
-          {state.isReference === true && (
+          {canBeReference && state.isReference === true && (
             <FormControl marginBottom="none">
               <FormControl.Label>
                 Which existing entry should this new entry be a reference to?
@@ -225,7 +235,7 @@ export const AddEntryForm = ({
                 <Select.Option value="" isDisabled>
                   Select an entry
                 </Select.Option>
-                {existingEntries.map((entry) => (
+                {parentEntryOptions.map((entry) => (
                   <Select.Option key={entry.tempId} value={entry.tempId}>
                     {entry.label}
                   </Select.Option>
@@ -234,7 +244,7 @@ export const AddEntryForm = ({
             </FormControl>
           )}
 
-          {state.isReference === true && showReferenceFieldSelect && (
+          {canBeReference && state.isReference === true && showReferenceFieldSelect && (
             <FormControl marginBottom="none">
               <FormControl.Label>
                 Which field on the parent should link to this entry?

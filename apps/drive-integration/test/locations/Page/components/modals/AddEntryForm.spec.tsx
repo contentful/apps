@@ -243,21 +243,47 @@ describe('AddEntryForm', () => {
       expect(screen.queryByText('Which field on the parent should link to this entry?')).toBeNull();
     });
 
-    it('disables Yes only when no existing parent can accept a reference', async () => {
+    it('hides the reference question when no existing parent can accept a child', async () => {
       renderForm(makeState({ contentTypeId: 'component' }), vi.fn(), entriesWithoutRefFields);
 
       await waitFor(() => {
-        expect(screen.getByLabelText('Yes')).toBeDisabled();
-        expect(screen.getByLabelText('No')).not.toBeDisabled();
+        expect(screen.getByText('Select the field(s) the content should map to')).toBeTruthy();
       });
+
+      expect(
+        screen.queryByText('Should this new entry be a reference of an existing entry?')
+      ).toBeNull();
+      expect(screen.queryByLabelText('Yes')).toBeNull();
+      expect(screen.queryByLabelText('No')).toBeNull();
     });
 
-    it('keeps Yes enabled when the new entry type has no reference fields but a parent can', async () => {
+    it('only lists parent entries whose content type can accept a child', async () => {
+      renderForm(
+        makeState({
+          contentTypeId: 'component',
+          isReference: true,
+        }),
+        vi.fn(),
+        [...existingEntries, ...entriesWithoutRefFields]
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Blog post')).toBeTruthy();
+        expect(screen.getByText('Landing page')).toBeTruthy();
+      });
+
+      expect(screen.queryByText('A tag')).toBeNull();
+    });
+
+    it('keeps the reference question when the new entry type has no reference fields but a parent can', async () => {
       renderForm(makeState({ contentTypeId: 'tag' }));
 
       await waitFor(() => {
-        expect(screen.getByLabelText('Yes')).not.toBeDisabled();
-        expect(screen.getByLabelText('No')).not.toBeDisabled();
+        expect(
+          screen.getByText('Should this new entry be a reference of an existing entry?')
+        ).toBeTruthy();
+        expect(screen.getByLabelText('Yes')).toBeTruthy();
+        expect(screen.getByLabelText('No')).toBeTruthy();
       });
     });
 
@@ -347,7 +373,7 @@ describe('AddEntryForm', () => {
       ).toBe(true);
     });
 
-    it('is disabled when isReference is null', () => {
+    it('is disabled when isReference is null and parents can accept a child', () => {
       expect(
         isAddEntrySaveDisabled(
           makeState({ contentTypeId: 'component', isReference: null, selectedFieldIds: ['title'] }),
@@ -355,6 +381,16 @@ describe('AddEntryForm', () => {
           existingEntries
         )
       ).toBe(true);
+    });
+
+    it('is enabled when isReference is null but no parent can accept a child', () => {
+      expect(
+        isAddEntrySaveDisabled(
+          makeState({ contentTypeId: 'component', isReference: null, selectedFieldIds: ['title'] }),
+          contentTypes as any,
+          entriesWithoutRefFields
+        )
+      ).toBe(false);
     });
 
     it('is disabled when No but no fields selected', () => {
