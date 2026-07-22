@@ -12,7 +12,6 @@ import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 import {
   DocumentTabProps,
   MappingReviewSuspendPayload,
-  CompletedWorkflowPayload,
   ResumePayload,
   TabsImagesSuspendPayload,
   RunStatus,
