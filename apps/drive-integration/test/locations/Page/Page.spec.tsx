@@ -147,8 +147,7 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
 
 vi.mock('../../../src/hooks/useGoogleDocsAgentFlags', () => ({
   useGoogleDocsAgentFlags: () => ({
-    'google-docs-async-runs': true,
-    'google-docs-agent-improvements': false,
+    'google-docs-agent-improvements': true,
   }),
 }));
 
