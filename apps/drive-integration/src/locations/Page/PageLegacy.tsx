@@ -29,7 +29,6 @@ export const PageLegacy = () => {
     oauthToken: '',
   });
 
-
   const handleSelectFile = () => {
     modalOrchestratorRef.current?.startFlow();
   };

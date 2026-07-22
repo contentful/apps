@@ -54,7 +54,10 @@ interface PreviewErrorState {
   message: string;
 }
 
-export const ModalOrchestratorLegacy = forwardRef<ModalOrchestratorLegacyHandle, ModalOrchestratorProps>(
+export const ModalOrchestratorLegacy = forwardRef<
+  ModalOrchestratorLegacyHandle,
+  ModalOrchestratorProps
+>(
   (
     {
       sdk,

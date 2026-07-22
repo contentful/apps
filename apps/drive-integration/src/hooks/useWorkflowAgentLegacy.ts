@@ -63,7 +63,8 @@ const getAgentPayload = (runData: AgentRunData): string | null => {
 
 const previewPayloadFromCompletedRun = (runData: AgentRunData): CompletedWorkflowPayload => {
   const googleDocPayload = runData.metadata?.googleDocPayload;
-  if (googleDocPayload == null) throw new Error('Workflow completed but result payload was missing.');
+  if (googleDocPayload == null)
+    throw new Error('Workflow completed but result payload was missing.');
   if (
     typeof googleDocPayload === 'object' &&
     googleDocPayload !== null &&
@@ -130,10 +131,16 @@ const getWorkflowRunResult = (
     case RunStatus.PENDING_REVIEW: {
       const suspendPayload = getSuspendPayload(runData);
       if (!suspendPayload) {
-        if (pendingReviewMissingPayloadCount < MAX_PENDING_REVIEW_MISSING_PAYLOAD_RETRIES) return null;
+        if (pendingReviewMissingPayloadCount < MAX_PENDING_REVIEW_MISSING_PAYLOAD_RETRIES)
+          return null;
         throw new Error('Workflow paused for review, but suspend payload was missing.');
       }
-      return { status, runId: threadId, suspendPayload: suspendPayload as MappingReviewSuspendPayload, messages: runData.messages ?? [] };
+      return {
+        status,
+        runId: threadId,
+        suspendPayload: suspendPayload as MappingReviewSuspendPayload,
+        messages: runData.messages ?? [],
+      };
     }
     case RunStatus.COMPLETED: {
       return {
@@ -183,7 +190,10 @@ const pollAgentRun = async (
   }
 
   console.error(`✗ Run [${runId}] timed out after ${elapsedSec(startMs)}`);
-  throw new WorkflowRunError(ERROR_MESSAGES.PROCESSING_TIMEOUT, WorkflowFailureReason.PROCESSING_TIMEOUT);
+  throw new WorkflowRunError(
+    ERROR_MESSAGES.PROCESSING_TIMEOUT,
+    WorkflowFailureReason.PROCESSING_TIMEOUT
+  );
 };
 
 export const useWorkflowAgentLegacy = ({
@@ -206,7 +216,9 @@ export const useWorkflowAgentLegacy = ({
             parts: [
               {
                 type: 'text' as const,
-                text: `Analyze the following google docs document ${documentId} and extract the Contentful entries and assets for the following content types: ${contentTypeIds.join(', ')}`,
+                text: `Analyze the following google docs document ${documentId} and extract the Contentful entries and assets for the following content types: ${contentTypeIds.join(
+                  ', '
+                )}`,
               },
             ],
           },
