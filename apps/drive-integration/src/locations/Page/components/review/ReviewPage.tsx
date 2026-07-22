@@ -7,7 +7,7 @@ import { cx } from '@emotion/css';
 import type { EntryProps } from 'contentful-management';
 import type { EntryBlockGraph, MappingReviewSuspendPayload, ReviewedReferenceGraph } from '@types';
 import { RunStatus } from '@types';
-import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
+import { resumeAndPollWorkflow } from '../../../../services/workflowService';
 import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
 import type { ContentTypeDisplayInfoMap } from '../../../../utils/overviewEntryList';
 import {
@@ -35,6 +35,7 @@ interface ReviewPageProps {
   runId?: string;
   onCancelReview: (graph: EntryBlockGraph) => Promise<void>;
   onExitReview: () => void;
+  onRunCompleted?: (entryIds: string[]) => void;
 }
 
 export const ReviewPage = ({
@@ -43,6 +44,7 @@ export const ReviewPage = ({
   runId,
   onCancelReview,
   onExitReview,
+  onRunCompleted,
 }: ReviewPageProps) => {
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
   const [selectedEntryIndex, setSelectedEntryIndex] = useState<number | null>(null);
@@ -94,8 +96,6 @@ export const ReviewPage = ({
   );
   const hasSelectedEntries = selectedEntryCount > 0;
 
-  const { resumeWorkflow } = useWorkflowAgent({ sdk, documentId: '', oauthToken: '' });
-
   const handleToggleEntrySelection = (entryKey: string, isSelected: boolean) => {
     setSelectedEntryKeys((previous) => {
       const next = new Set(previous);
@@ -125,7 +125,7 @@ export const ReviewPage = ({
         entryBlockGraph,
         selectedEntryKeys
       );
-      const result = await resumeWorkflow(runId, {
+      const result = await resumeAndPollWorkflow(sdk, runId, {
         entryBlockGraph: selectedEntryBlockGraph,
       });
 
@@ -143,6 +143,8 @@ export const ReviewPage = ({
           return;
         }
 
+        const entryIds = entries.map((e) => e.sys.id);
+        onRunCompleted?.(entryIds);
         setCreatedEntries(entries);
         setIsSummaryModalOpen(true);
         return;
@@ -166,9 +168,9 @@ export const ReviewPage = ({
     hasSelectedEntries,
     entryBlockGraph,
     selectedEntryKeys,
-    resumeWorkflow,
     sdk,
     onExitReview,
+    onRunCompleted,
   ]);
 
   const handleConfirmCancel = useCallback(async () => {

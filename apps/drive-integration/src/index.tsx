@@ -4,7 +4,6 @@ import { withLDProvider } from 'launchdarkly-react-client-sdk';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import LocalhostWarning from './locations/LocalhostWarning';
-
 const AppWithLD = withLDProvider({
   clientSideID: import.meta.env.VITE_LD_CLIENT_ID ?? '',
   options: { bootstrap: 'localStorage' },
