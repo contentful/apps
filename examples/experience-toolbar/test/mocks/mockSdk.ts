@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 
 /**
- * A minimal mock of the `ExperienceEditorToolbarAppSDK` surface used by the
+ * A minimal mock of the `ExperienceCanvasToolbarAppSDK` surface used by the
  * example. Subscription methods record their callback so tests can drive
  * changes (selection, context) and assert the UI reacts. Each
  * subscription returns an unsubscribe spy.

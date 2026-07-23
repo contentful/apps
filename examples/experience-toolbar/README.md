@@ -16,7 +16,7 @@ a toolbar app:
 - **Node inspection** — resolving the selected node with
   `sdk.experiences.experience.getNode(nodeId)` and reading its properties
 
-It is fully typed with `ExperienceEditorToolbarAppSDK`.
+It is fully typed with `ExperienceCanvasToolbarAppSDK`.
 
 > **Out of scope (by design).** This starter does not mutate the experience.
 > Data Assembly, `save()`/`publish()`, and property writes are deliberately left
