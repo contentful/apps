@@ -5,6 +5,7 @@ interface ImportMetaEnv {
   readonly VITE_LD_CLIENT_ID?: string;
   readonly VITE_GOOGLE_PICKER_API_KEY?: string;
   readonly VITE_GOOGLE_APP_ID?: string;
+  readonly VITE_ENV?: string;
 }
 
 declare module '*.png' {
