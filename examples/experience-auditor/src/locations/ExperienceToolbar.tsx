@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import type { ExperienceContext, ExperienceEditorToolbarAppSDK } from '@contentful/app-sdk';
+import type { ExperienceContext, ExperienceCanvasToolbarAppSDK } from '@contentful/app-sdk';
 import {
   Badge,
   Box,
@@ -32,7 +32,7 @@ import FindingList from '../components/FindingList';
  * outstanding errors.
  */
 const ExperienceToolbar = () => {
-  const sdk = useSDK<ExperienceEditorToolbarAppSDK>();
+  const sdk = useSDK<ExperienceCanvasToolbarAppSDK>();
 
   const [context, setContext] = useState<ExperienceContext>(() => sdk.experiences.context);
   const [report, setReport] = useState<AuditReport | null>(null);

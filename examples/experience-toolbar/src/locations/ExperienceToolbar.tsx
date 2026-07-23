@@ -3,7 +3,7 @@ import type {
   ComponentPropertyDescriptor,
   ExperienceContext,
   ExperienceNodeType,
-  ExperienceEditorToolbarAppSDK,
+  ExperienceCanvasToolbarAppSDK,
 } from '@contentful/app-sdk';
 import {
   Badge,
@@ -42,7 +42,7 @@ interface Selection {
  * call on cleanup.
  */
 const ExperienceToolbar = () => {
-  const sdk = useSDK<ExperienceEditorToolbarAppSDK>();
+  const sdk = useSDK<ExperienceCanvasToolbarAppSDK>();
 
   const [context, setContext] = useState<ExperienceContext>(() => sdk.experiences.context);
   const [selection, setSelection] = useState<Selection>(() =>
