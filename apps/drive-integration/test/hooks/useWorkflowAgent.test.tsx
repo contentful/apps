@@ -1,9 +1,19 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { PageAppSDK } from '@contentful/app-sdk';
-import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
+import { useWorkflowAgentLegacy as useWorkflowAgent } from '@hooks/useWorkflowAgentLegacy';
 import { RunStatus, WorkflowFailureReason } from '@types';
 import { createMockSDK } from '../mocks';
+
+const mockGetWorkflowRun = vi.fn();
+const mockResumeWorkflowRun = vi.fn();
+const mockStartAgentRun = vi.fn();
+
+vi.mock('../../src/services/agents-api', () => ({
+  getWorkflowRun: (...args: unknown[]) => mockGetWorkflowRun(...args),
+  resumeWorkflowRun: (...args: unknown[]) => mockResumeWorkflowRun(...args),
+  startAgentRun: (...args: unknown[]) => mockStartAgentRun(...args),
+}));
 
 // Minimal valid googleDocPayload that passes validatePayloadShape
 const COMPLETED_PAYLOAD = { entries: [], assets: [], referenceGraph: {} };
@@ -39,8 +49,9 @@ describe('useWorkflowAgent — workflow orchestration', () => {
     sdk = createMockSDK() as PageAppSDK;
     vi.useFakeTimers();
 
-    // Default: generate returns a run ID
-    vi.mocked(sdk.cma.agent.generate).mockResolvedValue({ sys: { id: 'run-123' } } as any);
+    // Default: startAgentRun returns a run ID
+    mockStartAgentRun.mockResolvedValue('run-123');
+    mockResumeWorkflowRun.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -56,15 +67,18 @@ describe('useWorkflowAgent — workflow orchestration', () => {
     );
 
     let callIndex = 0;
-    vi.mocked(sdk.cma.agentRun.get).mockImplementation(async () => {
+    mockGetWorkflowRun.mockImplementation(async () => {
       const response = mockResponses[Math.min(callIndex, mockResponses.length - 1)];
       callIndex++;
-      return response as any;
+      return response;
     });
 
     let resultPromise: Promise<any>;
     act(() => {
-      resultPromise = result.current.startWorkflow(['blogPost']);
+      resultPromise = result.current.startWorkflow(['blogPost'], {
+        selectedTabIds: [],
+        includeImages: false,
+      });
       // Attach a no-op catch immediately so Node doesn't flag the rejection as
       // unhandled between the act() call and the rejects assertion below.
       void resultPromise.catch(() => {});
@@ -90,10 +104,10 @@ describe('useWorkflowAgent — workflow orchestration', () => {
     );
 
     let callIndex = 0;
-    vi.mocked(sdk.cma.agentRun.get).mockImplementation(async () => {
+    mockGetWorkflowRun.mockImplementation(async () => {
       const response = mockResponses[Math.min(callIndex, mockResponses.length - 1)];
       callIndex++;
-      return response as any;
+      return response;
     });
 
     let resultPromise: Promise<any>;
@@ -157,7 +171,7 @@ describe('useWorkflowAgent — workflow orchestration', () => {
 
       expect(result.status).toBe(RunStatus.PENDING_REVIEW);
       expect(result.suspendPayload).toEqual(MAPPING_SUSPEND_PAYLOAD);
-      expect(sdk.cma.agentRun.get).toHaveBeenCalledTimes(5);
+      expect(mockGetWorkflowRun).toHaveBeenCalledTimes(5);
     });
 
     it('throws WorkflowRunError when PENDING_REVIEW missing payload exceeds retry limit', async () => {
@@ -203,7 +217,7 @@ describe('useWorkflowAgent — workflow orchestration', () => {
 
     it('throws WorkflowRunError with PROCESSING_TIMEOUT after max poll attempts', async () => {
       // Always returns IN_PROGRESS so polling exhausts MAX_POLL_ATTEMPTS (120)
-      vi.mocked(sdk.cma.agentRun.get).mockResolvedValue(makeRun(RunStatus.IN_PROGRESS) as any);
+      mockGetWorkflowRun.mockResolvedValue(makeRun(RunStatus.IN_PROGRESS));
 
       const { result } = renderHook(() =>
         useWorkflowAgent({ sdk, documentId: 'doc-1', oauthToken: 'token-x' })
@@ -211,7 +225,10 @@ describe('useWorkflowAgent — workflow orchestration', () => {
 
       let resultPromise: Promise<any>;
       act(() => {
-        resultPromise = result.current.startWorkflow(['blogPost']);
+        resultPromise = result.current.startWorkflow(['blogPost'], {
+          selectedTabIds: [],
+          includeImages: false,
+        });
         void resultPromise.catch(() => {});
       });
 
@@ -228,13 +245,10 @@ describe('useWorkflowAgent — workflow orchestration', () => {
 
     it('handles a run that is initially not found, then appears', async () => {
       let callCount = 0;
-      vi.mocked(sdk.cma.agentRun.get).mockImplementation(async () => {
+      mockGetWorkflowRun.mockImplementation(async () => {
         callCount++;
-        if (callCount < 3) {
-          const err = Object.assign(new Error('Not found'), { code: 'NotFound' });
-          throw err;
-        }
-        return makeRun(RunStatus.COMPLETED, { googleDocPayload: COMPLETED_PAYLOAD }) as any;
+        if (callCount < 3) return null;
+        return makeRun(RunStatus.COMPLETED, { googleDocPayload: COMPLETED_PAYLOAD });
       });
 
       const { result } = renderHook(() =>
@@ -243,7 +257,10 @@ describe('useWorkflowAgent — workflow orchestration', () => {
 
       let resultPromise: Promise<any>;
       act(() => {
-        resultPromise = result.current.startWorkflow(['blogPost']);
+        resultPromise = result.current.startWorkflow(['blogPost'], {
+          selectedTabIds: [],
+          includeImages: false,
+        });
       });
 
       for (let i = 0; i < 3; i++) {
@@ -257,8 +274,8 @@ describe('useWorkflowAgent — workflow orchestration', () => {
     });
 
     it('sets isAnalyzing to true while running and false when done', async () => {
-      vi.mocked(sdk.cma.agentRun.get).mockResolvedValue(
-        makeRun(RunStatus.COMPLETED, { googleDocPayload: COMPLETED_PAYLOAD }) as any
+      mockGetWorkflowRun.mockResolvedValue(
+        makeRun(RunStatus.COMPLETED, { googleDocPayload: COMPLETED_PAYLOAD })
       );
 
       const { result } = renderHook(() =>
@@ -269,7 +286,10 @@ describe('useWorkflowAgent — workflow orchestration', () => {
 
       let resultPromise: Promise<any>;
       act(() => {
-        resultPromise = result.current.startWorkflow(['blogPost']);
+        resultPromise = result.current.startWorkflow(['blogPost'], {
+          selectedTabIds: [],
+          includeImages: false,
+        });
       });
 
       expect(result.current.isAnalyzing).toBe(true);
@@ -285,7 +305,7 @@ describe('useWorkflowAgent — workflow orchestration', () => {
 
   describe('resumeWorkflow', () => {
     beforeEach(() => {
-      vi.mocked(sdk.cma.agentRun.resume).mockResolvedValue(undefined as any);
+      mockResumeWorkflowRun.mockResolvedValue(undefined);
     });
 
     it('resumes a run and polls to COMPLETED', async () => {
@@ -296,9 +316,12 @@ describe('useWorkflowAgent — workflow orchestration', () => {
 
       const workflowResult = await driveResume('run-123', { includeImages: true }, responses);
 
-      expect(sdk.cma.agentRun.resume).toHaveBeenCalledWith(
-        expect.objectContaining({ runId: 'run-123' }),
-        { resumePayload: { includeImages: true } }
+      expect(mockResumeWorkflowRun).toHaveBeenCalledWith(
+        sdk,
+        expect.any(String),
+        expect.any(String),
+        'run-123',
+        { includeImages: true }
       );
       expect(workflowResult.status).toBe(RunStatus.COMPLETED);
     });
@@ -334,7 +357,7 @@ describe('useWorkflowAgent — workflow orchestration', () => {
     });
 
     it('throws if resume API call fails', async () => {
-      vi.mocked(sdk.cma.agentRun.resume).mockRejectedValue(new Error('Resume rejected'));
+      mockResumeWorkflowRun.mockRejectedValue(new Error('Resume rejected'));
 
       await expect(
         driveResume('run-123', { includeImages: false }, [makeRun(RunStatus.IN_PROGRESS)])
