@@ -1,11 +1,11 @@
 import type {
   EntryBlockGraphEntry,
+  LocalizedField,
   ReviewedReferenceGraph,
   ReviewedReferenceGraphEdge,
-  WorkflowContentTypeField,
 } from '@types';
 
-type ParentRefField = Pick<WorkflowContentTypeField, 'id' | 'type'>;
+type ParentRefField = { id: string; type: string };
 
 /**
  * Links a new child entry onto a parent for a given reference field.
@@ -35,12 +35,10 @@ export function linkChildToParentEntry(args: {
   const existingLocalized = parentEntry.fields?.[refField.id] ?? {};
   const existingLocales = Object.keys(existingLocalized);
   const localesToWrite = existingLocales.length > 0 ? existingLocales : [defaultLocale];
-  const nextLocalized: Record<string, unknown> = { ...existingLocalized };
+  const nextLocalized: LocalizedField = { ...existingLocalized };
   for (const locale of localesToWrite) {
     if (isArrayRef) {
-      const existingRefs = Array.isArray(nextLocalized[locale])
-        ? (nextLocalized[locale] as unknown[])
-        : [];
+      const existingRefs = Array.isArray(nextLocalized[locale]) ? nextLocalized[locale] : [];
       nextLocalized[locale] = [...existingRefs, childRef];
     } else {
       nextLocalized[locale] = childRef;

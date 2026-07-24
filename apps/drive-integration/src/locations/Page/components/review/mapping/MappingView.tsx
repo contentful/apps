@@ -479,7 +479,7 @@ export const MappingView = ({
       entries: [...entryBlockGraph.entries, newEntry],
     };
 
-    if (isLinkedReference && parentEntry && refField?.id) {
+    if (isLinkedReference && parentEntry && refField?.id && refField.type) {
       const { parentEntry: updatedParent, edges: nextEdges } = linkChildToParentEntry({
         parentEntry,
         childTempId: tempId,
