@@ -33,8 +33,8 @@ export function linkChildToParentEntry(args: {
   const childRef = { __ref: childTempId };
 
   const existingLocalized = parentEntry.fields?.[refField.id] ?? {};
-  const localesToWrite =
-    Object.keys(existingLocalized).length > 0 ? Object.keys(existingLocalized) : [defaultLocale];
+  const existingLocales = Object.keys(existingLocalized);
+  const localesToWrite = existingLocales.length > 0 ? existingLocales : [defaultLocale];
   const nextLocalized: Record<string, unknown> = { ...existingLocalized };
   for (const locale of localesToWrite) {
     if (isArrayRef) {
@@ -59,7 +59,7 @@ export function linkChildToParentEntry(args: {
   } else {
     nextFieldMappings.push({
       fieldId: refField.id,
-      fieldType: refField.type ?? 'Link',
+      fieldType: refField.type,
       sourceRefs: [],
       sourceEntryIds: [childTempId],
       confidence: 1,
