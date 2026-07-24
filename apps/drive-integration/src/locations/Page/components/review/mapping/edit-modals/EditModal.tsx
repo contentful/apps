@@ -348,7 +348,7 @@ export const EditModal = ({
             {showAddEntryForm ? (
               <>
                 <Button onClick={() => setAddEntryFormState(null)} size="small" variant="secondary">
-                  Back
+                  Cancel
                 </Button>
                 <Button
                   onClick={handleAddEntrySave}

@@ -185,12 +185,10 @@ describe('EditModal', () => {
       await openAddEntryForm();
 
       expect(screen.getByText('Select content type')).toBeTruthy();
-      expect(screen.getByRole('button', { name: 'Back' })).toBeTruthy();
+      expect(screen.getByRole('button', { name: 'Cancel' })).toBeTruthy();
       expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
       expect(screen.queryByRole('button', { name: 'Next' })).toBeNull();
-      expect(
-        screen.queryByText('Should this new entry be a reference of an existing entry?')
-      ).toBeNull();
+      expect(screen.queryByText('Should this entry be a reference entry?')).toBeNull();
     });
 
     it('shows radios and field multiselect together after content type is selected', async () => {
@@ -199,17 +197,13 @@ describe('EditModal', () => {
       fireEvent.change(screen.getByRole('combobox'), { target: { value: 'page' } });
 
       await waitFor(() => {
-        expect(
-          screen.getByText('Should this new entry be a reference of an existing entry?')
-        ).toBeTruthy();
+        expect(screen.getByText('Should this entry be a reference entry?')).toBeTruthy();
         expect(screen.getByLabelText('Yes')).toBeTruthy();
         expect(screen.getByLabelText('No')).toBeTruthy();
         expect(screen.getByText('Select the field(s) the content should map to')).toBeTruthy();
       });
 
-      expect(
-        screen.queryByText('Which existing entry should this new entry be a reference to?')
-      ).toBeNull();
+      expect(screen.queryByText('Select the entry this should reference')).toBeNull();
     });
 
     it('shows parent entry select when Yes is chosen', async () => {
@@ -224,9 +218,7 @@ describe('EditModal', () => {
       fireEvent.click(screen.getByLabelText('Yes'));
 
       await waitFor(() => {
-        expect(
-          screen.getByText('Which existing entry should this new entry be a reference to?')
-        ).toBeTruthy();
+        expect(screen.getByText('Select the entry this should reference')).toBeTruthy();
         expect(screen.getByText('Blog post')).toBeTruthy();
       });
     });
@@ -269,10 +261,10 @@ describe('EditModal', () => {
       });
     });
 
-    it('exits the form when Back is clicked', async () => {
+    it('cancels the form and returns to the modal when Cancel is clicked', async () => {
       await openAddEntryForm();
 
-      fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
       await waitFor(() => {
         expect(screen.getByText('New location')).toBeTruthy();
