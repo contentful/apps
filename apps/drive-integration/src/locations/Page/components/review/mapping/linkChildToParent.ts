@@ -41,12 +41,12 @@ export function linkChildToParentEntry(args: {
     }
   }
 
-  const fmIdx = parentEntry.fieldMappings.findIndex((fm) => fm.fieldId === refField.id);
+  const fieldMappingIndex = parentEntry.fieldMappings.findIndex((fm) => fm.fieldId === refField.id);
   const nextFieldMappings = [...parentEntry.fieldMappings];
-  if (fmIdx >= 0) {
-    const fm = nextFieldMappings[fmIdx];
+  if (fieldMappingIndex >= 0) {
+    const fm = nextFieldMappings[fieldMappingIndex];
     const previousIds = fm.sourceEntryIds ?? [];
-    nextFieldMappings[fmIdx] = {
+    nextFieldMappings[fieldMappingIndex] = {
       ...fm,
       sourceEntryIds: isArrayRef ? [...previousIds, childTempId] : [childTempId],
     };

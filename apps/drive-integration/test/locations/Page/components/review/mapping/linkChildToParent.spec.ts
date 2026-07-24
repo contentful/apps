@@ -65,6 +65,26 @@ describe('linkChildToParentEntry', () => {
     });
   });
 
+  it('adds a new fieldMapping when a new child entry is added to a parent with no existing mapping for that field', () => {
+    const result = linkChildToParentEntry({
+      parentEntry: parentEntry({ fieldMappings: [] }),
+      childTempId: 'new-child',
+      refField: { id: 'author', type: 'Link' },
+      defaultLocale: 'en-US',
+      previousEdges: [],
+    });
+
+    expect(result.parentEntry.fieldMappings).toEqual([
+      {
+        fieldId: 'author',
+        fieldType: 'Link',
+        sourceRefs: [],
+        sourceEntryIds: ['new-child'],
+        confidence: 1,
+      },
+    ]);
+  });
+
   it('appends to Array reference fields and edges without removing prior children', () => {
     const result = linkChildToParentEntry({
       parentEntry: parentEntry({
