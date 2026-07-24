@@ -23,6 +23,12 @@ export function linkChildToParentEntry(args: {
   edges: ReviewedReferenceGraphEdge[];
 } {
   const { parentEntry, childTempId, refField, defaultLocale, previousEdges } = args;
+  const parentId = parentEntry.tempId;
+
+  if (!parentId) {
+    return { parentEntry, edges: previousEdges };
+  }
+
   const isArrayRef = refField.type === 'Array';
   const childRef = { __ref: childTempId };
 
@@ -60,22 +66,14 @@ export function linkChildToParentEntry(args: {
     });
   }
 
-  const parentId = parentEntry.tempId;
-  const keptEdges =
-    !parentId || isArrayRef
-      ? previousEdges
-      : previousEdges.filter((edge) => !(edge.from === parentId && edge.fieldId === refField.id));
+  const keptEdges = isArrayRef
+    ? previousEdges
+    : previousEdges.filter((edge) => !(edge.from === parentId && edge.fieldId === refField.id));
 
-  const nextEdges: ReviewedReferenceGraphEdge[] = parentId
-    ? [
-        ...keptEdges,
-        {
-          from: parentId,
-          to: childTempId,
-          fieldId: refField.id,
-        },
-      ]
-    : keptEdges;
+  const nextEdges: ReviewedReferenceGraphEdge[] = [
+    ...keptEdges,
+    { from: parentId, to: childTempId, fieldId: refField.id },
+  ];
 
   return {
     parentEntry: {

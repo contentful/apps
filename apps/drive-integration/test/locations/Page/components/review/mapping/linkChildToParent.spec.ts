@@ -85,6 +85,22 @@ describe('linkChildToParentEntry', () => {
     ]);
   });
 
+  it('returns the entry and edges unchanged when parentEntry has no tempId', () => {
+    const entry = parentEntry({ tempId: undefined });
+    const edges = [{ from: 'other', to: 'old-child', fieldId: 'author' }];
+
+    const result = linkChildToParentEntry({
+      parentEntry: entry,
+      childTempId: 'new-child',
+      refField: { id: 'author', type: 'Link' },
+      defaultLocale: 'en-US',
+      previousEdges: edges,
+    });
+
+    expect(result.parentEntry).toBe(entry);
+    expect(result.edges).toBe(edges);
+  });
+
   it('appends to Array reference fields and edges without removing prior children', () => {
     const result = linkChildToParentEntry({
       parentEntry: parentEntry({
