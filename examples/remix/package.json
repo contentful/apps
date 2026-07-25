@@ -17,7 +17,7 @@
     "@contentful/app-sdk": "^4.29.1",
     "@contentful/f36-components": "^4.68.1",
     "@contentful/f36-tokens": "^4.0.5",
-    "@remix-run/dev": "^2.14.0",
+    "@remix-run/dev": "^2.17.5",
     "@remix-run/node": "^2.14.0",
     "@remix-run/react": "^2.14.0",
     "@remix-run/serve": "^2.16.4",
