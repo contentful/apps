@@ -21,7 +21,7 @@
     "node-fetch": "^2.7.0",
     "openid-client": "^4.7.4",
     "rimraf": "^3.0.1",
-    "serverless": "^3.39.0",
+    "serverless": "^4.40.0",
     "serverless-express": "^2.0.12"
   },
   "overrides": {
