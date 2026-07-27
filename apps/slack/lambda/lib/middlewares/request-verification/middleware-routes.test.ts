@@ -22,8 +22,10 @@ describe('request-verification middleware mount', () => {
     const layer = stack.find(
       (l) => l.name !== 'bound dispatch' && l.regexp?.test('/api/messages') && !l.regexp.test('/')
     );
-    assert.ok(layer, 'request-verification middleware mount layer not found in router stack');
-    return layer!.regexp;
+    if (!layer) {
+      throw new Error('request-verification middleware mount layer not found in router stack');
+    }
+    return layer.regexp;
   };
 
   it('guards POST /api/tokens (path-to-regexp actually matches it)', () => {
