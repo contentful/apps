@@ -1,37 +1,48 @@
 import { assert } from '../../../test/utils';
+import { bootstrap } from '../../app';
 
-// AIS-297 / AIS-299 regression: 'api/tokens' (no leading slash) was silently
-// skipped by path-to-regexp, leaving POST /api/tokens unauthenticated.
-// This test locks the path list so the guard always includes /api/tokens.
-describe('request-verification middleware path list', () => {
-  it('includes /api/tokens with a leading slash', async () => {
-    // Dynamically require app.ts source text and assert the correct path string.
-    // We cannot call bootstrap() directly (it creates live AWS clients), so we
-    // read the registered path list from the module source instead.
-    const fs = await import('fs');
-    const path = await import('path');
-
-    const appSource = fs.readFileSync(
-      path.resolve(__dirname, '../../app.ts'),
-      'utf-8'
+// AIS-297 / AIS-299 regression: the Contentful request-verification middleware
+// was mounted on the bare string 'api/tokens' (no leading slash). Express 4
+// compiles mount paths with path-to-regexp@0.1.x, which produces a regexp that
+// does NOT match an incoming '/api/tokens' path — so the only auth step on the
+// OAuth credentials endpoint was silently skipped.
+//
+// This test inspects the *compiled* Express router stack, so it exercises the
+// real failure mechanism (path-to-regexp matching) rather than the source text.
+describe('request-verification middleware mount', () => {
+  // The guard is mounted via app.use([<paths>], createContentfulRequestVerification...).
+  // In the compiled router stack it is the path-scoped middleware layer that
+  // matches '/api/messages' but is NOT a catch-all (does not match '/') and is
+  // not a terminal route ('bound dispatch'). That uniquely identifies it: the
+  // only other layers matching '/api/messages' are catch-alls (cors, json, the
+  // serverless middleware, error handler) which all also match '/'.
+  const guardRegExp = (): RegExp => {
+    const stack = (bootstrap() as unknown as { _router: { stack: { name: string; regexp: RegExp }[] } })
+      ._router.stack;
+    const layer = stack.find(
+      (l) => l.name !== 'bound dispatch' && l.regexp?.test('/api/messages') && !l.regexp.test('/')
     );
+    assert.ok(layer, 'request-verification middleware mount layer not found in router stack');
+    return layer!.regexp;
+  };
 
-    // The guard is mounted via: app.use([...paths], createContentfulRequestVerificationMiddleware(...))
-    // Extract the string array passed to that call.
-    const guardCallMatch = appSource.match(
-      /createContentfulRequestVerificationMiddleware\([\s\S]*?\)/
+  it('guards POST /api/tokens (path-to-regexp actually matches it)', () => {
+    assert.isTrue(
+      guardRegExp().test('/api/tokens'),
+      'verification middleware must match /api/tokens — a bare "api/tokens" mount silently bypasses it'
     );
-    assert.ok(guardCallMatch, 'createContentfulRequestVerificationMiddleware call not found in app.ts');
+  });
 
-    // Find the array literal that precedes the call on the same app.use(...) invocation.
-    const useBlockMatch = appSource.match(
-      /app\.use\(\s*(\[[\s\S]*?\])\s*,\s*createContentfulRequestVerificationMiddleware/
-    );
-    assert.ok(useBlockMatch, 'app.use path array for request-verification middleware not found');
+  it('still guards the other protected routes', () => {
+    const regexp = guardRegExp();
+    assert.isTrue(regexp.test('/api/messages'), 'must guard /api/messages');
+    assert.isTrue(regexp.test('/api/events'), 'must guard /api/events');
+    assert.isTrue(regexp.test('/api/spaces/anything'), 'must guard /api/spaces/*');
+  });
 
-    const pathArray: string[] = JSON.parse(useBlockMatch![1].replace(/'/g, '"').replace(/\s/g, ''));
-
-    assert.include(pathArray, '/api/tokens', 'Guard must protect /api/tokens (with leading slash)');
-    assert.notInclude(pathArray, 'api/tokens', 'Guard must NOT use bare api/tokens (missing slash bypasses path-to-regexp)');
+  it('does not over-match unrelated routes', () => {
+    const regexp = guardRegExp();
+    assert.isFalse(regexp.test('/api/slack-events'), 'must not guard the public Slack events route');
+    assert.isFalse(regexp.test('/api/oauth'), 'must not guard the public OAuth redirect route');
   });
 });
