@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Flex, Heading, Layout, Menu } from '@contentful/f36-components';
-import { EyeIcon, MoreHorizontalIcon, PencilSimpleIcon } from '@contentful/f36-icons';
+import { DotsThreeIcon, EyeIcon, PencilSimpleIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { cx } from '@emotion/css';
@@ -246,7 +246,7 @@ export const ReviewPage = ({
               <Menu>
                 <Menu.Trigger>
                   <button type="button" className={moreActionsButton} aria-label="More actions">
-                    <MoreHorizontalIcon size="small" />
+                    <DotsThreeIcon size="small" />
                   </button>
                 </Menu.Trigger>
                 <Menu.List>
