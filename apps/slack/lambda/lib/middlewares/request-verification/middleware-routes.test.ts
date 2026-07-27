@@ -1,4 +1,4 @@
-import { assert } from '../../test/utils';
+import { assert } from '../../../test/utils';
 
 // AIS-297 / AIS-299 regression: 'api/tokens' (no leading slash) was silently
 // skipped by path-to-regexp, leaving POST /api/tokens unauthenticated.
