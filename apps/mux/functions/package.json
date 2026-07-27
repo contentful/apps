@@ -28,7 +28,7 @@
     ]
   },
   "devDependencies": {
-    "@contentful/app-scripts": "^2.5.5",
+    "@contentful/app-scripts": "^2.5.12",
     "@contentful/node-apps-toolkit": "^3.13.1",
     "@tsconfig/recommended": "^1.0.8",
     "@types/node": "^22.15.32",
