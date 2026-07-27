@@ -60,7 +60,7 @@ import {
   MAPPING_RAIL_WIDTH,
 } from './MappingView.styles';
 import { buildSourceRefKey } from './sourceRefUtils';
-import { MappingCard } from './MappingCard';
+import { EditMappingCard } from './EditMappingCard';
 import { FALLBACK_CARD_HEIGHT, getMappingRailMinHeight, MappingRail } from './MappingRail';
 import { NormalizedDocumentSection } from './NormalizedDocumentSection';
 import { buildMappingDisplayGroups, type MappingDisplayGroup } from './buildMappingDisplayGroups';
@@ -1160,7 +1160,7 @@ export const MappingView = ({
                               />
                             ))
                           : editCards.map((card) => (
-                              <MappingCard
+                              <EditMappingCard
                                 key={card.key}
                                 card={card}
                                 top={cardOffsets[card.key] ?? 0}
