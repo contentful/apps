@@ -12,8 +12,6 @@ import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 import {
   DocumentTabProps,
   MappingReviewSuspendPayload,
-  ResumePayload,
-  TabsImagesSuspendPayload,
   RunStatus,
   WorkflowRunResult,
   WorkflowFailureReason,
@@ -23,6 +21,10 @@ import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal'
 import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
 import { useWorkflowAgentLegacy } from '@hooks/useWorkflowAgentLegacy';
 import { isAiAccessDeniedError } from '../../../../utils/aiAccess';
+import {
+  fetchDocumentSelection,
+  DocumentSelectionConfig,
+} from '../../../../utils/fetchDocumentSelection';
 
 export interface ModalOrchestratorLegacyHandle {
   startFlow: () => void;
@@ -275,68 +277,50 @@ export const ModalOrchestratorLegacy = forwardRef<
       showDiscardConfirmation();
     };
 
-    const showDocumentScopeReview = (suspendPayload?: TabsImagesSuspendPayload) => {
-      setAvailableTabs(
-        (suspendPayload?.tabs ?? []).map((tab) => ({
-          tabId: tab.id ?? '',
-          tabTitle: tab.title ?? '',
-        }))
-      );
+    const showDocumentScopeReview = (
+      selectionConfig: DocumentSelectionConfig,
+      contentTypeIds: string[]
+    ) => {
+      setAvailableTabs(selectionConfig.tabs.map((tab) => ({ tabId: tab.id, tabTitle: tab.title })));
       setSelectedTabs([]);
       setUseAllTabs(null);
       setIncludeImages(null);
-      setRequiresImageSelection(Boolean(suspendPayload?.requiresImageSelection));
+      const requiresTabSelection = selectionConfig.tabs.length > 1;
+      const requiresImages = selectionConfig.imageCount > 0;
+      setRequiresImageSelection(requiresImages);
 
-      if (suspendPayload?.requiresTabSelection) {
+      if (requiresTabSelection) {
         setFlowStep(FlowStep.SELECT_TABS);
         return;
       }
 
-      if (suspendPayload?.requiresImageSelection) {
+      if (requiresImages) {
         setFlowStep(FlowStep.INCLUDE_IMAGES);
         return;
       }
 
-      setFlowStep(null);
+      void startWorkflowWithDelayedLoading(contentTypeIds, {
+        selectedTabIds: [],
+        includeImages: false,
+      }).catch(handleWorkflowError);
     };
 
     const handleWorkflowResult = (workflowRun: WorkflowRunResult) => {
       setActiveRunId(workflowRun.runId);
 
       if (workflowRun.status === RunStatus.PENDING_REVIEW) {
-        if (workflowRun.suspendPayload.suspendStepId === 'mapping-review') {
-          setFlowStep(null);
-          onMappingReviewReady(workflowRun.suspendPayload, workflowRun.runId);
-          return;
-        }
-
-        showDocumentScopeReview(workflowRun.suspendPayload as unknown as TabsImagesSuspendPayload);
+        setFlowStep(null);
+        onMappingReviewReady(workflowRun.suspendPayload, workflowRun.runId);
         return;
       }
 
       setFlowStep(null);
     };
 
-    const continueWorkflow = async (resumePayloadOverrides?: Partial<ResumePayload>) => {
-      if (!activeRunId) {
-        throw new Error('Workflow run id is missing for resume.');
-      }
-
-      const resumePayload: ResumePayload = {
-        ...(selectedTabs.length > 0
-          ? { selectedTabIds: selectedTabs.map((tab) => tab.tabId) }
-          : {}),
-        ...(includeImages !== null ? { includeImages } : {}),
-        ...resumePayloadOverrides,
-      };
-
-      setFlowStep(FlowStep.LOADING);
-
-      const workflowRun = await resumeWorkflow(activeRunId, resumePayload);
-      handleWorkflowResult(workflowRun);
-    };
-
-    const startWorkflowWithDelayedLoading = async (contentTypeIds: string[]) => {
+    const startWorkflowWithDelayedLoading = async (
+      contentTypeIds: string[],
+      documentSelection: { selectedTabIds: string[]; includeImages: boolean }
+    ) => {
       let isStartPending = true;
       const loadingModalTimeout = window.setTimeout(() => {
         if (isStartPending) {
@@ -345,7 +329,7 @@ export const ModalOrchestratorLegacy = forwardRef<
       }, CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS);
 
       try {
-        return await startWorkflow(contentTypeIds, { selectedTabIds: [], includeImages: false });
+        return await startWorkflow(contentTypeIds, documentSelection);
       } finally {
         isStartPending = false;
         window.clearTimeout(loadingModalTimeout);
@@ -363,11 +347,15 @@ export const ModalOrchestratorLegacy = forwardRef<
         return;
       }
 
+      let selectionConfig: DocumentSelectionConfig;
       try {
-        handleWorkflowResult(await startWorkflowWithDelayedLoading(contentTypeIds));
+        selectionConfig = await fetchDocumentSelection(documentId, oauthToken);
       } catch (error) {
         handleWorkflowError(error);
+        return;
       }
+
+      showDocumentScopeReview(selectionConfig, contentTypeIds);
     };
 
     const handleSelectTabsContinue = async (selectedTabs: DocumentTabProps[]) => {
@@ -379,7 +367,12 @@ export const ModalOrchestratorLegacy = forwardRef<
       }
 
       try {
-        await continueWorkflow({ selectedTabIds: selectedTabs.map((tab) => tab.tabId) });
+        handleWorkflowResult(
+          await startWorkflowWithDelayedLoading(
+            selectedContentTypes.map((ct) => ct.sys.id),
+            { selectedTabIds: selectedTabs.map((tab) => tab.tabId), includeImages: false }
+          )
+        );
       } catch (error) {
         handleWorkflowError(error);
       }
@@ -389,7 +382,15 @@ export const ModalOrchestratorLegacy = forwardRef<
       setIncludeImages(includeImages);
 
       try {
-        await continueWorkflow({ includeImages });
+        handleWorkflowResult(
+          await startWorkflowWithDelayedLoading(
+            selectedContentTypes.map((ct) => ct.sys.id),
+            {
+              selectedTabIds: selectedTabs.map((tab) => tab.tabId),
+              includeImages,
+            }
+          )
+        );
       } catch (error) {
         handleWorkflowError(error);
       }
