@@ -440,9 +440,9 @@ describe('useNeedsUpdate', () => {
     });
 
     it('surfaces stale published entries on page 0 instead of burying them behind archived ones', async () => {
-      // Regression test for ES-512: archived entries are the least recently
-      // touched, so with an oldest-first sort they filled every early page and
-      // pushed actionable published content out of reach.
+      // Archived entries are the least recently touched, so with an
+      // oldest-first sort they filled every early page and pushed actionable
+      // published content out of reach.
       const veryOldDate = subMonths(new Date(), 24);
       const staleButNewerDate = subMonths(new Date(), 7);
 
