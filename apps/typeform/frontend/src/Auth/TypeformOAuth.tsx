@@ -33,8 +33,9 @@ export function TypeformOAuth({
       return;
     }
 
-    const handleTokenEvent = ({ data, source }: any) => {
-      if (source !== oauthWindow) {
+    const handleTokenEvent = ({ data, source, origin }: MessageEvent) => {
+      // Only trust a token that came from our own OAuth popup on our own origin.
+      if (source !== oauthWindow || origin !== window.location.origin) {
         return;
       }
 
