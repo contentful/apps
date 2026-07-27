@@ -17,8 +17,9 @@ describe('request-verification middleware mount', () => {
   // only other layers matching '/api/messages' are catch-alls (cors, json, the
   // serverless middleware, error handler) which all also match '/'.
   const guardRegExp = (): RegExp => {
-    const stack = (bootstrap() as unknown as { _router: { stack: { name: string; regexp: RegExp }[] } })
-      ._router.stack;
+    const stack = (
+      bootstrap() as unknown as { _router: { stack: { name: string; regexp: RegExp }[] } }
+    )._router.stack;
     const layer = stack.find(
       (l) => l.name !== 'bound dispatch' && l.regexp?.test('/api/messages') && !l.regexp.test('/')
     );
@@ -44,7 +45,10 @@ describe('request-verification middleware mount', () => {
 
   it('does not over-match unrelated routes', () => {
     const regexp = guardRegExp();
-    assert.isFalse(regexp.test('/api/slack-events'), 'must not guard the public Slack events route');
+    assert.isFalse(
+      regexp.test('/api/slack-events'),
+      'must not guard the public Slack events route'
+    );
     assert.isFalse(regexp.test('/api/oauth'), 'must not guard the public OAuth redirect route');
   });
 });
