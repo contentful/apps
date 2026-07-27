@@ -21,6 +21,10 @@ export async function fetchAllEntries(sdk: BaseAppSDK): Promise<FetchAllEntriesR
         query: {
           skip: batchSkip,
           limit: batchSize,
+          // Explicit stable sort key. Without it the API ordering is not
+          // guaranteed between requests, so deep skip/limit pagination over
+          // a large space can silently skip or duplicate entries.
+          order: 'sys.createdAt',
           // sys-only projection -- strips fields and metadata from the
           // response, shrinking payload 10-50x. Titles are lazy-loaded
           // per visible page via useEntryTitlesForIds.

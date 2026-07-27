@@ -366,6 +366,119 @@ describe('useNeedsUpdate', () => {
     });
   });
 
+  describe('Archived entry filtering', () => {
+    const oldDateBeyondThreshold = () => {
+      const oldDate = subMonths(new Date(), 6);
+      oldDate.setDate(oldDate.getDate() - 1);
+      return oldDate;
+    };
+
+    beforeEach(() => {
+      mockUseUsers.mockReturnValue({
+        usersMap: new Map(),
+        isFetching: false,
+        refetch: mockRefetchUsers,
+        error: null,
+      });
+    });
+
+    it('excludes archived entries that are older than the threshold', async () => {
+      const oldDate = oldDateBeyondThreshold();
+
+      const entries = [
+        createMockEntry({
+          id: 'archived-entry',
+          contentTypeId: 'blogPost',
+          updatedAt: oldDate.toISOString(),
+          archived: true,
+        }),
+        createMockEntry({
+          id: 'published-entry',
+          contentTypeId: 'blogPost',
+          updatedAt: oldDate.toISOString(),
+        }),
+      ];
+
+      const contentTypes = new Map([
+        ['blogPost', createMockContentType({ id: 'blogPost', name: 'Blog Post' })],
+      ]);
+
+      const { result } = renderHook(() => useNeedsUpdate(entries, 0, contentTypes), {
+        wrapper: createQueryProviderWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(result.current.items).toHaveLength(1);
+      });
+
+      expect(result.current.items[0].id).toBe('published-entry');
+      expect(result.current.total).toBe(1);
+    });
+
+    it('returns no items when every stale entry is archived', () => {
+      const oldDate = oldDateBeyondThreshold();
+
+      const entries = Array.from({ length: 5 }, (_, i) =>
+        createMockEntry({
+          id: `archived-${i}`,
+          contentTypeId: 'blogPost',
+          updatedAt: oldDate.toISOString(),
+          archived: true,
+        })
+      );
+
+      const contentTypes = new Map([
+        ['blogPost', createMockContentType({ id: 'blogPost', name: 'Blog Post' })],
+      ]);
+
+      const { result } = renderHook(() => useNeedsUpdate(entries, 0, contentTypes), {
+        wrapper: createQueryProviderWrapper(),
+      });
+
+      expect(result.current.items).toEqual([]);
+      expect(result.current.total).toBe(0);
+    });
+
+    it('surfaces stale published entries on page 0 instead of burying them behind archived ones', async () => {
+      // Regression test for ES-512: archived entries are the least recently
+      // touched, so with an oldest-first sort they filled every early page and
+      // pushed actionable published content out of reach.
+      const veryOldDate = subMonths(new Date(), 24);
+      const staleButNewerDate = subMonths(new Date(), 7);
+
+      const archivedEntries = Array.from({ length: 25 }, (_, i) =>
+        createMockEntry({
+          id: `archived-${i}`,
+          contentTypeId: 'blogPost',
+          updatedAt: veryOldDate.toISOString(),
+          archived: true,
+        })
+      );
+
+      const publishedEntry = createMockEntry({
+        id: 'stale-published',
+        contentTypeId: 'blogPost',
+        updatedAt: staleButNewerDate.toISOString(),
+      });
+
+      const contentTypes = new Map([
+        ['blogPost', createMockContentType({ id: 'blogPost', name: 'Blog Post' })],
+      ]);
+
+      const { result } = renderHook(
+        () => useNeedsUpdate([...archivedEntries, publishedEntry], 0, contentTypes),
+        { wrapper: createQueryProviderWrapper() }
+      );
+
+      await waitFor(() => {
+        expect(result.current.items).toHaveLength(1);
+      });
+
+      expect(result.current.items[0].id).toBe('stale-published');
+      expect(result.current.total).toBe(1);
+    });
+  });
+
   describe('Content type filtering', () => {
     const setupOldEntries = () => {
       const thresholdDate = subMonths(new Date(), 6);

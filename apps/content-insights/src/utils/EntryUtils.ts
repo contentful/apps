@@ -1,8 +1,22 @@
 import { ContentTypeProps, EntryProps } from 'contentful-management';
 import { EntryStatus } from '../utils/types';
 
+// Archived entries are excluded from "needs update" reporting: they are
+// deliberately stale, so their old `updatedAt` is expected rather than
+// actionable. Mirrors `isArchived` in contentful-management.
+export function isArchivedEntry(entry: EntryProps): boolean {
+  return !!entry?.sys?.archivedVersion;
+}
+
 export function getEntryStatus(entry: EntryProps): EntryStatus {
   const { sys } = entry;
+
+  // Checked before publishedVersion: an archived entry keeps the
+  // publishedVersion it had when archived and would otherwise report
+  // as Published.
+  if (isArchivedEntry(entry)) {
+    return EntryStatus.Archived;
+  }
 
   if (!sys.publishedVersion) {
     return EntryStatus.Draft;
