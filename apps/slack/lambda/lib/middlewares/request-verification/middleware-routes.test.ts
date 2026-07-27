@@ -1,21 +1,7 @@
 import { assert } from '../../../test/utils';
 import { bootstrap } from '../../app';
 
-// AIS-297 / AIS-299 regression: the Contentful request-verification middleware
-// was mounted on the bare string 'api/tokens' (no leading slash). Express 4
-// compiles mount paths with path-to-regexp@0.1.x, which produces a regexp that
-// does NOT match an incoming '/api/tokens' path — so the only auth step on the
-// OAuth credentials endpoint was silently skipped.
-//
-// This test inspects the *compiled* Express router stack, so it exercises the
-// real failure mechanism (path-to-regexp matching) rather than the source text.
 describe('request-verification middleware mount', () => {
-  // The guard is mounted via app.use([<paths>], createContentfulRequestVerification...).
-  // In the compiled router stack it is the path-scoped middleware layer that
-  // matches '/api/messages' but is NOT a catch-all (does not match '/') and is
-  // not a terminal route ('bound dispatch'). That uniquely identifies it: the
-  // only other layers matching '/api/messages' are catch-alls (cors, json, the
-  // serverless middleware, error handler) which all also match '/'.
   const guardRegExp = (): RegExp => {
     const stack = (
       bootstrap() as unknown as { _router: { stack: { name: string; regexp: RegExp }[] } }
