@@ -142,6 +142,20 @@ jobs:
             GOOGLE_DOCS_TEST_CLOUDFRONT_DIST_ID=$GOOGLE_DOCS_TEST_CLOUDFRONT_DIST_ID \
             STAGE='test' npm run deploy:test
       - run:
+          name: Build and deploy drive-integration to staging
+          command: |
+            if git diff --name-only HEAD^ HEAD | grep -q "^apps/drive-integration/"; then
+              cd apps/drive-integration
+              VITE_GOOGLE_PICKER_API_KEY=$VITE_GOOGLE_PICKER_API_KEY \
+              VITE_GOOGLE_APP_ID=$VITE_GOOGLE_APP_ID \
+              VITE_LD_CLIENT_ID='588a047044b03e0b3211298d' \
+              NODE_ENV='staging' \
+              npm run build:frontend
+              npm run upload:app-staging
+            else
+              echo "No drive-integration changes, skipping deploy"
+            fi
+      - run:
           name: Invalidate Slack staging cloudfront distribution
           command: aws cloudfront create-invalidation --distribution-id $SLACK_TEST_CLOUDFRONT_DIST_ID --paths "/*"
 
