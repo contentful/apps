@@ -319,7 +319,7 @@ describe('MappingView', () => {
       />
     );
 
-    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-testid^="edit-mapping-card-"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(1);
     expect(screen.getByText('Body copy')).toBeTruthy();
     expect(
@@ -398,7 +398,7 @@ describe('MappingView', () => {
       />
     );
 
-    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-testid^="edit-mapping-card-"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
   });
 
@@ -515,7 +515,7 @@ describe('MappingView', () => {
     expect(screen.getByText('Body copy (2/3)')).toBeTruthy();
     expect(screen.getByText('Body copy (3/3)')).toBeTruthy();
     expect(screen.getByText('Summary')).toBeTruthy();
-    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(4);
+    expect(container.querySelectorAll('[data-testid^="edit-mapping-card-"]')).toHaveLength(4);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(2);
   });
 
@@ -633,7 +633,7 @@ describe('MappingView', () => {
     );
 
     expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
-    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-testid^="edit-mapping-card-"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
   });
 
@@ -1013,7 +1013,7 @@ describe('MappingView', () => {
     const initialBackgroundColor = textSegments[0].style.backgroundColor;
     expect(textSegments[1].style.backgroundColor).toBe(initialBackgroundColor);
 
-    const mappingCard = container.querySelector<HTMLElement>('[data-testid^="mapping-card-"]');
+    const mappingCard = container.querySelector<HTMLElement>('[data-testid^="edit-mapping-card-"]');
     expect(mappingCard).toBeTruthy();
 
     fireEvent.mouseEnter(mappingCard as HTMLElement);
