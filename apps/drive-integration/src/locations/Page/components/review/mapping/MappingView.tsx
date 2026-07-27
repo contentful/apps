@@ -57,12 +57,14 @@ import {
   mappingGroupSurfaceEdit,
   mappingGroupSurfaceView,
   mappingGroupSurfaceViewHovered,
+  MAPPING_RAIL_WIDTH,
 } from './MappingView.styles';
 import { buildSourceRefKey } from './sourceRefUtils';
-import { MappingEntryCards } from './MappingEntryCards';
+import { MappingCard } from './MappingCard';
+import { getMappingRailMinHeight, MappingRail } from './MappingRail';
 import { NormalizedDocumentSection } from './NormalizedDocumentSection';
 import { buildMappingDisplayGroups, type MappingDisplayGroup } from './buildMappingDisplayGroups';
-import { ViewMappingRail, type ViewMappingCardEntry } from './ViewMappingRail';
+import { ViewMappingCard, type ViewMappingCardData } from './ViewMappingCard';
 import {
   applyImageExclusionToEntryBlockGraph,
   appendImageToTargets,
@@ -96,6 +98,8 @@ const EMPTY_REMOVE_MODAL: RemoveModalState = {
   textRanges: [],
   imageRefs: [],
 };
+
+const DEFAULT_CARD_HEIGHT = 28;
 
 interface MappingViewProps {
   payload: MappingReviewSuspendPayload;
@@ -648,7 +652,9 @@ export const MappingView = ({
             ? Math.max(0, anchorNode.getBoundingClientRect().top - groupTop)
             : 0;
           const height =
-            wrapperNode?.getBoundingClientRect().height || wrapperNode?.offsetHeight || 28;
+            wrapperNode?.getBoundingClientRect().height ||
+            wrapperNode?.offsetHeight ||
+            DEFAULT_CARD_HEIGHT;
 
           return { key: card.key, rawTop, height };
         });
@@ -669,7 +675,7 @@ export const MappingView = ({
     });
 
     return () => observer.disconnect();
-  }, [allGroups]);
+  }, [allGroups, isViewMode]);
 
   const handleEditFromSelection = () => {
     if (isDisabled || !selectedText.trim()) return;
@@ -943,11 +949,11 @@ export const MappingView = ({
     closeEditModal();
   };
 
-  const viewCardsByGroup = useMemo((): Record<string, ViewMappingCardEntry[]> => {
-    const result: Record<string, ViewMappingCardEntry[]> = {};
+  const viewCardsByGroup = useMemo((): Record<string, ViewMappingCardData[]> => {
+    const result: Record<string, ViewMappingCardData[]> = {};
 
     allGroups.forEach((group) => {
-      const cards: ViewMappingCardEntry[] = [];
+      const cards: ViewMappingCardData[] = [];
 
       group.mappingCards.forEach((card) => {
         const location = locationsByCardKey.get(card.key);
@@ -1033,7 +1039,10 @@ export const MappingView = ({
                 )}
               </Text>
             </Box>
-            <Flex alignItems="center" gap="spacing2Xs" style={{ flex: '0 0 280px', maxWidth: 280 }}>
+            <Flex
+              alignItems="center"
+              gap="spacing2Xs"
+              style={{ flex: `0 0 ${MAPPING_RAIL_WIDTH}px`, maxWidth: MAPPING_RAIL_WIDTH }}>
               <LightbulbIcon size="tiny" style={{ color: tokens.gray600, flexShrink: 0 }} />
               <Text as="span" fontSize="fontSizeS" fontColor="gray600">
                 Tip: hover over a card to highlight its content
@@ -1073,6 +1082,12 @@ export const MappingView = ({
                     ? mappingGroupSurfaceViewHovered
                     : mappingGroupSurfaceView
                   : mappingGroupSurfaceEdit;
+
+                const cardOffsets = cardOffsetsByGroup[group.id] ?? {};
+                const cardHeights = cardHeightsByGroup[group.id] ?? {};
+                const railCards = isViewMode
+                  ? viewCardsByGroup[group.id] ?? []
+                  : group.mappingCards;
 
                 return (
                   <Box key={group.id}>
@@ -1127,24 +1142,39 @@ export const MappingView = ({
                         )}
                       </Box>
 
-                      {isViewMode ? (
-                        <ViewMappingRail
-                          segmentId={group.id}
-                          cards={viewCardsByGroup[group.id] ?? []}
-                          hoveredMappingKeys={hoveredMappingKeys}
-                          onSetHoveredMappingKeys={setHoveredMappingKeys}
-                        />
-                      ) : (
-                        <MappingEntryCards
-                          groupId={group.id}
-                          mappingCards={group.mappingCards}
-                          cardOffsetsByGroup={cardOffsetsByGroup}
-                          cardHeightsByGroup={cardHeightsByGroup}
-                          hoveredMappingKeys={hoveredMappingKeys}
-                          onSetHoveredMappingKeys={setHoveredMappingKeys}
-                          setCardWrapperRef={setCardWrapperRef}
-                        />
-                      )}
+                      <MappingRail
+                        testId={
+                          isViewMode ? `view-mapping-rail-${group.id}` : `mapping-rail-${group.id}`
+                        }
+                        minHeight={getMappingRailMinHeight(railCards, cardOffsets, cardHeights)}>
+                        {railCards.map((card) =>
+                          isViewMode ? (
+                            <ViewMappingCard
+                              key={card.key}
+                              card={card as ViewMappingCardData}
+                              top={cardOffsets[card.key] ?? 0}
+                              wrapperRef={setCardWrapperRef(card.key)}
+                              isHovered={card.mappingKeys.some((key) =>
+                                hoveredMappingKeys.includes(key)
+                              )}
+                              onMouseEnter={() => setHoveredMappingKeys(card.mappingKeys)}
+                              onMouseLeave={() => setHoveredMappingKeys([])}
+                            />
+                          ) : (
+                            <MappingCard
+                              key={card.key}
+                              card={card}
+                              top={cardOffsets[card.key] ?? 0}
+                              wrapperRef={setCardWrapperRef(card.key)}
+                              isHovered={card.mappingKeys.some((key) =>
+                                hoveredMappingKeys.includes(key)
+                              )}
+                              onMouseEnter={() => setHoveredMappingKeys(card.mappingKeys)}
+                              onMouseLeave={() => setHoveredMappingKeys([])}
+                            />
+                          )
+                        )}
+                      </MappingRail>
                     </Flex>
                   </Box>
                 );

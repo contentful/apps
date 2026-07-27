@@ -1,3 +1,4 @@
+import { type Ref } from 'react';
 import { Box } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { FIELD_TYPE_SEPARATOR, truncateFieldValue } from '../../../../../utils/utils';
@@ -16,6 +17,8 @@ export interface ViewMappingCardData {
 
 interface ViewMappingCardProps {
   card: ViewMappingCardData;
+  top: number;
+  wrapperRef: Ref<HTMLDivElement>;
   isHovered: boolean;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
@@ -23,6 +26,8 @@ interface ViewMappingCardProps {
 
 export const ViewMappingCard = ({
   card,
+  top,
+  wrapperRef,
   isHovered,
   onMouseEnter,
   onMouseLeave,
@@ -34,10 +39,15 @@ export const ViewMappingCard = ({
 
   return (
     <Box
+      ref={wrapperRef}
       data-testid={`view-mapping-card-${card.key}`}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       style={{
+        position: 'absolute',
+        insetInlineStart: 0,
+        insetInlineEnd: 0,
+        top,
         border: `${isHovered ? 2 : 1}px solid ${isHovered ? tokens.green600 : tokens.green500}`,
         borderRadius: tokens.borderRadiusMedium,
         padding: tokens.spacing2Xs,
