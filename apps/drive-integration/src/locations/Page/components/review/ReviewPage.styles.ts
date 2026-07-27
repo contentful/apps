@@ -62,23 +62,26 @@ export const modeToggleButtonActive = css({
   },
 });
 
-export const cancelReviewButton = css({
-  '&, &&': {
-    backgroundColor: tokens.colorWhite,
-    border: `1px solid ${tokens.gray300}`,
-    borderRadius: tokens.borderRadiusMedium,
-    boxShadow: 'none',
-    color: tokens.gray900,
-    fontWeight: tokens.fontWeightDemiBold,
-  },
+export const moreActionsButton = css({
+  alignItems: 'center',
+  backgroundColor: tokens.colorWhite,
+  border: `1px solid ${tokens.gray300}`,
+  borderRadius: tokens.borderRadiusMedium,
+  color: tokens.gray700,
+  cursor: 'pointer',
+  display: 'inline-flex',
+  height: '32px',
+  justifyContent: 'center',
+  padding: `0 ${tokens.spacingXs}`,
+  width: '32px',
 
-  '&:hover, &&:hover': {
+  '&:hover': {
     backgroundColor: tokens.gray100,
     borderColor: tokens.gray400,
     color: tokens.gray900,
   },
 
-  '&:focus-visible, &&:focus-visible': {
+  '&:focus-visible': {
     boxShadow: `0 0 0 3px ${tokens.blue200}`,
     outline: 'none',
   },

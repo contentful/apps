@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Flex, Heading, Layout } from '@contentful/f36-components';
-import { EyeIcon, PencilSimpleIcon } from '@contentful/f36-icons';
+import { Button, Flex, Heading, Layout, Menu } from '@contentful/f36-components';
+import { EyeIcon, MoreHorizontalIcon, PencilSimpleIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { cx } from '@emotion/css';
@@ -22,7 +22,7 @@ import { SummaryModal } from '../modals/SummaryModal';
 import OverviewSection from '../overview/OverviewSection';
 import { MappingView } from './mapping/MappingView';
 import {
-  cancelReviewButton,
+  moreActionsButton,
   modeToggleButton,
   modeToggleButtonActive,
   modeToggleWrapper,
@@ -193,14 +193,9 @@ export const ReviewPage = ({
     void handleCreateEntries();
   }, [hasCreatedEntries, handleCreateEntries]);
 
-  const handleCancelOrExitReview = useCallback(() => {
-    if (hasCreatedEntries) {
-      onExitReview();
-      return;
-    }
-
+  const handleDeleteJob = useCallback(() => {
     setIsConfirmCancelModalOpen(true);
-  }, [hasCreatedEntries, onExitReview]);
+  }, []);
 
   const handleSummaryDone = useCallback(() => {
     setIsSummaryModalOpen(false);
@@ -247,13 +242,26 @@ export const ReviewPage = ({
                 Edit mode
               </button>
             </div>
+            {!hasCreatedEntries && (
+              <Menu>
+                <Menu.Trigger>
+                  <button type="button" className={moreActionsButton} aria-label="More actions">
+                    <MoreHorizontalIcon size="small" />
+                  </button>
+                </Menu.Trigger>
+                <Menu.List>
+                  <Menu.Item onClick={handleDeleteJob} style={{ color: 'red' }}>
+                    Delete
+                  </Menu.Item>
+                </Menu.List>
+              </Menu>
+            )}
             <Button
               variant="secondary"
               size="small"
-              className={cancelReviewButton}
-              onClick={handleCancelOrExitReview}
-              aria-label={hasCreatedEntries ? 'Exit review' : 'Cancel review'}>
-              {hasCreatedEntries ? 'Exit' : 'Cancel'}
+              onClick={onExitReview}
+              aria-label="Close review">
+              Close
             </Button>
           </Flex>
         </Flex>
