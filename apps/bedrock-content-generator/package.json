@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@aws-sdk/client-bedrock": "^3.529.1",
-    "@aws-sdk/client-bedrock-runtime": "^3.529.1",
+    "@aws-sdk/client-bedrock": "^3.981.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.981.0",
     "@contentful/app-scripts": "^1.29.0",
     "@contentful/app-sdk": "4.23.0",
     "@contentful/f36-components": "4.67.0",
