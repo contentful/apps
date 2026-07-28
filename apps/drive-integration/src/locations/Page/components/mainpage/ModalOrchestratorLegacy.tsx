@@ -290,14 +290,11 @@ export const ModalOrchestratorLegacy = forwardRef<
       showDiscardConfirmation();
     };
 
-    const showDocumentScopeReview = (
+    const showDocumentSelectionReview = (
       selectionConfig: DocumentSelectionConfig,
       contentTypeIds: string[]
     ) => {
       setAvailableTabs(selectionConfig.tabs.map((tab) => ({ tabId: tab.id, tabTitle: tab.title })));
-      setSelectedTabs([]);
-      setUseAllTabs(null);
-      setIncludeImages(null);
       const requiresTabSelection = selectionConfig.tabs.length > 1;
       const requiresImages = selectionConfig.imageCount > 0;
       setRequiresImageSelection(requiresImages);
@@ -376,7 +373,7 @@ export const ModalOrchestratorLegacy = forwardRef<
         return;
       }
 
-      showDocumentScopeReview(selectionConfig, contentTypeIds);
+      showDocumentSelectionReview(selectionConfig, contentTypeIds);
     };
 
     const handleSelectTabsContinue = async (selectedTabs: DocumentTabProps[]) => {
