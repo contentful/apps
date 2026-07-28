@@ -1,8 +1,9 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { locations } from '@contentful/app-sdk';
 import Page from './locations/Page/Page';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import ConfigScreen from './locations/ConfigScreen/ConfigScreen';
+import { useLDClient } from 'launchdarkly-react-client-sdk';
 
 const ComponentLocationSettings = {
   [locations.LOCATION_APP_CONFIG]: ConfigScreen,
@@ -11,6 +12,12 @@ const ComponentLocationSettings = {
 
 const App = () => {
   const sdk = useSDK();
+  const ldClient = useLDClient();
+
+  useEffect(() => {
+    if (!ldClient) return;
+    void ldClient.identify({ kind: 'user', key: sdk.user.sys.id, currentOrgId: sdk.ids.organization });
+  }, [ldClient, sdk.user.sys.id]);
 
   const Component = useMemo(() => {
     for (const [location, component] of Object.entries(ComponentLocationSettings)) {

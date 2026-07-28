@@ -43,7 +43,7 @@ export const PermissionsSection: FC<PermissionsSectionProps> = ({
     spacing="spacing2Xs"
     alignItems="flex-start"
     style={{ width: '100%' }}>
-    <Heading as="h2" marginBottom="spacing2Xs">
+    <Heading as="h2" marginBottom="spacing2Xs" style={{ fontSize: '16px' }}>
       Configure Contentful access
     </Heading>
     <Text marginBottom="spacingM">
@@ -52,7 +52,7 @@ export const PermissionsSection: FC<PermissionsSectionProps> = ({
 
     <Accordion style={{ width: '100%', maxWidth: '100%' }}>
       <Accordion.Item
-        title="Content lifecycle actions"
+        title={<span style={{ fontSize: '14px' }}>Content lifecycle actions</span>}
         isExpanded={expandedAccordions.contentLifecycle}
         onExpand={() => onAccordionToggle('contentLifecycle', true)}
         onCollapse={() => onAccordionToggle('contentLifecycle', false)}>
@@ -102,7 +102,7 @@ export const PermissionsSection: FC<PermissionsSectionProps> = ({
       </Accordion.Item>
 
       <Accordion.Item
-        title="Actions on other features"
+        title={<span style={{ fontSize: '14px' }}>Actions on other features</span>}
         isExpanded={expandedAccordions.otherFeatures}
         onExpand={() => onAccordionToggle('otherFeatures', true)}
         onCollapse={() => onAccordionToggle('otherFeatures', false)}>

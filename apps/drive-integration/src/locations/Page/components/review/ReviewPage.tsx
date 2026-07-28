@@ -5,9 +5,9 @@ import tokens from '@contentful/f36-tokens';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { cx } from '@emotion/css';
 import type { EntryProps } from 'contentful-management';
-import type { EntryBlockGraph, MappingReviewSuspendPayload } from '@types';
+import type { EntryBlockGraph, MappingReviewSuspendPayload, ReviewedReferenceGraph } from '@types';
 import { RunStatus } from '@types';
-import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
+import { resumeAndPollWorkflow } from '../../../../services/workflowService';
 import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
 import type { ContentTypeDisplayInfoMap } from '../../../../utils/overviewEntryList';
 import {
@@ -33,8 +33,9 @@ interface ReviewPageProps {
   sdk: PageAppSDK;
   payload: MappingReviewSuspendPayload;
   runId?: string;
-  onCancelReview: () => Promise<void>;
+  onCancelReview: (graph: EntryBlockGraph) => Promise<void>;
   onExitReview: () => void;
+  onRunCompleted?: (entryIds: string[]) => void;
 }
 
 export const ReviewPage = ({
@@ -43,6 +44,7 @@ export const ReviewPage = ({
   runId,
   onCancelReview,
   onExitReview,
+  onRunCompleted,
 }: ReviewPageProps) => {
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
   const [selectedEntryIndex, setSelectedEntryIndex] = useState<number | null>(null);
@@ -55,22 +57,26 @@ export const ReviewPage = ({
   const [entryBlockGraph, setEntryBlockGraph] = useState<EntryBlockGraph>(() =>
     structuredClone(payload.entryBlockGraph)
   );
+  const [referenceGraph, setReferenceGraph] = useState<ReviewedReferenceGraph>(() =>
+    structuredClone(payload.referenceGraph)
+  );
   const [selectedEntryKeys, setSelectedEntryKeys] = useState<Set<string>>(() =>
     getAllEntrySelectionKeys(payload.entryBlockGraph.entries)
   );
 
-  // Reset local graph when starting a different run; do not depend on payload.entryBlockGraph
+  // Reset local graphs when starting a different run; do not depend on payload fields
   // alone or user edits would be wiped when the parent re-renders with a new object reference.
   useEffect(() => {
     const nextEntryBlockGraph = structuredClone(payload.entryBlockGraph);
     setEntryBlockGraph(nextEntryBlockGraph);
+    setReferenceGraph(structuredClone(payload.referenceGraph));
     setSelectedEntryKeys(getAllEntrySelectionKeys(nextEntryBlockGraph.entries));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-init on run identity
   }, [runId, payload.documentId]);
 
   const reviewPayload = useMemo(
-    (): MappingReviewSuspendPayload => ({ ...payload, entryBlockGraph }),
-    [payload, entryBlockGraph]
+    (): MappingReviewSuspendPayload => ({ ...payload, entryBlockGraph, referenceGraph }),
+    [payload, entryBlockGraph, referenceGraph]
   );
   const contentTypeDisplayInfoMap = useMemo<ContentTypeDisplayInfoMap>(() => {
     const map = new Map<string, { name: string; displayField?: string }>();
@@ -89,8 +95,6 @@ export const ReviewPage = ({
     [entryBlockGraph.entries, selectedEntryKeys]
   );
   const hasSelectedEntries = selectedEntryCount > 0;
-
-  const { resumeWorkflow } = useWorkflowAgent({ sdk, documentId: '', oauthToken: '' });
 
   const handleToggleEntrySelection = (entryKey: string, isSelected: boolean) => {
     setSelectedEntryKeys((previous) => {
@@ -121,7 +125,7 @@ export const ReviewPage = ({
         entryBlockGraph,
         selectedEntryKeys
       );
-      const result = await resumeWorkflow(runId, {
+      const result = await resumeAndPollWorkflow(sdk, runId, {
         entryBlockGraph: selectedEntryBlockGraph,
       });
 
@@ -139,6 +143,8 @@ export const ReviewPage = ({
           return;
         }
 
+        const entryIds = entries.map((e) => e.sys.id);
+        onRunCompleted?.(entryIds);
         setCreatedEntries(entries);
         setIsSummaryModalOpen(true);
         return;
@@ -162,21 +168,21 @@ export const ReviewPage = ({
     hasSelectedEntries,
     entryBlockGraph,
     selectedEntryKeys,
-    resumeWorkflow,
     sdk,
     onExitReview,
+    onRunCompleted,
   ]);
 
   const handleConfirmCancel = useCallback(async () => {
     setIsCancelling(true);
 
     try {
-      await onCancelReview();
+      await onCancelReview(entryBlockGraph);
     } finally {
       setIsCancelling(false);
       setIsConfirmCancelModalOpen(false);
     }
-  }, [onCancelReview]);
+  }, [onCancelReview, entryBlockGraph]);
 
   const handleCreateOrViewEntries = useCallback(() => {
     if (hasCreatedEntries) {
@@ -209,7 +215,11 @@ export const ReviewPage = ({
     if (mode === 'view') {
       setSelectedEntryIndex(null);
     } else if (mode === 'edit' && selectedEntryIndex === null) {
-      setSelectedEntryIndex(entryBlockGraph.entries.length > 0 ? 0 : null);
+      const assignedChildTempIds = new Set((referenceGraph.edges ?? []).map((e) => e.to));
+      const firstRootIndex = entryBlockGraph.entries.findIndex(
+        (e) => !e.tempId || !assignedChildTempIds.has(e.tempId)
+      );
+      setSelectedEntryIndex(firstRootIndex >= 0 ? firstRootIndex : null);
     }
   };
 
@@ -270,7 +280,10 @@ export const ReviewPage = ({
             payload={reviewPayload}
             entryBlockGraph={entryBlockGraph}
             onEntryBlockGraphChange={setEntryBlockGraph}
+            referenceGraph={referenceGraph}
+            onReferenceGraphChange={setReferenceGraph}
             selectedEntryIndex={selectedEntryIndex}
+            defaultLocale={sdk.locales.default}
             isDisabled={isMappingDisabled}
             mode={reviewMode}
           />

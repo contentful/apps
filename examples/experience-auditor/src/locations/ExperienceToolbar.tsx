@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import type { ExperienceContext, ExperienceEditorToolbarAppSDK } from '@contentful/app-sdk';
+import type { ExperienceContext, ExperienceCanvasToolbarAppSDK } from '@contentful/app-sdk';
 import {
   Badge,
   Box,
@@ -32,7 +32,7 @@ import FindingList from '../components/FindingList';
  * outstanding errors.
  */
 const ExperienceToolbar = () => {
-  const sdk = useSDK<ExperienceEditorToolbarAppSDK>();
+  const sdk = useSDK<ExperienceCanvasToolbarAppSDK>();
 
   const [context, setContext] = useState<ExperienceContext>(() => sdk.experiences.context);
   const [report, setReport] = useState<AuditReport | null>(null);
@@ -60,6 +60,17 @@ const ExperienceToolbar = () => {
         setAuditing(false);
       }
     }
+  }, [sdk]);
+
+  // Report the panel's height so the host sizes the toolbar app to its content
+  // in the stacked Apps panel. sdk.window on the toolbar location arrived in
+  // app-sdk 4.67.0; guard it so hosts that don't serve it degrade to a no-op.
+  useEffect(() => {
+    if (!sdk.window) {
+      return;
+    }
+    sdk.window.startAutoResizer();
+    return () => sdk.window.stopAutoResizer();
   }, [sdk]);
 
   // Keep context in sync.

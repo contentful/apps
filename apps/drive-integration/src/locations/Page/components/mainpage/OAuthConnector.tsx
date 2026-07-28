@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { type ComponentProps } from 'react';
-import { Button, Flex, Text, Image } from '@contentful/f36-components';
+import { Button, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { CheckCircleIcon } from '@contentful/f36-icons';
-import driveLogo from '../../../../assets/drive-integration.svg';
 
 type OAuthConnectorProps = {
   isOAuthConnected: boolean;
@@ -49,60 +48,34 @@ export const OAuthConnector = ({
 
   return (
     <Flex
+      gap="spacingXs"
       alignItems="center"
-      justifyContent="space-between"
-      style={{
-        padding: `${tokens.spacingS} ${tokens.spacingL}`,
-        border: `1px solid ${tokens.gray300}`,
-        borderRadius: tokens.borderRadiusMedium,
+      onMouseEnter={() => {
+        if (isOAuthConnected) {
+          setIsHoveringConnected(true);
+        }
+      }}
+      onMouseLeave={() => {
+        setIsHoveringConnected(false);
       }}>
-      <Flex gap="spacingS" alignItems="center" justifyContent="center">
-        <Flex
-          alignItems="center"
-          justifyContent="center"
-          style={{
-            height: '40px',
-            width: '40px',
-            border: `1px solid ${tokens.gray300}`,
-            borderRadius: tokens.borderRadiusMedium,
-            backgroundColor: tokens.gray100,
-          }}>
-          <Image src={driveLogo} alt="Drive Integration" height="28px" width="32px" />
-        </Flex>
-        <Text fontSize="fontSizeL" fontWeight="fontWeightMedium" lineHeight="lineHeightL">
-          Drive Integration
+      {isOAuthConnected && isHoveringConnected && (
+        <Text
+          fontSize="fontSizeS"
+          fontWeight="fontWeightMedium"
+          lineHeight="lineHeightS"
+          fontColor="gray500">
+          Status: connected
         </Text>
-      </Flex>
-      <Flex
-        gap="spacingXs"
-        alignItems="center"
-        onMouseEnter={() => {
-          if (isOAuthConnected) {
-            setIsHoveringConnected(true);
-          }
-        }}
-        onMouseLeave={() => {
-          setIsHoveringConnected(false);
-        }}>
-        {isOAuthConnected && isHoveringConnected && (
-          <Text
-            fontSize="fontSizeS"
-            fontWeight="fontWeightMedium"
-            lineHeight="lineHeightS"
-            fontColor="gray500">
-            Status: connected
-          </Text>
-        )}
-        <Button
-          variant={isOAuthConnected && isHoveringConnected ? 'negative' : 'secondary'}
-          size="small"
-          endIcon={isOAuthConnected && !isHoveringConnected ? <ConnectedStatusIcon /> : undefined}
-          onClick={() => void handleButtonClick()}
-          isLoading={isOAuthBusy}
-          isDisabled={isOAuthBusy}>
-          {getButtonText()}
-        </Button>
-      </Flex>
+      )}
+      <Button
+        variant={isOAuthConnected && isHoveringConnected ? 'negative' : 'secondary'}
+        size="small"
+        startIcon={isOAuthConnected && !isHoveringConnected ? <ConnectedStatusIcon /> : undefined}
+        onClick={() => void handleButtonClick()}
+        isLoading={isOAuthBusy}
+        isDisabled={isOAuthBusy}>
+        {getButtonText()}
+      </Button>
     </Flex>
   );
 };

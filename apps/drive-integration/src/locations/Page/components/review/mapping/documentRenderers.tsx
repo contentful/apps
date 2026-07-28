@@ -12,6 +12,7 @@ import {
 } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import type {
+  ImageSourceRef,
   NormalizedDocumentContentBlock,
   NormalizedDocumentImage,
   NormalizedDocumentTable,
@@ -25,11 +26,7 @@ import type { ListMarker } from './buildListMarkers';
 import { buildTextSegments, type TextSegment } from './buildTextSegments';
 import { ReviewImageAssetCard } from './ReviewImageAssetCard';
 import { isImageSourceRefExcluded } from './sourceRefUtils';
-import {
-  tableCellChromeMapped,
-  tableCellChromeMappedHovered,
-  tableCellChromeUnmapped,
-} from './documentRenderers.styles';
+import { tableCellChromeMapped, tableCellChromeMappedHovered } from './documentRenderers.styles';
 
 // ─── Shared helpers ─────────────────────────────────────────────────────────
 
@@ -158,10 +155,8 @@ interface BlockRendererProps {
   hoveredMappingKeys: string[];
   isViewMode: boolean;
   onSetHoveredMappingKeys: (keys: string[]) => void;
-  onEditImage?: (
-    sourceRef: { type: 'image'; blockId: string; imageId: string },
-    label: string
-  ) => void;
+  onEditImage?: (sourceRef: ImageSourceRef, label: string) => void;
+  onRemoveImage?: (sourceRef: ImageSourceRef) => void;
 }
 
 export const BlockRenderer = ({
@@ -176,6 +171,7 @@ export const BlockRenderer = ({
   isViewMode,
   onSetHoveredMappingKeys,
   onEditImage,
+  onRemoveImage,
 }: BlockRendererProps) => {
   const visibleHighlights = filterByEntry(
     highlightIndex.blockHighlights[block.id] ?? [],
@@ -266,8 +262,13 @@ export const BlockRenderer = ({
               }
               onMouseLeave={highlighted ? () => onSetHoveredMappingKeys([]) : undefined}
               onEdit={
-                onEditImage
+                !isViewMode && onEditImage
                   ? () => onEditImage(imageSourceRef, image.title ?? image.altText ?? image.id)
+                  : undefined
+              }
+              onRemove={
+                !isViewMode && highlighted && onRemoveImage
+                  ? () => onRemoveImage(imageSourceRef)
                   : undefined
               }
             />
@@ -292,17 +293,8 @@ interface TableRendererProps {
   hoveredMappingKeys: string[];
   isViewMode: boolean;
   onSetHoveredMappingKeys: (keys: string[]) => void;
-  onEditImage?: (
-    sourceRef: {
-      type: 'tableImage';
-      tableId: string;
-      rowId: string;
-      cellId: string;
-      partId: string;
-      imageId: string;
-    },
-    label: string
-  ) => void;
+  onEditImage?: (sourceRef: ImageSourceRef, label: string) => void;
+  onRemoveImage?: (sourceRef: ImageSourceRef) => void;
 }
 
 interface TablePartRendererProps {
@@ -318,6 +310,7 @@ interface TablePartRendererProps {
   isViewMode: boolean;
   onSetHoveredMappingKeys: (keys: string[]) => void;
   onEditImage?: TableRendererProps['onEditImage'];
+  onRemoveImage?: TableRendererProps['onRemoveImage'];
 }
 
 const TablePartRenderer = ({
@@ -333,6 +326,7 @@ const TablePartRenderer = ({
   isViewMode,
   onSetHoveredMappingKeys,
   onEditImage,
+  onRemoveImage,
 }: TablePartRendererProps) => {
   if (part.type === 'image') {
     const image = imageById[part.imageId];
@@ -383,8 +377,13 @@ const TablePartRenderer = ({
           onMouseEnter={highlighted ? () => onSetHoveredMappingKeys(mappingKeys) : undefined}
           onMouseLeave={highlighted ? () => onSetHoveredMappingKeys([]) : undefined}
           onEdit={
-            onEditImage
+            !isViewMode && onEditImage
               ? () => onEditImage(imageSourceRef, image.title ?? image.altText ?? image.id)
+              : undefined
+          }
+          onRemove={
+            !isViewMode && highlighted && onRemoveImage
+              ? () => onRemoveImage(imageSourceRef)
               : undefined
           }
         />
@@ -429,6 +428,7 @@ export const TableRenderer = ({
   isViewMode,
   onSetHoveredMappingKeys,
   onEditImage,
+  onRemoveImage,
 }: TableRendererProps) => {
   const borderIndex = fullHighlightIndex ?? highlightIndex;
 
@@ -492,6 +492,7 @@ export const TableRenderer = ({
                           isViewMode={isViewMode}
                           onSetHoveredMappingKeys={onSetHoveredMappingKeys}
                           onEditImage={onEditImage}
+                          onRemoveImage={onRemoveImage}
                         />
                       </Box>
                     );

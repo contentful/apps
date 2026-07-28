@@ -4,7 +4,7 @@ import { useGoogleDocsPicker } from '@hooks/useGoogleDocPicker';
 interface SelectDocumentModalProps {
   oauthToken: string;
   isOpen: boolean;
-  onClose: (documentId?: string) => void;
+  onClose: (documentId?: string, documentTitle?: string) => void;
 }
 
 export default function SelectDocumentModal({
@@ -21,9 +21,9 @@ export default function SelectDocumentModal({
   }, [onClose]);
 
   // Stable callbacks that use refs
-  const handlePicked = useCallback((files: { id: string }[]) => {
+  const handlePicked = useCallback((files: { id: string; name: string }[]) => {
     if (files.length > 0) {
-      onCloseRef.current(files[0].id);
+      onCloseRef.current(files[0].id, files[0].name);
     } else {
       onCloseRef.current();
     }

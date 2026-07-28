@@ -11,7 +11,7 @@ import type { CollectedNode } from './types';
  * the same `getNode` + `getProperties` pattern, applied recursively.
  */
 export async function collectNodes(experience: ExperienceAPI): Promise<CollectedNode[]> {
-  const roots = experience.getRootNodes();
+  const roots = await experience.getRootNodes();
 
   const collected = await Promise.all(
     roots.map(async (node) => {

@@ -1,9 +1,9 @@
-import type { ExperienceEditorToolbarAppSDK } from '@contentful/app-sdk';
+import type { ExperienceCanvasToolbarAppSDK } from '@contentful/app-sdk';
 
 /**
  * DEMO ONLY — scaffolding for the standalone `?demo` mode. Typed loosely on
  * purpose: the mock only implements the surfaces the toolbar and collector
- * actually touch, and a single `as unknown as ExperienceEditorToolbarAppSDK`
+ * actually touch, and a single `as unknown as ExperienceCanvasToolbarAppSDK`
  * cast at the export bridges it to the real SDK type. Not used on any real path.
  */
 
@@ -64,8 +64,8 @@ export const demoSdk = {
       save: async () => {},
       publish: async () => {},
       getNode: (id: string) => nodes.find((n) => n.id === id) ?? null,
-      getRootNodes: () => nodes,
+      getRootNodes: async () => nodes,
       // selection intentionally omitted (see above)
     },
   },
-} as unknown as ExperienceEditorToolbarAppSDK;
+} as unknown as ExperienceCanvasToolbarAppSDK;

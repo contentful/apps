@@ -5,6 +5,7 @@ import type { EditModalFieldMapping, EditModalFieldOption } from '@types';
 import { useMultiselectScrollReflow } from '@hooks/useMultiselectReflow';
 import { isSelectableFieldType } from './utils';
 import { optionRow } from './FieldSelectionDropdown.styles';
+import { handleMultiselectKeyDown } from '../../../../../../utils/keyboard';
 
 interface FieldSelectionDropdownProps {
   selectedText: string;
@@ -55,16 +56,6 @@ export const FieldSelectionDropdown = ({
     return fieldOptions.filter((option) => isSelectableFieldType(option, selectedText));
   }, [fieldOptions, isImageContent, selectedText]);
 
-  const hasUnsupportedFields = useMemo(
-    () =>
-      fieldOptions.some((option) =>
-        isImageContent
-          ? !isSelectableForImage(option)
-          : !isSelectableFieldType(option, selectedText) && !option.isAssetField
-      ),
-    [fieldOptions, isImageContent, selectedText]
-  );
-
   const onSelectableStateChangeRef = useRef(onSelectableStateChange);
   onSelectableStateChangeRef.current = onSelectableStateChange;
 
@@ -92,50 +83,52 @@ export const FieldSelectionDropdown = ({
     selectedOptions.length === 0 ? 'Select one or more' : `${selectedOptions.length} selected`;
 
   return (
-    <FormControl as="div">
-      <Multiselect
-        key={key}
-        currentSelection={currentSelection}
-        placeholder={placeholder}
-        popoverProps={{
-          listMaxHeight: 200,
-          listRef: multiselectListRef,
-          placement: 'bottom',
-          isAutoalignmentEnabled: false,
-        }}>
-        {fieldOptions.map((option) => {
-          const fieldTypeDisplay = option.fieldDisplayType;
-          const isDisabled = isImageContent
-            ? !isSelectableForImage(option)
-            : !isSelectableFieldType(option, selectedText);
-          const isFilled = filledFieldIds.has(option.id);
-          return (
-            <Multiselect.Option
-              key={`${key}-${option.id}`}
-              value={option.id}
-              itemId={`${key}-${option.id}`}
-              isChecked={selectedFieldIds.includes(option.id)}
-              isDisabled={isDisabled && !selectedFieldIds.includes(option.id)}
-              onSelectItem={handleSelectField}
-              className={optionRow}>
-              <Flex gap="spacing2Xs">
-                <Text as="div" fontColor="gray700" fontWeight="fontWeightDemiBold">
-                  {option.fieldName}
-                </Text>
-                <Text as="div" fontColor="gray700" fontWeight="fontWeightNormal">
-                  ({fieldTypeDisplay})
-                </Text>
-              </Flex>
-              <Badge
-                variant={isFilled ? 'positive' : 'secondary'}
-                size="small"
-                style={{ marginLeft: 'auto' }}>
-                {isFilled ? 'Filled' : 'Empty'}
-              </Badge>
-            </Multiselect.Option>
-          );
-        })}
-      </Multiselect>
+    <FormControl as="div" marginBottom="none">
+      <div onKeyDown={handleMultiselectKeyDown}>
+        <Multiselect
+          key={key}
+          currentSelection={currentSelection}
+          placeholder={placeholder}
+          popoverProps={{
+            listMaxHeight: 150,
+            listRef: multiselectListRef,
+            placement: 'bottom',
+            isAutoalignmentEnabled: false,
+          }}>
+          {fieldOptions.map((option) => {
+            const fieldTypeDisplay = option.fieldDisplayType;
+            const isDisabled = isImageContent
+              ? !isSelectableForImage(option)
+              : !isSelectableFieldType(option, selectedText);
+            const isFilled = filledFieldIds.has(option.id);
+            return (
+              <Multiselect.Option
+                key={`${key}-${option.id}`}
+                value={option.id}
+                itemId={`${key}-${option.id}`}
+                isChecked={selectedFieldIds.includes(option.id)}
+                isDisabled={isDisabled && !selectedFieldIds.includes(option.id)}
+                onSelectItem={handleSelectField}
+                className={optionRow}>
+                <Flex gap="spacing2Xs">
+                  <Text as="div" fontColor="gray700" fontWeight="fontWeightDemiBold">
+                    {option.fieldName}
+                  </Text>
+                  <Text as="div" fontColor="gray700" fontWeight="fontWeightNormal">
+                    ({fieldTypeDisplay})
+                  </Text>
+                </Flex>
+                <Badge
+                  variant={isFilled ? 'positive' : 'secondary'}
+                  size="small"
+                  style={{ marginLeft: 'auto' }}>
+                  {isFilled ? 'Filled' : 'Empty'}
+                </Badge>
+              </Multiselect.Option>
+            );
+          })}
+        </Multiselect>
+      </div>
     </FormControl>
   );
 };

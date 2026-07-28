@@ -1,10 +1,9 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { EditModal } from '../../../../../src/locations/Page/components/review/mapping/edit-modals/EditModal';
 import React from 'react';
 
 const onClose = vi.fn();
-const onConfirmPrimary = vi.fn();
 
 const baseNewLocation = {
   id: 'page-event-detail',
@@ -41,6 +40,13 @@ const baseViewModel = {
 describe('EditModal', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.runAllTimers();
+    vi.useRealTimers();
   });
 
   it('renders the provided title and button label', async () => {
@@ -60,7 +66,7 @@ describe('EditModal', () => {
     });
   });
 
-  it('renders the "Assign to fields" section when newLocations is non-empty', async () => {
+  it('renders the new location section when newLocations is non-empty', async () => {
     render(
       <EditModal
         isOpen={true}
@@ -72,8 +78,8 @@ describe('EditModal', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Assign to fields')).toBeTruthy();
-      expect(screen.getByText('Page: Event detail')).toBeTruthy();
+      expect(screen.getByText('New location')).toBeTruthy();
+      expect(screen.getByText('Event detail')).toBeTruthy();
     });
   });
 
@@ -93,7 +99,7 @@ describe('EditModal', () => {
     });
   });
 
-  it('does not render the "Assign to fields" section when newLocations is empty', async () => {
+  it('renders an empty new location list when newLocations is empty', async () => {
     render(
       <EditModal
         isOpen={true}
@@ -108,7 +114,7 @@ describe('EditModal', () => {
     );
 
     await waitFor(() => {
-      expect(screen.queryByText('Assign to fields')).toBeNull();
+      expect(screen.queryByText('Event detail')).toBeNull();
     });
   });
 
@@ -144,8 +150,8 @@ describe('EditModal', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Page: Event detail')).toBeTruthy();
-      expect(screen.getByText('Component: Resource detail hero')).toBeTruthy();
+      expect(screen.getByText('Event detail')).toBeTruthy();
+      expect(screen.getByText('Resource detail hero')).toBeTruthy();
     });
   });
 });

@@ -3,7 +3,7 @@ import type {
   ComponentPropertyDescriptor,
   ExperienceContext,
   ExperienceNodeType,
-  ExperienceEditorToolbarAppSDK,
+  ExperienceCanvasToolbarAppSDK,
 } from '@contentful/app-sdk';
 import {
   Badge,
@@ -28,7 +28,7 @@ interface Selection {
 }
 
 /**
- * A minimal Experience Editor toolbar app. It demonstrates the core `sdk.experiences`
+ * A minimal Experience Canvas toolbar app. It demonstrates the core `sdk.experiences`
  * patterns a toolbar app is built on:
  *
  *  - reading `sdk.experiences.context` to tell experience vs. fragment editing apart
@@ -42,7 +42,7 @@ interface Selection {
  * call on cleanup.
  */
 const ExperienceToolbar = () => {
-  const sdk = useSDK<ExperienceEditorToolbarAppSDK>();
+  const sdk = useSDK<ExperienceCanvasToolbarAppSDK>();
 
   const [context, setContext] = useState<ExperienceContext>(() => sdk.experiences.context);
   const [selection, setSelection] = useState<Selection>(() =>
@@ -50,6 +50,17 @@ const ExperienceToolbar = () => {
   );
   const [properties, setProperties] = useState<ComponentPropertyDescriptor[] | null>(null);
   const [loadingProperties, setLoadingProperties] = useState(false);
+
+  // Report the panel's height so the host sizes the toolbar app to its content
+  // in the stacked Apps panel. sdk.window on the toolbar location arrived in
+  // app-sdk 4.67.0; guard it so hosts that don't serve it degrade to a no-op.
+  useEffect(() => {
+    if (!sdk.window) {
+      return;
+    }
+    sdk.window.startAutoResizer();
+    return () => sdk.window.stopAutoResizer();
+  }, [sdk]);
 
   // Keep the editing context (experience vs. fragment) in sync.
   useEffect(() => {

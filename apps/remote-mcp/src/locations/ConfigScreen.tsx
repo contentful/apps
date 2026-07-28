@@ -18,7 +18,6 @@ const ConfigScreen = () => {
     contentLifecycle: true,
     experienceOrchestration: false,
     otherFeatures: false,
-    migration: false,
   });
 
   const sdk = useSDK<ConfigAppSDK>();

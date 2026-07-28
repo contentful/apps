@@ -5,17 +5,9 @@ import { ContentTypeProps } from 'contentful-management';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
 import { ErrorModal, type ErrorModalConfig } from '../modals/ErrorModal';
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
-import { LoadingModal } from '../modals/LoadingModal';
 import { ERROR_MESSAGES } from '@constants/messages';
 import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
-import {
-  DocumentTabProps,
-  MappingReviewSuspendPayload,
-  RunStatus,
-  WorkflowRunResult,
-  WorkflowFailureReason,
-  WorkflowRunError,
-} from '@types';
+import { DocumentTabProps, WorkflowFailureReason, WorkflowRunError } from '@types';
 import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
 import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
 import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
@@ -25,6 +17,7 @@ import {
   DocumentSelectionConfig,
 } from '../../../../utils/fetchDocumentSelection';
 import { isAiAccessDeniedError } from '../../../../utils/aiAccess';
+import type { RunRecord } from '../../../../types/runs';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
@@ -35,7 +28,6 @@ enum FlowStep {
   CONTENT_TYPE_PICKER = 'contentTypePicker',
   SELECT_TABS = 'selectTabs',
   INCLUDE_IMAGES = 'includeImages',
-  LOADING = 'loading',
 }
 
 interface ModalOrchestratorProps {
@@ -45,8 +37,9 @@ interface ModalOrchestratorProps {
   isOAuthBusy?: boolean;
   onReconnectGoogleDrive?: () => Promise<void>;
   onAiAccessDenied?: (message: string) => void;
-  onMappingReviewReady: (payload: MappingReviewSuspendPayload, runId: string) => void;
-  onResetToMain: () => void;
+  onRunStarted: (runId: string) => void;
+  addRun: (record: RunRecord) => void;
+  storageError: string | null;
 }
 
 interface PreviewErrorState {
@@ -63,9 +56,10 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       isOAuthConnected = false,
       isOAuthBusy = false,
       onReconnectGoogleDrive = async () => undefined,
-      onMappingReviewReady,
-      onResetToMain,
+      onRunStarted,
       onAiAccessDenied,
+      addRun,
+      storageError,
     },
     ref
   ) => {
@@ -75,14 +69,15 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const [isReconnectPending, setIsReconnectPending] = useState(false);
     const [flowStep, setFlowStep] = useState<FlowStep | null>(null);
     const [documentId, setDocumentId] = useState<string>('');
+    const [documentTitle, setDocumentTitle] = useState<string>('Untitled Document');
     const [selectedContentTypes, setSelectedContentTypes] = useState<ContentTypeProps[]>([]);
     const [availableTabs, setAvailableTabs] = useState<DocumentTabProps[]>([]);
     const [selectedTabs, setSelectedTabs] = useState<DocumentTabProps[]>([]);
     const [useAllTabs, setUseAllTabs] = useState<boolean | null>(null);
     const [includeImages, setIncludeImages] = useState<boolean | null>(null);
     const [requiresImageSelection, setRequiresImageSelection] = useState(false);
-    const [activeRunId, setActiveRunId] = useState<string | null>(null);
-    const { startWorkflow, resumeWorkflow } = useWorkflowAgent({
+
+    const { startWorkflow } = useWorkflowAgent({
       sdk,
       documentId,
       oauthToken,
@@ -100,22 +95,22 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       },
     }));
 
-    const resetDocumentSelection = () => {
+    const resetDocumentSelection = useCallback(() => {
       setAvailableTabs([]);
       setSelectedTabs([]);
       setUseAllTabs(null);
       setIncludeImages(null);
       setRequiresImageSelection(false);
-    };
+    }, []);
 
-    const resetProgress = () => {
+    const resetProgress = useCallback(() => {
       setDocumentId('');
+      setDocumentTitle('Untitled Document');
       setSelectedContentTypes([]);
       resetDocumentSelection();
-      setActiveRunId(null);
       setFlowStep(null);
       setIsUploadModalOpen(false);
-    };
+    }, [resetDocumentSelection]);
 
     const showDiscardConfirmation = () => {
       if (!hasProgressToLose) return;
@@ -123,7 +118,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     };
 
     const handleFlowModalCloseRequest = () => {
-      if (flowStep === FlowStep.LOADING) return;
       showDiscardConfirmation();
     };
 
@@ -131,13 +125,11 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setPreviewErrorState(null);
       setIsReconnectPending(false);
       resetProgress();
-      onResetToMain();
-    }, [onResetToMain]);
+    }, [resetProgress]);
 
     const handleConfirmCancel = () => {
       setIsConfirmCancelModalOpen(false);
       resetProgress();
-      onResetToMain();
     };
 
     const showWorkflowError = (error?: unknown) => {
@@ -227,6 +219,18 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
+      if (
+        error instanceof WorkflowRunError &&
+        error.reason === WorkflowFailureReason.MISSING_PARAMETER
+      ) {
+        setPreviewErrorState({
+          reason: WorkflowFailureReason.MISSING_PARAMETER,
+          title: 'Missing parameter',
+          message: ERROR_MESSAGES.MISSING_PARAMETER,
+        });
+        return;
+      }
+
       setPreviewErrorState({
         reason: WorkflowFailureReason.GENERIC,
         title: 'Unable to generate preview',
@@ -242,20 +246,23 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       closePreviewErrorAndReset();
     }, [closePreviewErrorAndReset, isOAuthBusy, isOAuthConnected, isReconnectPending]);
 
-    const handleWorkflowError = (error: unknown) => {
-      if (isAiAccessDeniedError(error)) {
-        resetProgress();
-        onResetToMain();
-        onAiAccessDenied?.(error.message);
-        return;
-      }
+    const handleWorkflowError = useCallback(
+      (error: unknown) => {
+        if (isAiAccessDeniedError(error)) {
+          resetProgress();
+          onAiAccessDenied?.(error.message);
+          return;
+        }
 
-      showWorkflowError(error);
-    };
+        showWorkflowError(error);
+      },
+      [onAiAccessDenied, resetProgress]
+    );
 
-    const handleUploadModalCloseRequest = (docId?: string) => {
+    const handleUploadModalCloseRequest = (docId?: string, docTitle?: string) => {
       if (docId) {
         setDocumentId(docId);
+        setDocumentTitle(docTitle ?? 'Untitled Document');
         setIsUploadModalOpen(false);
         setFlowStep(FlowStep.CONTENT_TYPE_PICKER);
         return;
@@ -290,25 +297,37 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       }).catch(handleWorkflowError);
     };
 
-    const handleWorkflowResult = (workflowRun: WorkflowRunResult) => {
-      setActiveRunId(workflowRun.runId);
-
-      if (workflowRun.status === RunStatus.PENDING_REVIEW) {
-        setFlowStep(null);
-        onMappingReviewReady(workflowRun.suspendPayload, workflowRun.runId);
-        return;
-      }
-
-      setFlowStep(null);
-    };
-
     const startWorkflowWithScope = async (
       contentTypeIds: string[],
       documentSelection: DocumentSelection
     ) => {
-      setFlowStep(FlowStep.LOADING);
-      const result = await startWorkflow(contentTypeIds, documentSelection);
-      handleWorkflowResult(result);
+      if (storageError) {
+        showWorkflowError(
+          new WorkflowRunError(
+            'Unable to track this import: browser storage is unavailable or full.',
+            WorkflowFailureReason.GENERIC
+          )
+        );
+        return;
+      }
+
+      try {
+        const runId = await startWorkflow(contentTypeIds, documentSelection);
+
+        addRun({
+          runId,
+          documentTitle,
+          documentId,
+          contentTypeIds,
+          documentSelection,
+          startedAt: new Date().toISOString(),
+        });
+
+        resetProgress();
+        onRunStarted(runId);
+      } catch (err) {
+        handleWorkflowError(err);
+      }
     };
 
     const handleContentTypeContinue = async (contentTypeIds: string[]) => {
@@ -439,14 +458,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
               onClose={showDiscardConfirmation}
             />
           );
-        case FlowStep.LOADING:
-          return (
-            <LoadingModal
-              step="reviewingContentTypes"
-              title="Preparing your preview"
-              contentTypeCount={selectedContentTypes.length}
-            />
-          );
         default:
           return null;
       }
@@ -465,7 +476,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           onClose={handleFlowModalCloseRequest}
           size={'large'}
           shouldCloseOnOverlayClick={false}
-          shouldCloseOnEscapePress={flowStep !== FlowStep.LOADING}>
+          shouldCloseOnEscapePress={true}>
           {renderFlowStep}
         </Modal>
 

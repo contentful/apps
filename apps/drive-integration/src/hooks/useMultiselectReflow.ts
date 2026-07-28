@@ -4,19 +4,10 @@ export const useMultiselectScrollReflow = <T>(selection: T[]): RefObject<HTMLULi
   const listRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
-    if (listRef.current) {
-      const element = listRef.current;
-      const currentScroll = element.scrollTop;
-      const maxScroll = element.scrollHeight - element.clientHeight;
-
-      if (currentScroll >= maxScroll) {
-        element.scrollTop = currentScroll - 1;
-      } else {
-        element.scrollTop = currentScroll + 1;
-      }
-
-      element.scrollTop = currentScroll;
-    }
+    // Floating UI's autoUpdate listens to window resize to reposition the popover.
+    // Dispatching a resize event on selection change ensures the portal realigns
+    // regardless of whether the filtered list is scrollable.
+    window.dispatchEvent(new Event('resize'));
   }, [selection]);
 
   return listRef;

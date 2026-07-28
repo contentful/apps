@@ -27,6 +27,12 @@ describe('ExperienceToolbar', () => {
     expect(getByTestId('empty-state')).toBeInTheDocument();
   });
 
+  it('starts the auto resizer so the host sizes the toolbar panel', () => {
+    render(<ExperienceToolbar />);
+
+    expect(mockSdk.window.startAutoResizer).toHaveBeenCalledOnce();
+  });
+
   it('subscribes to context and selection changes', () => {
     render(<ExperienceToolbar />);
 
