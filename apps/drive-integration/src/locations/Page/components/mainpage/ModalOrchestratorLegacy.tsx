@@ -21,6 +21,7 @@ import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal'
 import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
 import { useWorkflowAgentLegacy } from '@hooks/useWorkflowAgentLegacy';
 import { isAiAccessDeniedError } from '../../../../utils/aiAccess';
+import { DocumentSelection } from '../../../../services/agents-api';
 import {
   fetchDocumentSelection,
   DocumentSelectionConfig,
@@ -103,7 +104,7 @@ export const ModalOrchestratorLegacy = forwardRef<
       },
     }));
 
-    const resetDocumentScopeReview = () => {
+    const resetDocumentScope = () => {
       setAvailableTabs([]);
       setSelectedTabs([]);
       setUseAllTabs(null);
@@ -114,7 +115,7 @@ export const ModalOrchestratorLegacy = forwardRef<
     const resetProgress = () => {
       setDocumentId('');
       setSelectedContentTypes([]);
-      resetDocumentScopeReview();
+      resetDocumentScope();
       setActiveRunId(null);
       setFlowStep(null);
       setIsUploadModalOpen(false);
@@ -311,10 +312,18 @@ export const ModalOrchestratorLegacy = forwardRef<
         return;
       }
 
-      void startWorkflowWithDelayedLoading(contentTypeIds, {
-        selectedTabIds: [],
-        includeImages: false,
-      }).catch(handleWorkflowError);
+      void (async () => {
+        try {
+          handleWorkflowResult(
+            await startWorkflowWithScope(contentTypeIds, {
+              selectedTabIds: [],
+              includeImages: false,
+            })
+          );
+        } catch (error) {
+          handleWorkflowError(error);
+        }
+      })();
     };
 
     const handleWorkflowResult = (workflowRun: WorkflowRunResult) => {
@@ -329,9 +338,9 @@ export const ModalOrchestratorLegacy = forwardRef<
       setFlowStep(null);
     };
 
-    const startWorkflowWithDelayedLoading = async (
+    const startWorkflowWithScope = async (
       contentTypeIds: string[],
-      documentSelection: { selectedTabIds: string[]; includeImages: boolean }
+      documentSelection: DocumentSelection
     ) => {
       let isStartPending = true;
       const loadingModalTimeout = window.setTimeout(() => {
@@ -380,7 +389,7 @@ export const ModalOrchestratorLegacy = forwardRef<
 
       try {
         handleWorkflowResult(
-          await startWorkflowWithDelayedLoading(
+          await startWorkflowWithScope(
             selectedContentTypes.map((ct) => ct.sys.id),
             { selectedTabIds: selectedTabs.map((tab) => tab.tabId), includeImages: false }
           )
@@ -395,7 +404,7 @@ export const ModalOrchestratorLegacy = forwardRef<
 
       try {
         handleWorkflowResult(
-          await startWorkflowWithDelayedLoading(
+          await startWorkflowWithScope(
             selectedContentTypes.map((ct) => ct.sys.id),
             {
               selectedTabIds: selectedTabs.map((tab) => tab.tabId),
