@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { Stack } from '@contentful/f36-components';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import { PermissionsSection } from '../components/access-config';
 import { usePermissions } from '../hooks/usePermissions';
 import { FormHeader } from '../components/form-header/FormHeader';
@@ -16,8 +16,11 @@ import { AppInstallationParameters } from '../components/types/config';
 const ConfigScreen = () => {
   const [expandedAccordions, setExpandedAccordions] = useState({
     contentLifecycle: true,
+    experienceOrchestration: false,
     otherFeatures: false,
   });
+
+  const sdk = useSDK<ConfigAppSDK>();
 
   const {
     contentLifecyclePermissions,
@@ -30,13 +33,6 @@ const ConfigScreen = () => {
     handleRowToggle,
     handleOtherFeatureToggle,
   } = usePermissions();
-
-  const sdk = useSDK<ConfigAppSDK>();
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
 
   const onConfigure = useCallback(async () => {
     // This method will be called when a user clicks on "Install"

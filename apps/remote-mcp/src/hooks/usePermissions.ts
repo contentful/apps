@@ -6,7 +6,6 @@ import type {
   ContentLifecycleEntityKey,
   EntityActionKey,
 } from '../components/types/config';
-import { ALL_ENTITIES } from '../components/types/config';
 import {
   createEmptyEntityPermissions,
   createEntityPermissions,
@@ -30,6 +29,11 @@ export const usePermissions = () => {
       tags: createEmptyEntityPermissions(),
       concepts: createEmptyEntityPermissions(),
       conceptSchemes: createEmptyEntityPermissions(),
+      componentTypes: createEmptyEntityPermissions(),
+      experiences: createEmptyEntityPermissions(),
+      templates: createEmptyEntityPermissions(),
+      dataAssemblies: createEmptyEntityPermissions(),
+      fragments: createEmptyEntityPermissions(),
     });
 
   const [otherFeaturesPermissions, setOtherFeaturesPermissions] =
@@ -37,22 +41,19 @@ export const usePermissions = () => {
       runAIActions: false,
     });
 
-  const handleSelectAllToggle = () => {
-    const newValue = !contentLifecyclePermissions.selectAll;
-    setContentLifecyclePermissions({
-      selectAll: newValue,
-      entries: createEntityPermissions('entries', newValue),
-      assets: createEntityPermissions('assets', newValue),
-      contentTypes: createEntityPermissions('contentTypes', newValue),
-      aiActions: createEntityPermissions('aiActions', newValue),
-      editorInterfaces: createEntityPermissions('editorInterfaces', newValue),
-      environments: createEntityPermissions('environments', newValue),
-      locales: createEntityPermissions('locales', newValue),
-      orgs: createEntityPermissions('orgs', newValue),
-      spaces: createEntityPermissions('spaces', newValue),
-      tags: createEntityPermissions('tags', newValue),
-      concepts: createEntityPermissions('concepts', newValue),
-      conceptSchemes: createEntityPermissions('conceptSchemes', newValue),
+  const handleSelectAllToggle = (entities: ContentLifecycleEntityKey[]) => {
+    // Derive the new value from the section's own entities: if every one is
+    // already fully enabled, this toggles the section off; otherwise on.
+    const allChecked = entities.every((entity) =>
+      areAllAvailablePermissionsChecked(entity, contentLifecyclePermissions[entity])
+    );
+    const newValue = !allChecked;
+    setContentLifecyclePermissions((prev) => {
+      const updates: Partial<ContentLifecyclePermissions> = {};
+      for (const entity of entities) {
+        updates[entity] = createEntityPermissions(entity, newValue);
+      }
+      return { ...prev, ...updates };
     });
   };
 
@@ -63,15 +64,14 @@ export const usePermissions = () => {
         ...prev[entity],
         [action]: !prev[entity][action as keyof EntityPermissions],
       },
-      selectAll: false,
     }));
   };
 
-  const handleColumnToggle = (action: EntityActionKey) => {
-    // Find all entities that support this action
-    const entitiesWithAction = ALL_ENTITIES.filter((entity) => isActionAvailable(entity, action));
+  const handleColumnToggle = (entities: ContentLifecycleEntityKey[], action: EntityActionKey) => {
+    // Find all entities in this section that support this action
+    const entitiesWithAction = entities.filter((entity) => isActionAvailable(entity, action));
 
-    // Check if all entities that support this action currently have it enabled
+    // Check if all of them currently have it enabled
     const allChecked = entitiesWithAction.every(
       (entity) => contentLifecyclePermissions[entity][action]
     );
@@ -79,7 +79,7 @@ export const usePermissions = () => {
 
     setContentLifecyclePermissions((prev) => {
       const updates: Partial<ContentLifecyclePermissions> = {};
-      for (const entity of ALL_ENTITIES) {
+      for (const entity of entities) {
         // Only update entities that support this action
         if (isActionAvailable(entity, action)) {
           updates[entity] = { ...prev[entity], [action]: newValue };
@@ -88,7 +88,6 @@ export const usePermissions = () => {
       return {
         ...prev,
         ...updates,
-        selectAll: false,
       };
     });
   };
@@ -105,7 +104,6 @@ export const usePermissions = () => {
     setContentLifecyclePermissions((prev) => ({
       ...prev,
       [entity]: entityPermissions,
-      selectAll: false,
     }));
   };
 

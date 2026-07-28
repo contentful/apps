@@ -1,4 +1,5 @@
 import type { InstallParameters, AppInstallationParameters } from '../components/types/config';
+import { createEmptyEntityPermissions } from './permissions';
 
 export const createAppInstallationParameters = (
   parameters: InstallParameters
@@ -17,6 +18,11 @@ export const createAppInstallationParameters = (
     tags: JSON.stringify(parameters.contentLifecyclePermissions.tags),
     concepts: JSON.stringify(parameters.contentLifecyclePermissions.concepts),
     conceptSchemes: JSON.stringify(parameters.contentLifecyclePermissions.conceptSchemes),
+    componentTypes: JSON.stringify(parameters.contentLifecyclePermissions.componentTypes),
+    experiences: JSON.stringify(parameters.contentLifecyclePermissions.experiences),
+    templates: JSON.stringify(parameters.contentLifecyclePermissions.templates),
+    dataAssemblies: JSON.stringify(parameters.contentLifecyclePermissions.dataAssemblies),
+    fragments: JSON.stringify(parameters.contentLifecyclePermissions.fragments),
     runAIActions: parameters.otherFeaturesPermissions.runAIActions,
   };
 };
@@ -39,6 +45,21 @@ export const parseAppInstallationParameters = (
       tags: JSON.parse(parameters.tags),
       concepts: JSON.parse(parameters.concepts),
       conceptSchemes: JSON.parse(parameters.conceptSchemes),
+      componentTypes: parameters.componentTypes
+        ? JSON.parse(parameters.componentTypes)
+        : createEmptyEntityPermissions(),
+      experiences: parameters.experiences
+        ? JSON.parse(parameters.experiences)
+        : createEmptyEntityPermissions(),
+      templates: parameters.templates
+        ? JSON.parse(parameters.templates)
+        : createEmptyEntityPermissions(),
+      dataAssemblies: parameters.dataAssemblies
+        ? JSON.parse(parameters.dataAssemblies)
+        : createEmptyEntityPermissions(),
+      fragments: parameters.fragments
+        ? JSON.parse(parameters.fragments)
+        : createEmptyEntityPermissions(),
     },
     otherFeaturesPermissions: {
       runAIActions: parameters.runAIActions,
