@@ -41,24 +41,6 @@ export const usePermissions = () => {
       runAIActions: false,
     });
 
-  const handleSelectAllToggle = () => {
-    const newValue = !contentLifecyclePermissions.selectAll;
-    setContentLifecyclePermissions({
-      selectAll: newValue,
-      entries: createEntityPermissions('entries', newValue),
-      assets: createEntityPermissions('assets', newValue),
-      contentTypes: createEntityPermissions('contentTypes', newValue),
-      aiActions: createEntityPermissions('aiActions', newValue),
-      editorInterfaces: createEntityPermissions('editorInterfaces', newValue),
-      environments: createEntityPermissions('environments', newValue),
-      locales: createEntityPermissions('locales', newValue),
-      orgs: createEntityPermissions('orgs', newValue),
-      spaces: createEntityPermissions('spaces', newValue),
-      tags: createEntityPermissions('tags', newValue),
-      concepts: createEntityPermissions('concepts', newValue),
-      conceptSchemes: createEntityPermissions('conceptSchemes', newValue),
-    });
-
   const handleSelectAllToggle = (entities: ContentLifecycleEntityKey[]) => {
     // Derive the new value from the section's own entities: if every one is
     // already fully enabled, this toggles the section off; otherwise on.
