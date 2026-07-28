@@ -74,7 +74,7 @@ export const PermissionsSection: FC<PermissionsSectionProps> = ({
       </Accordion.Item>
 
       <Accordion.Item
-        title="Experience orchestration actions"
+        title={<span style={{ fontSize: '14px' }}>Experience orchestration actions</span>}
         isExpanded={expandedAccordions.experienceOrchestration}
         onExpand={() => onAccordionToggle('experienceOrchestration', true)}
         onCollapse={() => onAccordionToggle('experienceOrchestration', false)}>
