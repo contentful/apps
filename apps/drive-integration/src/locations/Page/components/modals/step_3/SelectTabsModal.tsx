@@ -30,6 +30,7 @@ interface SelectTabsModalProps {
   setSelectedTabs: (tabs: DocumentTabProps[]) => void;
   useAllTabs: boolean | null;
   setUseAllTabs: (value: boolean | null) => void;
+  isLoading?: boolean;
 }
 
 export const SelectTabsModal = ({
@@ -40,6 +41,7 @@ export const SelectTabsModal = ({
   setSelectedTabs,
   useAllTabs,
   setUseAllTabs,
+  isLoading = false,
 }: SelectTabsModalProps) => {
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false);
   const multiselectListRef = useMultiselectScrollReflow(selectedTabs);
@@ -166,7 +168,11 @@ export const SelectTabsModal = ({
         <Button onClick={onClose} variant="secondary">
           Cancel
         </Button>
-        <Button onClick={handleContinue} variant="primary">
+        <Button
+          onClick={handleContinue}
+          variant="primary"
+          isLoading={isLoading}
+          isDisabled={isLoading}>
           Next
         </Button>
       </Modal.Controls>

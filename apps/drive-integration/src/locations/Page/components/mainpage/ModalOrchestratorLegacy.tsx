@@ -86,6 +86,7 @@ export const ModalOrchestratorLegacy = forwardRef<
     const [includeImages, setIncludeImages] = useState<boolean | null>(null);
     const [requiresImageSelection, setRequiresImageSelection] = useState(false);
     const [activeRunId, setActiveRunId] = useState<string | null>(null);
+    const [isWorkflowStarting, setIsWorkflowStarting] = useState(false);
     const { startWorkflow, resumeWorkflow } = useWorkflowAgentLegacy({
       sdk,
       documentId,
@@ -339,6 +340,7 @@ export const ModalOrchestratorLegacy = forwardRef<
       contentTypeIds: string[],
       documentSelection: DocumentSelection
     ) => {
+      setIsWorkflowStarting(true);
       let isStartPending = true;
       const loadingModalTimeout = window.setTimeout(() => {
         if (isStartPending) {
@@ -350,6 +352,7 @@ export const ModalOrchestratorLegacy = forwardRef<
         return await startWorkflow(contentTypeIds, documentSelection);
       } finally {
         isStartPending = false;
+        setIsWorkflowStarting(false);
         window.clearTimeout(loadingModalTimeout);
       }
     };
@@ -475,6 +478,7 @@ export const ModalOrchestratorLegacy = forwardRef<
               setSelectedTabs={setSelectedTabs}
               useAllTabs={useAllTabs}
               setUseAllTabs={setUseAllTabs}
+              isLoading={isWorkflowStarting}
             />
           );
         case FlowStep.INCLUDE_IMAGES:
@@ -484,6 +488,7 @@ export const ModalOrchestratorLegacy = forwardRef<
               setIncludeImages={setIncludeImages}
               onContinue={handleIncludeImagesContinue}
               onClose={showDiscardConfirmation}
+              isLoading={isWorkflowStarting}
             />
           );
         case FlowStep.LOADING:
