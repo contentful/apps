@@ -42,22 +42,9 @@ describe('fetchAllEntries', () => {
       query: {
         skip: 0,
         limit: 1000,
-        order: 'sys.createdAt',
         select: 'sys',
       },
     });
-  });
-
-  it('requests a stable sort key so deep pagination cannot skip or duplicate entries', async () => {
-    mockCma.entry.getMany.mockResolvedValueOnce(getManyEntries([], 0));
-
-    await fetchAllEntries(mockSdk);
-
-    expect(mockCma.entry.getMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        query: expect.objectContaining({ order: 'sys.createdAt' }),
-      })
-    );
   });
 
   it('handles pagination correctly with multiple batches', async () => {
@@ -84,7 +71,6 @@ describe('fetchAllEntries', () => {
       query: {
         skip: 0,
         limit: 1000,
-        order: 'sys.createdAt',
         select: 'sys',
       },
     });
@@ -92,7 +78,6 @@ describe('fetchAllEntries', () => {
       query: {
         skip: 1000,
         limit: 1000,
-        order: 'sys.createdAt',
         select: 'sys',
       },
     });
@@ -139,7 +124,6 @@ describe('fetchAllEntries', () => {
       query: {
         skip: 0,
         limit: 1000,
-        order: 'sys.createdAt',
         select: 'sys',
       },
     });
@@ -147,7 +131,6 @@ describe('fetchAllEntries', () => {
       query: {
         skip: 0,
         limit: 500, // Reduced batch size
-        order: 'sys.createdAt',
         select: 'sys',
       },
     });

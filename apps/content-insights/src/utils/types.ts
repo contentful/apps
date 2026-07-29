@@ -51,7 +51,6 @@ export enum EntryStatus {
   Draft = 'Draft',
   Published = 'Published',
   Changed = 'Changed',
-  Archived = 'Archived',
 }
 
 export enum CreatorViewSetting {

@@ -11,13 +11,6 @@ export function isArchivedEntry(entry: EntryProps): boolean {
 export function getEntryStatus(entry: EntryProps): EntryStatus {
   const { sys } = entry;
 
-  // Checked before publishedVersion: an archived entry keeps the
-  // publishedVersion it had when archived and would otherwise report
-  // as Published.
-  if (isArchivedEntry(entry)) {
-    return EntryStatus.Archived;
-  }
-
   if (!sys.publishedVersion) {
     return EntryStatus.Draft;
   }

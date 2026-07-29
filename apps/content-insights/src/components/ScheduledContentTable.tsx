@@ -16,7 +16,6 @@ enum BadgeVariant {
   Primary = 'primary',
   Positive = 'positive',
   Warning = 'warning',
-  Secondary = 'secondary',
 }
 
 const getStatusBadgeVariant = (status: EntryStatus | undefined): BadgeVariant => {
@@ -25,9 +24,6 @@ const getStatusBadgeVariant = (status: EntryStatus | undefined): BadgeVariant =>
   }
   if (status === EntryStatus.Changed) {
     return BadgeVariant.Primary;
-  }
-  if (status === EntryStatus.Archived) {
-    return BadgeVariant.Secondary;
   }
   return BadgeVariant.Warning;
 };
