@@ -61,28 +61,3 @@ export const modeToggleButtonActive = css({
     color: tokens.gray900,
   },
 });
-
-export const moreActionsButton = css({
-  alignItems: 'center',
-  backgroundColor: tokens.colorWhite,
-  border: `1px solid ${tokens.gray300}`,
-  borderRadius: tokens.borderRadiusMedium,
-  color: tokens.gray700,
-  cursor: 'pointer',
-  display: 'inline-flex',
-  height: '32px',
-  justifyContent: 'center',
-  padding: `0 ${tokens.spacingXs}`,
-  width: '32px',
-
-  '&:hover': {
-    backgroundColor: tokens.gray100,
-    borderColor: tokens.gray400,
-    color: tokens.gray900,
-  },
-
-  '&:focus-visible': {
-    boxShadow: `0 0 0 3px ${tokens.blue200}`,
-    outline: 'none',
-  },
-});

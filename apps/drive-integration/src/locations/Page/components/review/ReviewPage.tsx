@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Flex, Heading, Layout, Menu } from '@contentful/f36-components';
+import { Button, Flex, Heading, IconButton, Layout, Menu } from '@contentful/f36-components';
 import { DotsThreeIcon, EyeIcon, PencilSimpleIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { PageAppSDK } from '@contentful/app-sdk';
@@ -22,7 +22,6 @@ import { SummaryModal } from '../modals/SummaryModal';
 import OverviewSection from '../overview/OverviewSection';
 import { MappingView } from './mapping/MappingView';
 import {
-  moreActionsButton,
   modeToggleButton,
   modeToggleButtonActive,
   modeToggleWrapper,
@@ -225,29 +224,34 @@ export const ReviewPage = ({
           <Heading marginBottom="none">{title}</Heading>
           <Flex className={reviewHeaderActions}>
             <div className={modeToggleWrapper} role="group" aria-label="Review mode">
-              <button
-                type="button"
+              <Button
+                variant="transparent"
+                size="small"
                 className={cx(modeToggleButton, reviewMode === 'view' && modeToggleButtonActive)}
                 onClick={() => handleReviewModeChange('view')}
-                aria-pressed={reviewMode === 'view'}>
-                <EyeIcon size="small" />
+                aria-pressed={reviewMode === 'view'}
+                startIcon={<EyeIcon />}>
                 View only
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="transparent"
+                size="small"
                 className={cx(modeToggleButton, reviewMode === 'edit' && modeToggleButtonActive)}
                 onClick={() => handleReviewModeChange('edit')}
-                aria-pressed={reviewMode === 'edit'}>
-                <PencilSimpleIcon size="small" />
+                aria-pressed={reviewMode === 'edit'}
+                startIcon={<PencilSimpleIcon />}>
                 Edit mode
-              </button>
+              </Button>
             </div>
             {!hasCreatedEntries && (
               <Menu>
                 <Menu.Trigger>
-                  <button type="button" className={moreActionsButton} aria-label="More actions">
-                    <DotsThreeIcon size="small" />
-                  </button>
+                  <IconButton
+                    variant="secondary"
+                    size="small"
+                    aria-label="More actions"
+                    icon={<DotsThreeIcon />}
+                  />
                 </Menu.Trigger>
                 <Menu.List>
                   <Menu.Item onClick={handleDeleteJob} style={{ color: 'red' }}>
