@@ -33,8 +33,8 @@ export function TypeformOAuth({
       return;
     }
 
-    const handleTokenEvent = ({ data, source }: any) => {
-      if (source !== oauthWindow) {
+    const handleTokenEvent = ({ data, source, origin }: MessageEvent) => {
+      if (source !== oauthWindow || origin !== window.location.origin) {
         return;
       }
 
