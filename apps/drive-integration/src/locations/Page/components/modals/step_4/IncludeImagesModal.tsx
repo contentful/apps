@@ -6,6 +6,7 @@ interface IncludeImagesModalProps {
   setIncludeImages: (includeImages: boolean) => void;
   onContinue: (includeImages: boolean) => void;
   onClose: () => void;
+  isLoading?: boolean;
 }
 
 export const IncludeImagesModal = ({
@@ -13,6 +14,7 @@ export const IncludeImagesModal = ({
   setIncludeImages,
   onContinue,
   onClose,
+  isLoading = false,
 }: IncludeImagesModalProps) => {
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
@@ -53,7 +55,11 @@ export const IncludeImagesModal = ({
         <Button onClick={onClose} variant="secondary">
           Cancel
         </Button>
-        <Button onClick={handleContinue} variant="primary">
+        <Button
+          onClick={handleContinue}
+          variant="primary"
+          isLoading={isLoading}
+          isDisabled={isLoading}>
           Next
         </Button>
       </Modal.Controls>

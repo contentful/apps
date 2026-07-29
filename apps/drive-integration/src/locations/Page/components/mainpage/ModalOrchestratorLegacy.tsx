@@ -7,7 +7,6 @@ import { ErrorModal, type ErrorModalConfig } from '../modals/ErrorModal';
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
 import { LoadingModal } from '../modals/LoadingModal';
 import { ERROR_MESSAGES } from '@constants/messages';
-import { CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS } from '@constants/agent';
 import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 import {
   DocumentTabProps,
@@ -86,6 +85,7 @@ export const ModalOrchestratorLegacy = forwardRef<
     const [includeImages, setIncludeImages] = useState<boolean | null>(null);
     const [requiresImageSelection, setRequiresImageSelection] = useState(false);
     const [activeRunId, setActiveRunId] = useState<string | null>(null);
+    const [isWorkflowStarting, setIsWorkflowStarting] = useState(false);
     const { startWorkflow, resumeWorkflow } = useWorkflowAgentLegacy({
       sdk,
       documentId,
@@ -339,18 +339,12 @@ export const ModalOrchestratorLegacy = forwardRef<
       contentTypeIds: string[],
       documentSelection: DocumentSelection
     ) => {
-      let isStartPending = true;
-      const loadingModalTimeout = window.setTimeout(() => {
-        if (isStartPending) {
-          setFlowStep(FlowStep.LOADING);
-        }
-      }, CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS);
-
+      setIsWorkflowStarting(true);
+      setFlowStep(FlowStep.LOADING);
       try {
         return await startWorkflow(contentTypeIds, documentSelection);
       } finally {
-        isStartPending = false;
-        window.clearTimeout(loadingModalTimeout);
+        setIsWorkflowStarting(false);
       }
     };
 
@@ -475,6 +469,7 @@ export const ModalOrchestratorLegacy = forwardRef<
               setSelectedTabs={setSelectedTabs}
               useAllTabs={useAllTabs}
               setUseAllTabs={setUseAllTabs}
+              isLoading={isWorkflowStarting}
             />
           );
         case FlowStep.INCLUDE_IMAGES:
@@ -484,6 +479,7 @@ export const ModalOrchestratorLegacy = forwardRef<
               setIncludeImages={setIncludeImages}
               onContinue={handleIncludeImagesContinue}
               onClose={showDiscardConfirmation}
+              isLoading={isWorkflowStarting}
             />
           );
         case FlowStep.LOADING:

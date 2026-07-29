@@ -76,6 +76,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const [useAllTabs, setUseAllTabs] = useState<boolean | null>(null);
     const [includeImages, setIncludeImages] = useState<boolean | null>(null);
     const [requiresImageSelection, setRequiresImageSelection] = useState(false);
+    const [isWorkflowStarting, setIsWorkflowStarting] = useState(false);
 
     const { startWorkflow } = useWorkflowAgent({
       sdk,
@@ -311,6 +312,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
+      setIsWorkflowStarting(true);
       try {
         const runId = await startWorkflow(contentTypeIds, documentSelection);
 
@@ -327,6 +329,8 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         onRunStarted(runId);
       } catch (err) {
         handleWorkflowError(err);
+      } finally {
+        setIsWorkflowStarting(false);
       }
     };
 
@@ -447,6 +451,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
               setSelectedTabs={setSelectedTabs}
               useAllTabs={useAllTabs}
               setUseAllTabs={setUseAllTabs}
+              isLoading={isWorkflowStarting}
             />
           );
         case FlowStep.INCLUDE_IMAGES:
@@ -456,6 +461,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
               setIncludeImages={setIncludeImages}
               onContinue={handleIncludeImagesContinue}
               onClose={showDiscardConfirmation}
+              isLoading={isWorkflowStarting}
             />
           );
         default:
