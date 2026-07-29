@@ -5,7 +5,7 @@ import { EntryStatus } from '../utils/types';
 // deliberately stale, so their old `updatedAt` is expected rather than
 // actionable. Mirrors `isArchived` in contentful-management.
 export function isArchivedEntry(entry: EntryProps): boolean {
-  return !!entry?.sys?.archivedVersion;
+  return entry?.sys?.archivedVersion != null;
 }
 
 export function getEntryStatus(entry: EntryProps): EntryStatus {
