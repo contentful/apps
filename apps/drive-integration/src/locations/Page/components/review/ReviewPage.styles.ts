@@ -61,25 +61,3 @@ export const modeToggleButtonActive = css({
     color: tokens.gray900,
   },
 });
-
-export const cancelReviewButton = css({
-  '&, &&': {
-    backgroundColor: tokens.colorWhite,
-    border: `1px solid ${tokens.gray300}`,
-    borderRadius: tokens.borderRadiusMedium,
-    boxShadow: 'none',
-    color: tokens.gray900,
-    fontWeight: tokens.fontWeightDemiBold,
-  },
-
-  '&:hover, &&:hover': {
-    backgroundColor: tokens.gray100,
-    borderColor: tokens.gray400,
-    color: tokens.gray900,
-  },
-
-  '&:focus-visible, &&:focus-visible': {
-    boxShadow: `0 0 0 3px ${tokens.blue200}`,
-    outline: 'none',
-  },
-});

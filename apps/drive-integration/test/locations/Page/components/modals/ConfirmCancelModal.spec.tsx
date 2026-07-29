@@ -24,28 +24,28 @@ describe('ConfirmCancelModal', () => {
     render(<ConfirmCancelModal isOpen={true} onConfirm={onConfirm} onCancel={onCancel} />);
 
     await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Delete this job?' })).toBeTruthy();
       expect(
-        screen.getByRole('heading', { name: "You're about to lose your progress" })
-      ).toBeTruthy();
-      expect(
-        screen.getByText("No entries will be created and you'll need to start over.")
+        screen.getByText(
+          "This will permanently delete the job. No entries will be created and you'll need to start over."
+        )
       ).toBeTruthy();
     });
   });
 
-  it('renders Keep creating and Cancel without creating buttons', async () => {
+  it('renders Keep review open and Delete buttons', async () => {
     render(<ConfirmCancelModal isOpen={true} onConfirm={onConfirm} onCancel={onCancel} />);
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Keep creating' })).toBeTruthy();
-      expect(screen.getByRole('button', { name: 'Cancel without creating' })).toBeTruthy();
+      expect(screen.getByRole('button', { name: 'Keep review open' })).toBeTruthy();
+      expect(screen.getByRole('button', { name: 'Delete' })).toBeTruthy();
     });
   });
 
-  it('calls onConfirm when Cancel without creating is clicked', async () => {
+  it('calls onConfirm when Delete is clicked', async () => {
     render(<ConfirmCancelModal isOpen={true} onConfirm={onConfirm} onCancel={onCancel} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel without creating' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
 
     await waitFor(() => {
       expect(onConfirm).toHaveBeenCalledTimes(1);
@@ -53,10 +53,10 @@ describe('ConfirmCancelModal', () => {
     });
   });
 
-  it('calls onCancel when Keep creating is clicked', async () => {
+  it('calls onCancel when Keep review open is clicked', async () => {
     render(<ConfirmCancelModal isOpen={true} onConfirm={onConfirm} onCancel={onCancel} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Keep creating' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Keep review open' }));
 
     await waitFor(() => {
       expect(onCancel).toHaveBeenCalledTimes(1);
@@ -68,9 +68,7 @@ describe('ConfirmCancelModal', () => {
     render(<ConfirmCancelModal isOpen={false} onConfirm={onConfirm} onCancel={onCancel} />);
 
     await waitFor(() => {
-      expect(
-        screen.queryByRole('heading', { name: "You're about to lose your progress" })
-      ).toBeNull();
+      expect(screen.queryByRole('heading', { name: 'Delete this job?' })).toBeNull();
     });
   });
 
@@ -85,16 +83,13 @@ describe('ConfirmCancelModal', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Keep creating' })).toHaveProperty(
+      expect(screen.getByRole('button', { name: 'Keep review open' })).toHaveProperty(
         'disabled',
         true
       );
       // When isLoading, F36 injects a spinner so the accessible name gains "Loading…".
       // Query by partial text match to stay resilient to the spinner label.
-      expect(screen.getByRole('button', { name: /Cancel without creating/ })).toHaveProperty(
-        'disabled',
-        true
-      );
+      expect(screen.getByRole('button', { name: /Delete/ })).toHaveProperty('disabled', true);
     });
   });
 
@@ -108,10 +103,10 @@ describe('ConfirmCancelModal', () => {
       />
     );
 
-    await waitFor(() => screen.getByRole('button', { name: 'Keep creating' }));
+    await waitFor(() => screen.getByRole('button', { name: 'Keep review open' }));
 
-    fireEvent.click(screen.getByRole('button', { name: /Cancel without creating/ }));
-    fireEvent.click(screen.getByRole('button', { name: 'Keep creating' }));
+    fireEvent.click(screen.getByRole('button', { name: /Delete/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Keep review open' }));
 
     expect(onConfirm).not.toHaveBeenCalled();
     expect(onCancel).not.toHaveBeenCalled();
