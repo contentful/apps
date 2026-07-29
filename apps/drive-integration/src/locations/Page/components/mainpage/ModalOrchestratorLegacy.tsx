@@ -7,7 +7,6 @@ import { ErrorModal, type ErrorModalConfig } from '../modals/ErrorModal';
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
 import { LoadingModal } from '../modals/LoadingModal';
 import { ERROR_MESSAGES } from '@constants/messages';
-import { CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS } from '@constants/agent';
 import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
 import {
   DocumentTabProps,
@@ -341,19 +340,11 @@ export const ModalOrchestratorLegacy = forwardRef<
       documentSelection: DocumentSelection
     ) => {
       setIsWorkflowStarting(true);
-      let isStartPending = true;
-      const loadingModalTimeout = window.setTimeout(() => {
-        if (isStartPending) {
-          setFlowStep(FlowStep.LOADING);
-        }
-      }, CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS);
-
+      setFlowStep(FlowStep.LOADING);
       try {
         return await startWorkflow(contentTypeIds, documentSelection);
       } finally {
-        isStartPending = false;
         setIsWorkflowStarting(false);
-        window.clearTimeout(loadingModalTimeout);
       }
     };
 
