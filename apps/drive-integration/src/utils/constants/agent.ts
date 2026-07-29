@@ -8,7 +8,7 @@ const EXTENDED_POLL_TIME_MS = 60 * 60 * 1000; // 60 minutes (google-docs-agent-i
 export const MAX_POLL_ATTEMPTS = Math.floor(MAX_POLL_TIME_MS / POLL_INTERVAL_MS);
 export const EXTENDED_MAX_POLL_ATTEMPTS = Math.floor(EXTENDED_POLL_TIME_MS / POLL_INTERVAL_MS);
 
-export const CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS = 30000; // 30 seconds to wait for suspend payload
+export const CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS = 500; // brief delay before showing loading modal to avoid flash on fast responses
 
 // Agents-api writes PENDING_REVIEW status before the suspendPayload metadata flushes.
 // Allow this many consecutive PENDING_REVIEW polls with no suspendPayload before giving up.
