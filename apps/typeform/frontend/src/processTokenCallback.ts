@@ -1,11 +1,10 @@
 const DEFAULT_TOKEN_EXPIRATION_TIME = 604800;
 
 const processTokenCallback = (window: Window) => {
+  // The callback and the config screen that opened it share an origin, so the
+  // callback URL's own origin is the one to scope the token message to.
   const { searchParams, search, origin } = new URL(window.location.href);
 
-  // The OAuth callback is served from the same origin as the config screen that
-  // opened it, so scope the message to that origin instead of broadcasting the
-  // token to whatever origin the opener happens to be on.
   if (search.length) {
     const error = searchParams.get('error');
 

@@ -60,8 +60,6 @@ describe('processTokenCallback', () => {
     );
   });
 
-  // Guards against someone hardcoding the prod origin, which every other test
-  // here would still accept.
   it('derives the target origin from the callback URL rather than hardcoding one', () => {
     const window = mockWindow('http://localhost:3000/frontend/?token=abc123&expiresIn=10');
 
