@@ -9,7 +9,6 @@ import {
 import {
   MappingReviewSuspendPayload,
   ResumePayload,
-  TabsImagesSuspendPayload,
   CompletedWorkflowPayload,
   WorkflowRunResult,
   RunStatus,
@@ -104,6 +103,7 @@ const FAILURE_REASON_MESSAGES: Partial<Record<WorkflowFailureReason, string>> = 
   [WorkflowFailureReason.DOCUMENT_TOO_COMPLEX]: ERROR_MESSAGES.DOCUMENT_TOO_COMPLEX,
   [WorkflowFailureReason.PROCESSING_TIMEOUT]: ERROR_MESSAGES.PROCESSING_TIMEOUT,
   [WorkflowFailureReason.OUT_OF_DOMAIN]: ERROR_MESSAGES.OUT_OF_DOMAIN,
+  [WorkflowFailureReason.MISSING_PARAMETER]: ERROR_MESSAGES.MISSING_PARAMETER,
 };
 
 const getWorkflowFailureMessage = (
@@ -111,9 +111,7 @@ const getWorkflowFailureMessage = (
   failureReason: WorkflowFailureReason
 ): string => FAILURE_REASON_MESSAGES[failureReason] ?? getRunErrorMessage(runData);
 
-const getSuspendPayload = (
-  runData: AgentRunData
-): TabsImagesSuspendPayload | MappingReviewSuspendPayload | undefined =>
+const getSuspendPayload = (runData: AgentRunData): MappingReviewSuspendPayload | undefined =>
   runData.metadata?.suspendPayload;
 
 const getWorkflowRunResult = (
@@ -165,17 +163,13 @@ const pollAgentRun = async (
 ): Promise<WorkflowRunResult> => {
   const startMs = Date.now();
   let pendingReviewMissingPayloadCount = 0;
-  console.log(`⏳ Polling run [${runId}]`);
-
   for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
     const runData = await getWorkflowRun(sdk, spaceId, environmentId, runId);
     if (!runData) {
-      console.log(`  #${attempt + 1} — not found yet (${elapsedSec(startMs)})`);
       await wait(POLL_INTERVAL_MS);
       continue;
     }
     const status = getRunStatus(runData);
-    console.log(`  #${attempt + 1} — status: ${status} (${elapsedSec(startMs)})`);
     if (status === RunStatus.PENDING_REVIEW && !getSuspendPayload(runData)) {
       pendingReviewMissingPayloadCount++;
     } else {
@@ -183,7 +177,6 @@ const pollAgentRun = async (
     }
     const workflowRun = getWorkflowRunResult(runData, runId, pendingReviewMissingPayloadCount);
     if (workflowRun) {
-      console.log(`✓ Run [${runId}] settled: ${status} in ${elapsedSec(startMs)}`);
       return workflowRun;
     }
     await wait(POLL_INTERVAL_MS);

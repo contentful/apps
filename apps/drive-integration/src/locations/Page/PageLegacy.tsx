@@ -8,7 +8,7 @@ import {
 } from './components/mainpage/ModalOrchestratorLegacy';
 import { MainPageView } from './components/mainpage/MainPageView';
 import { ReviewPage } from './components/review/ReviewPage';
-import type { MappingReviewSuspendPayload } from '@types';
+import type { EntryBlockGraph, MappingReviewSuspendPayload } from '@types';
 import { useWorkflowAgentLegacy } from '@hooks/useWorkflowAgentLegacy';
 import { useGoogleDriveOAuth } from '@hooks/useGoogleDriveOAuth';
 import { isAiAccessDeniedError } from '../../utils/aiAccess';
@@ -55,13 +55,13 @@ export const PageLegacy = () => {
     handleReturnToMainPage();
   };
 
-  const handleCancelMappingReview = async () => {
+  const handleCancelMappingReview = async (entryBlockGraph: EntryBlockGraph) => {
     if (!mappingReviewState?.runId) {
       resetFlowAndReturnToMainPage();
       return;
     }
     try {
-      await resumeWorkflow(mappingReviewState.runId, { cancelled: true });
+      await resumeWorkflow(mappingReviewState.runId, { cancelled: true, entryBlockGraph });
     } catch (error) {
       console.error(error);
     } finally {
