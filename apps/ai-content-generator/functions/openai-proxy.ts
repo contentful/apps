@@ -36,7 +36,12 @@ export const handler: FunctionEventHandler<
 
   const { messages, model } = event.body;
 
-  const parsedMessages = JSON.parse(messages);
+  let parsedMessages: unknown;
+  try {
+    parsedMessages = JSON.parse(messages);
+  } catch {
+    throw new Error('Invalid messages parameter: must be a JSON-encoded array');
+  }
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
