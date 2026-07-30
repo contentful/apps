@@ -17,7 +17,7 @@ chai.use(sinonChai);
 
 describe('MsTeamsBotService', () => {
   const botServiceUrl = 'https://example.com';
-  const apiKey = mockRequestHeaders['x-api-key'];
+  const apiKey = 'api-key';
   const tenantId = 'tenant-id';
   const msTeamsBotService = new MsTeamsBotService(botServiceUrl, apiKey);
   const messageResponseId = 'messageResponseId';
@@ -63,7 +63,7 @@ describe('MsTeamsBotService', () => {
         'https://example.com/api/tenant/tenant-id/entry_activity_messages',
         {
           method: 'POST',
-          headers: mockRequestHeaders,
+          headers: mockRequestHeaders(tenantId),
           body: '{"channel":{}}',
         }
       );
@@ -88,7 +88,7 @@ describe('MsTeamsBotService', () => {
         'https://example.com/api/tenant/tenant-id/test_messages',
         {
           method: 'POST',
-          headers: mockRequestHeaders,
+          headers: mockRequestHeaders(tenantId),
           body: '{"channel":{}}',
         }
       );
@@ -116,7 +116,7 @@ describe('MsTeamsBotService', () => {
         'https://example.com/api/tenants/tenant-id/team_installations',
         {
           method: 'GET',
-          headers: mockRequestHeaders,
+          headers: mockRequestHeaders(tenantId),
         }
       );
     });
