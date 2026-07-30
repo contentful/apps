@@ -1,6 +1,5 @@
 interface AppInstallationParameters {
   model: string;
-  key: string;
   profile: string;
   brandProfile: ProfileType;
 }

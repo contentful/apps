@@ -6,22 +6,20 @@ import { Sections } from '../configText';
 import { ParameterReducer } from '../parameterReducer';
 
 interface Props {
-  apiKey: string;
   model: string;
   dispatch: Dispatch<ParameterReducer>;
-  isApiKeyValid: boolean;
 }
 
 const ConfigSection = (props: Props) => {
-  const { apiKey, model, dispatch, isApiKeyValid } = props;
+  const { model, dispatch } = props;
 
   return (
     <Flex flexDirection="column" alignItems="flex-start" fullWidth={true}>
       <Subheading>{Sections.configHeading}</Subheading>
       <Box>
         <Form>
-          <APIKey apiKey={apiKey} isInvalid={!isApiKeyValid} dispatch={dispatch} />
-          <Model apiKey={apiKey} model={model} dispatch={dispatch} />
+          <APIKey dispatch={dispatch} />
+          <Model model={model} dispatch={dispatch} />
         </Form>
       </Box>
     </Flex>

@@ -21,10 +21,6 @@ const initialParameters: Validator<AppInstallationParameters> = {
     value: defaultModelId,
     isValid: true,
   },
-  key: {
-    value: '',
-    isValid: true,
-  },
   profile: {
     value: '',
     isValid: true,
@@ -41,7 +37,6 @@ const ConfigPage = () => {
   const parametersToSave: AppInstallationParameters = useMemo(() => {
     return {
       model: parameters.model.value,
-      key: parameters.key.value,
       profile: parameters.profile.value,
       brandProfile: {
         additional: parameters.brandProfile.additional?.value,
@@ -53,19 +48,10 @@ const ConfigPage = () => {
         values: parameters.brandProfile.values?.value,
       },
     };
-  }, [
-    parameters.brandProfile,
-    parameters.key.value,
-    parameters.model.value,
-    parameters.profile.value,
-  ]);
+  }, [parameters.brandProfile, parameters.model.value, parameters.profile.value]);
 
   const validateParams = (): string[] => {
     const notifierErrors = [];
-
-    if (!parameters.key.isValid) {
-      notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingApiKey}`);
-    }
 
     if (!parameters.model.isValid) {
       notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingModel}`);
@@ -88,8 +74,6 @@ const ConfigPage = () => {
       <Heading>{Sections.pageHeading}</Heading>
       <hr css={styles.splitter} />
       <ConfigSection
-        apiKey={parameters.key.value}
-        isApiKeyValid={parameters.key.isValid}
         model={parameters.model.value}
         dispatch={dispatchParameters}
       />
