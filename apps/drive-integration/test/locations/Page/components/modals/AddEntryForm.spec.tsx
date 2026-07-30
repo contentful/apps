@@ -7,6 +7,7 @@ import {
   isAddEntrySaveDisabled,
   toAddEntryFormParams,
   type AddEntryFormState,
+  type ExistingEntryOption,
 } from '../../../../../src/locations/Page/components/review/mapping/edit-modals/AddEntryForm';
 
 vi.mock(
@@ -40,15 +41,24 @@ const contentTypes = [
     ],
   },
   {
+    sys: { id: 'component' },
+    name: 'Component',
+    fields: [{ id: 'title', name: 'Title', type: 'Symbol' }],
+  },
+  {
     sys: { id: 'tag' },
     name: 'Tag',
     fields: [{ id: 'label', name: 'Label', type: 'Symbol' }],
   },
 ];
 
-const existingEntries = [
-  { tempId: 'entry-1', label: 'Blog post' },
-  { tempId: 'entry-2', label: 'Landing page' },
+const existingEntries: ExistingEntryOption[] = [
+  { tempId: 'entry-1', label: 'Blog post', contentTypeId: 'article' },
+  { tempId: 'entry-2', label: 'Landing page', contentTypeId: 'page' },
+];
+
+const entriesWithoutRefFields: ExistingEntryOption[] = [
+  { tempId: 'tag-1', label: 'A tag', contentTypeId: 'tag' },
 ];
 
 const makeState = (overrides: Partial<AddEntryFormState> = {}): AddEntryFormState => ({
@@ -56,13 +66,17 @@ const makeState = (overrides: Partial<AddEntryFormState> = {}): AddEntryFormStat
   ...overrides,
 });
 
-const renderForm = (state: AddEntryFormState, onChange = vi.fn()) =>
+const renderForm = (
+  state: AddEntryFormState,
+  onChange = vi.fn(),
+  entries: ExistingEntryOption[] = existingEntries
+) =>
   render(
     <AddEntryForm
       state={state}
       onChange={onChange}
       contentTypes={contentTypes as any}
-      existingEntries={existingEntries}
+      existingEntries={entries}
       selectedText="Some text"
       isImageContent={false}
     />
@@ -83,15 +97,19 @@ describe('AddEntryForm', () => {
       });
     });
 
-    it('hides radios, entry select, and field multiselect until content type is selected', async () => {
+    it('hides radios, parent select, and field multiselect until content type is selected', async () => {
       renderForm(makeState());
 
       await waitFor(() => {
         expect(screen.getByText('Select content type')).toBeTruthy();
       });
 
-      expect(screen.queryByText('Should this entry be a reference entry?')).toBeNull();
-      expect(screen.queryByText('Select the entry this should reference')).toBeNull();
+      expect(
+        screen.queryByText('Should this new entry be a reference of an existing entry?')
+      ).toBeNull();
+      expect(
+        screen.queryByText('Which existing entry should this new entry be a reference to?')
+      ).toBeNull();
       expect(screen.queryByText('Field selection')).toBeNull();
     });
 
@@ -122,23 +140,27 @@ describe('AddEntryForm', () => {
 
   describe('controls after content type is selected', () => {
     it('shows radios and field multiselect together', async () => {
-      renderForm(makeState({ contentTypeId: 'article' }));
+      renderForm(makeState({ contentTypeId: 'component' }));
 
       await waitFor(() => {
-        expect(screen.getByText('Should this entry be a reference entry?')).toBeTruthy();
+        expect(
+          screen.getByText('Should this new entry be a reference of an existing entry?')
+        ).toBeTruthy();
         expect(screen.getByLabelText('Yes')).toBeTruthy();
         expect(screen.getByLabelText('No')).toBeTruthy();
         expect(screen.getByText('Select the field(s) the content should map to')).toBeTruthy();
         expect(screen.getByText('Field selection')).toBeTruthy();
       });
 
-      expect(screen.queryByText('Select the entry this should reference')).toBeNull();
-      expect(screen.queryByText('Which field should connect to this reference?')).toBeNull();
+      expect(
+        screen.queryByText('Which existing entry should this new entry be a reference to?')
+      ).toBeNull();
+      expect(screen.queryByText('Which field on the parent should link to this entry?')).toBeNull();
     });
 
     it('calls onChange with isReference: true when Yes is clicked', async () => {
       const onChange = vi.fn();
-      renderForm(makeState({ contentTypeId: 'article' }), onChange);
+      renderForm(makeState({ contentTypeId: 'component' }), onChange);
 
       fireEvent.click(screen.getByLabelText('Yes'));
 
@@ -149,7 +171,7 @@ describe('AddEntryForm', () => {
       const onChange = vi.fn();
       renderForm(
         makeState({
-          contentTypeId: 'article',
+          contentTypeId: 'component',
           isReference: true,
           referenceEntryId: 'entry-1',
           referenceFieldId: 'author',
@@ -166,65 +188,127 @@ describe('AddEntryForm', () => {
       });
     });
 
-    it('shows entry select when Yes is selected, keeping field multiselect visible', async () => {
+    it('shows parent entry select when Yes is selected', async () => {
       renderForm(
         makeState({
-          contentTypeId: 'article',
+          contentTypeId: 'component',
           isReference: true,
         })
       );
 
       await waitFor(() => {
-        expect(screen.getByText('Select the entry this should reference')).toBeTruthy();
+        expect(
+          screen.getByText('Which existing entry should this new entry be a reference to?')
+        ).toBeTruthy();
         expect(screen.getByText('Blog post')).toBeTruthy();
         expect(screen.getByText('Landing page')).toBeTruthy();
         expect(screen.getByText('Field selection')).toBeTruthy();
       });
     });
 
-    it('shows reference field select when Yes and multiple reference fields exist', async () => {
+    it('shows parent reference fields from the parent content type, not the new entry type', async () => {
+      // New entry is a Component (no ref fields); parent is Article (two ref fields)
       renderForm(
         makeState({
-          contentTypeId: 'article',
+          contentTypeId: 'component',
           isReference: true,
+          referenceEntryId: 'entry-1',
         })
       );
 
       await waitFor(() => {
-        expect(screen.getByText('Which field should connect to this reference?')).toBeTruthy();
+        expect(
+          screen.getByText('Which field on the parent should link to this entry?')
+        ).toBeTruthy();
         expect(screen.getByText('Related articles (Reference list)')).toBeTruthy();
         expect(screen.getByText('Author (Reference)')).toBeTruthy();
       });
     });
 
-    it('hides reference field select when only one reference field exists', async () => {
+    it('hides parent field select when parent has only one reference field', async () => {
       renderForm(
         makeState({
-          contentTypeId: 'page',
+          contentTypeId: 'component',
           isReference: true,
+          referenceEntryId: 'entry-2',
         })
       );
 
       await waitFor(() => {
-        expect(screen.getByText('Select the entry this should reference')).toBeTruthy();
+        expect(
+          screen.getByText('Which existing entry should this new entry be a reference to?')
+        ).toBeTruthy();
       });
 
-      expect(screen.queryByText('Which field should connect to this reference?')).toBeNull();
+      expect(screen.queryByText('Which field on the parent should link to this entry?')).toBeNull();
     });
 
-    it('disables Yes radio when content type has no reference fields', async () => {
+    it('hides the reference question when no existing parent can accept a child', async () => {
+      renderForm(makeState({ contentTypeId: 'component' }), vi.fn(), entriesWithoutRefFields);
+
+      await waitFor(() => {
+        expect(screen.getByText('Select the field(s) the content should map to')).toBeTruthy();
+      });
+
+      expect(
+        screen.queryByText('Should this new entry be a reference of an existing entry?')
+      ).toBeNull();
+      expect(screen.queryByLabelText('Yes')).toBeNull();
+      expect(screen.queryByLabelText('No')).toBeNull();
+    });
+
+    it('only lists parent entries whose content type can accept a child', async () => {
+      renderForm(
+        makeState({
+          contentTypeId: 'component',
+          isReference: true,
+        }),
+        vi.fn(),
+        [...existingEntries, ...entriesWithoutRefFields]
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Blog post')).toBeTruthy();
+        expect(screen.getByText('Landing page')).toBeTruthy();
+      });
+
+      expect(screen.queryByText('A tag')).toBeNull();
+    });
+
+    it('keeps the reference question when the new entry type has no reference fields but a parent can', async () => {
       renderForm(makeState({ contentTypeId: 'tag' }));
 
       await waitFor(() => {
-        expect(screen.getByLabelText('Yes')).toBeDisabled();
-        expect(screen.getByLabelText('No')).not.toBeDisabled();
+        expect(
+          screen.getByText('Should this new entry be a reference of an existing entry?')
+        ).toBeTruthy();
+        expect(screen.getByLabelText('Yes')).toBeTruthy();
+        expect(screen.getByLabelText('No')).toBeTruthy();
       });
     });
 
-    it('hides entry and reference field selects when No is selected', async () => {
+    it('hides parent field select until a parent entry is chosen', async () => {
       renderForm(
         makeState({
-          contentTypeId: 'article',
+          contentTypeId: 'component',
+          isReference: true,
+          referenceEntryId: '',
+        })
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('Which existing entry should this new entry be a reference to?')
+        ).toBeTruthy();
+      });
+
+      expect(screen.queryByText('Which field on the parent should link to this entry?')).toBeNull();
+    });
+
+    it('hides parent selects when No is selected', async () => {
+      renderForm(
+        makeState({
+          contentTypeId: 'component',
           isReference: false,
         })
       );
@@ -233,31 +317,38 @@ describe('AddEntryForm', () => {
         expect(screen.getByText('Field selection')).toBeTruthy();
       });
 
-      expect(screen.queryByText('Select the entry this should reference')).toBeNull();
-      expect(screen.queryByText('Which field should connect to this reference?')).toBeNull();
+      expect(
+        screen.queryByText('Which existing entry should this new entry be a reference to?')
+      ).toBeNull();
+      expect(screen.queryByText('Which field on the parent should link to this entry?')).toBeNull();
     });
 
-    it('calls onChange with referenceEntryId when an entry is selected', async () => {
+    it('resets referenceFieldId when parent entry changes', async () => {
       const onChange = vi.fn();
       renderForm(
         makeState({
-          contentTypeId: 'article',
+          contentTypeId: 'component',
           isReference: true,
+          referenceEntryId: 'entry-1',
+          referenceFieldId: 'author',
         }),
         onChange
       );
 
       const selects = screen.getAllByRole('combobox');
-      fireEvent.change(selects[1], { target: { value: 'entry-1' } });
+      fireEvent.change(selects[1], { target: { value: 'entry-2' } });
 
-      expect(onChange).toHaveBeenCalledWith({ referenceEntryId: 'entry-1' });
+      expect(onChange).toHaveBeenCalledWith({
+        referenceEntryId: 'entry-2',
+        referenceFieldId: '',
+      });
     });
 
-    it('calls onChange with referenceFieldId when a field is selected', async () => {
+    it('calls onChange with referenceFieldId when a parent field is selected', async () => {
       const onChange = vi.fn();
       renderForm(
         makeState({
-          contentTypeId: 'article',
+          contentTypeId: 'component',
           isReference: true,
           referenceEntryId: 'entry-1',
         }),
@@ -276,25 +367,38 @@ describe('AddEntryForm', () => {
       expect(
         isAddEntrySaveDisabled(
           makeState({ contentTypeId: '', isReference: false, selectedFieldIds: ['title'] }),
-          contentTypes as any
+          contentTypes as any,
+          existingEntries
         )
       ).toBe(true);
     });
 
-    it('is disabled when isReference is null', () => {
+    it('is disabled when isReference is null and parents can accept a child', () => {
       expect(
         isAddEntrySaveDisabled(
-          makeState({ contentTypeId: 'article', isReference: null, selectedFieldIds: ['title'] }),
-          contentTypes as any
+          makeState({ contentTypeId: 'component', isReference: null, selectedFieldIds: ['title'] }),
+          contentTypes as any,
+          existingEntries
         )
       ).toBe(true);
+    });
+
+    it('is enabled when isReference is null but no parent can accept a child', () => {
+      expect(
+        isAddEntrySaveDisabled(
+          makeState({ contentTypeId: 'component', isReference: null, selectedFieldIds: ['title'] }),
+          contentTypes as any,
+          entriesWithoutRefFields
+        )
+      ).toBe(false);
     });
 
     it('is disabled when No but no fields selected', () => {
       expect(
         isAddEntrySaveDisabled(
-          makeState({ contentTypeId: 'article', isReference: false, selectedFieldIds: [] }),
-          contentTypes as any
+          makeState({ contentTypeId: 'component', isReference: false, selectedFieldIds: [] }),
+          contentTypes as any,
+          existingEntries
         )
       ).toBe(true);
     });
@@ -303,106 +407,113 @@ describe('AddEntryForm', () => {
       expect(
         isAddEntrySaveDisabled(
           makeState({
-            contentTypeId: 'article',
+            contentTypeId: 'component',
             isReference: false,
             selectedFieldIds: ['title'],
           }),
-          contentTypes as any
+          contentTypes as any,
+          existingEntries
         )
       ).toBe(false);
     });
 
-    it('is disabled when Yes but no reference entry', () => {
+    it('is disabled when Yes but no parent entry', () => {
       expect(
         isAddEntrySaveDisabled(
           makeState({
-            contentTypeId: 'article',
+            contentTypeId: 'component',
             isReference: true,
             referenceEntryId: '',
             selectedFieldIds: ['title'],
           }),
-          contentTypes as any
+          contentTypes as any,
+          existingEntries
         )
       ).toBe(true);
     });
 
-    it('is disabled when Yes needs reference field but none selected', () => {
+    it('is disabled when Yes and parent needs a field but none selected', () => {
       expect(
         isAddEntrySaveDisabled(
           makeState({
-            contentTypeId: 'article',
+            contentTypeId: 'component',
             isReference: true,
             referenceEntryId: 'entry-1',
             referenceFieldId: '',
             selectedFieldIds: ['title'],
           }),
-          contentTypes as any
+          contentTypes as any,
+          existingEntries
         )
       ).toBe(true);
     });
 
-    it('is enabled when Yes with entry, field, and selected fields', () => {
+    it('is enabled when Yes with parent, field, and selected fields', () => {
       expect(
         isAddEntrySaveDisabled(
           makeState({
-            contentTypeId: 'article',
+            contentTypeId: 'component',
             isReference: true,
             referenceEntryId: 'entry-1',
             referenceFieldId: 'author',
             selectedFieldIds: ['title'],
           }),
-          contentTypes as any
+          contentTypes as any,
+          existingEntries
         )
       ).toBe(false);
     });
 
-    it('is enabled when Yes with entry and fields when reference field select not needed', () => {
+    it('is enabled when Yes with parent that has a single reference field', () => {
       expect(
         isAddEntrySaveDisabled(
           makeState({
-            contentTypeId: 'page',
+            contentTypeId: 'component',
             isReference: true,
-            referenceEntryId: 'entry-1',
+            referenceEntryId: 'entry-2',
             referenceFieldId: '',
             selectedFieldIds: ['title'],
           }),
-          contentTypes as any
+          contentTypes as any,
+          existingEntries
         )
       ).toBe(false);
     });
 
-    it('is disabled when Yes but content type has no reference fields', () => {
+    it('is disabled when Yes but selected parent has no reference fields', () => {
       expect(
         isAddEntrySaveDisabled(
           makeState({
-            contentTypeId: 'tag',
+            contentTypeId: 'component',
             isReference: true,
-            referenceEntryId: 'entry-1',
-            selectedFieldIds: ['label'],
+            referenceEntryId: 'tag-1',
+            selectedFieldIds: ['title'],
           }),
-          contentTypes as any
+          contentTypes as any,
+          [...existingEntries, ...entriesWithoutRefFields]
         )
       ).toBe(true);
     });
   });
 
   describe('toAddEntryFormParams', () => {
-    it('auto-picks the sole reference field when none is selected', () => {
+    it('auto-picks the sole parent reference field when none is selected', () => {
       expect(
         toAddEntryFormParams(
           makeState({
-            contentTypeId: 'page',
+            contentTypeId: 'component',
             isReference: true,
-            referenceEntryId: 'entry-1',
+            referenceEntryId: 'entry-2',
             referenceFieldId: '',
             selectedFieldIds: ['title'],
           }),
-          contentTypes as any
+          contentTypes as any,
+          existingEntries
         )
       ).toEqual({
-        contentTypeId: 'page',
+        contentTypeId: 'component',
         isReference: true,
-        referenceEntryId: 'entry-1',
+        referenceEntryId: 'entry-2',
         referenceFieldId: 'author',
         fieldIds: ['title'],
       });
@@ -412,16 +523,17 @@ describe('AddEntryForm', () => {
       expect(
         toAddEntryFormParams(
           makeState({
-            contentTypeId: 'article',
+            contentTypeId: 'component',
             isReference: false,
             referenceEntryId: 'entry-1',
             referenceFieldId: 'author',
             selectedFieldIds: ['title'],
           }),
-          contentTypes as any
+          contentTypes as any,
+          existingEntries
         )
       ).toEqual({
-        contentTypeId: 'article',
+        contentTypeId: 'component',
         isReference: false,
         referenceEntryId: null,
         referenceFieldId: null,

@@ -49,6 +49,7 @@ import {
   hasFieldType,
   isEntryReferenceField,
 } from './fieldFormatting';
+import { linkChildToParentEntry, withUpdatedReferenceGraph } from './linkChildToParent';
 import { EditModal } from './edit-modals/EditModal';
 import { RichTextSelectionPreview } from './edit-modals/RichTextSelectionPreview';
 
@@ -433,6 +434,7 @@ export const MappingView = ({
         return {
           tempId: entry.tempId ?? `${entry.contentTypeId}-${idx}`,
           label: `${contentTypeName} (${entryTitle})`,
+          contentTypeId: entry.contentTypeId,
         };
       }),
     [entryBlockGraph.entries, payload.contentTypes]
@@ -445,29 +447,30 @@ export const MappingView = ({
     const newEntryIndex = entryBlockGraph.entries.length;
     const tempId = crypto.randomUUID();
 
+    const parentEntryIndex = isLinkedReference
+      ? entryBlockGraph.entries.findIndex(
+          (entry, idx) =>
+            (entry.tempId ?? `${entry.contentTypeId}-${idx}`) === params.referenceEntryId
+        )
+      : -1;
+    const parentEntry =
+      parentEntryIndex >= 0 ? entryBlockGraph.entries[parentEntryIndex] : undefined;
+    const parentContentType = parentEntry
+      ? payload.contentTypes.find((ct) => ct.sys.id === parentEntry.contentTypeId)
+      : undefined;
+
     const refField = isLinkedReference
-      ? contentType?.fields?.find(
+      ? parentContentType?.fields?.find(
           (f) =>
             f.id === params.referenceFieldId ||
             (!params.referenceFieldId && isEntryReferenceField(f))
         )
       : undefined;
 
-    const newEntryFields: Record<string, Record<string, unknown>> = refField?.id
-      ? {
-          [refField.id]: {
-            [defaultLocale]:
-              refField.type === 'Array'
-                ? [{ __ref: params.referenceEntryId }]
-                : { __ref: params.referenceEntryId },
-          },
-        }
-      : {};
-
     const newEntry = {
       contentTypeId,
       tempId,
-      fields: newEntryFields,
+      fields: {} as Record<string, Record<string, unknown>>,
       fieldMappings: [],
     };
 
@@ -475,6 +478,27 @@ export const MappingView = ({
       ...entryBlockGraph,
       entries: [...entryBlockGraph.entries, newEntry],
     };
+
+    if (isLinkedReference && parentEntry && refField?.id && refField.type) {
+      const { parentEntry: updatedParent, edges: nextEdges } = linkChildToParentEntry({
+        parentEntry,
+        childTempId: tempId,
+        refField: { id: refField.id, type: refField.type },
+        defaultLocale,
+        previousEdges: referenceGraph.edges ?? [],
+      });
+
+      next = {
+        ...next,
+        entries: next.entries.map((entry, idx) =>
+          idx === parentEntryIndex ? updatedParent : entry
+        ),
+      };
+
+      if (onReferenceGraphChange) {
+        onReferenceGraphChange(withUpdatedReferenceGraph(referenceGraph, nextEdges));
+      }
+    }
 
     if (fieldIds.length > 0) {
       const resolvedTargets = fieldIds.flatMap((fieldId) => {
@@ -526,16 +550,6 @@ export const MappingView = ({
     }
 
     onEntryBlockGraphChange(next);
-
-    if (isLinkedReference && onReferenceGraphChange) {
-      onReferenceGraphChange({
-        ...referenceGraph,
-        edges: [
-          ...(referenceGraph.edges ?? []),
-          { from: tempId, to: params.referenceEntryId!, fieldId: refField?.id ?? '' },
-        ],
-      });
-    }
 
     closeEditModal();
   };
