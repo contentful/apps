@@ -12,47 +12,17 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 describe('Display Sidebar Warning', () => {
-  it('renders', () => {
-    const { getByText, unmount } = render(
-      <DisplaySidebarWarning hasBrandProfile={false} apiError={undefined} />
-    );
+  it('renders brand profile missing warning when hasBrandProfile is false', () => {
+    const { getByText, unmount } = render(<DisplaySidebarWarning hasBrandProfile={false} />);
 
     expect(getByText('Missing brand profile.')).toBeTruthy();
     unmount();
   });
 
-  it('Renders 401 and 404 error', () => {
-    const { getByText, rerender, unmount } = render(
-      <DisplaySidebarWarning hasBrandProfile={false} apiError={{ status: 401 }} />
-    );
+  it('renders nothing when hasBrandProfile is true', () => {
+    const { container, unmount } = render(<DisplaySidebarWarning hasBrandProfile={true} />);
 
-    expect(getByText('Invalid or missing API Key.')).toBeTruthy();
-
-    rerender(<DisplaySidebarWarning hasBrandProfile={false} apiError={{ status: 404 }} />);
-
-    expect(getByText('Invalid or missing API Key.')).toBeTruthy();
-    unmount();
-  });
-
-  it('Renders 500 and 503 error', () => {
-    const { getByText, rerender, unmount } = render(
-      <DisplaySidebarWarning hasBrandProfile={false} apiError={{ status: 500 }} />
-    );
-
-    expect(getByText('Chat GPT is currently unavailable.')).toBeTruthy();
-
-    rerender(<DisplaySidebarWarning hasBrandProfile={false} apiError={{ status: 503 }} />);
-
-    expect(getByText('Chat GPT is currently unavailable.')).toBeTruthy();
-    unmount();
-  });
-
-  it('Renders catch all error', () => {
-    const { getByText, unmount } = render(
-      <DisplaySidebarWarning hasBrandProfile={false} apiError={{ status: 999, message: 'Dog' }} />
-    );
-
-    expect(getByText('OpenAI API Error: Dog')).toBeTruthy();
+    expect(container.firstChild).toBeNull();
     unmount();
   });
 });
