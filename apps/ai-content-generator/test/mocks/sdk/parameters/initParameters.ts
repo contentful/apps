@@ -5,7 +5,6 @@ import { DialogInvocationParameters } from '@locations/Dialog';
 const init: { installation: AppInstallationParameters; invocation?: DialogInvocationParameters } = {
   installation: {
     model: '',
-    key: '',
     profile: '',
     brandProfile: {},
   },

@@ -6,7 +6,6 @@ const generateRandomParameters = (): AppInstallationParameters => {
 
   return {
     model: 'gpt-4',
-    key: 'sk-' + randomApiKey,
     profile: randomProfile,
     brandProfile: {},
   };

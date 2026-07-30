@@ -1,7 +1,7 @@
 import baseSystemPrompt from '@configs/prompts/baseSystemPrompt';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { OpenAI } from 'openai';
+import type { OpenAI } from 'openai';
 import { useState } from 'react';
 import { defaultModelId } from '@configs/ai/gptModels';
 import AppInstallationParameters, { ProfileType } from '@components/config/appInstallationParameters';
