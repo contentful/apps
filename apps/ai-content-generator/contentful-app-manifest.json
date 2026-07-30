@@ -1,0 +1,36 @@
+{
+  "functions": [
+    {
+      "id": "openaiProxyFunction",
+      "name": "OpenAI proxy function",
+      "description": "Calls OpenAI chat completions using the secret API key stored server-side.",
+      "path": "functions/openai-proxy.js",
+      "entryFile": "functions/openai-proxy.ts",
+      "allowNetworks": ["https://api.openai.com"],
+      "accepts": ["appaction.call"]
+    }
+  ],
+  "actions": [
+    {
+      "id": "openaiProxyAction",
+      "name": "OpenAI proxy action",
+      "type": "function-invocation",
+      "functionId": "openaiProxyFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "messages",
+          "name": "Messages",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "model",
+          "name": "Model",
+          "type": "Symbol",
+          "required": true
+        }
+      ]
+    }
+  ]
+}
