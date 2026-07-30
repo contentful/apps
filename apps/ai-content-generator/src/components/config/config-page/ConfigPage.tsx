@@ -1,4 +1,4 @@
-import { useMemo, useReducer } from 'react';
+import { useMemo, useReducer, useState } from 'react';
 import { Box, Heading } from '@contentful/f36-components';
 import ConfigSection from '@components/config/config-section/ConfigSection';
 import CostSection from '@components/config/cost-section/CostSection';
@@ -17,14 +17,8 @@ import { ConfigErrors } from '@components/config/configText';
 import AppInstallationParameters from '../appInstallationParameters';
 
 const initialParameters: Validator<AppInstallationParameters> = {
-  model: {
-    value: defaultModelId,
-    isValid: true,
-  },
-  profile: {
-    value: '',
-    isValid: true,
-  },
+  model: { value: defaultModelId, isValid: true },
+  profile: { value: '', isValid: true },
   brandProfile: {},
 };
 
@@ -33,10 +27,12 @@ const initialContentTypes: Set<string> = new Set();
 const ConfigPage = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
   const [contentTypes, dispatchContentTypes] = useReducer(contentTypeReducer, initialContentTypes);
+  const [keyInput, setKeyInput] = useState<string>('');
 
-  const parametersToSave: AppInstallationParameters = useMemo(() => {
+  const parametersToSave = useMemo(() => {
     return {
       model: parameters.model.value,
+      key: keyInput,
       profile: parameters.profile.value,
       brandProfile: {
         additional: parameters.brandProfile.additional?.value,
@@ -48,20 +44,17 @@ const ConfigPage = () => {
         values: parameters.brandProfile.values?.value,
       },
     };
-  }, [parameters.brandProfile, parameters.model.value, parameters.profile.value]);
+  }, [parameters.brandProfile, parameters.model.value, parameters.profile.value, keyInput]);
 
   const validateParams = (): string[] => {
     const notifierErrors = [];
-
     if (!parameters.model.isValid) {
       notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingModel}`);
     }
-
     const invalidBrandProfile = Object.values(parameters.brandProfile).findIndex((p) => !p.isValid);
     if (!parameters.profile.isValid || invalidBrandProfile !== -1) {
       notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.exceededCharacterLimit}`);
     }
-
     return notifierErrors;
   };
 
@@ -75,6 +68,8 @@ const ConfigPage = () => {
       <hr css={styles.splitter} />
       <ConfigSection
         model={parameters.model.value}
+        keyInput={keyInput}
+        onKeyChange={setKeyInput}
         dispatch={dispatchParameters}
       />
       <hr css={styles.splitter} />
