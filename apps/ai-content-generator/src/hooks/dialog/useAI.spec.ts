@@ -52,6 +52,35 @@ describe('useAI', () => {
     await waitFor(() => expect(result.current.isGenerating).toBe(false));
   });
 
+  it('sendStopSignal cancels an in-flight generation without setting output or error', async () => {
+    let resolveCall: (value: { response: { body: string } }) => void = () => {};
+    (
+      sdk.cma as unknown as { appActionCall: { createWithResponse: ReturnType<typeof vi.fn> } }
+    ).appActionCall = {
+      createWithResponse: vi.fn().mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveCall = resolve;
+          })
+      ),
+    };
+
+    const { result } = renderHook(() => useAI());
+
+    const generation = result.current.generateMessage(titlePrompt('this is a test'), 'en-US');
+    await waitFor(() => expect(result.current.isGenerating).toBe(true));
+
+    result.current.sendStopSignal();
+    await expect(generation).resolves.toBe('');
+
+    // A late-arriving response after a stop must be discarded.
+    resolveCall({ response: { body: JSON.stringify({ text: 'too late' }) } });
+
+    await waitFor(() => expect(result.current.isGenerating).toBe(false));
+    expect(result.current.output).toBe('');
+    expect(result.current.hasError).toBe(false);
+  });
+
   it('resetOutput clears output and error', async () => {
     (
       sdk.cma as unknown as { appActionCall: { createWithResponse: ReturnType<typeof vi.fn> } }
