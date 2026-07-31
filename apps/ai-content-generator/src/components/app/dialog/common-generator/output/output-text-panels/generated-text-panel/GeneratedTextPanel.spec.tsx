@@ -45,6 +45,26 @@ describe('GeneratedTextPanel', () => {
     unmount();
   });
 
+  it('renders the loading skeleton while generating', () => {
+    const hook = renderHook(() => useAI());
+    hook.result.current.isGenerating = true;
+
+    const { container, getByText, unmount } = render(
+      <Tabs currentTab={OutputTab.GENERATED_TEXT}>
+        <GeneratedTextPanel
+          generate={() => {}}
+          ai={hook.result.current}
+          outputFieldValidation={null}
+          apply={() => {}}
+        />
+      </Tabs>
+    );
+
+    expect(container.querySelector('[data-test-id="generated-text-skeleton"]')).toBeTruthy();
+    expect(getByText('Stop Generating')).toBeTruthy();
+    unmount();
+  });
+
   it("Renders length error when output field doesn't meet length requirements", () => {
     const hook = renderHook(() => useAI());
     const { getByText, unmount } = render(

@@ -1,8 +1,9 @@
-import { Button, CopyButton, Tabs, Paragraph } from '@contentful/f36-components';
+import { Button, CopyButton, Tabs, Paragraph, Flex } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import Hyperlink from '@components/common/HyperLink/HyperLink';
 import useAI from '@hooks/dialog/useAI';
 import TextFieldWithButtons from '@components/common/text-field-with-buttons/TextFieldWIthButtons';
+import GeneratedTextSkeleton from './GeneratedTextSkeleton';
 import { OutputTab } from '../../Output';
 import { ContentTypeFieldValidation } from 'contentful-management';
 import { useContext, useEffect, useState } from 'react';
@@ -94,9 +95,12 @@ const GeneratedTextPanel = (props: Props) => {
   return (
     <Tabs.Panel id={OutputTab.GENERATED_TEXT} css={styles.panel}>
       {isGenerating ? (
-        <TextFieldWithButtons inputText={output} sizeValidation={outputFieldValidation?.size}>
-          <Button onClick={sendStopSignal}>Stop Generating</Button>
-        </TextFieldWithButtons>
+        <Flex flexDirection="column" fullWidth css={styles.generatingContainer}>
+          <GeneratedTextSkeleton />
+          <Flex alignSelf="flex-end">
+            <Button onClick={sendStopSignal}>Stop Generating</Button>
+          </Flex>
+        </Flex>
       ) : (
         <TextFieldWithButtons
           inputText={output}

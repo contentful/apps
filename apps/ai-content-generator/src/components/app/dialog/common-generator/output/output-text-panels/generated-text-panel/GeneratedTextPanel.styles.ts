@@ -5,6 +5,11 @@ export const styles = {
   panel: css({
     flexGrow: 1,
   }),
+  generatingContainer: css({
+    height: '100%',
+    paddingLeft: tokens.spacing2Xl,
+    paddingRight: tokens.spacing2Xl,
+  }),
   button: css({
     marginLeft: `${tokens.spacingXs}`,
   }),
