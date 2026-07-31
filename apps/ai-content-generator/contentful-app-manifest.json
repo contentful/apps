@@ -6,8 +6,12 @@
       "description": "Calls OpenAI chat completions using the secret API key stored server-side.",
       "path": "functions/openai-proxy.js",
       "entryFile": "functions/openai-proxy.ts",
-      "allowNetworks": ["https://api.openai.com"],
-      "accepts": ["appaction.call"]
+      "allowNetworks": [
+        "https://api.openai.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
     }
   ],
   "actions": [
@@ -21,7 +25,7 @@
         {
           "id": "messages",
           "name": "Messages",
-          "type": "Text",
+          "type": "Symbol",
           "required": true
         },
         {

@@ -14,11 +14,10 @@ type OpenAiProxyResponse = {
   text: string;
 };
 
+// Installation parameters are persisted as a flat scalar object (see the app's
+// PersistedInstallationParameters). The proxy only needs the Secret `key`.
 type InstallationParameters = {
-  key: string;
-  model: string;
-  profile: string;
-  brandProfile: Record<string, string | undefined>;
+  key?: string;
 };
 
 export const handler: FunctionEventHandler<

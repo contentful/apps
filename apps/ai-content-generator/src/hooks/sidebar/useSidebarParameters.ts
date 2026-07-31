@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { SidebarAppSDK } from '@contentful/app-sdk';
-import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { PersistedInstallationParameters } from '@components/config/appInstallationParameters';
 
 /**
  * This hook is used to get the installation parameters from the sidebar location,
@@ -12,7 +12,7 @@ import AppInstallationParameters from '@components/config/appInstallationParamet
 const useSidebarParameters = () => {
   const [hasBrandProfile, setHasBrandProfile] = useState(true);
 
-  const sdk = useSDK<SidebarAppSDK<AppInstallationParameters>>();
+  const sdk = useSDK<SidebarAppSDK<PersistedInstallationParameters>>();
   const { profile } = sdk.parameters.installation;
 
   useEffect(() => {

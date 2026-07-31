@@ -1,9 +1,8 @@
-import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { PersistedInstallationParameters } from '@components/config/appInstallationParameters';
 
-const happyPath: AppInstallationParameters = {
+const happyPath: PersistedInstallationParameters = {
   model: 'gpt-3.5-turbo',
   profile: 'test-profile',
-  brandProfile: {},
 };
 
 export { happyPath };

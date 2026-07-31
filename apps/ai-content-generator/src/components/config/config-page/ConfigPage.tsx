@@ -14,7 +14,9 @@ import useGetContentTypes from '@hooks/config/useGetContentTypes';
 import parameterReducer, { Validator } from '@components/config/parameterReducer';
 import contentTypeReducer from '@components/config/contentTypeReducer';
 import { ConfigErrors } from '@components/config/configText';
-import AppInstallationParameters from '../appInstallationParameters';
+import AppInstallationParameters, {
+  PersistedInstallationParameters,
+} from '../appInstallationParameters';
 
 const initialParameters: Validator<AppInstallationParameters> = {
   model: { value: defaultModelId, isValid: true },
@@ -29,21 +31,30 @@ const ConfigPage = () => {
   const [contentTypes, dispatchContentTypes] = useReducer(contentTypeReducer, initialContentTypes);
   const [keyInput, setKeyInput] = useState<string>('');
 
-  const parametersToSave = useMemo(() => {
-    return {
+  const parametersToSave: PersistedInstallationParameters = useMemo(() => {
+    // Flat scalar shape: installation parameter definitions have no object
+    // type, and declaring the Secret `key` opts the whole object into strict
+    // `additionalProperties: false` validation. Each field here must have a
+    // matching definition on the AppDefinition (`key` Secret, rest Symbol).
+    const params: PersistedInstallationParameters = {
       model: parameters.model.value,
-      key: keyInput,
       profile: parameters.profile.value,
-      brandProfile: {
-        additional: parameters.brandProfile.additional?.value,
-        audience: parameters.brandProfile.audience?.value,
-        exclude: parameters.brandProfile.exclude?.value,
-        include: parameters.brandProfile.include?.value,
-        profile: parameters.brandProfile.profile?.value,
-        tone: parameters.brandProfile.tone?.value,
-        values: parameters.brandProfile.values?.value,
-      },
+      additional: parameters.brandProfile.additional?.value,
+      audience: parameters.brandProfile.audience?.value,
+      exclude: parameters.brandProfile.exclude?.value,
+      include: parameters.brandProfile.include?.value,
+      tone: parameters.brandProfile.tone?.value,
+      values: parameters.brandProfile.values?.value,
     };
+
+    // The key is write-only: only persist it when the admin enters a new value,
+    // otherwise omit it so we don't clobber the stored Secret with an empty
+    // string (the field placeholder promises "leave blank to keep existing").
+    if (keyInput) {
+      params.key = keyInput;
+    }
+
+    return params;
   }, [parameters.brandProfile, parameters.model.value, parameters.profile.value, keyInput]);
 
   const validateParams = (): string[] => {

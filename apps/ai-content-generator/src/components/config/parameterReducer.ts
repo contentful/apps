@@ -1,4 +1,6 @@
-import AppInstallationParameters from './appInstallationParameters';
+import AppInstallationParameters, {
+  PersistedInstallationParameters,
+} from './appInstallationParameters';
 
 export enum ParameterAction {
   UPDATE_MODEL = 'updateModel',
@@ -14,7 +16,7 @@ type ParameterStringActions = {
 
 type ParameterObjectActions = {
   type: ParameterAction.APPLY_CONTENTFUL_PARAMETERS;
-  value: AppInstallationParameters;
+  value: PersistedInstallationParameters;
 };
 
 type ParameterProfileAction = {
@@ -89,7 +91,9 @@ const parameterReducer = (
       };
     }
     case APPLY_CONTENTFUL_PARAMETERS: {
-      const parameter = action.value as AppInstallationParameters;
+      // Persisted params are flat (see PersistedInstallationParameters); rehydrate
+      // the nested brandProfile shape the config UI reducer works with.
+      const parameter = action.value;
       return {
         ...state,
         model: {
@@ -97,16 +101,16 @@ const parameterReducer = (
           isValid: parameter.model?.length > 0,
         },
         profile: {
-          value: parameter.profile,
+          value: parameter.profile || '',
           isValid: true,
         },
         brandProfile: {
-          values: { value: parameter.brandProfile?.values || '', isValid: true },
-          tone: { value: parameter.brandProfile?.tone || '', isValid: true },
-          exclude: { value: parameter.brandProfile?.exclude || '', isValid: true },
-          include: { value: parameter.brandProfile?.include || '', isValid: true },
-          audience: { value: parameter.brandProfile?.audience || '', isValid: true },
-          additional: { value: parameter.brandProfile?.additional || '', isValid: true },
+          values: { value: parameter.values || '', isValid: true },
+          tone: { value: parameter.tone || '', isValid: true },
+          exclude: { value: parameter.exclude || '', isValid: true },
+          include: { value: parameter.include || '', isValid: true },
+          audience: { value: parameter.audience || '', isValid: true },
+          additional: { value: parameter.additional || '', isValid: true },
         },
       };
     }

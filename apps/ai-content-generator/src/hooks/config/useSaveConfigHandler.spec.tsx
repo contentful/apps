@@ -8,7 +8,7 @@ import {
   mockContentTypes,
 } from '../../../test/mocks';
 import useSaveConfigHandler from './useSaveConfigHandler';
-import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { PersistedInstallationParameters } from '@components/config/appInstallationParameters';
 
 const mockSdk = new MockSdk();
 const sdk = mockSdk.sdk;
@@ -62,7 +62,7 @@ describe('useSaveConfigHandler', () => {
     };
 
     const { rerender } = renderHook(
-      (props: AppInstallationParameters) =>
+      (props: PersistedInstallationParameters) =>
         useSaveConfigHandler(props, mockValidateParams, mockContentTypes.mockSelectedContentTypes),
       {
         initialProps: mockSdkParameters.init.installation,

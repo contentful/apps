@@ -4,14 +4,16 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import type { OpenAI } from 'openai';
 import { useState } from 'react';
 import { defaultModelId } from '@configs/ai/gptModels';
-import AppInstallationParameters, { ProfileType } from '@components/config/appInstallationParameters';
+import {
+  PersistedInstallationParameters,
+  ProfileFields,
+  ProfileType,
+} from '@components/config/appInstallationParameters';
 
 export type GenerateMessage = (prompt: string, targetLocale: string) => Promise<string>;
 
-type InstallationParametersWithKey = AppInstallationParameters & { key?: string };
-
 const useAI = () => {
-  const sdk = useSDK<DialogAppSDK<InstallationParametersWithKey>>();
+  const sdk = useSDK<DialogAppSDK<PersistedInstallationParameters>>();
   const [output, setOutput] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [error, setError] = useState<unknown>(null);
@@ -19,7 +21,7 @@ const useAI = () => {
 
   const createGPTPayload = (
     content: string,
-    profile: ProfileType & { profile?: string },
+    profile: ProfileType,
     targetLocale: string
   ): OpenAI.ChatCompletionMessageParam[] => {
     const userPrompt: OpenAI.ChatCompletionMessageParam = { role: 'user', content };
@@ -37,15 +39,20 @@ const useAI = () => {
     setIsGenerating(true);
 
     try {
-      const model = sdk.parameters.installation.model ?? defaultModelId;
-      const messages = createGPTPayload(
-        prompt,
-        {
-          ...sdk.parameters.installation.brandProfile,
-          profile: sdk.parameters.installation.profile,
-        },
-        targetLocale
-      );
+      const installation = sdk.parameters.installation;
+      const model = installation.model ?? defaultModelId;
+      // Installation params are persisted flat; reassemble the ProfileType the
+      // prompt builder expects.
+      const profile: ProfileType = {
+        [ProfileFields.PROFILE]: installation.profile,
+        [ProfileFields.VALUES]: installation.values,
+        [ProfileFields.TONE]: installation.tone,
+        [ProfileFields.EXCLUDE]: installation.exclude,
+        [ProfileFields.INCLUDE]: installation.include,
+        [ProfileFields.AUDIENCE]: installation.audience,
+        [ProfileFields.ADDITIONAL]: installation.additional,
+      };
+      const messages = createGPTPayload(prompt, profile, targetLocale);
 
       const response = await sdk.cma.appActionCall.createWithResponse(
         {

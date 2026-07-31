@@ -1,8 +1,10 @@
 import { SegmentAppData } from '@configs/segment/segmentEvent';
 import { BaseAppSDK } from '@contentful/app-sdk';
-import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { PersistedInstallationParameters } from '@components/config/appInstallationParameters';
 
-const getTrackedAppData = (sdk: BaseAppSDK<AppInstallationParameters>): SegmentAppData => {
+const getTrackedAppData = (
+  sdk: BaseAppSDK<PersistedInstallationParameters>
+): SegmentAppData => {
   const { installation } = sdk.parameters;
 
   return {
@@ -10,12 +12,12 @@ const getTrackedAppData = (sdk: BaseAppSDK<AppInstallationParameters>): SegmentA
 
     config_options: {
       has_profile: !!installation?.profile,
-      has_values: !!installation?.brandProfile?.values,
-      has_tone: !!installation?.brandProfile?.tone,
-      has_exclude: !!installation?.brandProfile?.exclude,
-      has_include: !!installation?.brandProfile?.include,
-      has_audience: !!installation?.brandProfile?.audience,
-      has_additional: !!installation?.brandProfile?.additional,
+      has_values: !!installation?.values,
+      has_tone: !!installation?.tone,
+      has_exclude: !!installation?.exclude,
+      has_include: !!installation?.include,
+      has_audience: !!installation?.audience,
+      has_additional: !!installation?.additional,
     },
   };
 };
