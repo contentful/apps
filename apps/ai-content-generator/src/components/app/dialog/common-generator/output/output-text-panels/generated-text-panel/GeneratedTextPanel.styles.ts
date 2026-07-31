@@ -16,8 +16,4 @@ export const styles = {
   errorMessage: css({
     color: tokens.red500,
   }),
-  errorLink: css({
-    color: `${tokens.red500} !important`,
-    fontWeight: `${tokens.fontWeightNormal} !important`,
-  }),
 };
