@@ -22,6 +22,7 @@
   "lavamoat": {
     "allowScripts": {
       "@lavamoat/preinstall-always-fail": false,
+      "@contentful/app-scripts>esbuild": true,
       "@originjs/vite-plugin-commonjs>esbuild": true,
       "vite>esbuild": true
     }
