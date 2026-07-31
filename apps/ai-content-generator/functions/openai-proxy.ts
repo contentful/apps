@@ -57,7 +57,9 @@ export const handler: FunctionEventHandler<
   if (!response.ok) {
     const errorBody = await response.json().catch(() => ({}));
     throw new Error(
-      `OpenAI request failed: ${response.status} ${errorBody?.error?.message ?? response.statusText}`
+      `OpenAI request failed: ${response.status} ${
+        errorBody?.error?.message ?? response.statusText
+      }`
     );
   }
 

@@ -38,12 +38,8 @@ export type ParameterReducer =
   | ParameterProfileAction
   | ParameterBrandProfileActions;
 
-const {
-  UPDATE_MODEL,
-  UPDATE_PROFILE,
-  UPDATE_BRAND_PROFILE,
-  APPLY_CONTENTFUL_PARAMETERS,
-} = ParameterAction;
+const { UPDATE_MODEL, UPDATE_PROFILE, UPDATE_BRAND_PROFILE, APPLY_CONTENTFUL_PARAMETERS } =
+  ParameterAction;
 
 export type Validator<Type> = {
   [Key in keyof Type]: Type[Key] extends object

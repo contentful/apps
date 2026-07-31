@@ -2,9 +2,7 @@ import { SegmentAppData } from '@configs/segment/segmentEvent';
 import { BaseAppSDK } from '@contentful/app-sdk';
 import { PersistedInstallationParameters } from '@components/config/appInstallationParameters';
 
-const getTrackedAppData = (
-  sdk: BaseAppSDK<PersistedInstallationParameters>
-): SegmentAppData => {
+const getTrackedAppData = (sdk: BaseAppSDK<PersistedInstallationParameters>): SegmentAppData => {
   const { installation } = sdk.parameters;
 
   return {

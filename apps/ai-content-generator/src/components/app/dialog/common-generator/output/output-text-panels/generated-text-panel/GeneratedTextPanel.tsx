@@ -66,7 +66,12 @@ const GeneratedTextPanel = (props: Props) => {
   ]);
 
   const getModalErrorMessage = () => {
-    if (error !== null && typeof error === 'object' && 'status' in error && (error as { status: number }).status === 429) {
+    if (
+      error !== null &&
+      typeof error === 'object' &&
+      'status' in error &&
+      (error as { status: number }).status === 429
+    ) {
       return (
         <>
           <Paragraph css={styles.errorMessage}>
