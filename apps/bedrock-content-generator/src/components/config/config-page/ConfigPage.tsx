@@ -82,14 +82,6 @@ const ConfigPage = () => {
   const validateParams = (): string[] => {
     const notifierErrors = [];
 
-    if (!parameters.accessKeyId.isValid) {
-      notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingAccessKeyID}`);
-    }
-
-    if (!parameters.secretAccessKey.isValid) {
-      notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingSecretAccessKey}`);
-    }
-
     if (!parameters.model.isValid) {
       notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingModel}`);
     }

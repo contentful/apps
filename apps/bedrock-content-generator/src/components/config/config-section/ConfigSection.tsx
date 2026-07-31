@@ -44,9 +44,6 @@ const ConfigSection = ({
             model={model}
             modelValid={modelValid}
             dispatch={dispatch}
-            credentials={{ accessKeyID, secretAccessKey }}
-            region={region}
-            credentialsValid={isAccessKeyValid}
           />
         </Form>
       </Box>

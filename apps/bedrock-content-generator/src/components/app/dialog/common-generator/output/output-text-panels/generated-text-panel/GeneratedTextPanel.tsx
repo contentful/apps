@@ -57,7 +57,8 @@ const GeneratedTextPanel = (props: Props) => {
   const getModalErrorMessage = () => {
     if (!error) return null;
 
-    return <Paragraph css={styles.errorMessage}>{error.message}</Paragraph>;
+    const message = error instanceof Error ? error.message : String(error);
+    return <Paragraph css={styles.errorMessage}>{message}</Paragraph>;
   };
 
   return (

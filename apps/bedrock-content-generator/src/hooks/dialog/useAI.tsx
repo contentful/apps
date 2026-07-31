@@ -3,90 +3,68 @@ import { featuredModels } from '@configs/aws/featuredModels';
 import baseSystemPrompt from '@configs/prompts/baseSystemPrompt';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import AI from '@utils/aiApi';
-import { AiApiErrorType } from '@utils/aiApi/handleAiApiErrors';
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 
 export type GenerateMessage = (prompt: string, targetLocale: string) => Promise<string>;
 
-/**
- * This hook is used to generate messages using the Bedrock API
- * output will stream messages just like a chatbot
- *
- * @returns { generateMessage, resetOutput, output, sendStopSignal }
- */
 const useAI = () => {
   const sdk = useSDK<DialogAppSDK<AppInstallationParameters>>();
-  const model = featuredModels.find((m) => m.id === sdk.parameters.installation.model);
-  const ai = useMemo(
-    () =>
-      new AI(
-        sdk.parameters.installation.accessKeyId,
-        sdk.parameters.installation.secretAccessKey,
-        sdk.parameters.installation.region,
-        model
-      ),
-    [sdk.parameters.installation, model]
-  );
   const [output, setOutput] = useState<string>('');
-  const [stream, setStream] = useState<AsyncGenerator<string, void, unknown> | null>(null);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [error, setError] = useState<AiApiErrorType | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const [hasError, setHasError] = useState<boolean>(false);
 
   const resetOutput = () => {
     setOutput('');
     setError(null);
-    setStream(null);
-
     setHasError(false);
   };
 
-  const generateMessage = async (prompt: string, targetLocale: string) => {
+  const generateMessage = async (prompt: string, targetLocale: string): Promise<string> => {
     resetOutput();
-    let completeMessage = '';
     setIsGenerating(true);
 
     try {
+      const { model: modelId, region, brandProfile, profile } = sdk.parameters.installation;
+      const featuredModel = featuredModels.find((m) => m.id === modelId);
+      const invokeId = featuredModel?.getInvokeId
+        ? featuredModel.getInvokeId(region)
+        : (modelId ?? featuredModels[0].id);
+
       const systemPrompt = baseSystemPrompt(
-        {
-          ...sdk.parameters.installation.brandProfile,
-          profile: sdk.parameters.installation.profile,
-        },
+        { ...brandProfile, profile },
         targetLocale
       );
 
-      const stream = await ai.streamChatCompletion(systemPrompt, prompt);
-      if (!stream) throw new Error('Stream is null');
-      setStream(stream);
+      const response = await sdk.cma.appActionCall.createWithResponse(
+        {
+          appDefinitionId: sdk.ids.app!,
+          appActionId: 'bedrockProxyAction',
+        },
+        {
+          parameters: {
+            systemPrompt,
+            prompt,
+            model: invokeId,
+          },
+        }
+      );
 
-      for await (const streamOutput of stream) {
-        setOutput((prev) => prev + streamOutput);
-        completeMessage += streamOutput;
-      }
-    } catch (error: unknown) {
-      const e = error as AiApiErrorType;
-      console.error(e);
-      setError(e);
+      const body: { text: string } = JSON.parse(response.response.body);
+      setOutput(body.text);
+      return body.text;
+    } catch (err: unknown) {
+      console.error(err);
+      setError(err);
       setHasError(true);
-      setIsGenerating(false);
+      return '';
     } finally {
       setIsGenerating(false);
-      setStream(null);
     }
-
-    return completeMessage;
   };
 
-  useEffect(() => {
-    setIsGenerating(stream !== null);
-  }, [stream]);
-
   const stopMessageGeneration = () => {
-    if (stream) {
-      stream.return();
-      setStream(null);
-    }
+    // No-op: App Actions are not streaming; generation cannot be cancelled mid-flight.
   };
 
   return {
