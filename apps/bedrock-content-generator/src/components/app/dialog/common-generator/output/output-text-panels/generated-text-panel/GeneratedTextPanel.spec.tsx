@@ -1,6 +1,6 @@
 import { render, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { AIMock, mockCma, MockSdk } from '@test/mocks';
+import { mockCma, MockSdk } from '@test/mocks';
 import GeneratedTextPanel from './GeneratedTextPanel';
 import useAI from '@hooks/dialog/useAI';
 import { Tabs } from '@contentful/f36-components';
@@ -13,8 +13,6 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => sdk,
   useCMA: () => mockCma,
 }));
-
-vi.mock('@utils/aiApi', () => AIMock);
 
 describe('GeneratedTextPanel', () => {
   it('renders', () => {
