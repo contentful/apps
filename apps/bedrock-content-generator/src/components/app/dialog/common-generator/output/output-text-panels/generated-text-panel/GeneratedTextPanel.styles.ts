@@ -15,4 +15,9 @@ export const styles = {
     color: `${tokens.red500} !important`,
     fontWeight: `${tokens.fontWeightNormal} !important`,
   }),
+  generatingContainer: css({
+    height: '100%',
+    paddingLeft: tokens.spacing2Xl,
+    paddingRight: tokens.spacing2Xl,
+  }),
 };
