@@ -22,7 +22,7 @@
   "dependencies": {
     "@contentful/node-apps-toolkit": "^4.0.1",
     "aws-serverless-express": "3.4.0",
-    "express": "4.22.1",
+    "express": "4.22.2",
     "lodash.get": "^4.4.2",
     "node-fetch": "2.7.0"
   },

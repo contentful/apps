@@ -13,9 +13,9 @@
   "dependencies": {
     "@contentful/app-sdk": "^4.56.0",
     "@contentful/dam-app-base": "4.0.5",
-    "@contentful/f36-components": "6.7.4",
-    "react": "19.2.5",
-    "react-dom": "19.2.5"
+    "@contentful/f36-components": "6.16.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@contentful/app-scripts": "^2.5.11",

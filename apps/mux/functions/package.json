@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@mux/mux-node": "^12.2.0",
-    "contentful-management": "^11.54.1"
+    "@mux/mux-node": "^12.8.1",
+    "contentful-management": "^11.76.0"
   },
   "scripts": {
     "deploy": "npm run build && npm run upload",

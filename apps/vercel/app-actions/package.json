@@ -22,9 +22,9 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
-    "@contentful/node-apps-toolkit": "^3.9.1",
-    "@types/mocha": "^10.0.9",
-    "mocha": "^10.8.1",
-    "sinon": "^19.0.2"
+    "@contentful/node-apps-toolkit": "^3.16.1",
+    "@types/mocha": "^10.0.10",
+    "mocha": "^10.8.2",
+    "sinon": "^19.0.5"
   }
 }

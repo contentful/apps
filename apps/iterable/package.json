@@ -4,13 +4,13 @@
   "private": true,
   "dependencies": {
     "@contentful/app-sdk": "^4.29.1",
-    "@contentful/f36-components": "4.79.1",
-    "@contentful/f36-multiselect": "^4.26.1",
+    "@contentful/f36-components": "4.81.1",
+    "@contentful/f36-multiselect": "^4.81.1",
     "@contentful/f36-tokens": "4.2.0",
-    "@contentful/field-editor-json": "^3.3.38",
-    "@contentful/react-apps-toolkit": "1.2.16",
+    "@contentful/field-editor-json": "^3.6.5",
+    "@contentful/react-apps-toolkit": "1.2.23",
     "@phosphor-icons/react": "^2.1.10",
-    "contentful-management": "^11.52.0",
+    "contentful-management": "^11.76.0",
     "emotion": "10.0.27",
     "react": "18.3.1",
     "react-dom": "18.3.1"

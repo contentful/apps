@@ -6,16 +6,16 @@
     "@contentful/app-sdk": "^4.29.1",
     "@contentful/f36-components": "4.81.1",
     "@contentful/f36-tokens": "4.2.0",
-    "@contentful/react-apps-toolkit": "1.2.16",
+    "@contentful/react-apps-toolkit": "1.2.23",
     "@phosphor-icons/core": "^2.1.1",
     "@phosphor-icons/react": "^2.1.10",
     "contentful-management": "10.46.4",
     "emotion": "10.0.27",
-    "fuse.js": "^7.1.0",
+    "fuse.js": "^7.5.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-virtualized-auto-sizer": "^2.0.2",
-    "react-window": "^2.2.5"
+    "react-virtualized-auto-sizer": "^2.0.3",
+    "react-window": "^2.3.0"
   },
   "scripts": {
     "start": "vite",
