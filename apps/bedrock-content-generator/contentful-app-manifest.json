@@ -6,8 +6,12 @@
       "description": "Calls AWS Bedrock using the secret IAM credentials stored server-side.",
       "path": "functions/bedrock-proxy.js",
       "entryFile": "functions/bedrock-proxy.ts",
-      "allowNetworks": ["https://*.amazonaws.com"],
-      "accepts": ["appaction.call"]
+      "allowNetworks": [
+        "https://*.amazonaws.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
     }
   ],
   "actions": [
@@ -21,13 +25,13 @@
         {
           "id": "systemPrompt",
           "name": "System Prompt",
-          "type": "Text",
+          "type": "Symbol",
           "required": true
         },
         {
           "id": "prompt",
           "name": "Prompt",
-          "type": "Text",
+          "type": "Symbol",
           "required": true
         },
         {
