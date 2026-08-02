@@ -71,7 +71,7 @@ export const handler: FunctionEventHandler<
     contentHash,
   ].join('\n');
 
-  const credentialScope = `${dateStamp}/${region}/bedrock-runtime/aws4_request`;
+  const credentialScope = buildCredentialScope(dateStamp, region);
   const stringToSign = [
     'AWS4-HMAC-SHA256',
     amzDate,
@@ -79,7 +79,7 @@ export const handler: FunctionEventHandler<
     await sha256Hex(canonicalRequest),
   ].join('\n');
 
-  const signingKey = await getSigningKey(secretAccessKey, dateStamp, region, 'bedrock-runtime');
+  const signingKey = await getSigningKey(secretAccessKey, dateStamp, region, 'bedrock');
   const signature = await hmacHex(signingKey, stringToSign);
 
   const authorizationHeader =
@@ -109,6 +109,11 @@ export const handler: FunctionEventHandler<
 
   return { text };
 };
+
+/** Exported for unit testing — asserts the correct SigV4 signing name `bedrock`. */
+export function buildCredentialScope(dateStamp: string, region: string): string {
+  return `${dateStamp}/${region}/bedrock/aws4_request`;
+}
 
 function buildRequestBody(model: string, systemPrompt: string, prompt: string): string {
   if (model.startsWith('mistral.')) {
@@ -186,7 +191,7 @@ async function hmacBuf(key: ArrayBuffer | string, message: string): Promise<Arra
   return crypto.subtle.sign('HMAC', cryptoKey, new TextEncoder().encode(message));
 }
 
-async function getSigningKey(
+export async function getSigningKey(
   secretKey: string,
   dateStamp: string,
   region: string,
