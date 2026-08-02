@@ -1,4 +1,6 @@
-import AppInstallationParameters from './appInstallationParameters';
+import AppInstallationParameters, {
+  PersistedInstallationParameters,
+} from './appInstallationParameters';
 import featureConfig, { AIFeature } from '@configs/features/featureConfig';
 
 export enum ParameterAction {
@@ -33,7 +35,7 @@ type ParameterStringActions = {
 
 type ParameterObjectActions = {
   type: ParameterAction.APPLY_CONTENTFUL_PARAMETERS;
-  value: AppInstallationParameters;
+  value: PersistedInstallationParameters;
 };
 
 type ParameterProfileAction = {
@@ -147,53 +149,46 @@ const parameterReducer = (
       };
     }
     case ParameterAction.APPLY_CONTENTFUL_PARAMETERS: {
-      const parameter = action.value as AppInstallationParameters;
+      // Persisted params are flat (see PersistedInstallationParameters); rehydrate
+      // the nested brandProfile shape the config UI reducer works with.
+      // enabledFeatures is JSON-encoded as a Symbol string.
+      const parameter = action.value;
+      let enabledFeatures: AIFeature[];
+      try {
+        enabledFeatures = parameter.enabledFeatures
+          ? JSON.parse(parameter.enabledFeatures)
+          : (Object.keys(featureConfig) as AIFeature[]);
+      } catch {
+        enabledFeatures = Object.keys(featureConfig) as AIFeature[];
+      }
       return {
         ...state,
         accessKeyId: {
-          value: parameter.accessKeyId,
-          isValid: parameter.accessKeyId?.length > 0,
+          value: parameter.accessKeyId || '',
+          isValid: (parameter.accessKeyId?.length ?? 0) > 0,
         },
         secretAccessKey: {
-          value: parameter.secretAccessKey,
-          isValid: parameter.secretAccessKey?.length > 0,
+          value: parameter.secretAccessKey || '',
+          isValid: (parameter.secretAccessKey?.length ?? 0) > 0,
         },
         model: {
           value: parameter.model,
           isValid: parameter.model?.length > 0,
         },
         profile: {
-          value: parameter.profile,
+          value: parameter.profile || '',
           isValid: true,
         },
         brandProfile: {
-          values: {
-            value: parameter.brandProfile?.values || '',
-            isValid: true,
-          },
-          tone: {
-            value: parameter.brandProfile?.tone || '',
-            isValid: true,
-          },
-          exclude: {
-            value: parameter.brandProfile?.exclude || '',
-            isValid: true,
-          },
-          include: {
-            value: parameter.brandProfile?.include || '',
-            isValid: true,
-          },
-          audience: {
-            value: parameter.brandProfile?.audience || '',
-            isValid: true,
-          },
-          additional: {
-            value: parameter.brandProfile?.additional || '',
-            isValid: true,
-          },
+          values: { value: parameter.values || '', isValid: true },
+          tone: { value: parameter.tone || '', isValid: true },
+          exclude: { value: parameter.exclude || '', isValid: true },
+          include: { value: parameter.include || '', isValid: true },
+          audience: { value: parameter.audience || '', isValid: true },
+          additional: { value: parameter.additional || '', isValid: true },
         },
         enabledFeatures: {
-          value: parameter.enabledFeatures || (Object.keys(featureConfig) as AIFeature[]),
+          value: enabledFeatures,
           isValid: true,
         },
         region: {
