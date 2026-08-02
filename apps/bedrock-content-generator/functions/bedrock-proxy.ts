@@ -13,12 +13,6 @@ export type BedrockProxyParameters = {
 
 type BedrockProxyResponse = {
   text: string;
-  // TEMPORARY DIAGNOSTIC — remove before merge
-  ok?: boolean;
-  stage?: string;
-  status?: number;
-  bedrockError?: unknown;
-  debug?: unknown;
 };
 
 type InstallationParameters = {
@@ -54,6 +48,8 @@ export const handler: FunctionEventHandler<
 
   const host = `bedrock-runtime.${region}.amazonaws.com`;
   const path = `/model/${encodeURIComponent(model)}/invoke`;
+  // SigV4 requires double URI-encoding of path segments for non-S3 services.
+  const canonicalPath = `/model/${encodeURIComponent(encodeURIComponent(model))}/invoke`;
   const url = `https://${host}${path}`;
   const amzDate = new Date().toISOString().replace(/[:-]/g, '').replace(/\.\d{3}/, '');
   const dateStamp = amzDate.slice(0, 8);
@@ -70,7 +66,7 @@ export const handler: FunctionEventHandler<
 
   const canonicalRequest = [
     'POST',
-    path,
+    canonicalPath,
     '',
     canonicalHeaders,
     signedHeaders,
@@ -103,22 +99,11 @@ export const handler: FunctionEventHandler<
     body: requestBody,
   });
 
-  // TEMPORARY DIAGNOSTIC — return structured error instead of throwing
   if (!response.ok) {
     const errorBody = await response.json().catch(() => ({}));
-    return {
-      text: '',
-      ok: false,
-      stage: 'bedrock',
-      status: response.status,
-      bedrockError: errorBody,
-      debug: {
-        model,
-        region,
-        url,
-        accessKeyIdPrefix: accessKeyId.slice(0, 8),
-      },
-    };
+    throw new Error(
+      `Bedrock request failed: ${response.status} ${(errorBody as { message?: string }).message ?? response.statusText}`
+    );
   }
 
   const data = await response.json();
