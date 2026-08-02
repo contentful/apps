@@ -1,4 +1,4 @@
-import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { PersistedInstallationParameters } from '@components/config/appInstallationParameters';
 import { featuredModels } from '@configs/aws/featuredModels';
 import baseSystemPrompt from '@configs/prompts/baseSystemPrompt';
 import { DialogAppSDK } from '@contentful/app-sdk';
@@ -8,7 +8,7 @@ import { useState } from 'react';
 export type GenerateMessage = (prompt: string, targetLocale: string) => Promise<string>;
 
 const useAI = () => {
-  const sdk = useSDK<DialogAppSDK<AppInstallationParameters>>();
+  const sdk = useSDK<DialogAppSDK<PersistedInstallationParameters>>();
   const [output, setOutput] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [error, setError] = useState<unknown>(null);
@@ -25,16 +25,14 @@ const useAI = () => {
     setIsGenerating(true);
 
     try {
-      const { model: modelId, region, brandProfile, profile } = sdk.parameters.installation;
+      const installation = sdk.parameters.installation;
+      const { model: modelId, region } = installation;
       const featuredModel = featuredModels.find((m) => m.id === modelId);
       const invokeId = featuredModel?.getInvokeId
         ? featuredModel.getInvokeId(region)
         : (modelId ?? featuredModels[0].id);
 
-      const systemPrompt = baseSystemPrompt(
-        { ...brandProfile, profile },
-        targetLocale
-      );
+      const systemPrompt = baseSystemPrompt(installation, targetLocale);
 
       const response = await sdk.cma.appActionCall.createWithResponse(
         {
