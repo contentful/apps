@@ -13,6 +13,10 @@ interface Props {
   region: string;
   model: string;
   modelValid: boolean;
+  accessKeyIdInput: string;
+  secretAccessKeyInput: string;
+  onAccessKeyIdChange: (value: string) => void;
+  onSecretAccessKeyChange: (value: string) => void;
   dispatch: Dispatch<ParameterReducer>;
 }
 
@@ -24,6 +28,10 @@ const ConfigSection = ({
   dispatch,
   isAccessKeyValid,
   region,
+  accessKeyIdInput,
+  secretAccessKeyInput,
+  onAccessKeyIdChange,
+  onSecretAccessKeyChange,
 }: Props) => {
   return (
     <Flex flexDirection="column" alignItems="flex-start" fullWidth={true}>
@@ -37,14 +45,14 @@ const ConfigSection = ({
             secretAccessKey={secretAccessKey}
             region={region}
             isInvalid={!isAccessKeyValid}
+            accessKeyIdInput={accessKeyIdInput}
+            secretAccessKeyInput={secretAccessKeyInput}
+            onAccessKeyIdChange={onAccessKeyIdChange}
+            onSecretAccessKeyChange={onSecretAccessKeyChange}
             dispatch={dispatch}
           />
 
-          <Model
-            model={model}
-            modelValid={modelValid}
-            dispatch={dispatch}
-          />
+          <Model model={model} modelValid={modelValid} dispatch={dispatch} />
         </Form>
       </Box>
     </Flex>
