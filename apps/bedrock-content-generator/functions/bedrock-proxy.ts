@@ -13,6 +13,12 @@ export type BedrockProxyParameters = {
 
 type BedrockProxyResponse = {
   text: string;
+  // TEMPORARY DIAGNOSTIC — remove before merge
+  ok?: boolean;
+  stage?: string;
+  status?: number;
+  bedrockError?: unknown;
+  debug?: unknown;
 };
 
 type InstallationParameters = {
@@ -97,11 +103,22 @@ export const handler: FunctionEventHandler<
     body: requestBody,
   });
 
+  // TEMPORARY DIAGNOSTIC — return structured error instead of throwing
   if (!response.ok) {
     const errorBody = await response.json().catch(() => ({}));
-    throw new Error(
-      `Bedrock request failed: ${response.status} ${(errorBody as { message?: string }).message ?? response.statusText}`
-    );
+    return {
+      text: '',
+      ok: false,
+      stage: 'bedrock',
+      status: response.status,
+      bedrockError: errorBody,
+      debug: {
+        model,
+        region,
+        url,
+        accessKeyIdPrefix: accessKeyId.slice(0, 8),
+      },
+    };
   }
 
   const data = await response.json();
