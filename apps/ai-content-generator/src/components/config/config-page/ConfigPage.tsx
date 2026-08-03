@@ -1,5 +1,7 @@
 import { useMemo, useReducer, useState } from 'react';
 import { Box, Heading } from '@contentful/f36-components';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import type { ConfigAppSDK } from '@contentful/app-sdk';
 import ConfigSection from '@components/config/config-section/ConfigSection';
 import CostSection from '@components/config/cost-section/CostSection';
 import DisclaimerSection from '@components/config/disclaimer-section/DisclaimerSection';
@@ -27,9 +29,15 @@ const initialParameters: Validator<AppInstallationParameters> = {
 const initialContentTypes: Set<string> = new Set();
 
 const ConfigPage = () => {
+  const sdk = useSDK<ConfigAppSDK>();
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
   const [contentTypes, dispatchContentTypes] = useReducer(contentTypeReducer, initialContentTypes);
   const [keyInput, setKeyInput] = useState<string>('');
+
+  // The key is a write-only Secret, so we never read its value back — but the
+  // param is present (masked) once one has been stored. Use that to tell a
+  // first-time install (no key yet) from a re-save (keep the existing Secret).
+  const hasStoredKey = Boolean(sdk.parameters.installation?.key);
 
   const parametersToSave: PersistedInstallationParameters = useMemo(() => {
     // Flat scalar shape: installation parameter definitions have no object
@@ -59,6 +67,12 @@ const ConfigPage = () => {
 
   const validateParams = (): string[] => {
     const notifierErrors = [];
+    // A first install has no stored Secret yet — require a key so we don't save
+    // a config that can only fail at generation time. On re-saves a blank field
+    // is fine: it preserves the existing Secret (see parametersToSave above).
+    if (!hasStoredKey && !keyInput) {
+      notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingApiKey}`);
+    }
     if (!parameters.model.isValid) {
       notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingModel}`);
     }
