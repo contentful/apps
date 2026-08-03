@@ -1,8 +1,11 @@
-import { PersistedInstallationParameters } from '@components/config/appInstallationParameters';
+import {
+  PersistedInstallationParameters,
+  parseEnabledFeatures,
+} from '@components/config/appInstallationParameters';
 import { SidebarAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useEffect, useState } from 'react';
-import featureConfig, { AIFeature } from '@configs/features/featureConfig';
+import { AIFeature } from '@configs/features/featureConfig';
 
 /**
  * This hook is used to get the installation parameters from the sidebar location,
@@ -16,25 +19,16 @@ const useSidebarParameters = () => {
   const sdk = useSDK<SidebarAppSDK<PersistedInstallationParameters>>();
   const installation = sdk.parameters.installation;
   const profile = installation.profile;
-  // enabledFeatures is JSON-encoded as a Symbol string in the persisted shape.
-  let parsedFeatures: AIFeature[] | undefined;
-  try {
-    parsedFeatures = installation.enabledFeatures
-      ? JSON.parse(installation.enabledFeatures)
-      : undefined;
-  } catch {
-    parsedFeatures = undefined;
-  }
+  // Dual-read enabledFeatures: new installs store it JSON-encoded as a Symbol,
+  // pre-migration installs still have a real AIFeature[] array. Both resolve to
+  // the customer's selection (falling back to all features when absent).
+  const features = parseEnabledFeatures(
+    installation.enabledFeatures as AIFeature[] | string | undefined
+  );
 
   useEffect(() => {
     setHasBrandProfile(!!profile);
   }, [profile]);
-
-  // Default to all features if enabledFeatures is not set (for backward compatibility)
-  const features =
-    parsedFeatures && parsedFeatures.length > 0
-      ? parsedFeatures
-      : (Object.keys(featureConfig) as AIFeature[]);
 
   return {
     hasBrandProfile,

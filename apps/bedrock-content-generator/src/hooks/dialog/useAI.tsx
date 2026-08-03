@@ -1,4 +1,7 @@
-import { PersistedInstallationParameters } from '@components/config/appInstallationParameters';
+import {
+  PersistedInstallationParameters,
+  toProfileType,
+} from '@components/config/appInstallationParameters';
 import { featuredModels } from '@configs/aws/featuredModels';
 import baseSystemPrompt from '@configs/prompts/baseSystemPrompt';
 import { DialogAppSDK } from '@contentful/app-sdk';
@@ -32,7 +35,9 @@ const useAI = () => {
         ? featuredModel.getInvokeId(region)
         : modelId ?? featuredModels[0].id;
 
-      const systemPrompt = baseSystemPrompt(installation, targetLocale);
+      // Dual-read the brand profile: baseSystemPrompt expects a ProfileType, and
+      // pre-migration installs still keep those fields nested under brandProfile.
+      const systemPrompt = baseSystemPrompt(toProfileType(installation), targetLocale);
 
       const result = await sdk.cma.appActionCall.createWithResult(
         {

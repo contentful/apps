@@ -1,7 +1,10 @@
 import AppInstallationParameters, {
   PersistedInstallationParameters,
+  ProfileFields,
+  parseEnabledFeatures,
+  toProfileType,
 } from './appInstallationParameters';
-import featureConfig, { AIFeature } from '@configs/features/featureConfig';
+import { AIFeature } from '@configs/features/featureConfig';
 
 export enum ParameterAction {
   UPDATE_CREDENTIALS = 'updateCredentials',
@@ -149,18 +152,17 @@ const parameterReducer = (
       };
     }
     case ParameterAction.APPLY_CONTENTFUL_PARAMETERS: {
-      // Persisted params are flat (see PersistedInstallationParameters); rehydrate
-      // the nested brandProfile shape the config UI reducer works with.
-      // enabledFeatures is JSON-encoded as a Symbol string.
-      const parameter = action.value;
-      let enabledFeatures: AIFeature[];
-      try {
-        enabledFeatures = parameter.enabledFeatures
-          ? JSON.parse(parameter.enabledFeatures)
-          : (Object.keys(featureConfig) as AIFeature[]);
-      } catch {
-        enabledFeatures = Object.keys(featureConfig) as AIFeature[];
-      }
+      // Persisted params are flat (see PersistedInstallationParameters), but
+      // installs from before the flatten migration still carry a nested
+      // `brandProfile` and an `enabledFeatures` array (not a JSON string).
+      // Dual-read both so existing customers keep their brand profile and
+      // feature selection until they re-save, then rehydrate the nested shape
+      // the config UI reducer works with.
+      const parameter = action.value as PersistedInstallationParameters & {
+        enabledFeatures?: AIFeature[] | string;
+      };
+      const profile = toProfileType(parameter);
+      const enabledFeatures = parseEnabledFeatures(parameter.enabledFeatures);
       return {
         ...state,
         accessKeyId: {
@@ -176,16 +178,16 @@ const parameterReducer = (
           isValid: parameter.model?.length > 0,
         },
         profile: {
-          value: parameter.profile || '',
+          value: profile[ProfileFields.PROFILE] || '',
           isValid: true,
         },
         brandProfile: {
-          values: { value: parameter.values || '', isValid: true },
-          tone: { value: parameter.tone || '', isValid: true },
-          exclude: { value: parameter.exclude || '', isValid: true },
-          include: { value: parameter.include || '', isValid: true },
-          audience: { value: parameter.audience || '', isValid: true },
-          additional: { value: parameter.additional || '', isValid: true },
+          values: { value: profile[ProfileFields.VALUES] || '', isValid: true },
+          tone: { value: profile[ProfileFields.TONE] || '', isValid: true },
+          exclude: { value: profile[ProfileFields.EXCLUDE] || '', isValid: true },
+          include: { value: profile[ProfileFields.INCLUDE] || '', isValid: true },
+          audience: { value: profile[ProfileFields.AUDIENCE] || '', isValid: true },
+          additional: { value: profile[ProfileFields.ADDITIONAL] || '', isValid: true },
         },
         enabledFeatures: {
           value: enabledFeatures,

@@ -7,7 +7,9 @@
       "path": "functions/bedrock-proxy.js",
       "entryFile": "functions/bedrock-proxy.ts",
       "allowNetworks": [
-        "https://*.amazonaws.com"
+        "https://bedrock-runtime.us-east-1.amazonaws.com",
+        "https://bedrock-runtime.us-west-2.amazonaws.com",
+        "https://bedrock-runtime.eu-central-1.amazonaws.com"
       ],
       "accepts": [
         "appaction.call"
