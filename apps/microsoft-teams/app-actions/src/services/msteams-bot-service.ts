@@ -9,7 +9,9 @@ import {
 import { MessageResponse } from '../../../types';
 
 export class MsTeamsBotService {
-  constructor(public readonly botServiceUrl: string, public readonly apiKey: string) {}
+  constructor(public readonly botServiceUrl: string, public readonly apiKey: string) {
+    this.botServiceUrl = botServiceUrl.replace(/\/+$/, '');
+  }
 
   async sendWorkflowUpdateMessage(
     workflowUpdateMessage: WorkflowUpdateMessage,
