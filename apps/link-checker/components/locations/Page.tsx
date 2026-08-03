@@ -195,7 +195,7 @@ export default function Page() {
             item.sys.space.sys.id === sdk.ids.space &&
             item.sys.environment.sys.id === sdk.ids.environment
         );
-        if (!deepEqual(match?.parameters, sdk.parameters.installation)) {
+        if (match && !deepEqual(match.parameters, sdk.parameters.installation)) {
           window.location.reload();
         }
       } catch {
