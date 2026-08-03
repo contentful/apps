@@ -51,7 +51,10 @@ export const handler: FunctionEventHandler<
   // SigV4 requires double URI-encoding of path segments for non-S3 services.
   const canonicalPath = `/model/${encodeURIComponent(encodeURIComponent(model))}/invoke`;
   const url = `https://${host}${path}`;
-  const amzDate = new Date().toISOString().replace(/[:-]/g, '').replace(/\.\d{3}/, '');
+  const amzDate = new Date()
+    .toISOString()
+    .replace(/[:-]/g, '')
+    .replace(/\.\d{3}/, '');
   const dateStamp = amzDate.slice(0, 8);
 
   const contentHash = await sha256Hex(requestBody);
@@ -102,7 +105,9 @@ export const handler: FunctionEventHandler<
   if (!response.ok) {
     const errorBody = await response.json().catch(() => ({}));
     throw new Error(
-      `Bedrock request failed: ${response.status} ${(errorBody as { message?: string }).message ?? response.statusText}`
+      `Bedrock request failed: ${response.status} ${
+        (errorBody as { message?: string }).message ?? response.statusText
+      }`
     );
   }
 

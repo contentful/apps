@@ -34,7 +34,12 @@ describe('bedrock-proxy SigV4 signing', () => {
       const secretKey = 'wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY';
 
       const keyBedrock = await getSigningKey(secretKey, dateStamp, region, 'bedrock');
-      const keyBedrockRuntime = await getSigningKey(secretKey, dateStamp, region, 'bedrock-runtime');
+      const keyBedrockRuntime = await getSigningKey(
+        secretKey,
+        dateStamp,
+        region,
+        'bedrock-runtime'
+      );
 
       // Outputs must differ — the wrong service name produces an invalid key
       const toHex = (buf: ArrayBuffer) =>

@@ -30,7 +30,7 @@ const useAI = () => {
       const featuredModel = featuredModels.find((m) => m.id === modelId);
       const invokeId = featuredModel?.getInvokeId
         ? featuredModel.getInvokeId(region)
-        : (modelId ?? featuredModels[0].id);
+        : modelId ?? featuredModels[0].id;
 
       const systemPrompt = baseSystemPrompt(installation, targetLocale);
 
