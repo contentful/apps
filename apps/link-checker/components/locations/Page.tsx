@@ -195,7 +195,7 @@ export default function Page() {
             item.sys.space.sys.id === sdk.ids.space &&
             item.sys.environment.sys.id === sdk.ids.environment
         );
-        if (!deepEqual(match?.parameters, sdk.parameters.installation)) {
+        if (match && !deepEqual(match.parameters, sdk.parameters.installation)) {
           window.location.reload();
         }
       } catch {
@@ -318,12 +318,13 @@ export default function Page() {
       const resultMap = new Map<string, PageLinkResult>();
       const checksToQueue: typeof pendingChecks = [];
 
-      let skip = 0;
+      let lastSeenId: string | undefined;
       let hasLoadedFirstBatch = false;
       let entriesScanned = 0;
       let linksFound = 0;
       const entryQueryBase = {
         'sys.contentType.sys.id[in]': Array.from(contentTypeMap.keys()).join(','),
+        order: 'sys.id',
       };
 
       while (true) {
@@ -331,9 +332,9 @@ export default function Page() {
           spaceId: sdk.ids.space,
           environmentId: sdk.ids.environment,
           query: {
-            skip,
             limit: ENTRY_FETCH_LIMIT,
             ...entryQueryBase,
+            ...(lastSeenId ? { 'sys.id[gt]': lastSeenId } : {}),
           },
         });
 
@@ -461,7 +462,7 @@ export default function Page() {
           break;
         }
 
-        skip += ENTRY_FETCH_LIMIT;
+        lastSeenId = batchEntries[batchEntries.length - 1].sys.id;
       }
 
       if (!hasLoadedFirstBatch) {
