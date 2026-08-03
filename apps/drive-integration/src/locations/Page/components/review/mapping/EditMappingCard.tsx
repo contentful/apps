@@ -4,14 +4,14 @@ import tokens from '@contentful/f36-tokens';
 import { TruncatedRow } from './TruncatedRow';
 import { FIELD_TYPE_SEPARATOR, truncateFieldValue } from '../../../../../utils/utils';
 
-export interface MappingCardData {
+export interface EditMappingCardData {
   key: string;
   fieldName: string;
   fieldType: string;
 }
 
-interface MappingCardProps {
-  card: MappingCardData;
+interface EditMappingCardProps {
+  card: EditMappingCardData;
   top: number;
   wrapperRef: Ref<HTMLDivElement>;
   isHovered?: boolean;
@@ -19,20 +19,20 @@ interface MappingCardProps {
   onMouseLeave?: () => void;
 }
 
-export const MappingCard = ({
+export const EditMappingCard = ({
   card,
   top,
   wrapperRef,
   isHovered = false,
   onMouseEnter,
   onMouseLeave,
-}: MappingCardProps) => {
+}: EditMappingCardProps) => {
   const { fieldName, fieldType } = card;
   const { labelPart, typePart, fullValue, isTruncated } = truncateFieldValue(fieldName, fieldType);
   return (
     <Box
       ref={wrapperRef}
-      data-testid={`mapping-card-${card.key}`}
+      data-testid={`edit-mapping-card-${card.key}`}
       data-hovered={isHovered ? 'true' : 'false'}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}

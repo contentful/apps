@@ -8,7 +8,7 @@ import {
   mockContentTypes,
 } from '../../../test/mocks';
 import useSaveConfigHandler from './useSaveConfigHandler';
-import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { PersistedInstallationParameters } from '@components/config/appInstallationParameters';
 
 const mockSdk = new MockSdk();
 const sdk = mockSdk.sdk;
@@ -56,13 +56,14 @@ describe('useSaveConfigHandler', () => {
       rerender(parameters);
       await waitFor(() => expect(sdk.app.onConfigure).toHaveBeenCalledTimes(currentTimesCalled));
 
-      const configureCallback2 =
-        await sdk.app.onConfigure.mock.calls[onConfigureCallbackIndex][0]();
+      const configureCallback2 = await sdk.app.onConfigure.mock.calls[
+        onConfigureCallbackIndex
+      ][0]();
       expect(configureCallback2.parameters).toEqual(parameters);
     };
 
     const { rerender } = renderHook(
-      (props: AppInstallationParameters) =>
+      (props: PersistedInstallationParameters) =>
         useSaveConfigHandler(props, mockValidateParams, mockContentTypes.mockSelectedContentTypes),
       {
         initialProps: mockSdkParameters.init.installation,

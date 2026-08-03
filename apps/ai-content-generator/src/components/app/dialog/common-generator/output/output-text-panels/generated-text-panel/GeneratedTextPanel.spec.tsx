@@ -1,6 +1,6 @@
 import { render, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { AIMock, mockCma, MockSdk } from '@test/mocks';
+import { mockCma, MockSdk } from '@test/mocks';
 import GeneratedTextPanel from './GeneratedTextPanel';
 import useAI from '@hooks/dialog/useAI';
 import { Tabs } from '@contentful/f36-components';
@@ -13,8 +13,6 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => sdk,
   useCMA: () => mockCma,
 }));
-
-vi.mock('@utils/aiApi', () => AIMock);
 
 describe('GeneratedTextPanel', () => {
   it('renders', () => {
@@ -44,6 +42,26 @@ describe('GeneratedTextPanel', () => {
     );
 
     expect(getByText('4 characters')).toBeTruthy();
+    unmount();
+  });
+
+  it('renders the loading skeleton while generating', () => {
+    const hook = renderHook(() => useAI());
+    hook.result.current.isGenerating = true;
+
+    const { container, getByText, unmount } = render(
+      <Tabs currentTab={OutputTab.GENERATED_TEXT}>
+        <GeneratedTextPanel
+          generate={() => {}}
+          ai={hook.result.current}
+          outputFieldValidation={null}
+          apply={() => {}}
+        />
+      </Tabs>
+    );
+
+    expect(container.querySelector('[data-test-id="generated-text-skeleton"]')).toBeTruthy();
+    expect(getByText('Stop Generating')).toBeTruthy();
     unmount();
   });
 

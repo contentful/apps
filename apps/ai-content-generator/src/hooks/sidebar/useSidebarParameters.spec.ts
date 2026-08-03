@@ -12,12 +12,11 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 describe('useSidebarParameters', () => {
-  it('should return whether there is a brand profile and any errors', async () => {
+  it('should return whether there is a brand profile', async () => {
     const { result } = renderHook(() => useSidebarParameters());
 
     await waitFor(() => {
       expect(result.current).toHaveProperty('hasBrandProfile', true);
-      expect(result.current).toHaveProperty('apiError', undefined);
     });
   });
 });

@@ -1,4 +1,4 @@
-import { AIMock, MockSdk, generateRandomInvocationParameters } from '@test/mocks';
+import { MockSdk, generateRandomInvocationParameters } from '@test/mocks';
 import { renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -13,11 +13,16 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => sdk,
 }));
 
-vi.mock('@utils/aiApi', () => AIMock);
-
 describe('useAI', () => {
   beforeEach(() => {
     mockSdk.reset();
+    (
+      sdk.cma as unknown as { appActionCall: { createWithResult: ReturnType<typeof vi.fn> } }
+    ).appActionCall = {
+      createWithResult: vi.fn().mockResolvedValue({
+        sys: { status: 'succeeded', result: { text: 'Generated text' } },
+      }),
+    };
   });
 
   it('should start in a default state', () => {
@@ -35,16 +40,17 @@ describe('useAI', () => {
     await waitFor(() => expect(result.current.output).toBeTruthy());
   });
 
-  // TODO: Fix this flaky tests
-  it.skip('should stop generating when triggered and reset output', async () => {
+  it('should set hasError when the action fails', async () => {
+    (
+      sdk.cma as unknown as { appActionCall: { createWithResult: ReturnType<typeof vi.fn> } }
+    ).appActionCall = {
+      createWithResult: vi.fn().mockRejectedValue(new Error('Action failed')),
+    };
+
     const { result } = renderHook(() => useAI());
-    result.current.generateMessage(titlePrompt('this is a test'), 'en-US');
-    await waitFor(() => expect(result.current.isGenerating).toBe(true));
+    await result.current.generateMessage(titlePrompt('this is a test'), 'en-US');
 
-    result.current.stopMessageGeneration();
+    await waitFor(() => expect(result.current.hasError).toBe(true));
     await waitFor(() => expect(result.current.isGenerating).toBe(false));
-
-    result.current.resetOutput();
-    await waitFor(() => expect(result.current.output).toEqual(''));
   });
 });

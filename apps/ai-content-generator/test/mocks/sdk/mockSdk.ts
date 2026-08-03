@@ -1,4 +1,4 @@
-import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { PersistedInstallationParameters } from '@components/config/appInstallationParameters';
 import { DialogInvocationParameters } from '@locations/Dialog';
 import { vi } from 'vitest';
 import { mockSdkParameters } from '..';
@@ -13,12 +13,12 @@ import { createSDK } from './utils/createSdk';
 class MockSdk {
   sdk: ReturnType<typeof createSDK>;
   originalData: {
-    installation: AppInstallationParameters;
+    installation: PersistedInstallationParameters;
     invocation: DialogInvocationParameters | undefined;
   };
 
   constructor(parameters?: {
-    installation?: AppInstallationParameters;
+    installation?: PersistedInstallationParameters;
     invocation?: DialogInvocationParameters;
   }) {
     const mockParameters = mockSdkParameters.init;
@@ -50,6 +50,9 @@ class MockSdk {
     this.sdk.cma.contentType.getMany = vi.fn().mockReturnValue(mockGetManyContentType);
     this.sdk.cma.contentType.get = vi.fn().mockReturnValue(mockContentType);
     this.sdk.cma.entry.get = vi.fn().mockReturnValue(mockEntry);
+    this.sdk.cma.appActionCall.createWithResult = vi.fn().mockResolvedValue({
+      sys: { status: 'succeeded', result: { text: 'Generated text' } },
+    });
   }
 }
 

@@ -1,4 +1,4 @@
-import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { PersistedInstallationParameters } from '@components/config/appInstallationParameters';
 import { AppState, ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { generateEditorInterfaceAssignments } from '@utils/config/contentTypeHelpers';
@@ -12,15 +12,15 @@ import { useCallback, useEffect } from 'react';
  * @returns void
  */
 const useSaveConfigHandler = (
-  parameters: AppInstallationParameters,
-  validateParams: (params: AppInstallationParameters) => string[],
+  parameters: PersistedInstallationParameters,
+  validateParams: () => string[],
   contentTypes: Set<string>
 ) => {
   const sdk = useSDK<ConfigAppSDK>();
   // const { trackEvent } = useContext(SegmentAnalyticsContext);
 
   const getCurrentState = useCallback(async () => {
-    const notifierErrors = validateParams(parameters);
+    const notifierErrors = validateParams();
 
     if (notifierErrors.length) {
       notifierErrors.forEach((error) => sdk.notifier.error(error));

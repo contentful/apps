@@ -6,7 +6,7 @@ import { SegmentEvent, SegmentEventData, SegmentIdentify } from '@configs/segmen
 import getTrackedAppData from '@utils/segment/getTrackedAppData';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { SegmentEvents } from '@configs/segment/segmentEvent';
-import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { PersistedInstallationParameters } from '@components/config/appInstallationParameters';
 
 interface SegmentAnalyticsContextProps {
   identify: () => void;
@@ -14,9 +14,9 @@ interface SegmentAnalyticsContextProps {
 }
 
 type PossibleSDK =
-  | SidebarAppSDK<AppInstallationParameters>
-  | DialogAppSDK<AppInstallationParameters>
-  | ConfigAppSDK<AppInstallationParameters>;
+  | SidebarAppSDK<PersistedInstallationParameters>
+  | DialogAppSDK<PersistedInstallationParameters>
+  | ConfigAppSDK<PersistedInstallationParameters>;
 
 const noop = () => {};
 

@@ -7,18 +7,18 @@ import {
   mockContentType,
 } from './contentTypes/mockContentType';
 import { mockEntry } from './entry/mockEntry';
-import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { PersistedInstallationParameters } from '@components/config/appInstallationParameters';
 import { DialogInvocationParameters } from '@locations/Dialog';
 
 class MockSdk {
   sdk: ReturnType<typeof createSDK>;
   originalData: {
-    installation: AppInstallationParameters;
+    installation: PersistedInstallationParameters;
     invocation: DialogInvocationParameters | undefined;
   };
 
   constructor(parameters?: {
-    installation?: AppInstallationParameters;
+    installation?: PersistedInstallationParameters;
     invocation?: DialogInvocationParameters;
   }) {
     const mockParameters = mockSdkParameters.init;
