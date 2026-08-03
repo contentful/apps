@@ -1,5 +1,7 @@
-import { useMemo, useReducer } from 'react';
+import { useMemo, useReducer, useState } from 'react';
 import { Box, Heading } from '@contentful/f36-components';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import type { ConfigAppSDK } from '@contentful/app-sdk';
 import ConfigSection from '@components/config/config-section/ConfigSection';
 import CostSection from '@components/config/cost-section/CostSection';
 import DisclaimerSection from '@components/config/disclaimer-section/DisclaimerSection';
@@ -14,68 +16,70 @@ import useGetContentTypes from '@hooks/config/useGetContentTypes';
 import parameterReducer, { Validator } from '@components/config/parameterReducer';
 import contentTypeReducer from '@components/config/contentTypeReducer';
 import { ConfigErrors } from '@components/config/configText';
-import AppInstallationParameters from '../appInstallationParameters';
+import AppInstallationParameters, {
+  PersistedInstallationParameters,
+} from '../appInstallationParameters';
 
 const initialParameters: Validator<AppInstallationParameters> = {
-  model: {
-    value: defaultModelId,
-    isValid: true,
-  },
-  key: {
-    value: '',
-    isValid: true,
-  },
-  profile: {
-    value: '',
-    isValid: true,
-  },
+  model: { value: defaultModelId, isValid: true },
+  profile: { value: '', isValid: true },
   brandProfile: {},
 };
 
 const initialContentTypes: Set<string> = new Set();
 
 const ConfigPage = () => {
+  const sdk = useSDK<ConfigAppSDK>();
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
   const [contentTypes, dispatchContentTypes] = useReducer(contentTypeReducer, initialContentTypes);
+  const [keyInput, setKeyInput] = useState<string>('');
 
-  const parametersToSave: AppInstallationParameters = useMemo(() => {
-    return {
+  // The key is a write-only Secret, so we never read its value back — but the
+  // param is present (masked) once one has been stored. Use that to tell a
+  // first-time install (no key yet) from a re-save (keep the existing Secret).
+  const hasStoredKey = Boolean(sdk.parameters.installation?.key);
+
+  const parametersToSave: PersistedInstallationParameters = useMemo(() => {
+    // Flat scalar shape: installation parameter definitions have no object
+    // type, and declaring the Secret `key` opts the whole object into strict
+    // `additionalProperties: false` validation. Each field here must have a
+    // matching definition on the AppDefinition (`key` Secret, rest Symbol).
+    const params: PersistedInstallationParameters = {
       model: parameters.model.value,
-      key: parameters.key.value,
       profile: parameters.profile.value,
-      brandProfile: {
-        additional: parameters.brandProfile.additional?.value,
-        audience: parameters.brandProfile.audience?.value,
-        exclude: parameters.brandProfile.exclude?.value,
-        include: parameters.brandProfile.include?.value,
-        profile: parameters.brandProfile.profile?.value,
-        tone: parameters.brandProfile.tone?.value,
-        values: parameters.brandProfile.values?.value,
-      },
+      additional: parameters.brandProfile.additional?.value,
+      audience: parameters.brandProfile.audience?.value,
+      exclude: parameters.brandProfile.exclude?.value,
+      include: parameters.brandProfile.include?.value,
+      tone: parameters.brandProfile.tone?.value,
+      values: parameters.brandProfile.values?.value,
     };
-  }, [
-    parameters.brandProfile,
-    parameters.key.value,
-    parameters.model.value,
-    parameters.profile.value,
-  ]);
+
+    // The key is write-only: only persist it when the admin enters a new value,
+    // otherwise omit it so we don't clobber the stored Secret with an empty
+    // string (the field placeholder promises "leave blank to keep existing").
+    if (keyInput) {
+      params.key = keyInput;
+    }
+
+    return params;
+  }, [parameters.brandProfile, parameters.model.value, parameters.profile.value, keyInput]);
 
   const validateParams = (): string[] => {
     const notifierErrors = [];
-
-    if (!parameters.key.isValid) {
+    // A first install has no stored Secret yet — require a key so we don't save
+    // a config that can only fail at generation time. On re-saves a blank field
+    // is fine: it preserves the existing Secret (see parametersToSave above).
+    if (!hasStoredKey && !keyInput) {
       notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingApiKey}`);
     }
-
     if (!parameters.model.isValid) {
       notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingModel}`);
     }
-
     const invalidBrandProfile = Object.values(parameters.brandProfile).findIndex((p) => !p.isValid);
     if (!parameters.profile.isValid || invalidBrandProfile !== -1) {
       notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.exceededCharacterLimit}`);
     }
-
     return notifierErrors;
   };
 
@@ -88,9 +92,9 @@ const ConfigPage = () => {
       <Heading>{Sections.pageHeading}</Heading>
       <hr css={styles.splitter} />
       <ConfigSection
-        apiKey={parameters.key.value}
-        isApiKeyValid={parameters.key.isValid}
         model={parameters.model.value}
+        keyInput={keyInput}
+        onKeyChange={setKeyInput}
         dispatch={dispatchParameters}
       />
       <hr css={styles.splitter} />

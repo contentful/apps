@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@contentful/app-scripts": "^1.29.0",
-    "@contentful/app-sdk": "4.23.0",
+    "@contentful/app-scripts": "^2.3.0",
+    "@contentful/app-sdk": "4.68.1",
     "@contentful/f36-components": "4.67.0",
     "@contentful/f36-icons": "^4.27.0",
     "@contentful/f36-tokens": "4.0.5",
+    "@contentful/node-apps-toolkit": "^3.11.1",
     "@contentful/react-apps-toolkit": "1.2.16",
     "@contentful/rich-text-plain-text-renderer": "^16.0.5",
     "@emotion/react": "^11.11.1",
@@ -21,6 +22,7 @@
   "lavamoat": {
     "allowScripts": {
       "@lavamoat/preinstall-always-fail": false,
+      "@contentful/app-scripts>esbuild": true,
       "@originjs/vite-plugin-commonjs>esbuild": true,
       "vite>esbuild": true
     }
@@ -32,13 +34,16 @@
     "start:preview": "npm run build && vite preview",
     "start:staging": "NODE_ENV='staging' && npm run start:preview",
     "start:prod": "NODE_ENV='production' && npm run start:preview",
-    "build": "tsc && vite build --mode ${NODE_ENV:='production'}",
+    "build": "tsc && vite build --mode ${NODE_ENV:='production'} && npm run build:functions && cp -r build/functions dist/functions",
+    "build:functions": "contentful-app-scripts build-functions --ci",
     "test": "vitest --logHeapUsage --coverage",
     "test:ci": "vitest",
     "lint": "eslint src --max-warnings 0",
     "create-app-definition": "contentful-app-scripts create-app-definition",
-    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEFINITIONS_ORG_ID} --definition-id 3iszK8Gl7aaxLvxGyCOhgA --token ${CONTENTFUL_CMA_TOKEN}",
-    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEV_TESTING_ORG_ID} --definition-id 7sjBFUzBxj1fRrI0eUBwLc --token ${TEST_CMA_TOKEN}"
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEFINITIONS_ORG_ID} --definition-id 3iszK8Gl7aaxLvxGyCOhgA --token ${CONTENTFUL_CMA_TOKEN} && npm run upsert-actions",
+    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEV_TESTING_ORG_ID} --definition-id 7sjBFUzBxj1fRrI0eUBwLc --token ${TEST_CMA_TOKEN} && npm run upsert-actions:test",
+    "upsert-actions": "contentful-app-scripts upsert-actions --organization-id ${DEFINITIONS_ORG_ID} --definition-id 3iszK8Gl7aaxLvxGyCOhgA --token ${CONTENTFUL_CMA_TOKEN}",
+    "upsert-actions:test": "contentful-app-scripts upsert-actions --organization-id ${DEV_TESTING_ORG_ID} --definition-id 7sjBFUzBxj1fRrI0eUBwLc --token ${TEST_CMA_TOKEN}"
   },
   "browserslist": {
     "production": [
@@ -57,6 +62,7 @@
     "@lavamoat/preinstall-always-fail": "^1.0.0",
     "@originjs/vite-plugin-commonjs": "^1.0.3",
     "@testing-library/react": "14.0.0",
+    "@tsconfig/recommended": "^1.0.13",
     "@types/node": "18.0.3",
     "@types/react": "18.2.14",
     "@types/react-dom": "18.2.6",

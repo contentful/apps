@@ -12,7 +12,7 @@ import { SegmentEvents } from '@configs/segment/segmentEvent';
 import DisplaySidebarWarning from '@components/app/sidebar/DisplaySidebarWarning';
 
 const Sidebar = () => {
-  const { hasBrandProfile, apiError } = useSidebarParameters();
+  const { hasBrandProfile } = useSidebarParameters();
   useAutoResizer();
 
   const { trackEvent } = useContext(SegmentAnalyticsContext);
@@ -23,8 +23,8 @@ const Sidebar = () => {
 
   return (
     <>
-      <SidebarButtons shouldDisableButtons={!!apiError} />
-      <DisplaySidebarWarning hasBrandProfile={hasBrandProfile} apiError={apiError} />
+      <SidebarButtons shouldDisableButtons={false} />
+      <DisplaySidebarWarning hasBrandProfile={hasBrandProfile} />
       <Box css={styles.msgWrapper}>
         <HyperLink
           body={disclaimerMessage.body}
