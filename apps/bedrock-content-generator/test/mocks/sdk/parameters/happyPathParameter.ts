@@ -1,11 +1,8 @@
-import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { PersistedInstallationParameters } from '@components/config/appInstallationParameters';
 
-const happyPath: AppInstallationParameters = {
-  model: 'gpt-3.5-turbo',
+const happyPath: PersistedInstallationParameters = {
+  model: 'meta.llama2-70b-v1',
   profile: 'test-profile',
-  brandProfile: {},
-  accessKeyId: '',
-  secretAccessKey: '',
   region: '',
 };
 

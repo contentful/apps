@@ -1,14 +1,8 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  generateRandomParameters,
-  mockCma,
-  MockSdk,
-  mockSdkParameters,
-  mockContentTypes,
-} from '../../../test/mocks';
+import { mockCma, MockSdk, mockContentTypes } from '../../../test/mocks';
 import useSaveConfigHandler from './useSaveConfigHandler';
-import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { PersistedInstallationParameters } from '@components/config/appInstallationParameters';
 
 const mockSdk = new MockSdk();
 const sdk = mockSdk.sdk;
@@ -18,13 +12,27 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useCMA: () => mockCma,
 }));
 
+const generateTestParams = (): PersistedInstallationParameters => ({
+  model: 'meta.llama2-70b-v1',
+  profile: Math.random().toString(36).substring(7),
+  region: 'us-east-1',
+  accessKeyId: 'AKIAAAAAAAAAAAAAAAAA',
+  secretAccessKey: '1234',
+});
+
+const initParams: PersistedInstallationParameters = {
+  model: '',
+  profile: '',
+  region: '',
+};
+
 describe('useSaveConfigHandler', () => {
   beforeEach(() => {
     mockSdk.reset();
   });
 
   it('adds the on configure callback', async () => {
-    const parameters = generateRandomParameters();
+    const parameters = generateTestParams();
     const mockValidateParams = vi.fn().mockReturnValue([]);
 
     renderHook(() =>
@@ -41,11 +49,7 @@ describe('useSaveConfigHandler', () => {
   });
 
   it('updates the on configure callback when parameters change', async () => {
-    const testCases = [
-      generateRandomParameters(),
-      generateRandomParameters(),
-      mockSdkParameters.happyPath,
-    ];
+    const testCases = [generateTestParams(), generateTestParams(), generateTestParams()];
     const mockValidateParams = vi.fn().mockReturnValue([]);
 
     const testIfHookUpdates = async (parameterIndex: number) => {
@@ -63,10 +67,10 @@ describe('useSaveConfigHandler', () => {
     };
 
     const { rerender } = renderHook(
-      (props: AppInstallationParameters) =>
+      (props: PersistedInstallationParameters) =>
         useSaveConfigHandler(props, mockValidateParams, mockContentTypes.mockSelectedContentTypes),
       {
-        initialProps: mockSdkParameters.init.installation,
+        initialProps: initParams,
       }
     );
 
@@ -78,7 +82,7 @@ describe('useSaveConfigHandler', () => {
   });
 
   it('does not save the configuration when there are invalid parameters', async () => {
-    const parameters = generateRandomParameters();
+    const parameters = generateTestParams();
     const mockValidateParams = vi.fn().mockReturnValue(['invalid']);
 
     renderHook(() =>

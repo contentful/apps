@@ -1,4 +1,3 @@
-export * as AIMock from './AiMock';
 export * from './BedrockMock';
 export * as mockContentTypes from './sdk/contentTypes/mockContentType';
 export { mockEntry } from './sdk/entry/mockEntry';

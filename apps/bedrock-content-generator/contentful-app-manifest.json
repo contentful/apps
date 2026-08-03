@@ -1,0 +1,48 @@
+{
+  "functions": [
+    {
+      "id": "bedrockProxyFunction",
+      "name": "Bedrock proxy function",
+      "description": "Calls AWS Bedrock using the secret IAM credentials stored server-side.",
+      "path": "functions/bedrock-proxy.js",
+      "entryFile": "functions/bedrock-proxy.ts",
+      "allowNetworks": [
+        "https://bedrock-runtime.us-east-1.amazonaws.com",
+        "https://bedrock-runtime.us-west-2.amazonaws.com",
+        "https://bedrock-runtime.eu-central-1.amazonaws.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "bedrockProxyAction",
+      "name": "Bedrock proxy action",
+      "type": "function-invocation",
+      "functionId": "bedrockProxyFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "systemPrompt",
+          "name": "System Prompt",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "prompt",
+          "name": "Prompt",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "model",
+          "name": "Model",
+          "type": "Symbol",
+          "required": true
+        }
+      ]
+    }
+  ]
+}
