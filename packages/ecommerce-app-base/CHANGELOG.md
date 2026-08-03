@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.9](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.1.8...@contentful/ecommerce-app-base@4.1.9) (2026-08-02)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+## [4.1.8](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.1.7...@contentful/ecommerce-app-base@4.1.8) (2026-08-01)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+## [4.1.7](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.1.6...@contentful/ecommerce-app-base@4.1.7) (2026-08-01)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+## [4.1.6](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.1.5...@contentful/ecommerce-app-base@4.1.6) (2026-08-01)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+## [4.1.5](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.1.4...@contentful/ecommerce-app-base@4.1.5) (2026-08-01)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
 ## [4.1.4](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.1.3...@contentful/ecommerce-app-base@4.1.4) (2026-07-07)
 
 ### Bug Fixes
