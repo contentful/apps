@@ -11,7 +11,7 @@
     "deploy:test": "npm run build && sls deploy --stage test"
   },
   "dependencies": {
-    "@aws-sdk/client-bedrock-runtime": "^3.600.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.1101.0",
     "@vendia/serverless-express": "^4.10.4",
     "express": "^4.18.2"
   },
