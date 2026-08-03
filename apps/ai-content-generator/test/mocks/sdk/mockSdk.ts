@@ -50,6 +50,9 @@ class MockSdk {
     this.sdk.cma.contentType.getMany = vi.fn().mockReturnValue(mockGetManyContentType);
     this.sdk.cma.contentType.get = vi.fn().mockReturnValue(mockContentType);
     this.sdk.cma.entry.get = vi.fn().mockReturnValue(mockEntry);
+    this.sdk.cma.appActionCall.createWithResult = vi.fn().mockResolvedValue({
+      sys: { status: 'succeeded', result: { text: 'Generated text' } },
+    });
   }
 }
 

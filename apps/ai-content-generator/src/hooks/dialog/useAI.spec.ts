@@ -15,13 +15,6 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 describe('useAI', () => {
   beforeEach(() => {
     mockSdk.reset();
-    (
-      sdk.cma as unknown as { appActionCall: { createWithResponse: ReturnType<typeof vi.fn> } }
-    ).appActionCall = {
-      createWithResponse: vi.fn().mockResolvedValue({
-        response: { body: JSON.stringify({ text: 'Generated text response' }) },
-      }),
-    };
   });
 
   it('should start in a default state', () => {
@@ -35,14 +28,14 @@ describe('useAI', () => {
     await result.current.generateMessage(titlePrompt('this is a test'), 'en-US');
 
     await waitFor(() => expect(result.current.isGenerating).toBe(false));
-    await waitFor(() => expect(result.current.output).toBe('Generated text response'));
+    await waitFor(() => expect(result.current.output).toBe('Generated text'));
   });
 
   it('should set hasError when the App Action call fails', async () => {
     (
-      sdk.cma as unknown as { appActionCall: { createWithResponse: ReturnType<typeof vi.fn> } }
+      sdk.cma as unknown as { appActionCall: { createWithResult: ReturnType<typeof vi.fn> } }
     ).appActionCall = {
-      createWithResponse: vi.fn().mockRejectedValue(new Error('Action failed')),
+      createWithResult: vi.fn().mockRejectedValue(new Error('Action failed')),
     };
 
     const { result } = renderHook(() => useAI());
@@ -53,11 +46,12 @@ describe('useAI', () => {
   });
 
   it('sendStopSignal cancels an in-flight generation without setting output or error', async () => {
-    let resolveCall: (value: { response: { body: string } }) => void = () => {};
+    type ActionResult = { sys: { status: 'succeeded'; result: { text: string } } };
+    let resolveCall: (value: ActionResult) => void = () => {};
     (
-      sdk.cma as unknown as { appActionCall: { createWithResponse: ReturnType<typeof vi.fn> } }
+      sdk.cma as unknown as { appActionCall: { createWithResult: ReturnType<typeof vi.fn> } }
     ).appActionCall = {
-      createWithResponse: vi.fn().mockImplementation(
+      createWithResult: vi.fn().mockImplementation(
         () =>
           new Promise((resolve) => {
             resolveCall = resolve;
@@ -74,7 +68,7 @@ describe('useAI', () => {
     await expect(generation).resolves.toBe('');
 
     // A late-arriving response after a stop must be discarded.
-    resolveCall({ response: { body: JSON.stringify({ text: 'too late' }) } });
+    resolveCall({ sys: { status: 'succeeded', result: { text: 'too late' } } });
 
     await waitFor(() => expect(result.current.isGenerating).toBe(false));
     expect(result.current.output).toBe('');
@@ -83,9 +77,9 @@ describe('useAI', () => {
 
   it('resetOutput clears output and error', async () => {
     (
-      sdk.cma as unknown as { appActionCall: { createWithResponse: ReturnType<typeof vi.fn> } }
+      sdk.cma as unknown as { appActionCall: { createWithResult: ReturnType<typeof vi.fn> } }
     ).appActionCall = {
-      createWithResponse: vi.fn().mockRejectedValue(new Error('fail')),
+      createWithResult: vi.fn().mockRejectedValue(new Error('fail')),
     };
 
     const { result } = renderHook(() => useAI());

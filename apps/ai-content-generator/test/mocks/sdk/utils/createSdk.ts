@@ -38,6 +38,11 @@ const createSDK = (parameters: SdkParameters) => {
       entry: {
         get: vi.fn().mockReturnValueOnce(mockEntry),
       },
+      appActionCall: {
+        createWithResult: vi.fn().mockResolvedValue({
+          sys: { status: 'succeeded', result: { text: 'Generated text' } },
+        }),
+      },
     },
     locales: {},
     hostnames: {

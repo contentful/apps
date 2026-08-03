@@ -82,7 +82,7 @@ const useAI = () => {
       };
       const messages = createGPTPayload(prompt, profile, targetLocale);
 
-      const actionCall = sdk.cma.appActionCall.createWithResponse(
+      const actionCall = sdk.cma.appActionCall.createWithResult(
         {
           appDefinitionId: sdk.ids.app!,
           appActionId: 'openaiProxyAction',
@@ -97,9 +97,14 @@ const useAI = () => {
 
       // The App Action can't be cancelled server-side, so race it against the
       // abort signal and let the user stop waiting on it.
-      const response = await Promise.race([actionCall, rejectOnAbort(abortController.signal)]);
+      const result = await Promise.race([actionCall, rejectOnAbort(abortController.signal)]);
 
-      const body: { text: string } = JSON.parse(response.response.body);
+      if (result.sys.status !== 'succeeded') {
+        const msg = result.sys.status === 'failed' ? result.sys.error?.message : undefined;
+        throw new Error(msg ?? 'App action call failed');
+      }
+
+      const body = result.sys.result as { text: string };
       setOutput(body.text);
       return body.text;
     } catch (err: unknown) {
