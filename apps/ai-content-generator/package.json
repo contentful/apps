@@ -40,8 +40,10 @@
     "test:ci": "vitest",
     "lint": "eslint src --max-warnings 0",
     "create-app-definition": "contentful-app-scripts create-app-definition",
-    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEFINITIONS_ORG_ID} --definition-id ${DEFINITIONS_APP_DEF_ID} --token ${CONTENTFUL_CMA_TOKEN} && npm run upsert-actions",
-    "upsert-actions": "contentful-app-scripts upsert-actions --organization-id ${DEFINITIONS_ORG_ID} --definition-id ${DEFINITIONS_APP_DEF_ID} --token ${CONTENTFUL_CMA_TOKEN}"
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEFINITIONS_ORG_ID} --definition-id 3iszK8Gl7aaxLvxGyCOhgA --token ${CONTENTFUL_CMA_TOKEN} && npm run upsert-actions",
+    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEV_TESTING_ORG_ID} --definition-id 7sjBFUzBxj1fRrI0eUBwLc --token ${TEST_CMA_TOKEN} && npm run upsert-actions:test",
+    "upsert-actions": "contentful-app-scripts upsert-actions --organization-id ${DEFINITIONS_ORG_ID} --definition-id 3iszK8Gl7aaxLvxGyCOhgA --token ${CONTENTFUL_CMA_TOKEN}",
+    "upsert-actions:test": "contentful-app-scripts upsert-actions --organization-id ${DEV_TESTING_ORG_ID} --definition-id 7sjBFUzBxj1fRrI0eUBwLc --token ${TEST_CMA_TOKEN}"
   },
   "browserslist": {
     "production": [

@@ -1,5 +1,7 @@
 import AppInstallationParameters, {
   PersistedInstallationParameters,
+  ProfileFields,
+  toProfileType,
 } from './appInstallationParameters';
 
 export enum ParameterAction {
@@ -87,9 +89,13 @@ const parameterReducer = (
       };
     }
     case APPLY_CONTENTFUL_PARAMETERS: {
-      // Persisted params are flat (see PersistedInstallationParameters); rehydrate
-      // the nested brandProfile shape the config UI reducer works with.
+      // Persisted params are flat (see PersistedInstallationParameters), but
+      // installs from before the flatten migration still carry a nested
+      // `brandProfile`. Dual-read (flat first, nested fallback) so existing
+      // customers keep their brand profile until they re-save, then rehydrate
+      // the nested shape the config UI reducer works with.
       const parameter = action.value;
+      const profile = toProfileType(parameter);
       return {
         ...state,
         model: {
@@ -97,16 +103,16 @@ const parameterReducer = (
           isValid: parameter.model?.length > 0,
         },
         profile: {
-          value: parameter.profile || '',
+          value: profile[ProfileFields.PROFILE] || '',
           isValid: true,
         },
         brandProfile: {
-          values: { value: parameter.values || '', isValid: true },
-          tone: { value: parameter.tone || '', isValid: true },
-          exclude: { value: parameter.exclude || '', isValid: true },
-          include: { value: parameter.include || '', isValid: true },
-          audience: { value: parameter.audience || '', isValid: true },
-          additional: { value: parameter.additional || '', isValid: true },
+          values: { value: profile[ProfileFields.VALUES] || '', isValid: true },
+          tone: { value: profile[ProfileFields.TONE] || '', isValid: true },
+          exclude: { value: profile[ProfileFields.EXCLUDE] || '', isValid: true },
+          include: { value: profile[ProfileFields.INCLUDE] || '', isValid: true },
+          audience: { value: profile[ProfileFields.AUDIENCE] || '', isValid: true },
+          additional: { value: profile[ProfileFields.ADDITIONAL] || '', isValid: true },
         },
       };
     }

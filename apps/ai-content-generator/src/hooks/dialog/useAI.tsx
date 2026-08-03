@@ -6,8 +6,8 @@ import { useRef, useState } from 'react';
 import { defaultModelId } from '@configs/ai/gptModels';
 import {
   PersistedInstallationParameters,
-  ProfileFields,
   ProfileType,
+  toProfileType,
 } from '@components/config/appInstallationParameters';
 
 export type GenerateMessage = (prompt: string, targetLocale: string) => Promise<string>;
@@ -69,17 +69,10 @@ const useAI = () => {
     try {
       const installation = sdk.parameters.installation;
       const model = installation.model ?? defaultModelId;
-      // Installation params are persisted flat; reassemble the ProfileType the
-      // prompt builder expects.
-      const profile: ProfileType = {
-        [ProfileFields.PROFILE]: installation.profile,
-        [ProfileFields.VALUES]: installation.values,
-        [ProfileFields.TONE]: installation.tone,
-        [ProfileFields.EXCLUDE]: installation.exclude,
-        [ProfileFields.INCLUDE]: installation.include,
-        [ProfileFields.AUDIENCE]: installation.audience,
-        [ProfileFields.ADDITIONAL]: installation.additional,
-      };
+      // Installation params are persisted flat, but pre-migration installs still
+      // carry a nested brandProfile. Dual-read so existing customers keep brand
+      // context in generated prompts until they re-save under the flat schema.
+      const profile: ProfileType = toProfileType(installation);
       const messages = createGPTPayload(prompt, profile, targetLocale);
 
       const actionCall = sdk.cma.appActionCall.createWithResult(
