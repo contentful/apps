@@ -11,7 +11,12 @@ import {
   mockAppInstallation,
   mockRequestHeaders,
 } from '../../test/mocks';
-import { AppActionRequestContext, EntryActivityMessage, TestMessage } from '../types';
+import {
+  AppActionRequestContext,
+  EntryActivityMessage,
+  TestMessage,
+  WorkflowUpdateMessage,
+} from '../types';
 
 chai.use(sinonChai);
 
@@ -39,6 +44,39 @@ describe('MsTeamsBotService', () => {
     context = makeMockAppActionCallContext(cmaClientMockResponses, cmaRequestStub);
     const { appInstallationId, environmentId, spaceId, userId } = context.appActionCallContext;
     mockRequestContext = { appInstallationId, environmentId, spaceId, userId };
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  describe('sendWorkflowUpdateMessage', () => {
+    const workflowUpdateMessage = { channel: {} } as WorkflowUpdateMessage;
+
+    it('returns the result object from the service', async () => {
+      const result = await msTeamsBotService.sendWorkflowUpdateMessage(
+        workflowUpdateMessage,
+        tenantId,
+        mockRequestContext
+      );
+      expect(result).to.have.property('ok', true);
+    });
+
+    it('calls fetch with the appropriate values', async () => {
+      await msTeamsBotService.sendWorkflowUpdateMessage(
+        workflowUpdateMessage,
+        tenantId,
+        mockRequestContext
+      );
+      expect(stubbedFetch).to.have.been.calledWith(
+        'https://example.com/api/tenant/tenant-id/workflow_update_messages',
+        {
+          method: 'POST',
+          headers: mockRequestHeaders(tenantId),
+          body: '{"channel":{}}',
+        }
+      );
+    });
   });
 
   describe('sendEntryActivityMessage', () => {
