@@ -97,7 +97,7 @@ export function RunsPage({
     });
 
   return (
-    <Box padding="spacingL" style={{ maxWidth: '1200px' }}>
+    <Box padding="spacingL" style={{ maxWidth: '1200px', margin: '0 auto' }}>
       {/* Page header */}
       <Flex justifyContent="space-between" alignItems="flex-start" marginBottom="spacingM">
         <Box>

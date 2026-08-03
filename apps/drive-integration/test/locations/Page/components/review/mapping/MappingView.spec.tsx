@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MappingReviewSuspendPayload, SourceRef } from '@types';
 import { MappingView } from '../../../../../../src/locations/Page/components/review/mapping/MappingView';
@@ -319,7 +319,7 @@ describe('MappingView', () => {
       />
     );
 
-    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-testid^="edit-mapping-card-"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(1);
     expect(screen.getByText('Body copy')).toBeTruthy();
     expect(
@@ -398,7 +398,7 @@ describe('MappingView', () => {
       />
     );
 
-    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-testid^="edit-mapping-card-"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
   });
 
@@ -515,7 +515,7 @@ describe('MappingView', () => {
     expect(screen.getByText('Body copy (2/3)')).toBeTruthy();
     expect(screen.getByText('Body copy (3/3)')).toBeTruthy();
     expect(screen.getByText('Summary')).toBeTruthy();
-    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(4);
+    expect(container.querySelectorAll('[data-testid^="edit-mapping-card-"]')).toHaveLength(4);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(2);
   });
 
@@ -633,7 +633,7 @@ describe('MappingView', () => {
     );
 
     expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
-    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-testid^="edit-mapping-card-"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
   });
 
@@ -751,6 +751,236 @@ describe('MappingView', () => {
     ).toBeNull();
   });
 
+  it('positions view-mode rail cards by document anchor order instead of graph order', async () => {
+    const row1Text = 'Drupal migration content';
+    const row2Text = 'Blog post slug';
+    const row3Text = 'Document reference';
+
+    const createTableTextRef = (
+      rowId: string,
+      cellId: string,
+      partId: string,
+      text: string
+    ): SourceRef => ({
+      type: 'tableText',
+      tableId: 'table-1',
+      rowId,
+      cellId,
+      partId,
+      start: 0,
+      end: text.length,
+      flattenedRuns: [{ text, start: 0, end: text.length }],
+    });
+
+    const payload = createPayload({
+      blocks: [],
+      tables: [
+        {
+          id: 'table-1',
+          position: 1,
+          headers: ['Field', 'Value'],
+          rows: [
+            {
+              id: 'row-1',
+              cells: [
+                {
+                  id: 'cell-1',
+                  parts: [
+                    {
+                      id: 'part-1',
+                      type: 'text',
+                      textRuns: [{ text: 'Type' }],
+                      flattenedTextRuns: [{ text: 'Type', start: 0, end: 4 }],
+                    },
+                  ],
+                },
+                {
+                  id: 'cell-2',
+                  parts: [
+                    {
+                      id: 'part-2',
+                      type: 'text',
+                      textRuns: [{ text: row1Text }],
+                      flattenedTextRuns: [{ text: row1Text, start: 0, end: row1Text.length }],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              id: 'row-2',
+              cells: [
+                {
+                  id: 'cell-3',
+                  parts: [
+                    {
+                      id: 'part-3',
+                      type: 'text',
+                      textRuns: [{ text: 'Slug' }],
+                      flattenedTextRuns: [{ text: 'Slug', start: 0, end: 4 }],
+                    },
+                  ],
+                },
+                {
+                  id: 'cell-4',
+                  parts: [
+                    {
+                      id: 'part-4',
+                      type: 'text',
+                      textRuns: [{ text: row2Text }],
+                      flattenedTextRuns: [{ text: row2Text, start: 0, end: row2Text.length }],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              id: 'row-3',
+              cells: [
+                {
+                  id: 'cell-5',
+                  parts: [
+                    {
+                      id: 'part-5',
+                      type: 'text',
+                      textRuns: [{ text: 'Ref' }],
+                      flattenedTextRuns: [{ text: 'Ref', start: 0, end: 3 }],
+                    },
+                  ],
+                },
+                {
+                  id: 'cell-6',
+                  parts: [
+                    {
+                      id: 'part-6',
+                      type: 'text',
+                      textRuns: [{ text: row3Text }],
+                      flattenedTextRuns: [{ text: row3Text, start: 0, end: row3Text.length }],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          designValueIds: [],
+          imageIds: [],
+        },
+      ],
+      fieldMappings: [
+        {
+          fieldId: 'title',
+          fieldType: 'Symbol',
+          sourceRefs: [createTableTextRef('row-3', 'cell-6', 'part-6', row3Text)],
+        },
+        {
+          fieldId: 'summary',
+          fieldType: 'Text',
+          sourceRefs: [createTableTextRef('row-2', 'cell-4', 'part-4', row2Text)],
+        },
+        {
+          fieldId: 'body',
+          fieldType: 'Text',
+          sourceRefs: [createTableTextRef('row-1', 'cell-2', 'part-2', row1Text)],
+        },
+      ],
+    });
+
+    const anchorTops: Record<string, number> = {
+      'row:table-1:row-1': 40,
+      'row:table-1:row-2': 120,
+      'row:table-1:row-3': 200,
+    };
+
+    const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
+    Element.prototype.getBoundingClientRect = function (this: Element) {
+      const anchorTop = this.id ? anchorTops[this.id] : undefined;
+      if (anchorTop !== undefined) {
+        return {
+          top: anchorTop,
+          left: 0,
+          right: 280,
+          bottom: anchorTop + 32,
+          width: 280,
+          height: 32,
+          x: 0,
+          y: anchorTop,
+          toJSON: () => ({}),
+        } as DOMRect;
+      }
+
+      if (this.getAttribute('data-testid')?.startsWith('display-group-layout-')) {
+        return {
+          top: 0,
+          left: 0,
+          right: 800,
+          bottom: 300,
+          width: 800,
+          height: 300,
+          x: 0,
+          y: 0,
+          toJSON: () => ({}),
+        } as DOMRect;
+      }
+
+      if (this.getAttribute('data-testid')?.startsWith('view-mapping-card-')) {
+        return {
+          top: 0,
+          left: 0,
+          right: 280,
+          bottom: 72,
+          width: 280,
+          height: 72,
+          x: 0,
+          y: 0,
+          toJSON: () => ({}),
+        } as DOMRect;
+      }
+
+      return originalGetBoundingClientRect.call(this);
+    };
+
+    const { container } = render(
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={null}
+        defaultLocale="en-US"
+        mode="view"
+      />
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    try {
+      const viewCards = Array.from(
+        container.querySelectorAll<HTMLElement>('[data-testid^="view-mapping-card-"]')
+      );
+      expect(viewCards).toHaveLength(3);
+      viewCards.forEach((card) => {
+        expect(card.style.position).toBe('absolute');
+      });
+
+      const cardsByTop = viewCards
+        .map((card) => ({
+          fieldName: card.textContent?.includes('Body copy')
+            ? 'Body copy'
+            : card.textContent?.includes('Summary')
+            ? 'Summary'
+            : 'Title',
+          top: Number.parseFloat(card.style.top),
+        }))
+        .sort((left, right) => left.top - right.top);
+
+      expect(cardsByTop.map((card) => card.fieldName)).toEqual(['Body copy', 'Summary', 'Title']);
+      expect(cardsByTop[0].top).toBeLessThan(cardsByTop[1].top);
+      expect(cardsByTop[1].top).toBeLessThan(cardsByTop[2].top);
+    } finally {
+      Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+    }
+  });
+
   it('highlights all underlying grouped text when hovering a grouped rail card', () => {
     const blocks = [
       createBlock('block-1', 1, 'First body paragraph.'),
@@ -783,7 +1013,7 @@ describe('MappingView', () => {
     const initialBackgroundColor = textSegments[0].style.backgroundColor;
     expect(textSegments[1].style.backgroundColor).toBe(initialBackgroundColor);
 
-    const mappingCard = container.querySelector<HTMLElement>('[data-testid^="mapping-card-"]');
+    const mappingCard = container.querySelector<HTMLElement>('[data-testid^="edit-mapping-card-"]');
     expect(mappingCard).toBeTruthy();
 
     fireEvent.mouseEnter(mappingCard as HTMLElement);

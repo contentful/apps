@@ -24,6 +24,13 @@ export interface ContentLifecyclePermissions {
   tags: EntityPermissions;
   concepts: EntityPermissions;
   conceptSchemes: EntityPermissions;
+  // ExO (Experience Orchestration) entities. Shown on the config screen only
+  // in ExO-enabled or empty spaces. See AIS-187.
+  componentTypes: EntityPermissions;
+  experiences: EntityPermissions;
+  templates: EntityPermissions;
+  dataAssemblies: EntityPermissions;
+  fragments: EntityPermissions;
 }
 
 export interface OtherFeaturesPermissions {
@@ -49,6 +56,11 @@ export interface AppInstallationParameters {
   tags: string;
   concepts: string;
   conceptSchemes: string;
+  componentTypes: string;
+  experiences: string;
+  templates: string;
+  dataAssemblies: string;
+  fragments: string;
   runAIActions: boolean;
 }
 
@@ -76,10 +88,36 @@ export const ENTITY_AVAILABLE_ACTIONS: Record<
   tags: ['read', 'create'],
   orgs: ['read'],
   spaces: ['read'],
+  componentTypes: ['read'],
+  experiences: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish'],
+  templates: ['read'],
+  dataAssemblies: ['read'],
+  fragments: ['read', 'edit', 'create', 'delete'],
 } as const;
 
 /** All entity keys derived from ENTITY_AVAILABLE_ACTIONS */
 export const ALL_ENTITIES = Object.keys(ENTITY_AVAILABLE_ACTIONS) as ContentLifecycleEntityKey[];
+
+/**
+ * ExO (Experience Orchestration) entities. Rendered in their own
+ * "Experience orchestration actions" section on the config screen. These tools
+ * only function in ExO-compatible spaces; the section note calls this out.
+ * ExO-compatibility can't be detected from within an app (the App SDK CMA
+ * blocks reads of ExO entity types), so we always show the section rather than
+ * gate it. See AIS-187.
+ */
+export const EXO_ENTITIES: ContentLifecycleEntityKey[] = [
+  'componentTypes',
+  'experiences',
+  'templates',
+  'dataAssemblies',
+  'fragments',
+];
+
+/** Classic (non-ExO) entities, rendered in the "Content lifecycle actions" section. */
+export const CLASSIC_ENTITIES: ContentLifecycleEntityKey[] = ALL_ENTITIES.filter(
+  (entity) => !EXO_ENTITIES.includes(entity)
+);
 
 /** All actions shown in table columns */
 export const STANDARD_ACTIONS: EntityActionKey[] = [
@@ -93,3 +131,10 @@ export const STANDARD_ACTIONS: EntityActionKey[] = [
   'unarchive',
   'invoke',
 ];
+
+/** Actions relevant to ExO entities — STANDARD_ACTIONS trimmed to those used by at least one ExO entity. */
+export const EXO_ACTIONS: EntityActionKey[] = STANDARD_ACTIONS.filter((action) =>
+  EXO_ENTITIES.some((entity) =>
+    (ENTITY_AVAILABLE_ACTIONS[entity] as readonly EntityActionKey[]).includes(action)
+  )
+);

@@ -1,7 +1,8 @@
 import { type FC } from 'react';
-import { Stack, Heading, Text, Accordion } from '@contentful/f36-components';
+import { Stack, Heading, Text, Accordion, Note } from '@contentful/f36-components';
 import { ContentLifecyclePermissionsTable } from './ContentLifecyclePermissionsTable';
 import { OtherFeaturesPermissions } from './OtherFeaturesPermissions';
+import { CLASSIC_ENTITIES, EXO_ENTITIES, EXO_ACTIONS } from '../types/config';
 import type {
   ContentLifecyclePermissions,
   OtherFeaturesPermissions as OtherFeaturesPermissionsType,
@@ -15,12 +16,13 @@ interface PermissionsSectionProps {
   otherFeaturesPermissions: OtherFeaturesPermissionsType;
   expandedAccordions: {
     contentLifecycle: boolean;
+    experienceOrchestration: boolean;
     otherFeatures: boolean;
   };
   onAccordionToggle: (section: string, expanded: boolean) => void;
-  onSelectAllToggle: () => void;
+  onSelectAllToggle: (entities: ContentLifecycleEntityKey[]) => void;
   onEntityActionToggle: (entity: ContentLifecycleEntityKey, action: EntityActionKey) => void;
-  onColumnToggle: (action: EntityActionKey) => void;
+  onColumnToggle: (entities: ContentLifecycleEntityKey[], action: EntityActionKey) => void;
   onRowToggle: (entity: ContentLifecycleEntityKey) => void;
   onOtherFeatureToggle: (permission: OtherFeaturesPermissionKey) => void;
 }
@@ -62,6 +64,35 @@ export const PermissionsSection: FC<PermissionsSectionProps> = ({
           }}>
           <ContentLifecyclePermissionsTable
             permissions={contentLifecyclePermissions}
+            visibleEntities={CLASSIC_ENTITIES}
+            onSelectAllToggle={onSelectAllToggle}
+            onEntityActionToggle={onEntityActionToggle}
+            onColumnToggle={onColumnToggle}
+            onRowToggle={onRowToggle}
+          />
+        </div>
+      </Accordion.Item>
+
+      <Accordion.Item
+        title={<span style={{ fontSize: '14px' }}>Experience orchestration actions</span>}
+        isExpanded={expandedAccordions.experienceOrchestration}
+        onExpand={() => onAccordionToggle('experienceOrchestration', true)}
+        onCollapse={() => onAccordionToggle('experienceOrchestration', false)}>
+        <div
+          style={{
+            marginTop: '-12px',
+            boxSizing: 'border-box',
+            paddingRight: '16px',
+          }}>
+          <Note variant="neutral" style={{ marginTop: '12px', marginBottom: '16px' }}>
+            These tools are only available in Experience Orchestration (ExO) compatible spaces. If
+            your space is not ExO compatible, enabling these permissions has no effect and the
+            corresponding tools will not be available.
+          </Note>
+          <ContentLifecyclePermissionsTable
+            permissions={contentLifecyclePermissions}
+            visibleEntities={EXO_ENTITIES}
+            visibleActions={EXO_ACTIONS}
             onSelectAllToggle={onSelectAllToggle}
             onEntityActionToggle={onEntityActionToggle}
             onColumnToggle={onColumnToggle}

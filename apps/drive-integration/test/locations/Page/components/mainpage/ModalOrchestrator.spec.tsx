@@ -184,9 +184,7 @@ describe('ModalOrchestrator', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
     await waitFor(() => {
-      expect(
-        screen.getByRole('heading', { name: "You're about to lose your progress" })
-      ).toBeTruthy();
+      expect(screen.getByRole('heading', { name: 'Delete this job?' })).toBeTruthy();
     });
   });
 
@@ -205,18 +203,14 @@ describe('ModalOrchestrator', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
     await waitFor(() => {
-      expect(
-        screen.getByRole('heading', { name: "You're about to lose your progress" })
-      ).toBeTruthy();
+      expect(screen.getByRole('heading', { name: 'Delete this job?' })).toBeTruthy();
     });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel without creating' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
 
     await waitFor(() => {
       expect(screen.queryByRole('heading', { name: 'Select content type(s)' })).toBeNull();
-      expect(
-        screen.queryByRole('heading', { name: "You're about to lose your progress" })
-      ).toBeNull();
+      expect(screen.queryByRole('heading', { name: 'Delete this job?' })).toBeNull();
     });
   });
 
@@ -253,9 +247,7 @@ describe('ModalOrchestrator', () => {
 
     await waitFor(() => {
       expect(screen.queryByRole('button', { name: 'Pick document' })).toBeNull();
-      expect(
-        screen.queryByRole('heading', { name: "You're about to lose your progress" })
-      ).toBeNull();
+      expect(screen.queryByRole('heading', { name: 'Delete this job?' })).toBeNull();
     });
   });
 
@@ -272,12 +264,10 @@ describe('ModalOrchestrator', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
     await waitFor(() => {
-      expect(
-        screen.getByRole('heading', { name: "You're about to lose your progress" })
-      ).toBeTruthy();
+      expect(screen.getByRole('heading', { name: 'Delete this job?' })).toBeTruthy();
     });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel without creating' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
 
     await waitFor(() => {
       expect(mockAddRun).not.toHaveBeenCalled();

@@ -1,6 +1,14 @@
 import { css } from '@emotion/css';
 import tokens from '@contentful/f36-tokens';
 
+export const MAPPING_RAIL_WIDTH = 280;
+
+export const mappingRailStyle = {
+  flex: `0 0 ${MAPPING_RAIL_WIDTH}px`,
+  maxWidth: MAPPING_RAIL_WIDTH,
+  position: 'relative' as const,
+};
+
 const mappingGroupSurfaceBase = css({
   borderRadius: tokens.borderRadiusMedium,
   padding: tokens.spacing2Xs,

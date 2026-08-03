@@ -21,7 +21,7 @@ import type {
   EditModalNewLocation,
   SourceRef,
   TableTextSourceRef,
-  AddEntryWizardParams,
+  AddEntryFormParams,
   ReviewedReferenceGraph,
 } from '@types';
 import {
@@ -49,6 +49,7 @@ import {
   hasFieldType,
   isEntryReferenceField,
 } from './fieldFormatting';
+import { linkChildToParentEntry, withUpdatedReferenceGraph } from './linkChildToParent';
 import { EditModal } from './edit-modals/EditModal';
 import { RichTextSelectionPreview } from './edit-modals/RichTextSelectionPreview';
 
@@ -57,12 +58,14 @@ import {
   mappingGroupSurfaceEdit,
   mappingGroupSurfaceView,
   mappingGroupSurfaceViewHovered,
+  MAPPING_RAIL_WIDTH,
 } from './MappingView.styles';
 import { buildSourceRefKey } from './sourceRefUtils';
-import { MappingEntryCards } from './MappingEntryCards';
+import { EditMappingCard } from './EditMappingCard';
+import { FALLBACK_CARD_HEIGHT, getMappingRailMinHeight, MappingRail } from './MappingRail';
 import { NormalizedDocumentSection } from './NormalizedDocumentSection';
 import { buildMappingDisplayGroups, type MappingDisplayGroup } from './buildMappingDisplayGroups';
-import { ViewMappingRail, type ViewMappingCardEntry } from './ViewMappingRail';
+import { ViewMappingCard, type ViewMappingCardData } from './ViewMappingCard';
 import {
   applyImageExclusionToEntryBlockGraph,
   appendImageToTargets,
@@ -424,7 +427,7 @@ export const MappingView = ({
     [entryBlockGraph.entries, payload.contentTypes]
   );
 
-  const existingEntriesForWizard = useMemo(
+  const existingEntriesForAddEntry = useMemo(
     () =>
       entryBlockGraph.entries.map((entry, idx) => {
         const contentType = payload.contentTypes.find((ct) => ct.sys.id === entry.contentTypeId);
@@ -433,41 +436,43 @@ export const MappingView = ({
         return {
           tempId: entry.tempId ?? `${entry.contentTypeId}-${idx}`,
           label: `${contentTypeName} (${entryTitle})`,
+          contentTypeId: entry.contentTypeId,
         };
       }),
     [entryBlockGraph.entries, payload.contentTypes]
   );
 
-  const handleAddEntry = (params: AddEntryWizardParams) => {
+  const handleAddEntry = (params: AddEntryFormParams) => {
     const { contentTypeId, fieldIds } = params;
     const isLinkedReference = params.isReference && !!params.referenceEntryId;
     const contentType = payload.contentTypes.find((ct) => ct.sys.id === contentTypeId);
     const newEntryIndex = entryBlockGraph.entries.length;
     const tempId = crypto.randomUUID();
 
+    const parentEntryIndex = isLinkedReference
+      ? entryBlockGraph.entries.findIndex(
+          (entry, idx) =>
+            (entry.tempId ?? `${entry.contentTypeId}-${idx}`) === params.referenceEntryId
+        )
+      : -1;
+    const parentEntry =
+      parentEntryIndex >= 0 ? entryBlockGraph.entries[parentEntryIndex] : undefined;
+    const parentContentType = parentEntry
+      ? payload.contentTypes.find((ct) => ct.sys.id === parentEntry.contentTypeId)
+      : undefined;
+
     const refField = isLinkedReference
-      ? contentType?.fields?.find(
+      ? parentContentType?.fields?.find(
           (f) =>
             f.id === params.referenceFieldId ||
             (!params.referenceFieldId && isEntryReferenceField(f))
         )
       : undefined;
 
-    const newEntryFields: Record<string, Record<string, unknown>> = refField?.id
-      ? {
-          [refField.id]: {
-            [defaultLocale]:
-              refField.type === 'Array'
-                ? [{ __ref: params.referenceEntryId }]
-                : { __ref: params.referenceEntryId },
-          },
-        }
-      : {};
-
     const newEntry = {
       contentTypeId,
       tempId,
-      fields: newEntryFields,
+      fields: {} as Record<string, Record<string, unknown>>,
       fieldMappings: [],
     };
 
@@ -475,6 +480,27 @@ export const MappingView = ({
       ...entryBlockGraph,
       entries: [...entryBlockGraph.entries, newEntry],
     };
+
+    if (isLinkedReference && parentEntry && refField?.id && refField.type) {
+      const { parentEntry: updatedParent, edges: nextEdges } = linkChildToParentEntry({
+        parentEntry,
+        childTempId: tempId,
+        refField: { id: refField.id, type: refField.type },
+        defaultLocale,
+        previousEdges: referenceGraph.edges ?? [],
+      });
+
+      next = {
+        ...next,
+        entries: next.entries.map((entry, idx) =>
+          idx === parentEntryIndex ? updatedParent : entry
+        ),
+      };
+
+      if (onReferenceGraphChange) {
+        onReferenceGraphChange(withUpdatedReferenceGraph(referenceGraph, nextEdges));
+      }
+    }
 
     if (fieldIds.length > 0) {
       const resolvedTargets = fieldIds.flatMap((fieldId) => {
@@ -526,16 +552,6 @@ export const MappingView = ({
     }
 
     onEntryBlockGraphChange(next);
-
-    if (isLinkedReference && onReferenceGraphChange) {
-      onReferenceGraphChange({
-        ...referenceGraph,
-        edges: [
-          ...(referenceGraph.edges ?? []),
-          { from: tempId, to: params.referenceEntryId!, fieldId: refField?.id ?? '' },
-        ],
-      });
-    }
 
     closeEditModal();
   };
@@ -648,7 +664,9 @@ export const MappingView = ({
             ? Math.max(0, anchorNode.getBoundingClientRect().top - groupTop)
             : 0;
           const height =
-            wrapperNode?.getBoundingClientRect().height || wrapperNode?.offsetHeight || 28;
+            wrapperNode?.getBoundingClientRect().height ||
+            wrapperNode?.offsetHeight ||
+            FALLBACK_CARD_HEIGHT;
 
           return { key: card.key, rawTop, height };
         });
@@ -669,7 +687,7 @@ export const MappingView = ({
     });
 
     return () => observer.disconnect();
-  }, [allGroups]);
+  }, [allGroups, isViewMode]);
 
   const handleEditFromSelection = () => {
     if (isDisabled || !selectedText.trim()) return;
@@ -943,11 +961,11 @@ export const MappingView = ({
     closeEditModal();
   };
 
-  const viewCardsByGroup = useMemo((): Record<string, ViewMappingCardEntry[]> => {
-    const result: Record<string, ViewMappingCardEntry[]> = {};
+  const viewCardsByGroup = useMemo((): Record<string, ViewMappingCardData[]> => {
+    const result: Record<string, ViewMappingCardData[]> = {};
 
     allGroups.forEach((group) => {
-      const cards: ViewMappingCardEntry[] = [];
+      const cards: ViewMappingCardData[] = [];
 
       group.mappingCards.forEach((card) => {
         const location = locationsByCardKey.get(card.key);
@@ -1033,7 +1051,10 @@ export const MappingView = ({
                 )}
               </Text>
             </Box>
-            <Flex alignItems="center" gap="spacing2Xs" style={{ flex: '0 0 280px', maxWidth: 280 }}>
+            <Flex
+              alignItems="center"
+              gap="spacing2Xs"
+              style={{ flex: `0 0 ${MAPPING_RAIL_WIDTH}px`, maxWidth: MAPPING_RAIL_WIDTH }}>
               <LightbulbIcon size="tiny" style={{ color: tokens.gray600, flexShrink: 0 }} />
               <Text as="span" fontSize="fontSizeS" fontColor="gray600">
                 Tip: hover over a card to highlight its content
@@ -1073,6 +1094,12 @@ export const MappingView = ({
                     ? mappingGroupSurfaceViewHovered
                     : mappingGroupSurfaceView
                   : mappingGroupSurfaceEdit;
+
+                const cardOffsets = cardOffsetsByGroup[group.id] ?? {};
+                const cardHeights = cardHeightsByGroup[group.id] ?? {};
+                const viewCards = viewCardsByGroup[group.id] ?? [];
+                const editCards = group.mappingCards;
+                const railCards = isViewMode ? viewCards : editCards;
 
                 return (
                   <Box key={group.id}>
@@ -1127,24 +1154,39 @@ export const MappingView = ({
                         )}
                       </Box>
 
-                      {isViewMode ? (
-                        <ViewMappingRail
-                          segmentId={group.id}
-                          cards={viewCardsByGroup[group.id] ?? []}
-                          hoveredMappingKeys={hoveredMappingKeys}
-                          onSetHoveredMappingKeys={setHoveredMappingKeys}
-                        />
-                      ) : (
-                        <MappingEntryCards
-                          groupId={group.id}
-                          mappingCards={group.mappingCards}
-                          cardOffsetsByGroup={cardOffsetsByGroup}
-                          cardHeightsByGroup={cardHeightsByGroup}
-                          hoveredMappingKeys={hoveredMappingKeys}
-                          onSetHoveredMappingKeys={setHoveredMappingKeys}
-                          setCardWrapperRef={setCardWrapperRef}
-                        />
-                      )}
+                      <MappingRail
+                        testId={
+                          isViewMode ? `view-mapping-rail-${group.id}` : `mapping-rail-${group.id}`
+                        }
+                        minHeight={getMappingRailMinHeight(railCards, cardOffsets, cardHeights)}>
+                        {isViewMode
+                          ? viewCards.map((card) => (
+                              <ViewMappingCard
+                                key={card.key}
+                                card={card}
+                                top={cardOffsets[card.key] ?? 0}
+                                wrapperRef={setCardWrapperRef(card.key)}
+                                isHovered={card.mappingKeys.some((key) =>
+                                  hoveredMappingKeys.includes(key)
+                                )}
+                                onMouseEnter={() => setHoveredMappingKeys(card.mappingKeys)}
+                                onMouseLeave={() => setHoveredMappingKeys([])}
+                              />
+                            ))
+                          : editCards.map((card) => (
+                              <EditMappingCard
+                                key={card.key}
+                                card={card}
+                                top={cardOffsets[card.key] ?? 0}
+                                wrapperRef={setCardWrapperRef(card.key)}
+                                isHovered={card.mappingKeys.some((key) =>
+                                  hoveredMappingKeys.includes(key)
+                                )}
+                                onMouseEnter={() => setHoveredMappingKeys(card.mappingKeys)}
+                                onMouseLeave={() => setHoveredMappingKeys([])}
+                              />
+                            ))}
+                      </MappingRail>
                     </Flex>
                   </Box>
                 );
@@ -1175,9 +1217,8 @@ export const MappingView = ({
         title={editModalState.title}
         primaryButtonLabel={editModalState.primaryButtonLabel}
         contentTypes={payload.contentTypes}
-        existingEntries={existingEntriesForWizard}
+        existingEntries={existingEntriesForAddEntry}
         onAddEntry={handleAddEntry}
-        newEntryIndex={entryBlockGraph.entries.length}
         additionalContent={(() => {
           if (!pendingPreviewSourceRefs.length && !pendingPreviewHasTableContent) return undefined;
           const allTableText = pendingPreviewSourceRefs.every(isTableTextSourceRef);

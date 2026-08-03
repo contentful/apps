@@ -4,7 +4,7 @@
   "type": "module",
   "engines": {
     "node": ">=16.0.0",
-    "npm": ">=8.0.0"
+    "npm": ">=8.19.4"
   },
   "devDependencies": {
     "@sentry/cli": "^2.14.4",
@@ -44,6 +44,6 @@
     "registry": "https://npm.pkg.github.com/"
   },
   "overrides": {
-    "form-data": "^4.0.4"
+    "form-data": "^4.0.6"
   }
 }
