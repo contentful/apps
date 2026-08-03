@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  ProfileFields,
-  parseEnabledFeatures,
-  toProfileType,
-} from './appInstallationParameters';
+import { ProfileFields, parseEnabledFeatures, toProfileType } from './appInstallationParameters';
 import featureConfig, { AIFeature } from '@configs/features/featureConfig';
 
 const ALL_FEATURES = Object.keys(featureConfig) as AIFeature[];

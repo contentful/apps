@@ -90,9 +90,7 @@ export const toProfileType = (
  * value is absent or unparseable, so existing customers keep their feature
  * selection instead of silently reverting to "all features".
  */
-export const parseEnabledFeatures = (
-  value: AIFeature[] | string | undefined
-): AIFeature[] => {
+export const parseEnabledFeatures = (value: AIFeature[] | string | undefined): AIFeature[] => {
   const allFeatures = () => Object.keys(featureConfig) as AIFeature[];
 
   if (Array.isArray(value)) {
