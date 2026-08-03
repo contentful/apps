@@ -16,7 +16,9 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 describe('useAI', () => {
   beforeEach(() => {
     mockSdk.reset();
-    (sdk.cma as unknown as { appActionCall: { createWithResponse: ReturnType<typeof vi.fn> } }).appActionCall = {
+    (
+      sdk.cma as unknown as { appActionCall: { createWithResponse: ReturnType<typeof vi.fn> } }
+    ).appActionCall = {
       createWithResponse: vi.fn().mockResolvedValue({
         response: { body: JSON.stringify({ text: 'Generated text' }) },
       }),
@@ -39,7 +41,9 @@ describe('useAI', () => {
   });
 
   it('should set hasError when the action fails', async () => {
-    (sdk.cma as unknown as { appActionCall: { createWithResponse: ReturnType<typeof vi.fn> } }).appActionCall = {
+    (
+      sdk.cma as unknown as { appActionCall: { createWithResponse: ReturnType<typeof vi.fn> } }
+    ).appActionCall = {
       createWithResponse: vi.fn().mockRejectedValue(new Error('Action failed')),
     };
 
