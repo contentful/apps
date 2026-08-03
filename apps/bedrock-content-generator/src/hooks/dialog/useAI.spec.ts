@@ -17,10 +17,10 @@ describe('useAI', () => {
   beforeEach(() => {
     mockSdk.reset();
     (
-      sdk.cma as unknown as { appActionCall: { createWithResponse: ReturnType<typeof vi.fn> } }
+      sdk.cma as unknown as { appActionCall: { createWithResult: ReturnType<typeof vi.fn> } }
     ).appActionCall = {
-      createWithResponse: vi.fn().mockResolvedValue({
-        response: { body: JSON.stringify({ text: 'Generated text' }) },
+      createWithResult: vi.fn().mockResolvedValue({
+        sys: { status: 'succeeded', result: { text: 'Generated text' } },
       }),
     };
   });
@@ -42,9 +42,9 @@ describe('useAI', () => {
 
   it('should set hasError when the action fails', async () => {
     (
-      sdk.cma as unknown as { appActionCall: { createWithResponse: ReturnType<typeof vi.fn> } }
+      sdk.cma as unknown as { appActionCall: { createWithResult: ReturnType<typeof vi.fn> } }
     ).appActionCall = {
-      createWithResponse: vi.fn().mockRejectedValue(new Error('Action failed')),
+      createWithResult: vi.fn().mockRejectedValue(new Error('Action failed')),
     };
 
     const { result } = renderHook(() => useAI());

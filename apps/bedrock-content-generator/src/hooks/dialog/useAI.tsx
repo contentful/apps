@@ -34,7 +34,7 @@ const useAI = () => {
 
       const systemPrompt = baseSystemPrompt(installation, targetLocale);
 
-      const response = await sdk.cma.appActionCall.createWithResponse(
+      const result = await sdk.cma.appActionCall.createWithResult(
         {
           appDefinitionId: sdk.ids.app!,
           appActionId: 'bedrockProxyAction',
@@ -48,7 +48,12 @@ const useAI = () => {
         }
       );
 
-      const body: { text: string } = JSON.parse(response.response.body);
+      if (result.sys.status !== 'succeeded') {
+        const msg = result.sys.status === 'failed' ? result.sys.error?.message : undefined;
+        throw new Error(msg ?? 'App action call failed');
+      }
+
+      const body = result.sys.result as { text: string };
       setOutput(body.text);
       return body.text;
     } catch (err: unknown) {
