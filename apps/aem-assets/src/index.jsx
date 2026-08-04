@@ -264,7 +264,10 @@ async function renderDialog(sdk) {
     aemTierType: aemTierType ? aemTierType.split(',') : ['delivery', 'author'],
     env: env === 'stage' ? 'stage' : undefined,
     hideTreeNav,
-    selectedAssets: selectedAssets && Array.isArray(selectedAssets) ? selectedAssets : [],
+    selectedAssets:
+      prefillSelectedAssets === 'Yes' && selectedAssets && Array.isArray(selectedAssets)
+        ? selectedAssets
+        : [],
     selectionType,
     uploadConfig: {
       hideUploadButton: hideUploadButton === 'Yes' ? true : false,
