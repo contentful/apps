@@ -1,7 +1,8 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MappingReviewSuspendPayload, SourceRef } from '@types';
 import { MappingView } from '../../../../../../src/locations/Page/components/review/mapping/MappingView';
+import React from 'react';
 
 const mockUseReviewTextSelection = vi.fn();
 const mockClearSelection = vi.fn();
@@ -15,15 +16,22 @@ vi.mock(
   () => ({
     ReviewImageAssetCard: ({
       onEdit,
+      onRemove,
       isHighlighted,
     }: {
       onEdit: () => void;
+      onRemove?: () => void;
       isHighlighted: boolean;
     }) => (
       <div>
         <button type="button" onClick={onEdit}>
           {isHighlighted ? 'Reassign image' : 'Assign image'}
         </button>
+        {onRemove ? (
+          <button type="button" onClick={onRemove}>
+            Remove image
+          </button>
+        ) : null}
       </div>
     ),
   })
@@ -276,6 +284,7 @@ describe('MappingView', () => {
       selectedText: '',
       selectedRange: null,
       clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
     });
   });
 
@@ -310,7 +319,7 @@ describe('MappingView', () => {
       />
     );
 
-    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-testid^="edit-mapping-card-"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(1);
     expect(screen.getByText('Body copy')).toBeTruthy();
     expect(
@@ -389,7 +398,7 @@ describe('MappingView', () => {
       />
     );
 
-    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-testid^="edit-mapping-card-"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
   });
 
@@ -506,7 +515,7 @@ describe('MappingView', () => {
     expect(screen.getByText('Body copy (2/3)')).toBeTruthy();
     expect(screen.getByText('Body copy (3/3)')).toBeTruthy();
     expect(screen.getByText('Summary')).toBeTruthy();
-    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(4);
+    expect(container.querySelectorAll('[data-testid^="edit-mapping-card-"]')).toHaveLength(4);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(2);
   });
 
@@ -624,7 +633,7 @@ describe('MappingView', () => {
     );
 
     expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
-    expect(container.querySelectorAll('[data-testid^="mapping-card-"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-testid^="edit-mapping-card-"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-testid^="mapping-group-surface-"]')).toHaveLength(0);
   });
 
@@ -742,6 +751,236 @@ describe('MappingView', () => {
     ).toBeNull();
   });
 
+  it('positions view-mode rail cards by document anchor order instead of graph order', async () => {
+    const row1Text = 'Drupal migration content';
+    const row2Text = 'Blog post slug';
+    const row3Text = 'Document reference';
+
+    const createTableTextRef = (
+      rowId: string,
+      cellId: string,
+      partId: string,
+      text: string
+    ): SourceRef => ({
+      type: 'tableText',
+      tableId: 'table-1',
+      rowId,
+      cellId,
+      partId,
+      start: 0,
+      end: text.length,
+      flattenedRuns: [{ text, start: 0, end: text.length }],
+    });
+
+    const payload = createPayload({
+      blocks: [],
+      tables: [
+        {
+          id: 'table-1',
+          position: 1,
+          headers: ['Field', 'Value'],
+          rows: [
+            {
+              id: 'row-1',
+              cells: [
+                {
+                  id: 'cell-1',
+                  parts: [
+                    {
+                      id: 'part-1',
+                      type: 'text',
+                      textRuns: [{ text: 'Type' }],
+                      flattenedTextRuns: [{ text: 'Type', start: 0, end: 4 }],
+                    },
+                  ],
+                },
+                {
+                  id: 'cell-2',
+                  parts: [
+                    {
+                      id: 'part-2',
+                      type: 'text',
+                      textRuns: [{ text: row1Text }],
+                      flattenedTextRuns: [{ text: row1Text, start: 0, end: row1Text.length }],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              id: 'row-2',
+              cells: [
+                {
+                  id: 'cell-3',
+                  parts: [
+                    {
+                      id: 'part-3',
+                      type: 'text',
+                      textRuns: [{ text: 'Slug' }],
+                      flattenedTextRuns: [{ text: 'Slug', start: 0, end: 4 }],
+                    },
+                  ],
+                },
+                {
+                  id: 'cell-4',
+                  parts: [
+                    {
+                      id: 'part-4',
+                      type: 'text',
+                      textRuns: [{ text: row2Text }],
+                      flattenedTextRuns: [{ text: row2Text, start: 0, end: row2Text.length }],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              id: 'row-3',
+              cells: [
+                {
+                  id: 'cell-5',
+                  parts: [
+                    {
+                      id: 'part-5',
+                      type: 'text',
+                      textRuns: [{ text: 'Ref' }],
+                      flattenedTextRuns: [{ text: 'Ref', start: 0, end: 3 }],
+                    },
+                  ],
+                },
+                {
+                  id: 'cell-6',
+                  parts: [
+                    {
+                      id: 'part-6',
+                      type: 'text',
+                      textRuns: [{ text: row3Text }],
+                      flattenedTextRuns: [{ text: row3Text, start: 0, end: row3Text.length }],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          designValueIds: [],
+          imageIds: [],
+        },
+      ],
+      fieldMappings: [
+        {
+          fieldId: 'title',
+          fieldType: 'Symbol',
+          sourceRefs: [createTableTextRef('row-3', 'cell-6', 'part-6', row3Text)],
+        },
+        {
+          fieldId: 'summary',
+          fieldType: 'Text',
+          sourceRefs: [createTableTextRef('row-2', 'cell-4', 'part-4', row2Text)],
+        },
+        {
+          fieldId: 'body',
+          fieldType: 'Text',
+          sourceRefs: [createTableTextRef('row-1', 'cell-2', 'part-2', row1Text)],
+        },
+      ],
+    });
+
+    const anchorTops: Record<string, number> = {
+      'row:table-1:row-1': 40,
+      'row:table-1:row-2': 120,
+      'row:table-1:row-3': 200,
+    };
+
+    const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
+    Element.prototype.getBoundingClientRect = function (this: Element) {
+      const anchorTop = this.id ? anchorTops[this.id] : undefined;
+      if (anchorTop !== undefined) {
+        return {
+          top: anchorTop,
+          left: 0,
+          right: 280,
+          bottom: anchorTop + 32,
+          width: 280,
+          height: 32,
+          x: 0,
+          y: anchorTop,
+          toJSON: () => ({}),
+        } as DOMRect;
+      }
+
+      if (this.getAttribute('data-testid')?.startsWith('display-group-layout-')) {
+        return {
+          top: 0,
+          left: 0,
+          right: 800,
+          bottom: 300,
+          width: 800,
+          height: 300,
+          x: 0,
+          y: 0,
+          toJSON: () => ({}),
+        } as DOMRect;
+      }
+
+      if (this.getAttribute('data-testid')?.startsWith('view-mapping-card-')) {
+        return {
+          top: 0,
+          left: 0,
+          right: 280,
+          bottom: 72,
+          width: 280,
+          height: 72,
+          x: 0,
+          y: 0,
+          toJSON: () => ({}),
+        } as DOMRect;
+      }
+
+      return originalGetBoundingClientRect.call(this);
+    };
+
+    const { container } = render(
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={null}
+        defaultLocale="en-US"
+        mode="view"
+      />
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    try {
+      const viewCards = Array.from(
+        container.querySelectorAll<HTMLElement>('[data-testid^="view-mapping-card-"]')
+      );
+      expect(viewCards).toHaveLength(3);
+      viewCards.forEach((card) => {
+        expect(card.style.position).toBe('absolute');
+      });
+
+      const cardsByTop = viewCards
+        .map((card) => ({
+          fieldName: card.textContent?.includes('Body copy')
+            ? 'Body copy'
+            : card.textContent?.includes('Summary')
+            ? 'Summary'
+            : 'Title',
+          top: Number.parseFloat(card.style.top),
+        }))
+        .sort((left, right) => left.top - right.top);
+
+      expect(cardsByTop.map((card) => card.fieldName)).toEqual(['Body copy', 'Summary', 'Title']);
+      expect(cardsByTop[0].top).toBeLessThan(cardsByTop[1].top);
+      expect(cardsByTop[1].top).toBeLessThan(cardsByTop[2].top);
+    } finally {
+      Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+    }
+  });
+
   it('highlights all underlying grouped text when hovering a grouped rail card', () => {
     const blocks = [
       createBlock('block-1', 1, 'First body paragraph.'),
@@ -774,7 +1013,7 @@ describe('MappingView', () => {
     const initialBackgroundColor = textSegments[0].style.backgroundColor;
     expect(textSegments[1].style.backgroundColor).toBe(initialBackgroundColor);
 
-    const mappingCard = container.querySelector<HTMLElement>('[data-testid^="mapping-card-"]');
+    const mappingCard = container.querySelector<HTMLElement>('[data-testid^="edit-mapping-card-"]');
     expect(mappingCard).toBeTruthy();
 
     fireEvent.mouseEnter(mappingCard as HTMLElement);
@@ -805,6 +1044,7 @@ describe('MappingView', () => {
       selectedText: '',
       selectedRange: null,
       clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
     });
 
     const { container, rerender } = render(
@@ -823,6 +1063,7 @@ describe('MappingView', () => {
       selectedText: 'Second',
       selectedRange,
       clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
     });
 
     rerender(
@@ -840,7 +1081,7 @@ describe('MappingView', () => {
     expect(
       screen.getAllByText((_, node) => node?.textContent?.includes('Second') ?? false).length
     ).toBeGreaterThan(0);
-    expect(screen.getByText('Assign to fields')).toBeTruthy();
+    expect(screen.getByText('New location')).toBeTruthy();
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
 
@@ -851,6 +1092,7 @@ describe('MappingView', () => {
       selectedText: 'fresh body text',
       selectedRange,
       clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
     });
 
     const payload = createPayload();
@@ -866,9 +1108,10 @@ describe('MappingView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Edit content mapping' }));
 
     expect(screen.getByRole('heading', { name: 'Edit content mapping' })).toBeTruthy();
-    expect(screen.getByText('“fresh body text”')).toBeTruthy();
-    expect(screen.getByText('Assign to fields')).toBeTruthy();
-    expect(screen.getByText('Article: Untitled')).toBeTruthy();
+    expect(screen.getByText('fresh body text')).toBeTruthy();
+    expect(screen.getByText('New location')).toBeTruthy();
+    expect(screen.getAllByText('Article').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Untitled').length).toBeGreaterThan(0);
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
 
@@ -879,6 +1122,7 @@ describe('MappingView', () => {
       selectedText: 'plain text',
       selectedRange,
       clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
     });
 
     const payload = createPayload();
@@ -900,6 +1144,7 @@ describe('MappingView', () => {
       selectedText: '',
       selectedRange: null,
       clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
     });
 
     const payload = createPayload();
@@ -921,6 +1166,7 @@ describe('MappingView', () => {
       selectedText: 'selected body text',
       selectedRange,
       clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
     });
     rerender(
       <MappingView
@@ -934,7 +1180,7 @@ describe('MappingView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Edit content mapping' }));
 
     expect(screen.getByRole('heading', { name: 'Edit content mapping' })).toBeTruthy();
-    expect(screen.getByText('Assign to fields')).toBeTruthy();
+    expect(screen.getByText('New location')).toBeTruthy();
     expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
@@ -967,6 +1213,7 @@ describe('MappingView', () => {
       selectedText: '',
       selectedRange: null,
       clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
     });
 
     const { container, rerender } = render(
@@ -992,6 +1239,7 @@ describe('MappingView', () => {
       selectedText: selectedRange.toString(),
       selectedRange,
       clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
     });
 
     rerender(
@@ -1007,7 +1255,7 @@ describe('MappingView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Edit content mapping' }));
 
     expect(screen.getByRole('heading', { name: 'Edit content mapping' })).toBeTruthy();
-    expect(screen.getByText('Assign to fields')).toBeTruthy();
+    expect(screen.getByText('New location')).toBeTruthy();
     expect(screen.getAllByText('Body copy').length).toBeGreaterThan(0);
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
@@ -1042,6 +1290,132 @@ describe('MappingView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Assign image' }));
 
     expect(screen.getByRole('heading', { name: 'Edit content mapping' })).toBeTruthy();
-    expect(screen.getByText('Selected Article: Untitled')).toBeTruthy();
+    expect(screen.getAllByText('Selected Article').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Untitled').length).toBeGreaterThan(0);
+  });
+
+  it('removes mapped image from the entry via the image card menu', () => {
+    const payload = createImagePayload();
+    let currentGraph = payload.entryBlockGraph;
+    const onEntryBlockGraphChange = vi.fn(
+      (nextGraph: MappingReviewSuspendPayload['entryBlockGraph']) => {
+        currentGraph = nextGraph;
+      }
+    );
+
+    render(
+      <MappingView
+        payload={payload}
+        entryBlockGraph={currentGraph}
+        onEntryBlockGraphChange={onEntryBlockGraphChange}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Remove image' }));
+
+    const dialog = screen.getByRole('dialog');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Remove' }));
+
+    expect(onEntryBlockGraphChange).toHaveBeenCalledTimes(1);
+    expect(currentGraph.entries[0].fieldMappings).toHaveLength(0);
+  });
+
+  it('does not offer Remove in the selection menu for unmapped text', () => {
+    const selectedRange = createDetachedRange('plain text', 0, 5);
+    mockUseReviewTextSelection.mockReturnValue({
+      selectionRectangle: { top: 100, left: 100, right: 160, bottom: 120 },
+      selectedText: 'plain text',
+      selectedRange,
+      clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
+    });
+
+    const payload = createPayload();
+    render(
+      <MappingView
+        payload={payload}
+        {...mappingViewGraphProps(payload)}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
+    );
+
+    const menu = screen.getByTestId('review-selection-menu');
+    expect(within(menu).getByRole('button', { name: 'Edit content mapping' })).toBeTruthy();
+    expect(within(menu).queryByRole('button', { name: 'Remove' })).toBeNull();
+  });
+
+  it('removes content mapped to multiple fields of the same entry', () => {
+    const payload = createPayload({
+      fieldMappings: [
+        {
+          fieldId: 'body',
+          fieldType: 'Text',
+          sourceRefs: [createBlockTextSourceRef('block-1', 'Hello world')],
+        },
+        {
+          fieldId: 'summary',
+          fieldType: 'Text',
+          sourceRefs: [createBlockTextSourceRef('block-1', 'Hello world')],
+        },
+      ],
+    });
+
+    let currentGraph = payload.entryBlockGraph;
+    const onEntryBlockGraphChange = vi.fn(
+      (nextGraph: MappingReviewSuspendPayload['entryBlockGraph']) => {
+        currentGraph = nextGraph;
+      }
+    );
+
+    mockUseReviewTextSelection.mockReturnValueOnce({
+      selectionRectangle: null,
+      selectedText: '',
+      selectedRange: null,
+      clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
+    });
+
+    const { container, rerender } = render(
+      <MappingView
+        payload={payload}
+        entryBlockGraph={currentGraph}
+        onEntryBlockGraphChange={onEntryBlockGraphChange}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
+    );
+
+    const mappedSegment = container.querySelector('[data-review-text-segment="true"]');
+    const selectedRange = createDomRange(mappedSegment?.firstChild as Text, 0, 11);
+
+    mockUseReviewTextSelection.mockReturnValue({
+      selectionRectangle: { top: 100, left: 100, right: 160, bottom: 120 },
+      selectedText: 'Hello world',
+      selectedRange,
+      clearSelection: mockClearSelection,
+      freezeSelection: vi.fn(),
+    });
+
+    rerender(
+      <MappingView
+        payload={payload}
+        entryBlockGraph={currentGraph}
+        onEntryBlockGraphChange={onEntryBlockGraphChange}
+        selectedEntryIndex={0}
+        mode="edit"
+      />
+    );
+
+    const menu = screen.getByTestId('review-selection-menu');
+    fireEvent.click(within(menu).getByRole('button', { name: 'Remove' }));
+
+    const dialog = screen.getByRole('dialog');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Remove' }));
+
+    expect(onEntryBlockGraphChange).toHaveBeenCalledTimes(1);
+    expect(currentGraph.entries[0].fieldMappings.map((fm) => fm.fieldId)).toEqual([]);
   });
 });

@@ -22,9 +22,12 @@ export interface SlackAppInstallationParameters {
 
 export interface ResolvedEntity {
   actorId?: string;
+  actorName?: string;
   entryName?: string;
   date?: string;
   entity?: EventEntity;
+  spaceName?: string;
+  environmentId?: string;
 }
 
 // For now we only listen on events for entries

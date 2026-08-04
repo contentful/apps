@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Flex, Heading, Layout } from '@contentful/f36-components';
-import { EyeIcon, PencilSimpleIcon } from '@contentful/f36-icons';
+import { Button, Flex, Heading, IconButton, Layout, Menu } from '@contentful/f36-components';
+import { DotsThreeIcon, EyeIcon, PencilSimpleIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { cx } from '@emotion/css';
 import type { EntryProps } from 'contentful-management';
-import type { EntryBlockGraph, MappingReviewSuspendPayload } from '@types';
+import type { EntryBlockGraph, MappingReviewSuspendPayload, ReviewedReferenceGraph } from '@types';
 import { RunStatus } from '@types';
-import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
+import { resumeAndPollWorkflow } from '../../../../services/workflowService';
 import { createEntriesFromPreviewPayload } from '../../../../services/entryService';
 import type { ContentTypeDisplayInfoMap } from '../../../../utils/overviewEntryList';
 import {
@@ -22,7 +22,6 @@ import { SummaryModal } from '../modals/SummaryModal';
 import OverviewSection from '../overview/OverviewSection';
 import { MappingView } from './mapping/MappingView';
 import {
-  cancelReviewButton,
   modeToggleButton,
   modeToggleButtonActive,
   modeToggleWrapper,
@@ -33,8 +32,9 @@ interface ReviewPageProps {
   sdk: PageAppSDK;
   payload: MappingReviewSuspendPayload;
   runId?: string;
-  onCancelReview: () => Promise<void>;
+  onCancelReview: (graph: EntryBlockGraph) => Promise<void>;
   onExitReview: () => void;
+  onRunCompleted?: (entryIds: string[]) => void;
 }
 
 export const ReviewPage = ({
@@ -43,6 +43,7 @@ export const ReviewPage = ({
   runId,
   onCancelReview,
   onExitReview,
+  onRunCompleted,
 }: ReviewPageProps) => {
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
   const [selectedEntryIndex, setSelectedEntryIndex] = useState<number | null>(null);
@@ -55,22 +56,26 @@ export const ReviewPage = ({
   const [entryBlockGraph, setEntryBlockGraph] = useState<EntryBlockGraph>(() =>
     structuredClone(payload.entryBlockGraph)
   );
+  const [referenceGraph, setReferenceGraph] = useState<ReviewedReferenceGraph>(() =>
+    structuredClone(payload.referenceGraph)
+  );
   const [selectedEntryKeys, setSelectedEntryKeys] = useState<Set<string>>(() =>
     getAllEntrySelectionKeys(payload.entryBlockGraph.entries)
   );
 
-  // Reset local graph when starting a different run; do not depend on payload.entryBlockGraph
+  // Reset local graphs when starting a different run; do not depend on payload fields
   // alone or user edits would be wiped when the parent re-renders with a new object reference.
   useEffect(() => {
     const nextEntryBlockGraph = structuredClone(payload.entryBlockGraph);
     setEntryBlockGraph(nextEntryBlockGraph);
+    setReferenceGraph(structuredClone(payload.referenceGraph));
     setSelectedEntryKeys(getAllEntrySelectionKeys(nextEntryBlockGraph.entries));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-init on run identity
   }, [runId, payload.documentId]);
 
   const reviewPayload = useMemo(
-    (): MappingReviewSuspendPayload => ({ ...payload, entryBlockGraph }),
-    [payload, entryBlockGraph]
+    (): MappingReviewSuspendPayload => ({ ...payload, entryBlockGraph, referenceGraph }),
+    [payload, entryBlockGraph, referenceGraph]
   );
   const contentTypeDisplayInfoMap = useMemo<ContentTypeDisplayInfoMap>(() => {
     const map = new Map<string, { name: string; displayField?: string }>();
@@ -89,8 +94,6 @@ export const ReviewPage = ({
     [entryBlockGraph.entries, selectedEntryKeys]
   );
   const hasSelectedEntries = selectedEntryCount > 0;
-
-  const { resumeWorkflow } = useWorkflowAgent({ sdk, documentId: '', oauthToken: '' });
 
   const handleToggleEntrySelection = (entryKey: string, isSelected: boolean) => {
     setSelectedEntryKeys((previous) => {
@@ -121,7 +124,7 @@ export const ReviewPage = ({
         entryBlockGraph,
         selectedEntryKeys
       );
-      const result = await resumeWorkflow(runId, {
+      const result = await resumeAndPollWorkflow(sdk, runId, {
         entryBlockGraph: selectedEntryBlockGraph,
       });
 
@@ -139,6 +142,8 @@ export const ReviewPage = ({
           return;
         }
 
+        const entryIds = entries.map((e) => e.sys.id);
+        onRunCompleted?.(entryIds);
         setCreatedEntries(entries);
         setIsSummaryModalOpen(true);
         return;
@@ -162,21 +167,21 @@ export const ReviewPage = ({
     hasSelectedEntries,
     entryBlockGraph,
     selectedEntryKeys,
-    resumeWorkflow,
     sdk,
     onExitReview,
+    onRunCompleted,
   ]);
 
   const handleConfirmCancel = useCallback(async () => {
     setIsCancelling(true);
 
     try {
-      await onCancelReview();
+      await onCancelReview(entryBlockGraph);
     } finally {
       setIsCancelling(false);
       setIsConfirmCancelModalOpen(false);
     }
-  }, [onCancelReview]);
+  }, [onCancelReview, entryBlockGraph]);
 
   const handleCreateOrViewEntries = useCallback(() => {
     if (hasCreatedEntries) {
@@ -187,14 +192,9 @@ export const ReviewPage = ({
     void handleCreateEntries();
   }, [hasCreatedEntries, handleCreateEntries]);
 
-  const handleCancelOrExitReview = useCallback(() => {
-    if (hasCreatedEntries) {
-      onExitReview();
-      return;
-    }
-
+  const handleDeleteJob = useCallback(() => {
     setIsConfirmCancelModalOpen(true);
-  }, [hasCreatedEntries, onExitReview]);
+  }, []);
 
   const handleSummaryDone = useCallback(() => {
     setIsSummaryModalOpen(false);
@@ -209,7 +209,11 @@ export const ReviewPage = ({
     if (mode === 'view') {
       setSelectedEntryIndex(null);
     } else if (mode === 'edit' && selectedEntryIndex === null) {
-      setSelectedEntryIndex(entryBlockGraph.entries.length > 0 ? 0 : null);
+      const assignedChildTempIds = new Set((referenceGraph.edges ?? []).map((e) => e.to));
+      const firstRootIndex = entryBlockGraph.entries.findIndex(
+        (e) => !e.tempId || !assignedChildTempIds.has(e.tempId)
+      );
+      setSelectedEntryIndex(firstRootIndex >= 0 ? firstRootIndex : null);
     }
   };
 
@@ -220,30 +224,48 @@ export const ReviewPage = ({
           <Heading marginBottom="none">{title}</Heading>
           <Flex className={reviewHeaderActions}>
             <div className={modeToggleWrapper} role="group" aria-label="Review mode">
-              <button
-                type="button"
+              <Button
+                variant="transparent"
+                size="small"
                 className={cx(modeToggleButton, reviewMode === 'view' && modeToggleButtonActive)}
                 onClick={() => handleReviewModeChange('view')}
-                aria-pressed={reviewMode === 'view'}>
-                <EyeIcon size="small" />
+                aria-pressed={reviewMode === 'view'}
+                startIcon={<EyeIcon />}>
                 View only
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="transparent"
+                size="small"
                 className={cx(modeToggleButton, reviewMode === 'edit' && modeToggleButtonActive)}
                 onClick={() => handleReviewModeChange('edit')}
-                aria-pressed={reviewMode === 'edit'}>
-                <PencilSimpleIcon size="small" />
+                aria-pressed={reviewMode === 'edit'}
+                startIcon={<PencilSimpleIcon />}>
                 Edit mode
-              </button>
+              </Button>
             </div>
+            {!hasCreatedEntries && (
+              <Menu>
+                <Menu.Trigger>
+                  <IconButton
+                    variant="secondary"
+                    size="small"
+                    aria-label="More actions"
+                    icon={<DotsThreeIcon />}
+                  />
+                </Menu.Trigger>
+                <Menu.List>
+                  <Menu.Item onClick={handleDeleteJob} style={{ color: 'red' }}>
+                    Delete
+                  </Menu.Item>
+                </Menu.List>
+              </Menu>
+            )}
             <Button
               variant="secondary"
               size="small"
-              className={cancelReviewButton}
-              onClick={handleCancelOrExitReview}
-              aria-label={hasCreatedEntries ? 'Exit review' : 'Cancel review'}>
-              {hasCreatedEntries ? 'Exit' : 'Cancel'}
+              onClick={onExitReview}
+              aria-label="Close review">
+              Close
             </Button>
           </Flex>
         </Flex>
@@ -270,7 +292,10 @@ export const ReviewPage = ({
             payload={reviewPayload}
             entryBlockGraph={entryBlockGraph}
             onEntryBlockGraphChange={setEntryBlockGraph}
+            referenceGraph={referenceGraph}
+            onReferenceGraphChange={setReferenceGraph}
             selectedEntryIndex={selectedEntryIndex}
+            defaultLocale={sdk.locales.default}
             isDisabled={isMappingDisabled}
             mode={reviewMode}
           />

@@ -1,8 +1,7 @@
-import { Button, CopyButton, Tabs, Paragraph } from '@contentful/f36-components';
-import { ExternalLinkIcon } from '@contentful/f36-icons';
-import Hyperlink from '@components/common/HyperLink/HyperLink';
+import { Button, CopyButton, Tabs, Paragraph, Flex } from '@contentful/f36-components';
 import useAI from '@hooks/dialog/useAI';
 import TextFieldWithButtons from '@components/common/text-field-with-buttons/TextFieldWIthButtons';
+import GeneratedTextSkeleton from './GeneratedTextSkeleton';
 import { OutputTab } from '../../Output';
 import { ContentTypeFieldValidation } from 'contentful-management';
 import { useContext, useEffect, useState } from 'react';
@@ -20,7 +19,7 @@ interface Props {
 
 const GeneratedTextPanel = (props: Props) => {
   const { generate, ai, outputFieldValidation, apply } = props;
-  const { sendStopSignal, output, setOutput, isGenerating, hasError, error } = ai;
+  const { sendStopSignal, output, setOutput, isGenerating, hasError } = ai;
   const { trackGeneratorEvent } = useContext(GeneratorContext);
 
   const [canApply, setCanApply] = useState(false);
@@ -66,32 +65,21 @@ const GeneratedTextPanel = (props: Props) => {
   ]);
 
   const getModalErrorMessage = () => {
-    if (error?.status === 429) {
-      return (
-        <>
-          <Paragraph css={styles.errorMessage}>
-            <Hyperlink
-              body={errorMessages.rateLimitMessage}
-              substring={errorMessages.rateLimitSubstring}
-              hyperLinkHref={errorMessages.rateLimitLink}
-              icon={<ExternalLinkIcon />}
-              alignIcon="end"
-              textLinkStyle={styles.errorLink}
-            />
-          </Paragraph>
-        </>
-      );
-    } else {
-      return <Paragraph css={styles.errorMessage}>{errorMessages.defaultGenerateError}</Paragraph>;
-    }
+    // The proxy App Action collapses all OpenAI failures (including 429s) into a
+    // generic Error with no status code, so there's no rate-limit-specific
+    // branch to render — surface the default message.
+    return <Paragraph css={styles.errorMessage}>{errorMessages.defaultGenerateError}</Paragraph>;
   };
 
   return (
     <Tabs.Panel id={OutputTab.GENERATED_TEXT} css={styles.panel}>
       {isGenerating ? (
-        <TextFieldWithButtons inputText={output} sizeValidation={outputFieldValidation?.size}>
-          <Button onClick={sendStopSignal}>Stop Generating</Button>
-        </TextFieldWithButtons>
+        <Flex flexDirection="column" fullWidth css={styles.generatingContainer}>
+          <GeneratedTextSkeleton />
+          <Flex alignSelf="flex-end">
+            <Button onClick={sendStopSignal}>Stop Generating</Button>
+          </Flex>
+        </Flex>
       ) : (
         <TextFieldWithButtons
           inputText={output}

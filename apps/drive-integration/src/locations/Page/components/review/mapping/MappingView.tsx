@@ -1,4 +1,11 @@
-import { useLayoutEffect, useMemo, useRef, useState, type RefCallback } from 'react';
+import {
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type RefCallback,
+} from 'react';
 import { Box, Flex, Note, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import {
@@ -14,6 +21,8 @@ import type {
   EditModalNewLocation,
   SourceRef,
   TableTextSourceRef,
+  AddEntryFormParams,
+  ReviewedReferenceGraph,
 } from '@types';
 import {
   isBlockImageSourceRef,
@@ -30,15 +39,17 @@ import {
   buildMappingHighlightIndex,
   getMappingCardKey,
   type MappingHighlight,
-  type MappingHighlightIndex,
   uniqueHighlights,
 } from './buildHighlights';
 import { buildListMarkers } from './buildListMarkers';
 import {
   displayType,
-  isAssetFieldForImageAssign,
-  isWorkflowContentTypeFieldWithId,
+  buildFieldOptionsForContentType,
+  hasFieldId,
+  hasFieldType,
+  isEntryReferenceField,
 } from './fieldFormatting';
+import { linkChildToParentEntry, withUpdatedReferenceGraph } from './linkChildToParent';
 import { EditModal } from './edit-modals/EditModal';
 import { RichTextSelectionPreview } from './edit-modals/RichTextSelectionPreview';
 
@@ -47,13 +58,14 @@ import {
   mappingGroupSurfaceEdit,
   mappingGroupSurfaceView,
   mappingGroupSurfaceViewHovered,
+  MAPPING_RAIL_WIDTH,
 } from './MappingView.styles';
 import { buildSourceRefKey } from './sourceRefUtils';
-import { MappingEntryCards } from './MappingEntryCards';
+import { EditMappingCard } from './EditMappingCard';
+import { FALLBACK_CARD_HEIGHT, getMappingRailMinHeight, MappingRail } from './MappingRail';
 import { NormalizedDocumentSection } from './NormalizedDocumentSection';
 import { buildMappingDisplayGroups, type MappingDisplayGroup } from './buildMappingDisplayGroups';
-import { ViewMappingRail, type ViewMappingCardEntry } from './ViewMappingRail';
-import { ViewMappingCard } from './ViewMappingCard';
+import { ViewMappingCard, type ViewMappingCardData } from './ViewMappingCard';
 import {
   applyImageExclusionToEntryBlockGraph,
   appendImageToTargets,
@@ -66,6 +78,7 @@ import {
   collectTextExclusionRangesFromSelection,
   type TextExclusionRange,
 } from './entryBlockGraphExclusion';
+import { RemoveContentModal } from './edit-modals/RemoveContentModal';
 
 interface EditModalState {
   viewModel: EditModalContent;
@@ -73,11 +86,28 @@ interface EditModalState {
   primaryButtonLabel: string;
 }
 
+interface RemoveModalState {
+  isOpen: boolean;
+  locations: EditLocationOption[];
+  textRanges: TextExclusionRange[];
+  imageRefs: ImageSourceRef[];
+}
+
+const EMPTY_REMOVE_MODAL: RemoveModalState = {
+  isOpen: false,
+  locations: [],
+  textRanges: [],
+  imageRefs: [],
+};
+
 interface MappingViewProps {
   payload: MappingReviewSuspendPayload;
   entryBlockGraph: EntryBlockGraph;
   onEntryBlockGraphChange: (next: EntryBlockGraph) => void;
+  referenceGraph: ReviewedReferenceGraph;
+  onReferenceGraphChange?: (next: ReviewedReferenceGraph) => void;
   selectedEntryIndex: number | null;
+  defaultLocale: string;
   isDisabled?: boolean;
   mode?: 'view' | 'edit';
 }
@@ -135,7 +165,10 @@ export const MappingView = ({
   payload,
   entryBlockGraph,
   onEntryBlockGraphChange,
+  referenceGraph,
+  onReferenceGraphChange,
   selectedEntryIndex,
+  defaultLocale,
   isDisabled = false,
   mode = 'view',
 }: MappingViewProps): JSX.Element => {
@@ -165,6 +198,7 @@ export const MappingView = ({
     Record<string, Record<string, number>>
   >({});
   const [editModalState, setEditModalState] = useState<EditModalState>(EMPTY_EDIT_MODAL);
+  const [removeModalState, setRemoveModalState] = useState<RemoveModalState>(EMPTY_REMOVE_MODAL);
   const [pendingTextExclusionRanges, setPendingTextExclusionRanges] = useState<
     TextExclusionRange[] | null
   >(null);
@@ -179,7 +213,18 @@ export const MappingView = ({
   const cardWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const document = payload.normalizedDocument;
 
+  const {
+    selectionRectangle,
+    selectedText,
+    selectedRange,
+    clearSelection,
+    lockSelection: freezeSelection,
+  } = useReviewTextSelection(textSelectionRootRef);
+
+  const editButtonRef = useRef<HTMLDivElement>(null);
+
   const closeEditModal = () => {
+    clearSelection();
     setEditModalState(EMPTY_EDIT_MODAL);
     setPendingTextExclusionRanges(null);
     setPendingExcludeImageSourceRefs([]);
@@ -188,8 +233,16 @@ export const MappingView = ({
     setPendingPreviewHasTableContent(false);
   };
 
-  const { selectionRectangle, selectedText, selectedRange, clearSelection } =
-    useReviewTextSelection(textSelectionRootRef);
+  const handleDocumentKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Tab' && !e.shiftKey && selectedText.trim()) {
+      const button = editButtonRef.current?.querySelector('button') as HTMLElement | null;
+      if (button) {
+        e.preventDefault();
+        freezeSelection();
+        button.focus();
+      }
+    }
+  };
 
   const highlightIndex = useMemo(
     () => buildMappingHighlightIndex(entryBlockGraph, payload.contentTypes),
@@ -354,24 +407,12 @@ export const MappingView = ({
     const contentType = payload.contentTypes.find((item) => item.sys.id === entry.contentTypeId);
     const contentTypeName = contentType?.name ?? entry.contentTypeId;
     const entryTitle = getEntryTitleFromFieldMappings(entry, contentType?.displayField);
-    const contentTypeFields = contentType?.fields ?? [];
-    const fieldOptions = contentTypeFields.filter(isWorkflowContentTypeFieldWithId).map((field) => {
-      const fieldType = typeof field.type === 'string' ? field.type : 'Text';
-
-      return {
-        id: field.id,
-        fieldName: (field.name ?? '').trim() || field.id,
-        fieldType,
-        fieldDisplayType: displayType(fieldType, field.linkType, field.items),
-        isAssetField: isAssetFieldForImageAssign(field),
-      };
-    });
 
     return {
       id: entry.tempId ?? `${entry.contentTypeId}-${entryIndex}`,
       entryIndex,
       title: `${contentTypeName}: ${entryTitle}`,
-      fieldOptions,
+      fieldOptions: buildFieldOptionsForContentType(contentType),
       fieldMappings: entry.fieldMappings.map((fieldMapping) => ({
         fieldId: fieldMapping.fieldId,
         sourceRefs: fieldMapping.sourceRefs,
@@ -385,6 +426,135 @@ export const MappingView = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- recompute when entries or content types change
     [entryBlockGraph.entries, payload.contentTypes]
   );
+
+  const existingEntriesForAddEntry = useMemo(
+    () =>
+      entryBlockGraph.entries.map((entry, idx) => {
+        const contentType = payload.contentTypes.find((ct) => ct.sys.id === entry.contentTypeId);
+        const contentTypeName = contentType?.name ?? entry.contentTypeId;
+        const entryTitle = getEntryTitleFromFieldMappings(entry, contentType?.displayField);
+        return {
+          tempId: entry.tempId ?? `${entry.contentTypeId}-${idx}`,
+          label: `${contentTypeName} (${entryTitle})`,
+          contentTypeId: entry.contentTypeId,
+        };
+      }),
+    [entryBlockGraph.entries, payload.contentTypes]
+  );
+
+  const handleAddEntry = (params: AddEntryFormParams) => {
+    const { contentTypeId, fieldIds } = params;
+    const isLinkedReference = params.isReference && !!params.referenceEntryId;
+    const contentType = payload.contentTypes.find((ct) => ct.sys.id === contentTypeId);
+    const newEntryIndex = entryBlockGraph.entries.length;
+    const tempId = crypto.randomUUID();
+
+    const parentEntryIndex = isLinkedReference
+      ? entryBlockGraph.entries.findIndex(
+          (entry, idx) =>
+            (entry.tempId ?? `${entry.contentTypeId}-${idx}`) === params.referenceEntryId
+        )
+      : -1;
+    const parentEntry =
+      parentEntryIndex >= 0 ? entryBlockGraph.entries[parentEntryIndex] : undefined;
+    const parentContentType = parentEntry
+      ? payload.contentTypes.find((ct) => ct.sys.id === parentEntry.contentTypeId)
+      : undefined;
+
+    const refField = isLinkedReference
+      ? parentContentType?.fields?.find(
+          (f) =>
+            f.id === params.referenceFieldId ||
+            (!params.referenceFieldId && isEntryReferenceField(f))
+        )
+      : undefined;
+
+    const newEntry = {
+      contentTypeId,
+      tempId,
+      fields: {} as Record<string, Record<string, unknown>>,
+      fieldMappings: [],
+    };
+
+    let next: EntryBlockGraph = {
+      ...entryBlockGraph,
+      entries: [...entryBlockGraph.entries, newEntry],
+    };
+
+    if (isLinkedReference && parentEntry && refField?.id && refField.type) {
+      const { parentEntry: updatedParent, edges: nextEdges } = linkChildToParentEntry({
+        parentEntry,
+        childTempId: tempId,
+        refField: { id: refField.id, type: refField.type },
+        defaultLocale,
+        previousEdges: referenceGraph.edges ?? [],
+      });
+
+      next = {
+        ...next,
+        entries: next.entries.map((entry, idx) =>
+          idx === parentEntryIndex ? updatedParent : entry
+        ),
+      };
+
+      if (onReferenceGraphChange) {
+        onReferenceGraphChange(withUpdatedReferenceGraph(referenceGraph, nextEdges));
+      }
+    }
+
+    if (fieldIds.length > 0) {
+      const resolvedTargets = fieldIds.flatMap((fieldId) => {
+        const field = contentType?.fields?.find((f) => hasFieldId(f) && f.id === fieldId);
+        if (!field || !hasFieldType(field)) return [];
+        return [{ entryIndex: newEntryIndex, fieldId, fieldType: field.type }];
+      });
+
+      const richTextTargets = resolvedTargets.filter((t) => t.fieldType === 'RichText');
+      const nonRichTextTargets = resolvedTargets.filter((t) => t.fieldType !== 'RichText');
+
+      if (editModalState.viewModel.isImageContent) {
+        const imageRef = pendingExcludeImageSourceRefs[0];
+        if (imageRef) {
+          if (nonRichTextTargets.length) {
+            next = appendImageToTargets(next, imageRef, nonRichTextTargets);
+          }
+          if (richTextTargets.length) {
+            next = applyRichTextAssignToEntryBlockGraph(
+              next,
+              document,
+              [imageRef],
+              richTextTargets
+            );
+          }
+        }
+      } else {
+        if (richTextTargets.length && pendingPreviewSourceRefs.length) {
+          next = applyRichTextAssignToEntryBlockGraph(
+            next,
+            document,
+            pendingPreviewSourceRefs,
+            richTextTargets
+          );
+        }
+        const allRangesForAssign = [
+          ...(pendingTextExclusionRanges ?? []),
+          ...pendingTextAssignRanges,
+        ];
+        if (nonRichTextTargets.length && allRangesForAssign.length) {
+          next = applyTextAssignToEntryBlockGraph(
+            next,
+            document,
+            allRangesForAssign,
+            nonRichTextTargets
+          );
+        }
+      }
+    }
+
+    onEntryBlockGraphChange(next);
+
+    closeEditModal();
+  };
 
   const getLocationsForSourceRef = (sourceRef: SourceRef): EditLocationOption[] => {
     const targetKey = buildSourceRefKey(sourceRef);
@@ -415,16 +585,16 @@ export const MappingView = ({
     return matches;
   };
 
-  const getLocationsForSelectedText = (): EditLocationOption[] => {
+  const collectMappingKeysFromSelection = (): Set<string> => {
     const root = textSelectionRootRef.current;
     if (!root || !selectedRange) {
-      return [];
+      return new Set();
     }
 
-    const selectedMappedSegments = root.querySelectorAll<HTMLElement>(
-      '[data-review-text-segment="true"][data-is-mapped="true"]'
-    );
     const mappingKeys = new Set<string>();
+    const selectedMappedSegments = root.querySelectorAll<HTMLElement>(
+      '[data-review-text-segment="true"][data-is-mapped="true"], [data-review-image-segment="true"][data-is-mapped="true"]'
+    );
 
     for (const segment of selectedMappedSegments) {
       if (!rangeIntersectsNode(selectedRange, segment)) {
@@ -437,6 +607,15 @@ export const MappingView = ({
         .map((key) => key.trim())
         .filter(Boolean)
         .forEach((key) => mappingKeys.add(key));
+    }
+
+    return mappingKeys;
+  };
+
+  const getLocationsForSelectedText = (): EditLocationOption[] => {
+    const mappingKeys = collectMappingKeysFromSelection();
+    if (!mappingKeys.size) {
+      return [];
     }
 
     const locations = allGroups
@@ -485,7 +664,9 @@ export const MappingView = ({
             ? Math.max(0, anchorNode.getBoundingClientRect().top - groupTop)
             : 0;
           const height =
-            wrapperNode?.getBoundingClientRect().height || wrapperNode?.offsetHeight || 28;
+            wrapperNode?.getBoundingClientRect().height ||
+            wrapperNode?.offsetHeight ||
+            FALLBACK_CARD_HEIGHT;
 
           return { key: card.key, rawTop, height };
         });
@@ -506,7 +687,7 @@ export const MappingView = ({
     });
 
     return () => observer.disconnect();
-  }, [allGroups]);
+  }, [allGroups, isViewMode]);
 
   const handleEditFromSelection = () => {
     if (isDisabled || !selectedText.trim()) return;
@@ -560,6 +741,71 @@ export const MappingView = ({
       primaryButtonLabel: 'Save',
     });
     clearSelection();
+  };
+
+  const handleRemoveFromSelection = (locations: EditLocationOption[]) => {
+    if (isDisabled || !selectedText.trim()) return;
+    const selectionRange = selectedRange ? selectedRange.cloneRange() : null;
+    const textRanges = collectTextExclusionRangesFromSelection(
+      textSelectionRootRef.current,
+      selectionRange
+    );
+    const imageRefs = collectRichTextSourceRefsFromSelection(
+      textSelectionRootRef.current,
+      selectionRange,
+      document,
+      { mappedState: 'mapped' }
+    ).filter(
+      (ref): ref is ImageSourceRef => isBlockImageSourceRef(ref) || isTableImageSourceRef(ref)
+    );
+
+    if (!locations.length || (!textRanges.length && !imageRefs.length)) {
+      clearSelection();
+      return;
+    }
+
+    setRemoveModalState({ isOpen: true, locations, textRanges, imageRefs });
+    clearSelection();
+  };
+
+  const handleRemoveImage = (sourceRef: ImageSourceRef) => {
+    if (isDisabled) return;
+    const locations = getLocationsForSourceRef(sourceRef);
+    if (!locations.length) return;
+
+    setRemoveModalState({ isOpen: true, locations, textRanges: [], imageRefs: [sourceRef] });
+    setHoveredMappingKeys([]);
+  };
+
+  const closeRemoveModal = () => {
+    setRemoveModalState(EMPTY_REMOVE_MODAL);
+  };
+
+  const handleConfirmRemove = () => {
+    const { locations, textRanges, imageRefs } = removeModalState;
+    let next = entryBlockGraph;
+
+    for (const location of locations) {
+      const locationSourceRefKeys = new Set(
+        (location.sourceRefs?.length ? location.sourceRefs : [location.sourceRef]).map(
+          buildSourceRefKey
+        )
+      );
+
+      if (textRanges.length) {
+        next = applyTextExclusionToEntryBlockGraph(next, location, textRanges);
+      }
+
+      const matchingImages = imageRefs.filter((ref) =>
+        locationSourceRefKeys.has(buildSourceRefKey(ref))
+      );
+      for (const imageRef of matchingImages) {
+        next = applyImageExclusionToEntryBlockGraph(next, location, imageRef);
+      }
+    }
+
+    if (next !== entryBlockGraph) onEntryBlockGraphChange(next);
+    closeRemoveModal();
   };
 
   const handleEditImage = (sourceRef: ImageSourceRef, label: string) => {
@@ -652,10 +898,9 @@ export const MappingView = ({
           : undefined;
 
         const resolvedTargets = addedFieldIds.flatMap((fieldId) => {
-          const field = contentType?.fields?.find((f) => 'id' in f && f.id === fieldId);
-          const fieldType =
-            field && 'type' in field && typeof field.type === 'string' ? field.type : 'Text';
-          return [{ entryIndex: entryLoc.entryIndex, fieldId, fieldType }];
+          const field = contentType?.fields?.find((f) => hasFieldId(f) && f.id === fieldId);
+          if (!field || !hasFieldType(field)) return [];
+          return [{ entryIndex: entryLoc.entryIndex, fieldId, fieldType: field.type }];
         });
 
         if (isImageContent) {
@@ -716,11 +961,11 @@ export const MappingView = ({
     closeEditModal();
   };
 
-  const viewCardsByGroup = useMemo((): Record<string, ViewMappingCardEntry[]> => {
-    const result: Record<string, ViewMappingCardEntry[]> = {};
+  const viewCardsByGroup = useMemo((): Record<string, ViewMappingCardData[]> => {
+    const result: Record<string, ViewMappingCardData[]> = {};
 
     allGroups.forEach((group) => {
-      const cards: ViewMappingCardEntry[] = [];
+      const cards: ViewMappingCardData[] = [];
 
       group.mappingCards.forEach((card) => {
         const location = locationsByCardKey.get(card.key);
@@ -753,13 +998,23 @@ export const MappingView = ({
     return result;
   }, [allGroups, locationsByCardKey, entryBlockGraph.entries, payload.contentTypes]);
 
+  const selectionLocations =
+    selectionRectangle && !isDisabled && !isViewMode ? getLocationsForSelectedText() : [];
+
   return (
     <>
       <Flex
         ref={textSelectionRootRef}
+        contentEditable={!isViewMode || undefined}
+        suppressContentEditableWarning
+        onBeforeInput={(e) => e.preventDefault()}
+        onPaste={(e) => e.preventDefault()}
+        onCut={(e) => e.preventDefault()}
+        onDrop={(e) => e.preventDefault()}
+        onKeyDown={handleDocumentKeyDown}
         flexDirection="column"
         gap="spacingS"
-        style={{ marginTop: tokens.spacingM }}>
+        style={{ marginTop: tokens.spacingM, outline: 'none' }}>
         {(isViewMode || selectedEntryRow) && (
           <Flex
             gap="spacingM"
@@ -796,7 +1051,10 @@ export const MappingView = ({
                 )}
               </Text>
             </Box>
-            <Flex alignItems="center" gap="spacing2Xs" style={{ flex: '0 0 280px', maxWidth: 280 }}>
+            <Flex
+              alignItems="center"
+              gap="spacing2Xs"
+              style={{ flex: `0 0 ${MAPPING_RAIL_WIDTH}px`, maxWidth: MAPPING_RAIL_WIDTH }}>
               <LightbulbIcon size="tiny" style={{ color: tokens.gray600, flexShrink: 0 }} />
               <Text as="span" fontSize="fontSizeS" fontColor="gray600">
                 Tip: hover over a card to highlight its content
@@ -837,6 +1095,12 @@ export const MappingView = ({
                     : mappingGroupSurfaceView
                   : mappingGroupSurfaceEdit;
 
+                const cardOffsets = cardOffsetsByGroup[group.id] ?? {};
+                const cardHeights = cardHeightsByGroup[group.id] ?? {};
+                const viewCards = viewCardsByGroup[group.id] ?? [];
+                const editCards = group.mappingCards;
+                const railCards = isViewMode ? viewCards : editCards;
+
                 return (
                   <Box key={group.id}>
                     <Flex
@@ -862,7 +1126,8 @@ export const MappingView = ({
                                   hoveredMappingKeys={hoveredMappingKeys}
                                   isViewMode={isViewMode}
                                   onSetHoveredMappingKeys={setHoveredMappingKeys}
-                                  onEditImage={isViewMode ? undefined : handleEditImage}
+                                  onEditImage={handleEditImage}
+                                  onRemoveImage={handleRemoveImage}
                                 />
                               ))}
                             </Flex>
@@ -881,31 +1146,47 @@ export const MappingView = ({
                                 hoveredMappingKeys={hoveredMappingKeys}
                                 isViewMode={isViewMode}
                                 onSetHoveredMappingKeys={setHoveredMappingKeys}
-                                onEditImage={isViewMode ? undefined : handleEditImage}
+                                onEditImage={handleEditImage}
+                                onRemoveImage={handleRemoveImage}
                               />
                             ))}
                           </Flex>
                         )}
                       </Box>
 
-                      {isViewMode ? (
-                        <ViewMappingRail
-                          segmentId={group.id}
-                          cards={viewCardsByGroup[group.id] ?? []}
-                          hoveredMappingKeys={hoveredMappingKeys}
-                          onSetHoveredMappingKeys={setHoveredMappingKeys}
-                        />
-                      ) : (
-                        <MappingEntryCards
-                          groupId={group.id}
-                          mappingCards={group.mappingCards}
-                          cardOffsetsByGroup={cardOffsetsByGroup}
-                          cardHeightsByGroup={cardHeightsByGroup}
-                          hoveredMappingKeys={hoveredMappingKeys}
-                          onSetHoveredMappingKeys={setHoveredMappingKeys}
-                          setCardWrapperRef={setCardWrapperRef}
-                        />
-                      )}
+                      <MappingRail
+                        testId={
+                          isViewMode ? `view-mapping-rail-${group.id}` : `mapping-rail-${group.id}`
+                        }
+                        minHeight={getMappingRailMinHeight(railCards, cardOffsets, cardHeights)}>
+                        {isViewMode
+                          ? viewCards.map((card) => (
+                              <ViewMappingCard
+                                key={card.key}
+                                card={card}
+                                top={cardOffsets[card.key] ?? 0}
+                                wrapperRef={setCardWrapperRef(card.key)}
+                                isHovered={card.mappingKeys.some((key) =>
+                                  hoveredMappingKeys.includes(key)
+                                )}
+                                onMouseEnter={() => setHoveredMappingKeys(card.mappingKeys)}
+                                onMouseLeave={() => setHoveredMappingKeys([])}
+                              />
+                            ))
+                          : editCards.map((card) => (
+                              <EditMappingCard
+                                key={card.key}
+                                card={card}
+                                top={cardOffsets[card.key] ?? 0}
+                                wrapperRef={setCardWrapperRef(card.key)}
+                                isHovered={card.mappingKeys.some((key) =>
+                                  hoveredMappingKeys.includes(key)
+                                )}
+                                onMouseEnter={() => setHoveredMappingKeys(card.mappingKeys)}
+                                onMouseLeave={() => setHoveredMappingKeys([])}
+                              />
+                            ))}
+                      </MappingRail>
                     </Flex>
                   </Box>
                 );
@@ -916,7 +1197,17 @@ export const MappingView = ({
       </Flex>
 
       {selectionRectangle && !isDisabled && !isViewMode ? (
-        <EditMappingButton anchorRectangle={selectionRectangle} onEdit={handleEditFromSelection} />
+        <EditMappingButton
+          ref={editButtonRef}
+          anchorRectangle={selectionRectangle}
+          onEdit={handleEditFromSelection}
+          onRemove={
+            selectionLocations.length > 0
+              ? () => handleRemoveFromSelection(selectionLocations)
+              : undefined
+          }
+          onBlur={clearSelection}
+        />
       ) : null}
 
       <EditModal
@@ -925,6 +1216,9 @@ export const MappingView = ({
         viewModel={editModalState.viewModel}
         title={editModalState.title}
         primaryButtonLabel={editModalState.primaryButtonLabel}
+        contentTypes={payload.contentTypes}
+        existingEntries={existingEntriesForAddEntry}
+        onAddEntry={handleAddEntry}
         additionalContent={(() => {
           if (!pendingPreviewSourceRefs.length && !pendingPreviewHasTableContent) return undefined;
           const allTableText = pendingPreviewSourceRefs.every(isTableTextSourceRef);
@@ -965,6 +1259,13 @@ export const MappingView = ({
           );
         })()}
         onConfirmPrimary={handleEditModalConfirmPrimary}
+      />
+
+      <RemoveContentModal
+        isOpen={removeModalState.isOpen}
+        onConfirm={handleConfirmRemove}
+        onCancel={closeRemoveModal}
+        locations={removeModalState.locations}
       />
     </>
   );

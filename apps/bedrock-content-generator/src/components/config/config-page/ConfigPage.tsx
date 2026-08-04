@@ -13,8 +13,10 @@ import { Box, Heading } from '@contentful/f36-components';
 import useGetContentTypes from '@hooks/config/useGetContentTypes';
 import useInitializeParameters from '@hooks/config/useInitializeParameters';
 import useSaveConfigHandler from '@hooks/config/useSaveConfigHandler';
-import { useMemo, useReducer } from 'react';
-import AppInstallationParameters from '../appInstallationParameters';
+import { useMemo, useReducer, useState } from 'react';
+import AppInstallationParameters, {
+  PersistedInstallationParameters,
+} from '../appInstallationParameters';
 import { styles } from './ConfigPage.styles';
 
 const initialParameters: Validator<AppInstallationParameters> = {
@@ -50,45 +52,48 @@ const initialContentTypes: Set<string> = new Set();
 const ConfigPage = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
   const [contentTypes, dispatchContentTypes] = useReducer(contentTypeReducer, initialContentTypes);
+  const [accessKeyIdInput, setAccessKeyIdInput] = useState<string>('');
+  const [secretAccessKeyInput, setSecretAccessKeyInput] = useState<string>('');
 
-  const parametersToSave: AppInstallationParameters = useMemo(() => {
-    return {
-      accessKeyId: parameters.accessKeyId.value,
-      secretAccessKey: parameters.secretAccessKey.value,
+  const parametersToSave: PersistedInstallationParameters = useMemo(() => {
+    // Flat scalar shape: installation parameter definitions have no object
+    // type, and declaring Secret credentials opts the whole object into strict
+    // `additionalProperties: false` validation. Each field here must have a
+    // matching definition on the AppDefinition.
+    const params: PersistedInstallationParameters = {
       model: parameters.model.value,
       region: parameters.region.value,
       profile: parameters.profile.value,
-      brandProfile: {
-        additional: parameters.brandProfile.additional?.value,
-        audience: parameters.brandProfile.audience?.value,
-        exclude: parameters.brandProfile.exclude?.value,
-        include: parameters.brandProfile.include?.value,
-        profile: parameters.brandProfile.profile?.value,
-        tone: parameters.brandProfile.tone?.value,
-        values: parameters.brandProfile.values?.value,
-      },
-      enabledFeatures: parameters.enabledFeatures?.value,
+      additional: parameters.brandProfile.additional?.value,
+      audience: parameters.brandProfile.audience?.value,
+      exclude: parameters.brandProfile.exclude?.value,
+      include: parameters.brandProfile.include?.value,
+      tone: parameters.brandProfile.tone?.value,
+      values: parameters.brandProfile.values?.value,
+      // JSON-encode the array since Symbol params are scalar-only.
+      enabledFeatures: JSON.stringify(
+        parameters.enabledFeatures?.value || (Object.keys(featureConfig) as AIFeature[])
+      ),
     };
+
+    // Credentials are write-only: only persist when the admin enters new values,
+    // otherwise omit so we don't clobber stored Secrets with empty strings.
+    if (accessKeyIdInput) params.accessKeyId = accessKeyIdInput;
+    if (secretAccessKeyInput) params.secretAccessKey = secretAccessKeyInput;
+
+    return params;
   }, [
     parameters.brandProfile,
-    parameters.accessKeyId.value,
-    parameters.secretAccessKey.value,
-    parameters.region.value,
     parameters.model.value,
+    parameters.region.value,
     parameters.profile.value,
     parameters.enabledFeatures?.value,
+    accessKeyIdInput,
+    secretAccessKeyInput,
   ]);
 
   const validateParams = (): string[] => {
     const notifierErrors = [];
-
-    if (!parameters.accessKeyId.isValid) {
-      notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingAccessKeyID}`);
-    }
-
-    if (!parameters.secretAccessKey.isValid) {
-      notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingSecretAccessKey}`);
-    }
 
     if (!parameters.model.isValid) {
       notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingModel}`);
@@ -117,6 +122,10 @@ const ConfigPage = () => {
         model={parameters.model.value}
         modelValid={parameters.model.isValid}
         region={parameters.region.value}
+        accessKeyIdInput={accessKeyIdInput}
+        secretAccessKeyInput={secretAccessKeyInput}
+        onAccessKeyIdChange={setAccessKeyIdInput}
+        onSecretAccessKeyChange={setSecretAccessKeyInput}
         dispatch={dispatchParameters}
       />
       <hr css={styles.splitter} />

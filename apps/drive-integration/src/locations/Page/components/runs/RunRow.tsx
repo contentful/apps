@@ -1,0 +1,199 @@
+import { useState } from 'react';
+import {
+  Badge,
+  Button,
+  Flex,
+  TableCell,
+  TableRow,
+  Text,
+  Tooltip,
+} from '@contentful/f36-components';
+import { PageAppSDK } from '@contentful/app-sdk';
+import { DisplayStatus } from '../../../../types/runs';
+import type { RunWithStatus } from '../../../../types/runs';
+import { EntriesCreatedModal } from './EntriesCreatedModal';
+
+interface RunRowProps {
+  run: RunWithStatus;
+  sdk: PageAppSDK;
+  onReview: (runId: string) => void;
+  onRetry: (runId: string) => Promise<void>;
+}
+
+function formatDate(iso: string): string {
+  const date = new Date(iso);
+  return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function StatusBadge({
+  status,
+  errorMessage,
+  entryCount,
+}: {
+  status: RunWithStatus['displayStatus'];
+  errorMessage?: string;
+  entryCount?: number;
+}) {
+  switch (status) {
+    case DisplayStatus.LOADING:
+      return (
+        <Badge
+          variant="secondary"
+          style={{ background: '#F0F2F5', color: '#536171', border: 'none' }}>
+          Loading
+        </Badge>
+      );
+    case DisplayStatus.RUNNING:
+      return (
+        <Badge
+          variant="primary"
+          style={{ background: '#EAF0FB', color: '#0059C8', border: 'none', fontWeight: 500 }}>
+          In progress
+        </Badge>
+      );
+    case DisplayStatus.NEEDS_REVIEW:
+      return (
+        <Badge
+          variant="positive"
+          style={{ background: '#EAF7EC', color: '#1B7230', border: 'none', fontWeight: 500 }}>
+          Ready for review
+        </Badge>
+      );
+    case DisplayStatus.COMPLETED: {
+      const label =
+        entryCount === undefined
+          ? 'Complete'
+          : `Complete - ${entryCount} ${entryCount === 1 ? 'entry' : 'entries'}`;
+      return (
+        <Badge
+          variant="secondary"
+          style={{ background: '#F0F2F5', color: '#536171', border: 'none', fontWeight: 500 }}>
+          {label}
+        </Badge>
+      );
+    }
+    case DisplayStatus.FAILED: {
+      const badge = (
+        <Badge
+          variant="negative"
+          style={{ background: '#FDECEA', color: '#C0392B', border: 'none', fontWeight: 500 }}>
+          Failed
+        </Badge>
+      );
+      return errorMessage ? (
+        <Tooltip content={errorMessage} placement="top">
+          {badge}
+        </Tooltip>
+      ) : (
+        badge
+      );
+    }
+    case DisplayStatus.EXPIRED:
+      return (
+        <Badge
+          variant="secondary"
+          style={{ background: '#F0F2F5', color: '#536171', border: 'none', fontWeight: 500 }}>
+          Expired
+        </Badge>
+      );
+  }
+}
+
+export function RunRow({ run, sdk, onReview, onRetry }: RunRowProps) {
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleRetry = async () => {
+    setIsRetrying(true);
+    try {
+      await onRetry(run.runId);
+    } finally {
+      setIsRetrying(false);
+    }
+  };
+
+  return (
+    <>
+      <TableRow>
+        {/* Name */}
+        <TableCell>
+          <Text fontWeight="fontWeightMedium">{run.documentTitle}</Text>
+        </TableCell>
+
+        {/* Created date */}
+        <TableCell>
+          <Text fontSize="fontSizeS" fontColor="gray600">
+            {formatDate(run.startedAt)}
+          </Text>
+        </TableCell>
+
+        {/* Status badge */}
+        <TableCell style={{ verticalAlign: 'middle' }}>
+          <StatusBadge
+            status={run.displayStatus}
+            errorMessage={run.errorMessage}
+            entryCount={run.createdEntryIds?.length}
+          />
+        </TableCell>
+
+        {/* Action */}
+        <TableCell style={{ verticalAlign: 'middle' }}>
+          {run.displayStatus === DisplayStatus.RUNNING && (
+            <Flex gap="spacing2Xs" alignItems="center">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  style={{
+                    width: '5px',
+                    height: '5px',
+                    borderRadius: '50%',
+                    background: '#536171',
+                    animation: `driveDotBounce 1.2s ease-in-out ${i * 0.2}s infinite`,
+                  }}
+                />
+              ))}
+              <style>{`
+                @keyframes driveDotBounce {
+                  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+                  40% { transform: translateY(-5px); opacity: 1; }
+                }
+              `}</style>
+            </Flex>
+          )}
+          {run.displayStatus === DisplayStatus.NEEDS_REVIEW && (
+            <Button variant="secondary" size="small" onClick={() => onReview(run.runId)}>
+              Review
+            </Button>
+          )}
+          {run.displayStatus === DisplayStatus.COMPLETED &&
+            run.createdEntryIds &&
+            run.createdEntryIds.length > 0 && (
+              <Button variant="secondary" size="small" onClick={() => setIsModalOpen(true)}>
+                View
+              </Button>
+            )}
+          {(run.displayStatus === DisplayStatus.FAILED ||
+            run.displayStatus === DisplayStatus.EXPIRED) && (
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={() => void handleRetry()}
+              isLoading={isRetrying}
+              isDisabled={isRetrying}>
+              Retry
+            </Button>
+          )}
+        </TableCell>
+      </TableRow>
+
+      {run.createdEntryIds && run.createdEntryIds.length > 0 && (
+        <EntriesCreatedModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          sdk={sdk}
+          entryIds={run.createdEntryIds}
+        />
+      )}
+    </>
+  );
+}

@@ -16,6 +16,7 @@ export interface AppEventHandlerRequest {
   state?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface AppEventHandlerResponse {
   // Empty response for event handlers
 }

@@ -17,20 +17,23 @@ export const ConfirmCancelModal = ({
     <Modal isShown={isOpen} onClose={onCancel} size="medium" shouldCloseOnOverlayClick={false}>
       {() => (
         <>
-          <Modal.Header title="You're about to lose your progress" onClose={onCancel} />
+          <Modal.Header title="Delete this job?" onClose={onCancel} />
           <Modal.Content>
-            <Paragraph>No entries will be created and you'll need to start over.</Paragraph>
+            <Paragraph>
+              This will permanently delete the job. No entries will be created and you&apos;ll need
+              to start over.
+            </Paragraph>
           </Modal.Content>
           <Modal.Controls>
             <Button onClick={onCancel} variant="secondary" isDisabled={isConfirming}>
-              Keep creating
+              Keep review open
             </Button>
             <Button
               onClick={onConfirm}
-              variant="primary"
+              variant="negative"
               isLoading={isConfirming}
               isDisabled={isConfirming}>
-              Cancel without creating
+              Delete
             </Button>
           </Modal.Controls>
         </>

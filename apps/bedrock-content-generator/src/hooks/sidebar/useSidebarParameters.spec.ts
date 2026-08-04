@@ -1,4 +1,4 @@
-import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { PersistedInstallationParameters } from '@components/config/appInstallationParameters';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -16,7 +16,7 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 
 describe('useSidebarParameters', () => {
   it('should return whether there is a brand profile and any errors', async () => {
-    const sdk = useSDK<DialogAppSDK<AppInstallationParameters>>();
+    const sdk = useSDK<DialogAppSDK<PersistedInstallationParameters>>();
     sdk.parameters.installation = generateRandomParameters();
     const { result } = renderHook(() => useSidebarParameters());
 

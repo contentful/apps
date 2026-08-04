@@ -1,17 +1,20 @@
 import { GlobalStyles } from '@contentful/f36-components';
 import { SDKProvider } from '@contentful/react-apps-toolkit';
+import { withLDProvider } from 'launchdarkly-react-client-sdk';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import LocalhostWarning from './locations/LocalhostWarning';
+const AppWithLD = withLDProvider({
+  clientSideID: import.meta.env.VITE_LD_CLIENT_ID ?? '',
+  options: { bootstrap: 'localStorage' },
+})(App);
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
 
 const handleOAuthCallback = () => {
   const params = new URLSearchParams(window.location.search);
-  console.log('OAuth callback params:', params);
   if (params.has('code') && params.has('state') && window.opener) {
-    console.log('Sending OAuth completion message to parent window');
     window.opener.postMessage(
       {
         type: 'oauth:complete',
@@ -37,7 +40,7 @@ if (process.env.NODE_ENV === 'development' && window.self === window.top) {
   root.render(
     <SDKProvider>
       <GlobalStyles />
-      <App />
+      <AppWithLD />
     </SDKProvider>
   );
 }

@@ -1,0 +1,34 @@
+{
+  "name": "@contentful/aem-assets",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 1vE7iT7E8Wid6U52gxBXY2 --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 7wt4UW8rciutTE4lXQTpuc --token ${TEST_CMA_TOKEN}"
+  },
+  "dependencies": {
+    "@contentful/app-sdk": "^4.56.0",
+    "@contentful/dam-app-base": "4.0.5",
+    "@contentful/f36-components": "6.7.4",
+    "react": "19.2.5",
+    "react-dom": "19.2.5"
+  },
+  "devDependencies": {
+    "@contentful/app-scripts": "^2.5.11",
+    "@vitejs/plugin-react": "^6.0.1",
+    "vite": "^8.0.10"
+  },
+  "browserslist": {
+    "production": [">0.2%", "not dead", "not op_mini all"],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "homepage": "."
+}

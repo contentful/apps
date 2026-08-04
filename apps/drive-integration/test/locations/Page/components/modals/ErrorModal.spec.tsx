@@ -1,9 +1,19 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { ErrorModal } from '../../../../../src/locations/Page/components/modals/ErrorModal';
 
 describe('ErrorModal', () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.runAllTimers();
+    vi.useRealTimers();
+  });
+
   it('renders the provided title and message with the default close action', () => {
     const onClose = vi.fn();
 

@@ -48,3 +48,11 @@ export interface EditModalContent {
   currentLocations: EditLocationOption[];
   newLocations: EditModalNewLocation[];
 }
+
+export interface AddEntryFormParams {
+  contentTypeId: string;
+  isReference: boolean;
+  referenceEntryId: string | null;
+  referenceFieldId: string | null;
+  fieldIds: string[];
+}

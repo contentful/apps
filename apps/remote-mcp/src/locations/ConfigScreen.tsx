@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { Stack } from '@contentful/f36-components';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import { PermissionsSection } from '../components/access-config';
 import { usePermissions } from '../hooks/usePermissions';
 import { FormHeader } from '../components/form-header/FormHeader';
@@ -16,31 +16,23 @@ import { AppInstallationParameters } from '../components/types/config';
 const ConfigScreen = () => {
   const [expandedAccordions, setExpandedAccordions] = useState({
     contentLifecycle: true,
+    experienceOrchestration: false,
     otherFeatures: false,
-    migration: false,
   });
+
+  const sdk = useSDK<ConfigAppSDK>();
 
   const {
     contentLifecyclePermissions,
     otherFeaturesPermissions,
-    migrationPermissions,
     setContentLifecyclePermissions,
     setOtherFeaturesPermissions,
-    setMigrationPermissions,
     handleSelectAllToggle,
     handleEntityActionToggle,
     handleColumnToggle,
     handleRowToggle,
     handleOtherFeatureToggle,
-    handleMigrationToggle,
   } = usePermissions();
-
-  const sdk = useSDK<ConfigAppSDK>();
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
 
   const onConfigure = useCallback(async () => {
     // This method will be called when a user clicks on "Install"
@@ -54,7 +46,6 @@ const ConfigScreen = () => {
     const parameters = createAppInstallationParameters({
       contentLifecyclePermissions,
       otherFeaturesPermissions,
-      migrationPermissions,
     });
     return {
       // Parameters to be persisted as the app configuration.
@@ -63,7 +54,7 @@ const ConfigScreen = () => {
       // locations, you can just pass the currentState as is
       targetState: currentState,
     };
-  }, [contentLifecyclePermissions, otherFeaturesPermissions, migrationPermissions, sdk]);
+  }, [contentLifecyclePermissions, otherFeaturesPermissions, sdk]);
 
   useEffect(() => {
     // `onConfigure` allows to configure a callback to be
@@ -84,14 +75,13 @@ const ConfigScreen = () => {
 
         setContentLifecyclePermissions(parsedParameters.contentLifecyclePermissions);
         setOtherFeaturesPermissions(parsedParameters.otherFeaturesPermissions);
-        setMigrationPermissions(parsedParameters.migrationPermissions);
       }
 
       // Once preparation has finished, call `setReady` to hide
       // the loading screen and present the app to a user.
       sdk.app.setReady();
     })();
-  }, [sdk, setContentLifecyclePermissions, setOtherFeaturesPermissions, setMigrationPermissions]);
+  }, [sdk, setContentLifecyclePermissions, setOtherFeaturesPermissions]);
 
   const handleAccordionToggle = (section: string, expanded: boolean) => {
     setExpandedAccordions((prev) => ({
@@ -111,7 +101,6 @@ const ConfigScreen = () => {
       <PermissionsSection
         contentLifecyclePermissions={contentLifecyclePermissions}
         otherFeaturesPermissions={otherFeaturesPermissions}
-        migrationPermissions={migrationPermissions}
         expandedAccordions={expandedAccordions}
         onAccordionToggle={handleAccordionToggle}
         onSelectAllToggle={handleSelectAllToggle}
@@ -119,7 +108,6 @@ const ConfigScreen = () => {
         onColumnToggle={handleColumnToggle}
         onRowToggle={handleRowToggle}
         onOtherFeatureToggle={handleOtherFeatureToggle}
-        onMigrationToggle={handleMigrationToggle}
       />
       <Setup />
       <RolesPermissionsFooter />

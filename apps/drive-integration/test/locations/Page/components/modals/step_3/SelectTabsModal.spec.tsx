@@ -80,10 +80,13 @@ const selectTab = async (tabId: string) => {
 describe('SelectTabsModal', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
   });
 
   afterEach(() => {
     cleanup();
+    vi.runAllTimers();
+    vi.useRealTimers();
   });
 
   describe('Rendering', () => {

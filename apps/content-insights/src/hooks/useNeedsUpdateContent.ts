@@ -5,7 +5,7 @@ import { useUsers } from './useUsers';
 import { useEntryTitlesForIds } from './useEntryTitlesForIds';
 import type { AppInstallationParameters } from '../locations/ConfigScreen';
 import { ITEMS_PER_PAGE } from '../utils/consts';
-import { getEntryTitle, getUniqueUserIdsFromEntries } from '../utils/EntryUtils';
+import { getEntryTitle, getUniqueUserIdsFromEntries, isArchivedEntry } from '../utils/EntryUtils';
 import { parseDate, subMonths, msPerDay } from '../utils/dateUtils';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
 import { getCreatorFromEntry } from '../utils/UserUtils';
@@ -57,6 +57,8 @@ export function useNeedsUpdate(
   const filteredEntries = useMemo(
     () =>
       entries.filter((entry) => {
+        if (isArchivedEntry(entry)) return false;
+
         if (activeContentTypeSet !== null) {
           const contentTypeId = entry.sys.contentType?.sys?.id;
           if (!contentTypeId || !activeContentTypeSet.has(contentTypeId)) return false;

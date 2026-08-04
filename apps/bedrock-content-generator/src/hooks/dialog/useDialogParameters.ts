@@ -1,4 +1,4 @@
-import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { PersistedInstallationParameters } from '@components/config/appInstallationParameters';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { DialogInvocationParameters } from '@locations/Dialog';
@@ -23,7 +23,7 @@ export type DialogParameters = loadingState | resolvedState;
  * @returns DialogInvocationParameters
  */
 const useDialogParameters = (): DialogParameters => {
-  const sdk = useSDK<DialogAppSDK<AppInstallationParameters, DialogInvocationParameters>>();
+  const sdk = useSDK<DialogAppSDK<PersistedInstallationParameters, DialogInvocationParameters>>();
   const [parameters, setParameters] = useState<DialogInvocationParameters | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 

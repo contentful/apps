@@ -11,6 +11,7 @@ export interface MockEntryOverrides {
   createdById?: string;
   updatedAt?: string;
   publishedAt?: string;
+  archived?: boolean;
 }
 
 export function createMockEntry(overrides: MockEntryOverrides = {}): EntryProps {
@@ -22,6 +23,7 @@ export function createMockEntry(overrides: MockEntryOverrides = {}): EntryProps 
     createdById = `user-${Math.random().toString(36).slice(2, 11)}`,
     updatedAt = now.toISOString(),
     publishedAt = now.toISOString(),
+    archived = false,
   } = overrides;
 
   return {
@@ -31,6 +33,12 @@ export function createMockEntry(overrides: MockEntryOverrides = {}): EntryProps 
       createdAt,
       updatedAt,
       publishedAt,
+      // The CMA sets archivedVersion (and archivedAt) only on archived
+      // entries; absence is what marks an entry as not archived.
+      ...(archived && {
+        archivedVersion: 1,
+        archivedAt: updatedAt,
+      }),
       contentType: {
         sys: {
           id: contentTypeId,

@@ -20,6 +20,8 @@ export const ERROR_MESSAGES = {
     'The import took too long to complete. Try a simpler document or split it into smaller sections.',
   OUT_OF_DOMAIN:
     'This document or content type combination is outside the supported range for import. Try a different document or content type.',
+  MISSING_PARAMETER:
+    'The import could not be completed due to a missing or invalid parameter. Please try again or contact support if the issue persists.',
 } as const;
 
 export const SUCCESS_MESSAGES = {

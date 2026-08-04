@@ -1,10 +1,10 @@
 import { isTextSourceRef } from '@types';
-import type { MappingCardData } from './MappingCard';
+import type { EditMappingCardData } from './EditMappingCard';
 import type { Tab, DocSegment } from './buildDocument';
 import { type MappingHighlight, getMappingCardKey } from './buildHighlights';
 import { getAnchorIdForSourceRef } from './resolveMappingCardOffsets';
 
-export interface RenderedMappingCard extends MappingCardData {
+export interface RenderedMappingCard extends EditMappingCardData {
   fieldIdentity: string;
   anchorId: string;
   mappingKeys: string[];
@@ -17,7 +17,7 @@ export interface MappingDisplayGroup {
   showGroupedSurface: boolean;
 }
 
-interface DraftMappingCard extends MappingCardData {
+interface DraftMappingCard extends EditMappingCardData {
   fieldIdentity: string;
   anchorId: string;
   mappingKeys: string[];

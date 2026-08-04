@@ -36,6 +36,9 @@ const Config = (props: ConfigProps) => {
     apiBearerToken: '',
     excludedProjects: [],
   });
+  // Decoupled input state — keeps the TextInput editable without triggering the
+  // parameters.apiBearerToken useEffect (which fires a Wistia API call on every change).
+  const [tokenInput, setTokenInput] = useState('');
   const [loading, setLoadingStatus] = useState(false);
 
   const getProjects = useCallback(async () => {
@@ -57,6 +60,7 @@ const Config = (props: ConfigProps) => {
           setRequiredMessage(error.message);
         }
       }
+      setLoadingStatus(false);
     }
   }, [parameters.apiBearerToken]);
 
@@ -90,6 +94,7 @@ const Config = (props: ConfigProps) => {
       // Set local parameter state based on the installation params
       if (currentParameters) {
         setParameters(currentParameters);
+        setTokenInput(currentParameters.apiBearerToken || '');
       } else {
         setParameters({
           apiBearerToken: '',
@@ -102,24 +107,15 @@ const Config = (props: ConfigProps) => {
   }, [props.sdk]);
 
   const getInputValue: () => void = async () => {
-    const tokenField = document.getElementById('apiBearerTokenInput') as HTMLInputElement | null;
-    if (tokenField !== null) {
-      const value = tokenField?.value;
-      if (!value) {
-        setRequiredMessage('Please, provide a bearer token value');
+    if (!tokenInput) {
+      setRequiredMessage('Please, provide a bearer token value');
+    } else {
+      // in case the value provided is the same as the one stored, tries to fetch the projects anyway
+      // and the buttons will disappear in both the scenarios (succesful or error response)
+      if (tokenInput === parameters.apiBearerToken) {
+        getProjects();
       } else {
-        const newParameters: { [key: string]: any } = {
-          ...parameters,
-        };
-        newParameters['apiBearerToken'] = value;
-
-        // in case the value provided is the same as the one stored, tries to fetch the projects anyway
-        // and the buttons will disappear in both the scenarios (succesful or error response)
-        if (newParameters['apiBearerToken'] === parameters.apiBearerToken) {
-          getProjects();
-        } else {
-          setParameters(newParameters);
-        }
+        setParameters({ ...parameters, apiBearerToken: tokenInput });
       }
     }
   };
@@ -166,17 +162,20 @@ const Config = (props: ConfigProps) => {
             <Paragraph>Please provide your access bearer token for the Wistia Data API.</Paragraph>
             <Flex flexDirection="column" marginTop="spacingM">
               <div style={{ marginBottom: '20px' }}>
-                <FormControl id="apiBearerTokenInput">
+                <FormControl id="apiBearerTokenInput" isInvalid={!!requiredMessage}>
                   <FormControl.Label>Wistia Data API access bearer token</FormControl.Label>
                   <TextInput
                     isRequired
                     name="apiBearerTokenInput"
-                    onChange={() => setShowButton(true)}
-                    value={parameters.apiBearerToken}
+                    value={tokenInput}
+                    onChange={(e) => {
+                      setTokenInput(e.target.value);
+                      setShowButton(true);
+                    }}
                   />
-                  <FormControl.ValidationMessage>
-                    {requiredMessage || ''}
-                  </FormControl.ValidationMessage>
+                  {requiredMessage && (
+                    <FormControl.ValidationMessage>{requiredMessage}</FormControl.ValidationMessage>
+                  )}
                 </FormControl>
               </div>
               <div style={{ marginBottom: '5px' }}>
