@@ -28,6 +28,7 @@ Standard Vite app.
 
 ## Sharp Edges & Invariants
 
+- **`@tanstack/react-query` major uniqueness:** `field-editor-reference` hard-deps RQ `^4` while `field-editor-rich-text@6` / `field-editor-shared@4` peer-accept `^4 || ^5`. A dual-major install tree lets Vite bundle the wrong single major and crashes embedded entry/asset cards (`reading 'sys'`). `test/reactQueryMajors.spec.ts` fails CI if more than one major is present under `node_modules`. Do not remove the direct `@tanstack/react-query` pin without re-checking the install tree.
 - **`@contentful/field-editor-rich-text`** is embedded to provide the actual editing experience — this is the standard Contentful rich-text editor. Do not replace it with a custom editor.
 - **Versions stored as JSON** in a separate Contentful JSON field (not in the rich-text field itself). The versioning field must exist on the content type alongside the rich-text field — document this requirement clearly to users.
 - **Snapshot schema**: each snapshot has `{ id, timestamp, label, value: Document }`. Changing this schema requires migrating all existing version data.
