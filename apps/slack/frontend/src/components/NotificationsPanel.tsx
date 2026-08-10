@@ -111,7 +111,7 @@ export const NotificationsPanel = (props: Props) => {
         <ChannelNote />
         {notifications.map((notification, index) => (
           <NotificationItem
-            key={index}
+            key={notification.id}
             index={index}
             contentTypes={contentTypes}
             notification={notification}
