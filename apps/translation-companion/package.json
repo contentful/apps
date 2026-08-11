@@ -22,7 +22,7 @@
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 1RQoKuwhLeFN3BMPOwUfV1 --token ${CONTENTFUL_CMA_TOKEN}",
-    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id 7oPjKXwmGdQ9vnnjVe6MCy --definition-id 6JHs8kZdhdkARLNetwO3Jk --token $FLINKLY_CONTENTFUL_ACCESS_TOKEN --host api.flinkly.com",
+    "upload-staging": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id 7oPjKXwmGdQ9vnnjVe6MCy --definition-id 6JHs8kZdhdkARLNetwO3Jk --token $FLINKLY_CONTENTFUL_ACCESS_TOKEN --host api.flinkly.com",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:write": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
   },
