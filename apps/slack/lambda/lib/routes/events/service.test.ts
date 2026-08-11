@@ -53,25 +53,6 @@ describe('EventsService', () => {
       locale: {
         getMany: stub().resolves({ items: [{ default: true, code: 'de-DE' }] }),
       },
-      user: {
-        getForSpace: stub().callsFake(({ userId }) => {
-          const users: Record<
-            string,
-            { sys: { id: string }; firstName: string; lastName: string }
-          > = {
-            publisher: { sys: { id: 'publisher' }, firstName: 'Pub', lastName: 'Lisher' },
-            creator: { sys: { id: 'creator' }, firstName: 'Cre', lastName: 'Ator' },
-          };
-          const user = users[userId];
-          if (!user) {
-            return Promise.reject(new Error('not found'));
-          }
-          return Promise.resolve(user);
-        }),
-      },
-      space: {
-        get: stub().resolves({ name: 'Test Space' }),
-      },
     } as unknown as PlainClientAPI);
     authTokenRepository.get.resolves({ token: 'whatever' } as AuthToken);
     instance = new EventsService(
@@ -214,12 +195,9 @@ describe('EventsService', () => {
     it('returns the expected resolved values for PUBLISH', async () => {
       const expectedValue = {
         actorId: 'publisher',
-        actorName: 'Pub Lisher',
         entryName: 'test',
         date: 'Mon Feb 01 2021',
         entity: entryMock,
-        spaceName: 'Test Space',
-        environmentId: 'env-id',
       };
       const resolvedEntity = await instance.getResolvedEntity(
         'space-id',
@@ -233,12 +211,9 @@ describe('EventsService', () => {
     it('returns the expected resolved values for UNPUBLISHED', async () => {
       const expectedValue = {
         actorId: undefined,
-        actorName: undefined,
         entryName: 'test',
         date: 'Mon Mar 01 2021',
         entity: entryMock,
-        spaceName: 'Test Space',
-        environmentId: 'env-id',
       };
       const resolvedEntity = await instance.getResolvedEntity(
         'space-id',
@@ -252,12 +227,9 @@ describe('EventsService', () => {
     it('returns the expected resolved values for CREATED', async () => {
       const expectedValue = {
         actorId: 'creator',
-        actorName: 'Cre Ator',
         entryName: undefined,
         date: 'Mon Mar 01 2021',
         entity: entryMock,
-        spaceName: 'Test Space',
-        environmentId: 'env-id',
       };
       const resolvedEntity = await instance.getResolvedEntity(
         'space-id',
@@ -268,31 +240,12 @@ describe('EventsService', () => {
       );
       assert.deepEqual(resolvedEntity, expectedValue);
     });
-    it('falls back to the raw actor ID when the user lookup fails', async () => {
-      const unknownActorEventBody = {
-        ...eventBody,
-        sys: { ...eventBody.sys, createdBy: { sys: { id: 'unknown-user' } } },
-      } as unknown as EventEntity;
-
-      const resolvedEntity = await instance.getResolvedEntity(
-        'space-id',
-        'env-id',
-        'contentful',
-        SlackAppEventKey.CREATED,
-        unknownActorEventBody
-      );
-      assert.equal(resolvedEntity?.actorId, 'unknown-user');
-      assert.equal(resolvedEntity?.actorName, 'unknown-user');
-    });
     it('returns the expected resolved values for DELETE', async () => {
       const expectedValue = {
         actorId: undefined,
-        actorName: undefined,
         entryName: undefined,
         date: 'Fri Feb 01 2002',
         entity: undefined,
-        spaceName: 'Test Space',
-        environmentId: 'env-id',
       };
       const resolvedEntity = await instance.getResolvedEntity(
         'space-id',
