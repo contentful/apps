@@ -54,6 +54,14 @@ export class EventsService {
         ? `${user.firstName} ${user.lastName}`
         : user.email || userId;
     } catch (e) {
+      const error = e as { name?: string; message?: string; response?: { status?: number } };
+      console.error('getUserName: cmaClient.user.getForSpace failed, falling back to raw ID', {
+        spaceId,
+        userId,
+        errorName: error?.name,
+        errorMessage: error?.message,
+        errorStatus: error?.response?.status,
+      });
       return userId; // fallback to user ID if we can't get user details
     }
   };
@@ -66,6 +74,13 @@ export class EventsService {
       const space = await cmaClient.space.get({ spaceId });
       return space.name || spaceId;
     } catch (e) {
+      const error = e as { name?: string; message?: string; response?: { status?: number } };
+      console.error('getSpaceName: cmaClient.space.get failed, falling back to raw ID', {
+        spaceId,
+        errorName: error?.name,
+        errorMessage: error?.message,
+        errorStatus: error?.response?.status,
+      });
       return spaceId; // fallback to space ID if we can't get space details
     }
   };
