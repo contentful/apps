@@ -40,8 +40,8 @@ export function makeThumbnail(asset) {
 
 async function openDialog(sdk, _currentValue, _config) {
   const parameters = { ..._config, ...sdk.parameters.instance };
-  // const assetIds = _currentValue.map((asset) => ({ id: asset.id }));
-  // parameters.selectedAssets = assetIds;
+  const assetIds = _currentValue.map((asset) => ({ id: asset.id }));
+  parameters.selectedAssets = assetIds;
 
   const result = await sdk.dialogs.openCurrentApp({
     position: 'center',
@@ -189,8 +189,18 @@ if (ENABLE_POPUP_AUTH_REDIRECT_FIX && !isEmbeddedInIframe()) {
 
 async function renderDialog(sdk) {
   const config = sdk.parameters.invocation;
-  const { imsClientId, imsOrg, repositoryId, aemTierType, env, hideUploadButton, hideTreeNav } =
-    config;
+  const {
+    imsClientId,
+    imsOrg,
+    repositoryId,
+    aemTierType,
+    env,
+    hideUploadButton,
+    prefillSelectedAssets,
+    selectedAssets,
+    hideTreeNav,
+    selectionType,
+  } = config;
 
   if (ENABLE_POPUP_AUTH_REDIRECT_FIX) {
     persistImsConfig({ imsClientId, imsOrg });
@@ -250,10 +260,15 @@ async function renderDialog(sdk) {
 
   const contentAdvisorProps = {
     imsOrg,
+    repositoryId,
     aemTierType: aemTierType ? aemTierType.split(',') : ['delivery', 'author'],
-    env,
+    env: env === 'stage' ? 'stage' : undefined,
     hideTreeNav,
-    selectionType: 'multiple',
+    selectedAssets:
+      prefillSelectedAssets === 'Yes' && selectedAssets && Array.isArray(selectedAssets)
+        ? selectedAssets
+        : [],
+    selectionType,
     uploadConfig: {
       hideUploadButton: hideUploadButton === 'Yes' ? true : false,
     },
@@ -302,6 +317,22 @@ async function renderDialog(sdk) {
   });
 }
 
+async function customUpdateStateValue({ currentValue, result, config }, updateStateValue) {
+  if (config.prefillSelectedAssets === 'Yes') {
+    if (result) await updateStateValue(result);
+  } else {
+    if (Array.isArray(result) && result.length > 0) {
+      const newValue = [...(currentValue || []), ...result];
+
+      await updateStateValue(newValue);
+    }
+  }
+}
+
+function isDisabled() {
+  return false;
+}
+
 function validateParameters({ imsClientId }) {
   if (!imsClientId) {
     return 'Please add your IMS Client ID';
@@ -342,17 +373,30 @@ setup({
     {
       id: 'aemTierType',
       name: 'AEM Tier',
-      type: 'Symbol',
-      description: 'Specifies the tier type [delivery, author] for the app (defaults to both)',
+      type: 'List',
+      value: 'delivery,author',
+      default: '',
+      description:
+        'Specifies the tier type for the app (defaults to delivery and author if no selection made)',
       required: false,
-      default: 'delivery,author',
     },
     {
       id: 'env',
       name: 'Environment',
-      type: 'Symbol',
-      description: 'Specifies the AEM repository environment [prod,stage] for the app',
-      required: false,
+      type: 'List',
+      value: 'prod,stage',
+      default: 'prod',
+      description:
+        'Specifies the AEM repository environment for the app (defaults to prod if no selection made)',
+    },
+    {
+      id: 'prefillSelectedAssets',
+      name: 'Prefill Selected Assets',
+      type: 'List',
+      value: 'No,Yes',
+      default: 'Yes',
+      description:
+        'Determines whether the selected assets will be prefilled when opening the asset picker.',
     },
     {
       id: 'hideUploadButton',
@@ -361,12 +405,12 @@ setup({
       value: 'Yes, No',
       default: 'Yes',
       description: 'Specifies whether to show or hide the upload button',
-      required: false,
     },
   ],
-  validateParameters,
+  customUpdateStateValue,
+  isDisabled,
   makeThumbnail,
-  renderDialog,
   openDialog,
-  isDisabled: () => false,
+  renderDialog,
+  validateParameters,
 });
