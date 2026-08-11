@@ -26,6 +26,11 @@ export interface ContentLifecyclePermissions {
   conceptSchemes: EntityPermissions;
   // ExO (Experience Orchestration) entities. Shown on the config screen only
   // in ExO-enabled or empty spaces. See AIS-187.
+  //
+  // These keys predate the entity renaming (Component Type →
+  // Component, Template → Experience Template, Fragment → Experience
+  // Fragment) and are deliberately left alone: Only the user-facing labels in
+  // ../access-config/ContentLifecyclePermissionsTable.tsx were renamed.
   componentTypes: EntityPermissions;
   experiences: EntityPermissions;
   templates: EntityPermissions;

@@ -41,24 +41,18 @@ export class EventsService {
 
   private getUserName = async (
     cmaClient: PlainClientAPI,
+    spaceId: string,
     userId?: string
   ): Promise<string | undefined> => {
     if (!userId) {
       return undefined;
     }
     try {
-      // Try to get user from space users first
-      const spaceUsers = await cmaClient.user.getManyForSpace({});
-      const user = spaceUsers.items.find((u) => u.sys.id === userId);
+      const user = await cmaClient.user.getForSpace({ spaceId, userId });
 
-      if (user) {
-        return user.firstName && user.lastName
-          ? `${user.firstName} ${user.lastName}`
-          : user.email || userId;
-      }
-
-      // If not found in space users, return the user ID as fallback
-      return userId;
+      return user.firstName && user.lastName
+        ? `${user.firstName} ${user.lastName}`
+        : user.email || userId;
     } catch (e) {
       return userId; // fallback to user ID if we can't get user details
     }
@@ -216,7 +210,7 @@ export class EventsService {
 
     // Fetch additional information
     const [actorName, spaceName] = await Promise.all([
-      this.getUserName(cmaClient, actorId),
+      this.getUserName(cmaClient, spaceId, actorId),
       this.getSpaceName(cmaClient, spaceId),
     ]);
 

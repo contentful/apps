@@ -54,11 +54,19 @@ describe('EventsService', () => {
         getMany: stub().resolves({ items: [{ default: true, code: 'de-DE' }] }),
       },
       user: {
-        getManyForSpace: stub().resolves({
-          items: [
-            { sys: { id: 'publisher' }, firstName: 'Pub', lastName: 'Lisher' },
-            { sys: { id: 'creator' }, firstName: 'Cre', lastName: 'Ator' },
-          ],
+        getForSpace: stub().callsFake(({ userId }) => {
+          const users: Record<
+            string,
+            { sys: { id: string }; firstName: string; lastName: string }
+          > = {
+            publisher: { sys: { id: 'publisher' }, firstName: 'Pub', lastName: 'Lisher' },
+            creator: { sys: { id: 'creator' }, firstName: 'Cre', lastName: 'Ator' },
+          };
+          const user = users[userId];
+          if (!user) {
+            return Promise.reject(new Error('not found'));
+          }
+          return Promise.resolve(user);
         }),
       },
       space: {
@@ -259,6 +267,22 @@ describe('EventsService', () => {
         eventBody
       );
       assert.deepEqual(resolvedEntity, expectedValue);
+    });
+    it('falls back to the raw actor ID when the user lookup fails', async () => {
+      const unknownActorEventBody = {
+        ...eventBody,
+        sys: { ...eventBody.sys, createdBy: { sys: { id: 'unknown-user' } } },
+      } as unknown as EventEntity;
+
+      const resolvedEntity = await instance.getResolvedEntity(
+        'space-id',
+        'env-id',
+        'contentful',
+        SlackAppEventKey.CREATED,
+        unknownActorEventBody
+      );
+      assert.equal(resolvedEntity?.actorId, 'unknown-user');
+      assert.equal(resolvedEntity?.actorName, 'unknown-user');
     });
     it('returns the expected resolved values for DELETE', async () => {
       const expectedValue = {
