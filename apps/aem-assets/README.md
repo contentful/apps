@@ -8,14 +8,24 @@ This app lets editors browse, select, sort, and remove AEM DAM assets from a Con
 
 ## Configuration
 
+### Installation Parameters
+
 | Field | Required | Description |
 | --- | --- | --- |
 | IMS Client ID | Yes | Client ID from Adobe IMS. Must be requested from Adobe support — not the standard Adobe Developer Console. |
-| IMS Organization | Yes | The Adobe IMS org ID assigned when AEM as a Cloud Service was provisioned for your organization. |
-| Repository ID | No | Restricts asset selection to a single AEM repository. |
-| AEM Tier | No | Restricts the tier(s) searched (`delivery`, `author`). Defaults to both. |
-| Environment | No | Specifies the AEM repository environment (`prod`, `stage`). |
-| Hide Asset Upload Button | No | Hides the upload-to-AEM button inside the picker. Defaults to hidden. |
+| IMS Organization | Yes | The Adobe Identity Management System (IMS) ID provided by Adobe when provisioning Adobe AEM CS for your organization. |
+| Repository ID | No | Restricts the asset selector to a single repository. |
+| AEM Tier | No | Restricts the asset selector to repositories in the selected tier(s). |
+| Environment | No | Restricts the asset selector to repositories in the selected environment. |
+| Prefill Selected Assets | No | Specifies if selected assets are pre-selected in the asset picker. |
+| Hide Asset Upload Button | No | Specifies if the upload button is displayed in the asset picker. |
+
+### Instance Parameters
+
+| Field | Required | Description |
+| --- | --- | --- |
+| Hide Tree Nav | Yes | Specifies whether to show or hide the assets tree navigation sidebar |
+| Selection Type | No | Specifies if the field supports single or multiple asset selection. |
 
 ## Important setup requirement: origin allowlisting
 
