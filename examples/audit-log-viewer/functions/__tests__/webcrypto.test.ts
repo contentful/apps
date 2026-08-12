@@ -26,7 +26,8 @@ describe('base64 helpers', () => {
 describe('hmacSha256', () => {
   it('matches node:crypto for the same key and message', async () => {
     const keyBytes = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
-    const message = 'r\n\n2026-07-04T00:00:00Z\n/blob/acct/container/file.json\n\n\nhttps\n2022-11-02\nb\n\n\n\n\n\n\n';
+    const message =
+      'r\n\n2026-07-04T00:00:00Z\n/blob/acct/container/file.json\n\n\nhttps\n2022-11-02\nb\n\n\n\n\n\n\n';
     const ours = await hmacSha256(keyBytes, message);
     const expected = createHmac('sha256', Buffer.from(keyBytes)).update(message, 'utf8').digest();
     expect(Buffer.from(ours).equals(expected)).toBe(true);
@@ -49,9 +50,7 @@ describe('rsaSha256Sign', () => {
 
   it('pemToPkcs8Bytes matches node DER output', () => {
     const der = pemToPkcs8Bytes(privateKey);
-    const body = privateKey
-      .replace(/-----(BEGIN|END) PRIVATE KEY-----/g, '')
-      .replace(/\s+/g, '');
+    const body = privateKey.replace(/-----(BEGIN|END) PRIVATE KEY-----/g, '').replace(/\s+/g, '');
     expect(Buffer.from(der).equals(Buffer.from(body, 'base64'))).toBe(true);
   });
 });

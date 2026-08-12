@@ -4,8 +4,10 @@ import { ChevronLeftIcon, ChevronRightIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import type { AuditEvent } from '../lib/events';
 
-
-const ACTIVITY_VARIANT: Record<string, 'positive' | 'primary' | 'warning' | 'negative' | 'secondary'> = {
+const ACTIVITY_VARIANT: Record<
+  string,
+  'positive' | 'primary' | 'warning' | 'negative' | 'secondary'
+> = {
   Create: 'positive',
   Publish: 'positive',
   Update: 'primary',
@@ -69,15 +71,23 @@ export const EventsTable = ({ events }: { events: AuditEvent[] }) => {
         </Table.Body>
       </Table>
       {events.length > 0 && (
-        <Flex alignItems="center" justifyContent="space-between" marginTop="spacingM" marginBottom="spacingXl">
+        <Flex
+          alignItems="center"
+          justifyContent="space-between"
+          marginTop="spacingM"
+          marginBottom="spacingXl">
           <Flex alignItems="center" gap="spacingXs">
             <Text>Show</Text>
             <Select
               value={String(pageSize)}
-              onChange={(e) => { setPageSize(Number(e.target.value)); setPage(0); }}
-            >
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(0);
+              }}>
               {PAGE_SIZE_OPTIONS.map((n) => (
-                <Select.Option key={n} value={String(n)}>{n}</Select.Option>
+                <Select.Option key={n} value={String(n)}>
+                  {n}
+                </Select.Option>
               ))}
             </Select>
           </Flex>
@@ -90,8 +100,7 @@ export const EventsTable = ({ events }: { events: AuditEvent[] }) => {
               size="small"
               startIcon={<ChevronLeftIcon />}
               isDisabled={activePage === 0}
-              onClick={() => setPage((p) => p - 1)}
-            >
+              onClick={() => setPage((p) => p - 1)}>
               Previous
             </Button>
             <Button
@@ -99,8 +108,7 @@ export const EventsTable = ({ events }: { events: AuditEvent[] }) => {
               size="small"
               endIcon={<ChevronRightIcon />}
               isDisabled={activePage >= maxPage}
-              onClick={() => setPage((p) => p + 1)}
-            >
+              onClick={() => setPage((p) => p + 1)}>
               Next
             </Button>
           </Flex>

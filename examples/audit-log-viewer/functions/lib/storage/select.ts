@@ -10,7 +10,7 @@ export const MAX_FILES = 120;
 export function selectLogFiles(
   objects: Array<{ key: string; size: number }>,
   startDate: string,
-  endDate: string,
+  endDate: string
 ): { selected: Array<Omit<LogFileRef, 'url'>>; truncated: boolean } {
   const matches: Array<Omit<LogFileRef, 'url'>> = [];
   for (const obj of objects) {

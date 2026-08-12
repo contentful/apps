@@ -38,8 +38,8 @@ describe('EventsTable', () => {
     const many = Array.from({ length: 30 }, (_, i) => ev({ entityId: `e${i}` }));
     const { rerender } = render(<EventsTable events={many} />);
 
-    // Advance to page 2 (0-indexed page 1) via the Forma 36 Pagination next-page control.
-    fireEvent.click(screen.getByRole('button', { name: 'To next page' }));
+    // Advance to page 2 (0-indexed page 1) via the "Next" button.
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 
     // Page 2 shows the remaining 5 events (e25..e29).
     expect(screen.getByText(/e25/)).toBeInTheDocument();

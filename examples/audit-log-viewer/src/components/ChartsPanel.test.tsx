@@ -28,7 +28,7 @@ describe('ChartsPanel', () => {
           ev('Update', 'Jane', '2026-06-28T10:00:00.000Z'),
           ev('Delete', 'Bob', '2026-06-29T10:00:00.000Z'),
         ]}
-      />,
+      />
     );
     expect(getByText('Events over time')).toBeInTheDocument();
     expect(getByText('Top actors')).toBeInTheDocument();

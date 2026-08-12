@@ -40,8 +40,16 @@ describe('applyDirectory', () => {
       spaces: new Map(),
     };
     const [resolved] = applyDirectory(
-      [makeEvent({ actorType: 'App', actorId: 'app1', actorName: 'app1', spaceId: 'unknown', spaceName: 'unknown' })],
-      dir,
+      [
+        makeEvent({
+          actorType: 'App',
+          actorId: 'app1',
+          actorName: 'app1',
+          spaceId: 'unknown',
+          spaceName: 'unknown',
+        }),
+      ],
+      dir
     );
     expect(resolved.actorName).toBe('app1');
     expect(resolved.spaceName).toBe('unknown');

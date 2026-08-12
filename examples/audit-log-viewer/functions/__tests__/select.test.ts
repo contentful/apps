@@ -13,7 +13,7 @@ describe('selectLogFiles', () => {
         { key: 'unrelated.txt', size: 1 },
       ],
       '2026-06-01',
-      '2026-06-10',
+      '2026-06-10'
     );
     expect(selected).toEqual([{ key: key('20260603'), size: 20, coveredDate: '2026-06-02' }]);
     expect(truncated).toBe(false);

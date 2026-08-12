@@ -39,7 +39,7 @@ export async function createS3Client(cfg: StorageConfig): Promise<S3Client> {
         RoleSessionName: 'contentful-audit-log-viewer',
         ExternalId: cfg.externalId || undefined,
         DurationSeconds: 3600,
-      }),
+      })
     );
     if (!assumed.Credentials?.AccessKeyId || !assumed.Credentials.SecretAccessKey) {
       throw new Error('STS AssumeRole returned no credentials');
@@ -72,10 +72,7 @@ export class S3LogStorage implements LogStorageProvider {
   private readonly getClient: NonNullable<Deps['getClient']>;
   private readonly presign: NonNullable<Deps['presign']>;
 
-  constructor(
-    private readonly cfg: StorageConfig,
-    deps: Deps = {},
-  ) {
+  constructor(private readonly cfg: StorageConfig, deps: Deps = {}) {
     this.getClient = deps.getClient ?? createS3Client;
     this.presign = deps.presign ?? defaultPresign;
   }
@@ -91,7 +88,7 @@ export class S3LogStorage implements LogStorageProvider {
           Bucket: this.cfg.bucketName,
           Prefix: prefix,
           ContinuationToken: token,
-        }),
+        })
       );
       for (const obj of page.Contents ?? []) {
         if (obj.Key) objects.push({ key: obj.Key, size: obj.Size ?? 0 });
@@ -104,7 +101,7 @@ export class S3LogStorage implements LogStorageProvider {
       selected.map(async (m) => ({
         ...m,
         url: await this.presign(s3, this.cfg.bucketName, m.key),
-      })),
+      }))
     );
     return { files, truncated };
   }

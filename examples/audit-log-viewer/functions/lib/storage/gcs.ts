@@ -72,13 +72,28 @@ export function gcsCanonicalRequest(path: string, canonicalQuery: string): strin
   return ['GET', path, canonicalQuery, `host:${HOST}`, '', 'host', 'UNSIGNED-PAYLOAD'].join('\n');
 }
 
-export function gcsStringToSign(timestamp: string, date: string, canonicalRequestHashHex: string): string {
-  return ['GOOG4-RSA-SHA256', timestamp, `${date}/auto/storage/goog4_request`, canonicalRequestHashHex].join('\n');
+export function gcsStringToSign(
+  timestamp: string,
+  date: string,
+  canonicalRequestHashHex: string
+): string {
+  return [
+    'GOOG4-RSA-SHA256',
+    timestamp,
+    `${date}/auto/storage/goog4_request`,
+    canonicalRequestHashHex,
+  ].join('\n');
 }
 
-const toHex = (bytes: Uint8Array) => [...bytes].map((b) => b.toString(16).padStart(2, '0')).join('');
+const toHex = (bytes: Uint8Array) =>
+  [...bytes].map((b) => b.toString(16).padStart(2, '0')).join('');
 
-export async function gcsSignedUrl(key: GcsKey, bucket: string, object: string, now: Date): Promise<string> {
+export async function gcsSignedUrl(
+  key: GcsKey,
+  bucket: string,
+  object: string,
+  now: Date
+): Promise<string> {
   const { date, timestamp } = gcsDatestamps(now);
   const path = gcsResourcePath(bucket, object);
   const query = gcsCanonicalQuery(key, now);
@@ -87,16 +102,22 @@ export async function gcsSignedUrl(key: GcsKey, bucket: string, object: string, 
   return `https://${HOST}${path}?${query}&X-Goog-Signature=${toHex(sig)}`;
 }
 
-export async function gcsAccessToken(key: GcsKey, fetchFn: typeof fetch, now: Date): Promise<string> {
+export async function gcsAccessToken(
+  key: GcsKey,
+  fetchFn: typeof fetch,
+  now: Date
+): Promise<string> {
   const iat = Math.floor(now.getTime() / 1000);
   const header = base64UrlEncode(encoder.encode(JSON.stringify({ alg: 'RS256', typ: 'JWT' })));
   const claims = base64UrlEncode(
     encoder.encode(
-      JSON.stringify({ iss: key.client_email, scope: SCOPE, aud: TOKEN_URL, iat, exp: iat + 3600 }),
-    ),
+      JSON.stringify({ iss: key.client_email, scope: SCOPE, aud: TOKEN_URL, iat, exp: iat + 3600 })
+    )
   );
   const unsigned = `${header}.${claims}`;
-  const assertion = `${unsigned}.${base64UrlEncode(await rsaSha256Sign(key.private_key, unsigned))}`;
+  const assertion = `${unsigned}.${base64UrlEncode(
+    await rsaSha256Sign(key.private_key, unsigned)
+  )}`;
   const res = await fetchFn(TOKEN_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -135,10 +156,7 @@ export class GcsLogStorage implements LogStorageProvider {
   private readonly now: () => Date;
   private readonly key: GcsKey;
 
-  constructor(
-    private readonly cfg: GcsConfig,
-    deps: Deps = {},
-  ) {
+  constructor(private readonly cfg: GcsConfig, deps: Deps = {}) {
     this.fetchFn = deps.fetchFn ?? ((input, init) => fetch(input, init)); // wrapped: detached fetch throws Illegal invocation in the workerd runtime
     this.now = deps.now ?? (() => new Date());
     this.key = JSON.parse(cfg.gcsServiceAccountKey) as GcsKey; // shape pre-validated by readConfig
@@ -154,7 +172,9 @@ export class GcsLogStorage implements LogStorageProvider {
     do {
       const url =
         `https://${HOST}/storage/v1/b/${encodeURIComponent(this.cfg.gcsBucketName)}/o` +
-        `?prefix=${encodeURIComponent(prefix)}&fields=${encodeURIComponent('items(name,size),nextPageToken')}` +
+        `?prefix=${encodeURIComponent(prefix)}&fields=${encodeURIComponent(
+          'items(name,size),nextPageToken'
+        )}` +
         (pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : '');
       const res = await this.fetchFn(url, { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) {
@@ -176,7 +196,7 @@ export class GcsLogStorage implements LogStorageProvider {
       selected.map(async (m) => ({
         ...m,
         url: await gcsSignedUrl(this.key, this.cfg.gcsBucketName, m.key, now),
-      })),
+      }))
     );
     return { files, truncated };
   }

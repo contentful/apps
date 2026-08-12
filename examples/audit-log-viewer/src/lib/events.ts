@@ -92,14 +92,14 @@ export function filterEvents(events: AuditEvent[], f: EventFilters): AuditEvent[
         e.entityType.toLowerCase().includes(q) ||
         e.path.toLowerCase().includes(q) ||
         e.actorName.toLowerCase().includes(q) ||
-        e.spaceName.toLowerCase().includes(q)),
+        e.spaceName.toLowerCase().includes(q))
   );
 }
 
 export function topBy(
   events: AuditEvent[],
   key: (e: AuditEvent) => string,
-  n = 10,
+  n = 10
 ): { name: string; count: number }[] {
   const counts = new Map<string, number>();
   for (const e of events) {

@@ -18,9 +18,7 @@ describe('Config Screen component', () => {
   it('renders the configuration screen', async () => {
     render(<ConfigScreen />);
 
-    expect(
-      await screen.findByText('Audit Log Viewer configuration'),
-    ).toBeInTheDocument();
+    expect(await screen.findByText('Audit Log Viewer configuration')).toBeInTheDocument();
     expect(mockSdk.app.setReady).toHaveBeenCalled();
   });
 });

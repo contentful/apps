@@ -6,7 +6,7 @@ import { eventsPerDay, filterEvents, normalizeEvent, topBy, type AuditEvent } fr
 
 const fixture = readFileSync(
   join(__dirname, '../../test-fixtures/contentful-audit-TESTORG-20260630T040000000Z.json'),
-  'utf8',
+  'utf8'
 )
   .trim()
   .split('\n')
@@ -79,9 +79,7 @@ describe('aggregations', () => {
   });
 
   it('topBy ranks by count descending', () => {
-    expect(topBy(events, (e) => e.activity, 1)).toEqual([
-      expect.objectContaining({ count: 1 }),
-    ]);
+    expect(topBy(events, (e) => e.activity, 1)).toEqual([expect.objectContaining({ count: 1 })]);
     expect(topBy(events, (e) => e.actorName)).toHaveLength(2);
   });
 });

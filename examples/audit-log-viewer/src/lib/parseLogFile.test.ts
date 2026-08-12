@@ -19,10 +19,7 @@ describe('parseLogFile', () => {
   });
 
   it('parses NDJSON, skipping blank and malformed lines', async () => {
-    expect(await parseLogFile(enc('{"a":1}\n\nnot-json\n{"a":2}\n'))).toEqual([
-      { a: 1 },
-      { a: 2 },
-    ]);
+    expect(await parseLogFile(enc('{"a":1}\n\nnot-json\n{"a":2}\n'))).toEqual([{ a: 1 }, { a: 2 }]);
   });
 
   it('transparently gunzips (magic-byte detection)', async () => {

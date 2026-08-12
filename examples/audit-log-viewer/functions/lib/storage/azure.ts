@@ -16,7 +16,9 @@ const ERROR_DETAIL_MAX_LENGTH = 200;
 export function azureErrorDetail(body: string): string {
   if (!body) return '';
   const code = /<Code>([^<]*)<\/Code>/.exec(body)?.[1];
-  const authDetail = /<AuthenticationErrorDetail>([^<]*)<\/AuthenticationErrorDetail>/.exec(body)?.[1];
+  const authDetail = /<AuthenticationErrorDetail>([^<]*)<\/AuthenticationErrorDetail>/.exec(
+    body
+  )?.[1];
   const message = /<Message>([^<]*)<\/Message>/.exec(body)?.[1];
   const detail = authDetail ?? message;
   const parts = [code, detail].filter((p): p is string => Boolean(p && p.trim()));
@@ -85,10 +87,7 @@ export class AzureLogStorage implements LogStorageProvider {
   private readonly fetchFn: typeof fetch;
   private readonly now: () => Date;
 
-  constructor(
-    private readonly cfg: AzureConfig,
-    deps: Deps = {},
-  ) {
+  constructor(private readonly cfg: AzureConfig, deps: Deps = {}) {
     if (!/^[a-z0-9]{3,24}$/.test(cfg.azureAccountName)) {
       throw new Error('azureAccountName must be 3-24 lowercase letters/digits');
     }
@@ -141,7 +140,7 @@ export class AzureLogStorage implements LogStorageProvider {
         const blob = blobs.item(i);
         const name = blob?.getElementsByTagName('Name').item(0)?.textContent ?? '';
         const size = Number(
-          blob?.getElementsByTagName('Content-Length').item(0)?.textContent ?? '0',
+          blob?.getElementsByTagName('Content-Length').item(0)?.textContent ?? '0'
         );
         if (name) objects.push({ key: name, size });
       }
@@ -160,7 +159,7 @@ export class AzureLogStorage implements LogStorageProvider {
             canonicalizedResource: `${this.containerResource()}/${m.key}`,
             expiryIso,
           })),
-      })),
+      }))
     );
     return { files, truncated };
   }

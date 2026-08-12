@@ -24,7 +24,8 @@ const listXml = (names: string[], nextMarker = '') => `\uFEFF<?xml version="1.0"
 <EnumerationResults ServiceEndpoint="https://acct.blob.core.windows.net/" ContainerName="logs">
   <Blobs>${names
     .map(
-      (n) => `<Blob><Name>${n}</Name><Properties><Content-Length>42</Content-Length></Properties></Blob>`,
+      (n) =>
+        `<Blob><Name>${n}</Name><Properties><Content-Length>42</Content-Length></Properties></Blob>`
     )
     .join('')}</Blobs>
   <NextMarker>${nextMarker}</NextMarker>
@@ -41,7 +42,7 @@ describe('azureSasStringToSign', () => {
     expect(s).toBe(
       'r\n\n2026-07-04T00:15:00Z\n/blob/acct/logs/file.json\n\n\nhttps\n' +
         AZURE_SAS_VERSION +
-        '\nb\n\n\n\n\n\n\n',
+        '\nb\n\n\n\n\n\n\n'
     );
     expect(s.split('\n')).toHaveLength(16);
   });
@@ -75,13 +76,18 @@ describe('AzureLogStorage.listLogFiles', () => {
     const fetchFn = vi
       .fn()
       .mockResolvedValueOnce({ ok: true, text: async () => listXml([key('20260603')], 'M1') })
-      .mockResolvedValueOnce({ ok: true, text: async () => listXml([key('20260605'), 'noise.txt']) });
+      .mockResolvedValueOnce({
+        ok: true,
+        text: async () => listXml([key('20260605'), 'noise.txt']),
+      });
     const storage = new AzureLogStorage(cfg, { fetchFn: fetchFn as unknown as typeof fetch, now });
     const { files, truncated } = await storage.listLogFiles('2026-06-01', '2026-06-10');
 
     expect(fetchFn).toHaveBeenCalledTimes(2);
     const firstUrl: string = fetchFn.mock.calls[0][0];
-    expect(firstUrl).toContain('https://acct.blob.core.windows.net/logs?restype=container&comp=list');
+    expect(firstUrl).toContain(
+      'https://acct.blob.core.windows.net/logs?restype=container&comp=list'
+    );
     expect(firstUrl).toContain('prefix=contentful-audit-');
     const secondUrl: string = fetchFn.mock.calls[1][0];
     expect(secondUrl).toContain('marker=M1');
@@ -99,9 +105,13 @@ describe('AzureLogStorage.listLogFiles', () => {
 
   it('honors the configured prefix', async () => {
     const fetchFn = vi.fn().mockResolvedValue({ ok: true, text: async () => listXml([]) });
-    await new AzureLogStorage({ ...cfg, prefix: 'audit/' }, { fetchFn: fetchFn as unknown as typeof fetch, now })
-      .listLogFiles('2026-06-01', '2026-06-10');
-    expect(fetchFn.mock.calls[0][0]).toContain(`prefix=${encodeURIComponent('audit/contentful-audit-')}`);
+    await new AzureLogStorage(
+      { ...cfg, prefix: 'audit/' },
+      { fetchFn: fetchFn as unknown as typeof fetch, now }
+    ).listLogFiles('2026-06-01', '2026-06-10');
+    expect(fetchFn.mock.calls[0][0]).toContain(
+      `prefix=${encodeURIComponent('audit/contentful-audit-')}`
+    );
   });
 
   it('throws a clean error on non-200', async () => {
@@ -109,8 +119,8 @@ describe('AzureLogStorage.listLogFiles', () => {
     await expect(
       new AzureLogStorage(cfg, { fetchFn: fetchFn as unknown as typeof fetch, now }).listLogFiles(
         '2026-06-01',
-        '2026-06-10',
-      ),
+        '2026-06-10'
+      )
     ).rejects.toThrow('Azure list failed: HTTP 403');
   });
 
@@ -122,9 +132,11 @@ describe('AzureLogStorage.listLogFiles', () => {
     await expect(
       new AzureLogStorage(cfg, { fetchFn: fetchFn as unknown as typeof fetch, now }).listLogFiles(
         '2026-06-01',
-        '2026-06-10',
-      ),
-    ).rejects.toThrow('Azure list failed: HTTP 403 — AuthenticationFailed: Signature did not match');
+        '2026-06-10'
+      )
+    ).rejects.toThrow(
+      'Azure list failed: HTTP 403 — AuthenticationFailed: Signature did not match'
+    );
   });
 });
 
@@ -133,7 +145,7 @@ describe('AzureLogStorage input validation', () => {
 
   it('rejects an invalid account name at construction', () => {
     expect(() => new AzureLogStorage({ ...cfg, azureAccountName: 'Invalid_Name!' })).toThrow(
-      'azureAccountName must be 3-24 lowercase letters/digits',
+      'azureAccountName must be 3-24 lowercase letters/digits'
     );
   });
 
@@ -141,10 +153,10 @@ describe('AzureLogStorage input validation', () => {
     const fetchFn = vi.fn();
     const storage = new AzureLogStorage(
       { ...cfg, azureAccountKey: 'not-base64!!!' },
-      { fetchFn: fetchFn as unknown as typeof fetch, now },
+      { fetchFn: fetchFn as unknown as typeof fetch, now }
     );
     await expect(storage.listLogFiles('2026-06-01', '2026-06-10')).rejects.toThrow(
-      'azureAccountKey is not valid base64',
+      'azureAccountKey is not valid base64'
     );
   });
 });

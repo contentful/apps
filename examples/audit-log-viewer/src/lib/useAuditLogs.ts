@@ -53,7 +53,7 @@ export function useAuditLogs(sdk: PageAppSDK) {
           }
         };
         await Promise.all(
-          Array.from({ length: Math.min(CONCURRENCY, Math.max(files.length, 1)) }, worker),
+          Array.from({ length: Math.min(CONCURRENCY, Math.max(files.length, 1)) }, worker)
         );
         events.sort((a, b) => b.time - a.time);
         const dir = await directoryPromise;
@@ -64,7 +64,7 @@ export function useAuditLogs(sdk: PageAppSDK) {
         setState({ status: 'error', message: e instanceof Error ? e.message : String(e) });
       }
     },
-    [sdk],
+    [sdk]
   );
 
   return { state, load };

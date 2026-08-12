@@ -17,10 +17,7 @@ const s3Form = (): ConfigFormState => ({
 
 describe('buildParametersOnSave', () => {
   it('always includes provider and only the selected provider fields', () => {
-    const out = buildParametersOnSave(
-      { ...s3Form(), azureAccountName: 'should-not-leak' },
-      {},
-    );
+    const out = buildParametersOnSave({ ...s3Form(), azureAccountName: 'should-not-leak' }, {});
     expect(out.provider).toBe('s3');
     expect(out.bucketName).toBe('my-bucket');
     expect(out).not.toHaveProperty('azureAccountName');
@@ -30,7 +27,7 @@ describe('buildParametersOnSave', () => {
   it('uses newly typed secrets and re-sends saved (redacted) ones when blank', () => {
     const typed = buildParametersOnSave(
       { ...s3Form(), awsAccessKeyId: 'AKIANEW', awsSecretAccessKey: 'new' },
-      { awsAccessKeyId: '***', awsSecretAccessKey: '***' },
+      { awsAccessKeyId: '***', awsSecretAccessKey: '***' }
     );
     expect(typed.awsAccessKeyId).toBe('AKIANEW');
     const preserved = buildParametersOnSave(s3Form(), {
@@ -50,7 +47,7 @@ describe('buildParametersOnSave', () => {
         azureContainerName: 'logs',
         azureAccountKey: 'a2V5',
       },
-      {},
+      {}
     );
     expect(out).toEqual({
       provider: 'azure',
@@ -64,7 +61,7 @@ describe('buildParametersOnSave', () => {
   it('gcs form emits gcs fields only, preserving a saved key', () => {
     const out = buildParametersOnSave(
       { ...emptyConfigForm(), provider: 'gcs', gcsBucketName: 'b' },
-      { gcsServiceAccountKey: '<redacted>' },
+      { gcsServiceAccountKey: '<redacted>' }
     );
     expect(out).toEqual({
       provider: 'gcs',
@@ -94,17 +91,22 @@ describe('missingRequiredParameters', () => {
     expect(
       missingRequiredParameters(
         { ...emptyConfigForm(), provider: 'gcs', gcsBucketName: 'b' },
-        { gcsServiceAccountKey: '<redacted>' },
-      ),
+        { gcsServiceAccountKey: '<redacted>' }
+      )
     ).toEqual([]);
   });
 
   it('flags a newly typed GCS key that is not valid JSON with client_email/private_key', () => {
     expect(
       missingRequiredParameters(
-        { ...emptyConfigForm(), provider: 'gcs', gcsBucketName: 'b', gcsServiceAccountKey: 'not json' },
-        {},
-      ),
+        {
+          ...emptyConfigForm(),
+          provider: 'gcs',
+          gcsBucketName: 'b',
+          gcsServiceAccountKey: 'not json',
+        },
+        {}
+      )
     ).toEqual(['gcsServiceAccountKey (invalid JSON — expected client_email and private_key)']);
 
     expect(
@@ -115,8 +117,8 @@ describe('missingRequiredParameters', () => {
           gcsBucketName: 'b',
           gcsServiceAccountKey: JSON.stringify({ client_email: 'a@b.iam.gserviceaccount.com' }),
         },
-        {},
-      ),
+        {}
+      )
     ).toEqual(['gcsServiceAccountKey (invalid JSON — expected client_email and private_key)']);
   });
 
@@ -132,8 +134,8 @@ describe('missingRequiredParameters', () => {
             private_key: '-----BEGIN PRIVATE KEY-----\nabc\n-----END PRIVATE KEY-----\n',
           }),
         },
-        {},
-      ),
+        {}
+      )
     ).toEqual([]);
   });
 });

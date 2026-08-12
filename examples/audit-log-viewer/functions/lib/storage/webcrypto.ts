@@ -34,7 +34,7 @@ export async function hmacSha256(keyBytes: Uint8Array, message: string): Promise
     keyBytes as unknown as ArrayBuffer,
     { name: 'HMAC', hash: 'SHA-256' },
     false,
-    ['sign'],
+    ['sign']
   );
   const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(message));
   return new Uint8Array(sig);
@@ -46,7 +46,7 @@ export async function rsaSha256Sign(pkcs8Pem: string, message: string): Promise<
     pemToPkcs8Bytes(pkcs8Pem) as unknown as ArrayBuffer,
     { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
     false,
-    ['sign'],
+    ['sign']
   );
   const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, encoder.encode(message));
   return new Uint8Array(sig);

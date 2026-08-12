@@ -48,10 +48,22 @@ const makeTooltip =
     return (
       <Box style={tooltipContentStyle}>
         <Flex alignItems="center" gap="spacingXs">
-          <span style={{ display: 'inline-block', width: 10, height: 2, background: color, borderRadius: 1 }} />
-          <strong style={{ color: INK_PRIMARY, fontSize: tokens.fontSizeM }}>{payload[0]?.value}</strong>
+          <span
+            style={{
+              display: 'inline-block',
+              width: 10,
+              height: 2,
+              background: color,
+              borderRadius: 1,
+            }}
+          />
+          <strong style={{ color: INK_PRIMARY, fontSize: tokens.fontSizeM }}>
+            {payload[0]?.value}
+          </strong>
         </Flex>
-        <Box style={{ color: AXIS_TICK, fontSize: tokens.fontSizeS, marginTop: tokens.spacing2Xs }}>{label}</Box>
+        <Box style={{ color: AXIS_TICK, fontSize: tokens.fontSizeS, marginTop: tokens.spacing2Xs }}>
+          {label}
+        </Box>
       </Box>
     );
   };
@@ -59,8 +71,12 @@ const makeTooltip =
 const Card = ({ title, children }: { title: string; children: ReactNode }) => (
   <Box
     padding="spacingM"
-    style={{ border: `1px solid ${tokens.colorElementMid}`, borderRadius: tokens.borderRadiusMedium, flex: '1 1 320px', minWidth: 320 }}
-  >
+    style={{
+      border: `1px solid ${tokens.colorElementMid}`,
+      borderRadius: tokens.borderRadiusMedium,
+      flex: '1 1 320px',
+      minWidth: 320,
+    }}>
     <Subheading marginBottom="spacingS">{title}</Subheading>
     <Box style={{ width: '100%', height: 220 }}>{children}</Box>
   </Box>

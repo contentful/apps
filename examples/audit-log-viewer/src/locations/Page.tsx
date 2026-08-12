@@ -41,12 +41,16 @@ const Page = () => {
   }, [events]);
   const filtered = useMemo(
     () => filterEvents(events, { actor, activity, spaceId: space, query }),
-    [events, actor, activity, space, query],
+    [events, actor, activity, space, query]
   );
 
   return (
-    <Box padding="spacingXl" style={{ width: '100%', minHeight: '100vh', backgroundColor: tokens.colorWhite }}>
-      <Heading as="h1" marginBottom="none">Audit Log Viewer</Heading>
+    <Box
+      padding="spacingXl"
+      style={{ width: '100%', minHeight: '100vh', backgroundColor: tokens.colorWhite }}>
+      <Heading as="h1" marginBottom="none">
+        Audit Log Viewer
+      </Heading>
       <Text style={{ color: tokens.colorTextMid }}>
         Track who made changes across your organization — browse by date range to get started.
       </Text>
@@ -54,11 +58,7 @@ const Page = () => {
       <Flex gap="spacingM" alignItems="flex-end" marginTop="spacingL" marginBottom="spacingL">
         <FormControl marginBottom="none">
           <FormControl.Label>Start date</FormControl.Label>
-          <TextInput
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
+          <TextInput type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
         </FormControl>
         <FormControl marginBottom="none">
           <FormControl.Label>End date</FormControl.Label>
@@ -74,8 +74,7 @@ const Page = () => {
             setSpace('');
             setQuery('');
             load(startDate, endDate);
-          }}
-        >
+          }}>
           Apply
         </Button>
       </Flex>
@@ -84,9 +83,7 @@ const Page = () => {
         <Flex gap="spacingS" alignItems="center">
           <Spinner />
           <Text>
-            {state.total === 0
-              ? 'Loading…'
-              : `Loading logs… (${state.done} of ${state.total})`}
+            {state.total === 0 ? 'Loading…' : `Loading logs… (${state.done} of ${state.total})`}
           </Text>
         </Flex>
       )}
@@ -106,8 +103,8 @@ const Page = () => {
           {state.failedFiles.length > 0 && (
             <Note variant="warning" title={`${state.failedFiles.length} file(s) failed to load`}>
               Files can fail to download if the bucket CORS configuration is missing (see the app
-              configuration screen) or if the download outlived the 15-minute pre-signed URL
-              window — reload, or try a narrower date range.
+              configuration screen) or if the download outlived the 15-minute pre-signed URL window
+              — reload, or try a narrower date range.
             </Note>
           )}
           {filtered.length === 0 ? (
@@ -126,19 +123,25 @@ const Page = () => {
                   <Select value={space} onChange={(e) => setSpace(e.target.value)}>
                     <Select.Option value="">Space</Select.Option>
                     {spaceOptions.map(([id, name]) => (
-                      <Select.Option key={id} value={id}>{name}</Select.Option>
+                      <Select.Option key={id} value={id}>
+                        {name}
+                      </Select.Option>
                     ))}
                   </Select>
                   <Select value={actor} onChange={(e) => setActor(e.target.value)}>
                     <Select.Option value="">Actor</Select.Option>
                     {actors.map((a) => (
-                      <Select.Option key={a} value={a}>{a}</Select.Option>
+                      <Select.Option key={a} value={a}>
+                        {a}
+                      </Select.Option>
                     ))}
                   </Select>
                   <Select value={activity} onChange={(e) => setActivity(e.target.value)}>
                     <Select.Option value="">Action</Select.Option>
                     {activities.map((a) => (
-                      <Select.Option key={a} value={a}>{a}</Select.Option>
+                      <Select.Option key={a} value={a}>
+                        {a}
+                      </Select.Option>
                     ))}
                   </Select>
                   <Text style={{ color: tokens.colorTextLight, whiteSpace: 'nowrap' }}>

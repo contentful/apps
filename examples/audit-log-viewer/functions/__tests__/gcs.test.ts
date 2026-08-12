@@ -40,18 +40,20 @@ describe('V4 signing pieces (documented formats)', () => {
         '&X-Goog-Credential=reader%40proj.iam.gserviceaccount.com%2F20260704%2Fauto%2Fstorage%2Fgoog4_request' +
         '&X-Goog-Date=20260704T010203Z' +
         '&X-Goog-Expires=900' +
-        '&X-Goog-SignedHeaders=host',
+        '&X-Goog-SignedHeaders=host'
     );
   });
 
   it('canonical request has the documented 7 lines', () => {
     const cr = gcsCanonicalRequest('/my-logs/a%20b.json', 'Q=1');
-    expect(cr).toBe('GET\n/my-logs/a%20b.json\nQ=1\nhost:storage.googleapis.com\n\nhost\nUNSIGNED-PAYLOAD');
+    expect(cr).toBe(
+      'GET\n/my-logs/a%20b.json\nQ=1\nhost:storage.googleapis.com\n\nhost\nUNSIGNED-PAYLOAD'
+    );
   });
 
   it('string-to-sign has the documented 4 lines', () => {
     expect(gcsStringToSign('20260704T010203Z', '20260704', 'deadbeef')).toBe(
-      'GOOG4-RSA-SHA256\n20260704T010203Z\n20260704/auto/storage/goog4_request\ndeadbeef',
+      'GOOG4-RSA-SHA256\n20260704T010203Z\n20260704/auto/storage/goog4_request\ndeadbeef'
     );
   });
 
@@ -68,14 +70,19 @@ describe('gcsSignedUrl', () => {
     const canonicalQuery = url.search.slice(1);
     const { date, timestamp } = gcsDatestamps(NOW);
     const hash = await sha256Hex(gcsCanonicalRequest(url.pathname, canonicalQuery));
-    const verify = createVerify('RSA-SHA256').update(gcsStringToSign(timestamp, date, hash), 'utf8');
+    const verify = createVerify('RSA-SHA256').update(
+      gcsStringToSign(timestamp, date, hash),
+      'utf8'
+    );
     expect(verify.verify(publicKey, Buffer.from(sigHex, 'hex'))).toBe(true);
   });
 });
 
 describe('gcsAccessToken', () => {
   it('sends an RS256 JWT grant that node:crypto verifies, returns the token', async () => {
-    const fetchFn = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ access_token: 'tok' }) });
+    const fetchFn = vi
+      .fn()
+      .mockResolvedValue({ ok: true, json: async () => ({ access_token: 'tok' }) });
     const token = await gcsAccessToken(saKey, fetchFn as unknown as typeof fetch, NOW);
     expect(token).toBe('tok');
     const [url, init] = fetchFn.mock.calls[0];
@@ -95,16 +102,19 @@ describe('gcsAccessToken', () => {
   it('throws cleanly on exchange failure', async () => {
     const fetchFn = vi.fn().mockResolvedValue({ ok: false, status: 401, json: async () => ({}) });
     await expect(gcsAccessToken(saKey, fetchFn as unknown as typeof fetch, NOW)).rejects.toThrow(
-      'GCS token exchange failed: HTTP 401',
+      'GCS token exchange failed: HTTP 401'
     );
   });
 
   it('appends the upstream error_description when the token endpoint returns one', async () => {
-    const fetchFn = vi
-      .fn()
-      .mockResolvedValue({ ok: false, status: 400, text: async () => JSON.stringify({ error_description: 'invalid_grant' }), json: async () => ({ error_description: 'invalid_grant' }) });
+    const fetchFn = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 400,
+      text: async () => JSON.stringify({ error_description: 'invalid_grant' }),
+      json: async () => ({ error_description: 'invalid_grant' }),
+    });
     await expect(gcsAccessToken(saKey, fetchFn as unknown as typeof fetch, NOW)).rejects.toThrow(
-      'GCS token exchange failed: HTTP 400 — invalid_grant',
+      'GCS token exchange failed: HTTP 400 — invalid_grant'
     );
   });
 });
@@ -122,7 +132,12 @@ describe('GcsLogStorage.listLogFiles', () => {
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ items: [{ name: key('20260605'), size: '20' }, { name: 'noise.txt', size: '1' }] }),
+        json: async () => ({
+          items: [
+            { name: key('20260605'), size: '20' },
+            { name: 'noise.txt', size: '1' },
+          ],
+        }),
       });
     const storage = new GcsLogStorage(cfg, { fetchFn: fetchFn as unknown as typeof fetch, now });
     const { files, truncated } = await storage.listLogFiles('2026-06-01', '2026-06-10');
@@ -150,8 +165,8 @@ describe('GcsLogStorage.listLogFiles', () => {
     await expect(
       new GcsLogStorage(cfg, { fetchFn: fetchFn as unknown as typeof fetch, now }).listLogFiles(
         '2026-06-01',
-        '2026-06-10',
-      ),
+        '2026-06-10'
+      )
     ).rejects.toThrow('GCS list failed: HTTP 403');
   });
 
@@ -168,8 +183,8 @@ describe('GcsLogStorage.listLogFiles', () => {
     await expect(
       new GcsLogStorage(cfg, { fetchFn: fetchFn as unknown as typeof fetch, now }).listLogFiles(
         '2026-06-01',
-        '2026-06-10',
-      ),
+        '2026-06-10'
+      )
     ).rejects.toThrow('GCS list failed: HTTP 403 — Invalid Credentials');
   });
 });
@@ -189,7 +204,9 @@ describe('gcsErrorDetail', () => {
   });
 
   it('extracts error.message from the JSON API shape', () => {
-    expect(gcsErrorDetail({ error: { message: 'Invalid Credentials' } })).toBe('Invalid Credentials');
+    expect(gcsErrorDetail({ error: { message: 'Invalid Credentials' } })).toBe(
+      'Invalid Credentials'
+    );
   });
 
   it('extracts error_description from the OAuth token endpoint shape', () => {

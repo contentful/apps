@@ -63,7 +63,7 @@ const REQUIRED_TEXT: Record<Provider, Array<keyof ConfigFormState>> = {
  */
 export function buildParametersOnSave(
   form: ConfigFormState,
-  saved: Record<string, unknown>,
+  saved: Record<string, unknown>
 ): Record<string, string> {
   const out: Record<string, string> = { provider: form.provider, prefix: form.prefix.trim() };
   for (const key of TEXT_FIELDS[form.provider]) out[key] = (form[key] as string).trim();
@@ -78,7 +78,7 @@ export function buildParametersOnSave(
 /** Names of the selected provider's required parameters that would be empty after this save. */
 export function missingRequiredParameters(
   form: ConfigFormState,
-  saved: Record<string, unknown>,
+  saved: Record<string, unknown>
 ): string[] {
   const out = buildParametersOnSave(form, saved);
   const missing: string[] = REQUIRED_TEXT[form.provider].filter((k) => !out[k]);

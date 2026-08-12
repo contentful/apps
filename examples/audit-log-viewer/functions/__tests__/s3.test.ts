@@ -12,7 +12,9 @@ const cfg: StorageConfig = {
 
 const key = (yyyymmdd: string) => `contentful-audit-org1-${yyyymmdd}T040000000Z.json`;
 
-function fakeStorage(pages: Array<{ Contents: { Key: string; Size?: number }[]; NextContinuationToken?: string }>) {
+function fakeStorage(
+  pages: Array<{ Contents: { Key: string; Size?: number }[]; NextContinuationToken?: string }>
+) {
   let call = 0;
   const send = vi.fn(async () => {
     const page = pages[call++];
@@ -20,7 +22,7 @@ function fakeStorage(pages: Array<{ Contents: { Key: string; Size?: number }[]; 
   });
   const presign = vi.fn(async (_s3: unknown, _bucket: string, k: string) => `https://signed/${k}`);
   const storage = new S3LogStorage(cfg, {
-    getClient: async () => ({ send }) as never,
+    getClient: async () => ({ send } as never),
     presign,
   });
   return { storage, send, presign };
@@ -73,10 +75,13 @@ describe('S3LogStorage.listLogFiles', () => {
 
   it('lists with the configured prefix + contentful-audit-', async () => {
     const { storage, send } = fakeStorage([{ Contents: [] }]);
-    await new S3LogStorage({ ...cfg, prefix: 'audit/' }, {
-      getClient: async () => ({ send }) as never,
-      presign: async () => 'u',
-    }).listLogFiles('2026-06-01', '2026-06-10');
+    await new S3LogStorage(
+      { ...cfg, prefix: 'audit/' },
+      {
+        getClient: async () => ({ send } as never),
+        presign: async () => 'u',
+      }
+    ).listLogFiles('2026-06-01', '2026-06-10');
     const cmdInput = send.mock.calls[0][0].input;
     expect(cmdInput.Prefix).toBe('audit/contentful-audit-');
     expect(cmdInput.Bucket).toBe('test-bucket');

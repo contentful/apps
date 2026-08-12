@@ -50,7 +50,12 @@ function readConfig(params: Record<string, unknown>): ProviderConfig | { configE
     };
   }
   if (provider === 'gcs') {
-    return { provider, gcsBucketName: p.gcsBucketName!, gcsServiceAccountKey: p.gcsServiceAccountKey!, prefix };
+    return {
+      provider,
+      gcsBucketName: p.gcsBucketName!,
+      gcsServiceAccountKey: p.gcsServiceAccountKey!,
+      prefix,
+    };
   }
   return {
     provider,
@@ -67,7 +72,9 @@ function readConfig(params: Record<string, unknown>): ProviderConfig | { configE
 type StorageFactory = (cfg: ProviderConfig) => LogStorageProvider;
 
 export const makeHandler =
-  (storageFactory: StorageFactory = createStorage): FunctionEventHandler<FunctionTypeEnum.AppActionCall> =>
+  (
+    storageFactory: StorageFactory = createStorage
+  ): FunctionEventHandler<FunctionTypeEnum.AppActionCall> =>
   async (event: AppActionRequest<'Custom', ActionParams>, context: FunctionEventContext) => {
     try {
       const { startDate, endDate } = (event.body ?? {}) as Partial<ActionParams>;

@@ -42,7 +42,7 @@ const iamPolicy = (bucket: string) =>
       ],
     },
     null,
-    2,
+    2
   );
 
 const corsRule = JSON.stringify(
@@ -58,7 +58,7 @@ const corsRule = JSON.stringify(
     },
   ],
   null,
-  2,
+  2
 );
 
 const Code = ({ children }: { children: string }) => (
@@ -71,8 +71,7 @@ const Code = ({ children }: { children: string }) => (
       fontSize: tokens.fontSizeS,
       overflowX: 'auto',
       whiteSpace: 'pre-wrap',
-    }}
-  >
+    }}>
     {children}
   </pre>
 );
@@ -87,13 +86,16 @@ const ConfigScreen = () => {
 
   const backupKey = `audit-log-config-${sdk.ids.space}-${sdk.ids.app}`;
 
-  const writeBackup = useCallback((params: Record<string, string>) => {
-    const safe: Record<string, string> = {};
-    for (const [k, v] of Object.entries(params)) {
-      if (!SECRET_KEYS.has(k)) safe[k] = v;
-    }
-    localStorage.setItem(backupKey, JSON.stringify(safe));
-  }, [backupKey]);
+  const writeBackup = useCallback(
+    (params: Record<string, string>) => {
+      const safe: Record<string, string> = {};
+      for (const [k, v] of Object.entries(params)) {
+        if (!SECRET_KEYS.has(k)) safe[k] = v;
+      }
+      localStorage.setItem(backupKey, JSON.stringify(safe));
+    },
+    [backupKey]
+  );
 
   const onConfigure = useCallback(async () => {
     const missing = missingRequiredParameters(form, saved);
@@ -117,7 +119,9 @@ const ConfigScreen = () => {
       if (current && Object.keys(current).length > 0) {
         setSaved(current);
         const next = emptyConfigForm();
-        next.provider = (['s3', 'azure', 'gcs'] as const).includes(current.provider as Provider) ? (current.provider as Provider) : 's3';
+        next.provider = (['s3', 'azure', 'gcs'] as const).includes(current.provider as Provider)
+          ? (current.provider as Provider)
+          : 's3';
         for (const key of Object.keys(next) as Array<keyof ConfigFormState>) {
           if (key === 'provider' || SECRET_KEYS.has(key)) continue;
           const value = current[key];
@@ -135,7 +139,9 @@ const ConfigScreen = () => {
           try {
             const backup = JSON.parse(raw) as Record<string, string>;
             const next = emptyConfigForm();
-            next.provider = (['s3', 'azure', 'gcs'] as const).includes(backup.provider as Provider) ? (backup.provider as Provider) : 's3';
+            next.provider = (['s3', 'azure', 'gcs'] as const).includes(backup.provider as Provider)
+              ? (backup.provider as Provider)
+              : 's3';
             for (const key of Object.keys(next) as Array<keyof ConfigFormState>) {
               if (key === 'provider' || SECRET_KEYS.has(key)) continue;
               if (typeof backup[key] === 'string') {
@@ -162,7 +168,10 @@ const ConfigScreen = () => {
       <Box padding="spacingXl" style={{ maxWidth: tokens.contentWidthText, width: '100%' }}>
         <Heading as="h1">Audit Log Viewer configuration</Heading>
         {restoredFromBackup && (
-          <Note variant="warning" title="Configuration restored from local backup" marginBottom="spacingL">
+          <Note
+            variant="warning"
+            title="Configuration restored from local backup"
+            marginBottom="spacingL">
             Your saved configuration was cleared — likely by a recent app update. Non-secret fields
             have been restored from your browser&apos;s local backup. Re-enter your credentials and
             save to confirm.
@@ -170,8 +179,8 @@ const ConfigScreen = () => {
         )}
         <Note variant="primary" title="Security model" marginBottom="spacingL">
           <Text as="p">
-            Storage credentials are stored as secure installation parameters and are only readable by
-            the app&apos;s server-side Function. The browser only ever receives short-lived,
+            Storage credentials are stored as secure installation parameters and are only readable
+            by the app&apos;s server-side Function. The browser only ever receives short-lived,
             read-only pre-signed URLs.
           </Text>
           <Text as="p" marginTop="spacingS">
@@ -184,8 +193,7 @@ const ConfigScreen = () => {
           <FormControl.Label>Storage provider</FormControl.Label>
           <Select
             value={form.provider}
-            onChange={(e) => setForm((f) => ({ ...f, provider: e.target.value as Provider }))}
-          >
+            onChange={(e) => setForm((f) => ({ ...f, provider: e.target.value as Provider }))}>
             <Select.Option value="s3">Amazon S3</Select.Option>
             <Select.Option value="azure">Azure Blob Storage</Select.Option>
             <Select.Option value="gcs">Google Cloud Storage</Select.Option>
@@ -300,7 +308,8 @@ const ConfigScreen = () => {
                 placeholder="arn:aws:iam::123456789012:role/contentful-audit-log-reader"
               />
               <FormControl.HelpText>
-                Recommended. Using a role instead of long-lived access keys limits the blast radius if credentials are rotated or leaked.
+                Recommended. Using a role instead of long-lived access keys limits the blast radius
+                if credentials are rotated or leaked.
               </FormControl.HelpText>
             </FormControl>
             <FormControl isOptional>
@@ -322,8 +331,8 @@ const ConfigScreen = () => {
               </Accordion.Item>
               <Accordion.Item title="Bucket CORS (required)">
                 <Text>
-                  The browser downloads log files via pre-signed URLs, so the bucket must allow
-                  GET from the Contentful web app origin. For local development, temporarily add
+                  The browser downloads log files via pre-signed URLs, so the bucket must allow GET
+                  from the Contentful web app origin. For local development, temporarily add
                   http://localhost:3000 to AllowedOrigins.
                 </Text>
                 <Code>{corsRule}</Code>
@@ -344,9 +353,9 @@ const ConfigScreen = () => {
           {form.provider === 'gcs' && (
             <Accordion.Item title="GCS setup — service account and CORS">
               <Text>
-                Create a service account with the Storage Object Viewer role on the bucket,
-                create a JSON key, and paste it above. Bucket CORS must allow GET/HEAD from the
-                origins below (gcloud: gsutil cors set cors.json gs://&lt;bucket&gt;):
+                Create a service account with the Storage Object Viewer role on the bucket, create a
+                JSON key, and paste it above. Bucket CORS must allow GET/HEAD from the origins below
+                (gcloud: gsutil cors set cors.json gs://&lt;bucket&gt;):
               </Text>
               <Code>
                 {JSON.stringify(
@@ -358,22 +367,22 @@ const ConfigScreen = () => {
                     },
                   ],
                   null,
-                  2,
+                  2
                 )}
               </Code>
               <Text marginTop="spacingS">
-                GCS CORS does not support wildcard subdomains, and the Contentful app iframe runs
-                on a per-app ctfcloud.net origin, so &quot;*&quot; is required. This is safe: the
-                URLs themselves are auth&apos;d by their V4 signature and expire after 15
-                minutes — CORS adds no access control here.
+                GCS CORS does not support wildcard subdomains, and the Contentful app iframe runs on
+                a per-app ctfcloud.net origin, so &quot;*&quot; is required. This is safe: the URLs
+                themselves are auth&apos;d by their V4 signature and expire after 15 minutes — CORS
+                adds no access control here.
               </Text>
             </Accordion.Item>
           )}
           <Accordion.Item title="Function egress IPs (optional allowlisting)">
             <Text>
-              The server-side Function always calls your storage provider from these static IPs.
-              You can restrict the IAM user/role with an aws:SourceIp condition on ListBucket. Do
-              NOT apply an IP condition to s3:GetObject — pre-signed downloads come from your
+              The server-side Function always calls your storage provider from these static IPs. You
+              can restrict the IAM user/role with an aws:SourceIp condition on ListBucket. Do NOT
+              apply an IP condition to s3:GetObject — pre-signed downloads come from your
               editors&apos; browsers, not from these IPs.
             </Text>
             <Code>{EGRESS_IPS.join('\n')}</Code>
