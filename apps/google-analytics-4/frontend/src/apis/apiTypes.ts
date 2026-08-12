@@ -52,13 +52,13 @@ export const ZRunReportData = z.object({
   minimums: z.array(ZRow),
   rowCount: z.number(),
   metadata: z.object({
-    currencyCode: z.string(),
+    currencyCode: z.string().optional(),
     dataLossFromOtherRow: z.boolean(),
-    timeZone: z.string(),
-    _currencyCode: z.string(),
-    _timeZone: z.string(),
+    timeZone: z.string().optional(),
+    _currencyCode: z.string().optional(),
+    _timeZone: z.string().optional(),
   }),
-  propertyQuota: z.null(),
+  propertyQuota: z.unknown(),
   kind: z.string(),
 });
 

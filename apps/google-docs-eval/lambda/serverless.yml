@@ -1,0 +1,29 @@
+service: sls-apps-google-docs-eval
+
+frameworkVersion: '>=3.0.0'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  stage: ${opt:stage, 'test'}
+  region: 'us-east-1'
+  # Deploy to cf-proddev-apps-production (017078452822).
+  # The Lambda uses a Bedrock API key (AWS_BEARER_TOKEN_BEDROCK) for model auth.
+  # Set this env var directly in the Lambda console — do NOT put it here.
+  deploymentBucket:
+    name: cf-apps-serverless-deployment
+  deploymentPrefix: sls-apps-google-docs-eval
+
+functions:
+  app:
+    handler: dist/index.handler
+    timeout: 29
+    environment:
+      BEDROCK_MODEL_ID: 'us.anthropic.claude-haiku-4-5-20251001-v1:0'
+    events:
+      - http:
+          path: /
+          method: ANY
+      - http:
+          path: /{proxy+}
+          method: ANY

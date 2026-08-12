@@ -5,25 +5,19 @@ import { ContentTypeProps } from 'contentful-management';
 import { ConfirmCancelModal } from '../modals/ConfirmCancelModal';
 import { ErrorModal, type ErrorModalConfig } from '../modals/ErrorModal';
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
-import { LoadingModal } from '../modals/LoadingModal';
 import { ERROR_MESSAGES } from '@constants/messages';
-import { CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS } from '@constants/agent';
 import { SelectTabsModal } from '../modals/step_3/SelectTabsModal';
-import {
-  DocumentTabProps,
-  MappingReviewSuspendPayload,
-  CompletedWorkflowPayload,
-  ResumePayload,
-  TabsImagesSuspendPayload,
-  RunStatus,
-  WorkflowRunResult,
-  WorkflowFailureReason,
-  WorkflowRunError,
-} from '@types';
+import { DocumentTabProps, WorkflowFailureReason, WorkflowRunError } from '@types';
 import { ContentTypePickerModal } from '../modals/step_2/ContentTypePickerModal';
 import { IncludeImagesModal } from '../modals/step_4/IncludeImagesModal';
 import { useWorkflowAgent } from '@hooks/useWorkflowAgent';
+import { DocumentSelection } from '../../../../services/agents-api';
+import {
+  fetchDocumentSelection,
+  DocumentSelectionConfig,
+} from '../../../../utils/fetchDocumentSelection';
 import { isAiAccessDeniedError } from '../../../../utils/aiAccess';
+import type { RunRecord } from '../../../../types/runs';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
@@ -34,7 +28,6 @@ enum FlowStep {
   CONTENT_TYPE_PICKER = 'contentTypePicker',
   SELECT_TABS = 'selectTabs',
   INCLUDE_IMAGES = 'includeImages',
-  LOADING = 'loading',
 }
 
 interface ModalOrchestratorProps {
@@ -44,8 +37,9 @@ interface ModalOrchestratorProps {
   isOAuthBusy?: boolean;
   onReconnectGoogleDrive?: () => Promise<void>;
   onAiAccessDenied?: (message: string) => void;
-  onMappingReviewReady: (payload: MappingReviewSuspendPayload, runId: string) => void;
-  onResetToMain: () => void;
+  onRunStarted: (runId: string) => void;
+  addRun: (record: RunRecord) => void;
+  storageError: string | null;
 }
 
 interface PreviewErrorState {
@@ -62,9 +56,10 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       isOAuthConnected = false,
       isOAuthBusy = false,
       onReconnectGoogleDrive = async () => undefined,
-      onMappingReviewReady,
-      onResetToMain,
+      onRunStarted,
       onAiAccessDenied,
+      addRun,
+      storageError,
     },
     ref
   ) => {
@@ -74,14 +69,16 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const [isReconnectPending, setIsReconnectPending] = useState(false);
     const [flowStep, setFlowStep] = useState<FlowStep | null>(null);
     const [documentId, setDocumentId] = useState<string>('');
+    const [documentTitle, setDocumentTitle] = useState<string>('Untitled Document');
     const [selectedContentTypes, setSelectedContentTypes] = useState<ContentTypeProps[]>([]);
     const [availableTabs, setAvailableTabs] = useState<DocumentTabProps[]>([]);
     const [selectedTabs, setSelectedTabs] = useState<DocumentTabProps[]>([]);
     const [useAllTabs, setUseAllTabs] = useState<boolean | null>(null);
     const [includeImages, setIncludeImages] = useState<boolean | null>(null);
     const [requiresImageSelection, setRequiresImageSelection] = useState(false);
-    const [activeRunId, setActiveRunId] = useState<string | null>(null);
-    const { startWorkflow, resumeWorkflow } = useWorkflowAgent({
+    const [isWorkflowStarting, setIsWorkflowStarting] = useState(false);
+
+    const { startWorkflow } = useWorkflowAgent({
       sdk,
       documentId,
       oauthToken,
@@ -99,22 +96,22 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       },
     }));
 
-    const resetDocumentScopeReview = () => {
+    const resetDocumentSelection = useCallback(() => {
       setAvailableTabs([]);
       setSelectedTabs([]);
       setUseAllTabs(null);
       setIncludeImages(null);
       setRequiresImageSelection(false);
-    };
+    }, []);
 
-    const resetProgress = () => {
+    const resetProgress = useCallback(() => {
       setDocumentId('');
+      setDocumentTitle('Untitled Document');
       setSelectedContentTypes([]);
-      resetDocumentScopeReview();
-      setActiveRunId(null);
+      resetDocumentSelection();
       setFlowStep(null);
       setIsUploadModalOpen(false);
-    };
+    }, [resetDocumentSelection]);
 
     const showDiscardConfirmation = () => {
       if (!hasProgressToLose) return;
@@ -122,7 +119,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     };
 
     const handleFlowModalCloseRequest = () => {
-      if (flowStep === FlowStep.LOADING) return;
       showDiscardConfirmation();
     };
 
@@ -130,22 +126,11 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setPreviewErrorState(null);
       setIsReconnectPending(false);
       resetProgress();
-      onResetToMain();
-    }, [onResetToMain]);
+    }, [resetProgress]);
 
-    const handleConfirmCancel = async () => {
+    const handleConfirmCancel = () => {
       setIsConfirmCancelModalOpen(false);
-
-      if (activeRunId) {
-        try {
-          await resumeWorkflow(activeRunId, { cancelled: true });
-        } catch (error) {
-          console.error(error);
-        }
-      }
-
       resetProgress();
-      onResetToMain();
     };
 
     const showWorkflowError = (error?: unknown) => {
@@ -235,6 +220,18 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
+      if (
+        error instanceof WorkflowRunError &&
+        error.reason === WorkflowFailureReason.MISSING_PARAMETER
+      ) {
+        setPreviewErrorState({
+          reason: WorkflowFailureReason.MISSING_PARAMETER,
+          title: 'Missing parameter',
+          message: ERROR_MESSAGES.MISSING_PARAMETER,
+        });
+        return;
+      }
+
       setPreviewErrorState({
         reason: WorkflowFailureReason.GENERIC,
         title: 'Unable to generate preview',
@@ -250,20 +247,23 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       closePreviewErrorAndReset();
     }, [closePreviewErrorAndReset, isOAuthBusy, isOAuthConnected, isReconnectPending]);
 
-    const handleWorkflowError = (error: unknown) => {
-      if (isAiAccessDeniedError(error)) {
-        resetProgress();
-        onResetToMain();
-        onAiAccessDenied?.(error.message);
-        return;
-      }
+    const handleWorkflowError = useCallback(
+      (error: unknown) => {
+        if (isAiAccessDeniedError(error)) {
+          resetProgress();
+          onAiAccessDenied?.(error.message);
+          return;
+        }
 
-      showWorkflowError(error);
-    };
+        showWorkflowError(error);
+      },
+      [onAiAccessDenied, resetProgress]
+    );
 
-    const handleUploadModalCloseRequest = (docId?: string) => {
+    const handleUploadModalCloseRequest = (docId?: string, docTitle?: string) => {
       if (docId) {
         setDocumentId(docId);
+        setDocumentTitle(docTitle ?? 'Untitled Document');
         setIsUploadModalOpen(false);
         setFlowStep(FlowStep.CONTENT_TYPE_PICKER);
         return;
@@ -273,80 +273,64 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       showDiscardConfirmation();
     };
 
-    const showDocumentScopeReview = (suspendPayload?: TabsImagesSuspendPayload) => {
-      setAvailableTabs(
-        (suspendPayload?.tabs ?? []).map((tab) => ({
-          tabId: tab.id ?? '',
-          tabTitle: tab.title ?? '',
-        }))
-      );
-      setSelectedTabs([]);
-      setUseAllTabs(null);
-      setIncludeImages(null);
-      setRequiresImageSelection(Boolean(suspendPayload?.requiresImageSelection));
+    const showDocumentSelectionReview = (
+      selectionConfig: DocumentSelectionConfig,
+      contentTypeIds: string[]
+    ) => {
+      setAvailableTabs(selectionConfig.tabs.map((tab) => ({ tabId: tab.id, tabTitle: tab.title })));
+      const requiresTabSelection = selectionConfig.tabs.length > 1;
+      const requiresImages = selectionConfig.imageCount > 0;
+      setRequiresImageSelection(requiresImages);
 
-      if (suspendPayload?.requiresTabSelection) {
+      if (requiresTabSelection) {
         setFlowStep(FlowStep.SELECT_TABS);
         return;
       }
 
-      if (suspendPayload?.requiresImageSelection) {
+      if (requiresImages) {
         setFlowStep(FlowStep.INCLUDE_IMAGES);
         return;
       }
 
-      setFlowStep(null);
+      void startWorkflowWithScope(contentTypeIds, {
+        selectedTabIds: [],
+        includeImages: false,
+      }).catch(handleWorkflowError);
     };
 
-    const handleWorkflowResult = (workflowRun: WorkflowRunResult) => {
-      setActiveRunId(workflowRun.runId);
-
-      if (workflowRun.status === RunStatus.PENDING_REVIEW) {
-        if (workflowRun.suspendPayload.suspendStepId === 'mapping-review') {
-          setFlowStep(null);
-          onMappingReviewReady(workflowRun.suspendPayload, workflowRun.runId);
-          return;
-        }
-
-        showDocumentScopeReview(workflowRun.suspendPayload);
+    const startWorkflowWithScope = async (
+      contentTypeIds: string[],
+      documentSelection: DocumentSelection
+    ) => {
+      if (storageError) {
+        showWorkflowError(
+          new WorkflowRunError(
+            'Unable to track this import: browser storage is unavailable or full.',
+            WorkflowFailureReason.GENERIC
+          )
+        );
         return;
       }
 
-      setFlowStep(null);
-    };
-
-    const continueWorkflow = async (resumePayloadOverrides?: Partial<ResumePayload>) => {
-      if (!activeRunId) {
-        throw new Error('Workflow run id is missing for resume.');
-      }
-
-      const resumePayload: ResumePayload = {
-        ...(selectedTabs.length > 0
-          ? { selectedTabIds: selectedTabs.map((tab) => tab.tabId) }
-          : {}),
-        ...(includeImages !== null ? { includeImages } : {}),
-        ...resumePayloadOverrides,
-      };
-
-      setFlowStep(FlowStep.LOADING);
-
-      const workflowRun = await resumeWorkflow(activeRunId, resumePayload);
-      handleWorkflowResult(workflowRun);
-    };
-
-    const startWorkflowWithDelayedLoading = async (contentTypeIds: string[]) => {
-      let isStartPending = true;
-      const loadingModalTimeout = window.setTimeout(() => {
-        if (isStartPending) {
-          setFlowStep(FlowStep.LOADING);
-        }
-      }, CONTENT_TYPE_SUBMIT_LOADING_DELAY_MS);
-
+      setIsWorkflowStarting(true);
       try {
-        return await startWorkflow(contentTypeIds);
+        const runId = await startWorkflow(contentTypeIds, documentSelection);
+
+        addRun({
+          runId,
+          documentTitle,
+          documentId,
+          contentTypeIds,
+          documentSelection,
+          startedAt: new Date().toISOString(),
+        });
+
+        resetProgress();
+        onRunStarted(runId);
+      } catch (err) {
+        handleWorkflowError(err);
       } finally {
-        isStartPending = false;
-        window.clearTimeout(loadingModalTimeout);
+        setIsWorkflowStarting(false);
       }
     };
 
@@ -361,15 +345,19 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
+      let selectionConfig: DocumentSelectionConfig;
       try {
-        handleWorkflowResult(await startWorkflowWithDelayedLoading(contentTypeIds));
+        selectionConfig = await fetchDocumentSelection(documentId, oauthToken);
       } catch (error) {
         handleWorkflowError(error);
+        return;
       }
+
+      showDocumentSelectionReview(selectionConfig, contentTypeIds);
     };
 
-    const handleSelectTabsContinue = async (selectedTabs: DocumentTabProps[]) => {
-      setSelectedTabs(selectedTabs);
+    const handleSelectTabsContinue = async (nextSelectedTabs: DocumentTabProps[]) => {
+      setSelectedTabs(nextSelectedTabs);
 
       if (requiresImageSelection) {
         setFlowStep(FlowStep.INCLUDE_IMAGES);
@@ -377,17 +365,26 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       }
 
       try {
-        await continueWorkflow({ selectedTabIds: selectedTabs.map((tab) => tab.tabId) });
+        await startWorkflowWithScope(
+          selectedContentTypes.map((ct) => ct.sys.id),
+          { selectedTabIds: nextSelectedTabs.map((tab) => tab.tabId), includeImages: false }
+        );
       } catch (error) {
         handleWorkflowError(error);
       }
     };
 
-    const handleIncludeImagesContinue = async (includeImages: boolean) => {
-      setIncludeImages(includeImages);
+    const handleIncludeImagesContinue = async (nextIncludeImages: boolean) => {
+      setIncludeImages(nextIncludeImages);
 
       try {
-        await continueWorkflow({ includeImages });
+        await startWorkflowWithScope(
+          selectedContentTypes.map((ct) => ct.sys.id),
+          {
+            selectedTabIds: selectedTabs.map((tab) => tab.tabId),
+            includeImages: nextIncludeImages,
+          }
+        );
       } catch (error) {
         handleWorkflowError(error);
       }
@@ -454,6 +451,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
               setSelectedTabs={setSelectedTabs}
               useAllTabs={useAllTabs}
               setUseAllTabs={setUseAllTabs}
+              isLoading={isWorkflowStarting}
             />
           );
         case FlowStep.INCLUDE_IMAGES:
@@ -463,14 +461,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
               setIncludeImages={setIncludeImages}
               onContinue={handleIncludeImagesContinue}
               onClose={showDiscardConfirmation}
-            />
-          );
-        case FlowStep.LOADING:
-          return (
-            <LoadingModal
-              step="reviewingContentTypes"
-              title="Preparing your preview"
-              contentTypeCount={selectedContentTypes.length}
+              isLoading={isWorkflowStarting}
             />
           );
         default:
@@ -491,7 +482,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           onClose={handleFlowModalCloseRequest}
           size={'large'}
           shouldCloseOnOverlayClick={false}
-          shouldCloseOnEscapePress={flowStep !== FlowStep.LOADING}>
+          shouldCloseOnEscapePress={true}>
           {renderFlowStep}
         </Modal>
 

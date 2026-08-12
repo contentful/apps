@@ -181,7 +181,7 @@ export default class VercelClient implements VercelAPIClient {
       }
     } catch (e) {
       // let user continue if there is an error validating env value
-      console.error(e);
+      console.error('Failed to validate environment value.');
     }
 
     return false;

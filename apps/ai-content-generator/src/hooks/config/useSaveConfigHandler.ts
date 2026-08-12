@@ -1,4 +1,4 @@
-import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { PersistedInstallationParameters } from '@components/config/appInstallationParameters';
 import { AppState, ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useEffect, useCallback, useContext } from 'react';
@@ -9,13 +9,13 @@ import { SegmentEvents } from '@configs/segment/segmentEvent';
 /**
  * This hook is used to save the parameters of the app.
  *
- * @param parameters the parameters to be saved
+ * @param parameters the (flat) parameters to be persisted to Contentful
  * @param validateParams function to handle any parameter validations and returns an array of error messages
  * @returns void
  */
 const useSaveConfigHandler = (
-  parameters: AppInstallationParameters,
-  validateParams: (params: AppInstallationParameters) => string[],
+  parameters: PersistedInstallationParameters,
+  validateParams: (params: PersistedInstallationParameters) => string[],
   contentTypes: Set<string>
 ) => {
   const sdk = useSDK<ConfigAppSDK>();

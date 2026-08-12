@@ -5,11 +5,11 @@ import {
   mockContentType,
 } from '../contentTypes/mockContentType';
 import { mockEntry } from '../entry/mockEntry';
-import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { PersistedInstallationParameters } from '@components/config/appInstallationParameters';
 import { DialogInvocationParameters } from '@locations/Dialog';
 
 interface SdkParameters {
-  installation: AppInstallationParameters;
+  installation: PersistedInstallationParameters;
   invocation?: DialogInvocationParameters;
 }
 

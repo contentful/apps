@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import getTrackedAppData from './getTrackedAppData';
 import { BaseAppSDK } from '@contentful/app-sdk';
-import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { PersistedInstallationParameters } from '@components/config/appInstallationParameters';
 
 const sdk = {
   parameters: {
@@ -9,17 +9,15 @@ const sdk = {
       key: 'key',
       model: 'model',
       profile: 'profile',
-      brandProfile: {
-        values: 'values',
-        tone: 'tone',
-        exclude: 'exclude',
-        include: '',
-        audience: 'audience',
-        additional: '',
-      },
+      values: 'values',
+      tone: 'tone',
+      exclude: 'exclude',
+      include: '',
+      audience: 'audience',
+      additional: '',
     },
   },
-} as unknown as BaseAppSDK<AppInstallationParameters>;
+} as unknown as BaseAppSDK<PersistedInstallationParameters>;
 
 describe('getTrackedAppData', () => {
   it('should return the correct data', () => {

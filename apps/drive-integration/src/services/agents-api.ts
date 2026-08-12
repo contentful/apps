@@ -6,13 +6,17 @@ import {
   MappingReviewSuspendPayload,
   ResumePayload,
   RunStatus,
-  TabsImagesSuspendPayload,
   WorkflowFailure,
 } from '@types';
 
 const AGENTS_API_HEADERS = {
   'x-contentful-enable-alpha-feature': 'agents-api',
 };
+
+export interface DocumentSelection {
+  includeImages: boolean;
+  selectedTabIds: string[];
+}
 
 export interface AgentGeneratePayload {
   messages: Array<{
@@ -26,6 +30,7 @@ export interface AgentGeneratePayload {
     documentId: string;
     contentTypeIds: string[];
     oauthToken: string;
+    documentSelection: DocumentSelection;
   };
   threadId: string;
 }
@@ -39,7 +44,7 @@ export interface AgentRunData {
     status?: RunStatus;
     workflowId?: string;
     workflowRunId?: string;
-    suspendPayload?: TabsImagesSuspendPayload | MappingReviewSuspendPayload;
+    suspendPayload?: MappingReviewSuspendPayload;
     workflowFailure?: WorkflowFailure;
     googleDocPayload?: Record<string, unknown>;
   };

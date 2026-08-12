@@ -52,7 +52,7 @@ export function bootstrap(): serverless.Application {
 
   app.use(createServerlessMiddleware(config.serverless));
   app.use(
-    ['/api/messages', '/api/spaces/*', '/api/events', 'api/tokens'],
+    ['/api/messages', '/api/spaces/*', '/api/events', '/api/tokens'],
     createContentfulRequestVerificationMiddleware(config.signingSecret)
   );
   app.use('/api/slack-events', createSlackEventsMiddleware(config.slack, authTokenRepository));

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // jest-dom adds custom jest matchers for asserting on DOM nodes.
 // allows you to do things like:
 // expect(element).toHaveTextContent(/react/i)
@@ -43,7 +44,7 @@ if (typeof window !== 'undefined') {
     configure({
       testIdAttribute: 'data-test-id',
     });
-  } catch (error) {
+  } catch {
     // Silently fail if configuration fails (e.g., in Node.js environment)
     // This is expected for function tests that run in Node.js
   }

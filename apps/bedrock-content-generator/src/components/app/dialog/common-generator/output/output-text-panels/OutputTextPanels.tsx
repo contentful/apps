@@ -61,7 +61,7 @@ const OutputTextPanels = (props: Props) => {
         hasOutputField={Boolean(outputFieldId)}
         hasError={ai.hasError && !ai.output.length}
         dialogText={dialogText}
-        errorText={ai.error?.message}
+        errorText={ai.error instanceof Error ? ai.error.message : undefined}
       />
       <GeneratedTextPanel
         ai={ai}

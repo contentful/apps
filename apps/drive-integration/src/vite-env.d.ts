@@ -1,9 +1,11 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_ENABLE_MOCK_EDIT_MODAL?: string;
-  readonly VITE_ENABLE_MOCK_REVIEW_PAYLOAD?: string;
   readonly VITE_LOCAL_AGENTS_API_BASE_URL?: string;
+  readonly VITE_LD_CLIENT_ID?: string;
+  readonly VITE_GOOGLE_PICKER_API_KEY?: string;
+  readonly VITE_GOOGLE_APP_ID?: string;
+  readonly VITE_ENV?: string;
 }
 
 declare module '*.png' {

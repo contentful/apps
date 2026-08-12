@@ -21,7 +21,7 @@ export const createComment = async () => {
       console.log('Comment created');
       console.dir(comment, { depth: 5 });
     } catch (error) {
-      console.error(error);
+      console.error('Failed to hide and publish comment.');
     }
   }
 };

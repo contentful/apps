@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { AIMock, mockCma, MockSdk } from '@test/mocks';
+import { mockCma, MockSdk } from '@test/mocks';
 import OriginalTextPanel from './OriginalTextPanel';
 import { Tabs } from '@contentful/f36-components';
 import { OutputTab } from '../../Output';
@@ -13,8 +13,6 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => sdk,
   useCMA: () => mockCma,
 }));
-
-vi.mock('@utils/aiApi', () => AIMock);
 
 describe('OriginalTextPanel', () => {
   it('renders', () => {

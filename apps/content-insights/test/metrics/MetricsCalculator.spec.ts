@@ -310,5 +310,34 @@ describe('MetricsCalculator', () => {
 
       expect(metric?.value).toBe('2');
     });
+
+    it('excludes archived entries from the count', () => {
+      const entries: EntryProps[] = [
+        { sys: { updatedAt: daysAgo(200) } } as EntryProps,
+        { sys: { updatedAt: daysAgo(250), archivedVersion: 3 } } as EntryProps,
+        { sys: { updatedAt: daysAgo(300), archivedVersion: 7 } } as EntryProps,
+      ];
+
+      const calculator = new MetricsCalculator(entries, [], {
+        needsUpdateMonths: 6,
+      });
+      const metric = calculator.getAllMetrics().find((m) => m.title === 'Needs update');
+
+      expect(metric?.value).toBe('1');
+    });
+
+    it('reports zero when every stale entry is archived', () => {
+      const entries: EntryProps[] = [
+        { sys: { updatedAt: daysAgo(200), archivedVersion: 1 } } as EntryProps,
+        { sys: { updatedAt: daysAgo(250), archivedVersion: 2 } } as EntryProps,
+      ];
+
+      const calculator = new MetricsCalculator(entries, [], {
+        needsUpdateMonths: 6,
+      });
+      const metric = calculator.getAllMetrics().find((m) => m.title === 'Needs update');
+
+      expect(metric?.value).toBe('0');
+    });
   });
 });

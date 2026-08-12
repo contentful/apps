@@ -1,21 +1,16 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AIMock, generateRandomInvocationParameters, MockSdk } from '@test/mocks';
-
+import { MockSdk } from '@test/mocks';
 import useAI from './useAI';
 import titlePrompt from '@configs/prompts/titlePrompt';
 
-const invocationParameters = generateRandomInvocationParameters();
-const mockSdk = new MockSdk({ invocation: invocationParameters });
+const mockSdk = new MockSdk();
 const sdk = mockSdk.sdk;
-const cma = sdk.cma;
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => sdk,
-  useCMA: () => cma,
+  useCMA: () => sdk.cma,
 }));
-
-vi.mock('@utils/aiApi', () => AIMock);
 
 describe('useAI', () => {
   beforeEach(() => {
@@ -24,29 +19,75 @@ describe('useAI', () => {
 
   it('should start in a default state', () => {
     const { result } = renderHook(() => useAI());
-
     expect(result.current.isGenerating).toBe(false);
     expect(result.current.output).toBe('');
   });
 
-  it('should start generating when triggered', async () => {
+  it('should call the App Action and set output on success', async () => {
     const { result } = renderHook(() => useAI());
-    result.current.generateMessage(titlePrompt('this is a test'), 'en-US');
+    await result.current.generateMessage(titlePrompt('this is a test'), 'en-US');
 
     await waitFor(() => expect(result.current.isGenerating).toBe(false));
-    await waitFor(() => expect(result.current.output).toBeTruthy());
+    await waitFor(() => expect(result.current.output).toBe('Generated text'));
   });
 
-  // TODO: Fix this flaky tests
-  it.skip('should stop generating when triggered and reset output', async () => {
+  it('should set hasError when the App Action call fails', async () => {
+    (
+      sdk.cma as unknown as { appActionCall: { createWithResult: ReturnType<typeof vi.fn> } }
+    ).appActionCall = {
+      createWithResult: vi.fn().mockRejectedValue(new Error('Action failed')),
+    };
+
     const { result } = renderHook(() => useAI());
-    result.current.generateMessage(titlePrompt('this is a test'), 'en-US');
+    await result.current.generateMessage(titlePrompt('this is a test'), 'en-US');
+
+    await waitFor(() => expect(result.current.hasError).toBe(true));
+    await waitFor(() => expect(result.current.isGenerating).toBe(false));
+  });
+
+  it('sendStopSignal cancels an in-flight generation without setting output or error', async () => {
+    type ActionResult = { sys: { status: 'succeeded'; result: { text: string } } };
+    let resolveCall: (value: ActionResult) => void = () => {};
+    (
+      sdk.cma as unknown as { appActionCall: { createWithResult: ReturnType<typeof vi.fn> } }
+    ).appActionCall = {
+      createWithResult: vi.fn().mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveCall = resolve;
+          })
+      ),
+    };
+
+    const { result } = renderHook(() => useAI());
+
+    const generation = result.current.generateMessage(titlePrompt('this is a test'), 'en-US');
     await waitFor(() => expect(result.current.isGenerating).toBe(true));
 
     result.current.sendStopSignal();
+    await expect(generation).resolves.toBe('');
+
+    // A late-arriving response after a stop must be discarded.
+    resolveCall({ sys: { status: 'succeeded', result: { text: 'too late' } } });
+
     await waitFor(() => expect(result.current.isGenerating).toBe(false));
+    expect(result.current.output).toBe('');
+    expect(result.current.hasError).toBe(false);
+  });
+
+  it('resetOutput clears output and error', async () => {
+    (
+      sdk.cma as unknown as { appActionCall: { createWithResult: ReturnType<typeof vi.fn> } }
+    ).appActionCall = {
+      createWithResult: vi.fn().mockRejectedValue(new Error('fail')),
+    };
+
+    const { result } = renderHook(() => useAI());
+    await result.current.generateMessage(titlePrompt('test'), 'en-US');
+    await waitFor(() => expect(result.current.hasError).toBe(true));
 
     result.current.resetOutput();
-    await waitFor(() => expect(result.current.output).toEqual(''));
+    await waitFor(() => expect(result.current.output).toBe(''));
+    await waitFor(() => expect(result.current.hasError).toBe(false));
   });
 });

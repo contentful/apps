@@ -2,7 +2,7 @@ import { Dispatch, useEffect, useCallback } from 'react';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import type { ConfigAppSDK } from '@contentful/app-sdk';
 import { ParameterAction, ParameterReducer } from '@components/config/parameterReducer';
-import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { PersistedInstallationParameters } from '@components/config/appInstallationParameters';
 
 /**
  * This hook is used to initialize the parameters of the app.
@@ -16,7 +16,7 @@ const useInitializeParameters = (dispatch: Dispatch<ParameterReducer>) => {
 
   const dispatchParameters = useCallback(async () => {
     try {
-      const parameters = await sdk.app.getParameters<AppInstallationParameters>();
+      const parameters = await sdk.app.getParameters<PersistedInstallationParameters>();
 
       // TOOD Handle error state here when it's freshly installed in a space
       if (!parameters) return;

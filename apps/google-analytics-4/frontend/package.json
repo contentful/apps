@@ -16,7 +16,7 @@
     "chart.js": "^4.2.1",
     "contentful-management": "10.31.4",
     "emotion": "10.0.27",
-    "lodash": "4.17.21",
+    "lodash": "4.18.1",
     "react": "17.0.2",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "17.0.2",
@@ -62,5 +62,8 @@
     "vite": "^6.4.1",
     "vitest": "^2.1.8"
   },
-  "homepage": "."
+  "homepage": ".",
+  "overrides": {
+    "form-data": "^4.0.6"
+  }
 }

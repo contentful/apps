@@ -1,10 +1,10 @@
 import { type FC } from 'react';
-import { Stack, Heading, Paragraph, Note } from '@contentful/f36-components';
+import { Stack, Heading, Paragraph } from '@contentful/f36-components';
 
 export const FormHeader: FC = () => (
   <Stack flexDirection="column" spacing="spacingS" alignItems="flex-start">
     <Heading as="h1" fontSize="fontSizeXl" marginBottom="none">
-      Set up the Contentful remote MCP Server (Beta)
+      Set up the Contentful remote MCP Server
     </Heading>
 
     <Paragraph fontSize="fontSizeM" marginBottom="none">
@@ -13,12 +13,5 @@ export const FormHeader: FC = () => (
       perform actions in Contentful, like editing entries, updating content models, or migrating
       content between spaces.
     </Paragraph>
-
-    <Note variant="warning" title="Beta release">
-      This feature is in early access and may change as development continues. After you install
-      this app, open your preferred LLM tool to finish setup and install Contentful&apos;s MCP
-      there. Please note, the MCP app does not create a conversational interface inside Contentful,
-      it only enables integrations from external tools.
-    </Note>
   </Stack>
 );

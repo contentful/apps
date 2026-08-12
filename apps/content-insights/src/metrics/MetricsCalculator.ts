@@ -6,6 +6,7 @@ import {
   TIME_TO_PUBLISH_DAYS_RANGE,
 } from '../utils/consts';
 import { parseDate, addDays, subDays, subMonths, isWithin, msPerDay } from '../utils/dateUtils';
+import { isArchivedEntry } from '../utils/EntryUtils';
 
 export class MetricsCalculator {
   private readonly entries: ReadonlyArray<EntryProps>;
@@ -168,6 +169,10 @@ export class MetricsCalculator {
 
     let count = 0;
     for (const entry of this.entries) {
+      // Keep this in sync with useNeedsUpdate, or the card total and the
+      // "Needs update" table disagree.
+      if (isArchivedEntry(entry)) continue;
+
       const updatedAt = parseDate(entry?.sys?.updatedAt);
       if (!updatedAt) continue;
       if (updatedAt.getTime() >= cutoff.getTime()) continue;

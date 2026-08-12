@@ -12,10 +12,8 @@ const { mockResumeWorkflow, mockCreateEntriesFromPreviewPayload } = vi.hoisted((
   mockCreateEntriesFromPreviewPayload: vi.fn(),
 }));
 
-vi.mock('@hooks/useWorkflowAgent', () => ({
-  useWorkflowAgent: () => ({
-    resumeWorkflow: mockResumeWorkflow,
-  }),
+vi.mock('../../../../../src/services/workflowService', () => ({
+  resumeAndPollWorkflow: (...args: unknown[]) => mockResumeWorkflow(...args),
 }));
 
 vi.mock('../../../../../src/services/entryService', () => ({
@@ -184,7 +182,8 @@ describe('ReviewPage entry selection', () => {
 
     await waitFor(() => expect(mockResumeWorkflow).toHaveBeenCalledTimes(1));
 
-    const resumePayload = mockResumeWorkflow.mock.calls[0][1];
+    // resumeAndPollWorkflow signature: (sdk, runId, payload)
+    const resumePayload = mockResumeWorkflow.mock.calls[0][2];
     expect(resumePayload.entryBlockGraph.entries).toHaveLength(1);
     expect(resumePayload.entryBlockGraph.entries[0].tempId).toBe('page-1');
     expect(resumePayload.entryBlockGraph.entries[0].fieldMappings[1].sourceEntryIds).toEqual([]);

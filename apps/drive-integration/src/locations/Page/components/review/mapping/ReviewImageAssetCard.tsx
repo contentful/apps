@@ -1,5 +1,5 @@
 import { Box, Card, Flex, Image, MenuItem, Text } from '@contentful/f36-components';
-import { PencilSimpleIcon } from '@contentful/f36-icons';
+import { PencilSimpleIcon, TrashSimpleIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import type { ImageSourceRef, NormalizedDocumentImage } from '@types';
 import Splitter from '../../mainpage/Splitter';
@@ -18,6 +18,7 @@ export interface ReviewImageAssetCardProps {
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   onEdit?: () => void;
+  onRemove?: () => void;
 }
 
 export function getNormalizedImageDisplayName(image: NormalizedDocumentImage): string {
@@ -35,6 +36,7 @@ export function ReviewImageAssetCard({
   onMouseEnter,
   onMouseLeave,
   onEdit,
+  onRemove,
 }: ReviewImageAssetCardProps): JSX.Element {
   const title = getNormalizedImageDisplayName(image);
 
@@ -56,6 +58,25 @@ export function ReviewImageAssetCard({
       : `1px solid ${tokens.gray300}`
     : `1px solid ${isHighlighted ? 'transparent' : tokens.gray300}`;
 
+  const cardActions = [
+    onEdit ? (
+      <MenuItem key="edit" onClick={onEdit}>
+        <Flex alignItems="center" gap="spacing2Xs">
+          <PencilSimpleIcon size="tiny" />
+          <Text>Edit content mapping</Text>
+        </Flex>
+      </MenuItem>
+    ) : null,
+    onRemove ? (
+      <MenuItem key="remove" onClick={onRemove}>
+        <Flex alignItems="center" gap="spacing2Xs">
+          <TrashSimpleIcon size="tiny" color={tokens.red600} />
+          <Text fontColor="red600">Remove</Text>
+        </Flex>
+      </MenuItem>
+    ) : null,
+  ].filter((action): action is JSX.Element => action !== null);
+
   return (
     <Box
       data-testid={`review-image-asset-${buildSourceRefKey(sourceRef)}`}
@@ -74,20 +95,7 @@ export function ReviewImageAssetCard({
         boxSizing: 'border-box',
         padding: tokens.spacingXs,
       }}>
-      <Card
-        ariaLabel={title}
-        actions={
-          onEdit
-            ? [
-                <MenuItem key="edit" onClick={onEdit}>
-                  <Flex alignItems="center" gap="spacing2Xs">
-                    <PencilSimpleIcon size="tiny" />
-                    <Text>Edit content mapping</Text>
-                  </Flex>
-                </MenuItem>,
-              ]
-            : undefined
-        }>
+      <Card ariaLabel={title} actions={cardActions.length ? cardActions : undefined}>
         <Splitter />
         <Box padding="spacingS">
           <Image

@@ -11,11 +11,11 @@
     "@contentful/app-sdk": "4.13.0",
     "@contentful/ecommerce-app-base": "3.1.48",
     "@types/lodash": "4.17.7",
-   "@vitejs/plugin-react": "^4.3.4",
+    "@vitejs/plugin-react": "^4.3.4",
     "core-js": "3.38.1",
     "graphql": "15.9.0",
     "graphql-tag": "2.12.6",
-    "lodash": "4.17.21",
+    "lodash": "4.18.1",
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "typescript": "4.2.4"
@@ -35,5 +35,8 @@
     "> 1%",
     "not ie <= 11"
   ],
-  "homepage": "."
+  "homepage": ".",
+  "overrides": {
+    "form-data": "^4.0.6"
+  }
 }

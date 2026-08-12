@@ -37,13 +37,15 @@ export const MainPageView = ({
         flexDirection="column"
         gap="spacingXl"
         style={{ maxWidth: '900px', margin: `${tokens.spacingL} auto` }}>
-        <Heading marginBottom="none">Drive Integration</Heading>
-        <OAuthConnector
-          isOAuthConnected={isOAuthConnected}
-          isOAuthBusy={isOAuthBusy}
-          onConnect={onConnectGoogleDrive}
-          onDisconnect={onDisconnectGoogleDrive}
-        />
+        <Flex justifyContent="space-between" alignItems="center">
+          <Heading marginBottom="none">Drive Integration</Heading>
+          <OAuthConnector
+            isOAuthConnected={isOAuthConnected}
+            isOAuthBusy={isOAuthBusy}
+            onConnect={onConnectGoogleDrive}
+            onDisconnect={onDisconnectGoogleDrive}
+          />
+        </Flex>
         <Card padding="large">
           <Flex
             flexDirection="column"

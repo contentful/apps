@@ -1,9 +1,10 @@
 import TextFieldWithButtons from '@components/common/text-field-with-buttons/TextFieldWIthButtons';
-import { Button, CopyButton, Paragraph, Tabs } from '@contentful/f36-components';
+import { Button, CopyButton, Flex, Paragraph, Tabs } from '@contentful/f36-components';
 import useAI from '@hooks/dialog/useAI';
 import { ContentTypeFieldValidation } from 'contentful-management';
 import { useEffect, useState } from 'react';
 import { OutputTab } from '../../Output';
+import GeneratedTextSkeleton from './GeneratedTextSkeleton';
 import { styles } from './GeneratedTextPanel.styles';
 
 interface Props {
@@ -57,15 +58,19 @@ const GeneratedTextPanel = (props: Props) => {
   const getModalErrorMessage = () => {
     if (!error) return null;
 
-    return <Paragraph css={styles.errorMessage}>{error.message}</Paragraph>;
+    const message = error instanceof Error ? error.message : String(error);
+    return <Paragraph css={styles.errorMessage}>{message}</Paragraph>;
   };
 
   return (
     <Tabs.Panel id={OutputTab.GENERATED_TEXT} css={styles.panel}>
       {isGenerating ? (
-        <TextFieldWithButtons inputText={output} sizeValidation={outputFieldValidation?.size}>
-          <Button onClick={() => stopMessageGeneration()}>Stop Generating</Button>
-        </TextFieldWithButtons>
+        <Flex flexDirection="column" fullWidth css={styles.generatingContainer}>
+          <GeneratedTextSkeleton />
+          <Flex alignSelf="flex-end">
+            <Button onClick={() => stopMessageGeneration()}>Stop Generating</Button>
+          </Flex>
+        </Flex>
       ) : (
         <TextFieldWithButtons
           inputText={output}

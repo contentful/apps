@@ -1,0 +1,39 @@
+html,
+body,
+div {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+  font-family: system, sans-serif;
+}
+
+.dialog-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+/* Colors match Forma 36 tokens red100/red500/red700 (@contentful/f36-tokens) */
+.content-advisor-error {
+  background-color: #fff2f2;
+  border: 1px solid #da294a;
+  color: #990017;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.content-advisor-error[hidden] {
+  display: none;
+}
+
+.content-advisor-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px 0;
+}
