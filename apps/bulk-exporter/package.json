@@ -18,7 +18,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "deploy": "contentful-app-scripts upload --bundle-dir ./dist --ci --organization-id ${DEFINITIONS_ORG_ID} --definition-id TODO_PROD_APP_DEF_ID --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy": "contentful-app-scripts upload --bundle-dir ./dist --ci --organization-id ${DEFINITIONS_ORG_ID} --definition-id 1Oz4Ttx1lCCwdkiS4cEe11 --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --bundle-dir ./dist --ci --organization-id ${DEV_TESTING_ORG_ID} --definition-id TODO_TEST_APP_DEF_ID --token ${TEST_CMA_TOKEN}",
     "test": "vitest",
     "test:ci": "vitest run",
