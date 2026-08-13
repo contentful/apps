@@ -62,12 +62,12 @@ async function openDialog(sdk, _currentValue, _config) {
 
 function prepareAEMAssetsHTML() {
   return `
-    <dialog id='content-advisor-dialog' style='width:100%;height:100%;'>
-      <div id='content-advisor-error' class='content-advisor-error' role='alert' hidden></div>
+    <dialog id='content-advisor-dialog'>
       <div class='content-advisor-toolbar'>
         <div id='content-advisor-logout-container'></div>
+        <div id='content-advisor-error' role='alert' hidden></div>
       </div>
-      <div id='content-advisor' style='overflow-x:auto;width:100%;height:100%;'></div>
+      <div id='content-advisor' style='width:100%;height:95%;'></div>
     </dialog>
   `;
 }
@@ -226,10 +226,11 @@ async function renderDialog(sdk) {
         onLogout={async () => {
           if (!imsInstance) return;
           try {
-            await imsInstance.signOut();
-            showAuthError(
-              'You have been logged out of Adobe. Close this dialog and reopen the asset selector to sign in again.'
-            );
+            await imsInstance.signOut().then(() => {
+              showAuthError(
+                'You have been logged out of Adobe. Close this dialog and reopen the asset selector to sign in again.'
+              );
+            });
           } catch (error) {
             showAuthError(`Failed to log out of Adobe: ${error?.message || error}`);
           }
@@ -240,6 +241,7 @@ async function renderDialog(sdk) {
 
   const imsAuthProps = {
     imsClientId: imsClientId,
+    imsOrg: imsOrg,
     imsScope: IMS_SCOPE,
     redirectUrl: window.location.href,
     modalMode: true,
@@ -253,15 +255,21 @@ async function renderDialog(sdk) {
         'Your Adobe session has expired. Close this dialog and try selecting assets again.'
       );
     },
-    onAccessTokenReceived: () => {
-      hideAuthError();
+    onAccessTokenReceived: (imsToken) => {
+      if (imsToken) {
+        hideAuthError();
+      } else {
+        // Close the modal if we don't have a valid IMS token. The IMS login modal should open.
+        // After signing in, the user can re-open the asset selector by clicking the select assets button.
+        sdk.close();
+      }
     },
   };
 
   const contentAdvisorProps = {
     imsOrg,
     repositoryId,
-    aemTierType: aemTierType ? aemTierType.split(',') : ['delivery', 'author'],
+    aemTierType: aemTierType && aemTierType !== 'both' ? [aemTierType] : ['delivery', 'author'],
     env: env === 'stage' ? 'stage' : undefined,
     hideTreeNav,
     selectedAssets:
@@ -272,7 +280,7 @@ async function renderDialog(sdk) {
     uploadConfig: {
       hideUploadButton: hideUploadButton === 'Yes' ? true : false,
     },
-    alwaysUseDMDelivery: true,
+    alwaysUseDMDelivery: aemTierType !== 'author',
     // handleAssetSelection, // only enabled for testing
     handleSelection,
     onClose,
@@ -333,9 +341,12 @@ function isDisabled() {
   return false;
 }
 
-function validateParameters({ imsClientId }) {
+function validateParameters({ imsClientId, imsOrg }) {
   if (!imsClientId) {
     return 'Please add your IMS Client ID';
+  }
+  if (!imsOrg) {
+    return 'Please add your IMS Organization';
   }
   return null;
 }
@@ -352,7 +363,8 @@ setup({
       id: 'imsClientId',
       type: 'Symbol',
       name: 'IMS Client ID',
-      description: 'Your Client ID from Adobe IMS.',
+      description:
+        'The Adobe Identity Management System (IMS) Client ID provided by Adobe for your Adobe AEM CS organization.',
       required: true,
     },
     {
@@ -360,24 +372,23 @@ setup({
       name: 'IMS Organization',
       type: 'Symbol',
       description:
-        'Adobe Identity Management System (IMS) ID that is assigned while provisioning Adobe Experience Manager as a Cloud Service for your organization',
+        'The Adobe Identity Management System (IMS) ID provided by Adobe when provisioning Adobe AEM CS for your organization.',
       required: true,
     },
     {
       id: 'repositoryId',
-      name: 'Repository ID',
+      name: 'Repository',
       type: 'Symbol',
-      description: 'Restricts access to a single repository',
+      description: 'Restricts the asset selector to a single repository.',
       required: false,
     },
     {
       id: 'aemTierType',
       name: 'AEM Tier',
       type: 'List',
-      value: 'delivery,author',
-      default: '',
-      description:
-        'Specifies the tier type for the app (defaults to delivery and author if no selection made)',
+      value: 'delivery,author,both',
+      default: 'both',
+      description: 'Restricts the asset selector to repositories in the selected tier(s).',
       required: false,
     },
     {
@@ -386,8 +397,7 @@ setup({
       type: 'List',
       value: 'prod,stage',
       default: 'prod',
-      description:
-        'Specifies the AEM repository environment for the app (defaults to prod if no selection made)',
+      description: 'Restricts the asset selector to repositories in the selected environment.',
     },
     {
       id: 'prefillSelectedAssets',
@@ -395,8 +405,7 @@ setup({
       type: 'List',
       value: 'No,Yes',
       default: 'Yes',
-      description:
-        'Determines whether the selected assets will be prefilled when opening the asset picker.',
+      description: 'Specifies if selected assets are pre-selected in the asset picker.',
     },
     {
       id: 'hideUploadButton',
@@ -404,7 +413,7 @@ setup({
       type: 'List',
       value: 'Yes, No',
       default: 'Yes',
-      description: 'Specifies whether to show or hide the upload button',
+      description: 'Specifies if the upload button is displayed in the asset picker.',
     },
   ],
   customUpdateStateValue,
