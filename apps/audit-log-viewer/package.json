@@ -1,5 +1,5 @@
 {
-  "name": "audit-log-viewer-example",
+  "name": "audit-log-viewer",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -28,6 +28,7 @@
     "add-locations": "contentful-app-scripts add-locations",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 7xmKcOcvWM7l2vVhjUpmwB --token ${CONTENTFUL_CMA_TOKEN}",
     "build:functions": "contentful-app-scripts build-functions --ci",
     "configure-app": "node scripts/configure-app.mjs",
     "invoke": "node scripts/invoke-action.mjs",
