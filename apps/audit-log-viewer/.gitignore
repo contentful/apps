@@ -4,5 +4,7 @@ build
 .env.local
 *_accessKeys.csv
 contentful-audit-*.json
+# synthetic fixture for events.test.ts — not a real customer export
+!test-fixtures/contentful-audit-*.json
 # GCP service-account keys — never commit
 coffee-review-*.json
