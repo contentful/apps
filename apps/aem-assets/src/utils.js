@@ -30,13 +30,18 @@ export function getRenditions(asset) {
   return renditions.sort((a, b) => a.width - b.width);
 }
 
-export function transformAssets(assets) {
+export function transformAssets(assets, config) {
   const transformedAssets = assets.map((asset) => {
+    const assetId = asset['repo:assetId'] || asset['repo:id'] || asset.id;
     const renditions = getRenditions(asset);
-    const thumbUrl = renditions.find((r) => r.width >= 150 && r.width <= 400).href;
+    const urlRoot = config.assetsUrlRoot;
+
+    const thumbUrl = urlRoot
+      ? `${urlRoot}${!urlRoot.endsWith('/') ? '/' : ''}${assetId}`
+      : renditions.find((r) => r.width >= 150 && r.width <= 400).href;
 
     const transformedAsset = {
-      id: asset['repo:assetId'] || asset['repo:id'] || asset.id,
+      id: assetId,
       name: asset['repo:name'] || asset.name || '',
       url: thumbUrl,
       metadata: getMetadata(asset, renditions),

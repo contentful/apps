@@ -14,9 +14,10 @@ This app lets editors browse, select, sort, and remove AEM DAM assets from a Con
 | --- | --- | --- |
 | IMS Client ID | Yes | Client ID from Adobe IMS. Must be requested from Adobe support — not the standard Adobe Developer Console. |
 | IMS Organization | Yes | The Adobe Identity Management System (IMS) ID provided by Adobe when provisioning Adobe AEM CS for your organization. |
-| Repository ID | No | Restricts the asset selector to a single repository. |
-| AEM Tier | No | Restricts the asset selector to repositories in the selected tier(s). |
-| Environment | No | Restricts the asset selector to repositories in the selected environment. |
+| Repository ID | No | Restricts the asset selector to a single repository. [The AEM Tier and Environment values are ignored if a Repository value is provided.] |
+| AEM Tier | No | Restricts the asset selector to repositories in the selected tier(s). [Only used if a Repository value is not provided.] |
+| Environment | No | Restricts the asset selector to repositories in the selected environment. [Only used if a Repository value is not provided.] |
+| Assets URL Root | No | Specifies the root domain and path for constructing assets' URLs. [Used for generating tier or environment specific URLs] |
 | Prefill Selected Assets | No | Specifies if selected assets are pre-selected in the asset picker. |
 | Hide Asset Upload Button | No | Specifies if the upload button is displayed in the asset picker. |
 
