@@ -196,6 +196,7 @@ async function renderDialog(sdk) {
     aemTierType,
     env,
     hideUploadButton,
+    assetsUrlRoot,
     prefillSelectedAssets,
     selectedAssets,
     hideTreeNav,
@@ -268,9 +269,6 @@ async function renderDialog(sdk) {
 
   const contentAdvisorProps = {
     imsOrg,
-    repositoryId,
-    aemTierType: aemTierType && aemTierType !== 'both' ? [aemTierType] : ['delivery', 'author'],
-    env: env === 'stage' ? 'stage' : undefined,
     hideTreeNav,
     selectedAssets:
       prefillSelectedAssets === 'Yes' && selectedAssets && Array.isArray(selectedAssets)
@@ -280,7 +278,6 @@ async function renderDialog(sdk) {
     uploadConfig: {
       hideUploadButton: hideUploadButton === 'Yes' ? true : false,
     },
-    alwaysUseDMDelivery: aemTierType !== 'author',
     // handleAssetSelection, // only enabled for testing
     handleSelection,
     onClose,
@@ -288,13 +285,18 @@ async function renderDialog(sdk) {
     showToast: () => {},
   };
 
+  if (repositoryId) contentAdvisorProps.repositoryId = repositoryId;
+  if (!repositoryId && aemTierType && aemTierType !== 'both')
+    contentAdvisorProps.aemTierType = [aemTierType];
+  if (!repositoryId && env === 'stage') contentAdvisorProps.env = 'stage';
+
   // this function is only used for testing
   // function handleAssetSelection(assets) {
   //   const transformedAssets = transformAssets(assets);
   // }
 
   function handleSelection(assets) {
-    const transformedAssets = transformAssets(assets);
+    const transformedAssets = transformAssets(assets, config);
     sdk.close(transformedAssets);
   }
 
@@ -379,8 +381,8 @@ setup({
       id: 'repositoryId',
       name: 'Repository',
       type: 'Symbol',
-      description: 'Restricts the asset selector to a single repository.',
-      required: false,
+      description: `Restricts the asset selector to a single repository.
+        [The AEM Tier and Environment values are ignored if a Repository value is provided.]`,
     },
     {
       id: 'aemTierType',
@@ -388,8 +390,8 @@ setup({
       type: 'List',
       value: 'delivery,author,both',
       default: 'both',
-      description: 'Restricts the asset selector to repositories in the selected tier(s).',
-      required: false,
+      description: `Restricts the asset selector to repositories in the selected tier(s).
+        [Only used if a Repository value is not provided.]`,
     },
     {
       id: 'env',
@@ -397,7 +399,15 @@ setup({
       type: 'List',
       value: 'prod,stage',
       default: 'prod',
-      description: 'Restricts the asset selector to repositories in the selected environment.',
+      description: `Restricts the asset selector to repositories in the selected environment.
+        [Only used if a Repository value is not provided.]`,
+    },
+    {
+      id: 'assetsUrlRoot',
+      name: 'Assets URL Root',
+      type: 'Symbol',
+      description: `Specifies the root domain and path for constructing assets' URLs.
+        [Used for generating tier or environment specific URLs]`,
     },
     {
       id: 'prefillSelectedAssets',
