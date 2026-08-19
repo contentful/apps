@@ -13,29 +13,9 @@ const mockSdk: any = {
     appSignedRequest: {
       create: () => ({}),
     },
-    getSpace: () => ({
-      getEnvironment: () => ({
-        getContentTypes: () => ({
-          description:
-            'A series of lessons designed to teach sets of concepts that enable students to master Contentful.',
-          displayField: 'title',
-          name: 'Course',
-          fields: [
-            {
-              course: {
-                disabled: false,
-                id: 'title',
-                localized: true,
-                name: 'Title',
-                omitted: false,
-                required: true,
-                type: 'Symbol',
-              },
-            },
-          ],
-        }),
-      }),
-    }),
+    contentType: {
+      getMany: vi.fn().mockResolvedValue({ items: [] }),
+    },
   },
   ids: {
     app: 'test-app',
