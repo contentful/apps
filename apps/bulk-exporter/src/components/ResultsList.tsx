@@ -149,6 +149,14 @@ export interface ResultsListProps {
     format: 'csv' | 'json' | 'xlsx' | 'xml' | 'yaml',
     filename: string
   ) => void;
+  /** True once the user has clicked "Select all N entries matching this search" */
+  selectAllMatching?: boolean;
+  onSelectAllMatchingChange?: (value: boolean) => void;
+  /** Exports every entry matching the current search filters, not just the fetched page(s) */
+  onExportAllMatching?: (
+    format: 'csv' | 'json' | 'xlsx' | 'xml' | 'yaml',
+    filename: string
+  ) => void;
   contentTypeMap?: ContentTypeMap;
   userMap?: UserMap;
   spaceId?: string;
@@ -338,6 +346,9 @@ export function ResultsList({
   selectedIds = [],
   onSelectionChange,
   onExportSelected,
+  selectAllMatching = false,
+  onSelectAllMatchingChange,
+  onExportAllMatching,
   contentTypeMap = {},
   userMap = {},
   spaceId = '',
@@ -503,6 +514,12 @@ export function ResultsList({
 
   const handleSelectAll = () => {
     if (!onSelectionChange) return;
+    if (selectAllMatching) {
+      // Unchecking while every matching entry is selected drops back to no selection.
+      onSelectAllMatchingChange?.(false);
+      onSelectionChange([]);
+      return;
+    }
     if (allSelected) {
       onSelectionChange(selectedIds.filter((id) => !allCurrentIds.includes(id)));
     } else {
@@ -513,12 +530,30 @@ export function ResultsList({
 
   const handleSelectOne = (id: string) => {
     if (!onSelectionChange) return;
+    if (selectAllMatching) {
+      // Deselecting a single row while every matching entry is selected falls back
+      // to page-level selection (minus that row) rather than tracking exclusions.
+      onSelectAllMatchingChange?.(false);
+      onSelectionChange(allCurrentIds.filter((currentId) => currentId !== id));
+      return;
+    }
     if (selectedIds.includes(id)) {
       onSelectionChange(selectedIds.filter((selectedId) => selectedId !== id));
     } else {
       onSelectionChange([...selectedIds, id]);
     }
   };
+
+  const handleClearSelection = () => {
+    onSelectAllMatchingChange?.(false);
+    onSelectionChange?.([]);
+  };
+
+  const showSelectAllBanner =
+    !selectAllMatching &&
+    allSelected &&
+    totalCount !== undefined &&
+    totalCount > allCurrentIds.length;
 
   const getTitle = (entry: SearchResult): string => {
     if (!entry.fields) return entry.sys.id;
@@ -606,18 +641,40 @@ export function ResultsList({
         </Flex>
 
         {/* Selection bar */}
-        {selectedIds.length > 0 && (
+        {(selectedIds.length > 0 || selectAllMatching) && (
           <div style={{ padding: '0 24px' }}>
             <Flex
               alignItems="center"
               gap="spacingS"
+              flexWrap="wrap"
               style={{
                 padding: '12px 0',
                 borderTop: `1px solid ${tokens.gray200}`,
                 borderBottom: `1px solid ${tokens.gray200}`,
               }}>
-              <Text fontSize="fontSizeS" fontColor="gray700">
-                {selectedIds.length} {selectedIds.length === 1 ? 'entry' : 'entries'} selected:
+              <Text fontSize="fontSizeM" fontColor="gray700">
+                {selectAllMatching ? (
+                  <>
+                    All {(totalCount ?? selectedIds.length).toLocaleString()}{' '}
+                    {(totalCount ?? selectedIds.length) === 1 ? 'entry' : 'entries'} matching this
+                    search are selected.{' '}
+                    <TextLink as="button" onClick={handleClearSelection}>
+                      Clear selection
+                    </TextLink>
+                  </>
+                ) : showSelectAllBanner ? (
+                  <>
+                    All {allCurrentIds.length} {allCurrentIds.length === 1 ? 'entry' : 'entries'} on
+                    this page are selected.{' '}
+                    <TextLink as="button" onClick={() => onSelectAllMatchingChange?.(true)}>
+                      Select all {totalCount?.toLocaleString()} entries matching this search
+                    </TextLink>
+                  </>
+                ) : (
+                  `${selectedIds.length} ${
+                    selectedIds.length === 1 ? 'entry' : 'entries'
+                  } selected:`
+                )}
               </Text>
               {onExportSelected && (
                 <Button
@@ -635,7 +692,10 @@ export function ResultsList({
         {/* Table — horizontal scroll when field columns overflow.
             tableLayout: fixed lets us set exact column widths so sticky
             left offsets are reliable pixel values. */}
-        <div style={{ padding: `${selectedIds.length > 0 ? '24px' : '0'} 24px 24px` }}>
+        <div
+          style={{
+            padding: `${selectedIds.length > 0 || selectAllMatching ? '24px' : '0'} 24px 24px`,
+          }}>
           <div style={{ border: '1px solid #E7EBEE', borderRadius: '6px', overflow: 'hidden' }}>
             <div style={{ overflowX: 'auto', width: '100%' }}>
               <Table
@@ -672,8 +732,8 @@ export function ResultsList({
                       }}>
                       {onSelectionChange && (
                         <Checkbox
-                          isChecked={allSelected}
-                          isIndeterminate={someSelected}
+                          isChecked={allSelected || selectAllMatching}
+                          isIndeterminate={someSelected && !selectAllMatching}
                           onChange={handleSelectAll}
                           aria-label="Select all entries on this page"
                         />
@@ -900,7 +960,10 @@ export function ResultsList({
           <div style={{ padding: '16px 24px 0' }}>
             {isExporting ? (
               <Text>
-                {exportProgress?.message || `Exporting ${selectedIds.length} selected entries`}
+                {exportProgress?.message ||
+                  (selectAllMatching
+                    ? `Exporting ${(totalCount ?? 0).toLocaleString()} matching entries`
+                    : `Exporting ${selectedIds.length} selected entries`)}
               </Text>
             ) : (
               <>
@@ -944,6 +1007,11 @@ export function ResultsList({
               isDisabled={isExporting}
               onClick={() => {
                 const today = new Date().toISOString().split('T')[0];
+                if (selectAllMatching) {
+                  const resolvedFilename = exportFilename.trim() || `all-matching-${today}`;
+                  onExportAllMatching?.(exportFormat, resolvedFilename);
+                  return;
+                }
                 const resolvedFilename =
                   exportFilename.trim() || `selected-${selectedIds.length}-entries-${today}`;
                 onExportSelected?.(selectedIds, exportFormat, resolvedFilename);

@@ -1,4 +1,4 @@
-# Entry Exporter for Contentful
+# Content Exporter for Contentful
 
 A Contentful App that allows you to export unlimited entries from any content type to **5 different formats** (CSV, JSON, XLSX, XML, YAML), bypassing the 40-entry limitation of the Contentful web interface.
 
@@ -144,7 +144,7 @@ npm run deploy -- --organization-id YOUR_ORG_ID --definition-id YOUR_APP_DEF_ID 
 ### Search & Preview
 
 1. Navigate to **Apps** in the Contentful web UI main menu
-2. Select **Entry Exporter**
+2. Select **Content Exporter**
 3. Use the tabbed interface to build your query:
 
 #### Filter Tab
