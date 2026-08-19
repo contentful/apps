@@ -40,7 +40,7 @@ const ConfigScreen = () => {
     <Box padding="spacingXl" style={{ maxWidth: '900px', margin: '0 auto' }}>
       <Flex flexDirection="column" gap="spacingXl" alignItems="stretch">
         <Flex flexDirection="column" gap="spacingS" alignItems="flex-start" style={fullWidth}>
-          <Heading>Bulk Exporter</Heading>
+          <Heading>Content Exporter</Heading>
           <Paragraph>
             Export entries from Contentful with filters, saved field selections, and multiple file
             formats. No additional configuration is required before installation.
@@ -48,7 +48,7 @@ const ConfigScreen = () => {
         </Flex>
 
         <Note variant="positive" title="Ready to install">
-          Bulk Exporter adds a page to the Apps menu. After installation, users with access to this
+          Content Exporter adds a page to the Apps menu. After installation, users with access to this
           space can open the page and export entries from the content types they are allowed to
           read.
         </Note>
@@ -100,7 +100,7 @@ const ConfigScreen = () => {
         <Note variant="primary" title="Permissions">
           <Flex flexDirection="column" gap="spacingXs" alignItems="flex-start" style={fullWidth}>
             <Text>
-              Bulk Exporter can only export entries, tags, locales, and taxonomy data that the
+              Content Exporter can only export entries, tags, locales, and taxonomy data that the
               current user is allowed to access.
             </Text>
             <Text>

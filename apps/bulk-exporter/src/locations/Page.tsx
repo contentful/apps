@@ -70,6 +70,7 @@ const Page = () => {
   const ITEMS_PER_PAGE = 50;
   const [lastFormData, setLastFormData] = useState<ExportFormData | null>(null);
   const [selectedEntryIds, setSelectedEntryIds] = useState<string[]>([]);
+  const [selectAllMatching, setSelectAllMatching] = useState(false);
   const [contentTypeMap, setContentTypeMap] = useState<
     Record<string, { name: string; displayField?: string }>
   >({});
@@ -231,6 +232,7 @@ const Page = () => {
       setIsSearching(true);
       setSearchResults([]);
       setSelectedEntryIds([]);
+      setSelectAllMatching(false);
       setActivePage(0);
       setLastFormData(data);
 
@@ -340,6 +342,7 @@ const Page = () => {
       setIsSearching(true);
       setActivePage(page);
       setSelectedEntryIds([]);
+      setSelectAllMatching(false);
 
       const response = await sdk.cma.entry.getMany({
         query: { ...lastSearchQuery, limit: ITEMS_PER_PAGE, skip: page * ITEMS_PER_PAGE },
@@ -431,6 +434,17 @@ const Page = () => {
     }
   };
 
+  // Exports every entry matching the current filters (not just the fetched page),
+  // reusing the same filtered query the main "Export" flow uses so it scales to
+  // any result size instead of requiring every ID to be collected client-side.
+  const handleExportAllMatching = (
+    format: 'csv' | 'json' | 'xlsx' | 'xml' | 'yaml',
+    filename: string
+  ) => {
+    if (!lastFormData) return;
+    handleExport({ ...lastFormData, format, customFilename: filename });
+  };
+
   if (loading) {
     return (
       <Flex
@@ -449,7 +463,7 @@ const Page = () => {
     <Box style={{ maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
       <Flex flexDirection="column" alignItems="stretch" gap="spacingL" padding="spacingL">
         <Box style={{ width: '100%', maxWidth: '1040px' }}>
-          <Heading marginBottom="spacingS">Entry Exporter</Heading>
+          <Heading marginBottom="spacingS">Content Exporter</Heading>
           <Paragraph marginBottom="none" style={{ maxWidth: '700px' }}>
             Search, preview, and export Contentful entries across one content type or the whole
             space. Use filters to narrow the result set, then export matching or selected entries.
@@ -509,6 +523,9 @@ const Page = () => {
           selectedIds={selectedEntryIds}
           onSelectionChange={setSelectedEntryIds}
           onExportSelected={handleExportSelected}
+          selectAllMatching={selectAllMatching}
+          onSelectAllMatchingChange={setSelectAllMatching}
+          onExportAllMatching={handleExportAllMatching}
           contentTypeMap={contentTypeMap}
           userMap={userMap}
           spaceId={sdk.ids.space}
