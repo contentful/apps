@@ -652,7 +652,7 @@ export function ResultsList({
                 borderTop: `1px solid ${tokens.gray200}`,
                 borderBottom: `1px solid ${tokens.gray200}`,
               }}>
-              <Text fontSize="fontSizeS" fontColor="gray700">
+              <Text fontSize="fontSizeM" fontColor="gray700">
                 {selectAllMatching ? (
                   <>
                     All {(totalCount ?? selectedIds.length).toLocaleString()}{' '}
