@@ -53,6 +53,7 @@ export const ReviewPage = ({
   const [createdEntries, setCreatedEntries] = useState<EntryProps[] | null>(null);
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [blockFindingsAcknowledged, setBlockFindingsAcknowledged] = useState(false);
   const [entryBlockGraph, setEntryBlockGraph] = useState<EntryBlockGraph>(() =>
     structuredClone(payload.entryBlockGraph)
   );
@@ -70,6 +71,7 @@ export const ReviewPage = ({
     setEntryBlockGraph(nextEntryBlockGraph);
     setReferenceGraph(structuredClone(payload.referenceGraph));
     setSelectedEntryKeys(getAllEntrySelectionKeys(nextEntryBlockGraph.entries));
+    setBlockFindingsAcknowledged(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-init on run identity
   }, [runId, payload.documentId]);
 
@@ -89,6 +91,7 @@ export const ReviewPage = ({
   }, [payload.contentTypes]);
   const hasCreatedEntries = createdEntries !== null;
   const isMappingDisabled = isCreatePending || hasCreatedEntries;
+  const hasBlockFindings = (payload.validationFindings ?? []).some((f) => f.severity === 'block');
   const selectedEntryCount = useMemo(
     () => countSelectedEntries(entryBlockGraph.entries, selectedEntryKeys),
     [entryBlockGraph.entries, selectedEntryKeys]
@@ -285,8 +288,14 @@ export const ReviewPage = ({
             ctaLabel={hasCreatedEntries ? 'View entries' : 'Create selected entries'}
             onCtaClick={handleCreateOrViewEntries}
             isCtaLoading={isCreatePending}
-            isCtaDisabled={!hasCreatedEntries && !hasSelectedEntries}
+            isCtaDisabled={
+              !hasCreatedEntries &&
+              (!hasSelectedEntries || (hasBlockFindings && !blockFindingsAcknowledged))
+            }
             areEntrySelectionsDisabled={isMappingDisabled}
+            hasBlockFindings={hasBlockFindings}
+            blockFindingsAcknowledged={blockFindingsAcknowledged}
+            onBlockFindingsAcknowledged={setBlockFindingsAcknowledged}
           />
           <MappingView
             payload={reviewPayload}
