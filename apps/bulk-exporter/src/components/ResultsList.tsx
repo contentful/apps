@@ -843,7 +843,7 @@ export function ResultsList({
                           }}>
                           {onSelectionChange && (
                             <Checkbox
-                              isChecked={selectedIds.includes(entry.sys.id)}
+                              isChecked={selectedIds.includes(entry.sys.id) || selectAllMatching}
                               onChange={() => handleSelectOne(entry.sys.id)}
                               aria-label={`Select ${getTitle(entry)}`}
                             />
