@@ -48,8 +48,8 @@ const ConfigScreen = () => {
         </Flex>
 
         <Note variant="positive" title="Ready to install">
-          Content Exporter adds a page to the Apps menu. After installation, users with access to this
-          space can open the page and export entries from the content types they are allowed to
+          Content Exporter adds a page to the Apps menu. After installation, users with access to
+          this space can open the page and export entries from the content types they are allowed to
           read.
         </Note>
 

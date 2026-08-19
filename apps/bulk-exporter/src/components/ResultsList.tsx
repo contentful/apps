@@ -590,7 +590,7 @@ export function ResultsList({
     if (!entry.fields?.[field.id]) return '—';
     const localeMap = entry.fields[field.id];
     const value = locale
-      ? localeMap[locale] ?? Object.values(localeMap)[0]
+      ? (localeMap[locale] ?? Object.values(localeMap)[0])
       : Object.values(localeMap)[0];
     return formatFieldValue(field, value);
   };
@@ -691,7 +691,9 @@ export function ResultsList({
             tableLayout: fixed lets us set exact column widths so sticky
             left offsets are reliable pixel values. */}
         <div
-          style={{ padding: `${selectedIds.length > 0 || selectAllMatching ? '24px' : '0'} 24px 24px` }}>
+          style={{
+            padding: `${selectedIds.length > 0 || selectAllMatching ? '24px' : '0'} 24px 24px`,
+          }}>
           <div style={{ border: '1px solid #E7EBEE', borderRadius: '6px', overflow: 'hidden' }}>
             <div style={{ overflowX: 'auto', width: '100%' }}>
               <Table

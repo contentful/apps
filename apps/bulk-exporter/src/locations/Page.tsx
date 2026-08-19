@@ -535,7 +535,7 @@ const Page = () => {
           onSortChange={setColumnSort}
           contentTypeSchema={
             lastFormData?.contentTypeId
-              ? contentTypeSchemaMap[lastFormData.contentTypeId] ?? null
+              ? (contentTypeSchemaMap[lastFormData.contentTypeId] ?? null)
               : null
           }
           locales={lastFormData?.locales ?? []}
