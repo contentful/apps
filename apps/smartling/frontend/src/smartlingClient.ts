@@ -12,7 +12,10 @@ const smartlingClient = {
       },
     });
 
-    return (await res.json()) as SmartlingJobsResponse;
+    console.log(res);
+    const data = await res.json();
+    console.log(data);
+    return data as SmartlingJobsResponse;
   },
 
   async refresh(refresh_token: string) {
