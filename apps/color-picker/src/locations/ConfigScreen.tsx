@@ -27,7 +27,7 @@ import { ExternalLinkIcon, PlusIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { css } from 'emotion';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import SwatchEditor from '../components/SwatchEditor';
 import { AppInstallationParameters, Color } from '../types';
 
@@ -49,6 +49,29 @@ const styles = {
   }),
 };
 
+const DUPLICATE_COLOR_MESSAGE = 'Each color value must be unique.';
+
+function normalizeHexValue(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function getDuplicateColorIds(colors: Color[]) {
+  const idsByValue = new Map<string, string[]>();
+
+  colors.forEach((color) => {
+    const normalizedValue = normalizeHexValue(color.value);
+    const ids = idsByValue.get(normalizedValue) ?? [];
+    ids.push(color.id);
+    idsByValue.set(normalizedValue, ids);
+  });
+
+  return new Set(
+    Array.from(idsByValue.values())
+      .filter((ids) => ids.length > 1)
+      .flat()
+  );
+}
+
 const ConfigScreen = () => {
   const [isInstalled, setIsInstalled] = useState(false);
   const [parameters, setParameters] = useState<AppInstallationParameters>({
@@ -61,6 +84,9 @@ const ConfigScreen = () => {
     ],
   });
   const sdk = useSDK<ConfigAppSDK>();
+  const colors = parameters.themes[0].colors;
+
+  const duplicateColorIds = useMemo(() => getDuplicateColorIds(colors), [colors]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -136,13 +162,18 @@ const ConfigScreen = () => {
   };
 
   const onConfigure = useCallback(async () => {
+    if (duplicateColorIds.size > 0) {
+      sdk.notifier.error('Duplicate color values are not allowed');
+      return false;
+    }
+
     const currentState = await sdk.app.getCurrentState();
 
     return {
       parameters,
       targetState: currentState,
     };
-  }, [parameters, sdk]);
+  }, [duplicateColorIds, parameters, sdk]);
 
   useEffect(() => {
     // its configuration.
@@ -205,12 +236,15 @@ const ConfigScreen = () => {
               <SortableContext
                 items={parameters.themes[0].colors.map((c) => c.id)}
                 strategy={verticalListSortingStrategy}>
-                {parameters.themes[0].colors.map((swatch) => (
+                {colors.map((swatch) => (
                   <SwatchEditor
                     key={swatch.id}
                     swatch={swatch}
                     onChange={updateSwatch}
                     onRemove={removeSwatch}
+                    validationMessage={
+                      duplicateColorIds.has(swatch.id) ? DUPLICATE_COLOR_MESSAGE : undefined
+                    }
                   />
                 ))}
               </SortableContext>
