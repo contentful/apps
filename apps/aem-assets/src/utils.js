@@ -19,7 +19,7 @@ function getAssetId(asset) {
 
 export function getMetadata(asset, renditions) {
   const computed = asset?.computedMetadata || {};
-  const { embedded, links, ...copy } = computed;
+  const { _embedded, _links, ...copy } = computed;
   return { ...copy, renditions };
 }
 
