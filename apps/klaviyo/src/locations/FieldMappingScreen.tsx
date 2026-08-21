@@ -19,7 +19,7 @@ import {
 import {
   getEntryKlaviyoFieldMappings,
   setEntryKlaviyoFieldMappings,
-} from '../utils/field-mappings';
+} from '../utils/field-mappings-client';
 
 // Define interface for field data
 interface FieldData {
