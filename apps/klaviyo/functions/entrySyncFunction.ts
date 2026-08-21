@@ -1,7 +1,7 @@
 import * as contentful from 'contentful-management';
 import { KlaviyoService } from './klaviyoService';
 import console from 'console';
-import { getEntryKlaviyoFieldMappings } from '../src/utils/field-mappings';
+import { getEntryKlaviyoFieldMappings } from '../src/utils/field-mappings-legacy';
 import { OAuthSDK } from './initiateOauth';
 
 // Define Event types similar to Contentful's App SDK
