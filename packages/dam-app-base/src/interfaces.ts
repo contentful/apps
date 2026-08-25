@@ -135,9 +135,14 @@ export type CustomUpdateStateValueFn = (
 ) => Promise<void>;
 
 /**
- * Object containing additional data about the asset to display as primary and secondary information in the "more details" section
+ * Object containing additional data about the asset to display under the thumbnail.
  */
-export type AdditionalData = { primary: string; secondary: string };
+export type AdditionalData = {
+  primary: string;
+  secondary?: string;
+  /** Opens in a new tab when the filename label is rendered as a link. */
+  href?: string;
+};
 
 /**
  * Function that return an object that represents the primary and secondary data that should be displayed

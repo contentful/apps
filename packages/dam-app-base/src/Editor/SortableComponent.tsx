@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Card, Collapse, Flex, IconButton, TextLink } from '@contentful/f36-components';
+import { useCallback, useEffect, useState, type SyntheticEvent } from 'react';
+import { Card, Flex, IconButton, TextLink } from '@contentful/f36-components';
 import { XIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from '@emotion/css';
@@ -44,9 +44,6 @@ interface DragHandleProps {
   additionalData: AdditionalData | null;
 }
 
-interface AdditionalDataDisplayProps {
-  additionalData: AdditionalData;
-}
 interface SortableElementProps extends DragHandleProps {
   disabled: boolean;
   onDelete: () => void;
@@ -66,19 +63,13 @@ const styles = {
   card: (disabled: boolean) =>
     css({
       display: 'flex',
+      flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
       margin: '10px',
       position: 'relative',
       cursor: disabled ? 'move' : 'pointer',
       minHeight: '130px',
-      img: {
-        display: 'block',
-        maxWidth: '150px',
-        maxHeight: '100px',
-        margin: 'auto',
-        userSelect: 'none', // Image selection sometimes makes drag and drop ugly.
-      },
     }),
   remove: css({
     position: 'absolute',
@@ -106,32 +97,86 @@ const styles = {
     WebkitBoxOrient: 'vertical',
     color: tokens.gray500,
   }),
-  primaryAdditionalData: css({
-    fontWeight: tokens.fontWeightMedium,
+  thumbnailWrapper: css({
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '150px',
+    minHeight: '100px',
+    padding: tokens.spacing2Xs,
+    border: `1px solid ${tokens.gray300}`,
+    borderRadius: tokens.borderRadiusSmall,
+    backgroundColor: tokens.gray100,
+    backgroundImage: `linear-gradient(45deg, ${tokens.gray200} 25%, transparent 25%), linear-gradient(-45deg, ${tokens.gray200} 25%, transparent 25%), linear-gradient(45deg, transparent 75%, ${tokens.gray200} 75%), linear-gradient(-45deg, transparent 75%, ${tokens.gray200} 75%)`,
+    backgroundSize: '12px 12px',
+    backgroundPosition: '0 0, 0 6px, 6px -6px, -6px 0px',
+  }),
+  thumbnailImage: css({
+    display: 'block',
+    maxWidth: '100%',
+    maxHeight: '100px',
+    margin: 'auto',
+    userSelect: 'none',
+  }),
+  filename: css({
+    marginTop: tokens.spacing2Xs,
+    maxWidth: '150px',
+    wordBreak: 'break-word',
+    textAlign: 'center',
+    fontSize: tokens.fontSizeS,
+    lineHeight: tokens.lineHeightS,
     color: tokens.gray800,
-    cursor: 'default',
   }),
   secondaryAdditionalData: css({
+    marginTop: tokens.spacing2Xs,
+    maxWidth: '150px',
+    wordBreak: 'break-word',
+    textAlign: 'center',
+    fontSize: tokens.fontSizeS,
+    lineHeight: tokens.lineHeightS,
     color: tokens.gray500,
     cursor: 'default',
   }),
-  textlink: css({
-    marginTop: tokens.spacingXs,
-  }),
 };
 
-const AdditionalDataDisplay = ({ additionalData }: AdditionalDataDisplayProps) => {
+const stopDragPropagation = (event: SyntheticEvent) => {
+  event.stopPropagation();
+};
+
+const Filename = ({ label, href }: { label?: string; href?: string }) => {
+  if (!label) {
+    return null;
+  }
+
+  if (href) {
+    return (
+      <TextLink
+        as="a"
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={styles.filename}
+        onClick={stopDragPropagation}
+        onPointerDown={stopDragPropagation}>
+        {label}
+      </TextLink>
+    );
+  }
+
   return (
-    <Flex flexDirection="column" marginTop="spacingXs">
-      <p className={styles.primaryAdditionalData}>{additionalData.primary}</p>
-      <p className={styles.secondaryAdditionalData}>{additionalData.secondary}</p>
-    </Flex>
+    <p className={styles.filename} title={label}>
+      {label}
+    </p>
   );
 };
 
-const DragHandle = ({ url, alt, additionalData }: DragHandleProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+const Thumbnail = ({ url, alt }: { url: string; alt?: string }) => (
+  <div className={styles.thumbnailWrapper}>
+    <img src={url} alt={alt} title={alt} className={styles.thumbnailImage} />
+  </div>
+);
 
+const DragHandle = ({ url, alt, additionalData }: DragHandleProps) => {
   if (!url && !alt) {
     return (
       <div className={styles.altTextContainer}>
@@ -140,56 +185,23 @@ const DragHandle = ({ url, alt, additionalData }: DragHandleProps) => {
     );
   }
 
-  if (additionalData) {
-    // if additional data is provided then the "more details" section will be visible
-    if (!url) {
-      return (
-        <>
-          <div>
-            <Flex justifyContent="center" title={alt}>
-              <FileIcon />
-            </Flex>
-          </div>
-          <AdditionalDataDisplay additionalData={additionalData} />
-        </>
-      );
-    } else {
-      return (
-        <>
-          <div>
-            <img src={url} alt={alt} title={alt} />
-          </div>
-          <Collapse isExpanded={isExpanded}>
-            {<AdditionalDataDisplay additionalData={additionalData} />}
-          </Collapse>
-          <TextLink
-            as="button"
-            onClick={() => setIsExpanded((currentIsExpanded) => !currentIsExpanded)}
-            className={styles.textlink}>
-            {isExpanded ? 'Hide details' : 'More details'}
-          </TextLink>
-        </>
-      );
-    }
-  } else {
-    // display default asset card when no additional data is provided
-    if (!url) {
-      return (
-        <div className={styles.altTextContainer}>
+  const label = alt || additionalData?.primary;
+
+  return (
+    <Flex flexDirection="column" alignItems="center">
+      {url ? (
+        <Thumbnail url={url} alt={alt} />
+      ) : (
+        <Flex justifyContent="center" title={label}>
           <FileIcon />
-          <p className={styles.altTextDisplay} title={alt}>
-            {alt}
-          </p>
-        </div>
-      );
-    } else {
-      return (
-        <div>
-          <img src={url} alt={alt} title={alt} />
-        </div>
-      );
-    }
-  }
+        </Flex>
+      )}
+      <Filename label={label} href={additionalData?.href} />
+      {additionalData?.secondary && (
+        <p className={styles.secondaryAdditionalData}>{additionalData.secondary}</p>
+      )}
+    </Flex>
+  );
 };
 
 const SortableItem = ({
@@ -279,7 +291,7 @@ export const SortableComponent = ({
     );
 
     setItems(myItems.list);
-  }, [resources, makeThumbnail, getAdditionalData, setItems]);
+  }, [resources, makeThumbnail, getAdditionalData, config]);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
