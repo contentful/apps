@@ -59,8 +59,8 @@ function getAdditionalData(attachment) {
     typeof attachment.cdn_url === 'string'
       ? attachment.cdn_url
       : typeof attachment.url === 'string'
-        ? attachment.url
-        : undefined;
+      ? attachment.url
+      : undefined;
 
   return {
     primary: filename,
