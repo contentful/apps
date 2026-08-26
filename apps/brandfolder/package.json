@@ -7,7 +7,7 @@
     "cross-env": "7.0.3"
   },
   "dependencies": {
-    "@contentful/app-scripts": "^2.5.11",
+    "@contentful/app-scripts": "^4.1.8",
     "@contentful/dam-app-base": "4.0.6",
     "lodash": "^4.17.21",
     "react": "19.2.5",
@@ -30,6 +30,7 @@
   ],
   "homepage": ".",
   "overrides": {
-    "form-data": "^4.0.6"
+    "form-data": "^4.0.6",
+    "adm-zip": "0.6.0"
   }
 }
