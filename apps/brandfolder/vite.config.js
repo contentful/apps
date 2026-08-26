@@ -5,9 +5,15 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
+    fs: {
+      allow: ['..', '../..', '../../..'],
+    },
   },
   base: './',
   build: {
     outDir: 'build',
+  },
+  optimizeDeps: {
+    include: ['@contentful/dam-app-base'],
   },
 });
