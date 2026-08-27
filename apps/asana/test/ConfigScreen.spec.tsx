@@ -88,11 +88,14 @@ describe('Asana ConfigScreen', () => {
     });
   });
 
-  it('renders token field and test connection button', async () => {
+  it('renders OAuth credential fields, connect button, and test connection button', async () => {
     await renderAndWaitReady();
 
     expect(screen.getByText('Set up the Asana app')).toBeInTheDocument();
-    expect(screen.getByTestId('cf-ui-text-input')).toBeInTheDocument();
+    expect(screen.getAllByTestId('cf-ui-text-input')).toHaveLength(2);
+    expect(document.getElementById('oauthClientId')).toBeInTheDocument();
+    expect(document.getElementById('oauthClientSecret')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Connect to Asana' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Test connection' })).toBeInTheDocument();
   });
 
@@ -111,7 +114,10 @@ describe('Asana ConfigScreen', () => {
 
   it('hydrates saved workspaces for a configured token', async () => {
     mockSdk.app.getParameters.mockResolvedValue({
-      personalAccessToken: 'pat-123',
+      oauthClientId: 'client-1',
+      oauthClientSecret: 'secret-1',
+      oauthRefreshToken: 'refresh-123',
+      oauthRedirectUri: 'https://example.com/?oauthCallback=1',
       defaultWorkspaceGid: '',
       defaultWorkspaceName: '',
       defaultProjectGid: '',
@@ -134,7 +140,10 @@ describe('Asana ConfigScreen', () => {
 
   it('persists auto-detected primary task link mappings on configure', async () => {
     mockSdk.app.getParameters.mockResolvedValue({
-      personalAccessToken: 'pat-123',
+      oauthClientId: 'client-1',
+      oauthClientSecret: 'secret-1',
+      oauthRefreshToken: 'refresh-123',
+      oauthRedirectUri: 'https://example.com/?oauthCallback=1',
       defaultWorkspaceGid: '',
       defaultWorkspaceName: '',
       defaultProjectGid: '',

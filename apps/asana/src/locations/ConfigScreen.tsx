@@ -27,16 +27,23 @@ import {
   AsanaWorkspace,
   ConnectionStatus,
   ContentTypeOption,
+  ExchangeAsanaOAuthCodeResponse,
   GetAsanaProjectsResponse,
   GetAsanaWorkspacesResponse,
   PrimaryTaskLinkFieldMapping,
   ValidateAsanaCredentialsResponse,
 } from '../types';
 import { buildEditorInterfaceTargetState, EditorInterfaceState } from '../utils/editorInterface';
+import { generateOAuthState, generatePkcePair, getOAuthRedirectUri } from '../utils/oauth';
 import { getDefaultPrimaryTaskLinkMapping } from '../utils/primaryTaskLink';
 
+const OAUTH_SESSION_KEY = 'asana-oauth-pending';
+
 const emptyParameters: AppInstallationParameters = {
-  personalAccessToken: '',
+  oauthClientId: '',
+  oauthClientSecret: '',
+  oauthRefreshToken: '',
+  oauthRedirectUri: '',
   defaultWorkspaceGid: '',
   defaultWorkspaceName: '',
   defaultProjectGid: '',
@@ -57,6 +64,8 @@ const ConfigScreen = () => {
   const [isLoadingWorkspaces, setIsLoadingWorkspaces] = useState(false);
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
   const [projectSearchQuery, setProjectSearchQuery] = useState('');
+  const [transientAccessToken, setTransientAccessToken] = useState('');
+  const [isConnecting, setIsConnecting] = useState(false);
 
   const setConnectionState = (status: ConnectionStatus, message: string) => {
     setParameters((prev) => ({
@@ -78,13 +87,21 @@ const ConfigScreen = () => {
     return JSON.parse(response.response.body) as TResult;
   };
 
+  const validateCredentialsEntered = (): boolean => {
+    return Boolean(parameters.oauthClientId.trim() && parameters.oauthClientSecret.trim());
+  };
+
   const validateRequiredFields = (): boolean => {
-    if (parameters.personalAccessToken.trim()) {
+    if (
+      parameters.oauthClientId.trim() &&
+      parameters.oauthClientSecret.trim() &&
+      parameters.oauthRefreshToken.trim()
+    ) {
       setErrors({});
       return true;
     }
 
-    setErrors({ personalAccessToken: VALIDATION_MESSAGES.tokenRequired });
+    setErrors({ oauthClientId: VALIDATION_MESSAGES.tokenRequired });
     return false;
   };
 
@@ -119,7 +136,7 @@ const ConfigScreen = () => {
     );
   };
 
-  const loadProjects = async (workspaceGid: string, personalAccessToken?: string) => {
+  const loadProjects = async (workspaceGid: string, accessTokenOverride?: string) => {
     if (!workspaceGid) {
       setProjects([]);
       return;
@@ -129,7 +146,7 @@ const ConfigScreen = () => {
     try {
       const data = await callAction<GetAsanaProjectsResponse>('getAsanaProjectsAction', {
         workspaceGid,
-        personalAccessToken: personalAccessToken ?? parameters.personalAccessToken,
+        accessToken: accessTokenOverride ?? transientAccessToken ?? '',
       });
       setProjects(data.projects);
     } catch {
@@ -140,11 +157,11 @@ const ConfigScreen = () => {
     }
   };
 
-  const loadWorkspaces = async (personalAccessToken?: string) => {
+  const loadWorkspaces = async (accessTokenOverride?: string) => {
     setIsLoadingWorkspaces(true);
     try {
       const data = await callAction<GetAsanaWorkspacesResponse>('getAsanaWorkspacesAction', {
-        personalAccessToken: personalAccessToken ?? parameters.personalAccessToken,
+        accessToken: accessTokenOverride ?? transientAccessToken ?? '',
       });
       setWorkspaces(data.workspaces);
       return data.workspaces;
@@ -158,18 +175,18 @@ const ConfigScreen = () => {
   };
 
   const hydrateSavedOptions = async (savedParameters: AppInstallationParameters) => {
-    if (!savedParameters.personalAccessToken.trim()) {
+    if (!savedParameters.oauthRefreshToken.trim()) {
       return;
     }
 
-    const loadedWorkspaces = await loadWorkspaces(savedParameters.personalAccessToken);
+    const loadedWorkspaces = await loadWorkspaces();
     const selectedWorkspaceGid = savedParameters.defaultWorkspaceGid;
 
     if (
       selectedWorkspaceGid &&
       loadedWorkspaces.some((workspace) => workspace.gid === selectedWorkspaceGid)
     ) {
-      await loadProjects(selectedWorkspaceGid, savedParameters.personalAccessToken);
+      await loadProjects(selectedWorkspaceGid);
     }
   };
 
@@ -250,10 +267,11 @@ const ConfigScreen = () => {
     })();
   }, [sdk]);
 
-  const handleTokenChange = (value: string) => {
+  const resetConnectionState = (updates: Partial<AppInstallationParameters>) => {
     setParameters((prev) => ({
       ...prev,
-      personalAccessToken: value,
+      ...updates,
+      oauthRefreshToken: '',
       connectionStatus: ConnectionStatus.None,
       connectionMessage: '',
       defaultWorkspaceGid: '',
@@ -261,13 +279,22 @@ const ConfigScreen = () => {
       defaultProjectGid: '',
       defaultProjectName: '',
     }));
+    setTransientAccessToken('');
     setWorkspaces([]);
     setProjects([]);
     setErrors((prev) => {
       const next = { ...prev };
-      delete next.personalAccessToken;
+      delete next.oauthClientId;
       return next;
     });
+  };
+
+  const handleClientIdChange = (value: string) => {
+    resetConnectionState({ oauthClientId: value });
+  };
+
+  const handleClientSecretChange = (value: string) => {
+    resetConnectionState({ oauthClientSecret: value });
   };
 
   const handleWorkspaceChange = async (workspaceGid: string) => {
@@ -307,7 +334,7 @@ const ConfigScreen = () => {
     projects.find((project) => project.gid === parameters.defaultProjectGid) ?? null;
 
   const testConnection = async () => {
-    if (!validateRequiredFields()) {
+    if (!parameters.oauthRefreshToken.trim() && !transientAccessToken.trim()) {
       sdk.notifier.error(VALIDATION_MESSAGES.connectionRequired);
       return;
     }
@@ -323,14 +350,14 @@ const ConfigScreen = () => {
     try {
       const data = await callAction<ValidateAsanaCredentialsResponse>(
         'validateAsanaCredentialsAction',
-        { personalAccessToken: parameters.personalAccessToken }
+        { accessToken: transientAccessToken || '' }
       );
 
       const nextStatus = data.valid ? ConnectionStatus.Success : ConnectionStatus.Error;
       setConnectionState(nextStatus, data.message);
 
       if (data.valid) {
-        await loadWorkspaces(parameters.personalAccessToken);
+        await loadWorkspaces(transientAccessToken);
       } else {
         setWorkspaces([]);
         setProjects([]);
@@ -343,6 +370,117 @@ const ConfigScreen = () => {
       setProjects([]);
     }
   };
+
+  const connectToAsana = async () => {
+    if (!validateCredentialsEntered()) {
+      setErrors({ oauthClientId: VALIDATION_MESSAGES.oauthCredentialsRequired });
+      sdk.notifier.error(VALIDATION_MESSAGES.oauthCredentialsRequired);
+      return;
+    }
+
+    setIsConnecting(true);
+    try {
+      const { codeVerifier, codeChallenge } = await generatePkcePair();
+      const state = generateOAuthState();
+      const redirectUri = getOAuthRedirectUri();
+      sessionStorage.setItem(
+        OAUTH_SESSION_KEY,
+        JSON.stringify({ state, codeVerifier, redirectUri })
+      );
+
+      const authorizeUrl = new URL('https://app.asana.com/-/oauth_authorize');
+      authorizeUrl.searchParams.set('client_id', parameters.oauthClientId);
+      authorizeUrl.searchParams.set('redirect_uri', redirectUri);
+      authorizeUrl.searchParams.set('response_type', 'code');
+      authorizeUrl.searchParams.set('state', state);
+      authorizeUrl.searchParams.set('code_challenge', codeChallenge);
+      authorizeUrl.searchParams.set('code_challenge_method', 'S256');
+
+      const popup = window.open(authorizeUrl.toString(), 'asana-oauth', 'width=600,height=700');
+      if (!popup) {
+        setIsConnecting(false);
+        sdk.notifier.error(VALIDATION_MESSAGES.popupBlocked);
+      }
+    } catch {
+      setIsConnecting(false);
+      sdk.notifier.error('Could not start the Asana connection.');
+    }
+  };
+
+  useEffect(() => {
+    const onMessage = async (event: MessageEvent) => {
+      if (
+        event.origin !== window.location.origin ||
+        event.data?.source !== 'asana-oauth-callback'
+      ) {
+        return;
+      }
+
+      setIsConnecting(false);
+
+      const saved = sessionStorage.getItem(OAUTH_SESSION_KEY);
+      sessionStorage.removeItem(OAUTH_SESSION_KEY);
+
+      const { code, state, error } = event.data as {
+        code?: string;
+        state?: string;
+        error?: string;
+      };
+      if (error) {
+        sdk.notifier.error(`Asana denied the connection: ${error}`);
+        return;
+      }
+      if (!saved || !code || !state) {
+        sdk.notifier.error('The Asana connection response was invalid. Please try again.');
+        return;
+      }
+
+      const {
+        state: expectedState,
+        codeVerifier,
+        redirectUri,
+      } = JSON.parse(saved) as { state: string; codeVerifier: string; redirectUri: string };
+      if (state !== expectedState) {
+        sdk.notifier.error(
+          'The Asana connection response failed a security check. Please try again.'
+        );
+        return;
+      }
+
+      try {
+        const result = await callAction<ExchangeAsanaOAuthCodeResponse>(
+          'exchangeAsanaOAuthCodeAction',
+          {
+            code,
+            codeVerifier,
+            redirectUri,
+            clientId: parameters.oauthClientId,
+            clientSecret: parameters.oauthClientSecret,
+          }
+        );
+
+        if (!result.success) {
+          setConnectionState(ConnectionStatus.Error, result.message);
+          return;
+        }
+
+        setTransientAccessToken(result.accessToken ?? '');
+        setParameters((prev) => ({
+          ...prev,
+          oauthRefreshToken: result.refreshToken ?? '',
+          oauthRedirectUri: redirectUri,
+        }));
+        setConnectionState(ConnectionStatus.Success, result.message);
+        await loadWorkspaces(result.accessToken);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Could not connect to Asana.';
+        setConnectionState(ConnectionStatus.Error, message);
+      }
+    };
+
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [parameters.oauthClientId, parameters.oauthClientSecret, sdk]);
 
   return (
     <Flex fullWidth justifyContent="center">
@@ -359,30 +497,47 @@ const ConfigScreen = () => {
             <Subheading marginBottom="spacingM">Connect Asana</Subheading>
             <FormControl
               isRequired
-              isInvalid={Boolean(errors.personalAccessToken)}
+              isInvalid={Boolean(errors.oauthClientId)}
               marginBottom="spacingM">
-              <FormControl.Label>Asana personal access token</FormControl.Label>
+              <FormControl.Label>Asana OAuth client ID</FormControl.Label>
               <TextInput
-                id="personalAccessToken"
-                name="personalAccessToken"
-                value={parameters.personalAccessToken}
+                id="oauthClientId"
+                name="oauthClientId"
+                value={parameters.oauthClientId}
                 type="password"
-                onChange={(event) => handleTokenChange(event.target.value)}
+                onChange={(event) => handleClientIdChange(event.target.value)}
               />
-              {errors.personalAccessToken ? (
+            </FormControl>
+
+            <FormControl isRequired marginBottom="spacingM">
+              <FormControl.Label>Asana OAuth client secret</FormControl.Label>
+              <TextInput
+                id="oauthClientSecret"
+                name="oauthClientSecret"
+                value={parameters.oauthClientSecret}
+                type="password"
+                onChange={(event) => handleClientSecretChange(event.target.value)}
+              />
+              {errors.oauthClientId ? (
                 <FormControl.ValidationMessage>
-                  {errors.personalAccessToken}
+                  {errors.oauthClientId}
                 </FormControl.ValidationMessage>
               ) : (
                 <FormControl.HelpText>
-                  Use a personal access token for the first local version of the app.
+                  Register an OAuth app in the Asana developer console, then paste its client ID and
+                  secret here.
                 </FormControl.HelpText>
               )}
             </FormControl>
 
             <Flex alignItems="center" gap="spacingM">
+              <Button onClick={connectToAsana} isLoading={isConnecting}>
+                {parameters.oauthRefreshToken ? 'Reconnect to Asana' : 'Connect to Asana'}
+              </Button>
+
               {isInstalled ? (
                 <Button
+                  variant="secondary"
                   onClick={testConnection}
                   isLoading={parameters.connectionStatus === ConnectionStatus.Testing}>
                   Test connection
@@ -467,8 +622,8 @@ const ConfigScreen = () => {
                   !parameters.defaultWorkspaceGid
                     ? 'Select a workspace first'
                     : isLoadingProjects
-                    ? 'Loading projects...'
-                    : 'Type to search projects'
+                      ? 'Loading projects...'
+                      : 'Type to search projects'
                 }
                 isDisabled={!parameters.defaultWorkspaceGid || isLoadingProjects}
                 itemToString={(item) => item.name}

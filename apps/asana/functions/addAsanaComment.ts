@@ -6,7 +6,7 @@ import type {
 } from '@contentful/node-apps-toolkit';
 import { VALIDATION_MESSAGES } from '../src/const';
 import type { AddAsanaCommentRequest, AddAsanaCommentResponse } from '../src/types';
-import { addCommentToTask, extractTaskGid, getPersonalAccessToken } from './asanaClient';
+import { addCommentToTask, extractTaskGid, getAsanaAccessToken } from './asanaClient';
 
 function getTrimmedValue(value?: string) {
   return value?.trim() ?? '';
@@ -16,15 +16,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   event: AppActionRequest<'Custom'>,
   context: FunctionEventContext
 ): Promise<AddAsanaCommentResponse> => {
-  const personalAccessToken = getPersonalAccessToken(event, context);
   const body = (event.body as AddAsanaCommentRequest | undefined) ?? {};
-
-  if (!personalAccessToken) {
-    return {
-      success: false,
-      message: VALIDATION_MESSAGES.tokenRequired,
-    };
-  }
 
   const taskGid = extractTaskGid(body.taskId);
   if (!taskGid) {
@@ -42,8 +34,16 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
     };
   }
 
+  const accessToken = await getAsanaAccessToken(event, context);
+  if (!accessToken) {
+    return {
+      success: false,
+      message: VALIDATION_MESSAGES.tokenRequired,
+    };
+  }
+
   try {
-    await addCommentToTask(personalAccessToken, taskGid, comment);
+    await addCommentToTask(accessToken, taskGid, comment);
 
     return {
       success: true,

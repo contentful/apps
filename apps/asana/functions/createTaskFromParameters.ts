@@ -3,7 +3,7 @@ import type { AppInstallationParameters, CreateAsanaTaskResponse } from '../src/
 import { createTask } from './asanaClient';
 
 type CreateTaskFromParametersInput = {
-  personalAccessToken: string;
+  accessToken: string;
   title?: string;
   notes?: string;
   projectGid?: string;
@@ -16,14 +16,14 @@ function getTrimmedValue(value?: string) {
 }
 
 export async function createTaskFromParameters({
-  personalAccessToken,
+  accessToken,
   title,
   notes,
   projectGid,
   workspaceGid,
   installationParameters,
 }: CreateTaskFromParametersInput): Promise<CreateAsanaTaskResponse> {
-  const trimmedToken = getTrimmedValue(personalAccessToken);
+  const trimmedToken = getTrimmedValue(accessToken);
   const trimmedTitle = getTrimmedValue(title);
   const trimmedNotes = getTrimmedValue(notes);
   const resolvedProjectGid =

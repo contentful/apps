@@ -37,7 +37,10 @@ describe('appEventHandler', () => {
 
   const mockContext = {
     appInstallationParameters: {
-      personalAccessToken: 'installed-pat',
+      oauthClientId: 'client-id',
+      oauthClientSecret: 'client-secret',
+      oauthRefreshToken: 'refresh-token',
+      oauthRedirectUri: 'https://example.com/?oauthCallback=1',
       defaultWorkspaceGid: 'workspace-1',
       defaultWorkspaceName: 'Workspace',
       defaultProjectGid: 'project-1',
@@ -54,16 +57,21 @@ describe('appEventHandler', () => {
   });
 
   it('creates a task when a matching entry is published', async () => {
-    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        data: {
-          gid: 'task-1',
-          name: 'Publish-driven task',
-          permalink_url: 'https://app.asana.com/0/1/task-1/f',
-        },
-      }),
-    } as Response);
+    vi.mocked(globalThis.fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ access_token: 'test-access-token', expires_in: 3600 }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: {
+            gid: 'task-1',
+            name: 'Publish-driven task',
+            permalink_url: 'https://app.asana.com/0/1/task-1/f',
+          },
+        }),
+      } as Response);
 
     await handler(
       {
@@ -91,7 +99,7 @@ describe('appEventHandler', () => {
       {
         method: 'POST',
         headers: {
-          Authorization: 'Bearer installed-pat',
+          Authorization: 'Bearer test-access-token',
           Accept: 'application/json',
           'Content-Type': 'application/json',
         },

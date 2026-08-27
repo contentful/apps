@@ -155,8 +155,7 @@ const contentModels = [
           'Collect and publish three new customer stories aligned to priority industries for Q3 pipeline acceleration.',
         targetAudience: 'Enterprise marketing leaders in retail, fintech, and travel.',
         channels: 'Website customer stories hub\nSales enablement email\nOrganic social',
-        deliverables:
-          '3 customer story landing pages\n1 roundup email\n3 teaser social posts',
+        deliverables: '3 customer story landing pages\n1 roundup email\n3 teaser social posts',
         workflowStage: 'In Progress',
         plannedPublishDate: '2026-07-08T09:00:00.000Z',
         campaignOwner: 'Marketing Operations',
@@ -297,21 +296,11 @@ const contentModels = [
       }),
       symbolField('legalReviewStatus', 'Legal review status', {
         required: true,
-        validations: inValidation([
-          'Not Started',
-          'In Progress',
-          'Approved',
-          'Changes Requested',
-        ]),
+        validations: inValidation(['Not Started', 'In Progress', 'Approved', 'Changes Requested']),
       }),
       symbolField('brandReviewStatus', 'Brand review status', {
         required: true,
-        validations: inValidation([
-          'Not Started',
-          'In Progress',
-          'Approved',
-          'Changes Requested',
-        ]),
+        validations: inValidation(['Not Started', 'In Progress', 'Approved', 'Changes Requested']),
       }),
       textField('rollbackReason', 'Rollback reason'),
       symbolField('pageOwner', 'Page owner'),

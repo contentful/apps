@@ -31,12 +31,8 @@
       "description": "Validates the configured Asana personal access token by loading visible workspaces.",
       "path": "functions/validateAsanaCredentials.js",
       "entryFile": "functions/validateAsanaCredentials.ts",
-      "allowNetworks": [
-        "https://app.asana.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
+      "allowNetworks": ["https://app.asana.com"],
+      "accepts": ["appaction.call"]
     },
     {
       "id": "getAsanaWorkspacesFunction",
@@ -44,12 +40,8 @@
       "description": "Returns the visible Asana workspaces for the configured token.",
       "path": "functions/getAsanaWorkspaces.js",
       "entryFile": "functions/getAsanaWorkspaces.ts",
-      "allowNetworks": [
-        "https://app.asana.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
+      "allowNetworks": ["https://app.asana.com"],
+      "accepts": ["appaction.call"]
     },
     {
       "id": "getAsanaProjectsFunction",
@@ -57,12 +49,8 @@
       "description": "Searches visible Asana projects for a workspace.",
       "path": "functions/getAsanaProjects.js",
       "entryFile": "functions/getAsanaProjects.ts",
-      "allowNetworks": [
-        "https://app.asana.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
+      "allowNetworks": ["https://app.asana.com"],
+      "accepts": ["appaction.call"]
     },
     {
       "id": "createAsanaTaskFunction",
@@ -70,12 +58,8 @@
       "description": "Creates an Asana task using configured defaults and per-call overrides.",
       "path": "functions/createAsanaTask.js",
       "entryFile": "functions/createAsanaTask.ts",
-      "allowNetworks": [
-        "https://app.asana.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
+      "allowNetworks": ["https://app.asana.com"],
+      "accepts": ["appaction.call"]
     },
     {
       "id": "updateAsanaTaskFunction",
@@ -83,12 +67,8 @@
       "description": "Updates an existing Asana task by GID or task URL.",
       "path": "functions/updateAsanaTask.js",
       "entryFile": "functions/updateAsanaTask.ts",
-      "allowNetworks": [
-        "https://app.asana.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
+      "allowNetworks": ["https://app.asana.com"],
+      "accepts": ["appaction.call"]
     },
     {
       "id": "getAsanaTaskFunction",
@@ -96,12 +76,8 @@
       "description": "Loads details for an existing Asana task by GID or task URL.",
       "path": "functions/getAsanaTask.js",
       "entryFile": "functions/getAsanaTask.ts",
-      "allowNetworks": [
-        "https://app.asana.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
+      "allowNetworks": ["https://app.asana.com"],
+      "accepts": ["appaction.call"]
     },
     {
       "id": "getAsanaTasksFunction",
@@ -109,12 +85,8 @@
       "description": "Searches visible Asana tasks for a workspace or project.",
       "path": "functions/getAsanaTasks.js",
       "entryFile": "functions/getAsanaTasks.ts",
-      "allowNetworks": [
-        "https://app.asana.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
+      "allowNetworks": ["https://app.asana.com"],
+      "accepts": ["appaction.call"]
     },
     {
       "id": "addAsanaCommentFunction",
@@ -122,12 +94,8 @@
       "description": "Adds a comment to an existing Asana task.",
       "path": "functions/addAsanaComment.js",
       "entryFile": "functions/addAsanaComment.ts",
-      "allowNetworks": [
-        "https://app.asana.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
+      "allowNetworks": ["https://app.asana.com"],
+      "accepts": ["appaction.call"]
     },
     {
       "id": "appEventHandler",
@@ -135,12 +103,17 @@
       "description": "Function to handle Contentful app events.",
       "path": "functions/appEventHandler.js",
       "entryFile": "functions/appEventHandler.ts",
-      "allowNetworks": [
-        "https://app.asana.com"
-      ],
-      "accepts": [
-        "appevent.handler"
-      ]
+      "allowNetworks": ["https://app.asana.com"],
+      "accepts": ["appevent.handler"]
+    },
+    {
+      "id": "exchangeAsanaOAuthCodeFunction",
+      "name": "Exchange Asana OAuth code",
+      "description": "Exchanges an Asana OAuth authorization code for an access and refresh token.",
+      "path": "functions/exchangeAsanaOAuthCode.js",
+      "entryFile": "functions/exchangeAsanaOAuthCode.ts",
+      "allowNetworks": ["https://app.asana.com"],
+      "accepts": ["appaction.call"]
     }
   ],
   "actions": [
@@ -152,8 +125,8 @@
       "category": "Custom",
       "parameters": [
         {
-          "id": "personalAccessToken",
-          "name": "Personal Access Token",
+          "id": "accessToken",
+          "name": "Asana access token (transient override)",
           "type": "Symbol",
           "required": false
         }
@@ -168,10 +141,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "valid",
-          "message"
-        ]
+        "required": ["valid", "message"]
       }
     },
     {
@@ -182,8 +152,8 @@
       "category": "Custom",
       "parameters": [
         {
-          "id": "personalAccessToken",
-          "name": "Personal Access Token",
+          "id": "accessToken",
+          "name": "Asana access token (transient override)",
           "type": "Symbol",
           "required": false
         }
@@ -203,16 +173,11 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "gid",
-                "name"
-              ]
+              "required": ["gid", "name"]
             }
           }
         },
-        "required": [
-          "workspaces"
-        ]
+        "required": ["workspaces"]
       }
     },
     {
@@ -223,8 +188,8 @@
       "category": "Custom",
       "parameters": [
         {
-          "id": "personalAccessToken",
-          "name": "Personal Access Token",
+          "id": "accessToken",
+          "name": "Asana access token (transient override)",
           "type": "Symbol",
           "required": false
         },
@@ -256,16 +221,11 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "gid",
-                "name"
-              ]
+              "required": ["gid", "name"]
             }
           }
         },
-        "required": [
-          "projects"
-        ]
+        "required": ["projects"]
       }
     },
     {
@@ -310,12 +270,6 @@
           "name": "Workspace GID override",
           "type": "Symbol",
           "required": false
-        },
-        {
-          "id": "personalAccessToken",
-          "name": "Personal Access Token",
-          "type": "Symbol",
-          "required": false
         }
       ],
       "resultSchema": {
@@ -355,11 +309,7 @@
                 "type": "boolean"
               }
             },
-            "required": [
-              "gid",
-              "name",
-              "permalinkUrl"
-            ]
+            "required": ["gid", "name", "permalinkUrl"]
           },
           "projectGid": {
             "type": "string"
@@ -371,10 +321,7 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "success",
-          "message"
-        ]
+        "required": ["success", "message"]
       }
     },
     {
@@ -407,12 +354,6 @@
           "name": "Completed",
           "type": "Boolean",
           "required": false
-        },
-        {
-          "id": "personalAccessToken",
-          "name": "Personal Access Token",
-          "type": "Symbol",
-          "required": false
         }
       ],
       "resultSchema": {
@@ -452,17 +393,10 @@
                 "type": "boolean"
               }
             },
-            "required": [
-              "gid",
-              "name",
-              "permalinkUrl"
-            ]
+            "required": ["gid", "name", "permalinkUrl"]
           }
         },
-        "required": [
-          "success",
-          "message"
-        ]
+        "required": ["success", "message"]
       }
     },
     {
@@ -483,12 +417,6 @@
           "name": "Comment",
           "type": "Symbol",
           "required": true
-        },
-        {
-          "id": "personalAccessToken",
-          "name": "Personal Access Token",
-          "type": "Symbol",
-          "required": false
         }
       ],
       "resultSchema": {
@@ -501,10 +429,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "success",
-          "message"
-        ]
+        "required": ["success", "message"]
       }
     },
     {
@@ -519,12 +444,6 @@
           "name": "Task GID or URL",
           "type": "Symbol",
           "required": true
-        },
-        {
-          "id": "personalAccessToken",
-          "name": "Personal Access Token",
-          "type": "Symbol",
-          "required": false
         }
       ],
       "resultSchema": {
@@ -564,17 +483,10 @@
                 "type": "boolean"
               }
             },
-            "required": [
-              "gid",
-              "name",
-              "permalinkUrl"
-            ]
+            "required": ["gid", "name", "permalinkUrl"]
           }
         },
-        "required": [
-          "success",
-          "message"
-        ]
+        "required": ["success", "message"]
       }
     },
     {
@@ -584,12 +496,6 @@
       "functionId": "getAsanaTasksFunction",
       "category": "Custom",
       "parameters": [
-        {
-          "id": "personalAccessToken",
-          "name": "Personal Access Token",
-          "type": "Symbol",
-          "required": false
-        },
         {
           "id": "workspaceGid",
           "name": "Workspace GID",
@@ -624,16 +530,68 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "gid",
-                "name"
-              ]
+              "required": ["gid", "name"]
             }
           }
         },
-        "required": [
-          "tasks"
-        ]
+        "required": ["tasks"]
+      }
+    },
+    {
+      "id": "exchangeAsanaOAuthCodeAction",
+      "name": "Exchange Asana OAuth code",
+      "type": "function-invocation",
+      "functionId": "exchangeAsanaOAuthCodeFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "code",
+          "name": "Authorization code",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "codeVerifier",
+          "name": "PKCE code verifier",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "redirectUri",
+          "name": "Redirect URI",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "clientId",
+          "name": "Asana OAuth client ID",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "clientSecret",
+          "name": "Asana OAuth client secret",
+          "type": "Symbol",
+          "required": true
+        }
+      ],
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string"
+          }
+        },
+        "required": ["success", "message"]
       }
     }
   ]

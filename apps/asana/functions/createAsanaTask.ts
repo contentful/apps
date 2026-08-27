@@ -17,7 +17,7 @@ import {
   buildPrimaryTaskLinkFromEntryValues,
   getDefaultPrimaryTaskLinkMapping,
 } from '../src/utils/primaryTaskLink';
-import { getPersonalAccessToken } from './asanaClient';
+import { getAsanaAccessToken } from './asanaClient';
 import { createTaskFromParameters } from './createTaskFromParameters';
 
 type LocalizedFieldValue = Record<string, unknown> | undefined;
@@ -256,7 +256,6 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   event: AppActionRequest<'Custom'>,
   context: FunctionEventContext
 ): Promise<CreateAsanaTaskResponse> => {
-  const personalAccessToken = getPersonalAccessToken(event, context);
   const body = (event.body as CreateAsanaTaskRequest | undefined) ?? {};
   const installationParameters = (context.appInstallationParameters ??
     {}) as AppInstallationParameters;
@@ -306,8 +305,9 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
     };
   }
 
+  const accessToken = await getAsanaAccessToken(event, context);
   const result = await createTaskFromParameters({
-    personalAccessToken,
+    accessToken,
     title: body.title || entryTitle,
     notes: body.notes,
     projectGid: body.projectGid,

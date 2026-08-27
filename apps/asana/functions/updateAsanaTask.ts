@@ -6,7 +6,7 @@ import type {
 } from '@contentful/node-apps-toolkit';
 import { VALIDATION_MESSAGES } from '../src/const';
 import type { UpdateAsanaTaskRequest, UpdateAsanaTaskResponse } from '../src/types';
-import { extractTaskGid, getPersonalAccessToken, updateTask } from './asanaClient';
+import { extractTaskGid, getAsanaAccessToken, updateTask } from './asanaClient';
 
 function getTrimmedValue(value?: string) {
   return value?.trim() ?? '';
@@ -16,15 +16,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   event: AppActionRequest<'Custom'>,
   context: FunctionEventContext
 ): Promise<UpdateAsanaTaskResponse> => {
-  const personalAccessToken = getPersonalAccessToken(event, context);
   const body = (event.body as UpdateAsanaTaskRequest | undefined) ?? {};
-
-  if (!personalAccessToken) {
-    return {
-      success: false,
-      message: VALIDATION_MESSAGES.tokenRequired,
-    };
-  }
 
   const taskGid = extractTaskGid(body.taskId);
   if (!taskGid) {
@@ -47,8 +39,16 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
     };
   }
 
+  const accessToken = await getAsanaAccessToken(event, context);
+  if (!accessToken) {
+    return {
+      success: false,
+      message: VALIDATION_MESSAGES.tokenRequired,
+    };
+  }
+
   try {
-    const task = await updateTask(personalAccessToken, taskGid, {
+    const task = await updateTask(accessToken, taskGid, {
       ...(hasTitleUpdate ? { name: title } : {}),
       ...(hasNotesUpdate ? { notes } : {}),
       ...(hasCompletedUpdate ? { completed: body.completed } : {}),
