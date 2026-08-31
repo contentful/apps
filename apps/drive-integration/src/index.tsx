@@ -1,4 +1,5 @@
 import { GlobalStyles } from '@contentful/f36-components';
+import { SegmentAnalyticsProvider } from '@contentful/integration-frontend-toolkit/sdks';
 import { SDKProvider } from '@contentful/react-apps-toolkit';
 import { withLDProvider } from 'launchdarkly-react-client-sdk';
 import { createRoot } from 'react-dom/client';
@@ -8,6 +9,9 @@ const AppWithLD = withLDProvider({
   clientSideID: import.meta.env.VITE_LD_CLIENT_ID ?? '',
   options: { bootstrap: 'localStorage' },
 })(App);
+
+// Fullstory only captures a cross-origin iframe when this is set before its snippet loads.
+window._fs_run_in_iframe = true;
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
@@ -40,7 +44,9 @@ if (process.env.NODE_ENV === 'development' && window.self === window.top) {
   root.render(
     <SDKProvider>
       <GlobalStyles />
-      <AppWithLD />
+      <SegmentAnalyticsProvider writeKey={import.meta.env.VITE_SEGMENT_WRITE_KEY ?? ''}>
+        <AppWithLD />
+      </SegmentAnalyticsProvider>
     </SDKProvider>
   );
 }
