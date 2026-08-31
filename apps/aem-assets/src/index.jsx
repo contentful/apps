@@ -4,7 +4,7 @@ import { Button } from '@contentful/f36-components';
 import { setup } from '@contentful/dam-app-base';
 import './index.css';
 import logo from './logo.svg';
-import { getRenditions, pick, transformAssets } from './utils';
+import { getRenditions, getSafeRenditionUrl, pick, transformAssets } from './utils';
 
 const ADOBE_EXPERIENCE_CLOUD_DOMAIN = `https://experience.adobe.com`;
 const SCRIPT_URL = `${ADOBE_EXPERIENCE_CLOUD_DOMAIN}/solutions/CQ-assets-selectors/static-assets/resources/assets-selectors.js`;
@@ -30,9 +30,8 @@ const FIELDS_TO_PERSIST = [
 ];
 
 export function makeThumbnail(asset) {
-  const thumbRendition = asset?.computedMetadata?._links[ASSET_RENDITIONS_KEY][1];
-  const thumbnail = thumbRendition?.href || '';
-  const url = typeof thumbnail === 'string' ? thumbnail : undefined;
+  const renditions = getRenditions(asset);
+  const url = getSafeRenditionUrl(asset, renditions);
   const alt = asset.name || asset.id || '';
 
   return [url, alt];
@@ -40,8 +39,10 @@ export function makeThumbnail(asset) {
 
 async function openDialog(sdk, _currentValue, _config) {
   const parameters = { ..._config, ...sdk.parameters.instance };
-  const assetIds = _currentValue.map((asset) => ({ id: asset.id }));
-  parameters.selectedAssets = assetIds;
+  const currentAssets = Array.isArray(_currentValue) ? _currentValue : [];
+  parameters.selectedAssets = currentAssets
+    .filter((asset) => asset?.id)
+    .map((asset) => ({ id: asset.id }));
 
   const result = await sdk.dialogs.openCurrentApp({
     position: 'center',
@@ -53,10 +54,7 @@ async function openDialog(sdk, _currentValue, _config) {
     allowHeightOverflow: true,
   });
 
-  if (!Array.isArray(result)) {
-    return [];
-  }
-
+  if (!Array.isArray(result)) return undefined;
   return result.map((asset) => pick(asset, FIELDS_TO_PERSIST));
 }
 
@@ -94,14 +92,14 @@ function LogoutButton({ onLogout }) {
   );
 }
 
-function showAuthError(message) {
+function showAlert(message) {
   const banner = document.getElementById('content-advisor-error');
   if (!banner) return;
   banner.textContent = message;
   banner.hidden = false;
 }
 
-function hideAuthError() {
+function hideAlert() {
   const banner = document.getElementById('content-advisor-error');
   if (!banner) return;
   banner.hidden = true;
@@ -197,8 +195,8 @@ async function renderDialog(sdk) {
     env,
     hideUploadButton,
     prefillSelectedAssets,
-    selectedAssets,
-    hideTreeNav,
+    selectedAssets, //value set with field instance parameter
+    hideTreeNav, //value set with field instance parameter
     selectionType,
   } = config;
 
@@ -227,12 +225,12 @@ async function renderDialog(sdk) {
           if (!imsInstance) return;
           try {
             await imsInstance.signOut().then(() => {
-              showAuthError(
+              showAlert(
                 'You have been logged out of Adobe. Close this dialog and reopen the asset selector to sign in again.'
               );
             });
           } catch (error) {
-            showAuthError(`Failed to log out of Adobe: ${error?.message || error}`);
+            showAlert(`Failed to log out of Adobe: ${error?.message || error}`);
           }
         }}
       />
@@ -246,18 +244,18 @@ async function renderDialog(sdk) {
     redirectUrl: window.location.href,
     modalMode: true,
     onErrorReceived: (errorType, errorMessage) => {
-      showAuthError(
+      showAlert(
         `Adobe authentication failed (${errorType}). Check that the IMS Client ID and IMS Organization ID in the app configuration are still valid. If this persists after re-checking configuration, the Adobe Assets Selector's required auth scope may have changed and the app needs to be updated. Details: ${errorMessage}`
       );
     },
     onAccessTokenExpired: () => {
-      showAuthError(
+      showAlert(
         'Your Adobe session has expired. Close this dialog and try selecting assets again.'
       );
     },
     onAccessTokenReceived: (imsToken) => {
       if (imsToken) {
-        hideAuthError();
+        hideAlert();
       } else {
         // Close the modal if we don't have a valid IMS token. The IMS login modal should open.
         // After signing in, the user can re-open the asset selector by clicking the select assets button.
@@ -268,9 +266,6 @@ async function renderDialog(sdk) {
 
   const contentAdvisorProps = {
     imsOrg,
-    repositoryId,
-    aemTierType: aemTierType && aemTierType !== 'both' ? [aemTierType] : ['delivery', 'author'],
-    env: env === 'stage' ? 'stage' : undefined,
     hideTreeNav,
     selectedAssets:
       prefillSelectedAssets === 'Yes' && selectedAssets && Array.isArray(selectedAssets)
@@ -280,26 +275,35 @@ async function renderDialog(sdk) {
     uploadConfig: {
       hideUploadButton: hideUploadButton === 'Yes' ? true : false,
     },
-    alwaysUseDMDelivery: aemTierType !== 'author',
     // handleAssetSelection, // only enabled for testing
     handleSelection,
     onClose,
-    expiryOptions: () => {},
-    showToast: () => {},
+    // expiryOptions: () => {},
+    // showToast: () => {},
   };
+
+  if (repositoryId) contentAdvisorProps.repositoryId = repositoryId;
+  if (!repositoryId && aemTierType && aemTierType !== 'both')
+    contentAdvisorProps.aemTierType = [aemTierType];
+  if (!repositoryId && env === 'stage') contentAdvisorProps.env = 'stage';
 
   // this function is only used for testing
   // function handleAssetSelection(assets) {
-  //   const transformedAssets = transformAssets(assets);
+  // console.log(`assets:`, assets);
+  // const transformedAssets = transformAssets(assets);
   // }
 
   function handleSelection(assets) {
-    const transformedAssets = transformAssets(assets);
-    sdk.close(transformedAssets);
+    try {
+      const transformedAssets = transformAssets(assets, config);
+      sdk.close(transformedAssets);
+    } catch (error) {
+      showAlert(`Unable to prepare the selected assets: ${error?.message || error}`);
+    }
   }
 
   function onClose() {
-    hideAuthError();
+    hideAlert();
     document.getElementById('content-advisor-dialog').close();
     sdk.close();
   }
@@ -326,15 +330,19 @@ async function renderDialog(sdk) {
 }
 
 async function customUpdateStateValue({ currentValue, result, config }, updateStateValue) {
-  if (config.prefillSelectedAssets === 'Yes') {
-    if (result) await updateStateValue(result);
-  } else {
-    if (Array.isArray(result) && result.length > 0) {
-      const newValue = [...(currentValue || []), ...result];
+  if (!Array.isArray(result)) return;
 
-      await updateStateValue(newValue);
-    }
+  if (config.prefillSelectedAssets === 'Yes') {
+    await updateStateValue(result);
+    return;
   }
+
+  const current = Array.isArray(currentValue) ? currentValue : [];
+  const byId = new Map(current.filter((a) => a?.id).map((a) => [a.id, a]));
+  for (const asset of result) {
+    if (asset?.id) byId.set(asset.id, asset);
+  }
+  await updateStateValue([...byId.values()]);
 }
 
 function isDisabled() {
@@ -379,16 +387,18 @@ setup({
       id: 'repositoryId',
       name: 'Repository',
       type: 'Symbol',
-      description: 'Restricts the asset selector to a single repository.',
+      description: `Restricts the asset selector to a single repository.
+        [The AEM Tier and Environment values are ignored if a Repository value is provided.]`,
       required: false,
     },
     {
       id: 'aemTierType',
       name: 'AEM Tier',
       type: 'List',
-      value: 'delivery,author,both',
+      value: 'both,delivery,author',
       default: 'both',
-      description: 'Restricts the asset selector to repositories in the selected tier(s).',
+      description: `Restricts the asset selector to repositories in the selected tier(s).
+        [Only used if a Repository value is not provided.]`,
       required: false,
     },
     {
@@ -397,23 +407,35 @@ setup({
       type: 'List',
       value: 'prod,stage',
       default: 'prod',
-      description: 'Restricts the asset selector to repositories in the selected environment.',
+      description: `Restricts the asset selector to repositories in the selected environment.
+        [Only used if a Repository value is not provided.]`,
+      required: false,
+    },
+    {
+      id: 'assetsUrlRoot',
+      name: 'Assets URL Root',
+      type: 'Symbol',
+      description: `Specifies the root domain and path for constructing assets' URLs.
+        [Used for generating tier or environment specific URLs]`,
+      required: false,
     },
     {
       id: 'prefillSelectedAssets',
       name: 'Prefill Selected Assets',
       type: 'List',
-      value: 'No,Yes',
+      value: 'Yes,No',
       default: 'Yes',
       description: 'Specifies if selected assets are pre-selected in the asset picker.',
+      required: false,
     },
     {
       id: 'hideUploadButton',
       name: 'Hide Asset Upload Button',
       type: 'List',
-      value: 'Yes, No',
+      value: 'Yes,No',
       default: 'Yes',
       description: 'Specifies if the upload button is displayed in the asset picker.',
+      required: false,
     },
   ],
   customUpdateStateValue,

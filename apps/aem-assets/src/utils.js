@@ -1,57 +1,74 @@
 const ASSET_RENDITIONS_KEY = 'http://ns.adobe.com/adobecloud/rel/rendition';
+const ADOBE_EXPERIENCE_URL = 'https://experience.adobe.com/';
 
 /**
  * Source: https://github.com/you-dont-need/You-Dont-Need-Lodash-Underscore#_pick
  */
 export function pick(object, keys) {
-  return keys.reduce((obj, key) => {
-    if (object && object.hasOwnProperty(key)) {
-      obj[key] = object[key];
+  return keys.reduce((result, key) => {
+    if (object && object.hasOwnProperty.call(object, key)) {
+      result[key] = object[key];
     }
-    return obj;
+    return result;
   }, {});
 }
 
+function getAssetId(asset) {
+  return asset['repo:assetId'] || asset['repo:id'] || asset.id;
+}
+
 export function getMetadata(asset, renditions) {
-  const { _embedded, _links, ...copy } = asset.computedMetadata;
-  const metadata = { ...copy, renditions };
-  return metadata;
+  const computed = asset?.computedMetadata || {};
+  const { _embedded, _links, ...copy } = computed;
+  return { ...copy, renditions };
 }
 
 export function getRenditions(asset) {
-  const renditions = asset?.computedMetadata?._links[ASSET_RENDITIONS_KEY]?.map((r) => {
-    return {
-      href: r.href,
-      height: r.height,
-      width: r.width,
-      type: r.type,
-    };
-  });
-  return renditions.sort((a, b) => a.width - b.width);
+  const links = asset?.computedMetadata?._links?.[ASSET_RENDITIONS_KEY] ?? [];
+  return links
+    .filter((r) => typeof r?.href === 'string' && r.href.length > 0)
+    .map((r) => ({ href: r.href, height: r.height, width: r.width, type: r.type }))
+    .sort((a, b) => Number(a.width) - Number(b.width));
 }
 
-export function transformAssets(assets) {
-  const transformedAssets = assets.map((asset) => {
+export function getThumbUrl(asset, config) {
+  const assetRootUrl = config.assetsUrlRoot || null;
+  const assetId = getAssetId(asset);
+  const assetName = asset['repo:name'] || asset.name || '';
+
+  let thumbUrl = '';
+  if (assetRootUrl) {
+    const slash = assetRootUrl.endsWith('/') ? '' : '/';
+    thumbUrl = `${assetRootUrl}${slash}${assetId}/as/${assetName}`;
+  } else {
     const renditions = getRenditions(asset);
-    const thumbUrl = renditions.find((r) => r.width >= 150 && r.width <= 400).href;
+    if (Array.isArray(renditions) && renditions.length > 0) {
+      thumbUrl = getSafeRenditionUrl(asset, renditions);
+    } else {
+      thumbUrl = `${ADOBE_EXPERIENCE_URL}${assetId}`;
+    }
+  }
+  return thumbUrl;
+}
 
-    const transformedAsset = {
-      id: asset['repo:assetId'] || asset['repo:id'] || asset.id,
-      name: asset['repo:name'] || asset.name || '',
-      url: thumbUrl,
-      metadata: getMetadata(asset, renditions),
-      // path: asset['repo:path'] || asset.path || '',
-      // size: asset['repo:size'] || 0,
-      // mimetype: asset['dc:format'] || asset.mimetype || '',
-      // width: asset['tiff:imageWidth'] || asset.width || 0,
-      // height: asset['tiff:imageLeength'] || asset.height || 0,
-      // state: asset['repo:state'] || '',
-      // isExpired: asset.isExpired || false,
-      // renditions: renditions,
-    };
+export function getSafeRenditionUrl(asset, renditions) {
+  const usable = renditions.filter((r) => Number.isFinite(Number(r.width)));
+  const preferred = usable.find((r) => r.width >= 150 && r.width <= 400);
+  const nearest = usable[0];
+  return preferred?.href ?? nearest?.href ?? asset?.url ?? '';
+}
 
-    return transformedAsset;
-  });
-
-  return transformedAssets;
+export function transformAssets(assets, config) {
+  const source = Array.isArray(assets) ? assets : [];
+  return source
+    .filter((asset) => asset?.id)
+    .map((asset) => {
+      const renditions = getRenditions(asset);
+      return {
+        id: asset['repo:assetId'] || asset['repo:id'] || asset.id,
+        name: asset['repo:name'] || asset.name || '',
+        url: getThumbUrl(asset, config),
+        metadata: getMetadata(asset, renditions),
+      };
+    });
 }
