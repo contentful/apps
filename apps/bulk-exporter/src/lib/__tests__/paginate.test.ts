@@ -113,6 +113,122 @@ describe('paginate', () => {
     });
   });
 
+  describe('paginateEntries response-size handling', () => {
+    // Captured verbatim from the CMA response in ES-630: the app-sdk's
+    // postMessage bridge relays the raw API error object, not an Error
+    // instance, so this is the exact shape the retry logic must recognize.
+    const responseTooBigError = {
+      sys: { type: 'Error', id: 'BadRequest' },
+      message: 'Response size too big. Maximum allowed response size: 7340032B.',
+      requestId: '9a90d083-9da4-46c0-adcf-cad04aea653a',
+    };
+
+    it('halves the page size and retries when the CMA rejects a page as too big', async () => {
+      const getMany = vi
+        .fn()
+        .mockRejectedValueOnce(responseTooBigError)
+        .mockRejectedValueOnce(responseTooBigError)
+        .mockResolvedValueOnce({
+          items: Array(250).fill({ sys: { id: 'small' } }),
+          total: 250,
+        });
+
+      const mockCma = { entry: { getMany } };
+      const throttledFetch = vi.fn((fn) => fn());
+
+      const batches = [];
+      for await (const batch of paginateEntries(
+        mockCma as any,
+        { contentType: 'statement' },
+        throttledFetch
+      )) {
+        batches.push(batch);
+      }
+
+      expect(batches).toHaveLength(1);
+      expect(batches[0]).toHaveLength(250);
+      expect(getMany).toHaveBeenCalledTimes(3);
+      expect(getMany.mock.calls[0][0].query.limit).toBe(1000);
+      expect(getMany.mock.calls[1][0].query.limit).toBe(500);
+      expect(getMany.mock.calls[2][0].query.limit).toBe(250);
+    });
+
+    it('carries the reduced page size forward into subsequent pages', async () => {
+      const getMany = vi
+        .fn()
+        .mockRejectedValueOnce(responseTooBigError)
+        .mockResolvedValueOnce({
+          items: Array(500).fill({ sys: { id: 'page1' } }),
+          total: 700,
+        })
+        .mockResolvedValueOnce({
+          items: Array(200).fill({ sys: { id: 'page2' } }),
+          total: 700,
+        });
+
+      const mockCma = { entry: { getMany } };
+      const throttledFetch = vi.fn((fn) => fn());
+
+      const batches = [];
+      for await (const batch of paginateEntries(
+        mockCma as any,
+        { contentType: 'statement' },
+        throttledFetch
+      )) {
+        batches.push(batch);
+      }
+
+      expect(batches).toHaveLength(2);
+      expect(getMany.mock.calls[1][0].query.limit).toBe(500);
+      // Second page starts at the previously-successful 500 rather than
+      // re-discovering it by failing at 1000 again.
+      expect(getMany.mock.calls[2][0].query.limit).toBe(500);
+      expect(getMany.mock.calls[2][0].query.skip).toBe(500);
+    });
+
+    it('stops retrying and rethrows once the page size hits the floor', async () => {
+      const getMany = vi.fn().mockRejectedValue(responseTooBigError);
+      const mockCma = { entry: { getMany } };
+      const throttledFetch = vi.fn((fn) => fn());
+
+      const run = async () => {
+        for await (const _batch of paginateEntries(
+          mockCma as any,
+          { contentType: 'statement' },
+          throttledFetch
+        )) {
+          // drain
+        }
+      };
+
+      await expect(run()).rejects.toBe(responseTooBigError);
+
+      const limitsTried = getMany.mock.calls.map((call) => call[0].query.limit);
+      expect(limitsTried[limitsTried.length - 1]).toBe(25);
+      expect(Math.min(...limitsTried)).toBe(25);
+    });
+
+    it('rethrows unrelated errors without retrying', async () => {
+      const otherError = { sys: { type: 'Error', id: 'AccessDenied' }, message: 'Nope' };
+      const getMany = vi.fn().mockRejectedValue(otherError);
+      const mockCma = { entry: { getMany } };
+      const throttledFetch = vi.fn((fn) => fn());
+
+      const run = async () => {
+        for await (const _batch of paginateEntries(
+          mockCma as any,
+          { contentType: 'statement' },
+          throttledFetch
+        )) {
+          // drain
+        }
+      };
+
+      await expect(run()).rejects.toBe(otherError);
+      expect(getMany).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('getEntryCount', () => {
     it('should return total count', async () => {
       const mockCma = {
