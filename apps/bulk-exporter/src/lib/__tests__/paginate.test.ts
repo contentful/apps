@@ -114,13 +114,25 @@ describe('paginate', () => {
   });
 
   describe('paginateEntries response-size handling', () => {
-    // Captured verbatim from the CMA response in ES-630: the app-sdk's
-    // postMessage bridge relays the raw API error object, not an Error
-    // instance, so this is the exact shape the retry logic must recognize.
+    // What the app actually catches in production. The web app relays the
+    // rejection into the app's iframe over postMessage, which reduces the
+    // error to `{ code, message, data }` -- no prototype, no `sys`, no
+    // `status` -- and puts contentful-sdk-core's JSON blob in `message`.
     const responseTooBigError = {
-      sys: { type: 'Error', id: 'BadRequest' },
-      message: 'Response size too big. Maximum allowed response size: 7340032B.',
-      requestId: '9a90d083-9da4-46c0-adcf-cad04aea653a',
+      code: 'BadRequest',
+      message: JSON.stringify(
+        {
+          status: 400,
+          statusText: 'Bad Request',
+          message: 'Response size too big. Maximum allowed response size: 7340032B.',
+          details: {},
+          request: { url: '/spaces/60i3uyhfow4o/environments/master/entries', method: 'get' },
+          requestId: '9a90d083-9da4-46c0-adcf-cad04aea653a',
+        },
+        null,
+        '  '
+      ),
+      data: undefined,
     };
 
     it('halves the page size and retries when the CMA rejects a page as too big', async () => {
@@ -186,7 +198,7 @@ describe('paginate', () => {
       expect(getMany.mock.calls[2][0].query.skip).toBe(500);
     });
 
-    it('stops retrying and rethrows once the page size hits the floor', async () => {
+    it('halves down to a single entry before giving up', async () => {
       const getMany = vi.fn().mockRejectedValue(responseTooBigError);
       const mockCma = { entry: { getMany } };
       const throttledFetch = vi.fn((fn) => fn());
@@ -204,8 +216,55 @@ describe('paginate', () => {
       await expect(run()).rejects.toBe(responseTooBigError);
 
       const limitsTried = getMany.mock.calls.map((call) => call[0].query.limit);
-      expect(limitsTried[limitsTried.length - 1]).toBe(25);
-      expect(Math.min(...limitsTried)).toBe(25);
+      expect(limitsTried).toEqual([1000, 500, 250, 125, 62, 31, 15, 7, 3, 1]);
+    });
+
+    it('recovers when only a very small page fits under the response cap', async () => {
+      const getMany = vi
+        .fn()
+        .mockImplementation(({ query }) =>
+          query.limit > 25
+            ? Promise.reject(responseTooBigError)
+            : Promise.resolve({ items: Array(query.limit).fill({ sys: { id: 'big' } }), total: 15 })
+        );
+      const mockCma = { entry: { getMany } };
+      const throttledFetch = vi.fn((fn) => fn());
+
+      const batches = [];
+      for await (const batch of paginateEntries(
+        mockCma as any,
+        { contentType: 'statement' },
+        throttledFetch
+      )) {
+        batches.push(batch);
+      }
+
+      expect(batches.flat()).toHaveLength(15);
+    });
+
+    it('retries the raw API error body shape', async () => {
+      const rawApiError = {
+        sys: { type: 'Error', id: 'BadRequest' },
+        message: 'Response size too big. Maximum allowed response size: 7340032B.',
+        requestId: '9a90d083-9da4-46c0-adcf-cad04aea653a',
+      };
+      const getMany = vi
+        .fn()
+        .mockRejectedValueOnce(rawApiError)
+        .mockResolvedValueOnce({ items: [{ sys: { id: 'ok' } }], total: 1 });
+      const mockCma = { entry: { getMany } };
+
+      const batches = [];
+      for await (const batch of paginateEntries(
+        mockCma as any,
+        { contentType: 'statement' },
+        vi.fn((fn) => fn())
+      )) {
+        batches.push(batch);
+      }
+
+      expect(batches.flat()).toHaveLength(1);
+      expect(getMany.mock.calls[1][0].query.limit).toBe(500);
     });
 
     it('rethrows unrelated errors without retrying', async () => {
