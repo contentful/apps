@@ -39,7 +39,7 @@ export function getThumbUrl(asset, config) {
   let thumbUrl = '';
   if (assetRootUrl) {
     const slash = assetRootUrl.endsWith('/') ? '' : '/';
-    thumbUrl = `${assetRootUrl}${slash}${assetId}/as/${assetName}`;
+    thumbUrl = `${assetRootUrl}${slash}${assetId}`;
   } else {
     const renditions = getRenditions(asset);
     if (Array.isArray(renditions) && renditions.length > 0) {
