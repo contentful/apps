@@ -5,13 +5,13 @@ import type {
   FunctionTypeEnum,
 } from '@contentful/node-apps-toolkit';
 import type { GetAsanaWorkspacesResponse } from '../src/types';
-import { getPersonalAccessToken, getWorkspaces } from './asanaClient';
+import { getAsanaAccessToken, getWorkspaces } from './asanaClient';
 
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
   event: AppActionRequest<'Custom'>,
   context: FunctionEventContext
 ): Promise<GetAsanaWorkspacesResponse> => {
-  const personalAccessToken = getPersonalAccessToken(event, context);
-  const workspaces = await getWorkspaces(personalAccessToken);
+  const accessToken = await getAsanaAccessToken(event, context);
+  const workspaces = await getWorkspaces(accessToken);
   return { workspaces };
 };

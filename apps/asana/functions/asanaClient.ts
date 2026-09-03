@@ -23,21 +23,94 @@ function getAsanaErrorMessage<TData>(response: AsanaEnvelope<TData>) {
     .join(', ');
 }
 
-export function getPersonalAccessToken(
-  event: AppActionRequest<'Custom'>,
-  context: FunctionEventContext
-) {
-  const requestBody = event.body as Partial<AppInstallationParameters> | undefined;
+type AsanaOAuthTokenResponse = {
+  access_token: string;
+  refresh_token?: string;
+  expires_in?: number;
+  error?: string;
+  error_description?: string;
+};
 
-  if (requestBody?.personalAccessToken?.trim()) {
-    return requestBody.personalAccessToken.trim();
+async function requestAsanaOAuthToken(
+  body: Record<string, string>
+): Promise<AsanaOAuthTokenResponse> {
+  const response = await fetch('https://app.asana.com/-/oauth_token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams(body),
+  });
+
+  const payload = (await response.json()) as AsanaOAuthTokenResponse;
+  if (!response.ok) {
+    throw new Error(
+      payload.error_description || payload.error || VALIDATION_MESSAGES.invalidCredentials
+    );
   }
 
-  const installationParameters = context.appInstallationParameters as
-    | AppInstallationParameters
-    | undefined;
+  return payload;
+}
 
-  return installationParameters?.personalAccessToken?.trim() ?? '';
+export async function exchangeAuthorizationCode(params: {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  code: string;
+  codeVerifier: string;
+}): Promise<{ accessToken: string; refreshToken: string }> {
+  const token = await requestAsanaOAuthToken({
+    grant_type: 'authorization_code',
+    client_id: params.clientId,
+    client_secret: params.clientSecret,
+    redirect_uri: params.redirectUri,
+    code: params.code,
+    code_verifier: params.codeVerifier,
+  });
+
+  if (!token.refresh_token) {
+    throw new Error('Asana did not return a refresh token for this authorization code.');
+  }
+
+  return { accessToken: token.access_token, refreshToken: token.refresh_token };
+}
+
+export async function getAsanaAccessTokenFromParameters(
+  installationParameters?: Partial<AppInstallationParameters>
+): Promise<string> {
+  const clientId = installationParameters?.oauthClientId?.trim();
+  const clientSecret = installationParameters?.oauthClientSecret?.trim();
+  const redirectUri = installationParameters?.oauthRedirectUri?.trim();
+  const refreshToken = installationParameters?.oauthRefreshToken?.trim();
+
+  if (!clientId || !clientSecret || !redirectUri || !refreshToken) {
+    return '';
+  }
+
+  try {
+    const token = await requestAsanaOAuthToken({
+      grant_type: 'refresh_token',
+      client_id: clientId,
+      client_secret: clientSecret,
+      redirect_uri: redirectUri,
+      refresh_token: refreshToken,
+    });
+    return token.access_token;
+  } catch {
+    return '';
+  }
+}
+
+export async function getAsanaAccessToken(
+  event: AppActionRequest<'Custom'>,
+  context: FunctionEventContext
+): Promise<string> {
+  const requestBody = event.body as { accessToken?: string } | undefined;
+  if (requestBody?.accessToken?.trim()) {
+    return requestBody.accessToken.trim();
+  }
+
+  return getAsanaAccessTokenFromParameters(
+    context.appInstallationParameters as Partial<AppInstallationParameters> | undefined
+  );
 }
 
 export async function callAsana<TData>(

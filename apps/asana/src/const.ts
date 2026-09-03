@@ -1,9 +1,11 @@
 export const VALIDATION_MESSAGES = {
-  tokenRequired: 'Enter a valid Asana personal access token.',
+  tokenRequired: 'Connect this app to Asana before using this action.',
   saveRequired: 'Please fill in the required fields before saving.',
   saveFailed: 'Configuration could not be saved.',
-  connectionRequired: 'Please enter an Asana personal access token before testing the connection.',
+  connectionRequired: 'Connect to Asana before testing the connection.',
   installRequired: 'Please install the app before testing the connection.',
+  oauthCredentialsRequired: 'Enter an Asana OAuth client ID and client secret before connecting.',
+  popupBlocked: 'Enable popups for this site to connect to Asana.',
   validCredentials: 'Your Asana token is valid.',
   invalidCredentials: 'Asana authentication failed. Check your token and try again.',
   workspacesFailed: 'Could not load Asana workspaces.',

@@ -13,7 +13,10 @@ globalThis.fetch = vi.fn();
 describe('getAsanaTask handler', () => {
   const mockContext = {
     appInstallationParameters: {
-      personalAccessToken: 'installed-pat',
+      oauthClientId: 'client-id',
+      oauthClientSecret: 'client-secret',
+      oauthRefreshToken: 'refresh-token',
+      oauthRedirectUri: 'https://example.com/?oauthCallback=1',
       defaultWorkspaceGid: 'workspace-1',
       defaultWorkspaceName: 'Workspace',
       defaultProjectGid: 'project-1',
@@ -30,27 +33,32 @@ describe('getAsanaTask handler', () => {
       type: FunctionTypeEnum.AppActionCall,
       body,
       headers: {},
-    } as AppActionRequest<'Custom', GetAsanaTaskRequest>);
+    }) as AppActionRequest<'Custom', GetAsanaTaskRequest>;
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('loads a task by gid', async () => {
-    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        data: {
-          gid: '1214128635770001',
-          name: 'Existing launch brief',
-          permalink_url: 'https://app.asana.com/0/1/1214128635770001/f',
-          notes: 'Launch brief description from Asana.',
-          assignee: { name: 'Alex Doe' },
-          due_on: '2026-04-30',
-          completed: false,
-        },
-      }),
-    } as Response);
+    vi.mocked(globalThis.fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ access_token: 'test-access-token', expires_in: 3600 }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: {
+            gid: '1214128635770001',
+            name: 'Existing launch brief',
+            permalink_url: 'https://app.asana.com/0/1/1214128635770001/f',
+            notes: 'Launch brief description from Asana.',
+            assignee: { name: 'Alex Doe' },
+            due_on: '2026-04-30',
+            completed: false,
+          },
+        }),
+      } as Response);
 
     const result = await handler(
       createEvent({
@@ -76,18 +84,23 @@ describe('getAsanaTask handler', () => {
   });
 
   it('accepts an Asana task URL', async () => {
-    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        data: {
-          gid: '1214128635770002',
-          name: 'Existing linked task',
-          permalink_url: 'https://app.asana.com/0/1/1214128635770002/f',
-          notes: 'Existing linked task description.',
-          completed: false,
-        },
-      }),
-    } as Response);
+    vi.mocked(globalThis.fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ access_token: 'test-access-token', expires_in: 3600 }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: {
+            gid: '1214128635770002',
+            name: 'Existing linked task',
+            permalink_url: 'https://app.asana.com/0/1/1214128635770002/f',
+            notes: 'Existing linked task description.',
+            completed: false,
+          },
+        }),
+      } as Response);
 
     await handler(
       createEvent({
@@ -102,7 +115,7 @@ describe('getAsanaTask handler', () => {
       {
         method: 'GET',
         headers: {
-          Authorization: 'Bearer installed-pat',
+          Authorization: 'Bearer test-access-token',
           Accept: 'application/json',
         },
         body: undefined,
@@ -120,12 +133,17 @@ describe('getAsanaTask handler', () => {
   });
 
   it('returns the Asana API error message on failure', async () => {
-    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
-      ok: false,
-      json: async () => ({
-        errors: [{ message: 'Task not found' }],
-      }),
-    } as Response);
+    vi.mocked(globalThis.fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ access_token: 'test-access-token', expires_in: 3600 }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: false,
+        json: async () => ({
+          errors: [{ message: 'Task not found' }],
+        }),
+      } as Response);
 
     const result = await handler(
       createEvent({

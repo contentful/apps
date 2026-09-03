@@ -6,7 +6,10 @@ export enum ConnectionStatus {
 }
 
 export interface AppInstallationParameters {
-  personalAccessToken: string;
+  oauthClientId: string;
+  oauthClientSecret: string;
+  oauthRefreshToken: string;
+  oauthRedirectUri: string;
   defaultWorkspaceGid: string;
   defaultWorkspaceName: string;
   defaultProjectGid: string;
@@ -91,7 +94,6 @@ export interface CreateAsanaTaskRequest {
   titleFieldId?: string;
   projectGid?: string;
   workspaceGid?: string;
-  personalAccessToken?: string;
 }
 
 export interface UpdateAsanaTaskRequest {
@@ -99,23 +101,27 @@ export interface UpdateAsanaTaskRequest {
   title?: string;
   notes?: string;
   completed?: boolean;
-  personalAccessToken?: string;
 }
 
 export interface GetAsanaTaskRequest {
   taskId?: string;
-  personalAccessToken?: string;
 }
 
 export interface AddAsanaCommentRequest {
   taskId?: string;
   comment?: string;
-  personalAccessToken?: string;
 }
 
 export type ValidateAsanaCredentialsResponse = Record<string, unknown> & {
   valid: boolean;
   message: string;
+};
+
+export type ExchangeAsanaOAuthCodeResponse = Record<string, unknown> & {
+  success: boolean;
+  message: string;
+  accessToken?: string;
+  refreshToken?: string;
 };
 
 export type GetAsanaWorkspacesResponse = Record<string, unknown> & {

@@ -6,21 +6,13 @@ import type {
 } from '@contentful/node-apps-toolkit';
 import { VALIDATION_MESSAGES } from '../src/const';
 import type { GetAsanaTaskRequest, GetAsanaTaskResponse } from '../src/types';
-import { extractTaskGid, getPersonalAccessToken, getTask } from './asanaClient';
+import { extractTaskGid, getAsanaAccessToken, getTask } from './asanaClient';
 
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
   event: AppActionRequest<'Custom'>,
   context: FunctionEventContext
 ): Promise<GetAsanaTaskResponse> => {
-  const personalAccessToken = getPersonalAccessToken(event, context);
   const body = (event.body as GetAsanaTaskRequest | undefined) ?? {};
-
-  if (!personalAccessToken) {
-    return {
-      success: false,
-      message: VALIDATION_MESSAGES.tokenRequired,
-    };
-  }
 
   const taskGid = extractTaskGid(body.taskId);
   if (!taskGid) {
@@ -30,8 +22,16 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
     };
   }
 
+  const accessToken = await getAsanaAccessToken(event, context);
+  if (!accessToken) {
+    return {
+      success: false,
+      message: VALIDATION_MESSAGES.tokenRequired,
+    };
+  }
+
   try {
-    const task = await getTask(personalAccessToken, taskGid);
+    const task = await getTask(accessToken, taskGid);
 
     return {
       success: true,

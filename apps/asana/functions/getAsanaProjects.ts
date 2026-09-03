@@ -5,7 +5,7 @@ import type {
   FunctionTypeEnum,
 } from '@contentful/node-apps-toolkit';
 import type { GetAsanaProjectsResponse } from '../src/types';
-import { getPersonalAccessToken, searchProjects } from './asanaClient';
+import { getAsanaAccessToken, searchProjects } from './asanaClient';
 
 type ProjectRequestBody = {
   workspaceGid?: string;
@@ -16,7 +16,6 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   event: AppActionRequest<'Custom'>,
   context: FunctionEventContext
 ): Promise<GetAsanaProjectsResponse> => {
-  const personalAccessToken = getPersonalAccessToken(event, context);
   const body = event.body as ProjectRequestBody | undefined;
   const workspaceGid = body?.workspaceGid?.trim();
   const query = body?.query?.trim() ?? '';
@@ -25,6 +24,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
     return { projects: [] };
   }
 
-  const projects = await searchProjects(personalAccessToken, workspaceGid, query);
+  const accessToken = await getAsanaAccessToken(event, context);
+  const projects = await searchProjects(accessToken, workspaceGid, query);
   return { projects };
 };

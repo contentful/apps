@@ -6,15 +6,15 @@ import type {
 } from '@contentful/node-apps-toolkit';
 import type { ValidateAsanaCredentialsResponse } from '../src/types';
 import { VALIDATION_MESSAGES } from '../src/const';
-import { getPersonalAccessToken, getWorkspaces } from './asanaClient';
+import { getAsanaAccessToken, getWorkspaces } from './asanaClient';
 
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
   event: AppActionRequest<'Custom'>,
   context: FunctionEventContext
 ): Promise<ValidateAsanaCredentialsResponse> => {
-  const personalAccessToken = getPersonalAccessToken(event, context);
+  const accessToken = await getAsanaAccessToken(event, context);
 
-  if (!personalAccessToken) {
+  if (!accessToken) {
     return {
       valid: false,
       message: VALIDATION_MESSAGES.tokenRequired,
@@ -22,7 +22,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   }
 
   try {
-    const workspaces = await getWorkspaces(personalAccessToken);
+    const workspaces = await getWorkspaces(accessToken);
     return {
       valid: true,
       message: workspaces.length

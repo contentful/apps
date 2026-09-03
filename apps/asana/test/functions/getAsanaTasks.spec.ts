@@ -12,7 +12,10 @@ globalThis.fetch = vi.fn();
 describe('getAsanaTasks handler', () => {
   const mockContext = {
     appInstallationParameters: {
-      personalAccessToken: 'installed-pat',
+      oauthClientId: 'client-id',
+      oauthClientSecret: 'client-secret',
+      oauthRefreshToken: 'refresh-token',
+      oauthRedirectUri: 'https://example.com/?oauthCallback=1',
       defaultWorkspaceGid: 'workspace-1',
       defaultWorkspaceName: 'Workspace',
       defaultProjectGid: 'project-1',
@@ -31,29 +34,34 @@ describe('getAsanaTasks handler', () => {
       type: FunctionTypeEnum.AppActionCall,
       body,
       headers: {},
-    } as AppActionRequest<
+    }) as AppActionRequest<
       'Custom',
       {
         workspaceGid?: string;
         projectGid?: string;
         query?: string;
       }
-    >);
+    >;
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('searches tasks in a workspace', async () => {
-    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        data: [
-          { gid: '2', name: 'Beta task', resource_type: 'task' },
-          { gid: '1', name: 'Alpha task', resource_type: 'task' },
-        ],
-      }),
-    } as Response);
+    vi.mocked(globalThis.fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ access_token: 'test-access-token', expires_in: 3600 }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: [
+            { gid: '2', name: 'Beta task', resource_type: 'task' },
+            { gid: '1', name: 'Alpha task', resource_type: 'task' },
+          ],
+        }),
+      } as Response);
 
     const result = await handler(
       createEvent({ workspaceGid: 'workspace-1', query: 'task' }) as Parameters<typeof handler>[0],
@@ -69,15 +77,20 @@ describe('getAsanaTasks handler', () => {
   });
 
   it('searches tasks in a project when projectGid is provided', async () => {
-    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        data: [
-          { gid: '3', name: 'Manual link smoke test' },
-          { gid: '4', name: 'Another task' },
-        ],
-      }),
-    } as Response);
+    vi.mocked(globalThis.fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ access_token: 'test-access-token', expires_in: 3600 }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: [
+            { gid: '3', name: 'Manual link smoke test' },
+            { gid: '4', name: 'Another task' },
+          ],
+        }),
+      } as Response);
 
     const result = await handler(
       createEvent({
@@ -95,7 +108,7 @@ describe('getAsanaTasks handler', () => {
       'https://app.asana.com/api/1.0/projects/project-1/tasks?opt_fields=gid,name&completed_since=now&limit=100',
       {
         headers: {
-          Authorization: 'Bearer installed-pat',
+          Authorization: 'Bearer test-access-token',
           Accept: 'application/json',
         },
       }

@@ -12,7 +12,10 @@ describe('primaryTaskLink utils', () => {
     expect(
       getPrimaryTaskLinkMapping(
         {
-          personalAccessToken: '',
+          oauthClientId: '',
+          oauthClientSecret: '',
+          oauthRefreshToken: '',
+          oauthRedirectUri: '',
           defaultWorkspaceGid: '',
           defaultWorkspaceName: '',
           defaultProjectGid: '',
@@ -38,7 +41,10 @@ describe('primaryTaskLink utils', () => {
     expect(
       getPrimaryTaskLinkMapping(
         {
-          personalAccessToken: '',
+          oauthClientId: '',
+          oauthClientSecret: '',
+          oauthRefreshToken: '',
+          oauthRedirectUri: '',
           defaultWorkspaceGid: '',
           defaultWorkspaceName: '',
           defaultProjectGid: '',
@@ -71,7 +77,10 @@ describe('primaryTaskLink utils', () => {
     expect(
       getPrimaryTaskLinkMapping(
         {
-          personalAccessToken: '',
+          oauthClientId: '',
+          oauthClientSecret: '',
+          oauthRefreshToken: '',
+          oauthRedirectUri: '',
           defaultWorkspaceGid: '',
           defaultWorkspaceName: '',
           defaultProjectGid: '',

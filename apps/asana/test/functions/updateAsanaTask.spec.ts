@@ -13,7 +13,10 @@ globalThis.fetch = vi.fn();
 describe('updateAsanaTask handler', () => {
   const mockContext = {
     appInstallationParameters: {
-      personalAccessToken: 'installed-pat',
+      oauthClientId: 'client-id',
+      oauthClientSecret: 'client-secret',
+      oauthRefreshToken: 'refresh-token',
+      oauthRedirectUri: 'https://example.com/?oauthCallback=1',
       defaultWorkspaceGid: 'workspace-1',
       defaultWorkspaceName: 'Workspace',
       defaultProjectGid: 'project-1',
@@ -30,27 +33,32 @@ describe('updateAsanaTask handler', () => {
       type: FunctionTypeEnum.AppActionCall,
       body,
       headers: {},
-    } as AppActionRequest<'Custom', UpdateAsanaTaskRequest>);
+    }) as AppActionRequest<'Custom', UpdateAsanaTaskRequest>;
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('updates a task by gid', async () => {
-    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        data: {
-          gid: '1214128635770001',
-          name: 'Updated launch brief',
-          permalink_url: 'https://app.asana.com/0/1/1214128635770001/f',
-          notes: 'Updated by the app action.',
-          assignee: { name: 'Alex Doe' },
-          due_on: '2026-05-02',
-          completed: false,
-        },
-      }),
-    } as Response);
+    vi.mocked(globalThis.fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ access_token: 'test-access-token', expires_in: 3600 }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: {
+            gid: '1214128635770001',
+            name: 'Updated launch brief',
+            permalink_url: 'https://app.asana.com/0/1/1214128635770001/f',
+            notes: 'Updated by the app action.',
+            assignee: { name: 'Alex Doe' },
+            due_on: '2026-05-02',
+            completed: false,
+          },
+        }),
+      } as Response);
 
     const result = await handler(
       createEvent({
@@ -80,7 +88,7 @@ describe('updateAsanaTask handler', () => {
       {
         method: 'PUT',
         headers: {
-          Authorization: 'Bearer installed-pat',
+          Authorization: 'Bearer test-access-token',
           Accept: 'application/json',
           'Content-Type': 'application/json',
         },
@@ -95,18 +103,23 @@ describe('updateAsanaTask handler', () => {
   });
 
   it('accepts an Asana task URL', async () => {
-    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        data: {
-          gid: '1214128635770002',
-          name: 'Completed task',
-          permalink_url: 'https://app.asana.com/0/1/1214128635770002/f',
-          notes: '',
-          completed: true,
-        },
-      }),
-    } as Response);
+    vi.mocked(globalThis.fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ access_token: 'test-access-token', expires_in: 3600 }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: {
+            gid: '1214128635770002',
+            name: 'Completed task',
+            permalink_url: 'https://app.asana.com/0/1/1214128635770002/f',
+            notes: '',
+            completed: true,
+          },
+        }),
+      } as Response);
 
     await handler(
       createEvent({
@@ -160,18 +173,23 @@ describe('updateAsanaTask handler', () => {
   });
 
   it('allows clearing the task notes', async () => {
-    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        data: {
-          gid: '1214128635770003',
-          name: 'Task with cleared notes',
-          permalink_url: 'https://app.asana.com/0/1/1214128635770003/f',
-          notes: '',
-          completed: false,
-        },
-      }),
-    } as Response);
+    vi.mocked(globalThis.fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ access_token: 'test-access-token', expires_in: 3600 }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: {
+            gid: '1214128635770003',
+            name: 'Task with cleared notes',
+            permalink_url: 'https://app.asana.com/0/1/1214128635770003/f',
+            notes: '',
+            completed: false,
+          },
+        }),
+      } as Response);
 
     await handler(
       createEvent({
@@ -194,12 +212,17 @@ describe('updateAsanaTask handler', () => {
   });
 
   it('returns the Asana API error message on failure', async () => {
-    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
-      ok: false,
-      json: async () => ({
-        errors: [{ message: 'Task not found' }],
-      }),
-    } as Response);
+    vi.mocked(globalThis.fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ access_token: 'test-access-token', expires_in: 3600 }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: false,
+        json: async () => ({
+          errors: [{ message: 'Task not found' }],
+        }),
+      } as Response);
 
     const result = await handler(
       createEvent({

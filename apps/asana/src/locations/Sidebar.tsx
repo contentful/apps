@@ -14,15 +14,16 @@ import {
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { useEffect, useMemo, useState, type MouseEvent } from 'react';
 import { ASANA_AUTOMATION_CONFIG, VALIDATION_MESSAGES } from '../const';
-import type {
-  AppInstallationParameters,
-  CreateAsanaTaskResponse,
-  GetAsanaTaskResponse,
-  GetAsanaTasksResponse,
-  PrimaryAsanaTaskLink,
-  PrimaryAsanaTaskLinkValue,
-  TaskDetailsDialogResult,
-  TaskDetailsDialogParameters,
+import {
+  ConnectionStatus,
+  type AppInstallationParameters,
+  type CreateAsanaTaskResponse,
+  type GetAsanaTaskResponse,
+  type GetAsanaTasksResponse,
+  type PrimaryAsanaTaskLink,
+  type PrimaryAsanaTaskLinkValue,
+  type TaskDetailsDialogResult,
+  type TaskDetailsDialogParameters,
 } from '../types';
 import {
   buildPrimaryTaskLinkFromEntryValues,
@@ -45,7 +46,7 @@ const Sidebar = () => {
     type: field.type,
   }));
   const hasConnection =
-    Boolean(installationParameters?.personalAccessToken) &&
+    installationParameters?.connectionStatus === ConnectionStatus.Success &&
     Boolean(installationParameters?.defaultProjectGid);
   const primaryTaskMapping = useMemo(
     () => getPrimaryTaskLinkMapping(installationParameters, contentTypeId, contentTypeFields),

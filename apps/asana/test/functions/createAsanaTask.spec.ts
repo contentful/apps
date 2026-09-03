@@ -23,7 +23,10 @@ describe('createAsanaTask', () => {
 
   const mockContext = {
     appInstallationParameters: {
-      personalAccessToken: 'installed-pat',
+      oauthClientId: 'client-id',
+      oauthClientSecret: 'client-secret',
+      oauthRefreshToken: 'refresh-token',
+      oauthRedirectUri: 'https://example.com/?oauthCallback=1',
       defaultWorkspaceGid: 'workspace-1',
       defaultWorkspaceName: 'Workspace',
       defaultProjectGid: 'project-1',
@@ -36,16 +39,26 @@ describe('createAsanaTask', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(globalThis.fetch).mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        data: {
-          gid: 'task-1',
-          name: 'Created task',
-          permalink_url: 'https://app.asana.com/0/1/task-1/f',
-        },
-      }),
-    } as Response);
+    vi.mocked(globalThis.fetch).mockImplementation(async (input) => {
+      const url = typeof input === 'string' ? input : input.toString();
+      if (url.includes('/-/oauth_token')) {
+        return {
+          ok: true,
+          json: async () => ({ access_token: 'test-access-token', expires_in: 3600 }),
+        } as Response;
+      }
+
+      return {
+        ok: true,
+        json: async () => ({
+          data: {
+            gid: 'task-1',
+            name: 'Created task',
+            permalink_url: 'https://app.asana.com/0/1/task-1/f',
+          },
+        }),
+      } as Response;
+    });
     vi.mocked(mockCma.contentType.get).mockResolvedValue({
       displayField: 'title',
       fields: [
