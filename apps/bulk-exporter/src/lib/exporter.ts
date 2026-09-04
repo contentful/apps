@@ -3,26 +3,7 @@ import { createThrottler } from './throttle';
 import { paginateEntries, getEntryCount } from './paginate';
 import { flattenEntries, flattenEntry, type ContentType, type Entry } from './flatten';
 import { exportData, getFileExtension, type ExportFormat } from './exportFormats';
-
-/**
- * CMA errors relayed through the app-sdk's postMessage bridge often come
- * through as the raw API error object rather than an `Error` instance, so
- * `error instanceof Error` misses them and the user sees a generic message.
- */
-function extractErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  if (typeof error === 'object' && error !== null && 'message' in error) {
-    const message = (error as { message?: unknown }).message;
-    if (typeof message === 'string' && message.length > 0) {
-      return message;
-    }
-  }
-
-  return 'Unknown error';
-}
+import { extractErrorMessage } from './cmaError';
 
 export interface ExportOptions {
   contentType: ContentType | null;

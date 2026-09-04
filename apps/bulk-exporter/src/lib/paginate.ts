@@ -1,4 +1,5 @@
 import type { CMAClient } from '@contentful/app-sdk';
+import { isResponseTooBigError } from './cmaError';
 
 export interface PaginateOptions {
   contentType?: string;
@@ -13,36 +14,18 @@ export interface PaginateResult {
 }
 
 const PAGE_SIZE = 1000;
-const MIN_PAGE_SIZE = 25;
+const MIN_PAGE_SIZE = 1;
 const MAX_SKIP = 9000;
-
-/**
- * The CMA caps individual responses at ~7MB. Content types with large field
- * values can blow past that at our default page size, so this matches the
- * error the API returns (`sys.id: 'BadRequest'`, message mentions response
- * size) regardless of whether the SDK/transport wraps it in an Error or
- * passes the raw API error object through.
- */
-function isResponseTooBigError(error: unknown): boolean {
-  if (typeof error !== 'object' || error === null) {
-    return false;
-  }
-
-  const err = error as { message?: unknown; sys?: { id?: unknown }; status?: unknown };
-  const message = typeof err.message === 'string' ? err.message : '';
-
-  if (!/response size too big/i.test(message)) {
-    return false;
-  }
-
-  return err.sys?.id === 'BadRequest' || err.status === 400;
-}
 
 /**
  * Fetches a page, halving `limit` and retrying if the CMA rejects it as too
  * large. Returns the limit that actually worked so the caller can carry it
- * forward as the starting point for the next page instead of re-discovering
- * it on every request.
+ * forward as the starting point for the next page instead of re-discovering it
+ * on every request.
+ *
+ * Halves all the way to a single entry: any floor above 1 turns an export of
+ * sufficiently large entries into an unrecoverable failure, and only a
+ * single-entry page that is still too big is genuinely beyond our reach.
  */
 async function fetchPageWithAdaptiveLimit(
   cma: CMAClient,
