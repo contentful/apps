@@ -24,7 +24,6 @@ export interface ExportFormData {
   contentType: ContentType | null;
   contentTypeId: string;
   locales: string[];
-  fields?: string[];
   search?: string;
   status?: EntryStatus;
   createdFrom?: string;

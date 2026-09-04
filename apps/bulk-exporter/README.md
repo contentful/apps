@@ -31,11 +31,7 @@ A Contentful App that allows you to export unlimited entries from any content ty
 
 ### Export Capabilities
 - **Unlimited Entries**: Export any number of entries from any content type
-- **Smart Field Selection**: Auto-selects the title and key fields when you pick a content type
-- **One-Click Presets**: Essentials, Content, References, All, Clear
-- **Reorderable Columns**: Use up/down arrows to set the exact column order in your export
-- **Field Search**: Filter long field lists by name or ID
-- **Per-User Preferences**: Field selection, format, and filename are saved in your browser via `localStorage` so each user keeps their own settings
+- **Field Selection**: All fields are exported by default; uncheck a column header in the results preview to exclude it. Selection resets when you search a different content type.
 - **Locale Selection**: Export all locales or select specific ones
 - **Clean Output**: Human-readable column headers and formatted data
 - **Rate-Limit Aware**: Automatic throttling (8 req/s for paid tier) and retry logic

@@ -166,8 +166,9 @@ export interface ResultsListProps {
   onSortChange?: (sort: { column: SortColumn; direction: SortDirection } | null) => void;
   /** Full content type schema — enables dynamic field columns in the preview */
   contentTypeSchema?: ContentType | null;
-  /** Ordered field IDs selected in the Output tab */
-  selectedFields?: string[];
+  /** Field IDs the user has unchecked — rendered muted and omitted from the export */
+  excludedFieldIds?: string[];
+  onExcludedFieldIdsChange?: (ids: string[]) => void;
   /** Locales selected in the Output tab — one preview column per field×locale */
   locales?: string[];
 }
@@ -222,6 +223,16 @@ const fieldBodyCellStyle = {
   borderRight: '1px solid #E7EBEE',
   minWidth: COL_FIELD,
   verticalAlign: 'middle' as const,
+};
+
+const excludedHeaderCellStyle = {
+  ...fieldHeaderCellStyle,
+  background: tokens.gray100,
+};
+
+const excludedCellStyle = {
+  ...fieldBodyCellStyle,
+  background: tokens.gray100,
 };
 
 const fixedHeaderCellStyle = {
@@ -357,7 +368,8 @@ export function ResultsList({
   exportProgress = null,
   onSortChange,
   contentTypeSchema,
-  selectedFields,
+  excludedFieldIds = [],
+  onExcludedFieldIdsChange,
   locales = [],
 }: ResultsListProps) {
   const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
@@ -375,20 +387,21 @@ export function ResultsList({
     wasExporting.current = isExporting;
   }, [isExporting]);
 
-  // Build ordered field schema columns when a content type schema is available
-  const fieldColumns = useMemo<SchemaField[]>(() => {
-    if (!contentTypeSchema) return [];
-    const fieldMap = new Map(contentTypeSchema.fields.map((f) => [f.id, f]));
-    const orderedIds =
-      selectedFields && selectedFields.length > 0
-        ? selectedFields
-        : contentTypeSchema.fields.map((f) => f.id);
-    // Exclude any field whose ID is 'status' — publication status is already
-    // shown as a dedicated sticky column, so including it again is redundant.
-    return orderedIds
-      .map((id) => fieldMap.get(id))
-      .filter((f): f is SchemaField => f !== undefined && f.id !== 'status');
-  }, [contentTypeSchema, selectedFields]);
+  // Field columns are the schema's fields in content-type order. Exclusion is
+  // purely a display/export concern (see excludedFieldIdSet below) and must not
+  // remove columns, so it plays no part in this derivation.
+  const fieldColumns = contentTypeSchema?.fields ?? [];
+
+  const excludedFieldIdSet = useMemo(() => new Set(excludedFieldIds), [excludedFieldIds]);
+
+  const toggleField = (fieldId: string) => {
+    if (!onExcludedFieldIdsChange) return;
+    if (excludedFieldIdSet.has(fieldId)) {
+      onExcludedFieldIdsChange(excludedFieldIds.filter((id) => id !== fieldId));
+    } else {
+      onExcludedFieldIdsChange([...excludedFieldIds, fieldId]);
+    }
+  };
 
   // Expand to one column per field × locale combination
   const displayColumns = useMemo(() => {
@@ -773,27 +786,37 @@ export function ResultsList({
 
                     {hasFieldColumns ? (
                       /* Dynamic field columns — one per field × locale */
-                      displayColumns.map(({ field, locale }) => (
-                        <Table.Cell
-                          as="th"
-                          key={`${field.id}-${locale}`}
-                          style={fieldHeaderCellStyle}>
-                          <Flex flexDirection="column" gap="spacing2Xs">
-                            <Text
-                              fontWeight="fontWeightMedium"
-                              fontSize="fontSizeS"
-                              fontColor="gray900">
-                              {locales.length > 1 ? `(${locale}) ${field.name}` : field.name}
-                            </Text>
-                            <Text
-                              fontSize="fontSizeS"
-                              fontColor="gray600"
-                              style={{ fontSize: '11px' }}>
-                              {getFieldTypeLabel(field)}
-                            </Text>
-                          </Flex>
-                        </Table.Cell>
-                      ))
+                      displayColumns.map(({ field, locale }) => {
+                        const isExcluded = excludedFieldIdSet.has(field.id);
+                        return (
+                          <Table.Cell
+                            as="th"
+                            key={`${field.id}-${locale}`}
+                            style={isExcluded ? excludedHeaderCellStyle : fieldHeaderCellStyle}>
+                            <Flex alignItems="flex-start" gap="spacingXs">
+                              <Checkbox
+                                isChecked={!isExcluded}
+                                onChange={() => toggleField(field.id)}
+                                aria-label={`Include ${field.name} in export`}
+                              />
+                              <Flex flexDirection="column" gap="spacing2Xs">
+                                <Text
+                                  fontWeight="fontWeightMedium"
+                                  fontSize="fontSizeS"
+                                  fontColor={isExcluded ? 'gray500' : 'gray900'}>
+                                  {locales.length > 1 ? `(${locale}) ${field.name}` : field.name}
+                                </Text>
+                                <Text
+                                  fontSize="fontSizeS"
+                                  fontColor="gray600"
+                                  style={{ fontSize: '11px' }}>
+                                  {getFieldTypeLabel(field)}
+                                </Text>
+                              </Flex>
+                            </Flex>
+                          </Table.Cell>
+                        );
+                      })
                     ) : (
                       /* Default metadata columns when no content type selected */
                       <>
@@ -885,13 +908,20 @@ export function ResultsList({
 
                         {hasFieldColumns ? (
                           /* Field value cells — one per field × locale */
-                          displayColumns.map(({ field, locale }) => (
-                            <Table.Cell key={`${field.id}-${locale}`} style={fieldBodyCellStyle}>
-                              <Text fontSize="fontSizeS" fontColor="gray700">
-                                {getFieldValue(entry, field, locale)}
-                              </Text>
-                            </Table.Cell>
-                          ))
+                          displayColumns.map(({ field, locale }) => {
+                            const isExcluded = excludedFieldIdSet.has(field.id);
+                            return (
+                              <Table.Cell
+                                key={`${field.id}-${locale}`}
+                                style={isExcluded ? excludedCellStyle : fieldBodyCellStyle}>
+                                <Text
+                                  fontSize="fontSizeS"
+                                  fontColor={isExcluded ? 'gray400' : 'gray700'}>
+                                  {getFieldValue(entry, field, locale)}
+                                </Text>
+                              </Table.Cell>
+                            );
+                          })
                         ) : (
                           /* Default metadata cells */
                           <>
