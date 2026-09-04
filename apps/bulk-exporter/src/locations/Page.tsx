@@ -314,13 +314,24 @@ const Page = () => {
 
       // Fetch all selected entries in one API call using sys.id[in] instead of
       // per-entry requests, which avoids rate-limit issues at large selection sizes.
-      const firstEntry = searchResults.find((r) => r.sys.id === selectedIds[0]);
-      const contentTypeId = firstEntry?.sys.contentType.sys.id ?? '';
+      // The selection can span multiple content types (e.g. an "All content types"
+      // search), so only pin a single content type when every selected entry shares
+      // one — otherwise a content_type filter would silently drop the rest of the
+      // selection, and a single schema would mis-flatten entries of other types.
+      const selectedContentTypeIds = new Set(
+        searchResults
+          .filter((entry) => selectedIds.includes(entry.sys.id))
+          .map((entry) => entry.sys.contentType.sys.id)
+      );
+      const contentTypeId =
+        selectedContentTypeIds.size === 1 ? [...selectedContentTypeIds][0] : undefined;
 
       await exporter.start(
         {
-          contentType: contentTypes.find((ct) => ct.sys.id === contentTypeId) || null,
-          contentTypeId: contentTypeId || 'selected',
+          contentType: contentTypeId
+            ? contentTypes.find((ct) => ct.sys.id === contentTypeId) || null
+            : null,
+          contentTypeId: contentTypeId || 'all-content-types',
           locales: lastFormData?.locales ?? locales.map((l) => l.code),
           fields: exportFields,
           userMap: userMap,
