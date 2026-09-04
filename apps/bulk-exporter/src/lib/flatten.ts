@@ -59,6 +59,16 @@ export function flattenEntries(entries: Entry[], options: FlattenOptions): FlatR
   return entries.map((entry) => flattenEntry(entry, options));
 }
 
+function selectFields(
+  contentType: ContentType,
+  fields: string[] | undefined
+): ContentType['fields'] {
+  if (!fields) return contentType.fields;
+  return fields
+    .map((id) => contentType.fields.find((f) => f.id === id))
+    .filter((f): f is ContentType['fields'][number] => Boolean(f));
+}
+
 export function flattenEntry(entry: Entry, options: FlattenOptions): FlatRow {
   const { contentType, locales, fields, includeContentTypeName = true, userMap = {} } = options;
 
@@ -77,12 +87,7 @@ export function flattenEntry(entry: Entry, options: FlattenOptions): FlatRow {
     row['Content Type'] = contentType.name || contentType.sys.id;
   }
 
-  const fieldsToProcess =
-    fields && fields.length > 0
-      ? fields
-          .map((id) => contentType.fields.find((f) => f.id === id))
-          .filter((f): f is ContentType['fields'][number] => Boolean(f))
-      : contentType.fields;
+  const fieldsToProcess = selectFields(contentType, fields);
 
   for (const field of fieldsToProcess) {
     const fieldValues = entry.fields[field.id];
@@ -228,12 +233,7 @@ export function getColumnHeaders(
     headers.push('Content Type');
   }
 
-  const fieldsToInclude =
-    fields && fields.length > 0
-      ? fields
-          .map((id) => contentType.fields.find((f) => f.id === id))
-          .filter((f): f is ContentType['fields'][number] => Boolean(f))
-      : contentType.fields;
+  const fieldsToInclude = selectFields(contentType, fields);
 
   for (const field of fieldsToInclude) {
     if (field.localized) {

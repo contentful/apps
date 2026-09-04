@@ -71,6 +71,7 @@ const Page = () => {
   const [lastFormData, setLastFormData] = useState<ExportFormData | null>(null);
   const [selectedEntryIds, setSelectedEntryIds] = useState<string[]>([]);
   const [selectAllMatching, setSelectAllMatching] = useState(false);
+  const [excludedFieldIds, setExcludedFieldIds] = useState<string[]>([]);
   const [contentTypeMap, setContentTypeMap] = useState<
     Record<string, { name: string; displayField?: string }>
   >({});
@@ -98,9 +99,10 @@ const Page = () => {
     if (columnSort.column === 'name') {
       const ct = contentTypeId ? contentTypeSchemaMap[contentTypeId] : undefined;
       const displayFieldId = ct?.displayField;
-      const displayField = displayFieldId
-        ? ct?.fields.find((f) => f.id === displayFieldId)
-        : undefined;
+      const displayField =
+        displayFieldId && !excludedFieldIds.includes(displayFieldId)
+          ? ct?.fields.find((f) => f.id === displayFieldId)
+          : undefined;
       if (displayField) {
         const colName = displayField.localized
           ? `${displayField.name} (${locales[0]?.code ?? 'en-US'})`
@@ -119,6 +121,14 @@ const Page = () => {
     const rowKey = fixed[columnSort.column];
     return rowKey ? { column: rowKey, direction: columnSort.direction } : undefined;
   };
+
+  const previewSchema = lastFormData?.contentTypeId
+    ? contentTypeSchemaMap[lastFormData.contentTypeId] ?? null
+    : null;
+
+  const exportFields = previewSchema
+    ? previewSchema.fields.map((f) => f.id).filter((id) => !excludedFieldIds.includes(id))
+    : undefined;
 
   useEffect(() => {
     const loadData = async () => {
@@ -234,6 +244,9 @@ const Page = () => {
       setSelectedEntryIds([]);
       setSelectAllMatching(false);
       setActivePage(0);
+      if (data.contentTypeId !== lastFormData?.contentTypeId) {
+        setExcludedFieldIds([]);
+      }
       setLastFormData(data);
 
       const query = buildQuery({
@@ -301,14 +314,26 @@ const Page = () => {
 
       // Fetch all selected entries in one API call using sys.id[in] instead of
       // per-entry requests, which avoids rate-limit issues at large selection sizes.
-      const firstEntry = searchResults.find((r) => r.sys.id === selectedIds[0]);
-      const contentTypeId = firstEntry?.sys.contentType.sys.id ?? '';
+      // The selection can span multiple content types (e.g. an "All content types"
+      // search), so only pin a single content type when every selected entry shares
+      // one — otherwise a content_type filter would silently drop the rest of the
+      // selection, and a single schema would mis-flatten entries of other types.
+      const selectedContentTypeIds = new Set(
+        searchResults
+          .filter((entry) => selectedIds.includes(entry.sys.id))
+          .map((entry) => entry.sys.contentType.sys.id)
+      );
+      const contentTypeId =
+        selectedContentTypeIds.size === 1 ? [...selectedContentTypeIds][0] : undefined;
 
       await exporter.start(
         {
-          contentType: contentTypes.find((ct) => ct.sys.id === contentTypeId) || null,
-          contentTypeId: contentTypeId || 'selected',
-          locales: locales.map((l) => l.code),
+          contentType: contentTypeId
+            ? contentTypes.find((ct) => ct.sys.id === contentTypeId) || null
+            : null,
+          contentTypeId: contentTypeId || 'all-content-types',
+          locales: lastFormData?.locales ?? locales.map((l) => l.code),
+          fields: exportFields,
           userMap: userMap,
           contentTypeMap: contentTypeSchemaMap,
           format,
@@ -403,7 +428,7 @@ const Page = () => {
           contentType: data.contentType,
           contentTypeId: data.contentTypeId || 'all-content-types',
           locales: data.locales,
-          fields: data.fields,
+          fields: exportFields,
           filters,
           userMap: userMap,
           contentTypeMap: contentTypeSchemaMap,
@@ -533,11 +558,9 @@ const Page = () => {
           isExporting={isExporting}
           exportProgress={progress}
           onSortChange={setColumnSort}
-          contentTypeSchema={
-            lastFormData?.contentTypeId
-              ? contentTypeSchemaMap[lastFormData.contentTypeId] ?? null
-              : null
-          }
+          contentTypeSchema={previewSchema}
+          excludedFieldIds={excludedFieldIds}
+          onExcludedFieldIdsChange={setExcludedFieldIds}
           locales={lastFormData?.locales ?? []}
         />
       </Flex>
