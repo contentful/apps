@@ -321,7 +321,7 @@ const Page = () => {
         {
           contentType: contentTypes.find((ct) => ct.sys.id === contentTypeId) || null,
           contentTypeId: contentTypeId || 'selected',
-          locales: locales.map((l) => l.code),
+          locales: lastFormData?.locales ?? locales.map((l) => l.code),
           fields: exportFields,
           userMap: userMap,
           contentTypeMap: contentTypeSchemaMap,
