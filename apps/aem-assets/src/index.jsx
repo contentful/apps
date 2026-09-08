@@ -191,6 +191,7 @@ async function renderDialog(sdk) {
     imsClientId,
     imsOrg,
     repositoryId,
+    path,
     aemTierType,
     env,
     hideUploadButton,
@@ -283,6 +284,7 @@ async function renderDialog(sdk) {
   };
 
   if (repositoryId) contentAdvisorProps.repositoryId = repositoryId;
+  if (repositoryId && path) contentAdvisorProps.rootPath = path;
   if (!repositoryId && aemTierType && aemTierType !== 'both')
     contentAdvisorProps.aemTierType = [aemTierType];
   if (!repositoryId && env === 'stage') contentAdvisorProps.env = 'stage';
@@ -389,6 +391,15 @@ setup({
       type: 'Symbol',
       description: `Restricts the asset selector to a single repository.
         [The AEM Tier and Environment values are ignored if a Repository value is provided.]`,
+      required: false,
+    },
+    {
+      id: 'path',
+      name: 'Search path',
+      type: 'Symbol',
+      default: '/content/dam',
+      description:
+        'Restricts the asset selector to a specific folder in the repository. [Only used if a Repository value is provided.]',
       required: false,
     },
     {
