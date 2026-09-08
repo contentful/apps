@@ -31,7 +31,7 @@ const jsonResponse = (body: unknown, ok = true) =>
     ok,
     status: ok ? 200 : 500,
     json: async () => body,
-  }) as Response;
+  } as Response);
 
 const mockAuthResponse = {
   access_token: 'test-access-token',
@@ -175,9 +175,7 @@ describe('getMarketoForms handler', () => {
         url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/live.json',
       },
     ]);
-    expect(result.forms).not.toContainEqual(
-      expect.objectContaining({ id: 'form-archived' })
-    );
+    expect(result.forms).not.toContainEqual(expect.objectContaining({ id: 'form-archived' }));
   });
 
   it('should not issue duplicate folder lookups when multiple forms share a folder', async () => {

@@ -64,14 +64,13 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
 
   const forms: MarketoForm[] = formsResponse.result;
   const folderIds = [
-    ...new Set(
-      forms.map((form) => form.folder?.value).filter((id): id is number => id != null)
-    ),
+    ...new Set(forms.map((form) => form.folder?.value).filter((id): id is number => id != null)),
   ];
 
   const folderArchiveChecks = await Promise.all(
     folderIds.map(
-      async (folderId) => [folderId, await isFolderArchived(baseUrl, auth.access_token, folderId)] as const
+      async (folderId) =>
+        [folderId, await isFolderArchived(baseUrl, auth.access_token, folderId)] as const
     )
   );
   const archivedFolderIds = new Set(
