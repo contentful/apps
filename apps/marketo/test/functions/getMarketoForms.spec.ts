@@ -21,14 +21,10 @@ import {
 
 globalThis.fetch = vi.fn();
 
-type HandlerResponse = {
-  contentBlocks: MarketoFormsResponse;
-};
-
 const handler: (
   event: AppActionRequest<'Custom'>,
   context: FunctionEventContext
-) => Promise<HandlerResponse> = originalHandler as any;
+) => Promise<MarketoFormsResponse> = originalHandler as typeof handler;
 
 describe('getMarketoForms handler', () => {
   beforeEach(() => {
