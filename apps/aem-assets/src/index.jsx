@@ -284,7 +284,7 @@ async function renderDialog(sdk) {
   };
 
   if (repositoryId) contentAdvisorProps.repositoryId = repositoryId;
-  if (repositoryId && path) contentAdvisorProps.path = path;
+  if (repositoryId && path) contentAdvisorProps.rootPath = path;
   if (!repositoryId && aemTierType && aemTierType !== 'both')
     contentAdvisorProps.aemTierType = [aemTierType];
   if (!repositoryId && env === 'stage') contentAdvisorProps.env = 'stage';
