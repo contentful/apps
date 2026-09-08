@@ -6,16 +6,19 @@ import type {
 } from '@contentful/node-apps-toolkit';
 import { MarketoApiError } from './exceptions';
 import { getMarketoToken } from './getMarketoToken';
-import type { AppInstallationParameters, MarketoFormsResponse } from '../src/types';
+import type {
+  AppInstallationParameters,
+  MarketoApiResponse,
+  MarketoFolderRecord,
+  MarketoFormRecord,
+  MarketoFormsResponse,
+} from '../src/types';
 
-type MarketoForm = {
-  id: string;
-  url: string;
-  name: string;
-  folder?: { value: number };
-};
-
-const marketoGet = async (baseUrl: string, path: string, accessToken: string) => {
+const marketoGet = async <T>(
+  baseUrl: string,
+  path: string,
+  accessToken: string
+): Promise<{ response: Response; body: MarketoApiResponse<T> }> => {
   const response = await fetch(`${baseUrl}${path}`, {
     method: 'GET',
     headers: {
@@ -31,12 +34,12 @@ const marketoGet = async (baseUrl: string, path: string, accessToken: string) =>
 // is archived. Cross-referencing each form's folder is the only way to keep
 // archived forms out of the picker.
 const isFolderArchived = async (baseUrl: string, accessToken: string, folderId: number) => {
-  const { body } = await marketoGet(
+  const { body } = await marketoGet<MarketoFolderRecord>(
     baseUrl,
     `/rest/asset/v1/folder/${folderId}.json?type=Folder`,
     accessToken
   );
-  return Boolean(body?.success && body.result?.[0]?.isArchive);
+  return Boolean(body.success && body.result?.[0]?.isArchive);
 };
 
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
@@ -49,7 +52,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   const auth = await getMarketoToken(clientId, clientSecret, munchkinId);
   const baseUrl = `https://${munchkinId}.mktorest.com`;
 
-  const { response, body: formsResponse } = await marketoGet(
+  const { response, body: formsResponse } = await marketoGet<MarketoFormRecord>(
     baseUrl,
     '/rest/asset/v1/forms.json?maxReturn=200',
     auth.access_token
@@ -58,11 +61,11 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   if (!response.ok || !formsResponse.success) {
     throw new MarketoApiError(formsResponse.message || 'Marketo getForms request failed', {
       statusCode: response.status,
-      errors: formsResponse.errors,
+      errors: formsResponse.errors ?? [],
     });
   }
 
-  const forms: MarketoForm[] = formsResponse.result;
+  const forms = formsResponse.result ?? [];
   const folderIds = [
     ...new Set(forms.map((form) => form.folder?.value).filter((id): id is number => id != null)),
   ];

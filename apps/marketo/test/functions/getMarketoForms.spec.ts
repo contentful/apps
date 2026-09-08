@@ -7,6 +7,17 @@ import {
 } from '@contentful/node-apps-toolkit';
 import { MarketoAuthenticationError, MarketoApiError } from '../../functions/exceptions';
 import type { MarketoFormsResponse } from '../../src/types';
+import {
+  AUTH_URL,
+  FORMS_URL,
+  folderUrl,
+  mockAuthResponse,
+  buildMarketoForm,
+  buildMarketoFolder,
+  buildFormsApiResponse,
+  buildFolderApiResponse,
+  jsonResponse,
+} from '../mocks';
 
 globalThis.fetch = vi.fn();
 
@@ -18,26 +29,6 @@ const handler: (
   event: AppActionRequest<'Custom'>,
   context: FunctionEventContext
 ) => Promise<HandlerResponse> = originalHandler as any;
-
-const AUTH_URL =
-  'https://test-munchkin.mktorest.com/identity/oauth/token?grant_type=client_credentials&client_id=test-client-id&client_secret=test-client-secret';
-const FORMS_URL = 'https://test-munchkin.mktorest.com/rest/asset/v1/forms.json?maxReturn=200';
-
-const folderUrl = (folderId: number) =>
-  `https://test-munchkin.mktorest.com/rest/asset/v1/folder/${folderId}.json?type=Folder`;
-
-const jsonResponse = (body: unknown, ok = true) =>
-  ({
-    ok,
-    status: ok ? 200 : 500,
-    json: async () => body,
-  } as Response);
-
-const mockAuthResponse = {
-  access_token: 'test-access-token',
-  token_type: 'Bearer',
-  expires_in: 3600,
-};
 
 describe('getMarketoForms handler', () => {
   beforeEach(() => {
@@ -60,61 +51,38 @@ describe('getMarketoForms handler', () => {
     body: {},
   };
 
-  it('should successfully fetch and return Marketo forms', async () => {
-    const mockFormsResponse = {
-      success: true,
-      result: [
-        {
-          id: 'form-1',
-          name: 'Contact Form',
-          url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/1.json',
-          status: 'approved',
-          folder: { type: 'Folder', value: 100, folderName: 'Landing Pages' },
-        },
-        {
-          id: 'form-2',
-          name: 'Newsletter Signup',
-          url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/2.json',
-          status: 'approved',
-          folder: { type: 'Folder', value: 101, folderName: 'Emails' },
-        },
-      ],
-    };
-
-    const mockFetch = vi.mocked(fetch);
-    mockFetch.mockImplementation(async (input) => {
+  // Routes a fake fetch by URL, backed by a plain { [url]: responseBody } map.
+  // Every test only needs to describe the URLs it actually cares about.
+  const mockFetchRoutes = (routes: Record<string, unknown>) => {
+    vi.mocked(fetch).mockImplementation(async (input) => {
       const url = String(input);
-      if (url === AUTH_URL) return jsonResponse(mockAuthResponse);
-      if (url === FORMS_URL) return jsonResponse(mockFormsResponse);
-      if (url === folderUrl(100)) {
-        return jsonResponse({
-          success: true,
-          result: [{ id: 100, name: 'Landing Pages', isArchive: false }],
-        });
-      }
-      if (url === folderUrl(101)) {
-        return jsonResponse({
-          success: true,
-          result: [{ id: 101, name: 'Emails', isArchive: false }],
-        });
-      }
+      if (url in routes) return jsonResponse(routes[url]);
       throw new Error(`Unexpected fetch: ${url}`);
+    });
+  };
+
+  it('should successfully fetch and return Marketo forms', async () => {
+    const form1 = buildMarketoForm({ id: 'form-1', name: 'Contact Form' });
+    const form2 = buildMarketoForm({
+      id: 'form-2',
+      name: 'Newsletter Signup',
+      url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/2.json',
+      folder: { type: 'Folder', value: 101, folderName: 'Emails' },
+    });
+
+    mockFetchRoutes({
+      [AUTH_URL]: mockAuthResponse,
+      [FORMS_URL]: buildFormsApiResponse([form1, form2]),
+      [folderUrl(100)]: buildFolderApiResponse(buildMarketoFolder()),
+      [folderUrl(101)]: buildFolderApiResponse(buildMarketoFolder({ id: 101, name: 'Emails' })),
     });
 
     const result = await handler(mockEvent, mockContext);
 
     expect(result).toEqual({
       forms: [
-        {
-          id: 'form-1',
-          name: 'Contact Form',
-          url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/1.json',
-        },
-        {
-          id: 'form-2',
-          name: 'Newsletter Signup',
-          url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/2.json',
-        },
+        { id: 'form-1', name: 'Contact Form', url: form1.url },
+        { id: 'form-2', name: 'Newsletter Signup', url: form2.url },
       ],
     });
   });
@@ -125,92 +93,55 @@ describe('getMarketoForms handler', () => {
     // Archival is a folder-level property in Marketo, never a form-level
     // one, so the fix must cross-reference each form's folder before
     // returning it.
-    const mockFormsResponse = {
-      success: true,
-      result: [
-        {
-          id: 'form-live',
-          name: 'Current Contact Form',
-          url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/live.json',
-          status: 'approved',
-          folder: { type: 'Folder', value: 100, folderName: 'Landing Pages' },
-        },
-        {
-          id: 'form-archived',
-          name: 'z_archived_Old Contact Form',
-          url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/archived.json',
-          status: 'approved', // deliberately still "approved" -- Marketo never
-          // demotes a form's own status when its folder is archived.
-          folder: { type: 'Folder', value: 25, folderName: '_Archive' },
-        },
-      ],
-    };
+    const liveForm = buildMarketoForm({ id: 'form-live', name: 'Current Contact Form' });
+    const archivedForm = buildMarketoForm({
+      id: 'form-archived',
+      name: 'z_archived_Old Contact Form',
+      url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/archived.json',
+      folder: { type: 'Folder', value: 25, folderName: '_Archive' },
+    });
 
-    const mockFetch = vi.mocked(fetch);
-    mockFetch.mockImplementation(async (input) => {
-      const url = String(input);
-      if (url === AUTH_URL) return jsonResponse(mockAuthResponse);
-      if (url === FORMS_URL) return jsonResponse(mockFormsResponse);
-      if (url === folderUrl(100)) {
-        return jsonResponse({
-          success: true,
-          result: [{ id: 100, name: 'Landing Pages', isArchive: false }],
-        });
-      }
-      if (url === folderUrl(25)) {
-        return jsonResponse({
-          success: true,
-          result: [{ id: 25, name: '_Archive', isArchive: true }],
-        });
-      }
-      throw new Error(`Unexpected fetch: ${url}`);
+    mockFetchRoutes({
+      [AUTH_URL]: mockAuthResponse,
+      [FORMS_URL]: buildFormsApiResponse([liveForm, archivedForm]),
+      [folderUrl(100)]: buildFolderApiResponse(buildMarketoFolder()),
+      [folderUrl(25)]: buildFolderApiResponse(
+        buildMarketoFolder({ id: 25, name: '_Archive', isArchive: true })
+      ),
     });
 
     const result = await handler(mockEvent, mockContext);
 
     expect(result.forms).toEqual([
-      {
-        id: 'form-live',
-        name: 'Current Contact Form',
-        url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/live.json',
-      },
+      { id: 'form-live', name: 'Current Contact Form', url: liveForm.url },
     ]);
     expect(result.forms).not.toContainEqual(expect.objectContaining({ id: 'form-archived' }));
   });
 
   it('should not issue duplicate folder lookups when multiple forms share a folder', async () => {
-    const mockFormsResponse = {
-      success: true,
-      result: [
-        {
-          id: 'form-a',
-          name: 'Archived A',
-          url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/a.json',
-          status: 'approved',
-          folder: { type: 'Folder', value: 25, folderName: '_Archive' },
-        },
-        {
-          id: 'form-b',
-          name: 'Archived B',
-          url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/b.json',
-          status: 'approved',
-          folder: { type: 'Folder', value: 25, folderName: '_Archive' },
-        },
-      ],
-    };
+    const formA = buildMarketoForm({
+      id: 'form-a',
+      name: 'Archived A',
+      url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/a.json',
+      folder: { type: 'Folder', value: 25, folderName: '_Archive' },
+    });
+    const formB = buildMarketoForm({
+      id: 'form-b',
+      name: 'Archived B',
+      url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/b.json',
+      folder: { type: 'Folder', value: 25, folderName: '_Archive' },
+    });
 
-    const mockFetch = vi.mocked(fetch);
     let folderLookupCount = 0;
-    mockFetch.mockImplementation(async (input) => {
+    vi.mocked(fetch).mockImplementation(async (input) => {
       const url = String(input);
       if (url === AUTH_URL) return jsonResponse(mockAuthResponse);
-      if (url === FORMS_URL) return jsonResponse(mockFormsResponse);
+      if (url === FORMS_URL) return jsonResponse(buildFormsApiResponse([formA, formB]));
       if (url === folderUrl(25)) {
         folderLookupCount += 1;
-        return jsonResponse({
-          success: true,
-          result: [{ id: 25, name: '_Archive', isArchive: true }],
-        });
+        return jsonResponse(
+          buildFolderApiResponse(buildMarketoFolder({ id: 25, name: '_Archive', isArchive: true }))
+        );
       }
       throw new Error(`Unexpected fetch: ${url}`);
     });
@@ -222,40 +153,27 @@ describe('getMarketoForms handler', () => {
   });
 
   it('should keep a form when it has no folder information (defensive fallback)', async () => {
-    const mockFormsResponse = {
-      success: true,
-      result: [
-        {
-          id: 'form-no-folder',
-          name: 'Legacy Form',
-          url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/legacy.json',
-          status: 'approved',
-        },
-      ],
-    };
+    const formWithoutFolder = buildMarketoForm({
+      id: 'form-no-folder',
+      name: 'Legacy Form',
+      url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/legacy.json',
+      folder: undefined,
+    });
 
-    const mockFetch = vi.mocked(fetch);
-    mockFetch.mockImplementation(async (input) => {
-      const url = String(input);
-      if (url === AUTH_URL) return jsonResponse(mockAuthResponse);
-      if (url === FORMS_URL) return jsonResponse(mockFormsResponse);
-      throw new Error(`Unexpected fetch: ${url}`);
+    mockFetchRoutes({
+      [AUTH_URL]: mockAuthResponse,
+      [FORMS_URL]: buildFormsApiResponse([formWithoutFolder]),
     });
 
     const result = await handler(mockEvent, mockContext);
 
     expect(result.forms).toEqual([
-      {
-        id: 'form-no-folder',
-        name: 'Legacy Form',
-        url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/legacy.json',
-      },
+      { id: 'form-no-folder', name: 'Legacy Form', url: formWithoutFolder.url },
     ]);
   });
 
   it('should throw MarketoAuthenticationError when authentication fails', async () => {
-    const mockFetch = vi.mocked(fetch);
-    mockFetch.mockResolvedValueOnce({
+    vi.mocked(fetch).mockResolvedValueOnce({
       ok: false,
       status: 401,
       statusText: 'Unauthorized',
@@ -280,8 +198,7 @@ describe('getMarketoForms handler', () => {
       message: 'Rate limit exceeded',
     };
 
-    const mockFetch = vi.mocked(fetch);
-    mockFetch
+    vi.mocked(fetch)
       .mockResolvedValueOnce({
         ok: true,
         json: async () => mockAuthResponse,
