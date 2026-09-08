@@ -46,6 +46,38 @@
       "entryFile": "functions/oauth/checkStatus.ts",
       "allowNetworks": ["oauth2.googleapis.com"],
       "accepts": ["appaction.call"]
+    },
+    {
+      "id": "recordRun",
+      "name": "Record Run",
+      "description": "Records a run in the database",
+      "path": "functions/storage/recordRun.js",
+      "entryFile": "functions/storage/recordRun.ts",
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "removeRun",
+      "name": "Remove Run",
+      "description": "Removes a run from the database",
+      "path": "functions/storage/removeRun.js",
+      "entryFile": "functions/storage/removeRun.ts",
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "updateRun",
+      "name": "Update Run",
+      "description": "Updates a run in the database",
+      "path": "functions/storage/updateRun.js",
+      "entryFile": "functions/storage/updateRun.ts",
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "listRuns",
+      "name": "List Runs",
+      "description": "Lists all runs in the database",
+      "path": "functions/storage/listRuns.js",
+      "entryFile": "functions/storage/listRuns.ts",
+      "accepts": ["appaction.call"]
     }
   ],
   "actions": [
@@ -100,6 +132,77 @@
       "resultSchema": {
         "type": "object"
       }
+    },
+    {
+      "name": "Record Run",
+      "category": "Custom",
+      "description": "Records a run in the database",
+      "type": "function-invocation",
+      "functionId": "recordRun",
+      "parametersSchema": {
+        "type": "object"
+      },
+      "resultSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "Remove Run",
+      "category": "Custom",
+      "description": "Removes a run from the database",
+      "type": "function-invocation",
+      "functionId": "removeRun",
+      "parametersSchema": {
+        "type": "object"
+      },
+      "resultSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "Update Run",
+      "category": "Custom",
+      "description": "Updates a run in the database",
+      "type": "function-invocation",
+      "functionId": "updateRun",
+      "parametersSchema": {
+        "type": "object"
+      },
+      "resultSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "List Runs",
+      "category": "Custom",
+      "description": "Lists all runs in the database",
+      "type": "function-invocation",
+      "functionId": "listRuns",
+      "parametersSchema": {
+        "type": "object"
+      },
+      "resultSchema": {
+        "type": "object"
+      }
     }
-  ]
+  ],
+  "storage": {
+    "version": 1,
+    "namespace": "driveIntegration",
+    "functions": ["recordRun", "removeRun", "updateRun", "listRuns"],
+    "tables": [
+      {
+        "name": "runs",
+        "columns": [
+          { "name": "runId", "type": "text", "nullable": false, "index": true },
+          { "name": "documentTitle", "type": "text", "nullable": false },
+          { "name": "documentId", "type": "text", "nullable": false },
+          { "name": "contentTypeIds", "type": "text", "nullable": false },
+          { "name": "documentSelection", "type": "json", "nullable": false },
+          { "name": "startedAt", "type": "text", "nullable": false },
+          { "name": "createdEntryIds", "type": "text", "nullable": true }
+        ]
+      }
+    ]
+  }
 }
