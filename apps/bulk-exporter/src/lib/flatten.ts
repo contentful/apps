@@ -20,6 +20,10 @@ export interface Entry {
     };
   };
   fields: Record<string, Record<string, unknown>>;
+  metadata?: {
+    tags?: Array<{ sys: { id: string } }>;
+    concepts?: Array<{ sys: { id: string } }>;
+  };
 }
 
 export interface ContentType {
@@ -49,6 +53,14 @@ export interface FlattenOptions {
   resolveReferences?: boolean;
   includeContentTypeName?: boolean;
   userMap?: Record<string, string>;
+  /** Opt-in: adds a "Tags" column with human-readable tag names. */
+  includeTags?: boolean;
+  /** Opt-in: adds a "Taxonomy Concepts" column. IDs only — concept labels
+   * cannot be resolved because the App Framework blocks apps from calling
+   * the org-scoped Taxonomy Concepts endpoint. */
+  includeConcepts?: boolean;
+  /** Tag ID → human-readable tag name, used to resolve names for the Tags column. */
+  tagMap?: Record<string, string>;
 }
 
 export interface FlatRow {
@@ -70,7 +82,16 @@ function selectFields(
 }
 
 export function flattenEntry(entry: Entry, options: FlattenOptions): FlatRow {
-  const { contentType, locales, fields, includeContentTypeName = true, userMap = {} } = options;
+  const {
+    contentType,
+    locales,
+    fields,
+    includeContentTypeName = true,
+    userMap = {},
+    includeTags = false,
+    includeConcepts = false,
+    tagMap = {},
+  } = options;
 
   const updatedByUserId = entry.sys.updatedBy?.sys.id;
   const updatedByName = updatedByUserId ? userMap[updatedByUserId] || updatedByUserId : 'Unknown';
@@ -85,6 +106,17 @@ export function flattenEntry(entry: Entry, options: FlattenOptions): FlatRow {
 
   if (includeContentTypeName) {
     row['Content Type'] = contentType.name || contentType.sys.id;
+  }
+
+  if (includeTags) {
+    const tagIds = entry.metadata?.tags?.map((t) => t.sys.id) ?? [];
+    row['Tags'] = tagIds.length > 0 ? tagIds.map((id) => tagMap[id] || id).join('; ') : null;
+  }
+
+  if (includeConcepts) {
+    const conceptIds = entry.metadata?.concepts?.map((c) => c.sys.id) ?? [];
+    // IDs only — the App Framework blocks apps from resolving concept labels.
+    row['Taxonomy Concepts'] = conceptIds.length > 0 ? conceptIds.join('; ') : null;
   }
 
   const fieldsToProcess = selectFields(contentType, fields);

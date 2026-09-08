@@ -32,6 +32,7 @@ A Contentful App that allows you to export unlimited entries from any content ty
 ### Export Capabilities
 - **Unlimited Entries**: Export any number of entries from any content type
 - **Field Selection**: All fields are exported by default; uncheck a column header in the results preview to exclude it. Selection resets when you search a different content type.
+- **Tags & Taxonomy Columns** *(opt-in)*: Check **Include tags** / **Include taxonomy concepts** in the export dialog to add these columns. Tags export with real names; taxonomy concepts always export as IDs only (see [Column Headers](#column-headers)).
 - **Locale Selection**: Export all locales or select specific ones
 - **Clean Output**: Human-readable column headers and formatted data
 - **Rate-Limit Aware**: Automatic throttling (8 req/s for paid tier) and retry logic
@@ -151,8 +152,11 @@ npm run deploy -- --organization-id YOUR_ORG_ID --definition-id YOUR_APP_DEF_ID 
 - Select sort order
 
 #### Tags & Taxonomy Tab
-- Select tags (match any or all)
-- Select taxonomy concepts (match any or all)
+- Select tags (match any or all) — tags filter and export with their real, human-readable names
+- Select taxonomy concepts (match any or all) — the concept picker is populated incrementally from
+  concepts seen in your search results, not a full org-wide list, because the App Framework doesn't
+  allow apps to call the org-scoped Taxonomy Concepts endpoint. Concepts are always identified by ID
+  only; this is a platform limitation and is not affected by space role or app permissions.
 
 #### Advanced Tab
 - Add field-level filters with operators (equals, not equals, exists, contains, etc.)
@@ -195,6 +199,12 @@ All 5 formats use clean, human-readable formatting with **consistent data struct
 - **Status**: "Draft" or "Published"
 - **Content Type**: Human-readable content type name
 - **Field columns**: Use field names from your content model (e.g., "Title (en-US)", "Author")
+- **Tags** *(opt-in)*: Only included if you check **Include tags** in the export dialog. Shows the
+  entry's tags as real, human-readable names (e.g., `tech; blog; tips`).
+- **Taxonomy Concepts** *(opt-in)*: Only included if you check **Include taxonomy concepts** in the
+  export dialog. Shows concept **IDs only** (e.g., `marketing; seo`) — the App Framework doesn't let
+  apps resolve concept IDs to their labels (like "Marketing"), so this is a platform limitation, not a
+  bug or a permissions issue. No space role or app access change will add concept labels.
 
 #### Data Formatting (CSV)
 - **References**: Just the entry/asset ID (e.g., `abc123`)
@@ -229,11 +239,18 @@ All 5 formats use clean, human-readable formatting with **consistent data struct
 - Array of objects format
 - Perfect for configuration management
 
-**Example CSV output:**
+**Example CSV output (default columns):**
 ```csv
-Entry ID,Created,Updated,Last Updated By,Status,Content Type,Title (en-US),Author,Tags
-abc123,2024-01-01,2024-01-02,Jane Smith,Published,Blog Post,Hello World,author456,tech; blog; tips
+Entry ID,Created,Updated,Last Updated By,Status,Content Type,Title (en-US),Author
+abc123,2024-01-01,2024-01-02,Jane Smith,Published,Blog Post,Hello World,author456
 ```
+
+**Example CSV output (with "Include tags" and "Include taxonomy concepts" checked):**
+```csv
+Entry ID,Created,Updated,Last Updated By,Status,Content Type,Title (en-US),Author,Tags,Taxonomy Concepts
+abc123,2024-01-01,2024-01-02,Jane Smith,Published,Blog Post,Hello World,author456,tech; blog; tips,marketing; seo
+```
+Note that `Tags` shows real names while `Taxonomy Concepts` shows raw IDs only — see above.
 
 ## Rate Limits
 
