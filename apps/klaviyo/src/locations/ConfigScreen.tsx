@@ -224,6 +224,9 @@ const ConfigScreen = () => {
   };
 
   const messageHandler = async (event: MessageEvent) => {
+    if (event.origin !== window.location.origin || event.source !== popupWindowRef.current) {
+      return;
+    }
     if (event.data.type === 'oauth:complete') {
       console.log('oauth:complete');
       const appDefinitionId = sdk.ids.app;
