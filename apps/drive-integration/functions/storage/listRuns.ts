@@ -9,7 +9,9 @@ import {
  * App Storage is not available for external usage.
  * Replace with a real query of the `runs` table when it is.
  */
-export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (): Promise<AppActionResponse> => {
+export const handler: FunctionEventHandler<
+  FunctionTypeEnum.AppActionCall
+> = async (): Promise<AppActionResponse> => {
   console.log('listRuns dummy invoked');
 
   return {
