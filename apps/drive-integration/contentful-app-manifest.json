@@ -197,22 +197,10 @@
           { "name": "runId", "type": "text", "nullable": false, "index": true },
           { "name": "documentTitle", "type": "text", "nullable": false },
           { "name": "documentId", "type": "text", "nullable": false },
+          { "name": "contentTypeIds", "type": "text", "nullable": false },
           { "name": "documentSelection", "type": "json", "nullable": false },
-          { "name": "startedAt", "type": "text", "nullable": false }
-        ]
-      },
-      {
-        "name": "runContentTypes",
-        "columns": [
-          { "name": "runId", "type": "text", "nullable": false, "index": true },
-          { "name": "contentTypeId", "type": "text", "nullable": false }
-        ]
-      },
-      {
-        "name": "runCreatedEntries",
-        "columns": [
-          { "name": "runId", "type": "text", "nullable": false, "index": true },
-          { "name": "entryId", "type": "text", "nullable": false }
+          { "name": "startedAt", "type": "text", "nullable": false },
+          { "name": "createdEntryIds", "type": "text", "nullable": true }
         ]
       }
     ]
