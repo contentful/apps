@@ -8,6 +8,7 @@ import type {
 const KLAVIYO_API_URL = 'https://a.klaviyo.com/api';
 const KLAVIYO_API_REVISION = '2025-04-15';
 const ALLOWED_ENDPOINTS = ['template-universal-content', 'images'];
+const ALLOWED_ENDPOINT_PATTERN = new RegExp(`^(${ALLOWED_ENDPOINTS.join('|')})(/[A-Za-z0-9_-]+)?$`);
 
 type AppActionParameters = {
   endpoint: string;
@@ -58,8 +59,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
       console.error('Missing params');
       return { response: { error: 'Missing required params' } };
     }
-    const baseEndpoint = endpoint.split('/')[0];
-    if (!ALLOWED_ENDPOINTS.includes(baseEndpoint))
+    if (!ALLOWED_ENDPOINT_PATTERN.test(endpoint))
       return { response: { error: 'Endpoint not allowed' } };
     const formattedEndpoint = endpoint.endsWith('/') ? endpoint : `${endpoint}/`;
     let url = `${KLAVIYO_API_URL}/${formattedEndpoint}`;
