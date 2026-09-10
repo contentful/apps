@@ -78,6 +78,14 @@
       "path": "functions/storage/listRuns.js",
       "entryFile": "functions/storage/listRuns.ts",
       "accepts": ["appaction.call"]
+    },
+    {
+      "id": "testConnection",
+      "name": "Test Connection",
+      "description": "Tests the connection to the database",
+      "path": "functions/storage/testConnection.js",
+      "entryFile": "functions/storage/testConnection.ts",
+      "accepts": ["appaction.call"]
     }
   ],
   "actions": [
@@ -132,64 +140,12 @@
       "resultSchema": {
         "type": "object"
       }
-    },
-    {
-      "name": "Record Run",
-      "category": "Custom",
-      "description": "Records a run in the database",
-      "type": "function-invocation",
-      "functionId": "recordRun",
-      "parametersSchema": {
-        "type": "object"
-      },
-      "resultSchema": {
-        "type": "object"
-      }
-    },
-    {
-      "name": "Remove Run",
-      "category": "Custom",
-      "description": "Removes a run from the database",
-      "type": "function-invocation",
-      "functionId": "removeRun",
-      "parametersSchema": {
-        "type": "object"
-      },
-      "resultSchema": {
-        "type": "object"
-      }
-    },
-    {
-      "name": "Update Run",
-      "category": "Custom",
-      "description": "Updates a run in the database",
-      "type": "function-invocation",
-      "functionId": "updateRun",
-      "parametersSchema": {
-        "type": "object"
-      },
-      "resultSchema": {
-        "type": "object"
-      }
-    },
-    {
-      "name": "List Runs",
-      "category": "Custom",
-      "description": "Lists all runs in the database",
-      "type": "function-invocation",
-      "functionId": "listRuns",
-      "parametersSchema": {
-        "type": "object"
-      },
-      "resultSchema": {
-        "type": "object"
-      }
     }
   ],
   "storage": {
     "version": 1,
     "namespace": "driveIntegration",
-    "functions": ["recordRun", "removeRun", "updateRun", "listRuns"],
+    "functions": ["recordRun", "removeRun", "updateRun", "listRuns", "testConnection"],
     "tables": [
       {
         "name": "runs",
