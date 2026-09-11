@@ -608,7 +608,7 @@ export function ResultsList({
     if (!entry.fields?.[field.id]) return '—';
     const localeMap = entry.fields[field.id];
     const value = locale
-      ? (localeMap[locale] ?? Object.values(localeMap)[0])
+      ? localeMap[locale] ?? Object.values(localeMap)[0]
       : Object.values(localeMap)[0];
     return formatFieldValue(field, value);
   };
