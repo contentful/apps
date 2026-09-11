@@ -10,9 +10,16 @@ import {
   Paragraph,
   Subheading,
   TextInput,
+  TextLink,
   Tooltip,
 } from '@contentful/f36-components';
-import { InfoIcon, MagnifyingGlassIcon, PlusIcon, TrashSimpleIcon } from '@contentful/f36-icons';
+import {
+  ArrowSquareOutIcon,
+  InfoIcon,
+  MagnifyingGlassIcon,
+  PlusIcon,
+  TrashSimpleIcon,
+} from '@contentful/f36-icons';
 import { css } from '@emotion/css';
 import tokens from '@contentful/f36-tokens';
 import type { ContentType } from '../lib/flatten';
@@ -53,6 +60,7 @@ export interface ExportFormProps {
   isSearching: boolean;
   estimatedCount: number | null;
   spaceId: string;
+  organizationId: string;
 }
 
 const styles = {
@@ -98,8 +106,11 @@ export function ExportForm({
   isExporting,
   isSearching,
   spaceId,
+  organizationId,
 }: ExportFormProps) {
   const initialSpacePrefs = useMemo(() => getSpacePreferences(spaceId), [spaceId]);
+
+  const taxonomyManagerUrl = `https://app.contentful.com/account/organizations/${organizationId}/taxonomy/concept-schemes`;
 
   const [contentTypeId, setContentTypeId] = useState('');
   const [selectedLocales, setSelectedLocales] = useState<string[]>([]);
@@ -114,6 +125,10 @@ export function ExportForm({
   const [tagsMatchAll] = useState(false);
   const [selectedConcepts, setSelectedConcepts] = useState<string[]>([]);
   const [conceptsMatchAll] = useState(false);
+  const [manualConcepts, setManualConcepts] = useState<
+    Array<{ sys: { id: string }; prefLabel: Record<string, string> }>
+  >([]);
+  const [conceptSearchValue, setConceptSearchValue] = useState('');
   const [fieldFilters, setFieldFilters] = useState<FieldFilter[]>([]);
   const [format] = useState<ExportFormat>(initialSpacePrefs.format ?? 'csv');
   const [showCreatedRange, setShowCreatedRange] = useState(false);
@@ -123,6 +138,37 @@ export function ExportForm({
     () => contentTypes.find((ct) => ct.sys.id === contentTypeId) || null,
     [contentTypes, contentTypeId]
   );
+
+  // Concepts the app has discovered from search results, plus any the user has
+  // manually entered by ID — see the note on availableConcepts for why the app
+  // can't just list every concept in the organization up front.
+  const allConcepts = useMemo(() => {
+    const seenIds = new Set(availableConcepts.map((c) => c.sys.id));
+    const extra = manualConcepts.filter((c) => !seenIds.has(c.sys.id));
+    return [...availableConcepts, ...extra];
+  }, [availableConcepts, manualConcepts]);
+
+  const trimmedConceptSearch = conceptSearchValue.trim();
+
+  const filteredConcepts = useMemo(() => {
+    const term = trimmedConceptSearch.toLowerCase();
+    if (!term) return allConcepts;
+    return allConcepts.filter((concept) => {
+      const label = (Object.values(concept.prefLabel)[0] || '').toLowerCase();
+      return concept.sys.id.toLowerCase().includes(term) || label.includes(term);
+    });
+  }, [allConcepts, trimmedConceptSearch]);
+
+  const canAddConceptId =
+    trimmedConceptSearch.length > 0 && !allConcepts.some((c) => c.sys.id === trimmedConceptSearch);
+
+  const handleAddConceptId = (id: string) => {
+    setManualConcepts((prev) =>
+      prev.some((c) => c.sys.id === id) ? prev : [...prev, { sys: { id }, prefLabel: {} }]
+    );
+    setSelectedConcepts((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setConceptSearchValue('');
+  };
 
   useEffect(() => {
     if (!spaceId) return;
@@ -187,9 +233,14 @@ export function ExportForm({
         </div>
 
         <div className={styles.cardBody}>
-          <Flex gap="spacingM" alignItems="flex-start" flexWrap="wrap">
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: tokens.spacingM,
+            }}>
             {/* Content type */}
-            <FormControl style={{ width: '220px', marginBottom: 0 }}>
+            <FormControl style={{ marginBottom: 0 }}>
               <FormControl.Label>Content type</FormControl.Label>
               <Select
                 value={contentTypeId}
@@ -205,7 +256,7 @@ export function ExportForm({
             </FormControl>
 
             {/* Search entry text */}
-            <FormControl style={{ flex: '1 1 240px', marginBottom: 0 }}>
+            <FormControl style={{ marginBottom: 0 }}>
               <FormControl.Label>Search entry text</FormControl.Label>
               <TextInput
                 placeholder="Search"
@@ -220,7 +271,7 @@ export function ExportForm({
             </FormControl>
 
             {/* Status */}
-            <FormControl style={{ width: '140px', marginBottom: 0 }}>
+            <FormControl style={{ marginBottom: 0 }}>
               <FormControl.Label>Status</FormControl.Label>
               <Select
                 value={status}
@@ -237,7 +288,7 @@ export function ExportForm({
             {/* Locales */}
             <FormControl
               isDisabled={!selectedContentType || isExporting}
-              style={{ flex: '1 1 160px', marginBottom: 0 }}>
+              style={{ marginBottom: 0 }}>
               <FormControl.Label>Locales</FormControl.Label>
               <Multiselect
                 currentSelection={selectedLocales}
@@ -264,9 +315,14 @@ export function ExportForm({
             </FormControl>
 
             {/* Tags */}
-            <FormControl style={{ flex: '1 1 180px', marginBottom: 0 }}>
-              <FormControl.Label>Tags</FormControl.Label>
-              <Multiselect currentSelection={selectedTags} placeholder="Select one or more">
+            <FormControl isDisabled={isExporting} style={{ marginBottom: 0 }}>
+              <Flex alignItems="center" gap="spacing2Xs" marginBottom="spacingXs">
+                <FormControl.Label style={{ marginBottom: 0 }}>Tags</FormControl.Label>
+              </Flex>
+              <Multiselect
+                currentSelection={selectedTags}
+                placeholder="Select one or more"
+                triggerButtonProps={{ isDisabled: isExporting }}>
                 {availableTags.map((tag) => (
                   <Multiselect.Option
                     key={tag.sys.id}
@@ -287,30 +343,73 @@ export function ExportForm({
             </FormControl>
 
             {/* Taxonomy concepts */}
-            {availableConcepts.length > 0 && (
-              <FormControl style={{ flex: '1 1 180px', marginBottom: 0 }}>
-                <FormControl.Label>Taxonomy concepts</FormControl.Label>
-                <Multiselect currentSelection={selectedConcepts} placeholder="Select one or more">
-                  {availableConcepts.map((concept) => (
-                    <Multiselect.Option
-                      key={concept.sys.id}
-                      itemId={concept.sys.id}
-                      value={concept.sys.id}
-                      label={Object.values(concept.prefLabel)[0] || concept.sys.id}
-                      onSelectItem={() =>
-                        setSelectedConcepts((prev) =>
-                          prev.includes(concept.sys.id)
-                            ? prev.filter((c) => c !== concept.sys.id)
-                            : [...prev, concept.sys.id]
-                        )
-                      }
-                      isChecked={selectedConcepts.includes(concept.sys.id)}
-                    />
-                  ))}
-                </Multiselect>
-              </FormControl>
-            )}
-          </Flex>
+            <FormControl isDisabled={isExporting} style={{ marginBottom: 0 }}>
+              <Flex alignItems="center" gap="spacing2Xs" marginBottom="spacingXs">
+                <FormControl.Label style={{ marginBottom: 0 }}>Taxonomy concepts</FormControl.Label>
+                <Tooltip
+                  content="Concepts are shown as IDs here because the App Framework blocks apps from calling the org-scoped Taxonomy Concepts endpoint, so labels can't be resolved. This list only includes concepts found in recently updated or searched entries, so it may not include every concept in your organization. Visit your Taxonomy Manager to see the label for any ID, or type/paste an ID in the dropdown to add it directly."
+                  placement="top">
+                  <span
+                    role="img"
+                    aria-label="About taxonomy concept IDs"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      cursor: 'help',
+                    }}>
+                    <InfoIcon size="tiny" />
+                  </span>
+                </Tooltip>
+              </Flex>
+              <Multiselect
+                currentSelection={selectedConcepts}
+                placeholder="Select or paste an ID"
+                searchProps={{
+                  searchPlaceholder: 'Search or paste a concept ID',
+                  onSearchValueChange: (e) => setConceptSearchValue(e.target.value),
+                }}
+                triggerButtonProps={{ isDisabled: isExporting }}>
+                {canAddConceptId && (
+                  <Multiselect.Option
+                    key="__add_concept_id__"
+                    itemId={trimmedConceptSearch}
+                    value={trimmedConceptSearch}
+                    label={`Add "${trimmedConceptSearch}" as concept ID`}
+                    onSelectItem={() => handleAddConceptId(trimmedConceptSearch)}
+                    isChecked={false}
+                  />
+                )}
+                {filteredConcepts.map((concept) => (
+                  <Multiselect.Option
+                    key={concept.sys.id}
+                    itemId={concept.sys.id}
+                    value={concept.sys.id}
+                    label={Object.values(concept.prefLabel)[0] || concept.sys.id}
+                    onSelectItem={() =>
+                      setSelectedConcepts((prev) =>
+                        prev.includes(concept.sys.id)
+                          ? prev.filter((c) => c !== concept.sys.id)
+                          : [...prev, concept.sys.id]
+                      )
+                    }
+                    isChecked={selectedConcepts.includes(concept.sys.id)}
+                  />
+                ))}
+              </Multiselect>
+              <FormControl.HelpText>
+                Options fill in as concepts appear in your search results, or type/paste an ID in
+                the dropdown to add it directly.{' '}
+                <TextLink
+                  href={taxonomyManagerUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  icon={<ArrowSquareOutIcon />}
+                  alignIcon="end">
+                  View labels in Taxonomy Manager
+                </TextLink>
+              </FormControl.HelpText>
+            </FormControl>
+          </div>
 
           {/* Additive filter buttons */}
           <Flex gap="spacingS" marginTop="spacingM" flexWrap="wrap">

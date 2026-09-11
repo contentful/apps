@@ -23,6 +23,12 @@ export interface ExportOptions {
   sortByColumn?: { column: string; direction: 'asc' | 'desc' };
   /** Client-side status post-filter for statuses the CMA can't distinguish server-side. */
   statusPostFilter?: (entry: Entry) => boolean;
+  /** Opt-in: adds a "Tags" column with human-readable tag names. */
+  includeTags?: boolean;
+  /** Opt-in: adds a "Taxonomy Concepts" column. IDs only — see Page.tsx for why. */
+  includeConcepts?: boolean;
+  /** Tag ID → human-readable tag name, used to resolve names for the Tags column. */
+  tagMap?: Record<string, string>;
 }
 
 function sortRowsByColumn<T extends Record<string, string | number | boolean | null>>(
@@ -142,6 +148,9 @@ export class Exporter {
             locales: options.locales,
             fields: options.fields,
             userMap: options.userMap,
+            includeTags: options.includeTags,
+            includeConcepts: options.includeConcepts,
+            tagMap: options.tagMap,
           });
         } else if (options.contentTypeMap) {
           rows = filteredBatch.map((entry) => {
@@ -154,6 +163,9 @@ export class Exporter {
                 locales: options.locales,
                 fields: options.fields,
                 userMap: options.userMap,
+                includeTags: options.includeTags,
+                includeConcepts: options.includeConcepts,
+                tagMap: options.tagMap,
               });
             } else {
               const updatedByUserId = entry.sys.updatedBy?.sys.id;
@@ -169,6 +181,19 @@ export class Exporter {
                 Status: entry.sys.publishedVersion ? 'Published' : 'Draft',
                 'Content Type': contentTypeId,
               };
+
+              if (options.includeTags) {
+                const tagIds = entry.metadata?.tags?.map((t) => t.sys.id) ?? [];
+                row['Tags'] =
+                  tagIds.length > 0
+                    ? tagIds.map((id) => options.tagMap?.[id] || id).join('; ')
+                    : null;
+              }
+
+              if (options.includeConcepts) {
+                const conceptIds = entry.metadata?.concepts?.map((c) => c.sys.id) ?? [];
+                row['Taxonomy Concepts'] = conceptIds.length > 0 ? conceptIds.join('; ') : null;
+              }
 
               if (entry.fields) {
                 for (const [fieldId, fieldValue] of Object.entries(entry.fields)) {
@@ -186,7 +211,7 @@ export class Exporter {
               ? options.userMap?.[updatedByUserId] || updatedByUserId
               : 'Unknown';
 
-            return {
+            const row: Record<string, string | number | boolean | null> = {
               'Entry ID': entry.sys.id,
               Created: new Date(entry.sys.createdAt).toISOString().split('T')[0],
               Updated: new Date(entry.sys.updatedAt).toISOString().split('T')[0],
@@ -194,6 +219,21 @@ export class Exporter {
               Status: entry.sys.publishedVersion ? 'Published' : 'Draft',
               'Content Type': entry.sys.contentType.sys.id,
             };
+
+            if (options.includeTags) {
+              const tagIds = entry.metadata?.tags?.map((t) => t.sys.id) ?? [];
+              row['Tags'] =
+                tagIds.length > 0
+                  ? tagIds.map((id) => options.tagMap?.[id] || id).join('; ')
+                  : null;
+            }
+
+            if (options.includeConcepts) {
+              const conceptIds = entry.metadata?.concepts?.map((c) => c.sys.id) ?? [];
+              row['Taxonomy Concepts'] = conceptIds.length > 0 ? conceptIds.join('; ') : null;
+            }
+
+            return row;
           });
         }
 
