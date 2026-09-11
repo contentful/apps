@@ -223,7 +223,9 @@ export class Exporter {
             if (options.includeTags) {
               const tagIds = entry.metadata?.tags?.map((t) => t.sys.id) ?? [];
               row['Tags'] =
-                tagIds.length > 0 ? tagIds.map((id) => options.tagMap?.[id] || id).join('; ') : null;
+                tagIds.length > 0
+                  ? tagIds.map((id) => options.tagMap?.[id] || id).join('; ')
+                  : null;
             }
 
             if (options.includeConcepts) {

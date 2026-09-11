@@ -608,7 +608,7 @@ export function ResultsList({
     if (!entry.fields?.[field.id]) return '—';
     const localeMap = entry.fields[field.id];
     const value = locale
-      ? localeMap[locale] ?? Object.values(localeMap)[0]
+      ? (localeMap[locale] ?? Object.values(localeMap)[0])
       : Object.values(localeMap)[0];
     return formatFieldValue(field, value);
   };
@@ -1039,8 +1039,8 @@ export function ResultsList({
                     </Checkbox>
                   </Flex>
                   <FormControl.HelpText>
-                    Taxonomy concepts export as IDs only — the App Framework doesn&apos;t allow
-                    apps to resolve concept labels.
+                    Taxonomy concepts export as IDs only — the App Framework doesn&apos;t allow apps
+                    to resolve concept labels.
                   </FormControl.HelpText>
                 </FormControl>
               </>

@@ -160,8 +160,7 @@ export function ExportForm({
   }, [allConcepts, trimmedConceptSearch]);
 
   const canAddConceptId =
-    trimmedConceptSearch.length > 0 &&
-    !allConcepts.some((c) => c.sys.id === trimmedConceptSearch);
+    trimmedConceptSearch.length > 0 && !allConcepts.some((c) => c.sys.id === trimmedConceptSearch);
 
   const handleAddConceptId = (id: string) => {
     setManualConcepts((prev) =>
@@ -287,7 +286,9 @@ export function ExportForm({
             </FormControl>
 
             {/* Locales */}
-            <FormControl isDisabled={!selectedContentType || isExporting} style={{ marginBottom: 0 }}>
+            <FormControl
+              isDisabled={!selectedContentType || isExporting}
+              style={{ marginBottom: 0 }}>
               <FormControl.Label>Locales</FormControl.Label>
               <Multiselect
                 currentSelection={selectedLocales}
@@ -344,9 +345,7 @@ export function ExportForm({
             {/* Taxonomy concepts */}
             <FormControl isDisabled={isExporting} style={{ marginBottom: 0 }}>
               <Flex alignItems="center" gap="spacing2Xs" marginBottom="spacingXs">
-                <FormControl.Label style={{ marginBottom: 0 }}>
-                  Taxonomy concepts
-                </FormControl.Label>
+                <FormControl.Label style={{ marginBottom: 0 }}>Taxonomy concepts</FormControl.Label>
                 <Tooltip
                   content="Concepts are shown as IDs here. This list only includes concepts found in recently updated or searched entries, so it may not include every concept in your organization. Visit your Taxonomy Manager to see the label for any ID, or type/paste an ID in the dropdown to add it directly."
                   placement="top">
