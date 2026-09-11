@@ -7,8 +7,7 @@ import type {
 
 const KLAVIYO_API_URL = 'https://a.klaviyo.com/api';
 const KLAVIYO_API_REVISION = '2025-04-15';
-const ALLOWED_ENDPOINTS = ['template-universal-content', 'images'];
-const ALLOWED_ENDPOINT_PATTERN = new RegExp(`^(${ALLOWED_ENDPOINTS.join('|')})(/[A-Za-z0-9_-]+)?$`);
+const ALLOWED_ENDPOINT_PATTERN = /^(template-universal-content|images)(\/[A-Za-z0-9_-]+)?$/;
 
 type AppActionParameters = {
   endpoint: string;
