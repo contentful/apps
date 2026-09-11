@@ -20,7 +20,7 @@
   "dependencies": {
     "@contentful/ai-image-tagging-frontend": "^1.5.25",
     "aws-serverless-express": "3.3.6",
-    "express": "4.17.1",
+    "express": "4.20.0",
     "luxon": "1.28.1",
     "node-fetch": "2.7.0"
   },
