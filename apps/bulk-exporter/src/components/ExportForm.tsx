@@ -347,7 +347,7 @@ export function ExportForm({
               <Flex alignItems="center" gap="spacing2Xs" marginBottom="spacingXs">
                 <FormControl.Label style={{ marginBottom: 0 }}>Taxonomy concepts</FormControl.Label>
                 <Tooltip
-                  content="Concepts are shown as IDs here. This list only includes concepts found in recently updated or searched entries, so it may not include every concept in your organization. Visit your Taxonomy Manager to see the label for any ID, or type/paste an ID in the dropdown to add it directly."
+                  content="Concepts are shown as IDs here because the App Framework blocks apps from calling the org-scoped Taxonomy Concepts endpoint, so labels can't be resolved. This list only includes concepts found in recently updated or searched entries, so it may not include every concept in your organization. Visit your Taxonomy Manager to see the label for any ID, or type/paste an ID in the dropdown to add it directly."
                   placement="top">
                   <span
                     role="img"

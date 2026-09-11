@@ -1039,8 +1039,8 @@ export function ResultsList({
                     </Checkbox>
                   </Flex>
                   <FormControl.HelpText>
-                    Taxonomy concepts export as IDs only — the App Framework doesn&apos;t allow apps
-                    to resolve concept labels.
+                    Taxonomy concepts export as IDs only — the App Framework doesn't allow apps to
+                    resolve concept labels.
                   </FormControl.HelpText>
                 </FormControl>
               </>

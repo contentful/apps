@@ -112,10 +112,10 @@ const ConfigScreen = () => {
 
         <Note variant="warning" title="Taxonomy concepts export as IDs only">
           <Text>
-            The App Framework doesn&apos;t let apps call the org-scoped Taxonomy Concepts endpoint,
-            so this is a platform limitation, not a permissions issue — no space role or app access
-            change will add concept labels (e.g. &quot;Marketing&quot;) to exports. Tags export with
-            their real names.
+            The App Framework doesn't let apps call the org-scoped Taxonomy Concepts endpoint, so
+            this is a platform limitation, not a permissions issue — no space role or app access
+            change will add concept labels (e.g. "Marketing") to exports. Tags export with their
+            real names.
           </Text>
         </Note>
       </Flex>

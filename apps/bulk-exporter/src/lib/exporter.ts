@@ -25,7 +25,7 @@ export interface ExportOptions {
   statusPostFilter?: (entry: Entry) => boolean;
   /** Opt-in: adds a "Tags" column with human-readable tag names. */
   includeTags?: boolean;
-  /** Opt-in: adds a "Taxonomy Concepts" column. IDs only — see flatten.ts. */
+  /** Opt-in: adds a "Taxonomy Concepts" column. IDs only — see Page.tsx for why. */
   includeConcepts?: boolean;
   /** Tag ID → human-readable tag name, used to resolve names for the Tags column. */
   tagMap?: Record<string, string>;

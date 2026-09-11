@@ -55,9 +55,7 @@ export interface FlattenOptions {
   userMap?: Record<string, string>;
   /** Opt-in: adds a "Tags" column with human-readable tag names. */
   includeTags?: boolean;
-  /** Opt-in: adds a "Taxonomy Concepts" column. IDs only — concept labels
-   * cannot be resolved because the App Framework blocks apps from calling
-   * the org-scoped Taxonomy Concepts endpoint. */
+  /** Opt-in: adds a "Taxonomy Concepts" column. IDs only — see Page.tsx for why. */
   includeConcepts?: boolean;
   /** Tag ID → human-readable tag name, used to resolve names for the Tags column. */
   tagMap?: Record<string, string>;
@@ -115,7 +113,6 @@ export function flattenEntry(entry: Entry, options: FlattenOptions): FlatRow {
 
   if (includeConcepts) {
     const conceptIds = entry.metadata?.concepts?.map((c) => c.sys.id) ?? [];
-    // IDs only — the App Framework blocks apps from resolving concept labels.
     row['Taxonomy Concepts'] = conceptIds.length > 0 ? conceptIds.join('; ') : null;
   }
 
