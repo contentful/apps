@@ -5,10 +5,12 @@ function buildEvent(body: Record<string, any>) {
   return { body } as any;
 }
 
-function buildContext(token: { tokenType: string; accessToken: string } = {
-  tokenType: 'Bearer',
-  accessToken: 'test-access-token',
-}) {
+function buildContext(
+  token: { tokenType: string; accessToken: string } = {
+    tokenType: 'Bearer',
+    accessToken: 'test-access-token',
+  }
+) {
   return {
     oauthSdk: {
       token: vi.fn().mockResolvedValue(token),
