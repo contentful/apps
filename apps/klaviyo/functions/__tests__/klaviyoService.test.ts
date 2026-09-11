@@ -23,7 +23,9 @@ describe('KlaviyoService.makeRequest token handling', () => {
       text: vi.fn().mockResolvedValue('{"errors":[{"detail":"boom"}]}'),
     });
 
-    await expect((service as any).makeRequest('GET', 'template-universal-content')).rejects.toThrow();
+    await expect(
+      (service as any).makeRequest('GET', 'template-universal-content')
+    ).rejects.toThrow();
 
     const allLoggedArgs = consoleErrorSpy.mock.calls.flat();
     for (const arg of allLoggedArgs) {
@@ -63,7 +65,9 @@ describe('KlaviyoService.makeRequest token handling', () => {
       text: vi.fn().mockResolvedValue('service unavailable'),
     });
 
-    await expect((service as any).makeRequest('GET', 'template-universal-content')).rejects.toThrow();
+    await expect(
+      (service as any).makeRequest('GET', 'template-universal-content')
+    ).rejects.toThrow();
 
     const allLoggedArgs = consoleErrorSpy.mock.calls.flat().map((arg) => JSON.stringify(arg));
     expect(allLoggedArgs.some((arg) => arg.includes('503'))).toBe(true);
