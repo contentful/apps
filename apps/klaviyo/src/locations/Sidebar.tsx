@@ -6,7 +6,7 @@ import { FieldData } from '../config/klaviyo';
 import {
   getEntryKlaviyoFieldMappings,
   setEntryKlaviyoFieldMappings,
-} from '../utils/field-mappings';
+} from '../utils/field-mappings-client';
 import { getFieldDetails } from '../utils/field-utilities';
 import { logger } from '../utils/logger';
 import { useAutoResizer } from '@contentful/react-apps-toolkit';
