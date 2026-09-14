@@ -826,7 +826,7 @@ export class KlaviyoService {
       } else if (token && typeof token === 'object' && 'token' in token) {
         tokenString = (token as any).token;
       } else {
-        console.error('Invalid token format:', token);
+        console.error('Invalid token format received from OAuth SDK:', typeof token);
         throw new Error('Invalid token format received from OAuth SDK');
       }
 
@@ -838,8 +838,9 @@ export class KlaviyoService {
       const responseText = await response.text();
 
       if (!response.ok) {
+        const { Authorization, ...safeHeaders } = headers as Record<string, string>;
         console.error(`API error (${response.status}): ${responseText}`);
-        console.error(`Request headers:`, headers);
+        console.error(`Request headers:`, safeHeaders);
         console.error(`Request URL: ${fullUrl}`);
 
         throw new Error(`Klaviyo API error (${response.status}): ${responseText}`);
