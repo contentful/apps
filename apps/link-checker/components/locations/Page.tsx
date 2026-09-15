@@ -867,7 +867,8 @@ export default function Page() {
                 <Table.Body>
                   {filteredResults.map((result) => (
                     <Table.Row key={result.id}>
-                      <Table.Cell style={{ minWidth: '132px' }}>
+                      <Table.Cell
+                        style={{ minWidth: '132px', maxWidth: '133px', overflowX: 'scroll' }}>
                         <StatusBadge result={result} />
                       </Table.Cell>
                       <Table.Cell style={{ minWidth: '280px' }}>
