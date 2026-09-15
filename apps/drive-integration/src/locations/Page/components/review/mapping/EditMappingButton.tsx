@@ -49,11 +49,16 @@ export const EditMappingButton = forwardRef<HTMLDivElement, EditMappingButtonPro
           size="small"
           startIcon={<PencilSimpleIcon />}
           onClick={onEdit}
-          style={{
-            borderRight: `1px solid ${tokens.gray400}`,
-            borderBottomRightRadius: 0,
-            borderTopRightRadius: 0,
-          }}>
+          // Only flatten the right edge when the Remove button sits against it
+          style={
+            onRemove
+              ? {
+                  borderRight: `1px solid ${tokens.gray400}`,
+                  borderBottomRightRadius: 0,
+                  borderTopRightRadius: 0,
+                }
+              : undefined
+          }>
           Edit content mapping
         </Button>
         {onRemove ? (
