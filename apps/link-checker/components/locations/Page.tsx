@@ -459,7 +459,9 @@ export default function Page() {
         const isLastBatch = !response.items || response.items.length < ENTRY_FETCH_LIMIT;
         const now = Date.now();
         const shouldFlush =
-          !hasLoadedFirstBatch || isLastBatch || now - findLinksFlushRef.current >= RESULTS_FLUSH_INTERVAL_MS;
+          !hasLoadedFirstBatch ||
+          isLastBatch ||
+          now - findLinksFlushRef.current >= RESULTS_FLUSH_INTERVAL_MS;
 
         if (!hasLoadedFirstBatch) {
           setLoading(false);
@@ -880,10 +882,10 @@ export default function Page() {
               {!hasFoundLinks && !loading
                 ? 'Click "Find links" to extract links from your content.'
                 : !hasAssignedContentTypes
-                ? 'No content types are assigned to Link Checker in the app configuration.'
-                : loading
-                ? `Finding links. ${scanStats.entriesScanned} entries scanned so far.`
-                : 'No links match the current filters.'}
+                  ? 'No content types are assigned to Link Checker in the app configuration.'
+                  : loading
+                    ? `Finding links. ${scanStats.entriesScanned} entries scanned so far.`
+                    : 'No links match the current filters.'}
             </Note>
           ) : (
             <Box ref={tableScrollRef} style={{ overflow: 'auto', maxHeight: '70vh' }}>
@@ -901,7 +903,10 @@ export default function Page() {
                 <Table.Body>
                   {topSpacerHeight > 0 && (
                     <tr>
-                      <td colSpan={6} style={{ height: `${topSpacerHeight}px`, padding: 0, border: 'none' }} />
+                      <td
+                        colSpan={6}
+                        style={{ height: `${topSpacerHeight}px`, padding: 0, border: 'none' }}
+                      />
                     </tr>
                   )}
                   {virtualRows.map((virtualRow) => {
