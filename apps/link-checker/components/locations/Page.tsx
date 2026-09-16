@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import {
   Badge,
@@ -18,6 +18,7 @@ import {
 } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { normalizeDomainPattern, urlMatchesAnyDomainPattern } from '@/utils/domainPatterns';
 import { extractUrlsFromEntry, isRelativeUrl, type ExtractedUrl } from '@/utils/extractUrls';
 import { type AppInstallationParameters } from './ConfigScreen';
@@ -38,6 +39,8 @@ const FETCH_LIMIT = 1000;
 const ENTRY_FETCH_LIMIT = 100;
 const CHECK_CONCURRENCY = 5;
 const SUPPORTED_FIELD_TYPES = ['Symbol', 'Text', 'RichText'];
+const RESULTS_FLUSH_INTERVAL_MS = 200;
+const ESTIMATED_ROW_HEIGHT = 64;
 
 type LinkStatus = 'valid' | 'invalid' | 'unchecked' | 'checking';
 
@@ -229,6 +232,9 @@ export default function Page() {
       urlToCheck: string;
     }>
   >([]);
+
+  const findLinksFlushRef = useRef(0);
+  const scanFlushRef = useRef(0);
 
   const findLinks = useCallback(async () => {
     setError(null);
@@ -450,15 +456,23 @@ export default function Page() {
           }
         }
 
+        const isLastBatch = !response.items || response.items.length < ENTRY_FETCH_LIMIT;
+        const now = Date.now();
+        const shouldFlush =
+          !hasLoadedFirstBatch || isLastBatch || now - findLinksFlushRef.current >= RESULTS_FLUSH_INTERVAL_MS;
+
         if (!hasLoadedFirstBatch) {
           setLoading(false);
           hasLoadedFirstBatch = true;
         }
 
         setScanStats({ entriesScanned, linksFound });
-        setResults(sortResults(Array.from(resultMap.values())));
+        if (shouldFlush) {
+          findLinksFlushRef.current = now;
+          setResults(sortResults(Array.from(resultMap.values())));
+        }
 
-        if (!response.items || response.items.length < ENTRY_FETCH_LIMIT) {
+        if (isLastBatch) {
           break;
         }
 
@@ -558,6 +572,7 @@ export default function Page() {
     setScanning(true);
     setProgress({ checked: 0, total: pendingChecks.length });
     setHasStartedScan(true);
+    scanFlushRef.current = 0;
 
     try {
       const queue = [...pendingChecks];
@@ -631,11 +646,18 @@ export default function Page() {
           resultMap.set(resultId, nextResult);
           checkedCount += 1;
           setProgress({ checked: checkedCount, total: pendingChecks.length });
-          setResults(sortResults(Array.from(resultMap.values())));
+
+          const now = Date.now();
+          const isLastCheck = checkedCount === pendingChecks.length;
+          if (isLastCheck || now - scanFlushRef.current >= RESULTS_FLUSH_INTERVAL_MS) {
+            scanFlushRef.current = now;
+            setResults(sortResults(Array.from(resultMap.values())));
+          }
         }
       });
 
       await Promise.all(workers);
+      setResults(sortResults(Array.from(resultMap.values())));
       setScanning(false);
       setProgress(null);
     } catch (scanError) {
@@ -700,6 +722,18 @@ export default function Page() {
   const handleRunScan = async () => {
     await runScan();
   };
+
+  const tableScrollRef = useRef<HTMLDivElement>(null);
+  const rowVirtualizer = useVirtualizer({
+    count: filteredResults.length,
+    getScrollElement: () => tableScrollRef.current,
+    estimateSize: () => ESTIMATED_ROW_HEIGHT,
+    overscan: 10,
+  });
+  const virtualRows = rowVirtualizer.getVirtualItems();
+  const topSpacerHeight = virtualRows[0]?.start ?? 0;
+  const bottomSpacerHeight =
+    rowVirtualizer.getTotalSize() - (virtualRows[virtualRows.length - 1]?.end ?? 0);
 
   return (
     <Flex justifyContent="center" paddingLeft="spacingL" paddingRight="spacingL">
@@ -852,7 +886,7 @@ export default function Page() {
                 : 'No links match the current filters.'}
             </Note>
           ) : (
-            <Box style={{ overflowX: 'auto' }}>
+            <Box ref={tableScrollRef} style={{ overflow: 'auto', maxHeight: '70vh' }}>
               <Table>
                 <Table.Head>
                   <Table.Row>
@@ -865,47 +899,65 @@ export default function Page() {
                   </Table.Row>
                 </Table.Head>
                 <Table.Body>
-                  {filteredResults.map((result) => (
-                    <Table.Row key={result.id}>
-                      <Table.Cell
-                        style={{ minWidth: '132px', maxWidth: '133px', overflowX: 'scroll' }}>
-                        <StatusBadge result={result} />
-                      </Table.Cell>
-                      <Table.Cell style={{ minWidth: '280px' }}>
-                        <Flex flexDirection="column" alignItems="flex-start">
+                  {topSpacerHeight > 0 && (
+                    <tr>
+                      <td colSpan={6} style={{ height: `${topSpacerHeight}px`, padding: 0, border: 'none' }} />
+                    </tr>
+                  )}
+                  {virtualRows.map((virtualRow) => {
+                    const result = filteredResults[virtualRow.index];
+                    if (!result) return null;
+
+                    return (
+                      <Table.Row key={result.id}>
+                        <Table.Cell
+                          style={{ minWidth: '132px', maxWidth: '133px', overflowX: 'scroll' }}>
+                          <StatusBadge result={result} />
+                        </Table.Cell>
+                        <Table.Cell style={{ minWidth: '280px' }}>
+                          <Flex flexDirection="column" alignItems="flex-start">
+                            <TextLink
+                              href={result.resolvedUrl ?? result.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                              {result.url}
+                            </TextLink>
+                            {result.resolvedUrl && result.resolvedUrl !== result.url && (
+                              <Text fontSize="fontSizeS" fontColor="gray600">
+                                Resolves to {result.resolvedUrl}
+                              </Text>
+                            )}
+                          </Flex>
+                        </Table.Cell>
+                        <Table.Cell style={{ minWidth: '180px' }}>
+                          {result.contentTypeName}
+                        </Table.Cell>
+                        <Table.Cell style={{ minWidth: '240px' }}>
                           <TextLink
-                            href={result.resolvedUrl ?? result.url}
+                            href={result.entryUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
-                            {result.url}
+                            icon={<ExternalLinkIcon />}
+                            alignIcon="end">
+                            {result.entryTitle}
                           </TextLink>
-                          {result.resolvedUrl && result.resolvedUrl !== result.url && (
-                            <Text fontSize="fontSizeS" fontColor="gray600">
-                              Resolves to {result.resolvedUrl}
-                            </Text>
-                          )}
-                        </Flex>
-                      </Table.Cell>
-                      <Table.Cell style={{ minWidth: '180px' }}>
-                        {result.contentTypeName}
-                      </Table.Cell>
-                      <Table.Cell style={{ minWidth: '240px' }}>
-                        <TextLink
-                          href={result.entryUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          icon={<ExternalLinkIcon />}
-                          alignIcon="end">
-                          {result.entryTitle}
-                        </TextLink>
-                      </Table.Cell>
-                      <Table.Cell style={{ minWidth: '170px' }}>{result.fieldName}</Table.Cell>
-                      <Table.Cell style={{ minWidth: '120px', whiteSpace: 'nowrap' }}>
-                        {result.locale}
-                      </Table.Cell>
-                    </Table.Row>
-                  ))}
+                        </Table.Cell>
+                        <Table.Cell style={{ minWidth: '170px' }}>{result.fieldName}</Table.Cell>
+                        <Table.Cell style={{ minWidth: '120px', whiteSpace: 'nowrap' }}>
+                          {result.locale}
+                        </Table.Cell>
+                      </Table.Row>
+                    );
+                  })}
+                  {bottomSpacerHeight > 0 && (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        style={{ height: `${bottomSpacerHeight}px`, padding: 0, border: 'none' }}
+                      />
+                    </tr>
+                  )}
                 </Table.Body>
               </Table>
             </Box>
