@@ -882,10 +882,10 @@ export default function Page() {
               {!hasFoundLinks && !loading
                 ? 'Click "Find links" to extract links from your content.'
                 : !hasAssignedContentTypes
-                  ? 'No content types are assigned to Link Checker in the app configuration.'
-                  : loading
-                    ? `Finding links. ${scanStats.entriesScanned} entries scanned so far.`
-                    : 'No links match the current filters.'}
+                ? 'No content types are assigned to Link Checker in the app configuration.'
+                : loading
+                ? `Finding links. ${scanStats.entriesScanned} entries scanned so far.`
+                : 'No links match the current filters.'}
             </Note>
           ) : (
             <Box ref={tableScrollRef} style={{ overflow: 'auto', maxHeight: '70vh' }}>
