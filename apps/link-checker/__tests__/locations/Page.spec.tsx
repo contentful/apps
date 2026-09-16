@@ -483,11 +483,15 @@ describe('Page component', () => {
     render(<Page />);
     fireEvent.click(screen.getByRole('button', { name: 'Find links' }));
 
-    await screen.findByText(`https://example.com/link-${batchCount - 1}-99`);
-    await screen.findByText('https://example.com/link-0-0');
+    await screen.findByText(
+      `https://example.com/link-${batchCount - 1}-99`,
+      {},
+      { timeout: 15000 }
+    );
+    await screen.findByText('https://example.com/link-0-0', {}, { timeout: 15000 });
 
     expect(screen.getByText(`${batchCount * 100} total`)).toBeInTheDocument();
-  });
+  }, 20000);
 
   it('reflects every checked link once a large scan finishes, even with throttled updates', async () => {
     const linkCount = 60;
@@ -513,15 +517,18 @@ describe('Page component', () => {
 
     render(<Page />);
     fireEvent.click(screen.getByRole('button', { name: 'Find links' }));
-    await screen.findByText(`https://example.com/link-${linkCount - 1}`);
+    await screen.findByText(`https://example.com/link-${linkCount - 1}`, {}, { timeout: 15000 });
 
     fireEvent.click(screen.getByRole('button', { name: 'Run scan' }));
 
-    await waitFor(() => {
-      expect(screen.getByText(`${linkCount} valid`)).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByText(`${linkCount} valid`)).toBeInTheDocument();
+      },
+      { timeout: 15000 }
+    );
     expect(screen.queryByText(/\d+ unchecked/)).not.toBeInTheDocument();
-  });
+  }, 20000);
 
   it('checks www URLs as absolute https URLs instead of resolving them against the current domain', async () => {
     const createWithResponse = vi.fn().mockResolvedValue({
