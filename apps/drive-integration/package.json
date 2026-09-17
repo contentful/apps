@@ -10,6 +10,7 @@
     "@contentful/f36-multiselect": "^6.7.1",
     "@contentful/f36-tokens": "^5.1.0",
     "@contentful/field-editor-json": "^3.3.38",
+    "@contentful/integration-frontend-toolkit": "^1.7.4",
     "@contentful/node-apps-toolkit": "^3.13.0",
     "@contentful/react-apps-toolkit": "^1.2.16",
     "@emotion/css": "^11.13.4",
