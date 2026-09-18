@@ -49,7 +49,7 @@
     "vitest": "^3.2.4"
   },
   "overrides": {
-    "@contentful/rich-text-types": "^16.1.0",
+    "@contentful/rich-text-types": "^16.8.5",
     "slate": "0.94.1",
     "slate-react": "0.102.0"
   }
