@@ -4,13 +4,15 @@ import {
   FunctionEventContext,
   FunctionTypeEnum,
 } from '@contentful/node-apps-toolkit/lib/requests/typings';
-import { muxFetch } from './helpers/muxClient';
+import { muxFetch, resolveMuxUrl } from './helpers/muxClient';
 
 type Parameters = {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   path: string;
   body?: string;
 };
+
+const ALLOWED_PATH_PREFIX = '/video/v1/';
 
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
   event: AppActionRequest<'Custom', Parameters>,
@@ -22,6 +24,19 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   if (!muxAccessTokenId || !muxAccessTokenSecret) {
     console.error('[muxProxy] Missing Mux credentials in appInstallationParameters');
     return { ok: false, error: 'Missing Mux API credentials', status: 401 };
+  }
+
+  let resolvedPath: string;
+  try {
+    resolvedPath = resolveMuxUrl(path).pathname;
+  } catch (err) {
+    console.error(`[muxProxy] Rejected invalid path: ${method} ${path}`);
+    return { ok: false, error: 'Path not permitted', status: 403 };
+  }
+
+  if (!resolvedPath.startsWith(ALLOWED_PATH_PREFIX)) {
+    console.error(`[muxProxy] Rejected disallowed path: ${method} ${path} -> ${resolvedPath}`);
+    return { ok: false, error: 'Path not permitted', status: 403 };
   }
 
   let res: Response;

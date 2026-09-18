@@ -1,8 +1,17 @@
 const MUX_API_BASE = 'https://api.mux.com';
+const MUX_API_HOST = 'api.mux.com';
 
 interface MuxCredentials {
   tokenId: string;
   tokenSecret: string;
+}
+
+export function resolveMuxUrl(path: string): URL {
+  const url = new URL(path, MUX_API_BASE);
+  if (url.host !== MUX_API_HOST) {
+    throw new Error(`Invalid Mux API path (resolved to ${url.host})`);
+  }
+  return url;
 }
 
 export async function muxFetch(
@@ -11,9 +20,10 @@ export async function muxFetch(
   path: string,
   body?: string
 ): Promise<Response> {
+  const url = resolveMuxUrl(path);
   const encoded = btoa(`${credentials.tokenId}:${credentials.tokenSecret}`);
 
-  return fetch(`${MUX_API_BASE}${path}`, {
+  return fetch(url.toString(), {
     method,
     headers: {
       Authorization: `Basic ${encoded}`,
