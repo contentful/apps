@@ -29,6 +29,7 @@ export const usePermissions = () => {
       tags: createEmptyEntityPermissions(),
       concepts: createEmptyEntityPermissions(),
       conceptSchemes: createEmptyEntityPermissions(),
+      releases: createEmptyEntityPermissions(),
       componentTypes: createEmptyEntityPermissions(),
       experiences: createEmptyEntityPermissions(),
       templates: createEmptyEntityPermissions(),

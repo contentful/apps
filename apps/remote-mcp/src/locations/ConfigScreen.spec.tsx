@@ -65,4 +65,32 @@ describe('Config Screen component', () => {
 
     expect(queryByText('Migration permissions')).not.toBeInTheDocument();
   });
+
+  it('loads for an existing install whose stored parameters predate the releases field', async () => {
+    mockSdk.app.getParameters.mockResolvedValue({
+      selectAll: false,
+      entries: '{}',
+      assets: '{}',
+      contentTypes: '{}',
+      aiActions: '{}',
+      editorInterfaces: '{}',
+      environments: '{}',
+      locales: '{}',
+      orgs: '{}',
+      spaces: '{}',
+      tags: '{}',
+      concepts: '{}',
+      conceptSchemes: '{}',
+      // `releases` intentionally omitted, as on an install saved before it existed.
+      runAIActions: false,
+    });
+
+    const { getByText } = render(<ConfigScreen />);
+
+    await waitFor(() => {
+      expect(mockSdk.app.setReady).toHaveBeenCalled();
+    });
+
+    expect(getByText('Set up the Contentful remote MCP Server')).toBeInTheDocument();
+  });
 });

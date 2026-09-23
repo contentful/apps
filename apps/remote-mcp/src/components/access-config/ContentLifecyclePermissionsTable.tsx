@@ -90,6 +90,7 @@ export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTab
                 tags: 'Tags',
                 concepts: 'Concepts',
                 conceptSchemes: 'Concept schemes',
+                releases: 'Releases',
                 // ExO labels follow the entity renaming. The keys stay as
                 // they are — they're app-installation-parameter keys already
                 // persisted on every existing install. See ../types/config.ts.
