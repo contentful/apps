@@ -46,7 +46,9 @@ export const parseAppInstallationParameters = (
       tags: JSON.parse(parameters.tags),
       concepts: JSON.parse(parameters.concepts),
       conceptSchemes: JSON.parse(parameters.conceptSchemes),
-      releases: JSON.parse(parameters.releases),
+      releases: parameters.releases
+        ? JSON.parse(parameters.releases)
+        : createEmptyEntityPermissions(),
       componentTypes: parameters.componentTypes
         ? JSON.parse(parameters.componentTypes)
         : createEmptyEntityPermissions(),
