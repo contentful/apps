@@ -19,6 +19,39 @@ interface InstallationParameters {
   siteId: string;
 }
 
+interface SfccLocalizedText {
+  default?: string;
+}
+
+interface SfccImage {
+  absUrl?: string;
+  alt?: SfccLocalizedText;
+}
+
+interface ProductSummary {
+  id: string;
+  name?: SfccLocalizedText;
+  image?: SfccImage;
+}
+
+interface CategorySummary {
+  id: string;
+  catalogId?: string;
+  name?: SfccLocalizedText;
+}
+
+// The UI only ever reads id/name/image (products) or id/catalogId/name (categories) —
+// see SearchBar, ProductSearchResults, CategorySearchResults, ItemCard. Projecting down
+// to those fields here keeps every sfccApi response far under the App Action platform's
+// response size cap, regardless of how much SFCC includes in the full representation.
+function toProductSummary(product: any): ProductSummary {
+  return { id: product?.id, name: product?.name, image: product?.image };
+}
+
+function toCategorySummary(category: any): CategorySummary {
+  return { id: category?.id, catalogId: category?.catalogId, name: category?.name };
+}
+
 async function fetchSfccToken(params: InstallationParameters): Promise<string> {
   const authToken = Buffer.from(`${params.clientId}:${params.clientSecret}`).toString('base64');
   const tenantId = params.organizationId.split('_').slice(2).join('_');
@@ -110,7 +143,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
           method: 'POST',
           body: JSON.stringify(buildSearchBody(action.query)),
         })) as { hits?: unknown[] };
-        return { ok: true, data: data.hits ?? [] };
+        return { ok: true, data: (data.hits ?? []).map(toProductSummary) };
       }
 
       case 'searchCategories': {
@@ -119,19 +152,19 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
           method: 'POST',
           body: JSON.stringify(buildSearchBody(action.query, true)),
         })) as { hits?: unknown[] };
-        return { ok: true, data: data.hits ?? [] };
+        return { ok: true, data: (data.hits ?? []).map(toCategorySummary) };
       }
 
       case 'fetchProduct': {
         const url = `${base}/product/products/v1/organizations/${organizationId}/products/${action.productId}?siteId=${siteId}`;
         const data = await sfccFetch(url, token, { method: 'GET' });
-        return { ok: true, data };
+        return { ok: true, data: toProductSummary(data) };
       }
 
       case 'fetchCategory': {
         const url = `${base}/product/catalogs/v1/organizations/${organizationId}/catalogs/${action.catalogId}/categories/${action.categoryId}`;
         const data = await sfccFetch(url, token, { method: 'GET' });
-        return { ok: true, data };
+        return { ok: true, data: toCategorySummary(data) };
       }
 
       default:

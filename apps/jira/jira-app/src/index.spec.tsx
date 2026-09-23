@@ -227,7 +227,14 @@ describe('The Jira App Components', () => {
       (window.open as Mock).mockReturnValue(source);
 
       fireEvent.click(oauthButton);
-      fireEvent(window, new MessageEvent('message', { data: { token, expireTime }, source }));
+      fireEvent(
+        window,
+        new MessageEvent('message', {
+          data: { token, expireTime },
+          source,
+          origin: 'http://localhost:3000',
+        })
+      );
 
       expect(window.open).toHaveBeenCalledWith(
         'https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=XD9k9QU9VT4Rt26u6lbO3NM0fOqvvXan&scope=read%3Ajira-user%20read%3Ajira-work%20write%3Ajira-work&redirect_uri=https%3A%2F%2Fapi.jira.ctfapps.net%2Fauth&response_type=code&state=http%3A%2F%2Flocalhost%3A3000%2F&prompt=consent',
@@ -249,7 +256,14 @@ describe('The Jira App Components', () => {
       (window.open as Mock).mockReturnValue(source);
 
       fireEvent.click(oauthButton);
-      fireEvent(window, new MessageEvent('message', { data: { error }, source }));
+      fireEvent(
+        window,
+        new MessageEvent('message', {
+          data: { error },
+          source,
+          origin: 'http://localhost:3000',
+        })
+      );
 
       expect(mockSdk.notifier.error).toHaveBeenCalledWith(
         'There was an error authenticating. Please refresh and try again.'
@@ -580,7 +594,7 @@ describe('The Jira App Components', () => {
       standalone(mockWindow as any);
       expect(mockWindow.opener.postMessage).toHaveBeenCalledWith(
         { token: '123', expireTime: 10100 },
-        '*'
+        'http://localhost:1234'
       );
       expect(mockWindow.history.replaceState).toHaveBeenCalledWith({}, 'oauth', '/');
     });
@@ -605,7 +619,10 @@ describe('The Jira App Components', () => {
       standalone(mockWindow as any);
 
       expect(mockWindow.localStorage.setItem).toHaveBeenCalledTimes(0);
-      expect(mockWindow.opener.postMessage).toHaveBeenCalledWith({ error: errorMessage }, '*');
+      expect(mockWindow.opener.postMessage).toHaveBeenCalledWith(
+        { error: errorMessage },
+        'http://localhost:1234'
+      );
     });
 
     it('should handle no query string', () => {
@@ -629,7 +646,7 @@ describe('The Jira App Components', () => {
       expect(mockWindow.localStorage.setItem).toHaveBeenCalledTimes(0);
       expect(mockWindow.opener.postMessage).toHaveBeenCalledWith(
         { error: 'No query string provided!' },
-        '*'
+        'http://localhost:1234'
       );
     });
   });

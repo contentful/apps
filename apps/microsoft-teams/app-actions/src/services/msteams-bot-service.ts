@@ -9,7 +9,9 @@ import {
 import { MessageResponse } from '../../../types';
 
 export class MsTeamsBotService {
-  constructor(public readonly botServiceUrl: string, public readonly apiKey: string) {}
+  constructor(public readonly botServiceUrl: string, public readonly apiKey: string) {
+    this.botServiceUrl = botServiceUrl.replace(/\/+$/, '');
+  }
 
   async sendWorkflowUpdateMessage(
     workflowUpdateMessage: WorkflowUpdateMessage,
@@ -20,7 +22,7 @@ export class MsTeamsBotService {
       `${this.botServiceUrl}/api/tenant/${tenantId}/workflow_update_messages`,
       {
         method: 'POST',
-        headers: this.getRequestHeaders(requestContext),
+        headers: this.getRequestHeaders(requestContext, tenantId),
         body: JSON.stringify(workflowUpdateMessage),
       }
     );
@@ -42,7 +44,7 @@ export class MsTeamsBotService {
       `${this.botServiceUrl}/api/tenant/${tenantId}/entry_activity_messages`,
       {
         method: 'POST',
-        headers: this.getRequestHeaders(requestContext),
+        headers: this.getRequestHeaders(requestContext, tenantId),
         body: JSON.stringify(entryActivityMessage),
       }
     );
@@ -61,7 +63,7 @@ export class MsTeamsBotService {
   ): Promise<MsTeamsBotServiceResponse<MessageResponse>> {
     const res = await fetch(`${this.botServiceUrl}/api/tenant/${tenantId}/test_messages`, {
       method: 'POST',
-      headers: this.getRequestHeaders(requestContext),
+      headers: this.getRequestHeaders(requestContext, tenantId),
       body: JSON.stringify(testMessage),
     });
     const responseBody = await res.json();
@@ -78,7 +80,7 @@ export class MsTeamsBotService {
   ): Promise<MsTeamsBotServiceResponse<TeamInstallation[]>> {
     const res = await fetch(`${this.botServiceUrl}/api/tenants/${tenantId}/team_installations`, {
       method: 'GET',
-      headers: this.getRequestHeaders(requestContext),
+      headers: this.getRequestHeaders(requestContext, tenantId),
     });
     const responseBody = await res.json();
     this.assertMsTeamsBotServiceCallResult<TeamInstallation[]>(responseBody, (data) => {
@@ -87,11 +89,12 @@ export class MsTeamsBotService {
     return responseBody;
   }
 
-  private getRequestHeaders(requestContext: AppActionRequestContext) {
+  private getRequestHeaders(requestContext: AppActionRequestContext, tenantId: string) {
     const { environmentId, userId, spaceId, appInstallationId } = requestContext;
     return {
       'Content-Type': 'application/json',
       'x-api-key': this.apiKey,
+      'x-tenant-id': tenantId,
       'X-Contentful-App': appInstallationId,
       'X-Contentful-Environment': environmentId,
       'X-Contentful-Space': spaceId,

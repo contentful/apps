@@ -17,23 +17,32 @@ div {
   position: relative;
 }
 
+.content-advisor-toolbar {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#content-advisor-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
 /* Colors match Forma 36 tokens red100/red500/red700 (@contentful/f36-tokens) */
-.content-advisor-error {
+#content-advisor-error {
   background-color: #fff2f2;
   border: 1px solid #da294a;
   color: #990017;
   padding: 12px 16px;
-  margin-bottom: 8px;
   font-size: 14px;
   line-height: 1.4;
 }
 
-.content-advisor-error[hidden] {
+#content-advisor-error[hidden] {
   display: none;
-}
-
-.content-advisor-toolbar {
-  display: flex;
-  justify-content: flex-end;
-  padding: 8px 16px 0;
 }

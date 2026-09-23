@@ -147,7 +147,17 @@ export interface ResultsListProps {
   onExportSelected?: (
     selectedIds: string[],
     format: 'csv' | 'json' | 'xlsx' | 'xml' | 'yaml',
-    filename: string
+    filename: string,
+    options: { includeTags: boolean; includeConcepts: boolean }
+  ) => void;
+  /** True once the user has clicked "Select all N entries matching this search" */
+  selectAllMatching?: boolean;
+  onSelectAllMatchingChange?: (value: boolean) => void;
+  /** Exports every entry matching the current search filters, not just the fetched page(s) */
+  onExportAllMatching?: (
+    format: 'csv' | 'json' | 'xlsx' | 'xml' | 'yaml',
+    filename: string,
+    options: { includeTags: boolean; includeConcepts: boolean }
   ) => void;
   contentTypeMap?: ContentTypeMap;
   userMap?: UserMap;
@@ -158,8 +168,9 @@ export interface ResultsListProps {
   onSortChange?: (sort: { column: SortColumn; direction: SortDirection } | null) => void;
   /** Full content type schema — enables dynamic field columns in the preview */
   contentTypeSchema?: ContentType | null;
-  /** Ordered field IDs selected in the Output tab */
-  selectedFields?: string[];
+  /** Field IDs the user has unchecked — rendered muted and omitted from the export */
+  excludedFieldIds?: string[];
+  onExcludedFieldIdsChange?: (ids: string[]) => void;
   /** Locales selected in the Output tab — one preview column per field×locale */
   locales?: string[];
 }
@@ -214,6 +225,16 @@ const fieldBodyCellStyle = {
   borderRight: '1px solid #E7EBEE',
   minWidth: COL_FIELD,
   verticalAlign: 'middle' as const,
+};
+
+const excludedHeaderCellStyle = {
+  ...fieldHeaderCellStyle,
+  background: tokens.gray100,
+};
+
+const excludedCellStyle = {
+  ...fieldBodyCellStyle,
+  background: tokens.gray100,
 };
 
 const fixedHeaderCellStyle = {
@@ -338,6 +359,9 @@ export function ResultsList({
   selectedIds = [],
   onSelectionChange,
   onExportSelected,
+  selectAllMatching = false,
+  onSelectAllMatchingChange,
+  onExportAllMatching,
   contentTypeMap = {},
   userMap = {},
   spaceId = '',
@@ -346,7 +370,8 @@ export function ResultsList({
   exportProgress = null,
   onSortChange,
   contentTypeSchema,
-  selectedFields,
+  excludedFieldIds = [],
+  onExcludedFieldIdsChange,
   locales = [],
 }: ResultsListProps) {
   const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
@@ -354,6 +379,9 @@ export function ResultsList({
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [exportFormat, setExportFormat] = useState<'csv' | 'json' | 'xlsx' | 'xml' | 'yaml'>('csv');
   const [exportFilename, setExportFilename] = useState('');
+  // Opt-in: tags/taxonomy concepts are not exported by default.
+  const [includeTagsColumn, setIncludeTagsColumn] = useState(false);
+  const [includeConceptsColumn, setIncludeConceptsColumn] = useState(false);
   const wasExporting = useRef(false);
 
   // Close modal after export completes
@@ -364,20 +392,21 @@ export function ResultsList({
     wasExporting.current = isExporting;
   }, [isExporting]);
 
-  // Build ordered field schema columns when a content type schema is available
-  const fieldColumns = useMemo<SchemaField[]>(() => {
-    if (!contentTypeSchema) return [];
-    const fieldMap = new Map(contentTypeSchema.fields.map((f) => [f.id, f]));
-    const orderedIds =
-      selectedFields && selectedFields.length > 0
-        ? selectedFields
-        : contentTypeSchema.fields.map((f) => f.id);
-    // Exclude any field whose ID is 'status' — publication status is already
-    // shown as a dedicated sticky column, so including it again is redundant.
-    return orderedIds
-      .map((id) => fieldMap.get(id))
-      .filter((f): f is SchemaField => f !== undefined && f.id !== 'status');
-  }, [contentTypeSchema, selectedFields]);
+  // Field columns are the schema's fields in content-type order. Exclusion is
+  // purely a display/export concern (see excludedFieldIdSet below) and must not
+  // remove columns, so it plays no part in this derivation.
+  const fieldColumns = contentTypeSchema?.fields ?? [];
+
+  const excludedFieldIdSet = useMemo(() => new Set(excludedFieldIds), [excludedFieldIds]);
+
+  const toggleField = (fieldId: string) => {
+    if (!onExcludedFieldIdsChange) return;
+    if (excludedFieldIdSet.has(fieldId)) {
+      onExcludedFieldIdsChange(excludedFieldIds.filter((id) => id !== fieldId));
+    } else {
+      onExcludedFieldIdsChange([...excludedFieldIds, fieldId]);
+    }
+  };
 
   // Expand to one column per field × locale combination
   const displayColumns = useMemo(() => {
@@ -503,6 +532,12 @@ export function ResultsList({
 
   const handleSelectAll = () => {
     if (!onSelectionChange) return;
+    if (selectAllMatching) {
+      // Unchecking while every matching entry is selected drops back to no selection.
+      onSelectAllMatchingChange?.(false);
+      onSelectionChange([]);
+      return;
+    }
     if (allSelected) {
       onSelectionChange(selectedIds.filter((id) => !allCurrentIds.includes(id)));
     } else {
@@ -513,12 +548,30 @@ export function ResultsList({
 
   const handleSelectOne = (id: string) => {
     if (!onSelectionChange) return;
+    if (selectAllMatching) {
+      // Deselecting a single row while every matching entry is selected falls back
+      // to page-level selection (minus that row) rather than tracking exclusions.
+      onSelectAllMatchingChange?.(false);
+      onSelectionChange(allCurrentIds.filter((currentId) => currentId !== id));
+      return;
+    }
     if (selectedIds.includes(id)) {
       onSelectionChange(selectedIds.filter((selectedId) => selectedId !== id));
     } else {
       onSelectionChange([...selectedIds, id]);
     }
   };
+
+  const handleClearSelection = () => {
+    onSelectAllMatchingChange?.(false);
+    onSelectionChange?.([]);
+  };
+
+  const showSelectAllBanner =
+    !selectAllMatching &&
+    allSelected &&
+    totalCount !== undefined &&
+    totalCount > allCurrentIds.length;
 
   const getTitle = (entry: SearchResult): string => {
     if (!entry.fields) return entry.sys.id;
@@ -606,18 +659,40 @@ export function ResultsList({
         </Flex>
 
         {/* Selection bar */}
-        {selectedIds.length > 0 && (
+        {(selectedIds.length > 0 || selectAllMatching) && (
           <div style={{ padding: '0 24px' }}>
             <Flex
               alignItems="center"
               gap="spacingS"
+              flexWrap="wrap"
               style={{
                 padding: '12px 0',
                 borderTop: `1px solid ${tokens.gray200}`,
                 borderBottom: `1px solid ${tokens.gray200}`,
               }}>
-              <Text fontSize="fontSizeS" fontColor="gray700">
-                {selectedIds.length} {selectedIds.length === 1 ? 'entry' : 'entries'} selected:
+              <Text fontSize="fontSizeM" fontColor="gray700">
+                {selectAllMatching ? (
+                  <>
+                    All {(totalCount ?? selectedIds.length).toLocaleString()}{' '}
+                    {(totalCount ?? selectedIds.length) === 1 ? 'entry' : 'entries'} matching this
+                    search are selected.{' '}
+                    <TextLink as="button" onClick={handleClearSelection}>
+                      Clear selection
+                    </TextLink>
+                  </>
+                ) : showSelectAllBanner ? (
+                  <>
+                    All {allCurrentIds.length} {allCurrentIds.length === 1 ? 'entry' : 'entries'} on
+                    this page are selected.{' '}
+                    <TextLink as="button" onClick={() => onSelectAllMatchingChange?.(true)}>
+                      Select all {totalCount?.toLocaleString()} entries matching this search
+                    </TextLink>
+                  </>
+                ) : (
+                  `${selectedIds.length} ${
+                    selectedIds.length === 1 ? 'entry' : 'entries'
+                  } selected:`
+                )}
               </Text>
               {onExportSelected && (
                 <Button
@@ -635,7 +710,10 @@ export function ResultsList({
         {/* Table — horizontal scroll when field columns overflow.
             tableLayout: fixed lets us set exact column widths so sticky
             left offsets are reliable pixel values. */}
-        <div style={{ padding: `${selectedIds.length > 0 ? '24px' : '0'} 24px 24px` }}>
+        <div
+          style={{
+            padding: `${selectedIds.length > 0 || selectAllMatching ? '24px' : '0'} 24px 24px`,
+          }}>
           <div style={{ border: '1px solid #E7EBEE', borderRadius: '6px', overflow: 'hidden' }}>
             <div style={{ overflowX: 'auto', width: '100%' }}>
               <Table
@@ -672,8 +750,8 @@ export function ResultsList({
                       }}>
                       {onSelectionChange && (
                         <Checkbox
-                          isChecked={allSelected}
-                          isIndeterminate={someSelected}
+                          isChecked={allSelected || selectAllMatching}
+                          isIndeterminate={someSelected && !selectAllMatching}
                           onChange={handleSelectAll}
                           aria-label="Select all entries on this page"
                         />
@@ -713,27 +791,37 @@ export function ResultsList({
 
                     {hasFieldColumns ? (
                       /* Dynamic field columns — one per field × locale */
-                      displayColumns.map(({ field, locale }) => (
-                        <Table.Cell
-                          as="th"
-                          key={`${field.id}-${locale}`}
-                          style={fieldHeaderCellStyle}>
-                          <Flex flexDirection="column" gap="spacing2Xs">
-                            <Text
-                              fontWeight="fontWeightMedium"
-                              fontSize="fontSizeS"
-                              fontColor="gray900">
-                              {locales.length > 1 ? `(${locale}) ${field.name}` : field.name}
-                            </Text>
-                            <Text
-                              fontSize="fontSizeS"
-                              fontColor="gray600"
-                              style={{ fontSize: '11px' }}>
-                              {getFieldTypeLabel(field)}
-                            </Text>
-                          </Flex>
-                        </Table.Cell>
-                      ))
+                      displayColumns.map(({ field, locale }) => {
+                        const isExcluded = excludedFieldIdSet.has(field.id);
+                        return (
+                          <Table.Cell
+                            as="th"
+                            key={`${field.id}-${locale}`}
+                            style={isExcluded ? excludedHeaderCellStyle : fieldHeaderCellStyle}>
+                            <Flex alignItems="flex-start" gap="spacingXs">
+                              <Checkbox
+                                isChecked={!isExcluded}
+                                onChange={() => toggleField(field.id)}
+                                aria-label={`Include ${field.name} in export`}
+                              />
+                              <Flex flexDirection="column" gap="spacing2Xs">
+                                <Text
+                                  fontWeight="fontWeightMedium"
+                                  fontSize="fontSizeS"
+                                  fontColor={isExcluded ? 'gray500' : 'gray900'}>
+                                  {locales.length > 1 ? `(${locale}) ${field.name}` : field.name}
+                                </Text>
+                                <Text
+                                  fontSize="fontSizeS"
+                                  fontColor="gray600"
+                                  style={{ fontSize: '11px' }}>
+                                  {getFieldTypeLabel(field)}
+                                </Text>
+                              </Flex>
+                            </Flex>
+                          </Table.Cell>
+                        );
+                      })
                     ) : (
                       /* Default metadata columns when no content type selected */
                       <>
@@ -783,7 +871,7 @@ export function ResultsList({
                           }}>
                           {onSelectionChange && (
                             <Checkbox
-                              isChecked={selectedIds.includes(entry.sys.id)}
+                              isChecked={selectedIds.includes(entry.sys.id) || selectAllMatching}
                               onChange={() => handleSelectOne(entry.sys.id)}
                               aria-label={`Select ${getTitle(entry)}`}
                             />
@@ -825,13 +913,20 @@ export function ResultsList({
 
                         {hasFieldColumns ? (
                           /* Field value cells — one per field × locale */
-                          displayColumns.map(({ field, locale }) => (
-                            <Table.Cell key={`${field.id}-${locale}`} style={fieldBodyCellStyle}>
-                              <Text fontSize="fontSizeS" fontColor="gray700">
-                                {getFieldValue(entry, field, locale)}
-                              </Text>
-                            </Table.Cell>
-                          ))
+                          displayColumns.map(({ field, locale }) => {
+                            const isExcluded = excludedFieldIdSet.has(field.id);
+                            return (
+                              <Table.Cell
+                                key={`${field.id}-${locale}`}
+                                style={isExcluded ? excludedCellStyle : fieldBodyCellStyle}>
+                                <Text
+                                  fontSize="fontSizeS"
+                                  fontColor={isExcluded ? 'gray400' : 'gray700'}>
+                                  {getFieldValue(entry, field, locale)}
+                                </Text>
+                              </Table.Cell>
+                            );
+                          })
                         ) : (
                           /* Default metadata cells */
                           <>
@@ -900,7 +995,10 @@ export function ResultsList({
           <div style={{ padding: '16px 24px 0' }}>
             {isExporting ? (
               <Text>
-                {exportProgress?.message || `Exporting ${selectedIds.length} selected entries`}
+                {exportProgress?.message ||
+                  (selectAllMatching
+                    ? `Exporting ${(totalCount ?? 0).toLocaleString()} matching entries`
+                    : `Exporting ${selectedIds.length} selected entries`)}
               </Text>
             ) : (
               <>
@@ -918,13 +1016,32 @@ export function ResultsList({
                     <Select.Option value="yaml">YAML</Select.Option>
                   </Select>
                 </FormControl>
-                <FormControl marginBottom="none">
+                <FormControl marginBottom="spacingL">
                   <FormControl.Label>File name</FormControl.Label>
                   <TextInput
                     value={exportFilename}
                     onChange={(e) => setExportFilename(e.target.value)}
                     placeholder=""
                   />
+                </FormControl>
+                <FormControl marginBottom="none">
+                  <FormControl.Label>Tags &amp; taxonomy</FormControl.Label>
+                  <Flex flexDirection="column" gap="spacingXs">
+                    <Checkbox
+                      isChecked={includeTagsColumn}
+                      onChange={() => setIncludeTagsColumn((prev) => !prev)}>
+                      Include Tags column (names)
+                    </Checkbox>
+                    <Checkbox
+                      isChecked={includeConceptsColumn}
+                      onChange={() => setIncludeConceptsColumn((prev) => !prev)}>
+                      Include Taxonomy Concepts column (IDs only)
+                    </Checkbox>
+                  </Flex>
+                  <FormControl.HelpText>
+                    Taxonomy concepts export as IDs only — the App Framework doesn't allow apps to
+                    resolve concept labels.
+                  </FormControl.HelpText>
                 </FormControl>
               </>
             )}
@@ -944,9 +1061,18 @@ export function ResultsList({
               isDisabled={isExporting}
               onClick={() => {
                 const today = new Date().toISOString().split('T')[0];
+                const exportOptions = {
+                  includeTags: includeTagsColumn,
+                  includeConcepts: includeConceptsColumn,
+                };
+                if (selectAllMatching) {
+                  const resolvedFilename = exportFilename.trim() || `all-matching-${today}`;
+                  onExportAllMatching?.(exportFormat, resolvedFilename, exportOptions);
+                  return;
+                }
                 const resolvedFilename =
                   exportFilename.trim() || `selected-${selectedIds.length}-entries-${today}`;
-                onExportSelected?.(selectedIds, exportFormat, resolvedFilename);
+                onExportSelected?.(selectedIds, exportFormat, resolvedFilename, exportOptions);
               }}>
               {isExporting ? 'Exporting' : 'Export'}
             </Button>

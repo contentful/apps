@@ -39,43 +39,6 @@ export class EventsService {
     }
   };
 
-  private getUserName = async (
-    cmaClient: PlainClientAPI,
-    userId?: string
-  ): Promise<string | undefined> => {
-    if (!userId) {
-      return undefined;
-    }
-    try {
-      // Try to get user from space users first
-      const spaceUsers = await cmaClient.user.getManyForSpace({});
-      const user = spaceUsers.items.find((u) => u.sys.id === userId);
-
-      if (user) {
-        return user.firstName && user.lastName
-          ? `${user.firstName} ${user.lastName}`
-          : user.email || userId;
-      }
-
-      // If not found in space users, return the user ID as fallback
-      return userId;
-    } catch (e) {
-      return userId; // fallback to user ID if we can't get user details
-    }
-  };
-
-  private getSpaceName = async (
-    cmaClient: PlainClientAPI,
-    spaceId: string
-  ): Promise<string | undefined> => {
-    try {
-      const space = await cmaClient.space.get({ spaceId });
-      return space.name || spaceId;
-    } catch (e) {
-      return spaceId; // fallback to space ID if we can't get space details
-    }
-  };
-
   convertToEventKey(topic?: string): SlackAppEventKey | undefined {
     if (!topic) {
       throw new NotFoundException({ errMessage: 'Event topic not found' });
@@ -214,37 +177,21 @@ export class EventsService {
       }
     }
 
-    // Fetch additional information
-    const [actorName, spaceName] = await Promise.all([
-      this.getUserName(cmaClient, actorId),
-      this.getSpaceName(cmaClient, spaceId),
-    ]);
-
     return {
       actorId,
-      actorName,
       entryName: entryName,
       date,
       entity: entry,
-      spaceName,
-      environmentId,
     };
   }
 
   createMessageBlocks(event: SlackAppEventKey, entry: EntryProps, resolvedEntity?: ResolvedEntity) {
-    // Create enhanced message with author, space, and environment information
-    const authorInfo = resolvedEntity?.actorName ? ` by ${resolvedEntity.actorName}` : '';
-    const spaceInfo = resolvedEntity?.spaceName ? ` in space "${resolvedEntity.spaceName}"` : '';
-    const environmentInfo = resolvedEntity?.environmentId
-      ? ` (${resolvedEntity.environmentId} environment)`
-      : '';
-
     const blocks: (Block | KnownBlock)[] = [
       {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `*${MESSAGE_EMOJI_MAP[event]} An entry was ${EVENT_TEXT_MAP[event]}${authorInfo}${spaceInfo}${environmentInfo}!*`,
+          text: `*${MESSAGE_EMOJI_MAP[event]} An entry was ${EVENT_TEXT_MAP[event]}!*`,
         },
       },
     ];
@@ -262,42 +209,17 @@ export class EventsService {
       });
     }
 
-    // Enhanced context information
-    const contextElements = [];
-
-    // Add content type and date
     if (resolvedEntity?.date) {
-      contextElements.push(`${entry.sys.contentType.sys.id} | ${resolvedEntity.date}`);
-    } else {
-      contextElements.push(entry.sys.contentType.sys.id);
-    }
-
-    // Add author information if available
-    if (resolvedEntity?.actorName) {
-      contextElements.push(`Author: ${resolvedEntity.actorName}`);
-    }
-
-    // Add space and environment information
-    if (resolvedEntity?.spaceName) {
-      contextElements.push(`Space: ${resolvedEntity.spaceName}`);
-    }
-
-    if (resolvedEntity?.environmentId) {
-      contextElements.push(`Environment: ${resolvedEntity.environmentId}`);
-    }
-
-    if (contextElements.length > 0) {
       blocks.push({
         type: 'context',
         elements: [
           {
             type: 'mrkdwn',
-            text: contextElements.join(' • '),
+            text: `${entry.sys.contentType.sys.id} | ${resolvedEntity.date || 'A while ago'}`,
           },
         ],
       });
     }
-
     blocks.push({
       type: 'divider',
     });

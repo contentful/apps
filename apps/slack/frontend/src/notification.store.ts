@@ -1,4 +1,5 @@
 import create from 'zustand';
+import { v4 as uuidv4 } from 'uuid';
 
 export enum SlackAppEventKey {
   PUBLISH = 'publish',
@@ -8,6 +9,7 @@ export enum SlackAppEventKey {
 }
 
 export interface SlackNotification {
+  id: string;
   selectedChannel: string | null;
   selectedContentType: string | null;
   selectedEvent: Record<SlackAppEventKey, boolean>;
@@ -20,13 +22,13 @@ interface NotificationStore {
   setSelectedChannel: (channelId: string, index: number) => void;
   setSelectedContentType: (contentTypeId: string, index: number) => void;
   toggleEvent: (event: SlackAppEventKey, index: number) => void;
-  createNotification: (notification?: SlackNotification) => void;
+  createNotification: (notification?: Omit<SlackNotification, 'id'>) => void;
   setNotifications: (notifications: SlackNotification[]) => void;
   removeNotificationAtIndex: (index: number) => void;
   setActive: (active: boolean) => void;
 }
 
-const NOTIFICATION_TEMPLATE: SlackNotification = {
+const NOTIFICATION_TEMPLATE: Omit<SlackNotification, 'id'> = {
   selectedChannel: null,
   selectedContentType: null,
   selectedEvent: {
@@ -73,8 +75,18 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
     }),
   createNotification: (notification) =>
     set((state) => ({
-      notifications: [...state.notifications, notification || NOTIFICATION_TEMPLATE],
+      notifications: [
+        ...state.notifications,
+        { ...(notification || NOTIFICATION_TEMPLATE), id: uuidv4() },
+      ],
     })),
-  setNotifications: (notifications: SlackNotification[]) => set({ notifications }),
+  setNotifications: (notifications: SlackNotification[]) =>
+    set({
+      // backfill ids for notifications persisted before ids were introduced
+      notifications: notifications.map((notification) => ({
+        ...notification,
+        id: notification.id || uuidv4(),
+      })),
+    }),
   setActive: (active: boolean) => set({ active }),
 }));

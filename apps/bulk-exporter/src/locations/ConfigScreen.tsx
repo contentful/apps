@@ -40,7 +40,7 @@ const ConfigScreen = () => {
     <Box padding="spacingXl" style={{ maxWidth: '900px', margin: '0 auto' }}>
       <Flex flexDirection="column" gap="spacingXl" alignItems="stretch">
         <Flex flexDirection="column" gap="spacingS" alignItems="flex-start" style={fullWidth}>
-          <Heading>Bulk Exporter</Heading>
+          <Heading>Content Exporter</Heading>
           <Paragraph>
             Export entries from Contentful with filters, saved field selections, and multiple file
             formats. No additional configuration is required before installation.
@@ -48,8 +48,8 @@ const ConfigScreen = () => {
         </Flex>
 
         <Note variant="positive" title="Ready to install">
-          Bulk Exporter adds a page to the Apps menu. After installation, users with access to this
-          space can open the page and export entries from the content types they are allowed to
+          Content Exporter adds a page to the Apps menu. After installation, users with access to
+          this space can open the page and export entries from the content types they are allowed to
           read.
         </Note>
 
@@ -100,14 +100,23 @@ const ConfigScreen = () => {
         <Note variant="primary" title="Permissions">
           <Flex flexDirection="column" gap="spacingXs" alignItems="flex-start" style={fullWidth}>
             <Text>
-              Bulk Exporter can only export entries, tags, locales, and taxonomy data that the
-              current user is allowed to access.
+              Content Exporter can only export entries, tags, and locales that the current user is
+              allowed to access.
             </Text>
             <Text>
               If a user cannot load content types or entries, review their space role and app
               access.
             </Text>
           </Flex>
+        </Note>
+
+        <Note variant="warning" title="Taxonomy concepts export as IDs only">
+          <Text>
+            The App Framework doesn't let apps call the org-scoped Taxonomy Concepts endpoint, so
+            this is a platform limitation, not a permissions issue — no space role or app access
+            change will add concept labels (e.g. "Marketing") to exports. Tags export with their
+            real names.
+          </Text>
         </Note>
       </Flex>
     </Box>

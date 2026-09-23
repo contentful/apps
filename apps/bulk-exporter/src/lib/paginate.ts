@@ -1,4 +1,5 @@
 import type { CMAClient } from '@contentful/app-sdk';
+import { isResponseTooBigError } from './cmaError';
 
 export interface PaginateOptions {
   contentType?: string;
@@ -13,7 +14,41 @@ export interface PaginateResult {
 }
 
 const PAGE_SIZE = 1000;
+const MIN_PAGE_SIZE = 1;
 const MAX_SKIP = 9000;
+
+/**
+ * Fetches a page, halving `limit` and retrying if the CMA rejects it as too
+ * large. Returns the limit that actually worked so the caller can carry it
+ * forward as the starting point for the next page instead of re-discovering it
+ * on every request.
+ *
+ * Halves all the way to a single entry: any floor above 1 turns an export of
+ * sufficiently large entries into an unrecoverable failure, and only a
+ * single-entry page that is still too big is genuinely beyond our reach.
+ */
+async function fetchPageWithAdaptiveLimit(
+  cma: CMAClient,
+  queryParams: Record<string, unknown>,
+  startingLimit: number,
+  throttledFetch: <T>(fn: () => Promise<T>) => Promise<T>
+): Promise<{ result: PaginateResult; limitUsed: number }> {
+  let limit = startingLimit;
+
+  while (true) {
+    try {
+      const result = (await throttledFetch(() =>
+        cma.entry.getMany({ query: { ...queryParams, limit } })
+      )) as PaginateResult;
+      return { result, limitUsed: limit };
+    } catch (error) {
+      if (!isResponseTooBigError(error) || limit <= MIN_PAGE_SIZE) {
+        throw error;
+      }
+      limit = Math.max(MIN_PAGE_SIZE, Math.floor(limit / 2));
+    }
+  }
+}
 
 export async function* paginateEntries(
   cma: CMAClient,
@@ -24,10 +59,9 @@ export async function* paginateEntries(
 
   let skip = 0;
   let total = Infinity;
+  let limit = PAGE_SIZE;
 
   const queryParams: Record<string, unknown> = {
-    limit: PAGE_SIZE,
-    skip,
     order,
     ...filters,
   };
@@ -39,9 +73,13 @@ export async function* paginateEntries(
   while (skip < total && skip < MAX_SKIP) {
     queryParams.skip = skip;
 
-    const result = (await throttledFetch(() =>
-      cma.entry.getMany({ query: queryParams })
-    )) as PaginateResult;
+    const { result, limitUsed } = await fetchPageWithAdaptiveLimit(
+      cma,
+      queryParams,
+      limit,
+      throttledFetch
+    );
+    limit = limitUsed;
 
     if (result.items.length === 0) {
       break;
@@ -50,7 +88,7 @@ export async function* paginateEntries(
     total = result.total;
     yield result.items;
 
-    skip += PAGE_SIZE;
+    skip += result.items.length;
 
     if (skip >= total) {
       return;
@@ -58,7 +96,7 @@ export async function* paginateEntries(
   }
 
   if (skip >= MAX_SKIP && skip < total) {
-    yield* paginateByCursor(cma, options, throttledFetch, skip);
+    yield* paginateByCursor(cma, options, throttledFetch, skip, limit);
   }
 }
 
@@ -66,12 +104,13 @@ async function* paginateByCursor(
   cma: CMAClient,
   options: PaginateOptions,
   throttledFetch: <T>(fn: () => Promise<T>) => Promise<T>,
-  fetchedSoFar: number
+  fetchedSoFar: number,
+  startingLimit: number
 ): AsyncGenerator<unknown[], void, unknown> {
   const { contentType, filters = {}, order = 'sys.createdAt' } = options;
+  let limit = startingLimit;
 
   const queryParams: Record<string, unknown> = {
-    limit: PAGE_SIZE,
     skip: MAX_SKIP,
     order,
     ...filters,
@@ -81,9 +120,13 @@ async function* paginateByCursor(
     queryParams.content_type = contentType;
   }
 
-  const firstCursorResult = (await throttledFetch(() =>
-    cma.entry.getMany({ query: queryParams })
-  )) as PaginateResult;
+  const { result: firstCursorResult, limitUsed } = await fetchPageWithAdaptiveLimit(
+    cma,
+    queryParams,
+    limit,
+    throttledFetch
+  );
+  limit = limitUsed;
 
   if (firstCursorResult.items.length === 0) {
     return;
@@ -99,7 +142,6 @@ async function* paginateByCursor(
 
   while (fetched < total) {
     const cursorQueryParams: Record<string, unknown> = {
-      limit: PAGE_SIZE,
       order,
       'sys.createdAt[gt]': lastItem.sys.createdAt,
       ...filters,
@@ -109,9 +151,13 @@ async function* paginateByCursor(
       cursorQueryParams.content_type = contentType;
     }
 
-    const result = (await throttledFetch(() =>
-      cma.entry.getMany({ query: cursorQueryParams })
-    )) as PaginateResult;
+    const { result, limitUsed: nextLimitUsed } = await fetchPageWithAdaptiveLimit(
+      cma,
+      cursorQueryParams,
+      limit,
+      throttledFetch
+    );
+    limit = nextLimitUsed;
 
     if (result.items.length === 0) {
       break;

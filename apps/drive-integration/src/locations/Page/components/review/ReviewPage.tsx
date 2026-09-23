@@ -28,6 +28,9 @@ import {
   reviewHeaderActions,
 } from './ReviewPage.styles';
 
+// f36 pins startIcon color per Button variant, so the tint must be explicit.
+const modeIconColor = (isActive: boolean) => (isActive ? tokens.gray900 : tokens.gray600);
+
 interface ReviewPageProps {
   sdk: PageAppSDK;
   payload: MappingReviewSuspendPayload;
@@ -230,7 +233,7 @@ export const ReviewPage = ({
                 className={cx(modeToggleButton, reviewMode === 'view' && modeToggleButtonActive)}
                 onClick={() => handleReviewModeChange('view')}
                 aria-pressed={reviewMode === 'view'}
-                startIcon={<EyeIcon />}>
+                startIcon={<EyeIcon color={modeIconColor(reviewMode === 'view')} />}>
                 View only
               </Button>
               <Button
@@ -239,7 +242,7 @@ export const ReviewPage = ({
                 className={cx(modeToggleButton, reviewMode === 'edit' && modeToggleButtonActive)}
                 onClick={() => handleReviewModeChange('edit')}
                 aria-pressed={reviewMode === 'edit'}
-                startIcon={<PencilSimpleIcon />}>
+                startIcon={<PencilSimpleIcon color={modeIconColor(reviewMode === 'edit')} />}>
                 Edit mode
               </Button>
             </div>

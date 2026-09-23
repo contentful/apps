@@ -63,6 +63,9 @@ export const useConnect = () => {
   const [setTemporaryRefreshToken] = useAuthStore((state) => [state.setTemporaryRefreshToken]);
 
   const onMessage = async (message: MessageEvent) => {
+    if (message.origin !== window.location.origin) {
+      return;
+    }
     if (message.data.result === 'error') {
       sdk.notifier.error('Something went wrong while authenticating with Slack. Please try again.');
     }

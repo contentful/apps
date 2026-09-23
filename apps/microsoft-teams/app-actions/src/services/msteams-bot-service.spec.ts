@@ -11,13 +11,18 @@ import {
   mockAppInstallation,
   mockRequestHeaders,
 } from '../../test/mocks';
-import { AppActionRequestContext, EntryActivityMessage, TestMessage } from '../types';
+import {
+  AppActionRequestContext,
+  EntryActivityMessage,
+  TestMessage,
+  WorkflowUpdateMessage,
+} from '../types';
 
 chai.use(sinonChai);
 
 describe('MsTeamsBotService', () => {
   const botServiceUrl = 'https://example.com';
-  const apiKey = mockRequestHeaders['x-api-key'];
+  const apiKey = 'api-key';
   const tenantId = 'tenant-id';
   const msTeamsBotService = new MsTeamsBotService(botServiceUrl, apiKey);
   const messageResponseId = 'messageResponseId';
@@ -39,6 +44,39 @@ describe('MsTeamsBotService', () => {
     context = makeMockAppActionCallContext(cmaClientMockResponses, cmaRequestStub);
     const { appInstallationId, environmentId, spaceId, userId } = context.appActionCallContext;
     mockRequestContext = { appInstallationId, environmentId, spaceId, userId };
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  describe('sendWorkflowUpdateMessage', () => {
+    const workflowUpdateMessage = { channel: {} } as WorkflowUpdateMessage;
+
+    it('returns the result object from the service', async () => {
+      const result = await msTeamsBotService.sendWorkflowUpdateMessage(
+        workflowUpdateMessage,
+        tenantId,
+        mockRequestContext
+      );
+      expect(result).to.have.property('ok', true);
+    });
+
+    it('calls fetch with the appropriate values', async () => {
+      await msTeamsBotService.sendWorkflowUpdateMessage(
+        workflowUpdateMessage,
+        tenantId,
+        mockRequestContext
+      );
+      expect(stubbedFetch).to.have.been.calledWith(
+        'https://example.com/api/tenant/tenant-id/workflow_update_messages',
+        {
+          method: 'POST',
+          headers: mockRequestHeaders(tenantId),
+          body: '{"channel":{}}',
+        }
+      );
+    });
   });
 
   describe('sendEntryActivityMessage', () => {
@@ -63,7 +101,7 @@ describe('MsTeamsBotService', () => {
         'https://example.com/api/tenant/tenant-id/entry_activity_messages',
         {
           method: 'POST',
-          headers: mockRequestHeaders,
+          headers: mockRequestHeaders(tenantId),
           body: '{"channel":{}}',
         }
       );
@@ -88,7 +126,7 @@ describe('MsTeamsBotService', () => {
         'https://example.com/api/tenant/tenant-id/test_messages',
         {
           method: 'POST',
-          headers: mockRequestHeaders,
+          headers: mockRequestHeaders(tenantId),
           body: '{"channel":{}}',
         }
       );
@@ -116,7 +154,7 @@ describe('MsTeamsBotService', () => {
         'https://example.com/api/tenants/tenant-id/team_installations',
         {
           method: 'GET',
-          headers: mockRequestHeaders,
+          headers: mockRequestHeaders(tenantId),
         }
       );
     });

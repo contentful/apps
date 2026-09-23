@@ -196,6 +196,30 @@ describe('flatten', () => {
       expect(result['doesNotExist']).toBeUndefined();
     });
 
+    it('should include only metadata columns when fields is an empty array', () => {
+      const result = flattenEntry(mockEntry, {
+        contentType: mockContentType,
+        locales: ['en-US'],
+        fields: [],
+      });
+
+      expect(result['Entry ID']).toBe('entry123');
+      expect(result['Content Type']).toBe('Blog Post');
+      expect(result['Title (en-US)']).toBeUndefined();
+      expect(result['Slug']).toBeUndefined();
+    });
+
+    it('should include all fields when fields is undefined', () => {
+      const result = flattenEntry(mockEntry, {
+        contentType: mockContentType,
+        locales: ['en-US'],
+      });
+
+      expect(result['Title (en-US)']).toBe('Hello World');
+      expect(result['Slug']).toBe('hello-world');
+      expect(result['Author']).toBe('author123');
+    });
+
     it('should handle unpublished entries', () => {
       const unpublishedEntry: Entry = {
         ...mockEntry,
@@ -247,6 +271,27 @@ describe('flatten', () => {
       expect(headers).toContain('Slug');
       expect(headers).toContain('Author');
       expect(headers).toContain('Tags');
+    });
+
+    it('should include only metadata columns when fields is an empty array', () => {
+      const headers = getColumnHeaders(mockContentType, ['en-US'], true, []);
+
+      expect(headers).toEqual([
+        'Entry ID',
+        'Created',
+        'Updated',
+        'Last Updated By',
+        'Status',
+        'Content Type',
+      ]);
+    });
+
+    it('should include all fields when fields is undefined', () => {
+      const headers = getColumnHeaders(mockContentType, ['en-US']);
+
+      expect(headers).toContain('Title (en-US)');
+      expect(headers).toContain('Slug');
+      expect(headers).toContain('Author');
     });
   });
 });

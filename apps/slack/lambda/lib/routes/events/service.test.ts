@@ -53,17 +53,6 @@ describe('EventsService', () => {
       locale: {
         getMany: stub().resolves({ items: [{ default: true, code: 'de-DE' }] }),
       },
-      user: {
-        getManyForSpace: stub().resolves({
-          items: [
-            { sys: { id: 'publisher' }, firstName: 'Pub', lastName: 'Lisher' },
-            { sys: { id: 'creator' }, firstName: 'Cre', lastName: 'Ator' },
-          ],
-        }),
-      },
-      space: {
-        get: stub().resolves({ name: 'Test Space' }),
-      },
     } as unknown as PlainClientAPI);
     authTokenRepository.get.resolves({ token: 'whatever' } as AuthToken);
     instance = new EventsService(
@@ -206,12 +195,9 @@ describe('EventsService', () => {
     it('returns the expected resolved values for PUBLISH', async () => {
       const expectedValue = {
         actorId: 'publisher',
-        actorName: 'Pub Lisher',
         entryName: 'test',
         date: 'Mon Feb 01 2021',
         entity: entryMock,
-        spaceName: 'Test Space',
-        environmentId: 'env-id',
       };
       const resolvedEntity = await instance.getResolvedEntity(
         'space-id',
@@ -225,12 +211,9 @@ describe('EventsService', () => {
     it('returns the expected resolved values for UNPUBLISHED', async () => {
       const expectedValue = {
         actorId: undefined,
-        actorName: undefined,
         entryName: 'test',
         date: 'Mon Mar 01 2021',
         entity: entryMock,
-        spaceName: 'Test Space',
-        environmentId: 'env-id',
       };
       const resolvedEntity = await instance.getResolvedEntity(
         'space-id',
@@ -244,12 +227,9 @@ describe('EventsService', () => {
     it('returns the expected resolved values for CREATED', async () => {
       const expectedValue = {
         actorId: 'creator',
-        actorName: 'Cre Ator',
         entryName: undefined,
         date: 'Mon Mar 01 2021',
         entity: entryMock,
-        spaceName: 'Test Space',
-        environmentId: 'env-id',
       };
       const resolvedEntity = await instance.getResolvedEntity(
         'space-id',
@@ -263,12 +243,9 @@ describe('EventsService', () => {
     it('returns the expected resolved values for DELETE', async () => {
       const expectedValue = {
         actorId: undefined,
-        actorName: undefined,
         entryName: undefined,
         date: 'Fri Feb 01 2002',
         entity: undefined,
-        spaceName: 'Test Space',
-        environmentId: 'env-id',
       };
       const resolvedEntity = await instance.getResolvedEntity(
         'space-id',

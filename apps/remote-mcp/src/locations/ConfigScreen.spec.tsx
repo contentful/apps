@@ -52,11 +52,11 @@ describe('Config Screen component', () => {
     const { findByText } = render(<ConfigScreen />);
     await waitFor(() => expect(mockSdk.app.setReady).toHaveBeenCalled());
 
-    expect(await findByText('Component types')).toBeInTheDocument();
+    expect(await findByText('Components')).toBeInTheDocument();
     expect(await findByText('Experiences')).toBeInTheDocument();
     expect(await findByText('Data assemblies')).toBeInTheDocument();
-    expect(await findByText('Fragments')).toBeInTheDocument();
-    expect(await findByText('Templates')).toBeInTheDocument();
+    expect(await findByText('Experience fragments')).toBeInTheDocument();
+    expect(await findByText('Experience templates')).toBeInTheDocument();
   });
 
   it('does not render the migration section', async () => {

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { Heading, Paragraph, Box, Note, Spinner, Flex, Text } from '@contentful/f36-components';
 import { useSDK, useCMA } from '@contentful/react-apps-toolkit';
 import type { PageAppSDK } from '@contentful/app-sdk';
@@ -37,6 +37,10 @@ interface SearchResult {
     publishedAt?: string;
   };
   fields?: Record<string, Record<string, unknown>>;
+  metadata?: {
+    tags?: Array<{ sys: { id: string } }>;
+    concepts?: Array<{ sys: { id: string } }>;
+  };
 }
 
 interface CmaUser {
@@ -47,7 +51,6 @@ interface CmaUser {
 }
 
 interface CmaWithExtras {
-  concept: { getMany: (opts: { query: Record<string, unknown> }) => Promise<{ items: Concept[] }> };
   user: { getManyForSpace: (opts: { spaceId: string }) => Promise<{ items: CmaUser[] }> };
 }
 
@@ -70,6 +73,8 @@ const Page = () => {
   const ITEMS_PER_PAGE = 50;
   const [lastFormData, setLastFormData] = useState<ExportFormData | null>(null);
   const [selectedEntryIds, setSelectedEntryIds] = useState<string[]>([]);
+  const [selectAllMatching, setSelectAllMatching] = useState(false);
+  const [excludedFieldIds, setExcludedFieldIds] = useState<string[]>([]);
   const [contentTypeMap, setContentTypeMap] = useState<
     Record<string, { name: string; displayField?: string }>
   >({});
@@ -81,6 +86,36 @@ const Page = () => {
   } | null>(null);
 
   const exporterRef = useRef<Exporter | null>(null);
+
+  // Tag ID → human-readable name, used to resolve real names for the export's
+  // "Tags" column. Concepts have no equivalent map since labels aren't available.
+  const tagMap = useMemo(
+    () => Object.fromEntries(tags.map((tag) => [tag.sys.id, tag.name])),
+    [tags]
+  );
+
+  // The App Framework blocks apps from listing Taxonomy Concepts (it's an
+  // org-scoped CMA endpoint, apps only run at the space/environment level), so
+  // there's no way to fetch the full list up front. Instead, the concept filter
+  // is built incrementally from concept IDs seen in search results — IDs only,
+  // since labels aren't available either.
+  const mergeConceptsFromResults = (results: SearchResult[]) => {
+    const seenIds = new Set<string>();
+    for (const result of results) {
+      for (const concept of result.metadata?.concepts ?? []) {
+        seenIds.add(concept.sys.id);
+      }
+    }
+    if (seenIds.size === 0) return;
+
+    setConcepts((prev) => {
+      const existingIds = new Set(prev.map((c) => c.sys.id));
+      const newConcepts = [...seenIds]
+        .filter((id) => !existingIds.has(id))
+        .map((id) => ({ sys: { id }, prefLabel: {} }));
+      return newConcepts.length > 0 ? [...prev, ...newConcepts] : prev;
+    });
+  };
 
   /**
    * Translate the result-table SortColumn to the flat-row column name produced
@@ -97,9 +132,10 @@ const Page = () => {
     if (columnSort.column === 'name') {
       const ct = contentTypeId ? contentTypeSchemaMap[contentTypeId] : undefined;
       const displayFieldId = ct?.displayField;
-      const displayField = displayFieldId
-        ? ct?.fields.find((f) => f.id === displayFieldId)
-        : undefined;
+      const displayField =
+        displayFieldId && !excludedFieldIds.includes(displayFieldId)
+          ? ct?.fields.find((f) => f.id === displayFieldId)
+          : undefined;
       if (displayField) {
         const colName = displayField.localized
           ? `${displayField.name} (${locales[0]?.code ?? 'en-US'})`
@@ -118,6 +154,14 @@ const Page = () => {
     const rowKey = fixed[columnSort.column];
     return rowKey ? { column: rowKey, direction: columnSort.direction } : undefined;
   };
+
+  const previewSchema = lastFormData?.contentTypeId
+    ? contentTypeSchemaMap[lastFormData.contentTypeId] ?? null
+    : null;
+
+  const exportFields = previewSchema
+    ? previewSchema.fields.map((f) => f.id).filter((id) => !excludedFieldIds.includes(id))
+    : undefined;
 
   useEffect(() => {
     const loadData = async () => {
@@ -159,15 +203,20 @@ const Page = () => {
         if (import.meta.env.VITE_MOCK_CONCEPTS === 'true') {
           const { MOCK_CONCEPTS } = await import('../lib/mockConcepts');
           setConcepts(MOCK_CONCEPTS);
-        } else {
-          try {
-            const cmaExtras = cma as unknown as CmaWithExtras;
-            const conceptsResponse = await cmaExtras.concept.getMany({ query: { limit: 1000 } });
-            setConcepts(conceptsResponse.items);
-          } catch (error) {
-            console.warn('Concepts/taxonomy not available:', error);
-            setConcepts([]);
-          }
+        }
+        // Note: the App Framework blocks apps from calling the org-scoped Taxonomy
+        // Concepts listing endpoint, so we can't fetch the full list (or labels) up
+        // front. Instead the concept filter is populated incrementally from concept
+        // IDs seen in search results — see mergeConceptsFromResults below. To avoid
+        // the filter sitting empty until the user runs their first search, prime it
+        // with a bounded sample of the most recently updated entries here.
+        try {
+          const primingResponse = await sdk.cma.entry.getMany({
+            query: { limit: 100, order: '-sys.updatedAt' },
+          });
+          mergeConceptsFromResults(primingResponse.items as unknown as SearchResult[]);
+        } catch (error) {
+          console.warn('Unable to prime taxonomy concept filter:', error);
         }
 
         try {
@@ -231,7 +280,11 @@ const Page = () => {
       setIsSearching(true);
       setSearchResults([]);
       setSelectedEntryIds([]);
+      setSelectAllMatching(false);
       setActivePage(0);
+      if (data.contentTypeId !== lastFormData?.contentTypeId) {
+        setExcludedFieldIds([]);
+      }
       setLastFormData(data);
 
       const query = buildQuery({
@@ -264,6 +317,7 @@ const Page = () => {
         : (response.items as unknown as SearchResult[]);
 
       setSearchResults(items);
+      mergeConceptsFromResults(items);
       setEstimatedCount(response.items.length >= response.total ? items.length : response.total);
 
       setTimeout(() => {
@@ -283,7 +337,8 @@ const Page = () => {
   const handleExportSelected = async (
     selectedIds: string[],
     format: 'csv' | 'json' | 'xlsx' | 'xml' | 'yaml' = 'csv',
-    filename = ''
+    filename = '',
+    exportOptions: { includeTags?: boolean; includeConcepts?: boolean } = {}
   ) => {
     try {
       setIsExporting(true);
@@ -299,14 +354,26 @@ const Page = () => {
 
       // Fetch all selected entries in one API call using sys.id[in] instead of
       // per-entry requests, which avoids rate-limit issues at large selection sizes.
-      const firstEntry = searchResults.find((r) => r.sys.id === selectedIds[0]);
-      const contentTypeId = firstEntry?.sys.contentType.sys.id ?? '';
+      // The selection can span multiple content types (e.g. an "All content types"
+      // search), so only pin a single content type when every selected entry shares
+      // one — otherwise a content_type filter would silently drop the rest of the
+      // selection, and a single schema would mis-flatten entries of other types.
+      const selectedContentTypeIds = new Set(
+        searchResults
+          .filter((entry) => selectedIds.includes(entry.sys.id))
+          .map((entry) => entry.sys.contentType.sys.id)
+      );
+      const contentTypeId =
+        selectedContentTypeIds.size === 1 ? [...selectedContentTypeIds][0] : undefined;
 
       await exporter.start(
         {
-          contentType: contentTypes.find((ct) => ct.sys.id === contentTypeId) || null,
-          contentTypeId: contentTypeId || 'selected',
-          locales: locales.map((l) => l.code),
+          contentType: contentTypeId
+            ? contentTypes.find((ct) => ct.sys.id === contentTypeId) || null
+            : null,
+          contentTypeId: contentTypeId || 'all-content-types',
+          locales: lastFormData?.locales ?? locales.map((l) => l.code),
+          fields: exportFields,
           userMap: userMap,
           contentTypeMap: contentTypeSchemaMap,
           format,
@@ -315,6 +382,9 @@ const Page = () => {
           },
           filename,
           sortByColumn: buildSortByColumn(contentTypeId),
+          includeTags: exportOptions.includeTags,
+          includeConcepts: exportOptions.includeConcepts,
+          tagMap,
         },
         (newProgress) => {
           setProgress(newProgress);
@@ -340,6 +410,7 @@ const Page = () => {
       setIsSearching(true);
       setActivePage(page);
       setSelectedEntryIds([]);
+      setSelectAllMatching(false);
 
       const response = await sdk.cma.entry.getMany({
         query: { ...lastSearchQuery, limit: ITEMS_PER_PAGE, skip: page * ITEMS_PER_PAGE },
@@ -353,6 +424,7 @@ const Page = () => {
         : (response.items as unknown as SearchResult[]);
 
       setSearchResults(items);
+      mergeConceptsFromResults(items);
     } catch (error) {
       sdk.notifier.error('Failed to load results');
       console.error(error);
@@ -361,7 +433,10 @@ const Page = () => {
     }
   };
 
-  const handleExport = async (data: ExportFormData) => {
+  const handleExport = async (
+    data: ExportFormData,
+    exportOptions: { includeTags?: boolean; includeConcepts?: boolean } = {}
+  ) => {
     try {
       setLastFormData(data);
       setIsExporting(true);
@@ -400,7 +475,7 @@ const Page = () => {
           contentType: data.contentType,
           contentTypeId: data.contentTypeId || 'all-content-types',
           locales: data.locales,
-          fields: data.fields,
+          fields: exportFields,
           filters,
           userMap: userMap,
           contentTypeMap: contentTypeSchemaMap,
@@ -412,6 +487,9 @@ const Page = () => {
               : `contentful-export-${new Date().toISOString().split('T')[0]}`),
           sortByColumn: buildSortByColumn(data.contentTypeId),
           statusPostFilter: exportStatusPostFilter as ((entry: Entry) => boolean) | undefined,
+          includeTags: exportOptions.includeTags,
+          includeConcepts: exportOptions.includeConcepts,
+          tagMap,
         },
         (newProgress) => {
           setProgress(newProgress);
@@ -429,6 +507,18 @@ const Page = () => {
       setIsExporting(false);
       exporterRef.current = null;
     }
+  };
+
+  // Exports every entry matching the current filters (not just the fetched page),
+  // reusing the same filtered query the main "Export" flow uses so it scales to
+  // any result size instead of requiring every ID to be collected client-side.
+  const handleExportAllMatching = (
+    format: 'csv' | 'json' | 'xlsx' | 'xml' | 'yaml',
+    filename: string,
+    exportOptions: { includeTags?: boolean; includeConcepts?: boolean } = {}
+  ) => {
+    if (!lastFormData) return;
+    handleExport({ ...lastFormData, format, customFilename: filename }, exportOptions);
   };
 
   if (loading) {
@@ -449,7 +539,7 @@ const Page = () => {
     <Box style={{ maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
       <Flex flexDirection="column" alignItems="stretch" gap="spacingL" padding="spacingL">
         <Box style={{ width: '100%', maxWidth: '1040px' }}>
-          <Heading marginBottom="spacingS">Entry Exporter</Heading>
+          <Heading marginBottom="spacingS">Content Exporter</Heading>
           <Paragraph marginBottom="none" style={{ maxWidth: '700px' }}>
             Search, preview, and export Contentful entries across one content type or the whole
             space. Use filters to narrow the result set, then export matching or selected entries.
@@ -470,11 +560,12 @@ const Page = () => {
           onSubmit={handleExport}
           onEstimate={handleEstimate}
           onSearch={handleSearch}
-          onQuickExport={handleExport}
+          onQuickExport={(data) => handleExport(data)}
           isExporting={isExporting}
           isSearching={isSearching}
           estimatedCount={estimatedCount}
           spaceId={sdk.ids.space}
+          organizationId={sdk.ids.organization}
         />
 
         {searchResults.length === 0 && !isSearching && !lastSearchQuery && (
@@ -509,6 +600,9 @@ const Page = () => {
           selectedIds={selectedEntryIds}
           onSelectionChange={setSelectedEntryIds}
           onExportSelected={handleExportSelected}
+          selectAllMatching={selectAllMatching}
+          onSelectAllMatchingChange={setSelectAllMatching}
+          onExportAllMatching={handleExportAllMatching}
           contentTypeMap={contentTypeMap}
           userMap={userMap}
           spaceId={sdk.ids.space}
@@ -516,11 +610,9 @@ const Page = () => {
           isExporting={isExporting}
           exportProgress={progress}
           onSortChange={setColumnSort}
-          contentTypeSchema={
-            lastFormData?.contentTypeId
-              ? contentTypeSchemaMap[lastFormData.contentTypeId] ?? null
-              : null
-          }
+          contentTypeSchema={previewSchema}
+          excludedFieldIds={excludedFieldIds}
+          onExcludedFieldIdsChange={setExcludedFieldIds}
           locales={lastFormData?.locales ?? []}
         />
       </Flex>

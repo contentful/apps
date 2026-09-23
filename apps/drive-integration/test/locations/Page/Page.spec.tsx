@@ -145,12 +145,6 @@ vi.mock('../../../src/locations/Page/components/mainpage/ModalOrchestrator', () 
   ),
 }));
 
-vi.mock('../../../src/hooks/useGoogleDocsAgentFlags', () => ({
-  useGoogleDocsAgentFlags: () => ({
-    'google-docs-agent-improvements': true,
-  }),
-}));
-
 vi.mock('../../../src/locations/Page/components/runs/RunsPage', () => ({
   RunsPage: ({
     onStartImport,

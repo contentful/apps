@@ -374,6 +374,80 @@ describe('Page component', () => {
     expect(reload).not.toHaveBeenCalled();
   });
 
+  it('does not reload when getForOrganization returns no match for the current space/environment', async () => {
+    const reload = vi.fn();
+    Object.defineProperty(window, 'location', {
+      value: { reload },
+      configurable: true,
+      writable: true,
+    });
+
+    mockSdk.cma.appInstallation = {
+      getForOrganization: vi.fn().mockResolvedValue({
+        items: [
+          {
+            sys: {
+              space: { sys: { id: 'other-space' } },
+              environment: { sys: { id: 'other-env' } },
+            },
+            parameters: { selectedContentTypeIds: ['article'] },
+          },
+        ],
+      }),
+    };
+
+    render(<Page />);
+
+    triggerVisibilityChange('hidden');
+    triggerVisibilityChange('visible');
+
+    await waitFor(() => {
+      expect(mockSdk.cma.appInstallation.getForOrganization).toHaveBeenCalled();
+    });
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  it('uses cursor pagination and passes sys.id[gt] on subsequent entry fetches', async () => {
+    const batch1 = Array.from({ length: 100 }, (_, i) => ({
+      sys: { id: `entry-batch1-${i}`, contentType: { sys: { id: 'article' } } },
+      fields: {
+        title: { 'en-US': `Entry ${i}` },
+        body: { 'en-US': `https://example.com/link-${i}` },
+      },
+    }));
+    const batch2 = [
+      {
+        sys: { id: 'entry-batch2-0', contentType: { sys: { id: 'article' } } },
+        fields: {
+          title: { 'en-US': 'Last entry' },
+          body: { 'en-US': 'https://example.com/last' },
+        },
+      },
+    ];
+
+    const getMany = vi
+      .fn()
+      .mockResolvedValueOnce({ items: batch1 })
+      .mockResolvedValueOnce({ items: batch2 });
+
+    mockSdk.cma.entry = { getMany };
+
+    render(<Page />);
+    fireEvent.click(screen.getByRole('button', { name: 'Find links' }));
+
+    await screen.findByText('https://example.com/last');
+
+    expect(getMany).toHaveBeenCalledTimes(2);
+    expect(getMany).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        query: expect.objectContaining({
+          'sys.id[gt]': 'entry-batch1-99',
+        }),
+      })
+    );
+  });
+
   it('checks www URLs as absolute https URLs instead of resolving them against the current domain', async () => {
     const createWithResponse = vi.fn().mockResolvedValue({
       response: { body: JSON.stringify({ status: 200 }) },

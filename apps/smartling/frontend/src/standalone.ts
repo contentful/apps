@@ -1,5 +1,5 @@
 const standalone = (window: Window) => {
-  const { searchParams, search } = new URL(window.location.href);
+  const { searchParams, search, origin } = new URL(window.location.href);
   window.history.replaceState({}, 'smartling', '/');
 
   if (search.length) {
@@ -8,7 +8,7 @@ const standalone = (window: Window) => {
 
     window.localStorage.setItem('token', token);
     window.localStorage.setItem('refreshToken', refreshToken);
-    window.opener.postMessage({ token, refreshToken }, '*');
+    window.opener.postMessage({ token, refreshToken }, origin);
   }
 };
 export default standalone;

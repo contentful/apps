@@ -371,11 +371,12 @@ export const mockChannels: Channel[] = [
   },
 ];
 
-export const mockRequestHeaders = {
+export const mockRequestHeaders = (tenantId: string) => ({
   'Content-Type': 'application/json',
   'x-api-key': 'api-key',
+  'x-tenant-id': tenantId,
   'X-Contentful-App': 'app-installation-id',
   'X-Contentful-Environment': 'environment-id',
   'X-Contentful-Space': 'space-id',
   'X-Contentful-User': 'user-id',
-};
+});
