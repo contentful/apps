@@ -90,7 +90,9 @@ export const ENTITY_AVAILABLE_ACTIONS: Record<
   locales: ['read', 'edit', 'create', 'delete'],
   concepts: ['read', 'edit', 'create', 'delete'],
   conceptSchemes: ['read', 'edit', 'create', 'delete'],
-  releases: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish'],
+  // 'delete' is excluded: delete_release is never registered on the remote server
+  // (authorization-policy-service unconditionally denies it to delegated tokens).
+  releases: ['read', 'edit', 'create', 'publish', 'unpublish'],
   environments: ['read', 'create', 'delete'],
   editorInterfaces: ['read', 'edit'],
   tags: ['read', 'create'],
