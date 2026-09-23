@@ -90,6 +90,7 @@ export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTab
                 tags: 'Tags',
                 concepts: 'Concepts',
                 conceptSchemes: 'Concept schemes',
+                releases: 'Releases',
                 componentTypes: 'Component types',
                 experiences: 'Experiences',
                 templates: 'Templates',

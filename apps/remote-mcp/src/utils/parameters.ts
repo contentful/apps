@@ -18,6 +18,7 @@ export const createAppInstallationParameters = (
     tags: JSON.stringify(parameters.contentLifecyclePermissions.tags),
     concepts: JSON.stringify(parameters.contentLifecyclePermissions.concepts),
     conceptSchemes: JSON.stringify(parameters.contentLifecyclePermissions.conceptSchemes),
+    releases: JSON.stringify(parameters.contentLifecyclePermissions.releases),
     componentTypes: JSON.stringify(parameters.contentLifecyclePermissions.componentTypes),
     experiences: JSON.stringify(parameters.contentLifecyclePermissions.experiences),
     templates: JSON.stringify(parameters.contentLifecyclePermissions.templates),
@@ -45,6 +46,7 @@ export const parseAppInstallationParameters = (
       tags: JSON.parse(parameters.tags),
       concepts: JSON.parse(parameters.concepts),
       conceptSchemes: JSON.parse(parameters.conceptSchemes),
+      releases: JSON.parse(parameters.releases),
       componentTypes: parameters.componentTypes
         ? JSON.parse(parameters.componentTypes)
         : createEmptyEntityPermissions(),
