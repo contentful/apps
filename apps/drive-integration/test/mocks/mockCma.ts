@@ -10,6 +10,7 @@ export const createMockCMA = () => {
     },
     entry: {
       create: vi.fn(),
+      get: vi.fn(),
     },
     contentType: {
       getMany: vi.fn().mockResolvedValue({ items: [], total: 0 }),

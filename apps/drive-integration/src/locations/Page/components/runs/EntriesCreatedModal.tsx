@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, EntryCard, Flex, Modal, Spinner } from '@contentful/f36-components';
+import { Button, EntryCard, Flex, Modal, Note, Spinner } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import type { EntryProps } from 'contentful-management';
 import { fetchContentTypesInfoByIds } from '../../../../services/contentTypeService';
@@ -18,6 +18,19 @@ function resolveContentTypeLabel(contentTypeId: string, map?: ContentTypeDisplay
   return name && name.length > 0 ? name : 'Content type';
 }
 
+// Entries can be deleted from the space after a run completes — tell the user instead of showing nothing
+function buildMissingEntriesMessage(missingCount: number, totalCount: number): string {
+  const subject =
+    missingCount === totalCount
+      ? missingCount === 1
+        ? 'The entry'
+        : `All ${missingCount} entries`
+      : `${missingCount} of the ${totalCount} entries`;
+  const [verb, pronoun] = missingCount === 1 ? ['is', 'It was'] : ['are', 'They were'];
+
+  return `${subject} created by this run ${verb} no longer available. ${pronoun} likely deleted from this space or environment.`;
+}
+
 function entryStatus(entry: EntryProps): 'draft' | 'published' | 'changed' {
   if (!entry.sys.publishedAt) return 'draft';
   if (entry.sys.version > (entry.sys.publishedVersion ?? 0) + 1) return 'changed';
@@ -27,10 +40,16 @@ function entryStatus(entry: EntryProps): 'draft' | 'published' | 'changed' {
 export function EntriesCreatedModal({ isOpen, onClose, sdk, entryIds }: EntriesCreatedModalProps) {
   const [entries, setEntries] = useState<EntryProps[]>([]);
   const [ctMap, setCtMap] = useState<ContentTypeDisplayInfoMap>(new Map());
-  const [isLoading, setIsLoading] = useState(false);
+  // Starts true so the first paint shows the spinner, not a premature "entries missing" note
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!isOpen || entryIds.length === 0) return;
+    if (!isOpen) return;
+
+    if (entryIds.length === 0) {
+      setIsLoading(false);
+      return;
+    }
 
     setIsLoading(true);
 
@@ -42,11 +61,12 @@ export function EntriesCreatedModal({ isOpen, onClose, sdk, entryIds }: EntriesC
         sdk.cma.entry.get({ entryId: id, spaceId, environmentId }).catch(() => null)
       )
     )
-      .then((results) => {
+      .then(async (results) => {
         const fetched = results.filter((e): e is EntryProps => e !== null);
         setEntries(fetched);
+        // Content type names are cosmetic — a failure here must not blank out the entries
         const ctIds = fetched.map((e) => e.sys.contentType.sys.id);
-        return fetchContentTypesInfoByIds(sdk, ctIds).then(setCtMap);
+        setCtMap(await fetchContentTypesInfoByIds(sdk, ctIds).catch(() => new Map()));
       })
       .catch(() => {
         setEntries([]);
@@ -55,6 +75,7 @@ export function EntriesCreatedModal({ isOpen, onClose, sdk, entryIds }: EntriesC
   }, [isOpen, entryIds.join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const defaultLocale = sdk.locales.default;
+  const missingCount = entryIds.length - entries.length;
 
   return (
     <Modal isShown={isOpen} onClose={onClose} size="large" shouldCloseOnEscapePress>
@@ -68,6 +89,11 @@ export function EntriesCreatedModal({ isOpen, onClose, sdk, entryIds }: EntriesC
               </Flex>
             ) : (
               <Flex flexDirection="column" gap="spacingS">
+                {missingCount > 0 && (
+                  <Note variant="warning">
+                    {buildMissingEntriesMessage(missingCount, entryIds.length)}
+                  </Note>
+                )}
                 {entries.map((entry) => {
                   const contentTypeId = entry.sys.contentType.sys.id;
                   const title = getEntryDisplayTitle(
