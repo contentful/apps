@@ -566,6 +566,7 @@ const Page = () => {
           estimatedCount={estimatedCount}
           spaceId={sdk.ids.space}
           organizationId={sdk.ids.organization}
+          webappHostname={sdk.hostnames.webapp}
         />
 
         {searchResults.length === 0 && !isSearching && !lastSearchQuery && (
@@ -607,6 +608,7 @@ const Page = () => {
           userMap={userMap}
           spaceId={sdk.ids.space}
           environmentId={sdk.ids.environment}
+          webappHostname={sdk.hostnames.webapp}
           isExporting={isExporting}
           exportProgress={progress}
           onSortChange={setColumnSort}

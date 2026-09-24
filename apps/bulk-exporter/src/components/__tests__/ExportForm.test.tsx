@@ -15,6 +15,7 @@ const baseProps = {
   estimatedCount: null,
   spaceId: 'space1',
   organizationId: 'org1',
+  webappHostname: 'app.contentful.com',
 };
 
 const availableConcepts = [
