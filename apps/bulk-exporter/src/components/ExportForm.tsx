@@ -61,6 +61,7 @@ export interface ExportFormProps {
   estimatedCount: number | null;
   spaceId: string;
   organizationId: string;
+  webappHostname: string;
 }
 
 const styles = {
@@ -107,10 +108,11 @@ export function ExportForm({
   isSearching,
   spaceId,
   organizationId,
+  webappHostname,
 }: ExportFormProps) {
   const initialSpacePrefs = useMemo(() => getSpacePreferences(spaceId), [spaceId]);
 
-  const taxonomyManagerUrl = `https://app.contentful.com/account/organizations/${organizationId}/taxonomy/concept-schemes`;
+  const taxonomyManagerUrl = `https://${webappHostname}/account/organizations/${organizationId}/taxonomy/concept-schemes`;
 
   const [contentTypeId, setContentTypeId] = useState('');
   const [selectedLocales, setSelectedLocales] = useState<string[]>([]);

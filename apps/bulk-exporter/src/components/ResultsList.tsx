@@ -163,6 +163,7 @@ export interface ResultsListProps {
   userMap?: UserMap;
   spaceId?: string;
   environmentId?: string;
+  webappHostname?: string;
   isExporting?: boolean;
   exportProgress?: { fetched: number; total: number; message?: string } | null;
   onSortChange?: (sort: { column: SortColumn; direction: SortDirection } | null) => void;
@@ -366,6 +367,7 @@ export function ResultsList({
   userMap = {},
   spaceId = '',
   environmentId = 'master',
+  webappHostname = 'app.contentful.com',
   isExporting = false,
   exportProgress = null,
   onSortChange,
@@ -860,7 +862,7 @@ export function ResultsList({
                 <Table.Body>
                   {sortedResults.map((entry) => {
                     const status = getStatus(entry);
-                    const entryUrl = `https://app.contentful.com/spaces/${spaceId}/environments/${environmentId}/entries/${entry.sys.id}`;
+                    const entryUrl = `https://${webappHostname}/spaces/${spaceId}/environments/${environmentId}/entries/${entry.sys.id}`;
                     return (
                       <Table.Row key={entry.sys.id}>
                         {/* Checkbox — sticky */}
