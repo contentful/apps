@@ -11,7 +11,7 @@ import {
   Checkbox,
 } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
-import { ContentTypeProps, createClient } from 'contentful-management';
+import { ContentTypeProps } from 'contentful-management';
 import { KnownAppSDK, EditorInterface } from '@contentful/app-sdk';
 import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -163,17 +163,13 @@ const AssignContentTypeSection = (props: Props) => {
   }, [isContentTypeAssignmentValid, onIsValidContentTypeAssignment]);
 
   const fetchAllContentTypes = async (sdk: KnownAppSDK): Promise<ContentTypeProps[]> => {
-    const cma = createClient({ apiAdapter: sdk.cmaAdapter });
-    const space = await cma.getSpace(sdk.ids.space);
-    const environment = await space.getEnvironment(sdk.ids.environment);
-
     let allContentTypes: ContentTypeProps[] = [];
     let skip = 0;
     const limit = 100;
     let areMoreContentTypes = true;
 
     while (areMoreContentTypes) {
-      const response = await environment.getContentTypes({ skip, limit });
+      const response = await sdk.cma.contentType.getMany({ query: { skip, limit } });
       if (response.items) {
         allContentTypes = allContentTypes.concat(response.items as ContentTypeProps[]);
         areMoreContentTypes = response.items.length === limit;
