@@ -22,6 +22,22 @@
       "matchDepTypes": ["devDependencies"],
       "matchUpdateTypes": ["minor", "patch"],
       "groupName": "dev dependencies"
+    },
+    {
+      "description": "sharp and its force-installed Linux binaries must move together; a mismatched pair ships two libvips copies and an unpatched libheif",
+      "matchPackageNames": ["sharp", "@img/sharp-linux-x64", "@img/sharp-libvips-linux-x64"],
+      "groupName": "sharp and linux binaries"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "ai-image-generator force-installs the Linux sharp binaries from install-linux-sharp, outside the dependency graph, so the npm manager cannot see those versions",
+      "managerFilePatterns": ["/^apps/ai-image-generator/package\\.json$/"],
+      "matchStrings": [
+        "(?<depName>(?:@img/)?[a-z0-9@/-]*sharp[a-z0-9-]*)@(?<currentValue>[0-9]+\\.[0-9]+\\.[0-9]+)"
+      ],
+      "datasourceTemplate": "npm"
     }
   ]
 }

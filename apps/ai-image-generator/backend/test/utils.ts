@@ -3,13 +3,13 @@ import fs from 'fs';
 import path from 'path';
 import { Readable } from 'stream';
 import { Response } from 'node-fetch';
-import { AreEqualColorOpts, areEqualColors, toRGBA } from '../src/utils';
+import { AreEqualColorOpts, areEqualColors, RGBA, toRGBA } from '../src/utils';
 
 // a little utility function that computes the proportion of pixels in a given image that equal the provided
 // color. useful for testing
 export async function findColorProportion(
   sharpImage: sharp.Sharp,
-  color: sharp.RGBA,
+  color: RGBA,
   opts: AreEqualColorOpts = {}
 ): Promise<number> {
   let matchingPixelsFound = 0;
