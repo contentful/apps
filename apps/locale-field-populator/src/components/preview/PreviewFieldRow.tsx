@@ -12,6 +12,7 @@ interface PreviewFieldRowProps {
   isAdopted: boolean;
   onAdoptedChange: (adopted: boolean) => void;
   isDisabled?: boolean;
+  baseUrl: string;
 }
 
 const PreviewFieldRow = ({
@@ -23,6 +24,7 @@ const PreviewFieldRow = ({
   isAdopted,
   onAdoptedChange,
   isDisabled = false,
+  baseUrl,
 }: PreviewFieldRowProps) => {
   return (
     <Box padding="spacingS" className={styles.fieldBox}>
@@ -45,7 +47,12 @@ const PreviewFieldRow = ({
           <Paragraph marginBottom="spacingXs" fontWeight="fontWeightMedium">
             Source
           </Paragraph>
-          <PreviewField value={sourceValue} fieldDefinition={field} locale={sourceLocale} />
+          <PreviewField
+            value={sourceValue}
+            fieldDefinition={field}
+            locale={sourceLocale}
+            baseUrl={baseUrl}
+          />
         </Box>
         <Box>
           <Paragraph marginBottom="spacingXs" fontWeight="fontWeightMedium">
@@ -56,6 +63,7 @@ const PreviewFieldRow = ({
             fieldDefinition={field}
             locale={targetLocale}
             compareValue={sourceValue}
+            baseUrl={baseUrl}
           />
         </Box>
       </Grid>
