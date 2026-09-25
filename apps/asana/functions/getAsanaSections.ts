@@ -35,7 +35,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
 
     return {
       success: true,
-      message: 'Asana groups loaded successfully.',
+      message: 'Asana sections loaded successfully.',
       sections,
     };
   } catch (error) {

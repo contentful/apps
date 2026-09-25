@@ -68,7 +68,7 @@ describe('getAsanaSections handler', () => {
 
     expect(result).toEqual({
       success: true,
-      message: 'Asana groups loaded successfully.',
+      message: 'Asana sections loaded successfully.',
       sections: [
         { gid: 's1', name: 'Incoming from Contentful' },
         { gid: 's2', name: 'In Progress' },

@@ -191,10 +191,18 @@ const Dialog = () => {
           projectGid,
         });
         if (!isCancelled) {
+          if (!response.success) {
+            sdk.notifier.error(response.message || VALIDATION_MESSAGES.sectionsFailed);
+          }
           setSections(response.sections ?? []);
         }
-      } catch {
+      } catch (error) {
         if (!isCancelled) {
+          const message =
+            error instanceof Error && error.message
+              ? error.message
+              : VALIDATION_MESSAGES.sectionsFailed;
+          sdk.notifier.error(message);
           setSections([]);
         }
       } finally {
@@ -483,13 +491,13 @@ const Dialog = () => {
           </FormControl>
           {projectGid ? (
             <FormControl style={{ minWidth: '200px', flex: 1 }}>
-              <FormControl.Label>Group</FormControl.Label>
+              <FormControl.Label>Section</FormControl.Label>
               <Select
                 value={selectedSectionGid}
                 onChange={(event) => setSelectedSectionGid(event.target.value)}
                 isDisabled={isBusy || isLoadingSections}>
                 <Select.Option value="" isDisabled>
-                  {isLoadingSections ? 'Loading groups…' : 'Select a group'}
+                  {isLoadingSections ? 'Loading sections…' : 'Select a section'}
                 </Select.Option>
                 {sections.map((section) => (
                   <Select.Option key={section.gid} value={section.gid}>
@@ -498,7 +506,8 @@ const Dialog = () => {
                 ))}
               </Select>
               <FormControl.HelpText>
-                Currently: {invocation.sectionName || 'None'}. Moves the task between board groups.
+                Currently: {invocation.sectionName || 'None'}. Moves the task between board
+                sections.
               </FormControl.HelpText>
             </FormControl>
           ) : null}
