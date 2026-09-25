@@ -6,6 +6,7 @@ import {
   FormControl,
   Paragraph,
   Pill,
+  Select,
   SectionHeading,
   Text,
   TextInput,
@@ -17,8 +18,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { VALIDATION_MESSAGES } from '../const';
 import type {
   AddAsanaCommentResponse,
+  AsanaSection,
   AsanaTaskOption,
   AsanaUserOption,
+  GetAsanaSectionsResponse,
   GetAsanaTasksResponse,
   GetAsanaUsersResponse,
   TaskDetailsDialogParameters,
@@ -43,9 +46,13 @@ const Dialog = () => {
       }
     : null;
   const workspaceGid = invocation.workspaceGid ?? '';
+  const projectGid = invocation.projectGid ?? '';
 
   const [description, setDescription] = useState(invocation.taskDescription ?? '');
   const [dueDate, setDueDate] = useState(invocation.dueDate ?? '');
+  const [sections, setSections] = useState<AsanaSection[]>([]);
+  const [isLoadingSections, setIsLoadingSections] = useState(false);
+  const [selectedSectionGid, setSelectedSectionGid] = useState(invocation.sectionGid ?? '');
   const [assigneeQuery, setAssigneeQuery] = useState('');
   const [assigneeResults, setAssigneeResults] = useState<AsanaUserOption[]>([]);
   const [isSearchingAssignees, setIsSearchingAssignees] = useState(false);
@@ -75,8 +82,15 @@ const Dialog = () => {
   const hasAssigneeChanges = Boolean(selectedAssignee) || assigneeCleared;
   const hasDependencyChanges =
     pendingDependencyAdds.length > 0 || pendingDependencyRemovals.length > 0;
+  const hasSectionChanges = Boolean(
+    selectedSectionGid && selectedSectionGid !== (invocation.sectionGid ?? '')
+  );
   const hasDetailChanges =
-    hasDescriptionChanges || hasDueDateChanges || hasAssigneeChanges || hasDependencyChanges;
+    hasDescriptionChanges ||
+    hasDueDateChanges ||
+    hasAssigneeChanges ||
+    hasDependencyChanges ||
+    hasSectionChanges;
   const isBusy = isSaving || isPostingComment;
 
   const callAction = async <TResult,>(
@@ -162,6 +176,39 @@ const Dialog = () => {
     };
   }, [dependencyQuery, workspaceGid]);
 
+  useEffect(() => {
+    if (!projectGid) {
+      setSections([]);
+      return;
+    }
+
+    let isCancelled = false;
+    setIsLoadingSections(true);
+
+    (async () => {
+      try {
+        const response = await callAction<GetAsanaSectionsResponse>('getAsanaSectionsAction', {
+          projectGid,
+        });
+        if (!isCancelled) {
+          setSections(response.sections ?? []);
+        }
+      } catch {
+        if (!isCancelled) {
+          setSections([]);
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoadingSections(false);
+        }
+      }
+    })();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [projectGid]);
+
   const handleSaveDetails = async () => {
     if (!task || !hasDetailChanges) {
       return;
@@ -174,6 +221,7 @@ const Dialog = () => {
         ...(hasDescriptionChanges ? { notes: description.trim() } : {}),
         ...(hasAssigneeChanges ? { assignee: selectedAssignee ? selectedAssignee.gid : '' } : {}),
         ...(hasDueDateChanges ? { dueDate: dueDate.trim() } : {}),
+        ...(hasSectionChanges ? { sectionGid: selectedSectionGid } : {}),
       };
 
       const dependencyOps: Array<Record<string, string>> = [];
@@ -433,6 +481,27 @@ const Dialog = () => {
             />
             <FormControl.HelpText>Clear the date to remove the due date.</FormControl.HelpText>
           </FormControl>
+          {projectGid ? (
+            <FormControl style={{ minWidth: '200px', flex: 1 }}>
+              <FormControl.Label>Group</FormControl.Label>
+              <Select
+                value={selectedSectionGid}
+                onChange={(event) => setSelectedSectionGid(event.target.value)}
+                isDisabled={isBusy || isLoadingSections}>
+                <Select.Option value="" isDisabled>
+                  {isLoadingSections ? 'Loading groups…' : 'Select a group'}
+                </Select.Option>
+                {sections.map((section) => (
+                  <Select.Option key={section.gid} value={section.gid}>
+                    {section.name}
+                  </Select.Option>
+                ))}
+              </Select>
+              <FormControl.HelpText>
+                Currently: {invocation.sectionName || 'None'}. Moves the task between board groups.
+              </FormControl.HelpText>
+            </FormControl>
+          ) : null}
         </Flex>
 
         <FormControl>

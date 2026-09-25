@@ -14,6 +14,7 @@ export const VALIDATION_MESSAGES = {
   oauthDisconnectFailed: 'Could not disconnect from Asana. Please try again.',
   workspacesFailed: 'Could not load Asana workspaces.',
   projectsFailed: 'Could not load Asana projects.',
+  sectionsFailed: 'Could not load Asana groups.',
   taskTitleRequired: 'Enter an Asana task title.',
   taskIdRequired: 'Enter an Asana task GID or Asana task URL.',
   taskUpdateFieldsRequired: 'Provide at least one task field to update.',

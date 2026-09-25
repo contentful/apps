@@ -90,6 +90,19 @@
       ]
     },
     {
+      "id": "getAsanaSectionsFunction",
+      "name": "Get Asana project sections",
+      "description": "Lists the board/list groups (sections) for an Asana project.",
+      "path": "functions/getAsanaSections.js",
+      "entryFile": "functions/getAsanaSections.ts",
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
       "id": "getAsanaTasksFunction",
       "name": "Search Asana tasks",
       "description": "Searches visible Asana tasks for a workspace or project.",
@@ -477,6 +490,12 @@
           "name": "Dependency task GID to remove",
           "type": "Symbol",
           "required": false
+        },
+        {
+          "id": "sectionGid",
+          "name": "Section (group) GID to move the task into",
+          "type": "Symbol",
+          "required": false
         }
       ],
       "resultSchema": {
@@ -535,6 +554,15 @@
                     "name"
                   ]
                 }
+              },
+              "projectGid": {
+                "type": "string"
+              },
+              "sectionGid": {
+                "type": "string"
+              },
+              "sectionName": {
+                "type": "string"
               }
             },
             "required": [
@@ -656,6 +684,15 @@
                     "name"
                   ]
                 }
+              },
+              "projectGid": {
+                "type": "string"
+              },
+              "sectionGid": {
+                "type": "string"
+              },
+              "sectionName": {
+                "type": "string"
               }
             },
             "required": [
@@ -663,6 +700,54 @@
               "name",
               "permalinkUrl"
             ]
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      }
+    },
+    {
+      "id": "getAsanaSectionsAction",
+      "name": "List Asana project groups",
+      "type": "function-invocation",
+      "functionId": "getAsanaSectionsFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "projectGid",
+          "name": "Project GID",
+          "type": "Symbol",
+          "required": true
+        }
+      ],
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "gid": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "gid",
+                "name"
+              ]
+            }
           }
         },
         "required": [

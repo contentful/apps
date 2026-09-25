@@ -89,7 +89,7 @@ describe('updateAsanaTask handler', () => {
       },
     });
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://app.asana.com/api/1.0/tasks/1214128635770001?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid',
+      'https://app.asana.com/api/1.0/tasks/1214128635770001?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name',
       {
         method: 'PUT',
         headers: {
@@ -131,7 +131,7 @@ describe('updateAsanaTask handler', () => {
     );
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://app.asana.com/api/1.0/tasks/1214128635770002?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid',
+      'https://app.asana.com/api/1.0/tasks/1214128635770002?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name',
       expect.objectContaining({
         body: JSON.stringify({
           data: {
@@ -195,7 +195,7 @@ describe('updateAsanaTask handler', () => {
     );
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://app.asana.com/api/1.0/tasks/1214128635770003?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid',
+      'https://app.asana.com/api/1.0/tasks/1214128635770003?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name',
       expect.objectContaining({
         body: JSON.stringify({
           data: {
@@ -421,6 +421,53 @@ describe('updateAsanaTask handler', () => {
         body: JSON.stringify({ data: { dependencies: ['dep-1'] } }),
       })
     );
+  });
+
+  it('moves a task to a section without requiring another field update', async () => {
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ data: {} }),
+    } as Response);
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: {
+          gid: '1214128635770009',
+          name: 'Task moved to In Progress',
+          permalink_url: 'https://app.asana.com/0/1/1214128635770009/f',
+          completed: false,
+          memberships: [
+            { project: { gid: 'project-1' }, section: { gid: 'section-2', name: 'In Progress' } },
+          ],
+        },
+      }),
+    } as Response);
+
+    const result = await handler(
+      createEvent({
+        taskId: '1214128635770009',
+        sectionGid: 'section-2',
+      }) as Parameters<typeof handler>[0],
+      mockContext
+    );
+
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      1,
+      'https://app.asana.com/api/1.0/sections/section-2/addTask',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ data: { task: '1214128635770009' } }),
+      })
+    );
+    expect(result).toMatchObject({
+      success: true,
+      task: {
+        gid: '1214128635770009',
+        projectGid: 'project-1',
+        sectionGid: 'section-2',
+        sectionName: 'In Progress',
+      },
+    });
   });
 
   it('returns the Asana API error message on failure', async () => {

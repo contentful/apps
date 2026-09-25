@@ -107,7 +107,7 @@ describe('createAsanaTask', () => {
     });
     expect(mockCma.entry.get).not.toHaveBeenCalled();
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid',
+      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({
@@ -164,7 +164,7 @@ describe('createAsanaTask', () => {
     );
     expect(mockCma.entry.publish).toHaveBeenCalled();
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid',
+      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name',
       expect.objectContaining({
         body: JSON.stringify({
           data: {
@@ -207,7 +207,7 @@ describe('createAsanaTask', () => {
 
     expect(mockCma.contentType.get).toHaveBeenCalledWith({ contentTypeId: 'landingPage' });
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid',
+      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name',
       expect.objectContaining({
         body: JSON.stringify({
           data: {

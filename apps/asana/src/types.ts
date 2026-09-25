@@ -23,6 +23,11 @@ export interface AsanaProject {
   name: string;
 }
 
+export interface AsanaSection {
+  gid: string;
+  name: string;
+}
+
 export type AsanaTaskOption = {
   gid: string;
   name: string;
@@ -50,6 +55,9 @@ export interface AsanaTask {
   dueDate?: string;
   dependencies?: AsanaTaskOption[];
   workspaceGid?: string;
+  projectGid?: string;
+  sectionGid?: string;
+  sectionName?: string;
 }
 
 export interface PrimaryAsanaTaskLink {
@@ -93,6 +101,7 @@ export interface UpdateAsanaTaskRequest {
   dueDate?: string;
   addDependencyGid?: string;
   removeDependencyGid?: string;
+  sectionGid?: string;
 }
 
 export interface GetAsanaTaskRequest {
@@ -102,6 +111,10 @@ export interface GetAsanaTaskRequest {
 export interface AddAsanaCommentRequest {
   taskId?: string;
   comment?: string;
+}
+
+export interface GetAsanaSectionsRequest {
+  projectGid?: string;
 }
 
 export type ValidateAsanaCredentialsResponse = Record<string, unknown> & {
@@ -133,6 +146,12 @@ export type GetAsanaWorkspacesResponse = Record<string, unknown> & {
 
 export type GetAsanaProjectsResponse = Record<string, unknown> & {
   projects: AsanaProject[];
+};
+
+export type GetAsanaSectionsResponse = Record<string, unknown> & {
+  success: boolean;
+  message: string;
+  sections?: AsanaSection[];
 };
 
 export type GetAsanaTasksResponse = Record<string, unknown> & {
@@ -183,6 +202,9 @@ export interface TaskDetailsDialogParameters {
   dueDate?: string;
   workspaceGid?: string;
   dependencies?: AsanaTaskOption[];
+  projectGid?: string;
+  sectionGid?: string;
+  sectionName?: string;
 }
 
 export interface TaskDetailsDialogResult {

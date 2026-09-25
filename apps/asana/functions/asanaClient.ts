@@ -1,6 +1,7 @@
 import type { AppActionRequest, FunctionEventContext } from '@contentful/node-apps-toolkit';
 import type {
   AsanaProject,
+  AsanaSection,
   AsanaTask,
   AsanaTaskOption,
   AsanaUserOption,
@@ -237,6 +238,10 @@ type AsanaTaskRecord = {
   workspace?: {
     gid?: string;
   } | null;
+  memberships?: Array<{
+    project?: { gid?: string } | null;
+    section?: { gid?: string; name?: string } | null;
+  }>;
 };
 
 type CreateTaskPayload = {
@@ -255,7 +260,7 @@ type UpdateTaskPayload = {
 };
 
 const TASK_OPT_FIELDS =
-  'gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid';
+  'gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name';
 
 export async function createTask(
   accessToken: string,
@@ -315,6 +320,20 @@ async function mapAsanaTask(
       ? { dependencies: await resolveDependencyNames(accessToken, task.dependencies) }
       : {}),
     ...(typeof task.workspace?.gid === 'string' ? { workspaceGid: task.workspace.gid } : {}),
+    ...(() => {
+      const membership = task.memberships?.find((item) => typeof item.section?.gid === 'string');
+      return {
+        ...(typeof membership?.project?.gid === 'string'
+          ? { projectGid: membership.project.gid }
+          : {}),
+        ...(typeof membership?.section?.gid === 'string'
+          ? { sectionGid: membership.section.gid }
+          : {}),
+        ...(typeof membership?.section?.name === 'string'
+          ? { sectionName: membership.section.name }
+          : {}),
+      };
+    })(),
   };
 }
 
@@ -381,6 +400,27 @@ export async function removeTaskDependency(
   await callAsana<Record<string, unknown>>(`/tasks/${taskGid}/removeDependencies`, accessToken, {
     method: 'POST',
     body: JSON.stringify({ data: { dependencies: [dependencyGid] } }),
+  });
+}
+
+export async function getProjectSections(
+  accessToken: string,
+  projectGid: string
+): Promise<AsanaSection[]> {
+  return callAsanaList<AsanaSection>(
+    `/projects/${projectGid}/sections?opt_fields=gid,name`,
+    accessToken
+  );
+}
+
+export async function moveTaskToSection(
+  accessToken: string,
+  taskGid: string,
+  sectionGid: string
+): Promise<void> {
+  await callAsana<Record<string, unknown>>(`/sections/${sectionGid}/addTask`, accessToken, {
+    method: 'POST',
+    body: JSON.stringify({ data: { task: taskGid } }),
   });
 }
 

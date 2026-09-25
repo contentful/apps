@@ -11,6 +11,7 @@ import {
   extractTaskGid,
   getAsanaAccessToken,
   getTask,
+  moveTaskToSection,
   removeTaskDependency,
   updateTask,
 } from './asanaClient';
@@ -39,6 +40,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   const dueDate = getTrimmedValue(body.dueDate);
   const addDependencyGid = getTrimmedValue(body.addDependencyGid);
   const removeDependencyGid = getTrimmedValue(body.removeDependencyGid);
+  const sectionGid = getTrimmedValue(body.sectionGid);
   const hasTitleUpdate = typeof body.title === 'string';
   const hasNotesUpdate = typeof body.notes === 'string';
   const hasCompletedUpdate = typeof body.completed === 'boolean';
@@ -48,7 +50,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   const hasFieldUpdate =
     hasTitleUpdate || hasNotesUpdate || hasCompletedUpdate || hasAssigneeUpdate || hasDueDateUpdate;
 
-  if (!hasFieldUpdate && !addDependencyGid && !removeDependencyGid) {
+  if (!hasFieldUpdate && !addDependencyGid && !removeDependencyGid && !sectionGid) {
     return {
       success: false,
       message: VALIDATION_MESSAGES.taskUpdateFieldsRequired,
@@ -70,6 +72,10 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
 
     if (removeDependencyGid) {
       await removeTaskDependency(accessToken, taskGid, removeDependencyGid);
+    }
+
+    if (sectionGid) {
+      await moveTaskToSection(accessToken, taskGid, sectionGid);
     }
 
     const task = hasFieldUpdate
