@@ -19,7 +19,7 @@ const createMockSdk = (overrides?: Record<string, unknown>) => {
     },
     cma: {
       appActionCall: {
-        createWithResponse: vi.fn(),
+        createWithResult: vi.fn(),
       },
       contentType: {
         getMany: vi.fn().mockResolvedValue({ items: [] }),

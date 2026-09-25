@@ -54,47 +54,32 @@ describe('Asana ConfigScreen', () => {
       ],
     });
     mockCma.contentType.get.mockRejectedValue(new Error('not found'));
-    mockCma.appActionCall.createWithResponse.mockImplementation(({ appActionId }) => {
+    const succeeded = (result: unknown) =>
+      Promise.resolve({ sys: { status: 'succeeded', result } });
+
+    mockCma.appActionCall.createWithResult.mockImplementation(({ appActionId }) => {
       if (appActionId === 'checkStatusAction') {
-        return Promise.resolve({
-          response: { body: JSON.stringify({ connected: isConnected }) },
-        });
+        return succeeded({ connected: isConnected });
       }
 
       if (appActionId === 'initiateOauthAction') {
-        return Promise.resolve({
-          response: {
-            body: JSON.stringify({ authorizationUrl: 'https://app.asana.com/-/oauth_authorize' }),
-          },
-        });
+        return succeeded({ authorizationUrl: 'https://app.asana.com/-/oauth_authorize' });
       }
 
       if (appActionId === 'disconnectAction') {
         isConnected = false;
-        return Promise.resolve({
-          response: {
-            body: JSON.stringify({ success: true, message: VALIDATION_MESSAGES.oauthDisconnected }),
-          },
-        });
+        return succeeded({ success: true, message: VALIDATION_MESSAGES.oauthDisconnected });
       }
 
       if (appActionId === 'getAsanaWorkspacesAction') {
-        return Promise.resolve({
-          response: {
-            body: JSON.stringify({
-              workspaces: [{ gid: 'workspace-1', name: 'Marketing workspace' }],
-            }),
-          },
+        return succeeded({
+          workspaces: [{ gid: 'workspace-1', name: 'Marketing workspace' }],
         });
       }
 
       if (appActionId === 'getAsanaProjectsAction') {
-        return Promise.resolve({
-          response: {
-            body: JSON.stringify({
-              projects: [{ gid: 'project-1', name: 'Launch project' }],
-            }),
-          },
+        return succeeded({
+          projects: [{ gid: 'project-1', name: 'Launch project' }],
         });
       }
 
@@ -194,7 +179,7 @@ describe('Asana ConfigScreen', () => {
     expect(openSpy).toHaveBeenCalledWith('', 'asana-oauth', 'width=600,height=700');
 
     await waitFor(() => {
-      expect(mockCma.appActionCall.createWithResponse).toHaveBeenCalledWith(
+      expect(mockCma.appActionCall.createWithResult).toHaveBeenCalledWith(
         expect.objectContaining({ appActionId: 'initiateOauthAction' }),
         expect.anything()
       );

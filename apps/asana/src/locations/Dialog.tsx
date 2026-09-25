@@ -120,12 +120,23 @@ const Dialog = () => {
     appActionId: string,
     actionParameters: Record<string, string> = {}
   ): Promise<TResult> => {
-    const response = await sdk.cma.appActionCall.createWithResponse(
+    // Uses createWithResult (not createWithResponse) because createWithResponse's
+    // polling hits a legacy endpoint that has a call-not-found race right after
+    // creation, which the currently bundled web app CMA client doesn't retry.
+    const call = await sdk.cma.appActionCall.createWithResult(
       { appDefinitionId: sdk.ids.app!, appActionId },
       { parameters: actionParameters }
     );
 
-    return JSON.parse(response.response.body) as TResult;
+    if (call.sys.status === 'failed') {
+      throw new Error(call.sys.error.message);
+    }
+
+    if (call.sys.status !== 'succeeded') {
+      throw new Error(`Unexpected app action call status: ${call.sys.status}`);
+    }
+
+    return call.sys.result as TResult;
   };
 
   useEffect(() => {
