@@ -49,14 +49,41 @@ describe('getAsanaSections handler', () => {
     });
   });
 
-  it('loads sections for a project', async () => {
+  it('derives sections from the project task list, deduping repeats', async () => {
     vi.mocked(globalThis.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({
         data: [
-          { gid: 's1', name: 'Incoming from Contentful' },
-          { gid: 's2', name: 'In Progress' },
-          { gid: 's3', name: 'Done' },
+          {
+            gid: 't1',
+            memberships: [
+              {
+                project: { gid: 'project-1' },
+                section: { gid: 's1', name: 'Incoming from Contentful' },
+              },
+            ],
+          },
+          {
+            gid: 't2',
+            memberships: [
+              { project: { gid: 'project-1' }, section: { gid: 's2', name: 'In Progress' } },
+            ],
+          },
+          {
+            gid: 't3',
+            memberships: [
+              {
+                project: { gid: 'project-1' },
+                section: { gid: 's1', name: 'Incoming from Contentful' },
+              },
+            ],
+          },
+          {
+            gid: 't4',
+            memberships: [
+              { project: { gid: 'other-project' }, section: { gid: 's9', name: 'Wrong Project' } },
+            ],
+          },
         ],
       }),
     } as Response);
@@ -72,11 +99,10 @@ describe('getAsanaSections handler', () => {
       sections: [
         { gid: 's1', name: 'Incoming from Contentful' },
         { gid: 's2', name: 'In Progress' },
-        { gid: 's3', name: 'Done' },
       ],
     });
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://app.asana.com/api/1.0/projects/project-1/sections?opt_fields=gid,name',
+      'https://app.asana.com/api/1.0/projects/project-1/tasks?opt_fields=memberships.project.gid,memberships.section.gid,memberships.section.name&limit=100',
       {
         headers: {
           Authorization: 'Bearer test-access-token',

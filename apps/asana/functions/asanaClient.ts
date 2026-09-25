@@ -409,14 +409,40 @@ export async function removeTaskDependency(
   });
 }
 
+type AsanaTaskMembershipRecord = {
+  memberships?: Array<{
+    project?: { gid?: string } | null;
+    section?: { gid?: string; name?: string } | null;
+  }>;
+};
+
 export async function getProjectSections(
   accessToken: string,
   projectGid: string
 ): Promise<AsanaSection[]> {
-  return callAsanaList<AsanaSection>(
-    `/projects/${projectGid}/sections?opt_fields=gid,name`,
+  // Asana doesn't offer a scopable "list sections" endpoint (it's only available under the
+  // full-permissions `default` scope, which this app deliberately avoids requesting). Instead,
+  // derive the section list from the project's own tasks, which is covered by `tasks:read`.
+  // This only surfaces sections that currently contain at least one task - a brand-new empty
+  // board column won't appear until something lands in it.
+  const tasks = await callAsanaList<AsanaTaskMembershipRecord>(
+    `/projects/${projectGid}/tasks?opt_fields=memberships.project.gid,memberships.section.gid,memberships.section.name&limit=100`,
     accessToken
   );
+
+  const sections = new Map<string, string>();
+  for (const task of tasks) {
+    for (const membership of task.memberships ?? []) {
+      if (membership.project?.gid !== projectGid) {
+        continue;
+      }
+      if (membership.section?.gid && membership.section?.name) {
+        sections.set(membership.section.gid, membership.section.name);
+      }
+    }
+  }
+
+  return Array.from(sections, ([gid, name]) => ({ gid, name }));
 }
 
 export async function moveTaskToSection(
