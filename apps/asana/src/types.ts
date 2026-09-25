@@ -6,18 +6,11 @@ export enum ConnectionStatus {
 }
 
 export interface AppInstallationParameters {
-  oauthClientId: string;
-  oauthClientSecret: string;
-  oauthRefreshToken: string;
-  oauthRedirectUri: string;
   defaultWorkspaceGid: string;
   defaultWorkspaceName: string;
   defaultProjectGid: string;
   defaultProjectName: string;
   enabledContentTypeIds?: string[];
-  primaryTaskLinkMappings?: Record<string, PrimaryTaskLinkFieldMapping>;
-  connectionStatus?: ConnectionStatus;
-  connectionMessage?: string;
 }
 
 export interface AsanaWorkspace {
@@ -30,28 +23,20 @@ export interface AsanaProject {
   name: string;
 }
 
-export interface AsanaTaskOption {
+export type AsanaTaskOption = {
   gid: string;
   name: string;
-}
+};
+
+export type AsanaUserOption = {
+  gid: string;
+  name: string;
+  email?: string;
+};
 
 export interface ContentTypeOption {
   id: string;
   name: string;
-  fields: ContentTypeFieldOption[];
-}
-
-export interface ContentTypeFieldOption {
-  id: string;
-  name: string;
-  type: string;
-}
-
-export interface PrimaryTaskLinkFieldMapping {
-  objectFieldId?: string;
-  taskGidFieldId?: string;
-  taskUrlFieldId?: string;
-  taskNameFieldId?: string;
 }
 
 export interface AsanaTask {
@@ -61,7 +46,10 @@ export interface AsanaTask {
   description?: string;
   status?: string;
   assigneeName?: string;
+  assigneeGid?: string;
   dueDate?: string;
+  dependencies?: AsanaTaskOption[];
+  workspaceGid?: string;
 }
 
 export interface PrimaryAsanaTaskLink {
@@ -101,6 +89,10 @@ export interface UpdateAsanaTaskRequest {
   title?: string;
   notes?: string;
   completed?: boolean;
+  assignee?: string;
+  dueDate?: string;
+  addDependencyGid?: string;
+  removeDependencyGid?: string;
 }
 
 export interface GetAsanaTaskRequest {
@@ -117,11 +109,22 @@ export type ValidateAsanaCredentialsResponse = Record<string, unknown> & {
   message: string;
 };
 
-export type ExchangeAsanaOAuthCodeResponse = Record<string, unknown> & {
+export type InitiateAsanaOAuthResponse = Record<string, unknown> & {
+  authorizationUrl: string;
+};
+
+export type CompleteAsanaOAuthResponse = Record<string, unknown> & {
   success: boolean;
   message: string;
-  accessToken?: string;
-  refreshToken?: string;
+};
+
+export type DisconnectAsanaResponse = Record<string, unknown> & {
+  success: boolean;
+  message: string;
+};
+
+export type CheckAsanaStatusResponse = Record<string, unknown> & {
+  connected: boolean;
 };
 
 export type GetAsanaWorkspacesResponse = Record<string, unknown> & {
@@ -134,6 +137,10 @@ export type GetAsanaProjectsResponse = Record<string, unknown> & {
 
 export type GetAsanaTasksResponse = Record<string, unknown> & {
   tasks: AsanaTaskOption[];
+};
+
+export type GetAsanaUsersResponse = Record<string, unknown> & {
+  users: AsanaUserOption[];
 };
 
 export type CreateAsanaTaskResponse = Record<string, unknown> & {
@@ -174,6 +181,8 @@ export interface TaskDetailsDialogParameters {
   status?: string;
   assigneeName?: string;
   dueDate?: string;
+  workspaceGid?: string;
+  dependencies?: AsanaTaskOption[];
 }
 
 export interface TaskDetailsDialogResult {

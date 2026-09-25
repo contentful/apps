@@ -1,12 +1,13 @@
 import type { AppActionRequest, FunctionEventContext } from '@contentful/node-apps-toolkit';
 import type {
-  AppInstallationParameters,
   AsanaProject,
   AsanaTask,
   AsanaTaskOption,
+  AsanaUserOption,
   AsanaWorkspace,
 } from '../src/types';
 import { VALIDATION_MESSAGES } from '../src/const';
+import { getOAuthSdk } from './initiateOauth';
 
 type AsanaEnvelope<TData> = {
   data?: TData;
@@ -23,99 +24,24 @@ function getAsanaErrorMessage<TData>(response: AsanaEnvelope<TData>) {
     .join(', ');
 }
 
-type AsanaOAuthTokenResponse = {
-  access_token: string;
-  refresh_token?: string;
-  expires_in?: number;
-  error?: string;
-  error_description?: string;
-};
-
-async function requestAsanaOAuthToken(
-  body: Record<string, string>
-): Promise<AsanaOAuthTokenResponse> {
-  const response = await fetch('https://app.asana.com/-/oauth_token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams(body),
-  });
-
-  const payload = (await response.json()) as AsanaOAuthTokenResponse;
-  if (!response.ok) {
-    throw new Error(
-      payload.error_description || payload.error || VALIDATION_MESSAGES.invalidCredentials
-    );
-  }
-
-  return payload;
-}
-
-export async function exchangeAuthorizationCode(params: {
-  clientId: string;
-  clientSecret: string;
-  redirectUri: string;
-  code: string;
-  codeVerifier: string;
-}): Promise<{ accessToken: string; refreshToken: string }> {
-  const token = await requestAsanaOAuthToken({
-    grant_type: 'authorization_code',
-    client_id: params.clientId,
-    client_secret: params.clientSecret,
-    redirect_uri: params.redirectUri,
-    code: params.code,
-    code_verifier: params.codeVerifier,
-  });
-
-  if (!token.refresh_token) {
-    throw new Error('Asana did not return a refresh token for this authorization code.');
-  }
-
-  return { accessToken: token.access_token, refreshToken: token.refresh_token };
-}
-
-export async function getAsanaAccessTokenFromParameters(
-  installationParameters?: Partial<AppInstallationParameters>
-): Promise<string> {
-  const clientId = installationParameters?.oauthClientId?.trim();
-  const clientSecret = installationParameters?.oauthClientSecret?.trim();
-  const redirectUri = installationParameters?.oauthRedirectUri?.trim();
-  const refreshToken = installationParameters?.oauthRefreshToken?.trim();
-
-  if (!clientId || !clientSecret || !redirectUri || !refreshToken) {
-    return '';
-  }
-
-  try {
-    const token = await requestAsanaOAuthToken({
-      grant_type: 'refresh_token',
-      client_id: clientId,
-      client_secret: clientSecret,
-      redirect_uri: redirectUri,
-      refresh_token: refreshToken,
-    });
-    return token.access_token;
-  } catch {
-    return '';
-  }
-}
-
 export async function getAsanaAccessToken(
-  event: AppActionRequest<'Custom'>,
+  _event: AppActionRequest<'Custom'>,
   context: FunctionEventContext
 ): Promise<string> {
-  const requestBody = event.body as { accessToken?: string } | undefined;
-  if (requestBody?.accessToken?.trim()) {
-    return requestBody.accessToken.trim();
-  }
+  const sdk = getOAuthSdk(context);
 
-  return getAsanaAccessTokenFromParameters(
-    context.appInstallationParameters as Partial<AppInstallationParameters> | undefined
-  );
+  try {
+    const token = await sdk.token();
+    return token.accessToken;
+  } catch {
+    // sdk.token() throws when the current user hasn't connected Asana yet.
+    return '';
+  }
 }
 
 export async function callAsana<TData>(
   path: string,
-  personalAccessToken: string,
+  accessToken: string,
   init?: RequestInit
 ): Promise<TData> {
   const requestUrl = path.startsWith('https://app.asana.com/api/1.0')
@@ -125,7 +51,7 @@ export async function callAsana<TData>(
   const response = await fetch(requestUrl, {
     method: init?.method ?? 'GET',
     headers: {
-      Authorization: `Bearer ${personalAccessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       Accept: 'application/json',
       ...(init?.body ? { 'Content-Type': 'application/json' } : {}),
       ...init?.headers,
@@ -145,7 +71,7 @@ export async function callAsana<TData>(
   return body.data;
 }
 
-async function callAsanaList<TData>(path: string, personalAccessToken: string): Promise<TData[]> {
+async function callAsanaList<TData>(path: string, accessToken: string): Promise<TData[]> {
   const items: TData[] = [];
   let nextPath: string | null = path;
 
@@ -156,7 +82,7 @@ async function callAsanaList<TData>(path: string, personalAccessToken: string): 
 
     const response = await fetch(requestUrl, {
       headers: {
-        Authorization: `Bearer ${personalAccessToken}`,
+        Authorization: `Bearer ${accessToken}`,
         Accept: 'application/json',
       },
     });
@@ -173,20 +99,17 @@ async function callAsanaList<TData>(path: string, personalAccessToken: string): 
   return items;
 }
 
-export async function getWorkspaces(personalAccessToken: string): Promise<AsanaWorkspace[]> {
-  return callAsanaList<AsanaWorkspace>(
-    '/workspaces?opt_fields=gid,name&limit=100',
-    personalAccessToken
-  );
+export async function getWorkspaces(accessToken: string): Promise<AsanaWorkspace[]> {
+  return callAsanaList<AsanaWorkspace>('/workspaces?opt_fields=gid,name&limit=100', accessToken);
 }
 
 export async function getProjects(
-  personalAccessToken: string,
+  accessToken: string,
   workspaceGid: string
 ): Promise<AsanaProject[]> {
   const projects = await callAsanaList<AsanaProject>(
     `/workspaces/${workspaceGid}/projects?opt_fields=gid,name&limit=100`,
-    personalAccessToken
+    accessToken
   );
 
   return projects.sort((left, right) => left.name.localeCompare(right.name));
@@ -196,10 +119,11 @@ type AsanaTypeaheadResult = {
   gid: string;
   name: string;
   resource_type?: string;
+  email?: string;
 };
 
 export async function searchProjects(
-  personalAccessToken: string,
+  accessToken: string,
   workspaceGid: string,
   query: string
 ): Promise<AsanaProject[]> {
@@ -215,7 +139,7 @@ export async function searchProjects(
 
   const results = await callAsana<AsanaTypeaheadResult[]>(
     `/workspaces/${workspaceGid}/typeahead?${params.toString()}`,
-    personalAccessToken
+    accessToken
   );
 
   return results
@@ -225,7 +149,7 @@ export async function searchProjects(
 }
 
 export async function searchTasks(
-  personalAccessToken: string,
+  accessToken: string,
   workspaceGid: string,
   query: string
 ): Promise<AsanaTaskOption[]> {
@@ -241,7 +165,7 @@ export async function searchTasks(
 
   const results = await callAsana<AsanaTypeaheadResult[]>(
     `/workspaces/${workspaceGid}/typeahead?${params.toString()}`,
-    personalAccessToken
+    accessToken
   );
 
   return results
@@ -250,14 +174,44 @@ export async function searchTasks(
     .sort((left, right) => left.name.localeCompare(right.name));
 }
 
+export async function searchUsers(
+  accessToken: string,
+  workspaceGid: string,
+  query: string
+): Promise<AsanaUserOption[]> {
+  const params = new URLSearchParams({
+    resource_type: 'user',
+    count: query.trim() ? '20' : '10',
+    opt_fields: 'gid,name,email,resource_type',
+  });
+
+  if (query.trim()) {
+    params.set('query', query.trim());
+  }
+
+  const results = await callAsana<AsanaTypeaheadResult[]>(
+    `/workspaces/${workspaceGid}/typeahead?${params.toString()}`,
+    accessToken
+  );
+
+  return results
+    .filter((item) => !item.resource_type || item.resource_type === 'user')
+    .map((item) => ({
+      gid: item.gid,
+      name: item.name,
+      ...(item.email ? { email: item.email } : {}),
+    }))
+    .sort((left, right) => left.name.localeCompare(right.name));
+}
+
 export async function getProjectTasks(
-  personalAccessToken: string,
+  accessToken: string,
   projectGid: string,
   query: string
 ): Promise<AsanaTaskOption[]> {
   const tasks = await callAsanaList<AsanaTaskOption>(
     `/projects/${projectGid}/tasks?opt_fields=gid,name&completed_since=now&limit=100`,
-    personalAccessToken
+    accessToken
   );
 
   const normalizedQuery = query.trim().toLowerCase();
@@ -276,7 +230,12 @@ type AsanaTaskRecord = {
   completed?: boolean;
   due_on?: string | null;
   assignee?: {
+    gid?: string;
     name?: string;
+  } | null;
+  dependencies?: Array<{ gid: string; name?: string }>;
+  workspace?: {
+    gid?: string;
   } | null;
 };
 
@@ -291,23 +250,53 @@ type UpdateTaskPayload = {
   name?: string;
   notes?: string;
   completed?: boolean;
+  assignee?: string | null;
+  due_on?: string | null;
 };
 
+const TASK_OPT_FIELDS =
+  'gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid';
+
 export async function createTask(
-  personalAccessToken: string,
+  accessToken: string,
   payload: CreateTaskPayload
 ): Promise<AsanaTaskRecord> {
-  return callAsana<AsanaTaskRecord>(
-    '/tasks?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.name',
-    personalAccessToken,
-    {
-      method: 'POST',
-      body: JSON.stringify({ data: payload }),
-    }
+  return callAsana<AsanaTaskRecord>(`/tasks?opt_fields=${TASK_OPT_FIELDS}`, accessToken, {
+    method: 'POST',
+    body: JSON.stringify({ data: payload }),
+  });
+}
+
+// Asana's task API doesn't always expand `dependencies.name` (dependencies are returned as
+// bare gids when the requesting user only has partial visibility into the referenced task), so
+// any dependency missing a name is resolved with an individual lookup.
+async function resolveDependencyNames(
+  accessToken: string,
+  dependencies: Array<{ gid: string; name?: string }>
+): Promise<AsanaTaskOption[]> {
+  return Promise.all(
+    dependencies.map(async (dependency) => {
+      if (typeof dependency.name === 'string' && dependency.name.trim()) {
+        return { gid: dependency.gid, name: dependency.name };
+      }
+
+      try {
+        const dependencyTask = await callAsana<{ gid: string; name?: string }>(
+          `/tasks/${dependency.gid}?opt_fields=gid,name`,
+          accessToken
+        );
+        return { gid: dependency.gid, name: dependencyTask.name?.trim() || dependency.gid };
+      } catch {
+        return { gid: dependency.gid, name: dependency.gid };
+      }
+    })
   );
 }
 
-function mapAsanaTask(task: AsanaTaskRecord): AsanaTask & { completed?: boolean } {
+async function mapAsanaTask(
+  accessToken: string,
+  task: AsanaTaskRecord
+): Promise<AsanaTask & { completed?: boolean }> {
   return {
     gid: task.gid,
     name: task.name,
@@ -320,7 +309,12 @@ function mapAsanaTask(task: AsanaTaskRecord): AsanaTask & { completed?: boolean 
         }
       : {}),
     ...(typeof task.assignee?.name === 'string' ? { assigneeName: task.assignee.name } : {}),
+    ...(typeof task.assignee?.gid === 'string' ? { assigneeGid: task.assignee.gid } : {}),
     ...(typeof task.due_on === 'string' ? { dueDate: task.due_on } : {}),
+    ...(Array.isArray(task.dependencies)
+      ? { dependencies: await resolveDependencyNames(accessToken, task.dependencies) }
+      : {}),
+    ...(typeof task.workspace?.gid === 'string' ? { workspaceGid: task.workspace.gid } : {}),
   };
 }
 
@@ -340,40 +334,62 @@ export function extractTaskGid(taskIdOrUrl?: string) {
 }
 
 export async function updateTask(
-  personalAccessToken: string,
+  accessToken: string,
   taskGid: string,
   payload: UpdateTaskPayload
 ): Promise<AsanaTask & { completed?: boolean }> {
   const task = await callAsana<AsanaTaskRecord>(
-    `/tasks/${taskGid}?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.name`,
-    personalAccessToken,
+    `/tasks/${taskGid}?opt_fields=${TASK_OPT_FIELDS}`,
+    accessToken,
     {
       method: 'PUT',
       body: JSON.stringify({ data: payload }),
     }
   );
 
-  return mapAsanaTask(task);
+  return mapAsanaTask(accessToken, task);
 }
 
 export async function getTask(
-  personalAccessToken: string,
+  accessToken: string,
   taskGid: string
 ): Promise<AsanaTask & { completed?: boolean }> {
   const task = await callAsana<AsanaTaskRecord>(
-    `/tasks/${taskGid}?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.name`,
-    personalAccessToken
+    `/tasks/${taskGid}?opt_fields=${TASK_OPT_FIELDS}`,
+    accessToken
   );
 
-  return mapAsanaTask(task);
+  return mapAsanaTask(accessToken, task);
+}
+
+export async function addTaskDependency(
+  accessToken: string,
+  taskGid: string,
+  dependencyGid: string
+): Promise<void> {
+  await callAsana<Record<string, unknown>>(`/tasks/${taskGid}/addDependencies`, accessToken, {
+    method: 'POST',
+    body: JSON.stringify({ data: { dependencies: [dependencyGid] } }),
+  });
+}
+
+export async function removeTaskDependency(
+  accessToken: string,
+  taskGid: string,
+  dependencyGid: string
+): Promise<void> {
+  await callAsana<Record<string, unknown>>(`/tasks/${taskGid}/removeDependencies`, accessToken, {
+    method: 'POST',
+    body: JSON.stringify({ data: { dependencies: [dependencyGid] } }),
+  });
 }
 
 export async function addCommentToTask(
-  personalAccessToken: string,
+  accessToken: string,
   taskGid: string,
   comment: string
 ): Promise<void> {
-  await callAsana<Record<string, unknown>>(`/tasks/${taskGid}/stories`, personalAccessToken, {
+  await callAsana<Record<string, unknown>>(`/tasks/${taskGid}/stories`, accessToken, {
     method: 'POST',
     body: JSON.stringify({
       data: {

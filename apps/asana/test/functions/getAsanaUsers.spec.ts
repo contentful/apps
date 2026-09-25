@@ -5,11 +5,11 @@ import {
 } from '@contentful/node-apps-toolkit';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AppInstallationParameters } from '../../src/types';
-import { handler } from '../../functions/getAsanaTasks';
+import { handler } from '../../functions/getAsanaUsers';
 
 globalThis.fetch = vi.fn();
 
-describe('getAsanaTasks handler', () => {
+describe('getAsanaUsers handler', () => {
   const mockOauthSdk = {
     token: vi.fn().mockResolvedValue({
       tokenType: 'bearer',
@@ -32,21 +32,13 @@ describe('getAsanaTasks handler', () => {
 
   const createEvent = (body: {
     workspaceGid?: string;
-    projectGid?: string;
     query?: string;
-  }): AppActionRequest<'Custom', { workspaceGid?: string; projectGid?: string; query?: string }> =>
+  }): AppActionRequest<'Custom', { workspaceGid?: string; query?: string }> =>
     ({
       type: FunctionTypeEnum.AppActionCall,
       body,
       headers: {},
-    } as AppActionRequest<
-      'Custom',
-      {
-        workspaceGid?: string;
-        projectGid?: string;
-        query?: string;
-      }
-    >);
+    } as AppActionRequest<'Custom', { workspaceGid?: string; query?: string }>);
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -57,71 +49,60 @@ describe('getAsanaTasks handler', () => {
     });
   });
 
-  it('searches tasks in a workspace', async () => {
+  it('searches users in a workspace', async () => {
     vi.mocked(globalThis.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({
         data: [
-          { gid: '2', name: 'Beta task', resource_type: 'task' },
-          { gid: '1', name: 'Alpha task', resource_type: 'task' },
+          { gid: '2', name: 'Jamie Lee', email: 'jamie@example.com', resource_type: 'user' },
+          { gid: '1', name: 'Alex Doe', email: 'alex@example.com', resource_type: 'user' },
         ],
       }),
     } as Response);
 
     const result = await handler(
-      createEvent({ workspaceGid: 'workspace-1', query: 'task' }) as Parameters<typeof handler>[0],
+      createEvent({ workspaceGid: 'workspace-1', query: 'a' }) as Parameters<typeof handler>[0],
       mockContext
     );
 
     expect(result).toEqual({
-      tasks: [
-        { gid: '1', name: 'Alpha task' },
-        { gid: '2', name: 'Beta task' },
+      users: [
+        { gid: '1', name: 'Alex Doe', email: 'alex@example.com' },
+        { gid: '2', name: 'Jamie Lee', email: 'jamie@example.com' },
       ],
     });
-  });
-
-  it('searches tasks in a project when projectGid is provided', async () => {
-    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        data: [
-          { gid: '3', name: 'Manual link smoke test' },
-          { gid: '4', name: 'Another task' },
-        ],
-      }),
-    } as Response);
-
-    const result = await handler(
-      createEvent({
-        workspaceGid: 'workspace-1',
-        projectGid: 'project-1',
-        query: 'manual',
-      }) as Parameters<typeof handler>[0],
-      mockContext
-    );
-
-    expect(result).toEqual({
-      tasks: [{ gid: '3', name: 'Manual link smoke test' }],
-    });
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://app.asana.com/api/1.0/projects/project-1/tasks?opt_fields=gid,name&completed_since=now&limit=100',
-      {
+      expect.stringContaining('/workspaces/workspace-1/typeahead?resource_type=user'),
+      expect.objectContaining({
         headers: {
           Authorization: 'Bearer test-access-token',
           Accept: 'application/json',
         },
-      }
+      })
     );
   });
 
   it('returns an empty list when no workspace is provided', async () => {
     const result = await handler(
-      createEvent({ query: 'task' }) as Parameters<typeof handler>[0],
+      createEvent({ query: 'a' }) as Parameters<typeof handler>[0],
       mockContext
     );
 
-    expect(result).toEqual({ tasks: [] });
+    expect(result).toEqual({ users: [] });
     expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
+  it('throws when the Asana request fails', async () => {
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({ errors: [{ message: 'Invalid token' }] }),
+    } as Response);
+
+    await expect(
+      handler(
+        createEvent({ workspaceGid: 'workspace-1', query: 'a' }) as Parameters<typeof handler>[0],
+        mockContext
+      )
+    ).rejects.toThrow('Could not search Asana users.');
   });
 });

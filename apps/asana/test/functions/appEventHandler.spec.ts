@@ -35,12 +35,16 @@ describe('appEventHandler', () => {
     },
   } as unknown as PlainClientAPI;
 
+  const mockOauthSdk = {
+    token: vi.fn().mockResolvedValue({
+      tokenType: 'bearer',
+      accessToken: 'test-access-token',
+      expiry: 3600,
+    }),
+  };
+
   const mockContext = {
     appInstallationParameters: {
-      oauthClientId: 'client-id',
-      oauthClientSecret: 'client-secret',
-      oauthRefreshToken: 'refresh-token',
-      oauthRedirectUri: 'https://example.com/?oauthCallback=1',
       defaultWorkspaceGid: 'workspace-1',
       defaultWorkspaceName: 'Workspace',
       defaultProjectGid: 'project-1',
@@ -49,29 +53,30 @@ describe('appEventHandler', () => {
     cma: mockCma,
     spaceId: 'test-space',
     environmentId: 'test-env',
+    oauthSdk: mockOauthSdk,
   } as unknown as FunctionEventContext;
 
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(mockCma.entry.get).mockResolvedValue(mockEntry);
+    mockOauthSdk.token.mockResolvedValue({
+      tokenType: 'bearer',
+      accessToken: 'test-access-token',
+      expiry: 3600,
+    });
   });
 
   it('creates a task when a matching entry is published', async () => {
-    vi.mocked(globalThis.fetch)
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ access_token: 'test-access-token', expires_in: 3600 }),
-      } as Response)
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          data: {
-            gid: 'task-1',
-            name: 'Publish-driven task',
-            permalink_url: 'https://app.asana.com/0/1/task-1/f',
-          },
-        }),
-      } as Response);
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: {
+          gid: 'task-1',
+          name: 'Publish-driven task',
+          permalink_url: 'https://app.asana.com/0/1/task-1/f',
+        },
+      }),
+    } as Response);
 
     await handler(
       {
@@ -95,7 +100,7 @@ describe('appEventHandler', () => {
 
     expect(mockCma.entry.get).toHaveBeenCalledWith({ entryId: 'entry-1' });
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.name',
+      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid',
       {
         method: 'POST',
         headers: {

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ConfigScreen from '../src/locations/ConfigScreen';
 import { VALIDATION_MESSAGES } from '../src/const';
@@ -37,8 +37,11 @@ async function renderAndWaitReady() {
 }
 
 describe('Asana ConfigScreen', () => {
+  let isConnected = false;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    isConnected = false;
     mockSdk.app.getParameters.mockResolvedValue(null);
     mockSdk.app.isInstalled.mockResolvedValue(true);
     mockSdk.app.getCurrentState.mockResolvedValue({ EditorInterface: {} });
@@ -47,19 +50,30 @@ describe('Asana ConfigScreen', () => {
         {
           sys: { id: 'blogPost' },
           name: 'Blog Post',
-          fields: [
-            { id: 'asanaTaskGid', name: 'Asana Task GID', type: 'Symbol' },
-            { id: 'asanaTaskUrl', name: 'Asana Task URL', type: 'Symbol' },
-            { id: 'asanaTaskName', name: 'Asana Task Name', type: 'Symbol' },
-          ],
         },
       ],
     });
+    mockCma.contentType.get.mockRejectedValue(new Error('not found'));
     mockCma.appActionCall.createWithResponse.mockImplementation(({ appActionId }) => {
-      if (appActionId === 'validateAsanaCredentialsAction') {
+      if (appActionId === 'checkStatusAction') {
+        return Promise.resolve({
+          response: { body: JSON.stringify({ connected: isConnected }) },
+        });
+      }
+
+      if (appActionId === 'initiateOauthAction') {
         return Promise.resolve({
           response: {
-            body: JSON.stringify({ valid: true, message: VALIDATION_MESSAGES.validCredentials }),
+            body: JSON.stringify({ authorizationUrl: 'https://app.asana.com/-/oauth_authorize' }),
+          },
+        });
+      }
+
+      if (appActionId === 'disconnectAction') {
+        isConnected = false;
+        return Promise.resolve({
+          response: {
+            body: JSON.stringify({ success: true, message: VALIDATION_MESSAGES.oauthDisconnected }),
           },
         });
       }
@@ -88,43 +102,39 @@ describe('Asana ConfigScreen', () => {
     });
   });
 
-  it('renders OAuth credential fields, connect button, and test connection button', async () => {
+  it('shows a Connect to Asana button and a Not connected badge when not connected', async () => {
     await renderAndWaitReady();
 
     expect(screen.getByText('Set up the Asana app')).toBeInTheDocument();
-    expect(screen.getAllByTestId('cf-ui-text-input')).toHaveLength(2);
-    expect(document.getElementById('oauthClientId')).toBeInTheDocument();
-    expect(document.getElementById('oauthClientSecret')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Connect to Asana' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Test connection' })).toBeInTheDocument();
+    expect(screen.getByText('Not connected')).toBeInTheDocument();
   });
 
-  it('requires a token on configure', async () => {
+  it('requires a connection before configuring', async () => {
     await renderAndWaitReady();
 
     const callback = mockSdk.app.onConfigure.mock.calls.at(-1)?.[0];
     const result = callback ? await callback() : undefined;
 
     expect(result).toBe(false);
-    await waitFor(() => {
-      expect(mockSdk.notifier.error).toHaveBeenCalledWith(VALIDATION_MESSAGES.saveRequired);
-    });
-    expect(await screen.findByText(VALIDATION_MESSAGES.tokenRequired)).toBeInTheDocument();
+    expect(mockSdk.notifier.error).toHaveBeenCalledWith(VALIDATION_MESSAGES.connectionRequired);
   });
 
-  it('hydrates saved workspaces for a configured token', async () => {
+  it('shows a Connected badge and hydrates workspaces when already connected', async () => {
+    isConnected = true;
     mockSdk.app.getParameters.mockResolvedValue({
-      oauthClientId: 'client-1',
-      oauthClientSecret: 'secret-1',
-      oauthRefreshToken: 'refresh-123',
-      oauthRedirectUri: 'https://example.com/?oauthCallback=1',
       defaultWorkspaceGid: '',
       defaultWorkspaceName: '',
       defaultProjectGid: '',
       defaultProjectName: '',
     });
+
     await renderAndWaitReady();
 
+    await waitFor(() => {
+      expect(screen.getByText('Connected')).toBeInTheDocument();
+    });
+    expect(screen.getByRole('button', { name: 'Disconnect' })).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByRole('option', { name: 'Marketing workspace' })).toBeInTheDocument();
     });
@@ -138,12 +148,9 @@ describe('Asana ConfigScreen', () => {
     });
   });
 
-  it('persists auto-detected primary task link mappings on configure', async () => {
+  it('persists enabled content type ids and creates the task link content type on configure when connected', async () => {
+    isConnected = true;
     mockSdk.app.getParameters.mockResolvedValue({
-      oauthClientId: 'client-1',
-      oauthClientSecret: 'secret-1',
-      oauthRefreshToken: 'refresh-123',
-      oauthRedirectUri: 'https://example.com/?oauthCallback=1',
       defaultWorkspaceGid: '',
       defaultWorkspaceName: '',
       defaultProjectGid: '',
@@ -156,17 +163,71 @@ describe('Asana ConfigScreen', () => {
     const callback = mockSdk.app.onConfigure.mock.calls.at(-1)?.[0];
     const result = callback ? await callback() : undefined;
 
+    expect(mockCma.contentType.createWithId).toHaveBeenCalledWith(
+      expect.objectContaining({ contentTypeId: 'asanaTaskLink' }),
+      expect.objectContaining({ name: 'Asana Integration (do not delete)' })
+    );
     expect(result).toMatchObject({
       parameters: {
-        enabledContentTypeIds: ['blogPost'],
-        primaryTaskLinkMappings: {
-          blogPost: {
-            taskGidFieldId: 'asanaTaskGid',
-            taskUrlFieldId: 'asanaTaskUrl',
-            taskNameFieldId: 'asanaTaskName',
-          },
-        },
+        enabledContentTypeIds: JSON.stringify(['blogPost']),
       },
+    });
+  });
+
+  it('shows a note explaining the app will create the Asana Integration content type', async () => {
+    await renderAndWaitReady();
+
+    expect(screen.getByText(/Asana Integration \(do not delete\)/)).toBeInTheDocument();
+  });
+
+  it('opens an OAuth popup when Connect to Asana is clicked', async () => {
+    const popup = { closed: false, close: vi.fn(), location: { href: '' } };
+    const openSpy = vi.spyOn(window, 'open').mockReturnValue(popup as unknown as Window);
+
+    await renderAndWaitReady();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Connect to Asana' }));
+
+    // The popup is opened synchronously (blank) in direct response to the click, since some
+    // browsers only allow window.open() to navigate when called from a user gesture. The real
+    // authorization URL is set on popup.location.href once the initiateOauthAction resolves.
+    expect(openSpy).toHaveBeenCalledWith('', 'asana-oauth', 'width=600,height=700');
+
+    await waitFor(() => {
+      expect(mockCma.appActionCall.createWithResponse).toHaveBeenCalledWith(
+        expect.objectContaining({ appActionId: 'initiateOauthAction' }),
+        expect.anything()
+      );
+    });
+    await waitFor(() => {
+      expect(popup.location.href).toBe('https://app.asana.com/-/oauth_authorize');
+    });
+
+    openSpy.mockRestore();
+  });
+
+  it('disconnects from Asana when Disconnect is clicked', async () => {
+    isConnected = true;
+    mockSdk.app.getParameters.mockResolvedValue({
+      defaultWorkspaceGid: 'workspace-1',
+      defaultWorkspaceName: 'Marketing workspace',
+      defaultProjectGid: 'project-1',
+      defaultProjectName: 'Launch project',
+    });
+
+    await renderAndWaitReady();
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Disconnect' })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Disconnect' }));
+
+    await waitFor(() => {
+      expect(mockSdk.notifier.success).toHaveBeenCalledWith(VALIDATION_MESSAGES.oauthDisconnected);
+    });
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Connect to Asana' })).toBeInTheDocument();
     });
   });
 });

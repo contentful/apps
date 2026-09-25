@@ -11,12 +11,16 @@ import { handler } from '../../functions/addAsanaComment';
 globalThis.fetch = vi.fn();
 
 describe('addAsanaComment handler', () => {
+  const mockOauthSdk = {
+    token: vi.fn().mockResolvedValue({
+      tokenType: 'bearer',
+      accessToken: 'test-access-token',
+      expiry: 3600,
+    }),
+  };
+
   const mockContext = {
     appInstallationParameters: {
-      oauthClientId: 'client-id',
-      oauthClientSecret: 'client-secret',
-      oauthRefreshToken: 'refresh-token',
-      oauthRedirectUri: 'https://example.com/?oauthCallback=1',
       defaultWorkspaceGid: 'workspace-1',
       defaultWorkspaceName: 'Workspace',
       defaultProjectGid: 'project-1',
@@ -24,6 +28,7 @@ describe('addAsanaComment handler', () => {
     } satisfies AppInstallationParameters,
     spaceId: 'test-space',
     environmentId: 'test-env',
+    oauthSdk: mockOauthSdk,
   } as unknown as FunctionEventContext;
 
   const createEvent = (
@@ -33,27 +38,27 @@ describe('addAsanaComment handler', () => {
       type: FunctionTypeEnum.AppActionCall,
       body,
       headers: {},
-    }) as AppActionRequest<'Custom', AddAsanaCommentRequest>;
+    } as AppActionRequest<'Custom', AddAsanaCommentRequest>);
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockOauthSdk.token.mockResolvedValue({
+      tokenType: 'bearer',
+      accessToken: 'test-access-token',
+      expiry: 3600,
+    });
   });
 
   it('adds a comment to a task', async () => {
-    vi.mocked(globalThis.fetch)
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ access_token: 'test-access-token', expires_in: 3600 }),
-      } as Response)
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          data: {
-            gid: 'story-1',
-            text: 'Comment from Contentful',
-          },
-        }),
-      } as Response);
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: {
+          gid: 'story-1',
+          text: 'Comment from Contentful',
+        },
+      }),
+    } as Response);
 
     const result = await handler(
       createEvent({
@@ -117,17 +122,12 @@ describe('addAsanaComment handler', () => {
   });
 
   it('returns the Asana API error message on failure', async () => {
-    vi.mocked(globalThis.fetch)
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ access_token: 'test-access-token', expires_in: 3600 }),
-      } as Response)
-      .mockResolvedValueOnce({
-        ok: false,
-        json: async () => ({
-          errors: [{ message: 'Task not found' }],
-        }),
-      } as Response);
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({
+        errors: [{ message: 'Task not found' }],
+      }),
+    } as Response);
 
     const result = await handler(
       createEvent({

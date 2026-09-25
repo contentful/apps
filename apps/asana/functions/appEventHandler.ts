@@ -7,7 +7,7 @@ import type {
 import type { EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
 import { ASANA_AUTOMATION_CONFIG } from '../src/const';
 import type { AppInstallationParameters } from '../src/types';
-import { getAsanaAccessTokenFromParameters } from './asanaClient';
+import { getOAuthSdk } from './initiateOauth';
 import { createTaskFromParameters } from './createTaskFromParameters';
 
 type LocalizedFieldValue = Record<string, string | undefined> | undefined;
@@ -66,7 +66,9 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = a
   const installationParameters = (context.appInstallationParameters ??
     {}) as AppInstallationParameters;
 
-  const accessToken = await getAsanaAccessTokenFromParameters(installationParameters);
+  const sdk = getOAuthSdk(context);
+  const token = await sdk.token();
+  const accessToken = token.accessToken;
   const result = await createTaskFromParameters({
     accessToken,
     title: getFirstLocalizedValue(

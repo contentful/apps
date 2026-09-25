@@ -5,17 +5,23 @@ import {
   Flex,
   FormControl,
   Paragraph,
+  Pill,
   SectionHeading,
   Text,
+  TextInput,
   TextLink,
   Textarea,
 } from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { VALIDATION_MESSAGES } from '../const';
 import type {
   AddAsanaCommentResponse,
+  AsanaTaskOption,
+  AsanaUserOption,
   GetAsanaTaskResponse,
+  GetAsanaTasksResponse,
+  GetAsanaUsersResponse,
   TaskDetailsDialogParameters,
   TaskDetailsDialogResult,
   UpdateAsanaTaskResponse,
@@ -37,16 +43,42 @@ const Dialog = () => {
         dueDate: invocation.dueDate,
       }
     : null;
+  const workspaceGid = invocation.workspaceGid ?? '';
 
   const [description, setDescription] = useState(invocation.taskDescription ?? '');
+  const [dueDate, setDueDate] = useState(invocation.dueDate ?? '');
+  const [assigneeQuery, setAssigneeQuery] = useState('');
+  const [assigneeResults, setAssigneeResults] = useState<AsanaUserOption[]>([]);
+  const [isSearchingAssignees, setIsSearchingAssignees] = useState(false);
+  const [selectedAssignee, setSelectedAssignee] = useState<AsanaUserOption | null>(null);
+  const [assigneeCleared, setAssigneeCleared] = useState(false);
+  const [pendingDependencyAdds, setPendingDependencyAdds] = useState<AsanaTaskOption[]>([]);
+  const [pendingDependencyRemovals, setPendingDependencyRemovals] = useState<string[]>([]);
+  const [dependencyQuery, setDependencyQuery] = useState('');
+  const [dependencyResults, setDependencyResults] = useState<AsanaTaskOption[]>([]);
+  const [isSearchingDependencies, setIsSearchingDependencies] = useState(false);
   const [comment, setComment] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isPostingComment, setIsPostingComment] = useState(false);
+
+  const effectiveDependencies = [
+    ...(invocation.dependencies ?? []).filter(
+      (dependency) => !pendingDependencyRemovals.includes(dependency.gid)
+    ),
+    ...pendingDependencyAdds,
+  ];
 
   const hasDescriptionChanges = useMemo(
     () => description.trim() !== (task?.taskDescription ?? '').trim(),
     [description, task?.taskDescription]
   );
+  const hasDueDateChanges = dueDate !== (invocation.dueDate ?? '');
+  const hasAssigneeChanges = Boolean(selectedAssignee) || assigneeCleared;
+  const hasDependencyChanges =
+    pendingDependencyAdds.length > 0 || pendingDependencyRemovals.length > 0;
+  const hasDetailChanges =
+    hasDescriptionChanges || hasDueDateChanges || hasAssigneeChanges || hasDependencyChanges;
+  const isBusy = isSaving || isPostingComment;
 
   const callAction = async <TResult,>(
     appActionId: string,
@@ -59,6 +91,66 @@ const Dialog = () => {
 
     return JSON.parse(response.response.body) as TResult;
   };
+
+  useEffect(() => {
+    if (!workspaceGid || !assigneeQuery.trim()) {
+      setAssigneeResults([]);
+      setIsSearchingAssignees(false);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(async () => {
+      setIsSearchingAssignees(true);
+      try {
+        const response = await callAction<GetAsanaUsersResponse>('getAsanaUsersAction', {
+          workspaceGid,
+          query: assigneeQuery.trim(),
+        });
+        setAssigneeResults(response.users);
+      } catch {
+        setAssigneeResults([]);
+      } finally {
+        setIsSearchingAssignees(false);
+      }
+    }, 250);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [assigneeQuery, workspaceGid]);
+
+  useEffect(() => {
+    if (!workspaceGid || !dependencyQuery.trim()) {
+      setDependencyResults([]);
+      setIsSearchingDependencies(false);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(async () => {
+      setIsSearchingDependencies(true);
+      try {
+        const response = await callAction<GetAsanaTasksResponse>('getAsanaTasksAction', {
+          workspaceGid,
+          query: dependencyQuery.trim(),
+        });
+        setDependencyResults(
+          response.tasks.filter(
+            (candidate) =>
+              candidate.gid !== task?.taskGid &&
+              !effectiveDependencies.some((dependency) => dependency.gid === candidate.gid)
+          )
+        );
+      } catch {
+        setDependencyResults([]);
+      } finally {
+        setIsSearchingDependencies(false);
+      }
+    }, 250);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [dependencyQuery, workspaceGid]);
 
   const refreshTask = async () => {
     if (!task) {
@@ -76,31 +168,116 @@ const Dialog = () => {
     return response.task;
   };
 
-  const handleSaveDescription = async () => {
-    if (!task || !hasDescriptionChanges) {
+  const handleSaveDetails = async () => {
+    if (!task || !hasDetailChanges) {
       return;
     }
 
     setIsSaving(true);
 
     try {
-      const response = await callAction<UpdateAsanaTaskResponse>('updateAsanaTaskAction', {
-        taskId: task.taskGid,
-        notes: description.trim(),
-      });
+      const fieldUpdateParams = {
+        ...(hasDescriptionChanges ? { notes: description.trim() } : {}),
+        ...(hasAssigneeChanges ? { assignee: selectedAssignee ? selectedAssignee.gid : '' } : {}),
+        ...(hasDueDateChanges ? { dueDate: dueDate.trim() } : {}),
+      };
 
-      if (!response.success || !response.task) {
-        throw new Error(response.message || VALIDATION_MESSAGES.taskUpdateFailed);
+      const dependencyOps: Array<Record<string, string>> = [];
+      const maxOps = Math.max(pendingDependencyAdds.length, pendingDependencyRemovals.length);
+      for (let index = 0; index < maxOps; index += 1) {
+        const op: Record<string, string> = {};
+        if (pendingDependencyAdds[index]) {
+          op.addDependencyGid = pendingDependencyAdds[index].gid;
+        }
+        if (pendingDependencyRemovals[index]) {
+          op.removeDependencyGid = pendingDependencyRemovals[index];
+        }
+        dependencyOps.push(op);
+      }
+
+      let latestTask: UpdateAsanaTaskResponse['task'] | undefined;
+
+      if (dependencyOps.length === 0) {
+        const response = await callAction<UpdateAsanaTaskResponse>('updateAsanaTaskAction', {
+          taskId: task.taskGid,
+          ...fieldUpdateParams,
+        });
+
+        if (!response.success || !response.task) {
+          throw new Error(response.message || VALIDATION_MESSAGES.taskUpdateFailed);
+        }
+
+        latestTask = response.task;
+      } else {
+        for (let index = 0; index < dependencyOps.length; index += 1) {
+          const response = await callAction<UpdateAsanaTaskResponse>('updateAsanaTaskAction', {
+            taskId: task.taskGid,
+            ...(index === 0 ? fieldUpdateParams : {}),
+            ...dependencyOps[index],
+          });
+
+          if (!response.success || !response.task) {
+            throw new Error(response.message || VALIDATION_MESSAGES.taskUpdateFailed);
+          }
+
+          latestTask = response.task;
+        }
+      }
+
+      if (!latestTask) {
+        throw new Error(VALIDATION_MESSAGES.taskUpdateFailed);
       }
 
       sdk.notifier.success(VALIDATION_MESSAGES.taskUpdated);
-      sdk.close({ updatedTask: response.task } satisfies TaskDetailsDialogResult);
+      sdk.close({ updatedTask: latestTask } satisfies TaskDetailsDialogResult);
     } catch (error) {
       const message = error instanceof Error ? error.message : VALIDATION_MESSAGES.taskUpdateFailed;
       sdk.notifier.error(message);
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleSelectAssignee = (user: AsanaUserOption) => {
+    setSelectedAssignee(user);
+    setAssigneeCleared(false);
+    setAssigneeQuery('');
+    setAssigneeResults([]);
+  };
+
+  const handleClearAssigneeSelection = () => {
+    setSelectedAssignee(null);
+    setAssigneeCleared(false);
+  };
+
+  const handleUnassign = () => {
+    setSelectedAssignee(null);
+    setAssigneeCleared(true);
+    setAssigneeQuery('');
+    setAssigneeResults([]);
+  };
+
+  const handleAddDependency = (candidate: AsanaTaskOption) => {
+    setPendingDependencyAdds((current) =>
+      current.some((dependency) => dependency.gid === candidate.gid)
+        ? current
+        : [...current, candidate]
+    );
+    setDependencyQuery('');
+    setDependencyResults([]);
+  };
+
+  const handleRemoveDependency = (dependencyGid: string) => {
+    if (pendingDependencyAdds.some((dependency) => dependency.gid === dependencyGid)) {
+      setPendingDependencyAdds((current) =>
+        current.filter((dependency) => dependency.gid !== dependencyGid)
+      );
+      return;
+    }
+
+    setPendingDependencyRemovals((current) =>
+      current.includes(dependencyGid) ? current : [...current, dependencyGid]
+    );
   };
 
   const handleAddComment = async () => {
@@ -166,25 +343,103 @@ const Dialog = () => {
           </TextLink>
         </Box>
 
+        <Box>
+          <Text as="div" marginBottom="spacing2Xs" fontColor="gray600">
+            Status
+          </Text>
+          <Text>{task.status || 'Unknown'}</Text>
+        </Box>
+
         <Flex gap="spacingL" flexWrap="wrap">
-          <Box>
-            <Text as="div" marginBottom="spacing2Xs" fontColor="gray600">
-              Status
-            </Text>
-            <Text>{task.status || 'Unknown'}</Text>
-          </Box>
-          <Box>
-            <Text as="div" marginBottom="spacing2Xs" fontColor="gray600">
-              Assignee
-            </Text>
-            <Text>{task.assigneeName || 'Unassigned'}</Text>
-          </Box>
-          <Box>
-            <Text as="div" marginBottom="spacing2Xs" fontColor="gray600">
-              Due date
-            </Text>
-            <Text>{task.dueDate || 'No due date'}</Text>
-          </Box>
+          <FormControl style={{ minWidth: '260px', flex: 1 }}>
+            <Flex justifyContent="space-between" alignItems="center">
+              <FormControl.Label marginBottom="none">Assignee</FormControl.Label>
+              {selectedAssignee || (task.assigneeName && !assigneeCleared) ? (
+                <Button
+                  variant="transparent"
+                  size="small"
+                  onClick={selectedAssignee ? handleClearAssigneeSelection : handleUnassign}
+                  isDisabled={isBusy}>
+                  {selectedAssignee ? 'Cancel' : 'Unassign'}
+                </Button>
+              ) : null}
+            </Flex>
+            {selectedAssignee || assigneeCleared ? (
+              <Box marginBottom="spacingXs">
+                <Pill
+                  label={assigneeCleared ? 'Unassigned' : selectedAssignee!.name}
+                  onClose={handleClearAssigneeSelection}
+                  closeButtonAriaLabel="Clear assignee selection"
+                />
+              </Box>
+            ) : null}
+            <Box style={{ position: 'relative' }}>
+              <TextInput
+                value={assigneeQuery}
+                onChange={(event) => setAssigneeQuery(event.target.value)}
+                placeholder={
+                  selectedAssignee
+                    ? selectedAssignee.name
+                    : task.assigneeName || 'Search people to assign'
+                }
+                isDisabled={isBusy}
+              />
+              {assigneeQuery.trim() ? (
+                <Box
+                  marginTop="spacing2Xs"
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    right: 0,
+                    zIndex: 2,
+                    border: '1px solid #cfd9e0',
+                    borderRadius: '6px',
+                    backgroundColor: 'white',
+                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
+                    overflow: 'hidden',
+                  }}>
+                  {isSearchingAssignees ? (
+                    <Paragraph margin="spacingS">Searching Asana people...</Paragraph>
+                  ) : assigneeResults.length ? (
+                    <Flex flexDirection="column" style={{ maxHeight: '220px', overflowY: 'auto' }}>
+                      {assigneeResults.map((candidate, index) => (
+                        <Button
+                          key={candidate.gid}
+                          variant="transparent"
+                          isFullWidth
+                          isDisabled={isBusy}
+                          onClick={() => handleSelectAssignee(candidate)}
+                          style={{
+                            justifyContent: 'flex-start',
+                            borderRadius: 0,
+                            borderTop: index === 0 ? 'none' : '1px solid #e5ebed',
+                          }}>
+                          {candidate.name}
+                          {candidate.email ? ` (${candidate.email})` : ''}
+                        </Button>
+                      ))}
+                    </Flex>
+                  ) : (
+                    <Paragraph margin="spacingS">No matching people found.</Paragraph>
+                  )}
+                </Box>
+              ) : null}
+            </Box>
+            <FormControl.HelpText>
+              Currently: {task.assigneeName || 'Unassigned'}. Search by name or email to reassign.
+            </FormControl.HelpText>
+          </FormControl>
+          <FormControl style={{ minWidth: '200px', flex: 1 }}>
+            <FormControl.Label>Due date</FormControl.Label>
+            <TextInput
+              type="date"
+              value={dueDate}
+              onChange={(event) => setDueDate(event.target.value)}
+              isDisabled={isBusy}
+            />
+            <FormControl.HelpText>Clear the date to remove the due date.</FormControl.HelpText>
+          </FormControl>
         </Flex>
 
         <FormControl>
@@ -193,10 +448,85 @@ const Dialog = () => {
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             rows={8}
-            isDisabled={isSaving || isPostingComment}
+            isDisabled={isBusy}
           />
           <FormControl.HelpText>Updates the linked Asana task description.</FormControl.HelpText>
         </FormControl>
+
+        <Box>
+          <Text as="div" marginBottom="spacingXs" fontColor="gray600">
+            Dependencies
+          </Text>
+          <Flex gap="spacingXs" flexWrap="wrap" marginBottom="spacingS">
+            {effectiveDependencies.length ? (
+              effectiveDependencies.map((dependency) => (
+                <Pill
+                  key={dependency.gid}
+                  label={dependency.name}
+                  onClose={() => handleRemoveDependency(dependency.gid)}
+                  closeButtonAriaLabel={`Remove ${dependency.name} dependency`}
+                />
+              ))
+            ) : (
+              <Text fontColor="gray500">No dependencies.</Text>
+            )}
+          </Flex>
+          {workspaceGid ? (
+            <FormControl marginBottom="none">
+              <FormControl.Label>Add dependency</FormControl.Label>
+              <Box style={{ position: 'relative' }}>
+                <TextInput
+                  value={dependencyQuery}
+                  onChange={(event) => setDependencyQuery(event.target.value)}
+                  placeholder="Search Asana tasks to add as a dependency"
+                  isDisabled={isBusy}
+                />
+                {dependencyQuery.trim() ? (
+                  <Box
+                    marginTop="spacing2Xs"
+                    style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      right: 0,
+                      zIndex: 2,
+                      border: '1px solid #cfd9e0',
+                      borderRadius: '6px',
+                      backgroundColor: 'white',
+                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
+                      overflow: 'hidden',
+                    }}>
+                    {isSearchingDependencies ? (
+                      <Paragraph margin="spacingS">Searching Asana tasks...</Paragraph>
+                    ) : dependencyResults.length ? (
+                      <Flex
+                        flexDirection="column"
+                        style={{ maxHeight: '220px', overflowY: 'auto' }}>
+                        {dependencyResults.map((candidate, index) => (
+                          <Button
+                            key={candidate.gid}
+                            variant="transparent"
+                            isFullWidth
+                            isDisabled={isBusy}
+                            onClick={() => handleAddDependency(candidate)}
+                            style={{
+                              justifyContent: 'flex-start',
+                              borderRadius: 0,
+                              borderTop: index === 0 ? 'none' : '1px solid #e5ebed',
+                            }}>
+                            {candidate.name}
+                          </Button>
+                        ))}
+                      </Flex>
+                    ) : (
+                      <Paragraph margin="spacingS">No matching tasks found.</Paragraph>
+                    )}
+                  </Box>
+                ) : null}
+              </Box>
+            </FormControl>
+          ) : null}
+        </Box>
 
         <Box>
           <FormControl marginBottom="none">
@@ -205,7 +535,7 @@ const Dialog = () => {
               value={comment}
               onChange={(event) => setComment(event.target.value)}
               rows={4}
-              isDisabled={isSaving || isPostingComment}
+              isDisabled={isBusy}
               placeholder="Write a new Asana comment"
             />
             <FormControl.HelpText>
@@ -215,24 +545,21 @@ const Dialog = () => {
         </Box>
 
         <Flex justifyContent="flex-end" gap="spacingS">
-          <Button
-            variant="secondary"
-            onClick={handleClose}
-            isDisabled={isSaving || isPostingComment}>
+          <Button variant="secondary" onClick={handleClose} isDisabled={isBusy}>
             Close
           </Button>
           <Button
             variant="secondary"
             onClick={handleAddComment}
             isLoading={isPostingComment}
-            isDisabled={isSaving || isPostingComment}>
+            isDisabled={isBusy}>
             Add comment
           </Button>
           <Button
-            onClick={handleSaveDescription}
+            onClick={handleSaveDetails}
             isLoading={isSaving}
-            isDisabled={!hasDescriptionChanges || isSaving || isPostingComment}>
-            Save description
+            isDisabled={!hasDetailChanges || isBusy}>
+            Save changes
           </Button>
         </Flex>
       </Flex>

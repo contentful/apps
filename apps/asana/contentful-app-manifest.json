@@ -4,20 +4,6 @@
       "location": "app-config"
     },
     {
-      "location": "entry-field",
-      "fieldTypes": [
-        {
-          "type": "Symbol"
-        },
-        {
-          "type": "Text"
-        },
-        {
-          "type": "Object"
-        }
-      ]
-    },
-    {
       "location": "entry-sidebar"
     },
     {
@@ -31,8 +17,12 @@
       "description": "Validates the configured Asana personal access token by loading visible workspaces.",
       "path": "functions/validateAsanaCredentials.js",
       "entryFile": "functions/validateAsanaCredentials.ts",
-      "allowNetworks": ["https://app.asana.com"],
-      "accepts": ["appaction.call"]
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
     },
     {
       "id": "getAsanaWorkspacesFunction",
@@ -40,8 +30,12 @@
       "description": "Returns the visible Asana workspaces for the configured token.",
       "path": "functions/getAsanaWorkspaces.js",
       "entryFile": "functions/getAsanaWorkspaces.ts",
-      "allowNetworks": ["https://app.asana.com"],
-      "accepts": ["appaction.call"]
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
     },
     {
       "id": "getAsanaProjectsFunction",
@@ -49,8 +43,12 @@
       "description": "Searches visible Asana projects for a workspace.",
       "path": "functions/getAsanaProjects.js",
       "entryFile": "functions/getAsanaProjects.ts",
-      "allowNetworks": ["https://app.asana.com"],
-      "accepts": ["appaction.call"]
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
     },
     {
       "id": "createAsanaTaskFunction",
@@ -58,8 +56,12 @@
       "description": "Creates an Asana task using configured defaults and per-call overrides.",
       "path": "functions/createAsanaTask.js",
       "entryFile": "functions/createAsanaTask.ts",
-      "allowNetworks": ["https://app.asana.com"],
-      "accepts": ["appaction.call"]
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
     },
     {
       "id": "updateAsanaTaskFunction",
@@ -67,8 +69,12 @@
       "description": "Updates an existing Asana task by GID or task URL.",
       "path": "functions/updateAsanaTask.js",
       "entryFile": "functions/updateAsanaTask.ts",
-      "allowNetworks": ["https://app.asana.com"],
-      "accepts": ["appaction.call"]
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
     },
     {
       "id": "getAsanaTaskFunction",
@@ -76,8 +82,12 @@
       "description": "Loads details for an existing Asana task by GID or task URL.",
       "path": "functions/getAsanaTask.js",
       "entryFile": "functions/getAsanaTask.ts",
-      "allowNetworks": ["https://app.asana.com"],
-      "accepts": ["appaction.call"]
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
     },
     {
       "id": "getAsanaTasksFunction",
@@ -85,8 +95,25 @@
       "description": "Searches visible Asana tasks for a workspace or project.",
       "path": "functions/getAsanaTasks.js",
       "entryFile": "functions/getAsanaTasks.ts",
-      "allowNetworks": ["https://app.asana.com"],
-      "accepts": ["appaction.call"]
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "getAsanaUsersFunction",
+      "name": "Search Asana users",
+      "description": "Searches visible Asana users for a workspace.",
+      "path": "functions/getAsanaUsers.js",
+      "entryFile": "functions/getAsanaUsers.ts",
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
     },
     {
       "id": "addAsanaCommentFunction",
@@ -94,8 +121,12 @@
       "description": "Adds a comment to an existing Asana task.",
       "path": "functions/addAsanaComment.js",
       "entryFile": "functions/addAsanaComment.ts",
-      "allowNetworks": ["https://app.asana.com"],
-      "accepts": ["appaction.call"]
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
     },
     {
       "id": "appEventHandler",
@@ -103,17 +134,64 @@
       "description": "Function to handle Contentful app events.",
       "path": "functions/appEventHandler.js",
       "entryFile": "functions/appEventHandler.ts",
-      "allowNetworks": ["https://app.asana.com"],
-      "accepts": ["appevent.handler"]
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appevent.handler"
+      ]
     },
     {
-      "id": "exchangeAsanaOAuthCodeFunction",
-      "name": "Exchange Asana OAuth code",
-      "description": "Exchanges an Asana OAuth authorization code for an access and refresh token.",
-      "path": "functions/exchangeAsanaOAuthCode.js",
-      "entryFile": "functions/exchangeAsanaOAuthCode.ts",
-      "allowNetworks": ["https://app.asana.com"],
-      "accepts": ["appaction.call"]
+      "id": "initiateOauthFunction",
+      "name": "Initiate Asana OAuth",
+      "description": "Initiates the Asana OAuth flow using the Functions OAuth SDK.",
+      "path": "functions/initiateOauth.js",
+      "entryFile": "functions/initiateOauth.ts",
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "completeOauthFunction",
+      "name": "Complete Asana OAuth",
+      "description": "Completes the Asana OAuth flow using the Functions OAuth SDK.",
+      "path": "functions/completeOauth.js",
+      "entryFile": "functions/completeOauth.ts",
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "disconnectFunction",
+      "name": "Disconnect Asana",
+      "description": "Revokes the stored Asana OAuth connection.",
+      "path": "functions/disconnect.js",
+      "entryFile": "functions/disconnect.ts",
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "checkStatusFunction",
+      "name": "Check Asana connection status",
+      "description": "Checks whether the app currently has a valid Asana OAuth connection.",
+      "path": "functions/checkStatus.js",
+      "entryFile": "functions/checkStatus.ts",
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
     }
   ],
   "actions": [
@@ -123,14 +201,7 @@
       "type": "function-invocation",
       "functionId": "validateAsanaCredentialsFunction",
       "category": "Custom",
-      "parameters": [
-        {
-          "id": "accessToken",
-          "name": "Asana access token (transient override)",
-          "type": "Symbol",
-          "required": false
-        }
-      ],
+      "parameters": [],
       "resultSchema": {
         "type": "object",
         "properties": {
@@ -141,7 +212,10 @@
             "type": "string"
           }
         },
-        "required": ["valid", "message"]
+        "required": [
+          "valid",
+          "message"
+        ]
       }
     },
     {
@@ -150,14 +224,7 @@
       "type": "function-invocation",
       "functionId": "getAsanaWorkspacesFunction",
       "category": "Custom",
-      "parameters": [
-        {
-          "id": "accessToken",
-          "name": "Asana access token (transient override)",
-          "type": "Symbol",
-          "required": false
-        }
-      ],
+      "parameters": [],
       "resultSchema": {
         "type": "object",
         "properties": {
@@ -173,11 +240,16 @@
                   "type": "string"
                 }
               },
-              "required": ["gid", "name"]
+              "required": [
+                "gid",
+                "name"
+              ]
             }
           }
         },
-        "required": ["workspaces"]
+        "required": [
+          "workspaces"
+        ]
       }
     },
     {
@@ -187,12 +259,6 @@
       "functionId": "getAsanaProjectsFunction",
       "category": "Custom",
       "parameters": [
-        {
-          "id": "accessToken",
-          "name": "Asana access token (transient override)",
-          "type": "Symbol",
-          "required": false
-        },
         {
           "id": "workspaceGid",
           "name": "Workspace GID",
@@ -221,11 +287,16 @@
                   "type": "string"
                 }
               },
-              "required": ["gid", "name"]
+              "required": [
+                "gid",
+                "name"
+              ]
             }
           }
         },
-        "required": ["projects"]
+        "required": [
+          "projects"
+        ]
       }
     },
     {
@@ -302,14 +373,39 @@
               "assigneeName": {
                 "type": "string"
               },
+              "assigneeGid": {
+                "type": "string"
+              },
               "dueDate": {
                 "type": "string"
               },
               "completed": {
                 "type": "boolean"
+              },
+              "dependencies": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "gid": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "gid",
+                    "name"
+                  ]
+                }
               }
             },
-            "required": ["gid", "name", "permalinkUrl"]
+            "required": [
+              "gid",
+              "name",
+              "permalinkUrl"
+            ]
           },
           "projectGid": {
             "type": "string"
@@ -321,7 +417,10 @@
             "type": "boolean"
           }
         },
-        "required": ["success", "message"]
+        "required": [
+          "success",
+          "message"
+        ]
       }
     },
     {
@@ -353,6 +452,30 @@
           "id": "completed",
           "name": "Completed",
           "type": "Boolean",
+          "required": false
+        },
+        {
+          "id": "assignee",
+          "name": "Assignee email or GID",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "dueDate",
+          "name": "Due date (YYYY-MM-DD)",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "addDependencyGid",
+          "name": "Dependency task GID to add",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "removeDependencyGid",
+          "name": "Dependency task GID to remove",
+          "type": "Symbol",
           "required": false
         }
       ],
@@ -386,17 +509,45 @@
               "assigneeName": {
                 "type": "string"
               },
+              "assigneeGid": {
+                "type": "string"
+              },
               "dueDate": {
                 "type": "string"
               },
               "completed": {
                 "type": "boolean"
+              },
+              "dependencies": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "gid": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "gid",
+                    "name"
+                  ]
+                }
               }
             },
-            "required": ["gid", "name", "permalinkUrl"]
+            "required": [
+              "gid",
+              "name",
+              "permalinkUrl"
+            ]
           }
         },
-        "required": ["success", "message"]
+        "required": [
+          "success",
+          "message"
+        ]
       }
     },
     {
@@ -429,7 +580,10 @@
             "type": "string"
           }
         },
-        "required": ["success", "message"]
+        "required": [
+          "success",
+          "message"
+        ]
       }
     },
     {
@@ -476,17 +630,45 @@
               "assigneeName": {
                 "type": "string"
               },
+              "assigneeGid": {
+                "type": "string"
+              },
               "dueDate": {
                 "type": "string"
               },
               "completed": {
                 "type": "boolean"
+              },
+              "dependencies": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "gid": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "gid",
+                    "name"
+                  ]
+                }
               }
             },
-            "required": ["gid", "name", "permalinkUrl"]
+            "required": [
+              "gid",
+              "name",
+              "permalinkUrl"
+            ]
           }
         },
-        "required": ["success", "message"]
+        "required": [
+          "success",
+          "message"
+        ]
       }
     },
     {
@@ -530,18 +712,92 @@
                   "type": "string"
                 }
               },
-              "required": ["gid", "name"]
+              "required": [
+                "gid",
+                "name"
+              ]
             }
           }
         },
-        "required": ["tasks"]
+        "required": [
+          "tasks"
+        ]
       }
     },
     {
-      "id": "exchangeAsanaOAuthCodeAction",
-      "name": "Exchange Asana OAuth code",
+      "id": "getAsanaUsersAction",
+      "name": "Search Asana users",
       "type": "function-invocation",
-      "functionId": "exchangeAsanaOAuthCodeFunction",
+      "functionId": "getAsanaUsersFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "workspaceGid",
+          "name": "Workspace GID",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "query",
+          "name": "User query",
+          "type": "Symbol",
+          "required": false
+        }
+      ],
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "gid": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "gid",
+                "name"
+              ]
+            }
+          }
+        },
+        "required": [
+          "users"
+        ]
+      }
+    },
+    {
+      "id": "initiateOauthAction",
+      "name": "Initiate Oauth",
+      "type": "function-invocation",
+      "functionId": "initiateOauthFunction",
+      "category": "Custom",
+      "parameters": [],
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "authorizationUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "authorizationUrl"
+        ]
+      }
+    },
+    {
+      "id": "completeOauthAction",
+      "name": "Complete Oauth",
+      "type": "function-invocation",
+      "functionId": "completeOauthFunction",
       "category": "Custom",
       "parameters": [
         {
@@ -551,26 +807,8 @@
           "required": true
         },
         {
-          "id": "codeVerifier",
-          "name": "PKCE code verifier",
-          "type": "Symbol",
-          "required": true
-        },
-        {
-          "id": "redirectUri",
-          "name": "Redirect URI",
-          "type": "Symbol",
-          "required": true
-        },
-        {
-          "id": "clientId",
-          "name": "Asana OAuth client ID",
-          "type": "Symbol",
-          "required": true
-        },
-        {
-          "id": "clientSecret",
-          "name": "Asana OAuth client secret",
+          "id": "state",
+          "name": "OAuth state",
           "type": "Symbol",
           "required": true
         }
@@ -583,15 +821,54 @@
           },
           "message": {
             "type": "string"
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      }
+    },
+    {
+      "id": "disconnectAction",
+      "name": "Disconnect",
+      "type": "function-invocation",
+      "functionId": "disconnectFunction",
+      "category": "Custom",
+      "parameters": [],
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
           },
-          "accessToken": {
-            "type": "string"
-          },
-          "refreshToken": {
+          "message": {
             "type": "string"
           }
         },
-        "required": ["success", "message"]
+        "required": [
+          "success",
+          "message"
+        ]
+      }
+    },
+    {
+      "id": "checkStatusAction",
+      "name": "Check Status",
+      "type": "function-invocation",
+      "functionId": "checkStatusFunction",
+      "category": "Custom",
+      "parameters": [],
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "connected": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "connected"
+        ]
       }
     }
   ]

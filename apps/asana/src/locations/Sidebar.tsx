@@ -12,47 +12,44 @@ import {
   TextLink,
 } from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import { useEffect, useMemo, useState, type MouseEvent } from 'react';
+import { useEffect, useState, type MouseEvent } from 'react';
 import { ASANA_AUTOMATION_CONFIG, VALIDATION_MESSAGES } from '../const';
 import {
-  ConnectionStatus,
   type AppInstallationParameters,
+  type AsanaTask,
+  type CheckAsanaStatusResponse,
   type CreateAsanaTaskResponse,
   type GetAsanaTaskResponse,
   type GetAsanaTasksResponse,
   type PrimaryAsanaTaskLink,
-  type PrimaryAsanaTaskLinkValue,
   type TaskDetailsDialogResult,
   type TaskDetailsDialogParameters,
 } from '../types';
+import { parseInstallationParameters } from '../utils/installationParameters';
 import {
-  buildPrimaryTaskLinkFromEntryValues,
-  getPrimaryTaskLinkMapping,
-} from '../utils/primaryTaskLink';
+  deleteTaskLinkForEntry,
+  getTaskLinkForEntry,
+  saveTaskLinkForEntry,
+} from '../utils/taskLinkStore';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
   useAutoResizer();
 
-  const installationParameters = sdk.parameters.installation as AppInstallationParameters;
+  const installationParameters = parseInstallationParameters(
+    sdk.parameters.installation as AppInstallationParameters
+  );
   const entryTitle = sdk.contentType.displayField
     ? sdk.entry.fields[sdk.contentType.displayField]?.getValue()
     : '';
   const entrySys = sdk.entry.getSys();
   const contentTypeId = sdk.contentType.sys.id;
-  const contentTypeFields = sdk.contentType.fields.map((field) => ({
-    id: field.id,
-    name: field.name,
-    type: field.type,
-  }));
-  const hasConnection =
-    installationParameters?.connectionStatus === ConnectionStatus.Success &&
-    Boolean(installationParameters?.defaultProjectGid);
-  const primaryTaskMapping = useMemo(
-    () => getPrimaryTaskLinkMapping(installationParameters, contentTypeId, contentTypeFields),
-    [contentTypeFields, contentTypeId, installationParameters]
-  );
+  const hasDefaultProject = Boolean(installationParameters?.defaultProjectGid);
+  const [isUserConnected, setIsUserConnected] = useState(false);
+  const [isCheckingUserConnection, setIsCheckingUserConnection] = useState(true);
+  const hasConnection = hasDefaultProject && isUserConnected;
   const [taskLink, setTaskLink] = useState<PrimaryAsanaTaskLink | null>(null);
+  const [isLoadingTaskLink, setIsLoadingTaskLink] = useState(true);
   const [isCreatingTask, setIsCreatingTask] = useState(false);
   const [isLinkingTask, setIsLinkingTask] = useState(false);
   const [isUnlinkingTask, setIsUnlinkingTask] = useState(false);
@@ -65,158 +62,39 @@ const Sidebar = () => {
   const [isSearchingTasks, setIsSearchingTasks] = useState(false);
   const [showManualLinkInput, setShowManualLinkInput] = useState(false);
 
-  const getFirstLocalizedEntryValue = (field?: Record<string, unknown>) => {
-    if (!field) {
-      return undefined;
-    }
-
-    return Object.values(field).find((value) => value !== undefined);
-  };
-
-  const buildTaskLinkFromLocalizedEntryFields = (
-    fields: Record<string, Record<string, unknown> | undefined>
-  ) => {
-    if (!primaryTaskMapping) {
-      return null;
-    }
-
-    const mappedValues = {
-      ...(primaryTaskMapping.objectFieldId
-        ? {
-            [primaryTaskMapping.objectFieldId]: getFirstLocalizedEntryValue(
-              fields[primaryTaskMapping.objectFieldId]
-            ),
-          }
-        : {}),
-      ...(primaryTaskMapping.taskGidFieldId
-        ? {
-            [primaryTaskMapping.taskGidFieldId]: getFirstLocalizedEntryValue(
-              fields[primaryTaskMapping.taskGidFieldId]
-            ),
-          }
-        : {}),
-      ...(primaryTaskMapping.taskUrlFieldId
-        ? {
-            [primaryTaskMapping.taskUrlFieldId]: getFirstLocalizedEntryValue(
-              fields[primaryTaskMapping.taskUrlFieldId]
-            ),
-          }
-        : {}),
-      ...(primaryTaskMapping.taskNameFieldId
-        ? {
-            [primaryTaskMapping.taskNameFieldId]: getFirstLocalizedEntryValue(
-              fields[primaryTaskMapping.taskNameFieldId]
-            ),
-          }
-        : {}),
-    } as Record<string, PrimaryAsanaTaskLinkValue | string | undefined>;
-
-    const nextTaskLink = buildPrimaryTaskLinkFromEntryValues(mappedValues, primaryTaskMapping);
-    return nextTaskLink ? { ...nextTaskLink, entryId: entrySys.id } : null;
-  };
-
-  const readMappedTaskLink = () => {
-    if (!primaryTaskMapping) {
-      setTaskLink(null);
-      return;
-    }
-
-    const mappedValues = {
-      ...(primaryTaskMapping.objectFieldId
-        ? {
-            [primaryTaskMapping.objectFieldId]:
-              sdk.entry.fields[primaryTaskMapping.objectFieldId]?.getValue(),
-          }
-        : {}),
-      ...(primaryTaskMapping.taskGidFieldId
-        ? {
-            [primaryTaskMapping.taskGidFieldId]:
-              sdk.entry.fields[primaryTaskMapping.taskGidFieldId]?.getValue(),
-          }
-        : {}),
-      ...(primaryTaskMapping.taskUrlFieldId
-        ? {
-            [primaryTaskMapping.taskUrlFieldId]:
-              sdk.entry.fields[primaryTaskMapping.taskUrlFieldId]?.getValue(),
-          }
-        : {}),
-      ...(primaryTaskMapping.taskNameFieldId
-        ? {
-            [primaryTaskMapping.taskNameFieldId]:
-              sdk.entry.fields[primaryTaskMapping.taskNameFieldId]?.getValue(),
-          }
-        : {}),
-    } as Record<string, PrimaryAsanaTaskLinkValue | string | undefined>;
-
-    const nextTaskLink = buildPrimaryTaskLinkFromEntryValues(mappedValues, primaryTaskMapping);
-    setTaskLink(nextTaskLink ? { ...nextTaskLink, entryId: entrySys.id } : null);
-  };
-
   useEffect(() => {
-    readMappedTaskLink();
+    let isCancelled = false;
 
-    if (!primaryTaskMapping) {
-      return;
-    }
-
-    const detachListeners = [
-      primaryTaskMapping.objectFieldId
-        ? sdk.entry.fields[primaryTaskMapping.objectFieldId]?.onValueChanged(() =>
-            readMappedTaskLink()
-          )
-        : undefined,
-      primaryTaskMapping.taskGidFieldId
-        ? sdk.entry.fields[primaryTaskMapping.taskGidFieldId]?.onValueChanged(() =>
-            readMappedTaskLink()
-          )
-        : undefined,
-      primaryTaskMapping.taskUrlFieldId
-        ? sdk.entry.fields[primaryTaskMapping.taskUrlFieldId]?.onValueChanged(() =>
-            readMappedTaskLink()
-          )
-        : undefined,
-      primaryTaskMapping.taskNameFieldId
-        ? sdk.entry.fields[primaryTaskMapping.taskNameFieldId]?.onValueChanged(() =>
-            readMappedTaskLink()
-          )
-        : undefined,
-    ].filter(Boolean) as Array<() => void>;
-
-    return () => {
-      detachListeners.forEach((detach) => detach());
-    };
-  }, [entrySys.id, primaryTaskMapping]);
-
-  useEffect(() => {
-    if (!primaryTaskMapping || taskLink) {
-      return;
-    }
-
-    let isCanceled = false;
-
-    const refreshTaskLinkFromCma = async () => {
+    const loadTaskLink = async () => {
       try {
-        const entry = await sdk.cma.entry.get({ entryId: entrySys.id });
-        const nextTaskLink = buildTaskLinkFromLocalizedEntryFields(
-          entry.fields as Record<string, Record<string, unknown> | undefined>
-        );
-
-        if (!isCanceled && nextTaskLink) {
-          setTaskLink(nextTaskLink);
+        const link = await getTaskLinkForEntry(sdk.cma, entrySys.id);
+        if (!isCancelled) {
+          setTaskLink(link);
         }
       } catch {
-        // Best-effort refresh so an open sidebar can notice automation write-backs.
+        // Best-effort load so a temporary CMA error doesn't block the sidebar.
+      } finally {
+        if (!isCancelled) {
+          setIsLoadingTaskLink(false);
+        }
       }
     };
 
-    void refreshTaskLinkFromCma();
-    const intervalId = window.setInterval(refreshTaskLinkFromCma, 3000);
+    void loadTaskLink();
+
+    // Poll while unlinked so an open sidebar notices tasks created elsewhere
+    // (e.g. by the automation-driven app function) without a manual refresh.
+    const intervalId = window.setInterval(() => {
+      if (!taskLink) {
+        void loadTaskLink();
+      }
+    }, 3000);
 
     return () => {
-      isCanceled = true;
+      isCancelled = true;
       window.clearInterval(intervalId);
     };
-  }, [entrySys.id, primaryTaskMapping, sdk.cma.entry, taskLink]);
+  }, [entrySys.id, sdk.cma]);
 
   const openAppConfig = async (event: MouseEvent) => {
     event.preventDefault();
@@ -234,6 +112,31 @@ const Sidebar = () => {
 
     return JSON.parse(response.response.body) as TResult;
   };
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    (async () => {
+      try {
+        const status = await callAction<CheckAsanaStatusResponse>('checkStatusAction');
+        if (!isCancelled) {
+          setIsUserConnected(status.connected);
+        }
+      } catch {
+        if (!isCancelled) {
+          setIsUserConnected(false);
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsCheckingUserConnection(false);
+        }
+      }
+    })();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [sdk]);
 
   const entryUrl = `https://app.contentful.com/spaces/${sdk.ids.space}/environments/${sdk.ids.environment}/entries/${entrySys.id}`;
   const taskNameFieldValue = sdk.entry.fields[ASANA_AUTOMATION_CONFIG.taskNameFieldId]?.getValue();
@@ -288,6 +191,7 @@ const Sidebar = () => {
             ...(latestTask.status ? { status: latestTask.status } : {}),
             ...(latestTask.assigneeName ? { assigneeName: latestTask.assigneeName } : {}),
             ...(latestTask.dueDate ? { dueDate: latestTask.dueDate } : {}),
+            ...(latestTask.dependencies ? { dependencies: latestTask.dependencies } : {}),
           }
         : {
             taskGid: taskLink.taskGid,
@@ -299,12 +203,15 @@ const Sidebar = () => {
             ...(taskLink.dueDate ? { dueDate: taskLink.dueDate } : {}),
           };
 
+      const workspaceGid = latestTask?.workspaceGid || installationParameters.defaultWorkspaceGid;
+
       const result = (await sdk.dialogs.openCurrentApp({
         title: 'Manage Asana task',
         width: 'large',
         minHeight: '560px',
         parameters: {
           ...dialogTask,
+          ...(workspaceGid ? { workspaceGid } : {}),
         } satisfies TaskDetailsDialogParameters,
       })) as TaskDetailsDialogResult | null;
 
@@ -316,115 +223,33 @@ const Sidebar = () => {
     }
   };
 
-  const savePrimaryTaskLink = async (task: {
-    gid: string;
-    name: string;
-    permalinkUrl: string;
-    description?: string;
-    status?: string;
-    assigneeName?: string;
-    dueDate?: string;
-  }) => {
-    const nextTaskLinkValue: PrimaryAsanaTaskLinkValue = {
-      taskGid: task.gid,
-      taskUrl: task.permalinkUrl,
-      taskName: task.name,
-      ...(typeof task.description === 'string' ? { taskDescription: task.description } : {}),
-      ...(typeof task.status === 'string' ? { status: task.status } : {}),
-      ...(typeof task.assigneeName === 'string' ? { assigneeName: task.assigneeName } : {}),
-      ...(typeof task.dueDate === 'string' ? { dueDate: task.dueDate } : {}),
-    };
-
-    const objectField = primaryTaskMapping?.objectFieldId
-      ? sdk.entry.fields[primaryTaskMapping.objectFieldId]
-      : undefined;
-    const taskGidField = primaryTaskMapping?.taskGidFieldId
-      ? sdk.entry.fields[primaryTaskMapping.taskGidFieldId]
-      : undefined;
-    const taskUrlField = primaryTaskMapping?.taskUrlFieldId
-      ? sdk.entry.fields[primaryTaskMapping.taskUrlFieldId]
-      : undefined;
-    const taskNameField = primaryTaskMapping?.taskNameFieldId
-      ? sdk.entry.fields[primaryTaskMapping.taskNameFieldId]
-      : undefined;
-
-    if (!objectField && !taskGidField && !taskUrlField && !taskNameField) {
-      throw new Error('No writable Asana link field is configured on this entry.');
-    }
-
-    if (objectField) {
-      await objectField.setValue(nextTaskLinkValue);
-    }
-
-    if (taskGidField) {
-      await taskGidField.setValue(task.gid);
-    }
-
-    if (taskUrlField) {
-      await taskUrlField.setValue(task.permalinkUrl);
-    }
-
-    if (taskNameField) {
-      await taskNameField.setValue(task.name);
-    }
-
-    await sdk.entry.save();
-    setTaskLink({
+  const savePrimaryTaskLink = async (task: AsanaTask) => {
+    const savedTaskLink = await saveTaskLinkForEntry(sdk.cma, {
       entryId: entrySys.id,
-      taskGid: task.gid,
-      taskUrl: task.permalinkUrl,
-      taskName: task.name,
-      ...(typeof task.description === 'string' ? { taskDescription: task.description } : {}),
-      ...(typeof task.status === 'string' ? { status: task.status } : {}),
-      ...(typeof task.assigneeName === 'string' ? { assigneeName: task.assigneeName } : {}),
-      ...(typeof task.dueDate === 'string' ? { dueDate: task.dueDate } : {}),
+      contentTypeId,
+      task,
     });
+
+    setTaskLink(
+      savedTaskLink ?? {
+        entryId: entrySys.id,
+        taskGid: task.gid,
+        taskUrl: task.permalinkUrl,
+        taskName: task.name,
+        ...(typeof task.description === 'string' ? { taskDescription: task.description } : {}),
+        ...(typeof task.status === 'string' ? { status: task.status } : {}),
+        ...(typeof task.assigneeName === 'string' ? { assigneeName: task.assigneeName } : {}),
+        ...(typeof task.dueDate === 'string' ? { dueDate: task.dueDate } : {}),
+      }
+    );
   };
 
   const clearPrimaryTaskLink = async () => {
-    const objectField = primaryTaskMapping?.objectFieldId
-      ? sdk.entry.fields[primaryTaskMapping.objectFieldId]
-      : undefined;
-    const taskGidField = primaryTaskMapping?.taskGidFieldId
-      ? sdk.entry.fields[primaryTaskMapping.taskGidFieldId]
-      : undefined;
-    const taskUrlField = primaryTaskMapping?.taskUrlFieldId
-      ? sdk.entry.fields[primaryTaskMapping.taskUrlFieldId]
-      : undefined;
-    const taskNameField = primaryTaskMapping?.taskNameFieldId
-      ? sdk.entry.fields[primaryTaskMapping.taskNameFieldId]
-      : undefined;
-
-    if (!objectField && !taskGidField && !taskUrlField && !taskNameField) {
-      throw new Error('No writable Asana link field is configured on this entry.');
-    }
-
-    if (objectField) {
-      await objectField.setValue({});
-    }
-
-    if (taskGidField) {
-      await taskGidField.setValue('');
-    }
-
-    if (taskUrlField) {
-      await taskUrlField.setValue('');
-    }
-
-    if (taskNameField) {
-      await taskNameField.setValue('');
-    }
-
-    await sdk.entry.save();
+    await deleteTaskLinkForEntry(sdk.cma, entrySys.id);
     setTaskLink(null);
   };
 
   const createPrimaryTask = async () => {
-    if (!primaryTaskMapping) {
-      sdk.notifier.error('Configure primary task link fields for this content type first.');
-      return;
-    }
-
     const taskTitle = buildTaskTitle();
     if (!taskTitle) {
       sdk.notifier.error(VALIDATION_MESSAGES.taskTitleRequired);
@@ -457,11 +282,6 @@ const Sidebar = () => {
   };
 
   const linkTaskById = async (taskIdentifier: string) => {
-    if (!primaryTaskMapping) {
-      sdk.notifier.error('Configure primary task link fields for this content type first.');
-      return;
-    }
-
     const taskId = taskIdentifier.trim();
     if (!taskId) {
       sdk.notifier.error(VALIDATION_MESSAGES.taskIdRequired);
@@ -527,7 +347,7 @@ const Sidebar = () => {
   }, [hasConnection, installationParameters.defaultWorkspaceGid, sdk, taskLink, taskSearchQuery]);
 
   const unlinkTask = async () => {
-    if (!primaryTaskMapping || !taskLink) {
+    if (!taskLink) {
       return;
     }
 
@@ -546,10 +366,17 @@ const Sidebar = () => {
 
   return (
     <Stack flexDirection="column" spacing="spacingM">
-      {!hasConnection ? (
+      {isCheckingUserConnection ? null : !isUserConnected ? (
+        <Note variant="warning" title="Connect your Asana account">
+          You haven&apos;t connected your Asana account yet. Connect in the app config before
+          building entry-to-task linking.
+          <TextLink href="#" onClick={openAppConfig}>
+            Open app configuration
+          </TextLink>
+        </Note>
+      ) : !hasConnection ? (
         <Note variant="warning" title="Finish Asana setup first">
-          Connect Asana and choose a default project in the app config before building entry-to-task
-          linking.
+          Choose a default project in the app config before building entry-to-task linking.
           <TextLink href="#" onClick={openAppConfig}>
             Open app configuration
           </TextLink>
@@ -562,15 +389,7 @@ const Sidebar = () => {
 
       <Box>
         <SectionHeading>Primary Asana Task</SectionHeading>
-        {!primaryTaskMapping ? (
-          <Note variant="warning" title="Configure link storage first">
-            Configure the primary Asana task field for this content type in the app configuration
-            before creating a primary Asana task.
-            <TextLink href="#" onClick={openAppConfig}>
-              Open app configuration
-            </TextLink>
-          </Note>
-        ) : taskLink ? (
+        {isLoadingTaskLink ? null : taskLink ? (
           <Stack flexDirection="column" spacing="spacingM" alignItems="stretch">
             <Box>
               <Text as="div" marginBottom="spacing2Xs" fontColor="gray600">

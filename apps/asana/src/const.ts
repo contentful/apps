@@ -4,10 +4,14 @@ export const VALIDATION_MESSAGES = {
   saveFailed: 'Configuration could not be saved.',
   connectionRequired: 'Connect to Asana before testing the connection.',
   installRequired: 'Please install the app before testing the connection.',
-  oauthCredentialsRequired: 'Enter an Asana OAuth client ID and client secret before connecting.',
   popupBlocked: 'Enable popups for this site to connect to Asana.',
   validCredentials: 'Your Asana token is valid.',
   invalidCredentials: 'Asana authentication failed. Check your token and try again.',
+  oauthCodeRequired: 'Missing Asana authorization details. Please try connecting again.',
+  oauthConnected: 'Connected to Asana successfully.',
+  oauthConnectFailed: 'Could not connect to Asana. Please try again.',
+  oauthDisconnected: 'Disconnected from Asana successfully.',
+  oauthDisconnectFailed: 'Could not disconnect from Asana. Please try again.',
   workspacesFailed: 'Could not load Asana workspaces.',
   projectsFailed: 'Could not load Asana projects.',
   taskTitleRequired: 'Enter an Asana task title.',
@@ -32,9 +36,19 @@ export const ASANA_AUTOMATION_CONFIG = {
   taskNotesFieldId: 'taskNotes',
 } as const;
 
-export const PRIMARY_TASK_LINK_FIELD_IDS = {
-  objectFieldId: 'asanaTaskLink',
-  taskGidFieldId: 'asanaTaskGid',
-  taskUrlFieldId: 'asanaTaskUrl',
-  taskNameFieldId: 'asanaTaskName',
+export const TASK_LINK_CONTENT_TYPE_ID = 'asanaTaskLink';
+
+export const TASK_LINK_CONTENT_TYPE_NAME = 'Asana Integration (do not delete)';
+
+export const TASK_LINK_FIELD_IDS = {
+  contentfulEntryId: 'contentfulEntryId',
+  contentTypeId: 'contentTypeId',
+  taskGid: 'taskGid',
+  taskUrl: 'taskUrl',
+  taskName: 'taskName',
+  taskDescription: 'taskDescription',
+  status: 'status',
+  assigneeName: 'assigneeName',
+  dueDate: 'dueDate',
+  lastSyncedAt: 'lastSyncedAt',
 } as const;

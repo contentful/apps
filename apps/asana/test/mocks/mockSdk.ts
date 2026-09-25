@@ -23,6 +23,25 @@ const createMockSdk = (overrides?: Record<string, unknown>) => {
       },
       contentType: {
         getMany: vi.fn().mockResolvedValue({ items: [] }),
+        get: vi.fn().mockRejectedValue(new Error('not found')),
+        createWithId: vi.fn().mockResolvedValue({ sys: { id: 'asanaTaskLink' } }),
+        publish: vi.fn().mockResolvedValue({ sys: { id: 'asanaTaskLink' } }),
+      },
+      entry: {
+        get: vi.fn(),
+        getMany: vi.fn().mockResolvedValue({ items: [] }),
+        create: vi
+          .fn()
+          .mockImplementation((_params, entry) =>
+            Promise.resolve({ sys: { id: 'mock-link-entry-id' }, ...entry })
+          ),
+        update: vi.fn().mockImplementation((_params, entry) => Promise.resolve(entry)),
+        publish: vi.fn().mockImplementation((_params, entry) => Promise.resolve(entry)),
+        unpublish: vi.fn(),
+        delete: vi.fn(),
+      },
+      locale: {
+        getMany: vi.fn().mockResolvedValue({ items: [{ code: 'en-US', default: true }] }),
       },
     },
     ids: {

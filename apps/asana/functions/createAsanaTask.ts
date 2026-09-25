@@ -8,15 +8,10 @@ import type { EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-managem
 import type {
   AppInstallationParameters,
   AsanaTask,
-  ContentTypeFieldOption,
   CreateAsanaTaskRequest,
   CreateAsanaTaskResponse,
-  PrimaryAsanaTaskLinkValue,
 } from '../src/types';
-import {
-  buildPrimaryTaskLinkFromEntryValues,
-  getDefaultPrimaryTaskLinkMapping,
-} from '../src/utils/primaryTaskLink';
+import { getTaskLinkForEntry, saveTaskLinkForEntry } from '../src/utils/taskLinkStore';
 import { getAsanaAccessToken } from './asanaClient';
 import { createTaskFromParameters } from './createTaskFromParameters';
 
@@ -24,7 +19,6 @@ type LocalizedFieldValue = Record<string, unknown> | undefined;
 
 type EntryContext = {
   entry: EntryProps<KeyValueMap>;
-  contentTypeFields: ContentTypeFieldOption[];
   displayFieldId: string;
 };
 
@@ -53,24 +47,6 @@ function getFirstLocalizedString(field: LocalizedFieldValue) {
   return '';
 }
 
-function getFirstLocalizedFieldValue(field: LocalizedFieldValue) {
-  if (!field) {
-    return undefined;
-  }
-
-  return Object.values(field).find((value) => value !== undefined);
-}
-
-async function getDefaultLocale(cma: PlainClientAPI) {
-  try {
-    const locales = await cma.locale.getMany({ query: { limit: 1000 } });
-    const defaultLocale = locales.items.find((locale) => locale.default);
-    return defaultLocale?.code ?? 'en-US';
-  } catch {
-    return 'en-US';
-  }
-}
-
 async function getEntryContext(
   cma: PlainClientAPI,
   entryId?: string
@@ -85,7 +61,6 @@ async function getEntryContext(
   if (!contentTypeId) {
     return {
       entry,
-      contentTypeFields: [],
       displayFieldId: 'title',
     };
   }
@@ -94,17 +69,11 @@ async function getEntryContext(
     const contentType = await cma.contentType.get({ contentTypeId });
     return {
       entry,
-      contentTypeFields: contentType.fields.map((field) => ({
-        id: field.id,
-        name: field.name,
-        type: field.type,
-      })),
       displayFieldId: contentType.displayField || 'title',
     };
   } catch {
     return {
       entry,
-      contentTypeFields: [],
       displayFieldId: 'title',
     };
   }
@@ -149,7 +118,7 @@ async function waitForEntryTitle(
     await sleep(ENTRY_TITLE_RETRY_DELAY_MS);
     nextEntryContext = await getEntryContext(cma, entryId);
 
-    if (getExistingPrimaryTaskLink(nextEntryContext)) {
+    if (await getExistingTaskLink(cma, entryId)) {
       break;
     }
 
@@ -162,28 +131,11 @@ async function waitForEntryTitle(
   };
 }
 
-function getExistingPrimaryTaskLink(entryContext: EntryContext | null): AsanaTask | null {
-  if (!entryContext) {
-    return null;
-  }
-
-  const mapping = getDefaultPrimaryTaskLinkMapping(entryContext.contentTypeFields);
-  if (!mapping) {
-    return null;
-  }
-
-  const fieldValues = Object.fromEntries(
-    [mapping.objectFieldId, mapping.taskGidFieldId, mapping.taskUrlFieldId, mapping.taskNameFieldId]
-      .filter(Boolean)
-      .map((fieldId) => [
-        fieldId,
-        getFirstLocalizedFieldValue(
-          entryContext.entry.fields[fieldId as string] as LocalizedFieldValue
-        ),
-      ])
-  ) as Record<string, PrimaryAsanaTaskLinkValue | string | undefined>;
-
-  const taskLink = buildPrimaryTaskLinkFromEntryValues(fieldValues, mapping);
+async function getExistingTaskLink(
+  cma: PlainClientAPI,
+  entryId: string
+): Promise<AsanaTask | null> {
+  const taskLink = await getTaskLinkForEntry(cma, entryId);
   if (!taskLink) {
     return null;
   }
@@ -197,59 +149,6 @@ function getExistingPrimaryTaskLink(entryContext: EntryContext | null): AsanaTas
     ...(taskLink.assigneeName ? { assigneeName: taskLink.assigneeName } : {}),
     ...(taskLink.dueDate ? { dueDate: taskLink.dueDate } : {}),
   };
-}
-
-async function savePrimaryTaskLink(
-  cma: PlainClientAPI,
-  entryContext: EntryContext | null,
-  task: AsanaTask
-) {
-  if (!entryContext) {
-    return false;
-  }
-
-  const mapping = getDefaultPrimaryTaskLinkMapping(entryContext.contentTypeFields);
-  if (!mapping) {
-    return false;
-  }
-
-  const locale = await getDefaultLocale(cma);
-  const taskLinkValue: PrimaryAsanaTaskLinkValue = {
-    taskGid: task.gid,
-    taskUrl: task.permalinkUrl,
-    taskName: task.name,
-    ...(typeof task.description === 'string' ? { taskDescription: task.description } : {}),
-    ...(typeof task.status === 'string' ? { status: task.status } : {}),
-    ...(typeof task.assigneeName === 'string' ? { assigneeName: task.assigneeName } : {}),
-    ...(typeof task.dueDate === 'string' ? { dueDate: task.dueDate } : {}),
-    lastSyncedAt: new Date().toISOString(),
-  };
-
-  const setLocalizedFieldValue = (fieldId: string, value: unknown) => {
-    entryContext.entry.fields[fieldId] = {
-      ...((entryContext.entry.fields[fieldId] as Record<string, unknown> | undefined) ?? {}),
-      [locale]: value,
-    };
-  };
-
-  if (mapping.objectFieldId) {
-    setLocalizedFieldValue(mapping.objectFieldId, taskLinkValue);
-  }
-
-  if (mapping.taskGidFieldId) {
-    setLocalizedFieldValue(mapping.taskGidFieldId, task.gid);
-  }
-
-  if (mapping.taskUrlFieldId) {
-    setLocalizedFieldValue(mapping.taskUrlFieldId, task.permalinkUrl);
-  }
-
-  if (mapping.taskNameFieldId) {
-    setLocalizedFieldValue(mapping.taskNameFieldId, task.name);
-  }
-
-  await cma.entry.update({ entryId: entryContext.entry.sys.id }, entryContext.entry);
-  return true;
 }
 
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
@@ -295,7 +194,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
     };
   }
 
-  const existingTask = getExistingPrimaryTaskLink(entryContext);
+  const existingTask = cma && body.entryId ? await getExistingTaskLink(cma, body.entryId) : null;
   if (existingTask) {
     return {
       success: true,
@@ -320,10 +219,14 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   }
 
   try {
-    const entryLinked = await savePrimaryTaskLink(cma, entryContext, result.task);
+    await saveTaskLinkForEntry(cma, {
+      entryId: entryContext.entry.sys.id,
+      contentTypeId: entryContext.entry.sys.contentType?.sys.id,
+      task: result.task,
+    });
     return {
       ...result,
-      entryLinked,
+      entryLinked: true,
     };
   } catch (error) {
     return {
