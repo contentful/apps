@@ -19,9 +19,15 @@ interface SwatchEditorProps {
   swatch: Color;
   onChange: (swatch: Color) => void;
   onRemove: (swatch: Color) => void;
+  validationMessage?: string;
 }
 
-export default function SwatchEditor({ swatch, onChange, onRemove }: SwatchEditorProps) {
+export default function SwatchEditor({
+  swatch,
+  onChange,
+  onRemove,
+  validationMessage,
+}: SwatchEditorProps) {
   const {
     attributes,
     listeners,
@@ -39,7 +45,7 @@ export default function SwatchEditor({ swatch, onChange, onRemove }: SwatchEdito
 
   return (
     <div ref={setNodeRef} style={rowStyle}>
-      <FormControl marginBottom="spacingM">
+      <FormControl marginBottom="spacingM" isInvalid={Boolean(validationMessage)}>
         <Flex gap={tokens.spacingXs} alignItems="center">
           <DragHandle
             as="button"
@@ -79,6 +85,9 @@ export default function SwatchEditor({ swatch, onChange, onRemove }: SwatchEdito
             icon={<DeleteIcon variant="muted" />}
           />
         </Flex>
+        {validationMessage ? (
+          <FormControl.ValidationMessage>{validationMessage}</FormControl.ValidationMessage>
+        ) : null}
       </FormControl>
     </div>
   );
