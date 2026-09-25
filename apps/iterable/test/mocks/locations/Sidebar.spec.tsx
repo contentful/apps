@@ -24,7 +24,7 @@ describe('Sidebar', () => {
     expect(screen.getByText('Data feed link')).toBeTruthy();
     expect(
       screen.getByDisplayValue(
-        /https:\/\/cdn\.contentful\.com\/spaces\/space-id\/environments\/master\/entries/
+        /https:\/\/cdn\.contentful\.com\/spaces\/space-id\/environments\/environment-id\/entries/
       )
     ).toBeTruthy();
     expect(screen.getByRole('button', { name: /copy/i })).not.toHaveProperty('disabled', true);
@@ -60,7 +60,7 @@ describe('Sidebar', () => {
     };
     render(<Sidebar />);
     const input = screen.getByDisplayValue(
-      /https:\/\/cdn\.contentful\.com\/spaces\/space-id\/environments\/master\/entries\/entry-id\?access_token=.+&locale=\*/
+      /https:\/\/cdn\.contentful\.com\/spaces\/space-id\/environments\/environment-id\/entries\/entry-id\?access_token=.+&locale=\*/
     );
     expect(input).toBeTruthy();
   });
