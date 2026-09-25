@@ -99,22 +99,6 @@ export interface GetAsanaTaskRequest {
   taskId?: string;
 }
 
-export interface AddAsanaCommentRequest {
-  taskId?: string;
-  comment?: string;
-}
-
-export type AsanaComment = {
-  gid: string;
-  text: string;
-  authorName: string;
-  createdAt: string;
-};
-
-export interface GetAsanaCommentsRequest {
-  taskId?: string;
-}
-
 export type ValidateAsanaCredentialsResponse = Record<string, unknown> & {
   valid: boolean;
   message: string;
@@ -177,17 +161,6 @@ export type GetAsanaTaskResponse = Record<string, unknown> & {
   task?: AsanaTask & {
     completed?: boolean;
   };
-};
-
-export type AddAsanaCommentResponse = Record<string, unknown> & {
-  success: boolean;
-  message: string;
-};
-
-export type GetAsanaCommentsResponse = Record<string, unknown> & {
-  success: boolean;
-  message: string;
-  comments?: AsanaComment[];
 };
 
 export interface TaskDetailsDialogParameters {

@@ -18,7 +18,15 @@ const state = params.get('state');
 const error = params.get('error');
 
 if ((code || error) && window.opener) {
-  window.opener.postMessage({ type: 'oauth:complete', code, state, error }, window.location.origin);
+  // Use '*' rather than window.location.origin: the target origin here must be
+  // the *opener's* origin, not this popup's own origin. Contentful's app-hosting
+  // proxy (ctfcloud.net) can assign the popup's fresh OAuth-redirect navigation a
+  // different per-session hash subdomain than the one the opener iframe is
+  // currently loaded on, so using this popup's own origin silently drops the
+  // message. The payload is a one-time-use code/state pair that's independently
+  // validated server-side during the token exchange, so a wildcard target here
+  // doesn't add meaningful risk.
+  window.opener.postMessage({ type: 'oauth:complete', code, state, error }, '*');
   window.close();
 } else if (import.meta.env.DEV && window.self === window.top) {
   root.render(<LocalhostWarning />);

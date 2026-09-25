@@ -23,9 +23,6 @@ export const VALIDATION_MESSAGES = {
   taskCreateFailed: 'Could not create the Asana task.',
   taskUpdated: 'Asana task updated successfully.',
   taskUpdateFailed: 'Could not update the Asana task.',
-  taskCommentRequired: 'Enter a comment before posting to Asana.',
-  taskCommentAdded: 'Asana comment added successfully.',
-  taskCommentFailed: 'Could not add the Asana comment.',
 };
 
 export const ASANA_AUTOMATION_CONFIG = {

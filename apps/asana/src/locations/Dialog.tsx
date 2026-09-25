@@ -16,49 +16,14 @@ import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { useEffect, useMemo, useState } from 'react';
 import { VALIDATION_MESSAGES } from '../const';
 import type {
-  AddAsanaCommentResponse,
-  AsanaComment,
   AsanaTaskOption,
   AsanaUserOption,
-  GetAsanaCommentsResponse,
   GetAsanaTasksResponse,
   GetAsanaUsersResponse,
   TaskDetailsDialogParameters,
   TaskDetailsDialogResult,
   UpdateAsanaTaskResponse,
 } from '../types';
-
-function formatCommentTimestamp(isoDate: string) {
-  if (!isoDate) {
-    return '';
-  }
-
-  const date = new Date(isoDate);
-  if (Number.isNaN(date.getTime())) {
-    return '';
-  }
-
-  const diffMinutes = Math.floor((Date.now() - date.getTime()) / 60000);
-
-  if (diffMinutes < 1) {
-    return 'Just now';
-  }
-  if (diffMinutes < 60) {
-    return `${diffMinutes} minute${diffMinutes === 1 ? '' : 's'} ago`;
-  }
-
-  const diffHours = Math.floor(diffMinutes / 60);
-  if (diffHours < 24) {
-    return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
-  }
-
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays < 7) {
-    return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
-  }
-
-  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-}
 
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
@@ -90,12 +55,7 @@ const Dialog = () => {
   const [dependencyQuery, setDependencyQuery] = useState('');
   const [dependencyResults, setDependencyResults] = useState<AsanaTaskOption[]>([]);
   const [isSearchingDependencies, setIsSearchingDependencies] = useState(false);
-  const [comment, setComment] = useState('');
-  const [comments, setComments] = useState<AsanaComment[]>([]);
-  const [isLoadingComments, setIsLoadingComments] = useState(false);
-  const [commentsError, setCommentsError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [isPostingComment, setIsPostingComment] = useState(false);
 
   const effectiveDependencies = [
     ...(invocation.dependencies ?? []).filter(
@@ -114,7 +74,7 @@ const Dialog = () => {
     pendingDependencyAdds.length > 0 || pendingDependencyRemovals.length > 0;
   const hasDetailChanges =
     hasDescriptionChanges || hasDueDateChanges || hasAssigneeChanges || hasDependencyChanges;
-  const isBusy = isSaving || isPostingComment;
+  const isBusy = isSaving;
 
   const callAction = async <TResult,>(
     appActionId: string,
@@ -198,37 +158,6 @@ const Dialog = () => {
       window.clearTimeout(timeoutId);
     };
   }, [dependencyQuery, workspaceGid]);
-
-  const loadComments = async () => {
-    if (!task) {
-      return;
-    }
-
-    setIsLoadingComments(true);
-    setCommentsError(null);
-    try {
-      const response = await callAction<GetAsanaCommentsResponse>('getAsanaCommentsAction', {
-        taskId: task.taskGid,
-      });
-
-      if (!response.success) {
-        setComments([]);
-        setCommentsError(response.message || 'Could not load comments.');
-        return;
-      }
-
-      setComments(response.comments ?? []);
-    } catch (error) {
-      setComments([]);
-      setCommentsError(error instanceof Error ? error.message : 'Could not load comments.');
-    } finally {
-      setIsLoadingComments(false);
-    }
-  };
-
-  useEffect(() => {
-    void loadComments();
-  }, [task?.taskGid]);
 
   const handleSaveDetails = async () => {
     if (!task || !hasDetailChanges) {
@@ -340,41 +269,6 @@ const Dialog = () => {
     setPendingDependencyRemovals((current) =>
       current.includes(dependencyGid) ? current : [...current, dependencyGid]
     );
-  };
-
-  const handleAddComment = async () => {
-    if (!task) {
-      return;
-    }
-
-    const trimmedComment = comment.trim();
-    if (!trimmedComment) {
-      sdk.notifier.error(VALIDATION_MESSAGES.taskCommentRequired);
-      return;
-    }
-
-    setIsPostingComment(true);
-
-    try {
-      const response = await callAction<AddAsanaCommentResponse>('addAsanaCommentAction', {
-        taskId: task.taskGid,
-        comment: trimmedComment,
-      });
-
-      if (!response.success) {
-        throw new Error(response.message || VALIDATION_MESSAGES.taskCommentFailed);
-      }
-
-      setComment('');
-      await loadComments();
-      sdk.notifier.success(VALIDATION_MESSAGES.taskCommentAdded);
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : VALIDATION_MESSAGES.taskCommentFailed;
-      sdk.notifier.error(message);
-    } finally {
-      setIsPostingComment(false);
-    }
   };
 
   const handleClose = () => {
@@ -590,66 +484,9 @@ const Dialog = () => {
           ) : null}
         </Box>
 
-        <Box>
-          <Text as="div" marginBottom="spacingXs" fontColor="gray600">
-            Comments
-          </Text>
-          {isLoadingComments ? (
-            <Paragraph marginBottom="spacingS">Loading comments...</Paragraph>
-          ) : commentsError ? (
-            <Text fontColor="red600" as="div" marginBottom="spacingS">
-              {commentsError}
-            </Text>
-          ) : comments.length ? (
-            <Flex
-              flexDirection="column"
-              gap="spacingS"
-              marginBottom="spacingS"
-              style={{ maxHeight: '260px', overflowY: 'auto' }}>
-              {comments.map((commentItem) => (
-                <Box
-                  key={commentItem.gid}
-                  style={{ borderBottom: '1px solid #e5ebed', paddingBottom: '8px' }}>
-                  <Flex justifyContent="space-between" alignItems="baseline" gap="spacingXs">
-                    <Text fontWeight="fontWeightMedium">{commentItem.authorName}</Text>
-                    <Text fontColor="gray500" fontSize="fontSizeS">
-                      {formatCommentTimestamp(commentItem.createdAt)}
-                    </Text>
-                  </Flex>
-                  <Text as="div">{commentItem.text}</Text>
-                </Box>
-              ))}
-            </Flex>
-          ) : (
-            <Text fontColor="gray500" as="div" marginBottom="spacingS">
-              No comments yet.
-            </Text>
-          )}
-          <FormControl marginBottom="none">
-            <FormControl.Label>Add comment</FormControl.Label>
-            <Textarea
-              value={comment}
-              onChange={(event) => setComment(event.target.value)}
-              rows={4}
-              isDisabled={isBusy}
-              placeholder="Write a new Asana comment"
-            />
-            <FormControl.HelpText>
-              Posts a new comment to the linked Asana task.
-            </FormControl.HelpText>
-          </FormControl>
-        </Box>
-
         <Flex justifyContent="flex-end" gap="spacingS">
           <Button variant="secondary" onClick={handleClose} isDisabled={isBusy}>
             Close
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={handleAddComment}
-            isLoading={isPostingComment}
-            isDisabled={isBusy}>
-            Add comment
           </Button>
           <Button
             onClick={handleSaveDetails}
