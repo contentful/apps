@@ -44,7 +44,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
       message:
         error instanceof Error && error.message
           ? error.message
-          : VALIDATION_MESSAGES.sectionsFailed,
+          : `${VALIDATION_MESSAGES.sectionsFailed} (${String(error)})`,
     };
   }
 };

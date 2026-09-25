@@ -62,7 +62,10 @@ export async function callAsana<TData>(
 
   const body = (await response.json()) as AsanaEnvelope<TData>;
   if (!response.ok) {
-    throw new Error(getAsanaErrorMessage(body) || VALIDATION_MESSAGES.invalidCredentials);
+    throw new Error(
+      getAsanaErrorMessage(body) ||
+        `${VALIDATION_MESSAGES.invalidCredentials} (Asana returned ${response.status})`
+    );
   }
 
   if (!body.data) {
@@ -90,7 +93,10 @@ async function callAsanaList<TData>(path: string, accessToken: string): Promise<
 
     const body = (await response.json()) as AsanaEnvelope<TData[]>;
     if (!response.ok) {
-      throw new Error(getAsanaErrorMessage(body) || VALIDATION_MESSAGES.invalidCredentials);
+      throw new Error(
+        getAsanaErrorMessage(body) ||
+          `${VALIDATION_MESSAGES.invalidCredentials} (Asana returned ${response.status})`
+      );
     }
 
     items.push(...(body.data ?? []));
