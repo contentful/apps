@@ -93,6 +93,7 @@ const Dialog = () => {
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState<AsanaComment[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
+  const [commentsError, setCommentsError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isPostingComment, setIsPostingComment] = useState(false);
 
@@ -193,13 +194,22 @@ const Dialog = () => {
     }
 
     setIsLoadingComments(true);
+    setCommentsError(null);
     try {
       const response = await callAction<GetAsanaCommentsResponse>('getAsanaCommentsAction', {
         taskId: task.taskGid,
       });
+
+      if (!response.success) {
+        setComments([]);
+        setCommentsError(response.message || 'Could not load comments.');
+        return;
+      }
+
       setComments(response.comments ?? []);
-    } catch {
+    } catch (error) {
       setComments([]);
+      setCommentsError(error instanceof Error ? error.message : 'Could not load comments.');
     } finally {
       setIsLoadingComments(false);
     }
@@ -575,6 +585,10 @@ const Dialog = () => {
           </Text>
           {isLoadingComments ? (
             <Paragraph marginBottom="spacingS">Loading comments...</Paragraph>
+          ) : commentsError ? (
+            <Text fontColor="red600" as="div" marginBottom="spacingS">
+              {commentsError}
+            </Text>
           ) : comments.length ? (
             <Flex
               flexDirection="column"
