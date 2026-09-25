@@ -126,6 +126,25 @@ export interface TabsImagesSuspendPayload {
   tabs?: DocTabOption[];
 }
 
+export enum ValidationFindingSeverity {
+  Block = 'block',
+  Warn = 'warn',
+}
+
+/** A single validation finding from the validate-payload step. */
+export interface ValidationFinding {
+  /** Machine-readable finding code. */
+  code: string;
+  /** Human-readable explanation. */
+  message: string;
+  /** `block` findings prevent advancing; `warn` findings are advisory. */
+  severity: ValidationFindingSeverity;
+  /** Zero-based entry index, when entry-scoped. */
+  entryIndex?: number;
+  /** Field ID, when field-scoped. */
+  fieldId?: string;
+}
+
 export interface MappingReviewSuspendPayload {
   reason?: string;
   suspendStepId: 'mapping-review';
@@ -135,6 +154,7 @@ export interface MappingReviewSuspendPayload {
   entryBlockGraph: EntryBlockGraph;
   referenceGraph: ReviewedReferenceGraph;
   contentTypes: WorkflowContentType[];
+  validationFindings?: ValidationFinding[];
 }
 
 export type WorkflowRunResult =
