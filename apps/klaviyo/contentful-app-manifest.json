@@ -83,6 +83,22 @@
       "entryFile": "functions/checkStatus.ts",
       "allowNetworks": ["a.klaviyo.com"],
       "accepts": ["appaction.call"]
+    },
+    {
+      "id": "getFieldMappings",
+      "name": "Get Field Mappings",
+      "description": "Reads Klaviyo field mappings for an entry from durable storage",
+      "path": "functions/getFieldMappings.js",
+      "entryFile": "functions/getFieldMappings.ts",
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "setFieldMappings",
+      "name": "Set Field Mappings",
+      "description": "Writes Klaviyo field mappings for an entry to durable storage",
+      "path": "functions/setFieldMappings.js",
+      "entryFile": "functions/setFieldMappings.ts",
+      "accepts": ["appaction.call"]
     }
   ],
   "appEventHandlers": [
@@ -96,5 +112,24 @@
         "ContentManagement.Entry.save"
       ]
     }
-  ]
+  ],
+  "storage": {
+    "version": 1,
+    "namespace": "fieldMappings",
+    "functions": ["getFieldMappings", "setFieldMappings"],
+    "tables": [
+      {
+        "name": "field_mappings",
+        "columns": [
+          { "name": "entry_id", "type": "text", "nullable": false, "index": true },
+          { "name": "content_type_id", "type": "text", "nullable": true },
+          { "name": "contentful_field_id", "type": "text", "nullable": false },
+          { "name": "klaviyo_block_name", "type": "text", "nullable": false },
+          { "name": "field_type", "type": "text", "nullable": true },
+          { "name": "locale", "type": "text", "nullable": true },
+          { "name": "is_asset_field", "type": "boolean", "nullable": true }
+        ]
+      }
+    ]
+  }
 } 
