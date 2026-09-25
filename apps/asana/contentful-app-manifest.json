@@ -1,0 +1,640 @@
+{
+  "locations": [
+    {
+      "location": "app-config"
+    },
+    {
+      "location": "entry-field",
+      "fieldTypes": [
+        {
+          "type": "Symbol"
+        },
+        {
+          "type": "Text"
+        },
+        {
+          "type": "Object"
+        }
+      ]
+    },
+    {
+      "location": "entry-sidebar"
+    },
+    {
+      "location": "dialog"
+    }
+  ],
+  "functions": [
+    {
+      "id": "validateAsanaCredentialsFunction",
+      "name": "Validate Asana credentials",
+      "description": "Validates the configured Asana personal access token by loading visible workspaces.",
+      "path": "functions/validateAsanaCredentials.js",
+      "entryFile": "functions/validateAsanaCredentials.ts",
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "getAsanaWorkspacesFunction",
+      "name": "Get Asana workspaces",
+      "description": "Returns the visible Asana workspaces for the configured token.",
+      "path": "functions/getAsanaWorkspaces.js",
+      "entryFile": "functions/getAsanaWorkspaces.ts",
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "getAsanaProjectsFunction",
+      "name": "Get Asana projects",
+      "description": "Searches visible Asana projects for a workspace.",
+      "path": "functions/getAsanaProjects.js",
+      "entryFile": "functions/getAsanaProjects.ts",
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "createAsanaTaskFunction",
+      "name": "Create Asana task",
+      "description": "Creates an Asana task using configured defaults and per-call overrides.",
+      "path": "functions/createAsanaTask.js",
+      "entryFile": "functions/createAsanaTask.ts",
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "updateAsanaTaskFunction",
+      "name": "Update Asana task",
+      "description": "Updates an existing Asana task by GID or task URL.",
+      "path": "functions/updateAsanaTask.js",
+      "entryFile": "functions/updateAsanaTask.ts",
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "getAsanaTaskFunction",
+      "name": "Get Asana task details",
+      "description": "Loads details for an existing Asana task by GID or task URL.",
+      "path": "functions/getAsanaTask.js",
+      "entryFile": "functions/getAsanaTask.ts",
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "getAsanaTasksFunction",
+      "name": "Search Asana tasks",
+      "description": "Searches visible Asana tasks for a workspace or project.",
+      "path": "functions/getAsanaTasks.js",
+      "entryFile": "functions/getAsanaTasks.ts",
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "addAsanaCommentFunction",
+      "name": "Add Asana comment",
+      "description": "Adds a comment to an existing Asana task.",
+      "path": "functions/addAsanaComment.js",
+      "entryFile": "functions/addAsanaComment.ts",
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "appEventHandler",
+      "name": "App event handler function",
+      "description": "Function to handle Contentful app events.",
+      "path": "functions/appEventHandler.js",
+      "entryFile": "functions/appEventHandler.ts",
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appevent.handler"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "validateAsanaCredentialsAction",
+      "name": "Validate Asana connection",
+      "type": "function-invocation",
+      "functionId": "validateAsanaCredentialsFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "personalAccessToken",
+          "name": "Personal Access Token",
+          "type": "Symbol",
+          "required": false
+        }
+      ],
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "valid": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "valid",
+          "message"
+        ]
+      }
+    },
+    {
+      "id": "getAsanaWorkspacesAction",
+      "name": "List Asana workspaces",
+      "type": "function-invocation",
+      "functionId": "getAsanaWorkspacesFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "personalAccessToken",
+          "name": "Personal Access Token",
+          "type": "Symbol",
+          "required": false
+        }
+      ],
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "workspaces": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "gid": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "gid",
+                "name"
+              ]
+            }
+          }
+        },
+        "required": [
+          "workspaces"
+        ]
+      }
+    },
+    {
+      "id": "getAsanaProjectsAction",
+      "name": "Search Asana projects",
+      "type": "function-invocation",
+      "functionId": "getAsanaProjectsFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "personalAccessToken",
+          "name": "Personal Access Token",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "workspaceGid",
+          "name": "Workspace GID",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "query",
+          "name": "Project query",
+          "type": "Symbol",
+          "required": false
+        }
+      ],
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "projects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "gid": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "gid",
+                "name"
+              ]
+            }
+          }
+        },
+        "required": [
+          "projects"
+        ]
+      }
+    },
+    {
+      "id": "createAsanaTaskAction",
+      "name": "Create Asana task",
+      "type": "function-invocation",
+      "functionId": "createAsanaTaskFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "title",
+          "name": "Task title",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "notes",
+          "name": "Task notes",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "entryId",
+          "name": "Contentful entry ID",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "titleFieldId",
+          "name": "Title field ID",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "projectGid",
+          "name": "Project GID override",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "workspaceGid",
+          "name": "Workspace GID override",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "personalAccessToken",
+          "name": "Personal Access Token",
+          "type": "Symbol",
+          "required": false
+        }
+      ],
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "task": {
+            "type": "object",
+            "properties": {
+              "gid": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "permalinkUrl": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "assigneeName": {
+                "type": "string"
+              },
+              "dueDate": {
+                "type": "string"
+              },
+              "completed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "gid",
+              "name",
+              "permalinkUrl"
+            ]
+          },
+          "projectGid": {
+            "type": "string"
+          },
+          "workspaceGid": {
+            "type": "string"
+          },
+          "entryLinked": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      }
+    },
+    {
+      "id": "updateAsanaTaskAction",
+      "name": "Update Asana task",
+      "type": "function-invocation",
+      "functionId": "updateAsanaTaskFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "taskId",
+          "name": "Task GID or URL",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "title",
+          "name": "Updated task title",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "notes",
+          "name": "Updated task notes",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "completed",
+          "name": "Completed",
+          "type": "Boolean",
+          "required": false
+        },
+        {
+          "id": "personalAccessToken",
+          "name": "Personal Access Token",
+          "type": "Symbol",
+          "required": false
+        }
+      ],
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "task": {
+            "type": "object",
+            "properties": {
+              "gid": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "permalinkUrl": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "assigneeName": {
+                "type": "string"
+              },
+              "dueDate": {
+                "type": "string"
+              },
+              "completed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "gid",
+              "name",
+              "permalinkUrl"
+            ]
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      }
+    },
+    {
+      "id": "addAsanaCommentAction",
+      "name": "Add Asana comment",
+      "type": "function-invocation",
+      "functionId": "addAsanaCommentFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "taskId",
+          "name": "Task GID or URL",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "comment",
+          "name": "Comment",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "personalAccessToken",
+          "name": "Personal Access Token",
+          "type": "Symbol",
+          "required": false
+        }
+      ],
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      }
+    },
+    {
+      "id": "getAsanaTaskAction",
+      "name": "Get Asana task details",
+      "type": "function-invocation",
+      "functionId": "getAsanaTaskFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "taskId",
+          "name": "Task GID or URL",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "personalAccessToken",
+          "name": "Personal Access Token",
+          "type": "Symbol",
+          "required": false
+        }
+      ],
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "task": {
+            "type": "object",
+            "properties": {
+              "gid": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "permalinkUrl": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "assigneeName": {
+                "type": "string"
+              },
+              "dueDate": {
+                "type": "string"
+              },
+              "completed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "gid",
+              "name",
+              "permalinkUrl"
+            ]
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      }
+    },
+    {
+      "id": "getAsanaTasksAction",
+      "name": "Search Asana tasks",
+      "type": "function-invocation",
+      "functionId": "getAsanaTasksFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "personalAccessToken",
+          "name": "Personal Access Token",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "workspaceGid",
+          "name": "Workspace GID",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "projectGid",
+          "name": "Project GID",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "query",
+          "name": "Task query",
+          "type": "Symbol",
+          "required": false
+        }
+      ],
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "gid": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "gid",
+                "name"
+              ]
+            }
+          }
+        },
+        "required": [
+          "tasks"
+        ]
+      }
+    }
+  ]
+}
