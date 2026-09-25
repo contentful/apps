@@ -106,7 +106,9 @@ const Dialog = () => {
     );
 
     if (call.sys.status === 'failed') {
-      throw new Error(call.sys.error.message);
+      throw new Error(
+        call.sys.error.message || `App action call failed (${JSON.stringify(call.sys.error)})`
+      );
     }
 
     if (call.sys.status !== 'succeeded') {
@@ -201,7 +203,7 @@ const Dialog = () => {
           const message =
             error instanceof Error && error.message
               ? error.message
-              : VALIDATION_MESSAGES.sectionsFailed;
+              : `${VALIDATION_MESSAGES.sectionsFailed} (${String(error)})`;
           sdk.notifier.error(message);
           setSections([]);
         }
