@@ -129,6 +129,19 @@
       ]
     },
     {
+      "id": "getAsanaCommentsFunction",
+      "name": "Get Asana comments",
+      "description": "Loads the comment history for an existing Asana task.",
+      "path": "functions/getAsanaComments.js",
+      "entryFile": "functions/getAsanaComments.ts",
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
       "id": "appEventHandler",
       "name": "App event handler function",
       "description": "Function to handle Contentful app events.",
@@ -578,6 +591,62 @@
           },
           "message": {
             "type": "string"
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      }
+    },
+    {
+      "id": "getAsanaCommentsAction",
+      "name": "Get Asana comments",
+      "type": "function-invocation",
+      "functionId": "getAsanaCommentsFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "taskId",
+          "name": "Task GID or URL",
+          "type": "Symbol",
+          "required": true
+        }
+      ],
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "gid": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "authorName": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "gid",
+                "text",
+                "authorName",
+                "createdAt"
+              ]
+            }
           }
         },
         "required": [

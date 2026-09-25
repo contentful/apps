@@ -1,5 +1,6 @@
 import type { AppActionRequest, FunctionEventContext } from '@contentful/node-apps-toolkit';
 import type {
+  AsanaComment,
   AsanaProject,
   AsanaTask,
   AsanaTaskOption,
@@ -397,4 +398,33 @@ export async function addCommentToTask(
       },
     }),
   });
+}
+
+type AsanaStoryRecord = {
+  gid: string;
+  text?: string;
+  created_at?: string;
+  resource_subtype?: string;
+  created_by?: {
+    name?: string;
+  } | null;
+};
+
+export async function getTaskComments(
+  accessToken: string,
+  taskGid: string
+): Promise<AsanaComment[]> {
+  const stories = await callAsanaList<AsanaStoryRecord>(
+    `/tasks/${taskGid}/stories?opt_fields=gid,text,created_at,resource_subtype,created_by.name&limit=100`,
+    accessToken
+  );
+
+  return stories
+    .filter((story) => story.resource_subtype === 'comment_added' && typeof story.text === 'string')
+    .map((story) => ({
+      gid: story.gid,
+      text: story.text ?? '',
+      authorName: story.created_by?.name?.trim() || 'Unknown',
+      createdAt: story.created_at ?? '',
+    }));
 }
