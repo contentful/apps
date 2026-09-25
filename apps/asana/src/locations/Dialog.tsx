@@ -16,6 +16,7 @@ import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { useEffect, useMemo, useState } from 'react';
 import { VALIDATION_MESSAGES } from '../const';
 import type {
+  AddAsanaCommentResponse,
   AsanaTaskOption,
   AsanaUserOption,
   GetAsanaTasksResponse,
@@ -55,7 +56,9 @@ const Dialog = () => {
   const [dependencyQuery, setDependencyQuery] = useState('');
   const [dependencyResults, setDependencyResults] = useState<AsanaTaskOption[]>([]);
   const [isSearchingDependencies, setIsSearchingDependencies] = useState(false);
+  const [comment, setComment] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isPostingComment, setIsPostingComment] = useState(false);
 
   const effectiveDependencies = [
     ...(invocation.dependencies ?? []).filter(
@@ -74,7 +77,7 @@ const Dialog = () => {
     pendingDependencyAdds.length > 0 || pendingDependencyRemovals.length > 0;
   const hasDetailChanges =
     hasDescriptionChanges || hasDueDateChanges || hasAssigneeChanges || hasDependencyChanges;
-  const isBusy = isSaving;
+  const isBusy = isSaving || isPostingComment;
 
   const callAction = async <TResult,>(
     appActionId: string,
@@ -269,6 +272,40 @@ const Dialog = () => {
     setPendingDependencyRemovals((current) =>
       current.includes(dependencyGid) ? current : [...current, dependencyGid]
     );
+  };
+
+  const handleAddComment = async () => {
+    if (!task) {
+      return;
+    }
+
+    const trimmedComment = comment.trim();
+    if (!trimmedComment) {
+      sdk.notifier.error(VALIDATION_MESSAGES.taskCommentRequired);
+      return;
+    }
+
+    setIsPostingComment(true);
+
+    try {
+      const response = await callAction<AddAsanaCommentResponse>('addAsanaCommentAction', {
+        taskId: task.taskGid,
+        comment: trimmedComment,
+      });
+
+      if (!response.success) {
+        throw new Error(response.message || VALIDATION_MESSAGES.taskCommentFailed);
+      }
+
+      setComment('');
+      sdk.notifier.success(VALIDATION_MESSAGES.taskCommentAdded);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : VALIDATION_MESSAGES.taskCommentFailed;
+      sdk.notifier.error(message);
+    } finally {
+      setIsPostingComment(false);
+    }
   };
 
   const handleClose = () => {
@@ -484,9 +521,32 @@ const Dialog = () => {
           ) : null}
         </Box>
 
+        <Box>
+          <FormControl marginBottom="none">
+            <FormControl.Label>Add comment</FormControl.Label>
+            <Textarea
+              value={comment}
+              onChange={(event) => setComment(event.target.value)}
+              rows={4}
+              isDisabled={isBusy}
+              placeholder="Write a new Asana comment"
+            />
+            <FormControl.HelpText>
+              Posts a new comment to the linked Asana task.
+            </FormControl.HelpText>
+          </FormControl>
+        </Box>
+
         <Flex justifyContent="flex-end" gap="spacingS">
           <Button variant="secondary" onClick={handleClose} isDisabled={isBusy}>
             Close
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={handleAddComment}
+            isLoading={isPostingComment}
+            isDisabled={isBusy}>
+            Add comment
           </Button>
           <Button
             onClick={handleSaveDetails}

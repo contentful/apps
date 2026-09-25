@@ -383,3 +383,18 @@ export async function removeTaskDependency(
     body: JSON.stringify({ data: { dependencies: [dependencyGid] } }),
   });
 }
+
+export async function addCommentToTask(
+  accessToken: string,
+  taskGid: string,
+  comment: string
+): Promise<void> {
+  await callAsana<Record<string, unknown>>(`/tasks/${taskGid}/stories`, accessToken, {
+    method: 'POST',
+    body: JSON.stringify({
+      data: {
+        text: comment,
+      },
+    }),
+  });
+}

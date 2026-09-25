@@ -116,6 +116,19 @@
       ]
     },
     {
+      "id": "addAsanaCommentFunction",
+      "name": "Add Asana comment",
+      "description": "Adds a comment to an existing Asana task.",
+      "path": "functions/addAsanaComment.js",
+      "entryFile": "functions/addAsanaComment.ts",
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
       "id": "appEventHandler",
       "name": "App event handler function",
       "description": "Function to handle Contentful app events.",
@@ -529,6 +542,42 @@
               "name",
               "permalinkUrl"
             ]
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      }
+    },
+    {
+      "id": "addAsanaCommentAction",
+      "name": "Add Asana comment",
+      "type": "function-invocation",
+      "functionId": "addAsanaCommentFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "taskId",
+          "name": "Task GID or URL",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "comment",
+          "name": "Comment",
+          "type": "Symbol",
+          "required": true
+        }
+      ],
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
           }
         },
         "required": [
