@@ -205,6 +205,7 @@ const Sidebar = () => {
             ...(latestTask.dependencies ? { dependencies: latestTask.dependencies } : {}),
             ...(latestTask.sectionGid ? { sectionGid: latestTask.sectionGid } : {}),
             ...(latestTask.sectionName ? { sectionName: latestTask.sectionName } : {}),
+            ...(latestTask.customFields ? { customFields: latestTask.customFields } : {}),
           }
         : {
             taskGid: taskLink.taskGid,
@@ -219,15 +220,22 @@ const Sidebar = () => {
       const workspaceGid = latestTask?.workspaceGid || installationParameters.defaultWorkspaceGid;
       const projectGid = latestTask?.projectGid || installationParameters.defaultProjectGid;
 
+      // Custom field values carry nested optional properties that don't structurally satisfy
+      // the SDK's SerializedJSONValue type, even though they serialize to JSON just fine (which
+      // is what actually happens when these parameters cross into the dialog). Round-tripping
+      // through JSON here keeps the `satisfies` check for our own shape while sidestepping that
+      // mismatch.
       const result = (await sdk.dialogs.openCurrentApp({
         title: 'Manage Asana task',
         width: 'large',
         minHeight: '560px',
-        parameters: {
-          ...dialogTask,
-          ...(workspaceGid ? { workspaceGid } : {}),
-          ...(projectGid ? { projectGid } : {}),
-        } satisfies TaskDetailsDialogParameters,
+        parameters: JSON.parse(
+          JSON.stringify({
+            ...dialogTask,
+            ...(workspaceGid ? { workspaceGid } : {}),
+            ...(projectGid ? { projectGid } : {}),
+          } satisfies TaskDetailsDialogParameters)
+        ),
       })) as TaskDetailsDialogResult | null;
 
       if (result?.updatedTask) {

@@ -50,6 +50,37 @@ export type GetAsanaCustomFieldsResponse = Record<string, unknown> & {
   customFields?: AsanaCustomField[];
 };
 
+// A custom field's current value on a specific task. Only the value key matching `type` is
+// populated (e.g. a `text` field only sets `textValue`), mirroring Asana's own task response shape.
+export interface AsanaCustomFieldValue {
+  gid: string;
+  name: string;
+  type: string;
+  enumOptions?: AsanaCustomFieldOption[];
+  textValue?: string;
+  numberValue?: number;
+  enumValue?: AsanaCustomFieldOption | null;
+  multiEnumValues?: AsanaCustomFieldOption[];
+  dateValue?: string;
+  peopleValue?: AsanaUserOption[];
+  displayValue?: string;
+}
+
+export interface UpdateAsanaCustomFieldRequest {
+  taskId?: string;
+  fieldGid?: string;
+  fieldType?: string;
+  // JSON-encoded value shaped for `fieldType` (e.g. a gid string for enum, an array of gids for
+  // multi_enum/people, `{ date: 'YYYY-MM-DD' }` for date, or null to clear the field).
+  value?: string;
+}
+
+export type UpdateAsanaCustomFieldResponse = Record<string, unknown> & {
+  success: boolean;
+  message: string;
+  task?: AsanaTask & { completed?: boolean };
+};
+
 export type AsanaTaskOption = {
   gid: string;
   name: string;
@@ -80,6 +111,7 @@ export interface AsanaTask {
   projectGid?: string;
   sectionGid?: string;
   sectionName?: string;
+  customFields?: AsanaCustomFieldValue[];
 }
 
 export interface PrimaryAsanaTaskLink {
@@ -245,6 +277,7 @@ export interface TaskDetailsDialogParameters {
   projectGid?: string;
   sectionGid?: string;
   sectionName?: string;
+  customFields?: AsanaCustomFieldValue[];
 }
 
 export interface TaskDetailsDialogResult {

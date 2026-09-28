@@ -116,6 +116,19 @@
       ]
     },
     {
+      "id": "updateAsanaCustomFieldFunction",
+      "name": "Update Asana custom field",
+      "description": "Sets a custom field's value on an existing Asana task.",
+      "path": "functions/updateAsanaCustomField.js",
+      "entryFile": "functions/updateAsanaCustomField.ts",
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
       "id": "getAsanaTasksFunction",
       "name": "Search Asana tasks",
       "description": "Searches visible Asana tasks for a workspace or project.",
@@ -583,6 +596,108 @@
               },
               "sectionName": {
                 "type": "string"
+              },
+              "customFields": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "gid": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "enumOptions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "gid": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "gid",
+                          "name"
+                        ]
+                      }
+                    },
+                    "textValue": {
+                      "type": "string"
+                    },
+                    "numberValue": {
+                      "type": "number"
+                    },
+                    "enumValue": {
+                      "type": "object",
+                      "properties": {
+                        "gid": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "multiEnumValues": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "gid": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "gid",
+                          "name"
+                        ]
+                      }
+                    },
+                    "dateValue": {
+                      "type": "string"
+                    },
+                    "peopleValue": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "gid": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "email": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "gid",
+                          "name"
+                        ]
+                      }
+                    },
+                    "displayValue": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "gid",
+                    "name",
+                    "type"
+                  ]
+                }
               }
             },
             "required": [
@@ -769,6 +884,108 @@
               },
               "sectionName": {
                 "type": "string"
+              },
+              "customFields": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "gid": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "enumOptions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "gid": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "gid",
+                          "name"
+                        ]
+                      }
+                    },
+                    "textValue": {
+                      "type": "string"
+                    },
+                    "numberValue": {
+                      "type": "number"
+                    },
+                    "enumValue": {
+                      "type": "object",
+                      "properties": {
+                        "gid": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "multiEnumValues": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "gid": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "gid",
+                          "name"
+                        ]
+                      }
+                    },
+                    "dateValue": {
+                      "type": "string"
+                    },
+                    "peopleValue": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "gid": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "email": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "gid",
+                          "name"
+                        ]
+                      }
+                    },
+                    "displayValue": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "gid",
+                    "name",
+                    "type"
+                  ]
+                }
               }
             },
             "required": [
@@ -894,6 +1111,73 @@
                 "type"
               ]
             }
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      }
+    },
+    {
+      "id": "updateAsanaCustomFieldAction",
+      "name": "Update Asana custom field",
+      "type": "function-invocation",
+      "functionId": "updateAsanaCustomFieldFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "taskId",
+          "name": "Task GID or URL",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "fieldGid",
+          "name": "Custom field GID",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "fieldType",
+          "name": "Custom field type",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "value",
+          "name": "JSON-encoded field value",
+          "type": "Symbol",
+          "required": false
+        }
+      ],
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "task": {
+            "type": "object",
+            "properties": {
+              "gid": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "permalinkUrl": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "gid",
+              "name",
+              "permalinkUrl"
+            ]
           }
         },
         "required": [

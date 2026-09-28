@@ -20,6 +20,7 @@ import { VALIDATION_MESSAGES } from '../const';
 import type {
   AddAsanaCommentResponse,
   AsanaComment,
+  AsanaCustomFieldValue,
   AsanaSection,
   AsanaTaskOption,
   AsanaUserOption,
@@ -29,6 +30,7 @@ import type {
   GetAsanaUsersResponse,
   TaskDetailsDialogParameters,
   TaskDetailsDialogResult,
+  UpdateAsanaCustomFieldResponse,
   UpdateAsanaTaskResponse,
 } from '../types';
 
@@ -112,6 +114,285 @@ const LoadingDots = () => (
   </Flex>
 );
 
+const CUSTOM_FIELD_TYPE_LABELS: Record<string, string> = {
+  text: 'Text',
+  number: 'Number',
+  enum: 'Single-select',
+  multi_enum: 'Multi-select',
+  date: 'Date',
+  people: 'People',
+};
+
+const EDITABLE_CUSTOM_FIELD_TYPES = new Set(Object.keys(CUSTOM_FIELD_TYPE_LABELS));
+
+// Shapes a custom field's local draft value into the JSON string the
+// `updateAsanaCustomFieldAction` App Action expects for that field's type.
+function buildCustomFieldValuePayload(field: AsanaCustomFieldValue): string {
+  switch (field.type) {
+    case 'text':
+      return JSON.stringify(field.textValue?.trim() ?? '');
+    case 'number':
+      return JSON.stringify(typeof field.numberValue === 'number' ? field.numberValue : null);
+    case 'enum':
+      return JSON.stringify(field.enumValue?.gid ?? null);
+    case 'multi_enum':
+      return JSON.stringify((field.multiEnumValues ?? []).map((option) => option.gid));
+    case 'date':
+      return JSON.stringify(field.dateValue ? { date: field.dateValue } : null);
+    case 'people':
+      return JSON.stringify((field.peopleValue ?? []).map((person) => person.gid));
+    default:
+      return JSON.stringify(field.textValue ?? null);
+  }
+}
+
+type CustomFieldEditorProps = {
+  field: AsanaCustomFieldValue;
+  workspaceGid: string;
+  isDisabled: boolean;
+  callAction: <TResult>(
+    appActionId: string,
+    actionParameters?: Record<string, string>
+  ) => Promise<TResult>;
+  onChange: (fieldGid: string, patch: Partial<AsanaCustomFieldValue>) => void;
+};
+
+const CustomFieldEditor = ({
+  field,
+  workspaceGid,
+  isDisabled,
+  callAction,
+  onChange,
+}: CustomFieldEditorProps) => {
+  const [peopleQuery, setPeopleQuery] = useState('');
+  const [peopleResults, setPeopleResults] = useState<AsanaUserOption[]>([]);
+  const [isSearchingPeople, setIsSearchingPeople] = useState(false);
+
+  useEffect(() => {
+    if (field.type !== 'people' || !workspaceGid || !peopleQuery.trim()) {
+      setPeopleResults([]);
+      setIsSearchingPeople(false);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(async () => {
+      setIsSearchingPeople(true);
+      try {
+        const response = await callAction<GetAsanaUsersResponse>('getAsanaUsersAction', {
+          workspaceGid,
+          query: peopleQuery.trim(),
+        });
+        setPeopleResults(
+          response.users.filter(
+            (candidate) => !(field.peopleValue ?? []).some((person) => person.gid === candidate.gid)
+          )
+        );
+      } catch {
+        setPeopleResults([]);
+      } finally {
+        setIsSearchingPeople(false);
+      }
+    }, 250);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [callAction, field.peopleValue, field.type, peopleQuery, workspaceGid]);
+
+  if (field.type === 'text') {
+    return (
+      <TextInput
+        value={field.textValue ?? ''}
+        onChange={(event) => onChange(field.gid, { textValue: event.target.value })}
+        isDisabled={isDisabled}
+      />
+    );
+  }
+
+  if (field.type === 'number') {
+    return (
+      <TextInput
+        type="number"
+        value={typeof field.numberValue === 'number' ? String(field.numberValue) : ''}
+        onChange={(event) =>
+          onChange(field.gid, {
+            numberValue: event.target.value === '' ? undefined : Number(event.target.value),
+          })
+        }
+        isDisabled={isDisabled}
+      />
+    );
+  }
+
+  if (field.type === 'enum') {
+    return (
+      <Select
+        value={field.enumValue?.gid ?? ''}
+        onChange={(event) => {
+          const selected = field.enumOptions?.find((option) => option.gid === event.target.value);
+          onChange(field.gid, { enumValue: selected ?? null });
+        }}
+        isDisabled={isDisabled}>
+        <Select.Option value="">None</Select.Option>
+        {(field.enumOptions ?? []).map((option) => (
+          <Select.Option key={option.gid} value={option.gid}>
+            {option.name}
+          </Select.Option>
+        ))}
+      </Select>
+    );
+  }
+
+  if (field.type === 'multi_enum') {
+    const selectedGids = new Set((field.multiEnumValues ?? []).map((option) => option.gid));
+    const availableOptions = (field.enumOptions ?? []).filter(
+      (option) => !selectedGids.has(option.gid)
+    );
+
+    return (
+      <Box>
+        <Flex gap="spacingXs" flexWrap="wrap" marginBottom="spacingXs">
+          {(field.multiEnumValues ?? []).length ? (
+            (field.multiEnumValues ?? []).map((option) => (
+              <Pill
+                key={option.gid}
+                label={option.name}
+                onClose={() =>
+                  onChange(field.gid, {
+                    multiEnumValues: (field.multiEnumValues ?? []).filter(
+                      (selected) => selected.gid !== option.gid
+                    ),
+                  })
+                }
+                closeButtonAriaLabel={`Remove ${option.name}`}
+              />
+            ))
+          ) : (
+            <Text fontColor="gray500">None selected.</Text>
+          )}
+        </Flex>
+        {availableOptions.length ? (
+          <Select
+            value=""
+            onChange={(event) => {
+              const selected = field.enumOptions?.find(
+                (option) => option.gid === event.target.value
+              );
+              if (selected) {
+                onChange(field.gid, {
+                  multiEnumValues: [...(field.multiEnumValues ?? []), selected],
+                });
+              }
+            }}
+            isDisabled={isDisabled}>
+            <Select.Option value="">Add option</Select.Option>
+            {availableOptions.map((option) => (
+              <Select.Option key={option.gid} value={option.gid}>
+                {option.name}
+              </Select.Option>
+            ))}
+          </Select>
+        ) : null}
+      </Box>
+    );
+  }
+
+  if (field.type === 'date') {
+    return (
+      <TextInput
+        type="date"
+        value={field.dateValue ?? ''}
+        onChange={(event) => onChange(field.gid, { dateValue: event.target.value })}
+        isDisabled={isDisabled}
+      />
+    );
+  }
+
+  if (field.type === 'people') {
+    return (
+      <Box>
+        <Flex gap="spacingXs" flexWrap="wrap" marginBottom="spacingXs">
+          {(field.peopleValue ?? []).length ? (
+            (field.peopleValue ?? []).map((person) => (
+              <Pill
+                key={person.gid}
+                label={person.name}
+                onClose={() =>
+                  onChange(field.gid, {
+                    peopleValue: (field.peopleValue ?? []).filter(
+                      (selected) => selected.gid !== person.gid
+                    ),
+                  })
+                }
+                closeButtonAriaLabel={`Remove ${person.name}`}
+              />
+            ))
+          ) : (
+            <Text fontColor="gray500">None selected.</Text>
+          )}
+        </Flex>
+        <Box style={{ position: 'relative' }}>
+          <TextInput
+            value={peopleQuery}
+            onChange={(event) => setPeopleQuery(event.target.value)}
+            placeholder="Search Asana people to add"
+            isDisabled={isDisabled}
+          />
+          {peopleQuery.trim() ? (
+            <Box
+              marginTop="spacing2Xs"
+              style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                zIndex: 2,
+                border: '1px solid #cfd9e0',
+                borderRadius: '6px',
+                backgroundColor: 'white',
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
+                overflow: 'hidden',
+              }}>
+              {isSearchingPeople ? (
+                <Paragraph margin="spacingS">Searching Asana people...</Paragraph>
+              ) : peopleResults.length ? (
+                <Flex flexDirection="column" style={{ maxHeight: '220px', overflowY: 'auto' }}>
+                  {peopleResults.map((candidate, index) => (
+                    <Button
+                      key={candidate.gid}
+                      variant="transparent"
+                      isFullWidth
+                      isDisabled={isDisabled}
+                      onClick={() => {
+                        onChange(field.gid, {
+                          peopleValue: [...(field.peopleValue ?? []), candidate],
+                        });
+                        setPeopleQuery('');
+                        setPeopleResults([]);
+                      }}
+                      style={{
+                        justifyContent: 'flex-start',
+                        borderRadius: 0,
+                        borderTop: index === 0 ? 'none' : '1px solid #e5ebed',
+                      }}>
+                      {candidate.name}
+                      {candidate.email ? ` (${candidate.email})` : ''}
+                    </Button>
+                  ))}
+                </Flex>
+              ) : (
+                <Paragraph margin="spacingS">No matching people found.</Paragraph>
+              )}
+            </Box>
+          ) : null}
+        </Box>
+      </Box>
+    );
+  }
+
+  return <Text fontColor="gray500">{field.displayValue || 'Not editable in this app.'}</Text>;
+};
+
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
   useAutoResizer();
@@ -143,6 +424,10 @@ const Dialog = () => {
   const [assigneeCleared, setAssigneeCleared] = useState(false);
   const [pendingDependencyAdds, setPendingDependencyAdds] = useState<AsanaTaskOption[]>([]);
   const [pendingDependencyRemovals, setPendingDependencyRemovals] = useState<string[]>([]);
+  const [customFields, setCustomFields] = useState<AsanaCustomFieldValue[]>(
+    invocation.customFields ?? []
+  );
+  const [dirtyCustomFieldGids, setDirtyCustomFieldGids] = useState<Set<string>>(new Set());
   const [dependencyQuery, setDependencyQuery] = useState('');
   const [dependencyResults, setDependencyResults] = useState<AsanaTaskOption[]>([]);
   const [isSearchingDependencies, setIsSearchingDependencies] = useState(false);
@@ -196,13 +481,26 @@ const Dialog = () => {
   const hasSectionChanges = Boolean(
     selectedSectionGid && selectedSectionGid !== (invocation.sectionGid ?? '')
   );
+  const hasCustomFieldChanges = dirtyCustomFieldGids.size > 0;
   const hasDetailChanges =
     hasDescriptionChanges ||
     hasDueDateChanges ||
     hasAssigneeChanges ||
     hasDependencyChanges ||
-    hasSectionChanges;
+    hasSectionChanges ||
+    hasCustomFieldChanges;
   const isBusy = isSaving || isPostingComment;
+
+  const handleCustomFieldChange = (fieldGid: string, patch: Partial<AsanaCustomFieldValue>) => {
+    setCustomFields((current) =>
+      current.map((field) => (field.gid === fieldGid ? { ...field, ...patch } : field))
+    );
+    setDirtyCustomFieldGids((current) => {
+      const next = new Set(current);
+      next.add(fieldGid);
+      return next;
+    });
+  };
 
   const callAction = async <TResult,>(
     appActionId: string,
@@ -392,6 +690,7 @@ const Dialog = () => {
         ...(hasDueDateChanges ? { dueDate: dueDate.trim() } : {}),
         ...(hasSectionChanges ? { sectionGid: selectedSectionGid } : {}),
       };
+      const hasTaskFieldChanges = Object.keys(fieldUpdateParams).length > 0;
 
       // dependencyGid encodes add vs. remove in a single param (prefix "-" to remove) since
       // App Actions cap parameter count at 8. One op per add/remove, sent as separate calls.
@@ -402,23 +701,11 @@ const Dialog = () => {
 
       let latestTask: UpdateAsanaTaskResponse['task'] | undefined;
 
-      if (dependencyOps.length === 0) {
-        const response = await callAction<UpdateAsanaTaskResponse>('updateAsanaTaskAction', {
-          taskId: task.taskGid,
-          ...fieldUpdateParams,
-        });
-
-        if (!response.success || !response.task) {
-          throw new Error(response.message || VALIDATION_MESSAGES.taskUpdateFailed);
-        }
-
-        latestTask = response.task;
-      } else {
-        for (let index = 0; index < dependencyOps.length; index += 1) {
+      if (hasTaskFieldChanges || dependencyOps.length > 0) {
+        if (dependencyOps.length === 0) {
           const response = await callAction<UpdateAsanaTaskResponse>('updateAsanaTaskAction', {
             taskId: task.taskGid,
-            ...(index === 0 ? fieldUpdateParams : {}),
-            ...dependencyOps[index],
+            ...fieldUpdateParams,
           });
 
           if (!response.success || !response.task) {
@@ -426,7 +713,45 @@ const Dialog = () => {
           }
 
           latestTask = response.task;
+        } else {
+          for (let index = 0; index < dependencyOps.length; index += 1) {
+            const response = await callAction<UpdateAsanaTaskResponse>('updateAsanaTaskAction', {
+              taskId: task.taskGid,
+              ...(index === 0 ? fieldUpdateParams : {}),
+              ...dependencyOps[index],
+            });
+
+            if (!response.success || !response.task) {
+              throw new Error(response.message || VALIDATION_MESSAGES.taskUpdateFailed);
+            }
+
+            latestTask = response.task;
+          }
         }
+      }
+
+      // Each custom field is its own App Action call since updateAsanaCustomFieldAction takes a
+      // single field gid + value pair, rather than batching all edited fields into one call.
+      for (const field of customFields) {
+        if (!dirtyCustomFieldGids.has(field.gid)) {
+          continue;
+        }
+
+        const response = await callAction<UpdateAsanaCustomFieldResponse>(
+          'updateAsanaCustomFieldAction',
+          {
+            taskId: task.taskGid,
+            fieldGid: field.gid,
+            fieldType: field.type,
+            value: buildCustomFieldValuePayload(field),
+          }
+        );
+
+        if (!response.success || !response.task) {
+          throw new Error(response.message || VALIDATION_MESSAGES.customFieldUpdateFailed);
+        }
+
+        latestTask = response.task;
       }
 
       if (!latestTask) {
@@ -754,6 +1079,34 @@ const Dialog = () => {
             </FormControl>
           ) : null}
         </Box>
+
+        {customFields.length ? (
+          <Box>
+            <Text as="div" marginBottom="spacingXs" fontColor="gray600">
+              Custom fields
+            </Text>
+            <Flex flexDirection="column" gap="spacingM">
+              {customFields.map((field) => (
+                <FormControl key={field.gid} marginBottom="none">
+                  <FormControl.Label>{field.name}</FormControl.Label>
+                  <CustomFieldEditor
+                    field={field}
+                    workspaceGid={workspaceGid}
+                    isDisabled={isBusy}
+                    callAction={callAction}
+                    onChange={handleCustomFieldChange}
+                  />
+                  {!EDITABLE_CUSTOM_FIELD_TYPES.has(field.type) ? (
+                    <FormControl.HelpText>
+                      {CUSTOM_FIELD_TYPE_LABELS[field.type] || field.type} fields aren&apos;t
+                      editable in this app yet.
+                    </FormControl.HelpText>
+                  ) : null}
+                </FormControl>
+              ))}
+            </Flex>
+          </Box>
+        ) : null}
 
         <Box>
           <FormControl marginBottom="spacingM">

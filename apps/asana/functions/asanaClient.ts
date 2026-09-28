@@ -250,6 +250,19 @@ type AsanaTaskRecord = {
     project?: { gid?: string } | null;
     section?: { gid?: string; name?: string } | null;
   }>;
+  custom_fields?: Array<{
+    gid: string;
+    name?: string;
+    type?: string;
+    enum_options?: Array<{ gid?: string; name?: string; enabled?: boolean }>;
+    text_value?: string | null;
+    number_value?: number | null;
+    enum_value?: { gid?: string; name?: string } | null;
+    multi_enum_values?: Array<{ gid?: string; name?: string }>;
+    date_value?: { date?: string; date_time?: string } | null;
+    people_value?: Array<{ gid?: string; name?: string }>;
+    display_value?: string | null;
+  }>;
 };
 
 type CreateTaskPayload = {
@@ -257,9 +270,6 @@ type CreateTaskPayload = {
   notes?: string;
   projects?: string[];
   workspace?: string;
-  // Keyed by Asana custom field gid. Not yet wired to an App Action parameter -
-  // callers can pass this once a field-mapping configuration UI selects values.
-  custom_fields?: Record<string, string>;
 };
 
 type UpdateTaskPayload = {
@@ -268,13 +278,14 @@ type UpdateTaskPayload = {
   completed?: boolean;
   assignee?: string | null;
   due_on?: string | null;
-  // Keyed by Asana custom field gid. Not yet wired to an App Action parameter -
-  // callers can pass this once a field-mapping configuration UI selects values.
-  custom_fields?: Record<string, string>;
 };
 
 const TASK_OPT_FIELDS =
-  'gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name';
+  'gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name,' +
+  'custom_fields.gid,custom_fields.name,custom_fields.type,custom_fields.enum_options.gid,custom_fields.enum_options.name,custom_fields.enum_options.enabled,' +
+  'custom_fields.text_value,custom_fields.number_value,custom_fields.enum_value.gid,custom_fields.enum_value.name,' +
+  'custom_fields.multi_enum_values.gid,custom_fields.multi_enum_values.name,custom_fields.date_value.date,' +
+  'custom_fields.people_value.gid,custom_fields.people_value.name,custom_fields.display_value';
 
 export async function createTask(
   accessToken: string,
@@ -348,6 +359,56 @@ async function mapAsanaTask(
           : {}),
       };
     })(),
+    ...(Array.isArray(task.custom_fields)
+      ? {
+          customFields: task.custom_fields
+            .filter((field): field is typeof field & { gid: string } => Boolean(field.gid))
+            .map((field) => ({
+              gid: field.gid,
+              name: field.name ?? '',
+              type: field.type ?? 'text',
+              ...(field.enum_options
+                ? {
+                    enumOptions: field.enum_options
+                      .filter(
+                        (option): option is { gid: string; name: string; enabled?: boolean } =>
+                          option.enabled !== false && Boolean(option.gid) && Boolean(option.name)
+                      )
+                      .map((option) => ({ gid: option.gid, name: option.name })),
+                  }
+                : {}),
+              ...(typeof field.text_value === 'string' ? { textValue: field.text_value } : {}),
+              ...(typeof field.number_value === 'number'
+                ? { numberValue: field.number_value }
+                : {}),
+              ...(field.enum_value?.gid
+                ? { enumValue: { gid: field.enum_value.gid, name: field.enum_value.name ?? '' } }
+                : {}),
+              ...(Array.isArray(field.multi_enum_values)
+                ? {
+                    multiEnumValues: field.multi_enum_values
+                      .filter((option): option is { gid: string; name?: string } =>
+                        Boolean(option.gid)
+                      )
+                      .map((option) => ({ gid: option.gid, name: option.name ?? '' })),
+                  }
+                : {}),
+              ...(field.date_value?.date ? { dateValue: field.date_value.date } : {}),
+              ...(Array.isArray(field.people_value)
+                ? {
+                    peopleValue: field.people_value
+                      .filter((person): person is { gid: string; name?: string } =>
+                        Boolean(person.gid)
+                      )
+                      .map((person) => ({ gid: person.gid, name: person.name ?? '' })),
+                  }
+                : {}),
+              ...(typeof field.display_value === 'string'
+                ? { displayValue: field.display_value }
+                : {}),
+            })),
+        }
+      : {}),
   };
 }
 
@@ -377,6 +438,27 @@ export async function updateTask(
     {
       method: 'PUT',
       body: JSON.stringify({ data: payload }),
+    }
+  );
+
+  return mapAsanaTask(accessToken, task);
+}
+
+// `value` must already be shaped for `fieldType`: a gid string for enum, an array of gids for
+// multi_enum/people, a number for number, a string for text, `{ date: 'YYYY-MM-DD' }` (or null)
+// for date, matching what Asana's task update endpoint expects per custom field type.
+export async function updateTaskCustomField(
+  accessToken: string,
+  taskGid: string,
+  fieldGid: string,
+  value: unknown
+): Promise<AsanaTask & { completed?: boolean }> {
+  const task = await callAsana<AsanaTaskRecord>(
+    `/tasks/${taskGid}?opt_fields=${TASK_OPT_FIELDS}`,
+    accessToken,
+    {
+      method: 'PUT',
+      body: JSON.stringify({ data: { custom_fields: { [fieldGid]: value } } }),
     }
   );
 
