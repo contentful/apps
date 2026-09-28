@@ -17,7 +17,7 @@ apps/mux/
 │       └── util/              # muxApi, robots*, types
 ├── functions/                 # Contentful App Functions (its own package + build)
 │   └── src/
-│       ├── muxProxy.ts        # appaction.call — generic Mux REST passthrough
+│       ├── muxProxy.ts        # appaction.call — Mux REST proxy for /video/v1/ and /robots/v0/
 │       ├── getSignedUrlTokens.ts  # appaction.call — signs playback JWTs
 │       └── onPublish.ts       # appevent.handler — runs queued pendingActions
 ├── docs/ADRs/

@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const muxFetch = vi.fn();
-vi.mock('./helpers/muxClient', () => ({ muxFetch: (...args: unknown[]) => muxFetch(...args) }));
+vi.mock('./helpers/muxClient', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./helpers/muxClient')>()),
+  muxFetch: (...args: unknown[]) => muxFetch(...args),
+}));
 
 import { handler } from './muxProxy';
 

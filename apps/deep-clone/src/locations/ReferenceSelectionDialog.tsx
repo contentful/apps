@@ -50,7 +50,19 @@ const styles = {
 };
 
 function collectEntryIds(node: CloneReferenceNode): string[] {
-  return [node.entryId, ...node.children.flatMap((child) => collectEntryIds(child))];
+  // The reference tree is built per-path (buildReferenceNode), so an entry
+  // referenced from multiple parents ("diamond" fan-in, no cycle required)
+  // appears as a separate node under each parent. Dedupe by entryId here so
+  // counts and selection state reflect unique entries, not tree nodes.
+  const seen = new Set<string>();
+  const collect = (currentNode: CloneReferenceNode) => {
+    seen.add(currentNode.entryId);
+    for (const child of currentNode.children) {
+      collect(child);
+    }
+  };
+  collect(node);
+  return Array.from(seen);
 }
 
 function toggleNodeSelection(

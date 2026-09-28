@@ -14,7 +14,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -33,7 +33,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -52,7 +52,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -71,7 +71,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -90,7 +90,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -109,7 +109,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -128,7 +128,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -147,7 +147,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -166,7 +166,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -185,7 +185,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -204,7 +204,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -223,7 +223,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -242,7 +242,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -261,7 +261,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -280,7 +280,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -299,7 +299,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -318,7 +318,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -337,7 +337,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -356,7 +356,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -375,7 +375,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -394,7 +394,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -413,7 +413,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -432,7 +432,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -451,7 +451,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -470,7 +470,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -489,7 +489,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -508,7 +508,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -527,7 +527,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -546,7 +546,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -565,7 +565,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -584,7 +584,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -603,7 +603,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -622,7 +622,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -641,7 +641,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -660,7 +660,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -679,7 +679,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -698,4 +698,4 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: group:team-marketplace
+  owner: group:group-applied-ai-solutions

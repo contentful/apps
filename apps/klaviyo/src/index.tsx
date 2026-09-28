@@ -28,7 +28,7 @@ const handleOAuthCallback = () => {
         code: params.get('code'),
         state: params.get('state'),
       },
-      '*'
+      window.location.origin
     );
     // Close the popup window
     window.close();

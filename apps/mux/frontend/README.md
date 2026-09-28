@@ -299,7 +299,7 @@ The **Robots** tab runs Mux AI workflows on the current video and reads the resu
   only while **Let everyone run Robots** is on in the app configuration. It stays off until an
   admin saves it. Everyone still sees the results and can apply them, and the admin's default
   directives still run on every upload, listed read-only for anyone who cannot change them. This
-  hides controls; it is not a permission. `muxProxy` is a generic passthrough and the Mux secret
+  hides controls; it is not a permission. `muxProxy` forwards any Video or Robots call and the Mux secret
   reaches the browser in the installation parameters, so a determined user can still spend units —
   a real boundary needs the secret moved server-side first. See ADR-0016.
 - **Every job on the video is recorded.** The tab records every job it reads for the asset,

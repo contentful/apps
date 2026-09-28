@@ -24,6 +24,7 @@ export interface ContentLifecyclePermissions {
   tags: EntityPermissions;
   concepts: EntityPermissions;
   conceptSchemes: EntityPermissions;
+  releases: EntityPermissions;
   // ExO (Experience Orchestration) entities. Shown on the config screen only
   // in ExO-enabled or empty spaces. See AIS-187.
   //
@@ -61,6 +62,7 @@ export interface AppInstallationParameters {
   tags: string;
   concepts: string;
   conceptSchemes: string;
+  releases: string;
   componentTypes: string;
   experiences: string;
   templates: string;
@@ -88,6 +90,9 @@ export const ENTITY_AVAILABLE_ACTIONS: Record<
   locales: ['read', 'edit', 'create', 'delete'],
   concepts: ['read', 'edit', 'create', 'delete'],
   conceptSchemes: ['read', 'edit', 'create', 'delete'],
+  // 'delete' is excluded: delete_release is never registered on the remote server
+  // (authorization-policy-service unconditionally denies it to delegated tokens).
+  releases: ['read', 'edit', 'create', 'publish', 'unpublish'],
   environments: ['read', 'create', 'delete'],
   editorInterfaces: ['read', 'edit'],
   tags: ['read', 'create'],

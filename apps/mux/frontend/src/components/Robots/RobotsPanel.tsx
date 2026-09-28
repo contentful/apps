@@ -833,8 +833,8 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
   );
 
   // Who sees the run controls at all is `canRunRobots`: space admins, and everyone else once an
-  // admin turns on "Let everyone run Robots". UI-only — `muxProxy` forwards any path, so it hides
-  // controls rather than refusing calls. See ADR-0016.
+  // admin turns on "Let everyone run Robots". UI-only — `muxProxy` forwards any Robots call, so it
+  // hides controls rather than refusing calls. See ADR-0016.
   //
   // One rule for the buttons and the tables: a Run button is blocked exactly while its table shows
   // a pending row, so it is never disabled for a create nobody can see. An unconfirmed job create

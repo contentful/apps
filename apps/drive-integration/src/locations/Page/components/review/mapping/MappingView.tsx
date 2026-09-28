@@ -112,6 +112,17 @@ interface MappingViewProps {
   mode?: 'view' | 'edit';
 }
 
+const CARET_NAVIGATION_KEYS = new Set([
+  'ArrowUp',
+  'ArrowDown',
+  'ArrowLeft',
+  'ArrowRight',
+  'Home',
+  'End',
+  'PageUp',
+  'PageDown',
+]);
+
 const EMPTY_EDIT_MODAL: EditModalState = {
   viewModel: {
     selectedText: '',
@@ -208,6 +219,7 @@ export const MappingView = ({
   const [pendingTextAssignRanges, setPendingTextAssignRanges] = useState<TextExclusionRange[]>([]);
   const [pendingPreviewSourceRefs, setPendingPreviewSourceRefs] = useState<SourceRef[]>([]);
   const [pendingPreviewHasTableContent, setPendingPreviewHasTableContent] = useState(false);
+  const [isCaretVisible, setIsCaretVisible] = useState(false);
   const textSelectionRootRef = useRef<HTMLDivElement | null>(null);
   const groupLayoutRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const cardWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -234,6 +246,10 @@ export const MappingView = ({
   };
 
   const handleDocumentKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (CARET_NAVIGATION_KEYS.has(e.key)) {
+      setIsCaretVisible(true);
+    }
+
     if (e.key === 'Tab' && !e.shiftKey && selectedText.trim()) {
       const button = editButtonRef.current?.querySelector('button') as HTMLElement | null;
       if (button) {
@@ -1012,9 +1028,14 @@ export const MappingView = ({
         onCut={(e) => e.preventDefault()}
         onDrop={(e) => e.preventDefault()}
         onKeyDown={handleDocumentKeyDown}
+        onMouseDown={() => setIsCaretVisible(false)}
         flexDirection="column"
         gap="spacingS"
-        style={{ marginTop: tokens.spacingM, outline: 'none' }}>
+        style={{
+          marginTop: tokens.spacingM,
+          outline: 'none',
+          caretColor: isCaretVisible ? 'auto' : 'transparent',
+        }}>
         {(isViewMode || selectedEntryRow) && (
           <Flex
             gap="spacingM"

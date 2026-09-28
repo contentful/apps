@@ -147,7 +147,8 @@ export interface ResultsListProps {
   onExportSelected?: (
     selectedIds: string[],
     format: 'csv' | 'json' | 'xlsx' | 'xml' | 'yaml',
-    filename: string
+    filename: string,
+    options: { includeTags: boolean; includeConcepts: boolean }
   ) => void;
   /** True once the user has clicked "Select all N entries matching this search" */
   selectAllMatching?: boolean;
@@ -155,12 +156,14 @@ export interface ResultsListProps {
   /** Exports every entry matching the current search filters, not just the fetched page(s) */
   onExportAllMatching?: (
     format: 'csv' | 'json' | 'xlsx' | 'xml' | 'yaml',
-    filename: string
+    filename: string,
+    options: { includeTags: boolean; includeConcepts: boolean }
   ) => void;
   contentTypeMap?: ContentTypeMap;
   userMap?: UserMap;
   spaceId?: string;
   environmentId?: string;
+  webappHostname?: string;
   isExporting?: boolean;
   exportProgress?: { fetched: number; total: number; message?: string } | null;
   onSortChange?: (sort: { column: SortColumn; direction: SortDirection } | null) => void;
@@ -364,6 +367,7 @@ export function ResultsList({
   userMap = {},
   spaceId = '',
   environmentId = 'master',
+  webappHostname = 'app.contentful.com',
   isExporting = false,
   exportProgress = null,
   onSortChange,
@@ -377,6 +381,9 @@ export function ResultsList({
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [exportFormat, setExportFormat] = useState<'csv' | 'json' | 'xlsx' | 'xml' | 'yaml'>('csv');
   const [exportFilename, setExportFilename] = useState('');
+  // Opt-in: tags/taxonomy concepts are not exported by default.
+  const [includeTagsColumn, setIncludeTagsColumn] = useState(false);
+  const [includeConceptsColumn, setIncludeConceptsColumn] = useState(false);
   const wasExporting = useRef(false);
 
   // Close modal after export completes
@@ -855,7 +862,7 @@ export function ResultsList({
                 <Table.Body>
                   {sortedResults.map((entry) => {
                     const status = getStatus(entry);
-                    const entryUrl = `https://app.contentful.com/spaces/${spaceId}/environments/${environmentId}/entries/${entry.sys.id}`;
+                    const entryUrl = `https://${webappHostname}/spaces/${spaceId}/environments/${environmentId}/entries/${entry.sys.id}`;
                     return (
                       <Table.Row key={entry.sys.id}>
                         {/* Checkbox — sticky */}
@@ -1011,13 +1018,32 @@ export function ResultsList({
                     <Select.Option value="yaml">YAML</Select.Option>
                   </Select>
                 </FormControl>
-                <FormControl marginBottom="none">
+                <FormControl marginBottom="spacingL">
                   <FormControl.Label>File name</FormControl.Label>
                   <TextInput
                     value={exportFilename}
                     onChange={(e) => setExportFilename(e.target.value)}
                     placeholder=""
                   />
+                </FormControl>
+                <FormControl marginBottom="none">
+                  <FormControl.Label>Tags &amp; taxonomy</FormControl.Label>
+                  <Flex flexDirection="column" gap="spacingXs">
+                    <Checkbox
+                      isChecked={includeTagsColumn}
+                      onChange={() => setIncludeTagsColumn((prev) => !prev)}>
+                      Include Tags column (names)
+                    </Checkbox>
+                    <Checkbox
+                      isChecked={includeConceptsColumn}
+                      onChange={() => setIncludeConceptsColumn((prev) => !prev)}>
+                      Include Taxonomy Concepts column (IDs only)
+                    </Checkbox>
+                  </Flex>
+                  <FormControl.HelpText>
+                    Taxonomy concepts export as IDs only — the App Framework doesn't allow apps to
+                    resolve concept labels.
+                  </FormControl.HelpText>
                 </FormControl>
               </>
             )}
@@ -1037,14 +1063,18 @@ export function ResultsList({
               isDisabled={isExporting}
               onClick={() => {
                 const today = new Date().toISOString().split('T')[0];
+                const exportOptions = {
+                  includeTags: includeTagsColumn,
+                  includeConcepts: includeConceptsColumn,
+                };
                 if (selectAllMatching) {
                   const resolvedFilename = exportFilename.trim() || `all-matching-${today}`;
-                  onExportAllMatching?.(exportFormat, resolvedFilename);
+                  onExportAllMatching?.(exportFormat, resolvedFilename, exportOptions);
                   return;
                 }
                 const resolvedFilename =
                   exportFilename.trim() || `selected-${selectedIds.length}-entries-${today}`;
-                onExportSelected?.(selectedIds, exportFormat, resolvedFilename);
+                onExportSelected?.(selectedIds, exportFormat, resolvedFilename, exportOptions);
               }}>
               {isExporting ? 'Exporting' : 'Export'}
             </Button>

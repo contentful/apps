@@ -13,6 +13,20 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
+// jsdom has no layout, so render every row instead of windowing by scroll position.
+vi.mock('@tanstack/react-virtual', () => ({
+  useVirtualizer: ({ count }: { count: number }) => ({
+    getVirtualItems: () =>
+      Array.from({ length: count }, (_, index) => ({
+        index,
+        start: index * 64,
+        size: 64,
+        end: (index + 1) * 64,
+      })),
+    getTotalSize: () => count * 64,
+  }),
+}));
+
 describe('Page component', () => {
   beforeEach(() => {
     mockSdk.parameters.installation = {
@@ -447,6 +461,74 @@ describe('Page component', () => {
       })
     );
   });
+
+  it('does not drop results from earlier batches when throttling flushes across a large scan', async () => {
+    const batchCount = 8;
+    const batches = Array.from({ length: batchCount }, (_, batchIndex) =>
+      Array.from({ length: 100 }, (_, i) => ({
+        sys: { id: `entry-b${batchIndex}-${i}`, contentType: { sys: { id: 'article' } } },
+        fields: {
+          title: { 'en-US': `Entry ${batchIndex}-${i}` },
+          body: { 'en-US': `https://example.com/link-${batchIndex}-${i}` },
+        },
+      }))
+    );
+
+    const getMany = vi.fn();
+    batches.forEach((batch) => getMany.mockResolvedValueOnce({ items: batch }));
+    getMany.mockResolvedValueOnce({ items: [] });
+
+    mockSdk.cma.entry = { getMany };
+
+    render(<Page />);
+    fireEvent.click(screen.getByRole('button', { name: 'Find links' }));
+
+    await screen.findByText(
+      `https://example.com/link-${batchCount - 1}-99`,
+      {},
+      { timeout: 15000 }
+    );
+    await screen.findByText('https://example.com/link-0-0', {}, { timeout: 15000 });
+
+    expect(screen.getByText(`${batchCount * 100} total`)).toBeInTheDocument();
+  }, 20000);
+
+  it('reflects every checked link once a large scan finishes, even with throttled updates', async () => {
+    const linkCount = 60;
+    const entries = Array.from({ length: linkCount }, (_, i) => ({
+      sys: { id: `entry-${i}`, contentType: { sys: { id: 'article' } } },
+      fields: {
+        title: { 'en-US': `Entry ${i}` },
+        body: { 'en-US': `https://example.com/link-${i}` },
+      },
+    }));
+
+    mockSdk.cma.entry = {
+      getMany: vi
+        .fn()
+        .mockResolvedValueOnce({ items: entries })
+        .mockResolvedValueOnce({ items: [] }),
+    };
+    mockSdk.cma.appActionCall = {
+      createWithResponse: vi.fn().mockResolvedValue({
+        response: { body: JSON.stringify({ status: 200 }) },
+      }),
+    };
+
+    render(<Page />);
+    fireEvent.click(screen.getByRole('button', { name: 'Find links' }));
+    await screen.findByText(`https://example.com/link-${linkCount - 1}`, {}, { timeout: 15000 });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Run scan' }));
+
+    await waitFor(
+      () => {
+        expect(screen.getByText(`${linkCount} valid`)).toBeInTheDocument();
+      },
+      { timeout: 15000 }
+    );
+    expect(screen.queryByText(/\d+ unchecked/)).not.toBeInTheDocument();
+  }, 20000);
 
   it('checks www URLs as absolute https URLs instead of resolving them against the current domain', async () => {
     const createWithResponse = vi.fn().mockResolvedValue({

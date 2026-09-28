@@ -100,14 +100,23 @@ const ConfigScreen = () => {
         <Note variant="primary" title="Permissions">
           <Flex flexDirection="column" gap="spacingXs" alignItems="flex-start" style={fullWidth}>
             <Text>
-              Content Exporter can only export entries, tags, locales, and taxonomy data that the
-              current user is allowed to access.
+              Content Exporter can only export entries, tags, and locales that the current user is
+              allowed to access.
             </Text>
             <Text>
               If a user cannot load content types or entries, review their space role and app
               access.
             </Text>
           </Flex>
+        </Note>
+
+        <Note variant="warning" title="Taxonomy concepts export as IDs only">
+          <Text>
+            The App Framework doesn't let apps call the org-scoped Taxonomy Concepts endpoint, so
+            this is a platform limitation, not a permissions issue — no space role or app access
+            change will add concept labels (e.g. "Marketing") to exports. Tags export with their
+            real names.
+          </Text>
         </Note>
       </Flex>
     </Box>

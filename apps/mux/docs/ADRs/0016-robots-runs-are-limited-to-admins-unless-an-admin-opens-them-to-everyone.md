@@ -20,8 +20,9 @@ for that, and the control can only rest on what an app can know about the person
   screen is refused `SpaceMembership` and `SpaceMember` "from within an app" even as an admin, and
   touching `context.can` kills the invocation. No function-side gate by role or by admin is
   buildable today.
-- **Two routes skip the app whatever it decides.** `muxProxy` forwards any method and path, and the
-  Mux secret reaches every editor's browser in `sdk.parameters.installation`.
+- **Two routes skip the app whatever it decides.** `muxProxy` forwards any method under
+  `/video/v1/` and `/robots/v0/`, whoever calls it, and the Mux secret reaches every editor's
+  browser in `sdk.parameters.installation`.
 
 Mux's other CMS plugins are no precedent here: the Sanity plugin's only role gate hides the screen
 where credentials are entered.
@@ -92,9 +93,9 @@ rule.
 - Opening Robots to everyone is a single checkbox, and the note says which one.
 
 ### Negative
-- It does not stop a determined user. `muxProxy` forwards any path, the secret reaches the
+- It does not stop a determined user. `muxProxy` forwards any Robots call, the secret reaches the
   browser, and `scripts/call-app-action.ts` reaches the proxy without loading the app at all. Only
-  a function-side allowlist, after the secret leaves the browser, would.
+  a function-side check of who is calling, after the secret leaves the browser, would.
 - All or nothing: no "Editors yes, Authors no". With the switch off, admins are the bottleneck for
   every run and every cancel, including a job someone else started, and for clearing an
   unconfirmed create that is blocking Run.

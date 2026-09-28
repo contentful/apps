@@ -9,8 +9,8 @@ import type { InstallationParams } from './types';
  * cancelling, and choosing directives on upload. Results and Apply to entry stay open to everyone,
  * because reading costs nothing.
  *
- * A UI guardrail, not a permission: `muxProxy` still forwards any path and the Mux secret still
- * reaches the browser, so nothing refuses the call itself. See ADR-0016.
+ * A UI guardrail, not a permission: `muxProxy` forwards any Robots call, whoever makes it, and the
+ * Mux secret reaches the browser, so nothing refuses the call itself. See ADR-0016.
  */
 
 export const ROBOTS_ALLOW_EVERYONE_LABEL = 'Let everyone run Robots';
