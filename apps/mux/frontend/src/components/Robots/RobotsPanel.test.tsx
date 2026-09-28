@@ -39,6 +39,10 @@ const sdk = {
 
 /** A passthrough stamped by this install, for this entry. */
 const ourPassthrough = (requestId = 'abcdef0123456789') =>
+  `mux:cms:contentful:2.0.0|${ids.space}:${ids.environment}:${ids.entry}|${requestId}`;
+
+/** The same, as it was stamped before Mux's prefix. Jobs created then still carry it. */
+const ourLegacyPassthrough = (requestId = 'abcdef0123456789') =>
   `contentful@2.0.0|${ids.space}:${ids.environment}:${ids.entry}|${requestId}`;
 
 const value = (extra: Partial<MuxContentfulObject> = {}): MuxContentfulObject =>
@@ -824,17 +828,23 @@ describe('RobotsPanel — the fields the list leaves out', () => {
   });
 
   it("does not adopt another install's job just because it fetched its passthrough", async () => {
-    // `contentful@` identifies the app, not the install. Now that detail is fetched for jobs we
-    // do not own, a second Contentful install pointed at the same Mux account would otherwise
-    // have its jobs copied onto this entry. Both shapes are refused: the pre-scope format, which
-    // names nothing, and a scoped one naming a different space.
+    // The prefix identifies the integration, not the install. Now that detail is fetched for jobs
+    // we do not own, a second Contentful install pointed at the same Mux account would otherwise
+    // have its jobs copied onto this entry. Every shape is refused: the pre-scope format, which
+    // names nothing, and a scoped one naming a different space under either prefix.
     const foreign = summary({ id: 'rjob_other_space' });
+    const foreignOld = summary({ id: 'rjob_other_space_old' });
     const legacy = summary({ id: 'rjob_legacy' });
-    const muxApi = apiThatReturns([foreign, legacy], {
+    const muxApi = apiThatReturns([foreign, foreignOld, legacy], {
       rjob_other_space: {
         ...foreign,
-        passthrough: 'contentful@9.9.9|other-space:master:other-entry|0123456789abcdef',
+        passthrough: 'mux:cms:contentful:9.9.9|other-space:master:other-entry|0123456789abcdef',
         units_consumed: 11,
+      },
+      rjob_other_space_old: {
+        ...foreignOld,
+        passthrough: 'contentful@9.9.9|other-space:master:other-entry|0123456789abcdef',
+        units_consumed: 13,
       },
       rjob_legacy: {
         ...legacy,
@@ -849,22 +859,27 @@ describe('RobotsPanel — the fields the list leaves out', () => {
       expect(muxApi.getRobotsJob).toHaveBeenCalledWith('summarize', 'rjob_other_space')
     );
     expect(await screen.findByText('11')).toBeInTheDocument();
+    expect(await screen.findByText('13')).toBeInTheDocument();
     expect(read()?.robotsJobs).toBeUndefined();
   });
 
   it('adopts a job of ours that was never recorded, which nothing else could claim', async () => {
     // The orphan case, and the reason the scope segment exists at all. The page was closed
     // during the cold-start window, so the create was never written to the entry. Under
-    // `trustPassthrough: false` this job ran, it billed, and it belonged to nobody for good.
+    // `trustPassthrough: false` this job ran, it billed, and it belonged to nobody for good. One
+    // stamped before Mux's prefix is just as much ours.
     const orphan = summary({ id: 'rjob_orphan' });
-    const muxApi = apiThatReturns([orphan], {
+    const oldOrphan = summary({ id: 'rjob_old_orphan' });
+    const muxApi = apiThatReturns([orphan, oldOrphan], {
       rjob_orphan: { ...orphan, passthrough: ourPassthrough(), units_consumed: 5 },
+      rjob_old_orphan: { ...oldOrphan, passthrough: ourLegacyPassthrough(), units_consumed: 6 },
     });
     const { updateField, read } = withStored(value());
     renderPanel({ muxApi, updateField });
 
-    await waitFor(() => expect(read()?.robotsJobs).toHaveLength(1));
-    expect(read()?.robotsJobs?.[0].id).toBe('rjob_orphan');
+    await waitFor(() => expect(read()?.robotsJobs).toHaveLength(2));
+    const adopted = (read()?.robotsJobs ?? []).map((record) => record.id);
+    expect(adopted.sort()).toEqual(['rjob_old_orphan', 'rjob_orphan']);
   });
 
   it('stamps the space, environment and entry onto the jobs it creates', async () => {
@@ -883,7 +898,8 @@ describe('RobotsPanel — the fields the list leaves out', () => {
     await waitFor(() => expect(createRobotsJob).toHaveBeenCalled());
     const [, , stamped] = createRobotsJob.mock.calls[0] as unknown[];
     const passthrough = String(stamped);
-    expect(passthrough).toContain(`${ids.space}:${ids.environment}:${ids.entry}`);
+    expect(passthrough.startsWith('mux:cms:contentful:')).toBe(true);
+    expect(passthrough).toContain(`|${ids.space}:${ids.environment}:${ids.entry}|`);
     expect(passthrough.length).toBeLessThanOrEqual(255);
   });
 

@@ -79,6 +79,9 @@ it rather than just a bare request id:
 > ADR-0005's amendment of that date. Ownership, and everything here that decides it, still governs
 > `robotsJobs`.
 
+> **Amended 2026-09-27.** The prefix is now `mux:cms:contentful:`, the one Mux counts CMS
+> integrations by. `contentful@` is still read, never written — see the amendment of that date.
+
 ## Consequences
 
 ### Positive
@@ -207,6 +210,11 @@ A full 36-character UUID in that last slot makes it 263 and the create is reject
 request id is 16 hex characters — 64 bits, against a namespace of "the handful of jobs one entry
 starts on one asset".
 
+> **Amended 2026-09-27.** The format now opens with `mux:cms:contentful:` in place of
+> `contentful@`, and everything after the prefix is as described here. The worst case becomes 251,
+> and the 255 it is held to is the Video API's documented cap: the Robots reference gives none. See
+> the amendment of that date.
+
 Two things stay as they are, deliberately:
 
 - **A passthrough with no scope segment is not trusted**, the same as under
@@ -300,3 +308,165 @@ alternative is an editor who cannot run anything until they reload.
 `loadDirectiveRuns` finding the run or by the escape hatch. It disables the directive button
 alone, not the workflow one, so it does not have the blast radius that made this worth fixing. It
 is the same shape of gap and it is not fixed here.
+
+## Amendment, 2026-09-27: the passthrough opens with the prefix Mux counts CMS integrations by
+
+Mux product wants to know how many Robots jobs its CMS integrations create, and Mux engineering's
+answer is the `passthrough`, opened with a recognisable prefix. Their example:
+
+```json
+{
+  "passthrough": "mux:cms:contentful:",
+  "parameters": { "asset_id": "..." }
+}
+```
+
+They say the value reaches their analytics pipeline, and that every Robots workflow accepts it. The
+second half is checkable, and holds: in the published API spec
+(`https://www.mux.com/api-spec.json`) all twelve job-create bodies take a top-level `passthrough`,
+a string stored with the job and returned as it was sent.
+
+The request also suggested the scope might not be needed, and that we could send their value as it
+is. It is needed. The string does two jobs besides attribution, and their value does neither: with
+no request id there is nothing for `findJobByPassthrough` to match exactly, and with no scope an
+orphan is either adopted from any Contentful install on the Mux account — the hazard the
+2026-09-11 amendment closed — or, refusing unscoped values, not adopted at all. Nor does the new
+prefix make the scope any less necessary; if anything, more. `contentful@` was ours by convention
+alone, where `mux:cms:contentful:` is Mux's name for Contentful as an integration: every install
+writes it, and so can anything else Mux asks to be counted as Contentful.
+
+### The format
+
+```
+mux:cms:contentful:<version>|<space>:<environment>:<entry>|<16 hex>
+```
+
+The prefix changes and nothing after it does. Their example ends in a colon, and reads as a
+namespace — `mux`, `cms`, the partner — followed by whatever the integration needs. That holds as
+long as their pipeline matches the prefix rather than the whole value, which is the third question
+below. The prefix's own colons sit before the first `|`, so the scope parser, which splits only the
+second segment on `:`, never sees them.
+
+### The length
+
+```
+"mux:cms:contentful:"  19
+version                20   (generous; it is "2.0.0" today)
+"|"                     1
+space                  64
+":"                     1
+environment            64
+":"                     1
+entry                  64
+"|"                     1
+request id             16
+                     ----
+                      251   ≤ 255
+```
+
+Eight characters longer than before, and it fits with four to spare, so neither the request id nor
+the version is shortened. A UUID in the last slot would now make it 271.
+
+A correction to the 2026-09-11 text, which says Mux documents `passthrough` as at most 255
+characters. The Robots reference does not: it types a job's passthrough as a plain string with no
+maximum. 255 is the cap the Video API documents on every passthrough it has — asset, track, static
+rendition, generated subtitles — and it stays the budget, because assuming a looser bound than any
+Mux publishes is how a create gets refused. With four characters of slack the version's twenty is
+the line that can break, so a test now holds the build's version to it.
+
+### Reading the old prefix
+
+Jobs created before this change carry `contentful@`. `parseJobPassthrough` reads both prefixes and
+parses what follows the same way, so a pre-change orphan of ours is still adopted when it finishes,
+the pre-scope two-segment format is still parsed and never trusted, and anything else is still
+`undefined` without throwing. Neither prefix is a prefix of the other, so no string can match the
+wrong one.
+
+Nothing is written in the old prefix again, and nothing migrates. A recorded job is owned by its id
+in `robotsJobs`, never by its tag, and its stored `passthrough` stays exactly as Mux returned it;
+the field's shape and version do not move, because the record has always held the passthrough as a
+plain string. Robots has not shipped (ADR-0016), so the old prefix lives only on jobs from the
+installs that have tested it. Reading it costs one more `startsWith`; not reading it would orphan
+exactly those jobs.
+
+A deploy reaches every install at once but not every open tab: a page loaded before it runs the old
+bundle until it is reloaded, and both directions fail safe. The old bundle writes `contentful@`,
+which the new one reads. The new bundle writes `mux:cms:contentful:`, which the old one does not
+recognise, so a stale tab cannot adopt a new-format orphan and leaves it for the next tab that can.
+
+### Only Robots job creates carry it
+
+The requester would like the marker on every call, if it can go there without regressions. Every
+write the app sends Mux, against the published spec:
+
+| Call | From | Takes a `passthrough`? | Set here? |
+|---|---|---|---|
+| `POST /robots/v0/jobs/{workflow}` | Robots tab | Yes, top level | **Yes** — the format above |
+| `POST /robots/v0/directives/{id}/runs` | Robots tab | No: `asset_id` only | Cannot be |
+| `POST /robots/v0/jobs/{id}/cancel` | Robots tab | No body | Cannot be |
+| `POST /video/v1/assets` (add by URL) | field | Yes: the asset, `inputs[]`, their `generated_subtitles[]`, `static_renditions[]` | No |
+| `POST /video/v1/uploads` | field | The same, in `new_asset_settings` | No |
+| `POST /video/v1/assets/{id}/tracks` | Captions, Audio Tracks | Yes | No |
+| `POST /video/v1/assets/{id}/tracks/{track}/generate-subtitles` | Captions | Yes, per subtitle | No |
+| `POST /video/v1/assets/{id}/static-renditions` | MP4 Renditions | Yes | No |
+| `PATCH /video/v1/assets/{id}` (title) | `onPublish` | Yes | No — it would overwrite the customer's |
+| `POST /video/v1/assets/{id}/playback-ids` | `onPublish` | No | Cannot be |
+| `DELETE` of an asset, playback ID, track or static rendition | field, `onPublish` | No body | Cannot be |
+| `POST /video/v1/signing-keys` | config screen | No body | Cannot be |
+
+Everything the endpoints do accept belongs to the customer. Mux documents the asset passthrough as
+free-form, returned in the asset's details and its webhooks, and it is where customers commonly
+keep their own correlation ids. This app also mirrors every one of those values
+onto the entry: `passthrough` is one of `MUX_ASSET_MIRROR_KEYS`, and `captions`, `audioTracks` and
+`static_renditions` are stored as Mux returns them, their passthroughs included. A marker there
+would change what every new video delivers through the Delivery API, turn up in customers' webhook
+handlers as a value they did not write, and be overwritten the first time a customer set their own
+— silently losing the count with it. The metric is about Robots jobs, and a job's passthrough is
+the one such field that is ours alone.
+
+Worth knowing beside the table: every call through `muxProxy` already sends
+`x-source-platform: contentful`, so Mux can attribute everything else by that header if its
+pipeline records it. The config screen's direct calls do not send it. Adding a header to a
+cross-origin request needs Mux's CORS exception to allow it, and was not attempted.
+
+### What the count misses: jobs a directive dispatches
+
+Jobs Mux dispatches itself — from a directive run started in the tab, or from a directive attached
+at upload through `new_asset_settings.directives` — carry no passthrough of ours (ADR-0005,
+ADR-0009), and nothing in the API lets us give them one. The run create takes only `asset_id`, and
+a directive's definition — `name`, `subject`, `resources`, and `workflows` whose bindings carry
+`params`, the job's parameters minus `asset_id` — has no passthrough at any level. In the spec such
+a job's single-job GET names `directive: { id, run_id }` and the asset's own passthrough under
+`resources.assets[]`, and nothing that names the integration. So a count by prefix sees the jobs an
+editor runs from the tab and none of the automation. The questions for Mux engineering:
+
+1. Does a job the directive engine dispatches carry any passthrough, or anything else the analytics
+   pipeline can attribute to the integration that started the run or attached the directive? If
+   not, could the run create take a `passthrough` for the engine to stamp on the jobs it
+   dispatches, and `new_asset_settings` something equivalent for directives attached at ingest?
+2. Does `x-source-platform` reach the same pipeline? Every run create and every asset create from
+   this app carries it, so if it does, those jobs are attributable today by joining a job's
+   `directive.run_id`, or its asset, back to the request that created it.
+3. Does the pipeline match `mux:cms:contentful:` as a prefix? What follows it is our version, the
+   Contentful space, environment and entry ids, and a request id, and it contains both `:` and `|`.
+4. What is the maximum length of a Robots job's passthrough? The reference gives none, and this
+   app budgets 255.
+
+### Consequences of this amendment
+
+**Positive.** Mux can count this app's Robots jobs by the prefix it chose, with our version beside
+it. Reconciliation and orphan adoption are unchanged, and a job stamped before the change is still
+claimed. No request is added. The one delivered value that changes is the tag on job records
+written from now on, a plain string in the field's documented shape which, Robots being unshipped,
+nothing reads yet.
+
+**Negative.** The prefix is no longer this app's alone: it names the integration, so every install
+writes it and the scope carries all of the ownership. The budget's slack falls from twelve
+characters to four. Automation is not counted until Mux answers the first two questions. The
+original Negative above — attribution depends on "nothing else in Mux claiming that field" — is now
+half true: Mux reads the field, by prefix, and has asked us to shape it; it still does not write
+it. And the Contentful ids after the prefix reach Mux's analytics with it, where before they sat on
+the job in the customer's own account and nowhere else.
+
+**Neutral.** The parser reads two prefixes indefinitely. Robots has not shipped, so every
+production job carries the new prefix from the first. Nothing migrates.

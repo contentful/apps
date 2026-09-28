@@ -17,14 +17,24 @@ import {
  * describe the video whoever asked for them. See ADR-0003 and ADR-0005.
  */
 
-const ROBOTS_PLUGIN_ID = 'contentful';
-
 /**
+ * The namespace Mux asked its CMS integrations to open a job's `passthrough` with, so it can count
+ * the Robots jobs each one creates. It ends in a colon because what follows is ours to define.
+ *
  * A necessary condition for "is this job ours", never a sufficient one: the prefix names the
- * *app*, and two Contentful installs on the same Mux account both write it. The scope segment
+ * *integration*, and every Contentful install on the same Mux account writes it. The scope segment
  * that follows is what decides ownership — see `isOwnPassthrough`.
  */
-const ROBOTS_PASSTHROUGH_PREFIX = `${ROBOTS_PLUGIN_ID}@`;
+const ROBOTS_PASSTHROUGH_PREFIX = 'mux:cms:contentful:';
+
+/**
+ * What jobs were stamped with before the prefix above. Read, never written: a job created under it
+ * and never recorded is still an orphan of ours, and adopted like one. See ADR-0003.
+ */
+const LEGACY_ROBOTS_PASSTHROUGH_PREFIX = 'contentful@';
+
+/** Neither is a prefix of the other, so the order never decides which one a string matched. */
+const READABLE_PASSTHROUGH_PREFIXES = [ROBOTS_PASSTHROUGH_PREFIX, LEGACY_ROBOTS_PASSTHROUGH_PREFIX];
 
 const APP_VERSION = typeof __MUX_APP_VERSION__ === 'string' ? __MUX_APP_VERSION__ : 'unknown';
 
@@ -130,8 +140,8 @@ export function jobIdsFromDirectiveRuns(runs: RobotsDirectiveRun[]): Set<string>
 const REQUEST_ID_HEX_LENGTH = 16;
 
 /**
- * 64 random bits, not a UUID: `passthrough` is capped at 255 characters and the scope segment can
- * spend up to 194, so a 36-character UUID would push the worst case past the cap.
+ * 64 random bits, not a UUID: the `passthrough` budget is 255 characters and the scope segment can
+ * spend up to 194, so a 36-character UUID would push the worst case past it.
  */
 function randomRequestId(): string {
   const cryptoObj = typeof crypto !== 'undefined' ? crypto : undefined;
@@ -144,24 +154,29 @@ function randomRequestId(): string {
   return seed.padEnd(REQUEST_ID_HEX_LENGTH, '0').slice(-REQUEST_ID_HEX_LENGTH);
 }
 
-/** Separates the three ids inside the scope segment. Contentful ids never contain a colon. */
+/**
+ * Separates the three ids inside the scope segment. Contentful ids never contain a colon, and the
+ * prefix's own colons sit before the first `|`, so they never reach this split.
+ */
 const SCOPE_SEPARATOR = ':';
 
 /**
  * The `passthrough` stamped on every job this app creates:
- * `contentful@<version>|<space>:<environment>:<entry>|<16 hex>`.
+ * `mux:cms:contentful:<version>|<space>:<environment>:<entry>|<16 hex>`.
  *
- * Three jobs in one string: **attribution** (plugin and version, as job data rather than request
- * metadata), **idempotency** (a client-generated request id, so an unconfirmed create can be
- * matched exactly rather than guessed at from asset + workflow + time), and **install scope**
- * (without it the tag names the app, and a second Contentful install on the same Mux account is
- * indistinguishable from us).
+ * Three jobs in one string: **attribution** (Mux's prefix and our version, as job data rather
+ * than request metadata), **idempotency** (a client-generated request id, so an unconfirmed create
+ * can be matched exactly rather than guessed at from asset + workflow + time), and **install
+ * scope** (without it the tag names the integration, and a second Contentful install on the same
+ * Mux account is indistinguishable from us).
  *
- * Length budget: Mux caps `passthrough` at 255 and Contentful ids run to 64, so the worst case is
- * 11 + 20 + 1 + 64 + 1 + 64 + 1 + 64 + 1 + 16 = 243. A 36-character UUID in place of the request
- * id would make it 263 — which is why the request id is 16 hex characters.
+ * Length budget: 255, the cap Mux documents on every Video API passthrough. The Robots reference
+ * gives none, and assuming a looser one is how a create gets refused. With Contentful ids at their
+ * 64-character limit the worst case is 19 + 20 + 1 + 64 + 1 + 64 + 1 + 64 + 1 + 16 = 251. A
+ * 36-character UUID in place of the request id would make it 271 — which is why the request id is
+ * 16 hex characters.
  *
- * With no scope this falls back to the old two-segment form, which `isOwnPassthrough` trusts for
+ * With no scope this falls back to the two-segment form, which `isOwnPassthrough` trusts for
  * nothing.
  */
 export function buildJobPassthrough(scope?: RobotsPassthroughScope): string {
@@ -173,18 +188,23 @@ export function buildJobPassthrough(scope?: RobotsPassthroughScope): string {
 }
 
 /**
- * Reads a passthrough this app wrote back apart. Defensive by construction: anything that does
- * not parse comes back `undefined`, and nothing here can throw on arbitrary input.
+ * Reads a passthrough this app wrote back apart, under either prefix it has written. Defensive by
+ * construction: anything that does not parse comes back `undefined`, and nothing here can throw on
+ * arbitrary input.
  */
 export function parseJobPassthrough(
   passthrough: unknown
 ): { version: string; scope?: RobotsPassthroughScope } | undefined {
   if (typeof passthrough !== 'string') return undefined;
-  if (!passthrough.startsWith(ROBOTS_PASSTHROUGH_PREFIX)) return undefined;
+  const prefix = READABLE_PASSTHROUGH_PREFIXES.find((candidate) =>
+    passthrough.startsWith(candidate)
+  );
+  if (!prefix) return undefined;
 
   const [head, ...rest] = passthrough.split('|');
-  const version = head.slice(ROBOTS_PASSTHROUGH_PREFIX.length);
-  // Two segments is the pre-scope format, `contentful@<version>|<random>`. Parsed, not trusted.
+  const version = head.slice(prefix.length);
+  // Two segments is the pre-scope format, `contentful@<version>|<random>`, or a build with no
+  // scope. Parsed, not trusted.
   if (rest.length < 2) return { version };
 
   const parts = rest[0].split(SCOPE_SEPARATOR);

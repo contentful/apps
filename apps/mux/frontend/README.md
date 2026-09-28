@@ -309,16 +309,18 @@ The **Robots** tab runs Mux AI workflows on the current video and reads the resu
   opens the Robots tab on an entry whose video was summarized or moderated elsewhere, the entry
   gains `robotsOutputs` (and v4) and shows *Changed*, with nothing run from Contentful. See
   ADR-0005's 2026-09-25 amendment.
-- **Storing is narrower than showing, and a bare `contentful@` prefix proves nothing.** Because
-  the tab reads detail for jobs it does not own, it also sees *their* `passthrough` — and the
-  prefix identifies the app, not the install, so a second Contentful install pointed at the same
-  Mux account writes an identical-looking tag. The passthrough therefore carries an install scope:
-  `contentful@<version>|<space>:<environment>:<entry>|<16 hex>`, and `isOwnPassthrough` trusts it
-  only when all three ids match `sdk.ids`. Anything that does not parse, and the older two-segment
-  format, are never trusted — ownership then falls back to the two durable signals, already on the
-  entry or dispatched by a directive run on this asset. `findJobByPassthrough` is unaffected: it
-  compares the whole string against one this session generated, which is an identity check rather
-  than an ownership check. See `docs/ADRs/0003`.
+- **Storing is narrower than showing, and a bare prefix proves nothing.** Because the tab reads
+  detail for jobs it does not own, it also sees *their* `passthrough` — and the prefix identifies
+  the integration, not the install, so a second Contentful install pointed at the same Mux account
+  writes an identical-looking tag. The passthrough therefore carries an install scope:
+  `mux:cms:contentful:<version>|<space>:<environment>:<entry>|<16 hex>`, and `isOwnPassthrough`
+  trusts it only when all three ids match `sdk.ids`. Jobs stamped before 2026-09-27 open with
+  `contentful@` instead, and are read the same way, so one of ours is still recognised. Anything
+  that does not parse, and the older two-segment format, are never trusted — ownership then falls
+  back to the two durable signals, already on the entry or dispatched by a directive run on this
+  asset. `findJobByPassthrough` is unaffected: it compares the whole string against one this
+  session generated, which is an identity check rather than an ownership check. See
+  `docs/ADRs/0003`.
 - **A run Mux never confirmed blocks the button until it is resolved, not until a timer runs
   out.** App Functions cold-start, and one can lose its caller *after* its request reached Mux — so
   the job may be running and billing while the browser saw a failure. Nothing is ever retried
@@ -340,4 +342,8 @@ The **Robots** tab runs Mux AI workflows on the current video and reads the resu
   read, so a summary more than 20 jobs back is kept only once someone opens its row.
 - **No client analytics.** The app has no telemetry of any kind. Job attribution is done Mux-side
   instead: every proxied call carries `x-source-platform: contentful`, and every job created here
-  carries `contentful@<version>|<space>:<environment>:<entry>|<16 hex>` in its `passthrough`.
+  carries `mux:cms:contentful:<version>|<space>:<environment>:<entry>|<16 hex>` in its
+  `passthrough` — the prefix is the one Mux counts its CMS integrations' Robots jobs by. Nothing
+  else the app creates is marked: an asset's, a track's and a static rendition's `passthrough`
+  belong to the customer, and this app mirrors them onto the entry. Jobs a directive dispatches
+  are created by Mux and carry no passthrough of ours. See ADR-0003's 2026-09-27 amendment.

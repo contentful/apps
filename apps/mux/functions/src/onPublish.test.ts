@@ -236,9 +236,7 @@ describe('handler — creating a playback ID from a queued action', () => {
           ok: true,
           status: 200,
           json: async () =>
-            method === 'GET'
-              ? { data: { id: 'asset-1', status: 'ready', playback_ids: [] } }
-              : {},
+            method === 'GET' ? { data: { id: 'asset-1', status: 'ready', playback_ids: [] } } : {},
         } as any)
     );
 
@@ -254,9 +252,7 @@ describe('handler — creating a playback ID from a queued action', () => {
       }
     );
 
-    return vi
-      .mocked(muxFetch)
-      .mock.calls.filter(([, , path]) => path.includes('/playback-ids'));
+    return vi.mocked(muxFetch).mock.calls.filter(([, , path]) => path.includes('/playback-ids'));
   };
 
   beforeEach(() => {
@@ -350,12 +346,11 @@ describe('handler — publishing a queued asset delete', () => {
       },
     } as any);
 
-    vi.mocked(muxFetch).mockImplementation(
-      async (_credentials: unknown, method: string) =>
-        method === 'DELETE'
-          ? ({ ok: true, status: 200, json: async () => ({}) } as any)
-          : // The asset is gone, so the refresh read 404s.
-            ({ ok: false, status: 404, json: async () => ({}) } as any)
+    vi.mocked(muxFetch).mockImplementation(async (_credentials: unknown, method: string) =>
+      method === 'DELETE'
+        ? ({ ok: true, status: 200, json: async () => ({}) } as any)
+        : // The asset is gone, so the refresh read 404s.
+          ({ ok: false, status: 404, json: async () => ({}) } as any)
     );
 
     await handler(
@@ -368,9 +363,11 @@ describe('handler — publishing a queued asset delete', () => {
 
     // The asset was deleted at Mux...
     expect(
-      vi.mocked(muxFetch).mock.calls.some(
-        ([, method, path]) => method === 'DELETE' && path === '/video/v1/assets/asset-1'
-      )
+      vi
+        .mocked(muxFetch)
+        .mock.calls.some(
+          ([, method, path]) => method === 'DELETE' && path === '/video/v1/assets/asset-1'
+        )
     ).toBe(true);
 
     // ...and the field is dropped outright, not merged down to a husk. `undefined` is how a key
@@ -380,5 +377,75 @@ describe('handler — publishing a queued asset delete', () => {
     expect(JSON.stringify(stored)).not.toContain('robotsJobs');
     expect(JSON.stringify(stored)).not.toContain('robotsOutputs');
     expect(JSON.stringify(stored)).not.toContain('robotsDirectiveRuns');
+  });
+});
+
+/**
+ * The one asset write `onPublish` makes. `PATCH /video/v1/assets/{id}` takes a `passthrough` too,
+ * and sending one would overwrite whatever the customer keeps there, so the body is pinned whole.
+ */
+describe('handler — publishing a queued metadata update', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("changes the title and nothing else, never the asset's passthrough", async () => {
+    const entry = {
+      sys: {
+        id: 'entry-1',
+        environment: { sys: { id: 'master' } },
+        space: { sys: { id: 'space-1' } },
+      },
+      fields: {
+        muxVideo: {
+          'en-US': {
+            assetId: 'asset-1',
+            passthrough: 'customer-order-42',
+            pendingActions: {
+              delete: [],
+              create: [],
+              update: [{ type: 'metadata', data: { title: 'New title' }, retry: 0 }],
+            },
+          },
+        },
+      },
+    };
+    let stored: unknown = JSON.parse(JSON.stringify(entry));
+
+    vi.mocked(createClient).mockReturnValue({
+      entry: {
+        get: vi.fn(async () => JSON.parse(JSON.stringify(stored))),
+        update: vi.fn(async (_params: unknown, updated: unknown) => {
+          stored = updated;
+          return updated;
+        }),
+        publish: vi.fn(async () => stored),
+      },
+    } as never);
+
+    vi.mocked(muxFetch).mockImplementation(
+      async (_credentials: unknown, method: string) =>
+        ({
+          ok: true,
+          status: 200,
+          json: async () =>
+            method === 'GET'
+              ? { data: asset({ passthrough: 'customer-order-42', meta: { title: 'New title' } }) }
+              : {},
+        } as never)
+    );
+
+    await handler(
+      { type: 'appevent.handler', body: entry },
+      {
+        appInstallationParameters: { muxAccessTokenId: 'id', muxAccessTokenSecret: 'secret' },
+        cmaClientOptions: {},
+      }
+    );
+
+    const patches = vi.mocked(muxFetch).mock.calls.filter(([, method]) => method === 'PATCH');
+    expect(patches).toHaveLength(1);
+    expect(patches[0][2]).toBe('/video/v1/assets/asset-1');
+    expect(JSON.parse(patches[0][3] as string)).toEqual({ meta: { title: 'New title' } });
   });
 });

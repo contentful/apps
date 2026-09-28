@@ -55,6 +55,10 @@ Everything else is displayed and not stored.
 > create path proves ownership through `ownJobIds` instead of by parsing its own string back out.
 > Four ways to qualify now, not three. See ADR-0003's 2026-09-11 amendment.
 
+> **See also, 2026-09-27.** The prefix is now `mux:cms:contentful:`, and `contentful@` is still
+> read, so a job of ours is recognised whichever it was stamped with. Neither qualifies a job on
+> its own. See ADR-0003's amendment of that date.
+
 Stored records are **append-and-update only**. A record whose job the API no longer returns is left
 alone: it stops updating, and stays. Same for `robotsOutputs` — with the difference that
 `robotsOutputs` is keyed by workflow rather than by job, so a re-run supersedes the previous

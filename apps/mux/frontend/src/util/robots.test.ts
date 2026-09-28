@@ -39,6 +39,10 @@ const ours = { scope };
 
 /** A passthrough stamped by *this* install for *this* entry — the only kind that is trusted. */
 const ourPassthrough = (requestId = 'abcdef0123456789') =>
+  `mux:cms:contentful:2.0.0|${scope.space}:${scope.environment}:${scope.entry}|${requestId}`;
+
+/** The same stamp as this install wrote it before Mux's prefix, which jobs still carry. */
+const ourLegacyPassthrough = (requestId = 'abcdef0123456789') =>
   `contentful@2.0.0|${scope.space}:${scope.environment}:${scope.entry}|${requestId}`;
 
 /**
@@ -65,12 +69,12 @@ const baseValue = (extra: Partial<MuxContentfulObject> = {}): MuxContentfulObjec
   ({ version: 3, assetId: 'asset-1', ready: true, ...extra } as MuxContentfulObject);
 
 describe('buildJobPassthrough', () => {
-  it('carries the plugin id and a unique request id', () => {
+  it('opens with the prefix Mux counts CMS integrations by, then a unique request id', () => {
     const first = buildJobPassthrough(scope);
     const second = buildJobPassthrough(scope);
 
-    expect(first.startsWith('contentful@')).toBe(true);
-    expect(first).toContain('|');
+    // Mux's analytics matches the prefix; everything after its colon is ours.
+    expect(first).toMatch(/^mux:cms:contentful:[^|]+\|space-1:master:entry-1\|[0-9a-f]{16}$/);
     expect(first).not.toBe(second);
   });
 
@@ -79,11 +83,11 @@ describe('buildJobPassthrough', () => {
     expect(parsed?.scope).toEqual(scope);
   });
 
-  it("uses a 16-character request id, which is what keeps it inside Mux's 255-char cap", () => {
+  it('stays inside 255 characters with every id at its limit and a 20-character version', () => {
     // The budget, with Contentful's 64-character id limit spent three times over:
-    //   "contentful@" 11 + version 20 + "|" + space 64 + ":" + environment 64 + ":" + entry 64
-    //   + "|" + request id 16  =  243.
-    // A 36-character UUID in that last slot makes it 263 and the passthrough is rejected.
+    //   "mux:cms:contentful:" 19 + version 20 + "|" + space 64 + ":" + environment 64 + ":"
+    //   + entry 64 + "|" + request id 16  =  251.
+    // A 36-character UUID in that last slot makes it 271, which is why the request id is 16 hex.
     const requestId = buildJobPassthrough(scope).split('|')[2];
     expect(requestId).toMatch(/^[0-9a-f]{16}$/);
 
@@ -92,13 +96,19 @@ describe('buildJobPassthrough', () => {
       environment: 'b'.repeat(64),
       entry: 'c'.repeat(64),
     };
-    expect(buildJobPassthrough(longIds).length).toBeLessThanOrEqual(255);
+    const worst = buildJobPassthrough(longIds);
+    const version = parseJobPassthrough(worst)?.version ?? '';
+    // The version is this build's, so hold it to its line of the budget and price in the rest.
+    expect(version.length).toBeGreaterThan(0);
+    expect(version.length).toBeLessThanOrEqual(20);
+    expect(worst.length - version.length + 20).toBeLessThanOrEqual(255);
   });
 
-  it('falls back to the old two-segment form with no scope, which nothing trusts', () => {
-    const legacy = buildJobPassthrough();
-    expect(legacy.split('|')).toHaveLength(2);
-    expect(parseJobPassthrough(legacy)?.scope).toBeUndefined();
+  it('falls back to two segments with no scope, still attributed and trusted by nothing', () => {
+    const unscoped = buildJobPassthrough();
+    expect(unscoped.startsWith('mux:cms:contentful:')).toBe(true);
+    expect(unscoped.split('|')).toHaveLength(2);
+    expect(parseJobPassthrough(unscoped)?.scope).toBeUndefined();
   });
 });
 
@@ -109,6 +119,7 @@ describe('parseJobPassthrough', () => {
       null,
       42,
       {},
+      ['mux:cms:contentful:2.0.0|a:b:c|req'],
       '',
       'contentful@',
       'contentful@2.0.0|',
@@ -116,6 +127,12 @@ describe('parseJobPassthrough', () => {
       'contentful@2.0.0|a:b|req',
       'contentful@2.0.0|a:b:c:d|req',
       'contentful@2.0.0|::|req',
+      'mux:cms:contentful:',
+      'mux:cms:contentful:|',
+      'mux:cms:contentful:2.0.0||',
+      'mux:cms:contentful:2.0.0|a:b|req',
+      'mux:cms:contentful:2.0.0|::|req',
+      'mux:cms:contentful:2.0.0|a:b:c',
       'someone-else|a:b:c|req',
     ]) {
       expect(() => parseJobPassthrough(input)).not.toThrow();
@@ -124,10 +141,28 @@ describe('parseJobPassthrough', () => {
 
   it('reads nothing out of a passthrough that is not ours', () => {
     expect(parseJobPassthrough('mux-dashboard|whatever')).toBeUndefined();
+    // Another CMS integration in Mux's namespace, and the namespace without its closing colon.
+    expect(parseJobPassthrough('mux:cms:sanity:1.0.0|a:b:c|req')).toBeUndefined();
+    expect(parseJobPassthrough('mux:cms:contentful2.0.0|a:b:c|req')).toBeUndefined();
+    // Either prefix has to open the value; one that merely contains ours is someone else's.
+    expect(
+      parseJobPassthrough('order-42 mux:cms:contentful:2.0.0|space-1:master:entry-1|req')
+    ).toBeUndefined();
+    expect(parseJobPassthrough('x-contentful@2.0.0|space-1:master:entry-1|req')).toBeUndefined();
+  });
+
+  it('reads both prefixes it has written the same way', () => {
+    // A job stamped before the prefix changed must parse exactly as it did, or its orphan is lost.
+    expect(parseJobPassthrough(ourPassthrough())).toEqual({ version: '2.0.0', scope });
+    expect(parseJobPassthrough(ourLegacyPassthrough())).toEqual({ version: '2.0.0', scope });
+    expect(parseJobPassthrough('contentful@2.0.0|abcdef0123456789')).toEqual({ version: '2.0.0' });
   });
 
   it('reads the version but no scope from a malformed scope segment', () => {
     expect(parseJobPassthrough('contentful@2.0.0|only-two-parts:here|req')).toEqual({
+      version: '2.0.0',
+    });
+    expect(parseJobPassthrough('mux:cms:contentful:2.0.0|only-two-parts:here|req')).toEqual({
       version: '2.0.0',
     });
   });
@@ -138,15 +173,21 @@ describe('isOwnPassthrough', () => {
     expect(isOwnPassthrough(buildJobPassthrough(scope), scope)).toBe(true);
   });
 
+  it('still trusts one this install stamped before the prefix changed', () => {
+    expect(isOwnPassthrough(ourLegacyPassthrough(), scope)).toBe(true);
+  });
+
   it('refuses another space, environment or entry', () => {
     const stamped = buildJobPassthrough(scope);
     expect(isOwnPassthrough(stamped, { ...scope, space: 'space-2' })).toBe(false);
     expect(isOwnPassthrough(stamped, { ...scope, environment: 'staging' })).toBe(false);
     expect(isOwnPassthrough(stamped, { ...scope, entry: 'entry-2' })).toBe(false);
+    expect(isOwnPassthrough(ourLegacyPassthrough(), { ...scope, space: 'space-2' })).toBe(false);
   });
 
-  it('refuses the old two-segment format, which names only the app', () => {
+  it('refuses the two-segment format under either prefix, which names only the integration', () => {
     expect(isOwnPassthrough('contentful@2.0.0|abcdef0123456789', scope)).toBe(false);
+    expect(isOwnPassthrough('mux:cms:contentful:2.0.0|abcdef0123456789', scope)).toBe(false);
   });
 
   it('trusts nothing at all when there is no scope to compare against', () => {
@@ -158,6 +199,8 @@ describe('isOwnPassthrough', () => {
   it('refuses junk without throwing', () => {
     expect(isOwnPassthrough(undefined, scope)).toBe(false);
     expect(isOwnPassthrough('contentful@', scope)).toBe(false);
+    // Mux's example value, verbatim: the prefix alone, as anyone copying the example would send.
+    expect(isOwnPassthrough('mux:cms:contentful:', scope)).toBe(false);
     expect(isOwnPassthrough(12345, scope)).toBe(false);
   });
 });
@@ -376,12 +419,17 @@ describe('jobsClaimedByEntry', () => {
 describe('createRobotsJobWithReconciliation', () => {
   it('stamps a passthrough on the created job', async () => {
     const createRobotsJob = vi.fn(async () => ({ data: job() }));
-    await createRobotsJobWithReconciliation({ createRobotsJob } as never, 'summarize', 'asset-1', {
-      asset_id: 'asset-1',
-    });
+    await createRobotsJobWithReconciliation(
+      { createRobotsJob } as never,
+      'summarize',
+      'asset-1',
+      { asset_id: 'asset-1' },
+      scope
+    );
 
     const [, , passthrough] = createRobotsJob.mock.calls[0] as unknown[];
-    expect(String(passthrough)).toContain('contentful@');
+    expect(String(passthrough).startsWith('mux:cms:contentful:')).toBe(true);
+    expect(isOwnPassthrough(passthrough, scope)).toBe(true);
   });
 
   it('surfaces a failure Mux actually answered, without reconciling', async () => {
@@ -1186,13 +1234,27 @@ describe('applyRobotsJobsToValue — ownership from a scoped passthrough', () =>
     expect(next?.robotsJobs?.map((record) => record.id)).toEqual(['rjob_listed']);
   });
 
-  it('refuses another Contentful install pointed at the same Mux account', () => {
-    const foreign = `contentful@2.0.0|other-space:master:other-entry|0123456789abcdef`;
-    expect(applyRobotsJobsToValue(value(), listed(foreign), undefined, ours)).toEqual(value());
+  it('adopts an orphan stamped before the prefix changed, just the same', () => {
+    const next = applyRobotsJobsToValue(value(), listed(ourLegacyPassthrough()), undefined, ours);
+    expect(next?.robotsJobs?.map((record) => record.id)).toEqual(['rjob_listed']);
+    // Stored as Mux returned it: nothing rewrites an old stamp into the new prefix.
+    expect(next?.robotsJobs?.[0].passthrough).toBe(ourLegacyPassthrough());
+  });
+
+  it('refuses another Contentful install on the same Mux account, under either prefix', () => {
+    // Mux's prefix names the integration, so every install writes it; the scope tells them apart.
+    // The entry id alone does not: a space imported from this one, or an environment cloned from
+    // it, holds this very entry id.
+    for (const prefix of ['mux:cms:contentful:2.0.0', 'contentful@2.0.0']) {
+      for (const foreignScope of ['other-space:master:entry-1', 'space-1:staging:entry-1']) {
+        const foreign = `${prefix}|${foreignScope}|0123456789abcdef`;
+        expect(applyRobotsJobsToValue(value(), listed(foreign), undefined, ours)).toEqual(value());
+      }
+    }
   });
 
   it('refuses another entry in this very space and environment', () => {
-    const sibling = `contentful@2.0.0|${scope.space}:${scope.environment}:entry-2|0123456789abcdef`;
+    const sibling = `mux:cms:contentful:2.0.0|${scope.space}:${scope.environment}:entry-2|0123abcd`;
     expect(applyRobotsJobsToValue(value(), listed(sibling), undefined, ours)).toEqual(value());
   });
 
@@ -1225,6 +1287,25 @@ describe('applyRobotsJobsToValue — ownership from a scoped passthrough', () =>
     );
 
     expect(next?.robotsJobs?.[0].status).toBe('completed');
+  });
+
+  it('keeps owning a recorded job by id, and never rewrites its stamp', () => {
+    // Recorded jobs are owned by id, never by their tag: a stamp naming another entry — the records
+    // of a duplicated entry, say — changes nothing, and neither does the old prefix.
+    const stamp = 'contentful@2.0.0|space-1:master:the-original-entry|0123456789abcdef';
+    const record = { id: 'rjob_recorded', workflow: 'summarize', passthrough: stamp };
+    const withRecord = {
+      assetId: 'asset-1',
+      version: 4,
+      robotsJobs: [{ ...record, status: 'processing' }],
+    } as never as MuxContentfulObject;
+    const polled = [{ ...record, status: 'completed' }] as never as RobotsJob[];
+
+    const next = applyRobotsJobsToValue(withRecord, polled, undefined, ours);
+
+    expect(next?.robotsJobs).toEqual([{ ...record, status: 'completed' }]);
+    // And a poll that learns nothing new writes nothing.
+    expect(applyRobotsJobsToValue(next, polled, undefined, ours)).toBe(next);
   });
 
   it('still records a job a directive run on this asset dispatched', () => {
