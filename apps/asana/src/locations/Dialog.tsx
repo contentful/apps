@@ -925,47 +925,6 @@ const Dialog = () => {
           </Box>
         </Flex>
 
-        <Box>
-          <Text as="div" marginBottom="spacingXs" fontColor="gray600">
-            Tags
-          </Text>
-          <Flex gap="spacingXs" flexWrap="wrap">
-            {task.tags && task.tags.length ? (
-              task.tags.map((tag) => <Pill key={tag.gid} label={tag.name} />)
-            ) : (
-              <Text fontColor="gray500">No tags.</Text>
-            )}
-          </Flex>
-        </Box>
-
-        {customFields.length ? (
-          <Box>
-            <Text as="div" marginBottom="spacingXs" fontColor="gray600">
-              Custom fields
-            </Text>
-            <Flex flexDirection="column" gap="spacingM">
-              {customFields.map((field) => (
-                <FormControl key={field.gid} marginBottom="none">
-                  <FormControl.Label>{field.name}</FormControl.Label>
-                  <CustomFieldEditor
-                    field={field}
-                    workspaceGid={workspaceGid}
-                    isDisabled={isBusy}
-                    callAction={callAction}
-                    onChange={handleCustomFieldChange}
-                  />
-                  {!EDITABLE_CUSTOM_FIELD_TYPES.has(field.type) ? (
-                    <FormControl.HelpText>
-                      {CUSTOM_FIELD_TYPE_LABELS[field.type] || field.type} fields aren&apos;t
-                      editable in this app yet.
-                    </FormControl.HelpText>
-                  ) : null}
-                </FormControl>
-              ))}
-            </Flex>
-          </Box>
-        ) : null}
-
         <Flex gap="spacingL" flexWrap="wrap">
           <FormControl style={{ minWidth: '260px', flex: 1 }}>
             <Flex justifyContent="space-between" alignItems="center">
@@ -1056,40 +1015,7 @@ const Dialog = () => {
             />
             <FormControl.HelpText>Clear the date to remove the due date.</FormControl.HelpText>
           </FormControl>
-          {projectGid ? (
-            <FormControl style={{ minWidth: '200px', flex: 1 }}>
-              <FormControl.Label>Section</FormControl.Label>
-              <Select
-                value={selectedSectionGid}
-                onChange={(event) => setSelectedSectionGid(event.target.value)}
-                isDisabled={isBusy || isLoadingSections}>
-                <Select.Option value="" isDisabled>
-                  {isLoadingSections ? 'Loading sections…' : 'Select a section'}
-                </Select.Option>
-                {sections.map((section) => (
-                  <Select.Option key={section.gid} value={section.gid}>
-                    {section.name}
-                  </Select.Option>
-                ))}
-              </Select>
-              <FormControl.HelpText>
-                Currently: {invocation.sectionName || 'None'}. Moves the task between board
-                sections.
-              </FormControl.HelpText>
-            </FormControl>
-          ) : null}
         </Flex>
-
-        <FormControl>
-          <FormControl.Label>Description</FormControl.Label>
-          <Textarea
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            rows={8}
-            isDisabled={isBusy}
-          />
-          <FormControl.HelpText>Updates the linked Asana task description.</FormControl.HelpText>
-        </FormControl>
 
         <Box>
           <Text as="div" marginBottom="spacingXs" fontColor="gray600">
@@ -1165,6 +1091,80 @@ const Dialog = () => {
             </FormControl>
           ) : null}
         </Box>
+
+        <Box>
+          <Text as="div" marginBottom="spacingXs" fontColor="gray600">
+            Tags
+          </Text>
+          <Flex gap="spacingXs" flexWrap="wrap">
+            {task.tags && task.tags.length ? (
+              task.tags.map((tag) => <Pill key={tag.gid} label={tag.name} />)
+            ) : (
+              <Text fontColor="gray500">No tags.</Text>
+            )}
+          </Flex>
+        </Box>
+
+        {projectGid ? (
+          <FormControl>
+            <FormControl.Label>Section</FormControl.Label>
+            <Select
+              value={selectedSectionGid}
+              onChange={(event) => setSelectedSectionGid(event.target.value)}
+              isDisabled={isBusy || isLoadingSections}>
+              <Select.Option value="" isDisabled>
+                {isLoadingSections ? 'Loading sections…' : 'Select a section'}
+              </Select.Option>
+              {sections.map((section) => (
+                <Select.Option key={section.gid} value={section.gid}>
+                  {section.name}
+                </Select.Option>
+              ))}
+            </Select>
+            <FormControl.HelpText>
+              Currently: {invocation.sectionName || 'None'}. Moves the task between board sections.
+            </FormControl.HelpText>
+          </FormControl>
+        ) : null}
+
+        {customFields.length ? (
+          <Box>
+            <Text as="div" marginBottom="spacingXs" fontColor="gray600">
+              Custom fields
+            </Text>
+            <Flex flexDirection="column" gap="spacingM">
+              {customFields.map((field) => (
+                <FormControl key={field.gid} marginBottom="none">
+                  <FormControl.Label>{field.name}</FormControl.Label>
+                  <CustomFieldEditor
+                    field={field}
+                    workspaceGid={workspaceGid}
+                    isDisabled={isBusy}
+                    callAction={callAction}
+                    onChange={handleCustomFieldChange}
+                  />
+                  {!EDITABLE_CUSTOM_FIELD_TYPES.has(field.type) ? (
+                    <FormControl.HelpText>
+                      {CUSTOM_FIELD_TYPE_LABELS[field.type] || field.type} fields aren&apos;t
+                      editable in this app yet.
+                    </FormControl.HelpText>
+                  ) : null}
+                </FormControl>
+              ))}
+            </Flex>
+          </Box>
+        ) : null}
+
+        <FormControl>
+          <FormControl.Label>Description</FormControl.Label>
+          <Textarea
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            rows={8}
+            isDisabled={isBusy}
+          />
+          <FormControl.HelpText>Updates the linked Asana task description.</FormControl.HelpText>
+        </FormControl>
 
         <Box>
           <FormControl marginBottom="spacingM">
