@@ -891,8 +891,19 @@ const Dialog = () => {
   }
 
   return (
-    <Box padding="spacingL" style={{ width: '100%' }}>
-      <Flex flexDirection="column" gap="spacingL" alignItems="stretch" style={{ width: '100%' }}>
+    <Box
+      padding="spacingL"
+      style={{
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        maxHeight: '640px',
+      }}>
+      <Flex
+        flexDirection="column"
+        gap="spacingL"
+        alignItems="stretch"
+        style={{ width: '100%', overflowY: 'auto', flex: '1 1 auto', minHeight: 0 }}>
         <Box>
           <Text as="div" marginBottom="spacing2Xs" fontColor="gray600">
             Linked task
@@ -1244,25 +1255,28 @@ const Dialog = () => {
             </Text>
           )}
         </Box>
+      </Flex>
 
-        <Flex justifyContent="flex-end" gap="spacingS">
-          <Button variant="secondary" onClick={handleClose} isDisabled={isBusy}>
-            Close
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={handleAddComment}
-            isLoading={isPostingComment}
-            isDisabled={isBusy}>
-            Add comment
-          </Button>
-          <Button
-            onClick={handleSaveDetails}
-            isLoading={isSaving}
-            isDisabled={!hasDetailChanges || isBusy}>
-            Save changes
-          </Button>
-        </Flex>
+      <Flex
+        justifyContent="flex-end"
+        gap="spacingS"
+        style={{ flexShrink: 0, paddingTop: tokens.spacingM }}>
+        <Button variant="secondary" onClick={handleClose} isDisabled={isBusy}>
+          Close
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={handleAddComment}
+          isLoading={isPostingComment}
+          isDisabled={isBusy}>
+          Add comment
+        </Button>
+        <Button
+          onClick={handleSaveDetails}
+          isLoading={isSaving}
+          isDisabled={!hasDetailChanges || isBusy}>
+          Save changes
+        </Button>
       </Flex>
     </Box>
   );
