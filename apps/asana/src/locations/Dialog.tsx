@@ -63,6 +63,28 @@ function formatCommentTimestamp(isoDate: string) {
   return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
+const VISIBLE_COMMENT_COUNT = 3;
+const COMMENT_AVATAR_COLORS = ['#0d7f8c', '#7e3aad', '#c2185b', '#2c6ecb', '#e07a00', '#3f8c3f'];
+
+function getCommentInitials(name: string) {
+  const trimmed = name.trim();
+  if (!trimmed) {
+    return '?';
+  }
+  const parts = trimmed.split(/\s+/);
+  const initials =
+    parts.length > 1 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : parts[0].slice(0, 2);
+  return initials.toUpperCase();
+}
+
+function getCommentAvatarColor(name: string) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i += 1) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return COMMENT_AVATAR_COLORS[Math.abs(hash) % COMMENT_AVATAR_COLORS.length];
+}
+
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
   useAutoResizer();
@@ -101,6 +123,8 @@ const Dialog = () => {
   const [comments, setComments] = useState<AsanaComment[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [commentsError, setCommentsError] = useState<string | null>(null);
+  const [commentSortOrder, setCommentSortOrder] = useState<'oldest' | 'newest'>('oldest');
+  const [areAllCommentsShown, setAreAllCommentsShown] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isPostingComment, setIsPostingComment] = useState(false);
 
@@ -115,6 +139,26 @@ const Dialog = () => {
     () => description.trim() !== (task?.taskDescription ?? '').trim(),
     [description, task?.taskDescription]
   );
+
+  const chronologicalComments = useMemo(
+    () =>
+      [...comments].sort(
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      ),
+    [comments]
+  );
+  const hiddenCommentCount = Math.max(chronologicalComments.length - VISIBLE_COMMENT_COUNT, 0);
+  const displayedComments = areAllCommentsShown
+    ? chronologicalComments
+    : chronologicalComments.slice(-VISIBLE_COMMENT_COUNT);
+  const orderedComments =
+    commentSortOrder === 'newest' ? [...displayedComments].reverse() : displayedComments;
+  const moreCommentsLink =
+    !areAllCommentsShown && hiddenCommentCount ? (
+      <TextLink as="button" variant="secondary" onClick={() => setAreAllCommentsShown(true)}>
+        {hiddenCommentCount} more comment{hiddenCommentCount === 1 ? '' : 's'}
+      </TextLink>
+    ) : null;
   const hasDueDateChanges = dueDate !== (invocation.dueDate ?? '');
   const hasAssigneeChanges = Boolean(selectedAssignee) || assigneeCleared;
   const hasDependencyChanges =
@@ -682,41 +726,7 @@ const Dialog = () => {
         </Box>
 
         <Box>
-          <Text as="div" marginBottom="spacingXs" fontColor="gray600">
-            Comments
-          </Text>
-          {isLoadingComments ? (
-            <Paragraph marginBottom="spacingS">Loading comments...</Paragraph>
-          ) : commentsError ? (
-            <Text fontColor="red600" as="div" marginBottom="spacingS">
-              {commentsError}
-            </Text>
-          ) : comments.length ? (
-            <Flex
-              flexDirection="column"
-              gap="spacingS"
-              marginBottom="spacingS"
-              style={{ maxHeight: '260px', overflowY: 'auto' }}>
-              {comments.map((commentItem) => (
-                <Box
-                  key={commentItem.gid}
-                  style={{ borderBottom: '1px solid #e5ebed', paddingBottom: '8px' }}>
-                  <Flex justifyContent="space-between" alignItems="baseline" gap="spacingXs">
-                    <Text fontWeight="fontWeightMedium">{commentItem.authorName}</Text>
-                    <Text fontColor="gray500" fontSize="fontSizeS">
-                      {formatCommentTimestamp(commentItem.createdAt)}
-                    </Text>
-                  </Flex>
-                  <Text as="div">{commentItem.text}</Text>
-                </Box>
-              ))}
-            </Flex>
-          ) : (
-            <Text fontColor="gray500" as="div" marginBottom="spacingS">
-              No comments yet.
-            </Text>
-          )}
-          <FormControl marginBottom="none">
+          <FormControl marginBottom="spacingM">
             <FormControl.Label>Add comment</FormControl.Label>
             <Textarea
               value={comment}
@@ -729,6 +739,67 @@ const Dialog = () => {
               Posts a new comment to the linked Asana task.
             </FormControl.HelpText>
           </FormControl>
+
+          <Flex justifyContent="space-between" alignItems="center" marginBottom="spacingXs">
+            <Text fontColor="gray600" fontWeight="fontWeightMedium">
+              Comments
+            </Text>
+            {comments.length > 1 ? (
+              <TextLink
+                as="button"
+                variant="secondary"
+                onClick={() =>
+                  setCommentSortOrder((current) => (current === 'oldest' ? 'newest' : 'oldest'))
+                }>
+                {commentSortOrder === 'oldest' ? '↑ Oldest' : '↓ Newest'}
+              </TextLink>
+            ) : null}
+          </Flex>
+          {isLoadingComments ? (
+            <Paragraph marginBottom="spacingS">Loading comments...</Paragraph>
+          ) : commentsError ? (
+            <Text fontColor="red600" as="div" marginBottom="spacingS">
+              {commentsError}
+            </Text>
+          ) : comments.length ? (
+            <Flex flexDirection="column" gap="spacingS" marginBottom="spacingS">
+              {commentSortOrder === 'oldest' ? moreCommentsLink : null}
+              {orderedComments.map((commentItem) => (
+                <Flex key={commentItem.gid} gap="spacingS" alignItems="flex-start">
+                  <Box
+                    style={{
+                      flexShrink: 0,
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '50%',
+                      backgroundColor: getCommentAvatarColor(commentItem.authorName),
+                      color: '#fff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                    }}>
+                    {getCommentInitials(commentItem.authorName)}
+                  </Box>
+                  <Box style={{ flexGrow: 1 }}>
+                    <Flex alignItems="baseline" gap="spacingXs">
+                      <Text fontWeight="fontWeightMedium">{commentItem.authorName}</Text>
+                      <Text fontColor="gray500" fontSize="fontSizeS">
+                        {formatCommentTimestamp(commentItem.createdAt)}
+                      </Text>
+                    </Flex>
+                    <Text as="div">{commentItem.text}</Text>
+                  </Box>
+                </Flex>
+              ))}
+              {commentSortOrder === 'newest' ? moreCommentsLink : null}
+            </Flex>
+          ) : (
+            <Text fontColor="gray500" as="div" marginBottom="spacingS">
+              No comments yet.
+            </Text>
+          )}
         </Box>
 
         <Flex justifyContent="flex-end" gap="spacingS">
