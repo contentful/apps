@@ -7,8 +7,10 @@ import type {
 import type { EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
 import { ASANA_AUTOMATION_CONFIG } from '../src/const';
 import type { AppInstallationParameters } from '../src/types';
+import { parseInstallationParameters } from '../src/utils/installationParameters';
 import { getOAuthSdk } from './initiateOauth';
 import { createTaskFromParameters } from './createTaskFromParameters';
+import { syncFieldMappingsForEntry } from './syncFieldMappings';
 
 type LocalizedFieldValue = Record<string, string | undefined> | undefined;
 
@@ -32,15 +34,7 @@ async function getEntry(cma: PlainClientAPI, entryId: string) {
   return cma.entry.get({ entryId }) as Promise<EntryProps<KeyValueMap>>;
 }
 
-export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = async (
-  event: AppEventRequest,
-  context: FunctionEventContext
-) => {
-  const topic = getTopic(event);
-  if (!topic?.includes('Entry.publish')) {
-    return;
-  }
-
+async function handleEntryPublish(event: AppEventRequest, context: FunctionEventContext) {
   const body = event.body as EntryProps<KeyValueMap>;
   const entryId = body?.sys?.id;
   const contentTypeId = body?.sys?.contentType?.sys?.id;
@@ -82,5 +76,74 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = a
 
   if (!result.success) {
     throw new Error(result.message);
+  }
+}
+
+// Pushes any mapped field values for the saved entry into their linked Asana task's custom
+// fields. Checks for a matching field mapping before touching the CMA or Asana, so entries with
+// no configured mappings for their content type stay a cheap no-op.
+async function handleEntrySave(event: AppEventRequest, context: FunctionEventContext) {
+  const body = event.body as EntryProps<KeyValueMap>;
+  const entryId = body?.sys?.id;
+  const contentTypeId = body?.sys?.contentType?.sys?.id;
+
+  if (!entryId || !contentTypeId) {
+    return;
+  }
+
+  const installationParameters = (context.appInstallationParameters ??
+    {}) as AppInstallationParameters;
+  const { fieldMappings = [] } = parseInstallationParameters(installationParameters);
+
+  if (!fieldMappings.some((mapping) => mapping.contentTypeId === contentTypeId)) {
+    return;
+  }
+
+  const cma = context.cma;
+  if (!cma) {
+    throw new Error('Contentful CMA client is not available in the app event context.');
+  }
+
+  const sdk = getOAuthSdk(context);
+  let accessToken = '';
+  try {
+    const token = await sdk.token();
+    accessToken = token.accessToken;
+  } catch {
+    // Asana isn't connected yet; nothing to sync.
+    return;
+  }
+
+  if (!accessToken) {
+    return;
+  }
+
+  const entry = await getEntry(cma, entryId);
+  const result = await syncFieldMappingsForEntry({
+    cma,
+    entry,
+    installationParameters,
+    accessToken,
+  });
+
+  if (!result.success) {
+    throw new Error(result.message);
+  }
+}
+
+export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = async (
+  event: AppEventRequest,
+  context: FunctionEventContext
+) => {
+  const topic = getTopic(event);
+
+  if (topic?.includes('Entry.publish')) {
+    await handleEntryPublish(event, context);
+    return;
+  }
+
+  if (topic?.includes('Entry.save')) {
+    await handleEntrySave(event, context);
+    return;
   }
 };

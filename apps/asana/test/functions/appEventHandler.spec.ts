@@ -2,9 +2,14 @@ import { FunctionEventContext, FunctionTypeEnum } from '@contentful/node-apps-to
 import type { EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { handler } from '../../functions/appEventHandler';
+import { syncFieldMappingsForEntry } from '../../functions/syncFieldMappings';
 import type { AppInstallationParameters } from '../../src/types';
 
 globalThis.fetch = vi.fn();
+
+vi.mock('../../functions/syncFieldMappings', () => ({
+  syncFieldMappingsForEntry: vi.fn(),
+}));
 
 describe('appEventHandler', () => {
   const mockEntry = {
@@ -64,6 +69,11 @@ describe('appEventHandler', () => {
       accessToken: 'test-access-token',
       expiry: 3600,
     });
+    vi.mocked(syncFieldMappingsForEntry).mockResolvedValue({
+      success: true,
+      message: 'Synced field mappings to Asana.',
+      updatedFieldCount: 1,
+    });
   });
 
   it('creates a task when a matching entry is published', async () => {
@@ -120,7 +130,7 @@ describe('appEventHandler', () => {
     );
   });
 
-  it('ignores non-publish entry events', async () => {
+  it('ignores entry saves when no field mapping matches the content type', async () => {
     await handler(
       {
         type: FunctionTypeEnum.AppEventHandler,
@@ -143,6 +153,94 @@ describe('appEventHandler', () => {
 
     expect(mockCma.entry.get).not.toHaveBeenCalled();
     expect(globalThis.fetch).not.toHaveBeenCalled();
+    expect(syncFieldMappingsForEntry).not.toHaveBeenCalled();
+  });
+
+  it('syncs field mappings when a mapped content type is saved', async () => {
+    const contextWithFieldMappings = {
+      ...mockContext,
+      appInstallationParameters: {
+        ...mockContext.appInstallationParameters,
+        fieldMappings: [
+          {
+            contentTypeId: 'blogPost',
+            contentTypeName: 'Blog Post',
+            contentfulFieldId: 'status',
+            contentfulFieldName: 'Status',
+            asanaCustomFieldGid: 'custom-field-1',
+            asanaCustomFieldName: 'Address',
+          },
+        ],
+      },
+    } as unknown as FunctionEventContext;
+
+    await handler(
+      {
+        type: FunctionTypeEnum.AppEventHandler,
+        headers: {
+          'X-Contentful-Topic': 'ContentManagement.Entry.save',
+        },
+        body: {
+          sys: {
+            id: 'entry-1',
+            contentType: {
+              sys: {
+                id: 'blogPost',
+              },
+            },
+          },
+        },
+      } as Parameters<typeof handler>[0],
+      contextWithFieldMappings
+    );
+
+    expect(mockCma.entry.get).toHaveBeenCalledWith({ entryId: 'entry-1' });
+    expect(syncFieldMappingsForEntry).toHaveBeenCalledWith(
+      expect.objectContaining({ entry: mockEntry, accessToken: 'test-access-token' })
+    );
+  });
+
+  it('skips syncing a saved entry when Asana is not connected', async () => {
+    mockOauthSdk.token.mockRejectedValueOnce(new Error('not connected'));
+    const contextWithFieldMappings = {
+      ...mockContext,
+      appInstallationParameters: {
+        ...mockContext.appInstallationParameters,
+        fieldMappings: [
+          {
+            contentTypeId: 'blogPost',
+            contentTypeName: 'Blog Post',
+            contentfulFieldId: 'status',
+            contentfulFieldName: 'Status',
+            asanaCustomFieldGid: 'custom-field-1',
+            asanaCustomFieldName: 'Address',
+          },
+        ],
+      },
+    } as unknown as FunctionEventContext;
+
+    await handler(
+      {
+        type: FunctionTypeEnum.AppEventHandler,
+        headers: {
+          'X-Contentful-Topic': 'ContentManagement.Entry.save',
+        },
+        body: {
+          sys: {
+            id: 'entry-1',
+            contentType: {
+              sys: {
+                id: 'blogPost',
+              },
+            },
+          },
+        },
+      } as Parameters<typeof handler>[0],
+      contextWithFieldMappings
+    );
+
+    expect(mockCma.entry.get).not.toHaveBeenCalled();
+    expect(syncFieldMappingsForEntry).not.toHaveBeenCalled();
   });
 
   it('ignores publishes for other content types', async () => {
