@@ -16,9 +16,10 @@ export const BASE_FIELD_VERSION = 3;
 /**
  * One version for all of Robots, not one per key.
  *
- * `robotsJobs`, `robotsOutputs` and `robotsDirectiveRuns` all ship in the same release, so no
- * build ever writes one without knowing about the others. A version exists to tell apart shapes
- * written by *different* builds; three numbers would describe a history that never happened.
+ * `robotsJobs`, `robotsOutputs`, `robotsDirectiveRuns` and `robotsPendingCreates` all ship in the
+ * same release, so no build ever writes one without knowing about the others. A version exists to
+ * tell apart shapes written by *different* builds; four numbers would describe a history that
+ * never happened.
  *
  * Kept in step with `frontend/src/util/muxFieldVersion.ts`, which owns the browser copy of this
  * rule. Both raise on a key being present and *populated*, never on this build merely knowing
@@ -110,10 +111,12 @@ export function deriveFieldVersion(value: Record<string, unknown> | undefined | 
   // writers would then disagree forever about the same value.
   const jobs = value?.robotsJobs;
   const directiveRuns = value?.robotsDirectiveRuns;
+  const pendingCreates = value?.robotsPendingCreates;
   const holdsRobotsData =
     (Array.isArray(jobs) && jobs.length > 0) ||
     !!value?.robotsOutputs ||
-    (Array.isArray(directiveRuns) && directiveRuns.length > 0);
+    (Array.isArray(directiveRuns) && directiveRuns.length > 0) ||
+    (Array.isArray(pendingCreates) && pendingCreates.length > 0);
 
   return Math.max(carried, holdsRobotsData ? FIELD_VERSION_WITH_ROBOTS : 0);
 }

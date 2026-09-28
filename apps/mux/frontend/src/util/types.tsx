@@ -1,7 +1,12 @@
 import { FieldExtensionSDK } from '@contentful/app-sdk';
 import { ModalData } from '../components/AssetConfiguration/MuxAssetConfigurationModal';
 import { MuxApiService } from './muxApi';
-import { RobotsDirectiveRunRecord, RobotsJobRecord, RobotsOutputs } from './robotsTypes';
+import {
+  RobotsDirectiveRunRecord,
+  RobotsJobRecord,
+  RobotsOutputs,
+  RobotsPendingCreate,
+} from './robotsTypes';
 
 export interface AppProps {
   sdk: FieldExtensionSDK;
@@ -96,12 +101,14 @@ export interface MuxContentfulObject {
   };
   passthrough?: string;
   pendingActions?: PendingActions;
-  /** v4. Finished Robots jobs for this asset. In-flight jobs are never stored — see robotsTypes. */
+  /** v4. Every Robots job read for this asset, in flight or finished — see ADR-0005. */
   robotsJobs?: Array<RobotsJobRecord>;
-  /** v5. Summary and moderation output, so the Delivery API returns it with the entry. */
+  /** v4. Summary and moderation output, so the Delivery API returns it with the entry. */
   robotsOutputs?: RobotsOutputs;
-  /** v6. Directive runs started from this entry, so their jobs stay claimable — see ADR-0009. */
+  /** v4. Directive runs started from this entry — see ADR-0009. */
   robotsDirectiveRuns?: Array<RobotsDirectiveRunRecord>;
+  /** v4. Robots creates asked for here whose outcome is not known yet — see ADR-0003. */
+  robotsPendingCreates?: Array<RobotsPendingCreate>;
 }
 
 export interface Error {

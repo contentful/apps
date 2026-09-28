@@ -35,7 +35,8 @@ import RobotsParamFields from './RobotsParamFields';
 interface RobotsRunModalProps {
   isShown: boolean;
   onClose: () => void;
-  onRun: (workflow: RobotsWorkflow, parameters: Record<string, unknown>) => Promise<void>;
+  /** Not awaited: the modal closes on confirm, and the job table shows the run starting. */
+  onRun: (workflow: RobotsWorkflow, parameters: Record<string, unknown>) => Promise<void> | void;
   assetId: string;
   captions: Track[];
   audioTracks: Track[];
@@ -46,7 +47,7 @@ interface RobotsRunModalProps {
   isAudioOnly?: boolean;
   /** Seconds, when known. Unknown blocks nothing, the same as `isAudioOnly`. */
   duration?: number;
-  /** True while a create is in flight, or unconfirmed — Run stays disabled either way. */
+  /** True while a create is pending on this video — Run stays disabled until it resolves. */
   isRunDisabled: boolean;
   /** Why Run is unavailable, when it is for a reason worth explaining. */
   runDisabledReason?: string;
@@ -70,7 +71,6 @@ const RobotsRunModal: FC<RobotsRunModalProps> = ({
     initialWorkflow ?? DEFAULT_ROBOTS_WORKFLOW
   );
   const [values, setValues] = useState<Record<string, unknown>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
   /** The workflow the confirm step is for, so a workflow that changes under it leaves the step. */
   const [confirmedWorkflow, setConfirmedWorkflow] = useState<RobotsWorkflow | undefined>();
 
@@ -127,14 +127,9 @@ const RobotsRunModal: FC<RobotsRunModalProps> = ({
     setConfirmedWorkflow(workflow);
   };
 
-  const handleConfirm = async () => {
-    setIsSubmitting(true);
-    try {
-      await onRun(workflow, paramsFromFormValues(definition, assetId, values, context));
-      onClose();
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleConfirm = () => {
+    void onRun(workflow, paramsFromFormValues(definition, assetId, values, context));
+    onClose();
   };
 
   return (
@@ -269,11 +264,7 @@ const RobotsRunModal: FC<RobotsRunModalProps> = ({
                 <Button variant="secondary" onClick={() => setConfirmedWorkflow(undefined)}>
                   Back
                 </Button>
-                <Button
-                  variant="positive"
-                  isDisabled={isRunDisabled || isSubmitting}
-                  isLoading={isSubmitting}
-                  onClick={handleConfirm}>
+                <Button variant="positive" isDisabled={isRunDisabled} onClick={handleConfirm}>
                   Run {definition.label}
                 </Button>
               </>

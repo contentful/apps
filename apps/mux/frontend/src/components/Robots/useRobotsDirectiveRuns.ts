@@ -15,12 +15,6 @@ import { RobotsDirectiveRun, RobotsDirectiveRunRecord } from '../../util/robotsT
 export interface RobotsDirectiveRunsState {
   /** Every run to show and to poll: the listed ones, and the ones this asset's jobs name. */
   directiveRuns: RobotsDirectiveRun[];
-  /**
-   * The runs whose jobs belong on the entry: those of a directive configured at install, recorded
-   * on this entry, or started from this tab, however the run was found. Any other run was started
-   * somewhere else — it is shown, and its jobs are never claimed.
-   */
-  claimingRuns: RobotsDirectiveRun[];
   loadDirectiveRuns: () => Promise<void>;
   /** For the optimistic row a create adds, which is what arms the poll from the moment of a click. */
   addDirectiveRun: (run: RobotsDirectiveRun) => void;
@@ -39,6 +33,7 @@ export function useRobotsDirectiveRuns({
   assetId,
   defaultDirectiveIds,
   recordedRuns,
+  pendingDirectiveIds,
   runsNamedByJobs,
   isMountedRef,
 }: {
@@ -48,6 +43,8 @@ export function useRobotsDirectiveRuns({
   defaultDirectiveIds: string[];
   /** Runs the entry itself records, so a directive dropped from the config is still polled. */
   recordedRuns?: RobotsDirectiveRunRecord[];
+  /** Directives with a run create pending on the entry, so the run can be found. */
+  pendingDirectiveIds: string[];
   /** Runs the jobs on this asset name. See `directiveRunRefsFromJobs`. */
   runsNamedByJobs: RobotsDirectiveRunRef[];
   isMountedRef: React.MutableRefObject<boolean>;
@@ -80,18 +77,26 @@ export function useRobotsDirectiveRuns({
 
   /**
    * Every directive worth listing, as one stable string: the ones configured to run at ingest,
-   * the ones this entry records a run from, and the ones already on screen. Not the account's —
-   * that is what used to cost one round trip per directive in it (ADR-0009).
+   * the ones this entry records a run from, the ones with a run create pending, and the ones
+   * already on screen. Not the account's — that would cost one round trip per directive in it
+   * (ADR-0009).
    *
    * Sorted and joined because the identity matters: `loadDirectiveRuns` is a dependency of the
    * poll effect, so a set that merely re-orders would re-arm the 6 s timer before it ever fired.
    */
   const directiveIdKey = useMemo(
     () =>
-      Array.from(new Set([...defaultDirectiveIds, ...recordedDirectiveIds, ...liveDirectiveIds]))
+      Array.from(
+        new Set([
+          ...defaultDirectiveIds,
+          ...recordedDirectiveIds,
+          ...pendingDirectiveIds,
+          ...liveDirectiveIds,
+        ])
+      )
         .sort()
         .join(','),
-    [defaultDirectiveIds, recordedDirectiveIds, liveDirectiveIds]
+    [defaultDirectiveIds, recordedDirectiveIds, pendingDirectiveIds, liveDirectiveIds]
   );
   /** The runs this asset's jobs name, stable for the same reason. */
   const namedRunKey = useMemo(
@@ -135,9 +140,8 @@ export function useRobotsDirectiveRuns({
               .filter((run) => run.subject_id === assetId)
               .map((run) => ({ ...run, directive_id: directiveId }));
 
-            // `node_states` is normally on the list response; this is the fallback. It is the
-            // ownership signal — what says which jobs this directive dispatched — so without it a
-            // directive's jobs are indistinguishable from a stranger's and are never recorded.
+            // `node_states` is normally on the list response; this is the fallback. It is what the
+            // runs table's steps and the run record's `jobIds` come from.
             return Promise.all(
               runs.map(async (run) => {
                 if (run.node_states) return run;
@@ -184,7 +188,7 @@ export function useRobotsDirectiveRuns({
             try {
               const response = await muxApi.getRobotsDirectiveRun(directiveId, runId);
               const run = response.data;
-              // Checked, not assumed: what the run shows and what it claims both depend on it.
+              // Checked, not assumed: a run on another asset is not this video's.
               return run?.run_id && run.subject_id === assetId
                 ? { ...run, directive_id: directiveId }
                 : undefined;
@@ -232,14 +236,9 @@ export function useRobotsDirectiveRuns({
     );
   }, [listedRuns, namedRuns]);
 
-  const claimingRuns = useMemo(() => {
-    const claiming = new Set(directiveIdKey.split(','));
-    return directiveRuns.filter((run) => !!run.directive_id && claiming.has(run.directive_id));
-  }, [directiveRuns, directiveIdKey]);
-
   // Nothing to read is an answer already: no directive this entry has any tie to.
   const hasSomethingToRead = !!muxApi && (directiveIdKey !== '' || namedRunKey !== '');
   const isPending = hasSomethingToRead && settledKey !== `${directiveIdKey}|${namedRunKey}`;
 
-  return { directiveRuns, claimingRuns, loadDirectiveRuns, addDirectiveRun, isPending };
+  return { directiveRuns, loadDirectiveRuns, addDirectiveRun, isPending };
 }

@@ -1,12 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import RobotsJobTable, {
-  RobotsJobDetailState,
-  STARTED_ELSEWHERE_TOOLTIP,
-  unitsCell,
-} from './RobotsJobTable';
+import RobotsJobTable, { RobotsJobDetailState, unitsCell } from './RobotsJobTable';
 import { RobotsJob } from '../../util/robotsTypes';
+import { PendingCreateRow } from '../../util/robotsField';
 
 /**
  * Two things this table has to stop doing, and one rule that ties them together.
@@ -42,7 +39,9 @@ const show = (jobs: RobotsJob[], overrides: Record<string, unknown> = {}) => {
   render(
     <RobotsJobTable
       jobs={jobs}
-      startedElsewhereIds={(overrides.startedElsewhereIds as Set<string>) ?? new Set()}
+      pendingRows={(overrides.pendingRows as PendingCreateRow[]) ?? []}
+      onDontStart={overrides.onDontStart as ((requestId: string) => void) | undefined}
+      pointsToNote={(overrides.pointsToNote as boolean) ?? true}
       detailedJobIds={(overrides.detailedJobIds as Set<string>) ?? new Set()}
       unreadableJobIds={(overrides.unreadableJobIds as Set<string>) ?? new Set()}
       onCancel={props.onCancel as (j: RobotsJob) => void}
@@ -226,40 +225,6 @@ describe('an errored row', () => {
   });
 });
 
-describe('a row started elsewhere', () => {
-  it('says so, and says why on hover', async () => {
-    show([job({ id: 'rjob_ours' }), job({ id: 'rjob_dashboard' })], {
-      startedElsewhereIds: new Set(['rjob_dashboard']),
-    });
-
-    // Only the row the entry does not claim, and never the old wording, which read as a failed
-    // save.
-    const badge = screen.getByText('Started elsewhere');
-    expect(screen.getAllByText('Started elsewhere')).toHaveLength(1);
-    expect(screen.queryByText('Not saved to this entry')).not.toBeInTheDocument();
-
-    fireEvent.mouseOver(badge);
-    await waitFor(() =>
-      expect(screen.getByRole('tooltip')).toHaveTextContent(STARTED_ELSEWHERE_TOOLTIP)
-    );
-  });
-
-  it('gives the directive case its own words, because a directive job is not recorded either', () => {
-    // "Run outside the plugin" would be false for a job a directive dispatched on a run this
-    // entry did not start. The explanation has to be true of every row that carries the badge.
-    expect(STARTED_ELSEWHERE_TOOLTIP).toMatch(/a directive this entry did not start/);
-    expect(STARTED_ELSEWHERE_TOOLTIP).toMatch(/this entry keeps no record of it/);
-  });
-
-  it('does not say the result is lost, because a summary or moderation result is kept', () => {
-    // The old "it is not saved to this entry" became false for summarize and moderate rows.
-    expect(STARTED_ELSEWHERE_TOOLTIP).not.toMatch(/not saved/);
-    expect(STARTED_ELSEWHERE_TOOLTIP).toMatch(
-      /Summaries and moderation results are the exception: the newest of each is saved to this entry, whoever ran it/
-    );
-  });
-});
-
 describe('RobotsJobTable — row alignment and loading', () => {
   it('centres every cell of a row on the row, not on its top edge', () => {
     // F36 tables align cells to the top; the Actions button is taller than the text beside it.
@@ -273,8 +238,9 @@ describe('RobotsJobTable — row alignment and loading', () => {
     render(
       <RobotsJobTable
         jobs={[]}
+        pendingRows={[pendingRow('starting')]}
+        pointsToNote
         isLoading
-        startedElsewhereIds={new Set()}
         detailedJobIds={new Set()}
         unreadableJobIds={new Set()}
         onCancel={vi.fn()}
@@ -286,5 +252,97 @@ describe('RobotsJobTable — row alignment and loading', () => {
     );
     expect(screen.getByTestId('robots_job_table_loading')).toBeInTheDocument();
     expect(screen.queryByText(/No Robots jobs have run/)).not.toBeInTheDocument();
+  });
+});
+
+const pendingRow = (
+  phase: PendingCreateRow['phase'],
+  overrides: Partial<PendingCreateRow['pending']> = {}
+): PendingCreateRow => ({
+  pending: {
+    requestId: 'req_1',
+    kind: 'job',
+    workflow: 'summarize',
+    requestedAt: 1_700_000_500,
+    ...overrides,
+  } as PendingCreateRow['pending'],
+  phase,
+});
+
+describe('a pending row', () => {
+  const lastCell = (requestId = 'req_1') => screen.getByTestId(`robots-pending-${requestId}`);
+
+  it.each([
+    ['waiting-for-publish', 'Waiting for publish', 'Starts after the publish finishes'],
+    ['starting', 'Starting…', 'Waiting for Mux'],
+    ['unconfirmed', 'Not confirmed', 'See the note above'],
+  ] as const)('reads as %s, with nothing that implies a job exists', (phase, badge, last) => {
+    show([], { pendingRows: [pendingRow(phase)] });
+
+    const row = screen.getByText(badge).closest('tr') as HTMLElement;
+    expect(within(row).getByText('Summarize')).toBeInTheDocument();
+    expect(row).toHaveTextContent(/Requested /);
+    expect(within(row).getByText('Not counted yet')).toBeInTheDocument();
+    expect(lastCell()).toHaveTextContent(last);
+    for (const name of ['View output', 'Cancel']) {
+      expect(within(row).queryByRole('button', { name })).not.toBeInTheDocument();
+    }
+    expect(within(row).queryByTestId(/robots-load-units/)).not.toBeInTheDocument();
+  });
+
+  it('offers "Don’t start" only while waiting for the publish, and only with the handler', () => {
+    const onDontStart = vi.fn();
+    show([], { pendingRows: [pendingRow('waiting-for-publish')], onDontStart });
+    fireEvent.click(screen.getByRole('button', { name: 'Don’t start' }));
+    expect(onDontStart).toHaveBeenCalledWith('req_1');
+  });
+
+  it('offers nothing to withdraw once the create is on its way, or to someone who cannot run', () => {
+    show([], { pendingRows: [pendingRow('starting')], onDontStart: vi.fn() });
+    expect(screen.queryByRole('button', { name: 'Don’t start' })).not.toBeInTheDocument();
+  });
+
+  it('offers nothing to withdraw without the handler', () => {
+    show([], { pendingRows: [pendingRow('waiting-for-publish')] });
+    expect(screen.queryByRole('button', { name: 'Don’t start' })).not.toBeInTheDocument();
+  });
+
+  it('points at the note only for someone the note is shown to', () => {
+    show([], { pendingRows: [pendingRow('unconfirmed')], pointsToNote: false });
+    expect(lastCell()).toHaveTextContent('Waiting for Mux');
+  });
+
+  it('is a row, not the empty state', () => {
+    show([], { pendingRows: [pendingRow('starting')] });
+    expect(screen.getByTestId('robots_job_table')).toBeInTheDocument();
+    expect(screen.queryByText(/No Robots jobs have run/)).not.toBeInTheDocument();
+  });
+
+  it('gives its place to the job that resolves it', () => {
+    const older = job({ id: 'rjob_older', created_at: 1_700_000_000 });
+    const newer = job({ id: 'rjob_newer', created_at: 1_700_001_000 });
+    const props = {
+      detailedJobIds: new Set<string>(),
+      unreadableJobIds: new Set<string>(),
+      onViewOutput: vi.fn(),
+      onLoadDetail: vi.fn(),
+      cancellingIds: [],
+      loadingDetailIds: [],
+      pointsToNote: true,
+    };
+    const { rerender } = render(
+      <RobotsJobTable jobs={[older, newer]} pendingRows={[pendingRow('starting')]} {...props} />
+    );
+    const rowIndex = (text: string) =>
+      Array.from(screen.getByTestId('robots_job_table').querySelectorAll('tbody tr')).findIndex(
+        (row) => row.textContent?.includes(text)
+      );
+    expect(rowIndex('Starting…')).toBe(1);
+
+    const resolved = job({ id: 'rjob_resolved', status: 'pending', created_at: 1_700_000_502 });
+    rerender(<RobotsJobTable jobs={[older, resolved, newer]} pendingRows={[]} {...props} />);
+    const rows = screen.getByTestId('robots_job_table').querySelectorAll('tbody tr');
+    expect(rows).toHaveLength(3);
+    expect(rows[1]).toHaveTextContent('pending');
   });
 });

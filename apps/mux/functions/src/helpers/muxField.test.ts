@@ -118,6 +118,22 @@ describe('mergeMuxAssetIntoField', () => {
     expect(merged.version).toBe(5);
   });
 
+  it('keeps robotsPendingCreates untouched through a publish', () => {
+    // The guard on a Robots create that has not been confirmed yet. Browser-owned, like the rest.
+    const existing = {
+      version: FIELD_VERSION_WITH_ROBOTS,
+      assetId: 'asset-1',
+      robotsPendingCreates: [
+        { requestId: '9f2c0b7a41d3e865', kind: 'job', workflow: 'summarize', requestedAt: 1 },
+      ],
+    };
+
+    const merged = mergeMuxAssetIntoField(existing, assetMirror);
+
+    expect(merged.robotsPendingCreates).toEqual(existing.robotsPendingCreates);
+    expect(merged.version).toBe(FIELD_VERSION_WITH_ROBOTS);
+  });
+
   it('preserves an output whose job was never recorded here, at v4', () => {
     // What an entry holds once the browser keeps a summary from a job started elsewhere: outputs,
     // and no job records to go with them. See ADR-0005's 2026-09-25 amendment.

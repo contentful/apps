@@ -12,6 +12,10 @@ export const EM_DASH = '—';
 export const formatTimestamp = (seconds?: number): string =>
   seconds ? new Date(seconds * 1000).toLocaleString() : EM_DASH;
 
+/** The time of day alone, for a sentence about something that happened minutes ago. */
+export const formatTimeOfDay = (seconds: number): string =>
+  new Date(seconds * 1000).toLocaleTimeString();
+
 /** A duration or offset in milliseconds, as `m:ss`. */
 export const formatMs = (ms?: number): string => {
   if (typeof ms !== 'number') return EM_DASH;

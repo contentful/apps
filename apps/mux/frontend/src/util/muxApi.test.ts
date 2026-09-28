@@ -7,10 +7,9 @@ import { MuxApiService, addByURL, getUploadUrl } from './muxApi';
 /**
  * Where this plugin puts a `passthrough` in what it sends Mux, read off the proxy call itself.
  *
- * One place only: a Robots job create, where the field is ours and Mux counts CMS integrations by
- * its prefix. Every other write either takes no passthrough or the field is the customer's — an
- * asset's, a track's and a static rendition's are mirrored onto the entry and reach the Delivery
- * API. See ADR-0003's 2026-09-27 amendment.
+ * One place only: the interim marker on a Robots job create (ADR-0003). Every other passthrough is
+ * the customer's — an asset's, a track's and a static rendition's are mirrored onto the entry and
+ * reach the Delivery API.
  */
 
 interface ProxyCall {
@@ -105,15 +104,14 @@ describe('what the plugin sends Mux', () => {
   });
 
   it('stamps a Robots job at the top level, beside its parameters', async () => {
-    const stamp = 'mux:cms:contentful:2.0.0|space-1:master:entry-1|0123456789abcdef';
-    await muxApi.createRobotsJob('summarize', { asset_id: 'asset-1' }, stamp);
+    await muxApi.createRobotsJob('summarize', { asset_id: 'asset-1' });
 
     expect(proxyCalls).toHaveLength(1);
     expect(proxyCalls[0]).toMatchObject({ method: 'POST', path: '/robots/v0/jobs/summarize' });
-    // Mux reads the tag from the top level; inside `parameters` it is an unknown workflow parameter.
+    // Mux reads it from the top level; inside `parameters` it is an unknown workflow parameter.
     expect(bodyOf(proxyCalls[0])).toEqual({
       parameters: { asset_id: 'asset-1' },
-      passthrough: stamp,
+      passthrough: 'mux:cms:contentful:',
     });
   });
 

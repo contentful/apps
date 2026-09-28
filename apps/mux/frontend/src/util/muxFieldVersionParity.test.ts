@@ -21,9 +21,9 @@ import {
  *   and forth for as long as the entry is edited.
  *
  * So the table below pins the exact number for every shape the field can be in. **An identical
- * table lives in `functions/src/helpers/muxField.test.ts`** — the two packages cannot import each
- * other (separate `rootDir`s), so the tables are mirrored by hand. Change one only by changing
- * both, and only on purpose.
+ * table lives in `functions/src/helpers/muxFieldVersionParity.test.ts`** — the two packages cannot
+ * import each other (separate `rootDir`s), so the tables are mirrored by hand. Change one only by
+ * changing both, and only on purpose.
  */
 describe('the two copies of the field-version rule agree', () => {
   const cases: Array<[string, Record<string, unknown> | undefined, number]> = [
@@ -57,7 +57,18 @@ describe('the two copies of the field-version rule agree', () => {
     // tested truthiness rather than `Array.isArray` would raise the version here; one that did
     // not would leave it — which is exactly the shape of disagreement that never converges.
     ['robotsJobs corrupted to a string', { version: 3, robotsJobs: 'nonsense' }, 3],
-    ['robotsDirectiveRuns corrupted to an object', { version: 3, robotsDirectiveRuns: { a: 1 } }, 3],
+    [
+      'robotsDirectiveRuns corrupted to an object',
+      { version: 3, robotsDirectiveRuns: { a: 1 } },
+      3,
+    ],
+    ['an empty pending-create array', { version: 3, robotsPendingCreates: [] }, 3],
+    ['one pending create', { version: 3, robotsPendingCreates: [{ requestId: 'q' }] }, 4],
+    [
+      'robotsPendingCreates corrupted to an object',
+      { version: 3, robotsPendingCreates: { a: 1 } },
+      3,
+    ],
     ['robotsOutputs corrupted to a string', { version: 3, robotsOutputs: 'nonsense' }, 4],
     ['a non-numeric version', { version: '4', robotsJobs: [{ id: 'j' }] }, 4],
   ];

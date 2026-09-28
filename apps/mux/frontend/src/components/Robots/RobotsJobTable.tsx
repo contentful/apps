@@ -1,18 +1,11 @@
 import { FC } from 'react';
-import {
-  Badge,
-  Box,
-  Button,
-  Skeleton,
-  Table,
-  Text,
-  TextLink,
-  Tooltip,
-} from '@contentful/f36-components';
+import { Box, Button, Skeleton, Table, Text, TextLink } from '@contentful/f36-components';
 import { RobotsJob, isTerminalStatus } from '../../util/robotsTypes';
 import { workflowLabel } from '../../util/robotsCatalog';
 import { formatTimestamp } from '../../util/robotsFormat';
+import { PendingCreateRow, jobTableRows } from '../../util/robotsField';
 import EmptyTableNote from './EmptyTableNote';
+import PendingCreateCell from './PendingCreateCell';
 import RobotsStatusBadge from './RobotsStatusBadge';
 
 /** The job list, following the `TrackList` table convention used for captions and audio. */
@@ -60,24 +53,14 @@ export function unitsCell(job: RobotsJob, detail: RobotsJobDetailState): RobotsU
   return { label: 'Not loaded', isLoadable: true };
 }
 
-/**
- * Why a row carries the "Started elsewhere" badge. It has to hold for every job that gets it,
- * whatever its workflow: none of them is recorded, and the summarize and moderate ones still have
- * their output kept (ADR-0005's 2026-09-25 amendment).
- */
-export const STARTED_ELSEWHERE_TOOLTIP =
-  'Started outside this entry — from the Mux dashboard, another entry, or a directive this entry ' +
-  'did not start. It is listed because it ran on this video, and this entry keeps no record of ' +
-  'it. Summaries and moderation results are the exception: the newest of each is saved to this ' +
-  'entry, whoever ran it.';
-
 interface RobotsJobTableProps {
   jobs: RobotsJob[];
-  /**
-   * Ids of the jobs this entry does not claim. They are shown and not recorded, so the row says
-   * why rather than leaving the editor to notice the gap in the Data tab.
-   */
-  startedElsewhereIds: Set<string>;
+  /** Job creates still pending, shown as rows until each becomes its job. See `pendingCreateRows`. */
+  pendingRows: PendingCreateRow[];
+  /** Withdraws a create still waiting behind a publish. Absent for someone who cannot run Robots. */
+  onDontStart?: (requestId: string) => void;
+  /** Whether an unconfirmed row points at the note above the table, which only runners see. */
+  pointsToNote: boolean;
   /** Ids whose full record has been read. See `RobotsJobDetailState`. */
   detailedJobIds: Set<string>;
   /** Ids whose detail read was attempted and failed. */
@@ -160,7 +143,9 @@ const JobActions: FC<JobActionsProps> = ({ job, isCancelling, onCancel, onViewOu
 
 const RobotsJobTable: FC<RobotsJobTableProps> = ({
   jobs,
-  startedElsewhereIds,
+  pendingRows,
+  onDontStart,
+  pointsToNote,
   detailedJobIds,
   unreadableJobIds,
   onCancel,
@@ -194,7 +179,8 @@ const RobotsJobTable: FC<RobotsJobTableProps> = ({
     );
   }
 
-  if (jobs.length === 0) {
+  const rows = jobTableRows(pendingRows, jobs);
+  if (rows.length === 0) {
     return <EmptyTableNote>No Robots jobs have run on this video yet.</EmptyTableNote>;
   }
 
@@ -204,7 +190,34 @@ const RobotsJobTable: FC<RobotsJobTableProps> = ({
       <Table data-testid="robots_job_table" verticalAlign="middle">
         {head}
         <Table.Body>
-          {jobs.map((job) => {
+          {rows.map(({ key, pending, item: job }) => {
+            if (pending) {
+              // No Mux id, so nothing on it implies a job exists: no output, Cancel or Units read.
+              return (
+                <Table.Row key={key}>
+                  <Table.Cell>
+                    <Text>
+                      {pending.pending.kind === 'job' && workflowLabel(pending.pending.workflow)}
+                    </Text>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <RobotsStatusBadge kind="create" status={pending.phase} />
+                  </Table.Cell>
+                  <Table.Cell>Requested {formatTimestamp(pending.pending.requestedAt)}</Table.Cell>
+                  <Table.Cell>
+                    <Text>Not counted yet</Text>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <PendingCreateCell
+                      row={pending}
+                      onDontStart={onDontStart}
+                      pointsToNote={pointsToNote}
+                    />
+                  </Table.Cell>
+                </Table.Row>
+              );
+            }
+
             const units = unitsCell(job, detailState(job, detailedJobIds, unreadableJobIds));
             // The background read is coming, so this is loading, not "Not loaded".
             const isLoadingDetail =
@@ -212,16 +225,9 @@ const RobotsJobTable: FC<RobotsJobTableProps> = ({
               (units.isLoadable && !!pendingDetailIds?.has(job.id));
 
             return (
-              <Table.Row key={job.id}>
+              <Table.Row key={key}>
                 <Table.Cell>
                   <Text>{workflowLabel(job.workflow)}</Text>
-                  {startedElsewhereIds.has(job.id) && (
-                    <Box marginTop="spacingXs">
-                      <Tooltip content={STARTED_ELSEWHERE_TOOLTIP} placement="top">
-                        <Badge variant="secondary">Started elsewhere</Badge>
-                      </Tooltip>
-                    </Box>
-                  )}
                   {/* No failure reason here: the status says it errored, View output says why. */}
                 </Table.Cell>
                 <Table.Cell>

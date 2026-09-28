@@ -14,34 +14,42 @@ import {
 import { CycleIcon } from '@contentful/f36-icons';
 import { MuxApiError, MuxApiService } from '../../util/muxApi';
 import {
+  LocalPendingCreate,
+  PendingCreatePhase,
+  PendingCreateRow,
+  ROBOTS_CREATE_CONFIRM_GRACE_S,
   ROBOTS_DOCS_URL,
   ROBOTS_POLL_INTERVAL_MS,
   ROBOTS_UNCONFIRMED_RECHECK_TICKS,
-  RobotsPassthroughScope,
-  RobotsUnconfirmedCreateError,
-  RobotsUnconfirmedDirectiveRunError,
   activeDirectiveRuns,
   activeJobs,
+  addPendingCreate,
   advisoryFromError,
   applyRobotsDirectiveRunsToValue,
   applyRobotsJobsToValue,
   cachedRobotsCapability,
   capabilityFromError,
-  createRobotsDirectiveRunWithReconciliation,
-  createRobotsJobWithReconciliation,
   directiveRunRefsFromJobs,
-  findJobByPassthrough,
-  findRecentDirectiveRun,
-  jobIdsFromDirectiveRuns,
-  jobsClaimedByEntry,
-  recordRobotsDirectiveRun,
+  freshPendingCreates,
+  newPendingDirectiveRunCreate,
+  newPendingJobCreate,
+  pendingCreateRows,
+  pendingCreatesOf,
+  removePendingCreates,
+  resolvePendingCreatesFromReads,
+  resolvePendingDirectiveRunCreate,
+  resolvePendingJobCreate,
+  startRobotsDirectiveRun,
+  startRobotsJob,
   unfinishedJobRecords,
 } from '../../util/robots';
+import { workflowLabel } from '../../util/robotsCatalog';
 import {
   RobotsAdvisory,
   RobotsDirective,
   RobotsDirectiveRun,
   RobotsJob,
+  RobotsPendingCreate,
   RobotsWorkflow,
 } from '../../util/robotsTypes';
 import { MuxContentfulObject, Track } from '../../util/types';
@@ -52,6 +60,7 @@ import RobotsJobTable from './RobotsJobTable';
 import RobotsRunModal from './RobotsRunModal';
 import RobotsOutputViewer from './RobotsOutputViewer';
 import RobotsDirectiveRunTable from './RobotsDirectiveRunTable';
+import RobotsUnconfirmedNote from './RobotsUnconfirmedNote';
 import ApplyToEntryModal from './ApplyToEntryModal';
 import { useRobotsDirectiveRuns } from './useRobotsDirectiveRuns';
 import { directiveNamesById } from './useRobotsDirectiveNames';
@@ -69,15 +78,14 @@ import { useRobotsJobList } from './useRobotsJobList';
  * serialized write path on the App component, so this loop and the 500 ms asset poll cannot
  * clobber each other. See ADR-0001.
  *
- * **It shows more than it records.** The table lists every Robots job on the asset, dashboard ones
- * included; only jobs this plugin started are recorded on the entry. The newest summary and
- * moderation output is kept whoever started the job. See `isPluginOriginatedJob`, ADR-0005.
+ * **It records what it reads.** Every Robots job listed for the asset is recorded on the entry,
+ * whoever started it, with the newest summary and moderation output. See ADR-0005.
  *
  * **Neither Run button offers a retry it cannot justify.** Both creates are billable and neither
- * API has an idempotency key, so an unconfirmed outcome is reconciled against the server and,
- * failing that, held behind a guard. Both guards keep looking for what they are guarding against
- * for a bounded number of poll ticks and lift by finding it; neither ever lifts on a timer, and
- * the editor's "nothing is running" button stays the last resort. See ADR-0003.
+ * API has an idempotency key, so each create is guarded by a placeholder saved on the entry before
+ * anything is sent, and shown as a row in its table until the job or run replaces it. A read that
+ * finds the job resolves it; nothing time-based does, and the editor's "nothing is running" button
+ * stays the last resort. See ADR-0003.
  */
 
 interface RobotsPanelProps {
@@ -88,7 +96,8 @@ interface RobotsPanelProps {
   isActive: boolean;
   updateField: (
     mutate: (current: MuxContentfulObject | undefined) => MuxContentfulObject | undefined,
-    options?: { save?: boolean }
+    // Inline rather than `UpdateFieldOptions`: importing from `index.tsx` would be a cycle.
+    options?: { save?: boolean; onParked?: () => void; flushOnUnmount?: boolean }
   ) => Promise<void>;
   /** Re-reads the Mux asset, for workflows that attach a track. */
   resync: (params?: { silent?: boolean; skipPlayerResync?: boolean }) => Promise<void>;
@@ -106,14 +115,14 @@ type DirectiveListing =
 /**
  * The asset gate, and it is a gate rather than an early return inside the panel.
  *
- * Everything this tab knows — the job list, the detail cache, the directive runs, the guard on an
- * unconfirmed create — is *about one Mux asset*. Returning early from a component that has already
+ * Everything this tab knows — the job list, the detail cache, the directive runs, the creates it is
+ * making — is *about one Mux asset*. Returning early from a component that has already
  * run its hooks leaves all of that alive and invisible: with no asset the panel would hold a job
  * list for a video that no longer exists, and on the next asset it would hold the *previous* one's.
  * That second case is the reachable one. Pasting a different Mux asset ID replaces the whole value
  * (ADR-0001) without unmounting this panel, and the persist effect would then merge the old
- * asset's job records onto the new asset's entry — they carry a scope-matching `passthrough`, so
- * `isPluginOriginatedJob` accepts them.
+ * asset's job records onto the new asset's entry. The mutators are asset-gated as well, for a write
+ * queued before the swap and applied after it.
  *
  * So: no asset, no component. And `key` on the asset id, so an asset swap is a remount and no
  * state can cross between two videos.
@@ -154,35 +163,19 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
   const [isRunModalShown, setIsRunModalShown] = useState(false);
   const [isApplyModalShown, setIsApplyModalShown] = useState(false);
   const [viewedJob, setViewedJob] = useState<RobotsJob | undefined>();
-  const [isStartingRun, setIsStartingRun] = useState(false);
-  const [isStartingDirectiveRun, setIsStartingDirectiveRun] = useState(false);
-  /**
-   * A create whose outcome Mux never confirmed: the passthrough it was stamped with, and the
-   * workflow that passthrough belongs to — both, because resolving it means the single-job GET and
-   * the list carries no passthrough to look up.
-   *
-   * Held until the job list positively resolves it, not until a timer expires: a cold-started
-   * function can lose its caller *after* reaching Mux, so the job may be running and billing.
-   */
-  const [pendingCreate, setPendingCreate] = useState<
-    { passthrough: string; workflow: RobotsWorkflow } | undefined
-  >();
-  /**
-   * The same guard for the directive path, which spends more per click: the directive whose run
-   * we could not confirm.
-   *
-   * Only the id, where the job guard also carries a passthrough — the runs endpoint takes none,
-   * so there is no token to match and adoption is by asset plus recency. See ADR-0003.
-   */
-  const [pendingDirectiveRun, setPendingDirectiveRun] = useState<string | undefined>();
+  /** This tab's own creates, one per kind, while they are being made. See `pendingCreateRows`. */
+  const [localJobCreate, setLocalJobCreate] = useState<LocalPendingCreate | undefined>();
+  const [localRunCreate, setLocalRunCreate] = useState<LocalPendingCreate | undefined>();
+  /** Creates this tab settled — refused, withdrawn, cleared — whose removal may still wait. */
+  const [settledRequestIds, setSettledRequestIds] = useState<ReadonlySet<string>>(() => new Set());
+  /** Re-renders when a stored placeholder crosses the grace period, to relabel its row. */
+  const [graceTick, setGraceTick] = useState(0);
   /**
    * A limit a refused run ran into — units, today. Shown over the tab rather than instead of it,
    * because a cheaper run may still fit, and cleared by the next run Mux accepts: nothing else is
    * evidence either way, since only a create is checked against the units left.
    */
   const [advisory, setAdvisory] = useState<RobotsAdvisory | undefined>();
-  /** Jobs this session created, whose record can lag the list — see `startedElsewhereIds`. */
-  const [startedHereIds, setStartedHereIds] = useState<Set<string>>(new Set());
 
   const isMountedRef = useRef(true);
   const pollTimerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -196,30 +189,22 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
    * anyone opens this tab on an old entry.
    */
   const seenRunningJobIdsRef = useRef<Set<string>>(new Set());
-  /** Keep each per-refresh re-check from overlapping itself. One per guard: they look separately. */
-  const isReconcilingCreateRef = useRef(false);
-  const isReconcilingDirectiveRunRef = useRef(false);
-  /** How many poll ticks each unresolved create has already been looked for on. */
+  /** How many poll ticks each kind of pending create has already been looked for on. */
   const createRecheckTicksRef = useRef(0);
   const directiveRecheckTicksRef = useRef(0);
+  /** Pending creates this tab has seen, so one arriving from another tab gets a full budget. */
+  const seenRequestIdsRef = useRef<Set<string>>(new Set());
+  /** Request id → the job or run id its create response named, for creates made in this tab. */
+  const createdForRequestRef = useRef<Map<string, string>>(new Map());
+  /** The create each Run button is making, read synchronously: two confirms in one frame start one. */
+  const startingJobRef = useRef<string>();
+  const startingDirectiveRef = useRef<string>();
+  /** Creates withdrawn with "Don't start" while their placeholder waited behind a publish. */
+  const withdrawnRef = useRef<Set<string>>(new Set());
   /** What the session already knew about Robots before this panel read anything. */
   const cachedCapabilityRef = useRef(cachedRobotsCapability());
   /** So the picker's names are fetched once per asset rather than on every activation. */
   const hasLoadedDirectivesRef = useRef(false);
-
-  /**
-   * Which install this entry is, for scoping the passthrough we stamp and for deciding whether one
-   * we read back is ours.
-   *
-   * `ids.environment`, never `ids.environmentAlias`: an alias is repointable, and a scope that
-   * moves under a running job would orphan it. An incomplete `ids` yields `undefined`, which means
-   * "trust no passthrough", never "trust every passthrough".
-   */
-  const scope = useMemo<RobotsPassthroughScope | undefined>(() => {
-    const ids = sdk?.ids;
-    if (!ids?.space || !ids?.environment || !ids?.entry) return undefined;
-    return { space: ids.space, environment: ids.environment, entry: ids.entry };
-  }, [sdk?.ids?.space, sdk?.ids?.environment, sdk?.ids?.entry]);
 
   useEffect(
     () => () => {
@@ -231,6 +216,43 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
 
   const captions = useMemo(() => (value?.captions ?? []) as Track[], [value?.captions]);
   const audioTracks = useMemo(() => (value?.audioTracks ?? []) as Track[], [value?.audioTracks]);
+
+  /**
+   * Whether this entry already records a job that has not finished.
+   *
+   * Read from the stored value, so it costs nothing and is known on the first render — before
+   * anything has been fetched, and without anybody opening this tab. See ADR-0013.
+   */
+  const hasUnfinishedJobs = useMemo(
+    () => unfinishedJobRecords(value).length > 0,
+    [value?.robotsJobs]
+  );
+  /** The same for a create saved on the entry and not resolved yet, on the same six-hour bound. */
+  const hasFreshPendingCreates = useMemo(
+    () => freshPendingCreates(value).length > 0,
+    [value?.robotsPendingCreates]
+  );
+  /**
+   * The job creates this entry is waiting on, read from the stored value: they survive a reload
+   * and reach every open tab. Run stays blocked while there is one.
+   */
+  const jobCreates = useMemo(
+    () => pendingCreatesOf(value).filter((pending) => pending.kind === 'job'),
+    [value?.robotsPendingCreates]
+  );
+  /** The same for directive runs. */
+  const runCreates = useMemo(
+    () =>
+      pendingCreatesOf(value).flatMap((pending) =>
+        pending.kind === 'directive-run' ? [pending] : []
+      ),
+    [value?.robotsPendingCreates]
+  );
+  /** Listed whether or not they are configured, so their runs can be found. */
+  const pendingDirectiveIds = useMemo(
+    () => runCreates.map((pending) => pending.directiveId),
+    [runCreates]
+  );
 
   /**
    * A completed job may have changed the Mux asset, so the mirror is stale.
@@ -289,7 +311,6 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
 
   const {
     directiveRuns,
-    claimingRuns,
     loadDirectiveRuns,
     addDirectiveRun,
     isPending: areDirectiveRunsPending,
@@ -298,6 +319,7 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
     assetId,
     defaultDirectiveIds,
     recordedRuns: value?.robotsDirectiveRuns,
+    pendingDirectiveIds,
     runsNamedByJobs,
     isMountedRef,
   });
@@ -322,17 +344,6 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
   }, [muxApi]);
 
   /**
-   * Whether this entry already records a job that has not finished.
-   *
-   * Read from the stored value, so it costs nothing and is known on the first render — before
-   * anything has been fetched, and without anybody opening this tab. See ADR-0013.
-   */
-  const hasUnfinishedJobs = useMemo(
-    () => unfinishedJobRecords(value).length > 0,
-    [value?.robotsJobs]
-  );
-
-  /**
    * First activation.
    *
    * Everything here is one app-action round trip, which is two CMA requests and a function that
@@ -354,10 +365,12 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
    */
   useEffect(() => {
     // `isActive` is what keeps Robots free for editors who never open this tab — but an entry
-    // reopened while a job it started is still running has to pick the loop back up on its own,
-    // or a publish re-publishes the stale `processing` record. Only entries that already record
-    // an unfinished job qualify, so an install that has never run Robots still fetches nothing.
-    if ((!isActive && !hasUnfinishedJobs) || !muxApi || hasLoadedOnce) return;
+    // reopened while a job is still running, or a create is still unresolved, has to pick the loop
+    // back up on its own, or a publish re-publishes the stale record. Only entries that already
+    // hold one qualify, so an install that has never run Robots still fetches nothing.
+    if ((!isActive && !hasUnfinishedJobs && !hasFreshPendingCreates) || !muxApi || hasLoadedOnce) {
+      return;
+    }
     // Already answered, for this whole browser session: an account without the `robots:*` scope
     // does not acquire it between two entries, and asking again per entry is what the session
     // cache exists to prevent. This is the one place that reads it, because it is the only place
@@ -374,6 +387,7 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
   }, [
     isActive,
     hasUnfinishedJobs,
+    hasFreshPendingCreates,
     muxApi,
     hasLoadedOnce,
     refresh,
@@ -404,158 +418,46 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
     loadDirectives();
   }, [isActive, mayListDirectives, loadDirectives]);
 
-  /**
-   * Re-check an unconfirmed create against the job list, once per refresh.
-   *
-   * The guard has to have an exit that is not the button that duplicates the job. Keyed on
-   * `pollNonce` so this is per refresh rather than per render, and bounded to a single pass: one
-   * list call and at most five single-job reads, only while a create is genuinely unresolved.
-   */
-  useEffect(() => {
-    if (!muxApi || !pendingCreate) return;
-    if (isReconcilingCreateRef.current) return;
-    isReconcilingCreateRef.current = true;
-
-    let cancelled = false;
-    (async () => {
-      try {
-        const found = await findJobByPassthrough(
-          muxApi,
-          assetId,
-          pendingCreate.workflow,
-          pendingCreate.passthrough,
-          1
-        );
-        if (cancelled || !isMountedRef.current || !found) return;
-
-        // Detail we have already paid for, so the background pass does not buy it again.
-        rememberJobDetail(found);
-        try {
-          // `ownJobIds` rather than the passthrough: this job was matched byte-for-byte against a
-          // string this session generated, which is a stronger claim than parsing one back out.
-          // `save: true` because we have already paid for it — losing the record again to an
-          // unsaved buffer repeats the failure this recovery exists for.
-          await updateField(
-            (current) =>
-              applyRobotsJobsToValue(current, [found], undefined, {
-                scope,
-                ownJobIds: new Set([found.id]),
-              }),
-            { save: true }
-          );
-        } catch (writeError) {
-          console.error('[robots] Adopted an unconfirmed job but could not record it', writeError);
-        }
-        // Only now, with the job positively identified, does Run come back.
-        setPendingCreate(undefined);
-      } finally {
-        isReconcilingCreateRef.current = false;
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [muxApi, assetId, pendingCreate, pollNonce, scope, updateField, rememberJobDetail]);
-
-  /**
-   * The same re-check for an unconfirmed *directive* run — the effect above applied twice, not a
-   * second design. Keyed on the same `pollNonce`, bounded by the same tick count, and the guard
-   * it lifts is lifted the same way: by finding the run, never by a timer.
-   *
-   * One difference, and it is forced by the API: there is no `passthrough` on a run, so this
-   * matches on directive + asset + a recent `started_at` instead of an exact token. That match is
-   * `findRecentDirectiveRun`'s, unchanged and still fail-closed — a run with no `started_at` is
-   * never adopted — because the cost of adopting a stranger's run is dropping the guard on a run
-   * that never started. The adoption window is twice `ROBOTS_UNCONFIRMED_RECHECK_TICKS` worth of
-   * ticks, so the looking stops well before a run started at the click could age out of it.
-   */
-  useEffect(() => {
-    if (!muxApi || !pendingDirectiveRun) return;
-    if (isReconcilingDirectiveRunRef.current) return;
-    isReconcilingDirectiveRunRef.current = true;
-
-    const directiveId = pendingDirectiveRun;
-    let cancelled = false;
-    (async () => {
-      try {
-        const found = await findRecentDirectiveRun(muxApi, directiveId, assetId, { attempts: 1 });
-        if (cancelled || !isMountedRef.current || !found) return;
-
-        try {
-          // The same write `handleRunDirective` makes on the happy path, for the same reason:
-          // it is the only place a run is added to the entry, and without it ownership of the
-          // jobs this run dispatches expires with the newest 25 (ADR-0009). `save: true` because
-          // the run is already billing.
-          await updateField((current) => recordRobotsDirectiveRun(current, found), { save: true });
-        } catch (writeError) {
-          console.error(
-            '[robots] Adopted an unconfirmed directive run but could not record it',
-            writeError
-          );
-        }
-
-        // The optimistic row, so the poll loop now has the run itself to stay alive for.
-        addDirectiveRun(found);
-        setPendingDirectiveRun(undefined);
-      } finally {
-        isReconcilingDirectiveRunRef.current = false;
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [muxApi, assetId, pendingDirectiveRun, pollNonce, updateField, addDirectiveRun]);
-
   /** The newest reads, for the persist mutator to apply against. See the effect below. */
   const latestPersistInputRef = useRef<{
     jobs: RobotsJob[];
     runs: RobotsDirectiveRun[];
-    claimingRuns: RobotsDirectiveRun[];
-  }>({ jobs: [], runs: [], claimingRuns: [] });
+    links: ReadonlyMap<string, string>;
+  }>({ jobs: [], runs: [], links: createdForRequestRef.current });
 
   /**
    * Persist whatever the latest read says.
    *
-   * Deliberately separate from `refresh`. Ownership of a job a directive created server-side can
-   * only be established from that directive's run, and the two lists arrive independently — so
-   * doing this inside `refresh` made it order-dependent, and getting the order wrong was silent.
-   *
-   * Re-running is free when there is nothing new: `applyRobotsJobsToValue` hands back the identical
-   * value and `updateField` drops writes that would change nothing.
+   * Re-running is free when there is nothing new: the mutators hand back the identical value and
+   * `updateField` drops writes that would change nothing.
    */
   useEffect(() => {
     if (enrichedJobs.length === 0 && directiveRuns.length === 0) return;
-    latestPersistInputRef.current = { jobs: enrichedJobs, runs: directiveRuns, claimingRuns };
+    latestPersistInputRef.current = {
+      jobs: enrichedJobs,
+      runs: directiveRuns,
+      links: createdForRequestRef.current,
+    };
     updateField((current) => {
       // Read at apply time, not at effect time. A write parked behind the publish gate re-applies
       // up to 90 s later, and `mergeJobRecords` lets an incoming record win — so a mutator holding
       // the snapshot from the tick it was queued on would write a stale `processing` over a stored
       // `completed`. The ref always holds the newest read, so a replay is idempotent.
-      const { jobs: latestJobs, runs, claimingRuns: claiming } = latestPersistInputRef.current;
-      // Runs first: their `node_states` name the jobs they dispatched, and the job pass reads
-      // those ids back for ownership. This only ever *updates* runs the entry already records — a
-      // run is added at creation and nowhere else — so every run it can see is safe to pass.
-      const withRuns = applyRobotsDirectiveRunsToValue(current, runs);
-      // Claiming is narrower: a run of a directive this entry has no tie to was started somewhere
-      // else, and its jobs are shown, not recorded (ADR-0009).
-      return applyRobotsJobsToValue(withRuns, latestJobs, jobIdsFromDirectiveRuns(claiming), {
-        // The prefix identifies the app, not the install, so it proves nothing on its own; the
-        // scope segment is what says the job was started from this space, environment and entry.
-        // Passing it lets a job we created but never managed to record be adopted when it
-        // finishes, rather than billing forever as nobody's.
-        //
-        // Known limit: `passthrough` only exists on the single-job GET, which is only issued for
-        // terminal jobs — so an orphan is adopted when it finishes, not while it runs.
-        scope,
-      });
+      const { jobs: latestJobs, runs, links } = latestPersistInputRef.current;
+      // Placeholders first: a job already recorded can no longer resolve one (ADR-0003). Runs
+      // are only updated here; a run is added at creation, or by resolving its placeholder.
+      const resolved = resolvePendingCreatesFromReads(current, latestJobs, runs, assetId, links);
+      return applyRobotsJobsToValue(
+        applyRobotsDirectiveRunsToValue(resolved, runs),
+        latestJobs,
+        assetId
+      );
     }).catch((error) => {
       // Not awaited: this runs on the poll loop and must not block it. A write parked behind the
       // publish gate and then dropped at unmount rejects, and the next poll re-derives it.
       console.warn('[robots] Could not persist the latest job state', error);
     });
-  }, [enrichedJobs, directiveRuns, claimingRuns, updateField, scope]);
+  }, [enrichedJobs, directiveRuns, updateField, assetId]);
 
   const inFlight = useMemo(() => activeJobs(enrichedJobs), [enrichedJobs]);
   /**
@@ -567,38 +469,38 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
    */
   const activeRuns = useMemo(() => activeDirectiveRuns(directiveRuns), [directiveRuns]);
 
+  /** A create this tab has not seen before, from another tab say, gets a full tick budget. */
+  useEffect(() => {
+    for (const pending of [...jobCreates, ...runCreates]) {
+      if (seenRequestIdsRef.current.has(pending.requestId)) continue;
+      seenRequestIdsRef.current.add(pending.requestId);
+      if (pending.kind === 'job') createRecheckTicksRef.current = 0;
+      else directiveRecheckTicksRef.current = 0;
+    }
+  }, [jobCreates, runCreates]);
+
   /**
-   * Rows whose job the entry will not record, so each can say why. Read off the rule the persist
-   * effect records by rather than off what is recorded: a job of ours is briefly unrecorded after
-   * every create, and for up to 90 s behind the publish gate, and "started elsewhere" would be
-   * false for it. The jobs this session created count as ours for the same reason.
+   * A stored placeholder this tab is not making reads as starting, then as not confirmed once
+   * `ROBOTS_CREATE_CONFIRM_GRACE_S` has passed. One timer, for the next such moment. It changes a
+   * label and brings the note in, never Run.
    */
-  const startedElsewhereIds = useMemo(() => {
-    const claimed = new Set(
-      jobsClaimedByEntry(value, enrichedJobs, jobIdsFromDirectiveRuns(claimingRuns), {
-        scope,
-        ownJobIds: startedHereIds,
-      }).map((job) => job.id)
+  useEffect(() => {
+    const nowS = Date.now() / 1000;
+    const localIds = [localJobCreate?.pending.requestId, localRunCreate?.pending.requestId];
+    const untilCrossings = [...jobCreates, ...runCreates]
+      .filter(
+        (pending) =>
+          !localIds.includes(pending.requestId) && !settledRequestIds.has(pending.requestId)
+      )
+      .map((pending) => pending.requestedAt + ROBOTS_CREATE_CONFIRM_GRACE_S - nowS)
+      .filter((seconds) => seconds > 0);
+    if (untilCrossings.length === 0) return;
+    const timer = setTimeout(
+      () => setGraceTick((tick) => tick + 1),
+      Math.ceil(Math.min(...untilCrossings) * 1000)
     );
-    // Not said of a row whose ownership is still being read — its detail can carry our
-    // passthrough, and the runs can claim it. Said a moment late rather than taken back.
-    return new Set(
-      enrichedJobs
-        .filter(
-          (job) => !claimed.has(job.id) && !pendingDetailIds.has(job.id) && !areDirectiveRunsPending
-        )
-        .map((job) => job.id)
-    );
-  }, [
-    value?.robotsJobs,
-    value?.robotsDirectiveRuns,
-    enrichedJobs,
-    claimingRuns,
-    scope,
-    startedHereIds,
-    pendingDetailIds,
-    areDirectiveRunsPending,
-  ]);
+    return () => clearTimeout(timer);
+  }, [jobCreates, runCreates, localJobCreate, localRunCreate, settledRequestIds, graceTick]);
 
   /**
    * Poll while anything is live — on any tab.
@@ -615,26 +517,13 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
     }
     if (capability?.state !== 'enabled') return;
     if (!hasLoadedOnce) return;
-    // The third reason to keep ticking, and the one that was missing. ADR-0003 promises an
-    // unresolved create "re-checks the job list on every subsequent refresh" — but the re-check
-    // effect is keyed on `pollNonce`, and `pollNonce` only advances when this loop calls
-    // `refresh`. An unconfirmed create is exactly the case where nothing is in flight to arm the
-    // loop, so the re-check ran once and then never again, and `runDisabledReason` — which
-    // disables Run for *every* workflow, not just the one that was being created — stayed up for
-    // the rest of the session. Reloading the entry was the only thing that cleared it.
-    //
-    // Bounded by a count of attempts rather than a clock, because ADR-0003's invariant is that
-    // nothing time-based re-enables Run. What the bound ends is the *looking*; the guard itself
-    // still only lifts by finding the job or by the editor saying nothing is running.
-    //
-    // Both guards, on the same terms. `pendingDirectiveRun` had the identical gap — its re-check
-    // is keyed on the same `pollNonce`, so with nothing in flight it never ran either, and the
-    // Run-directive button stayed disabled for the session. Smaller blast radius than the job
-    // guard, same bug.
+    // A pending create keeps the loop ticking with nothing in flight, so its job or run can be
+    // found; bounded by a count of ticks, never a clock. What the bound ends is the looking: the
+    // placeholder still blocks Run (ADR-0003).
     const isRecheckingCreate =
-      !!pendingCreate && createRecheckTicksRef.current < ROBOTS_UNCONFIRMED_RECHECK_TICKS;
+      jobCreates.length > 0 && createRecheckTicksRef.current < ROBOTS_UNCONFIRMED_RECHECK_TICKS;
     const isRecheckingDirectiveRun =
-      !!pendingDirectiveRun && directiveRecheckTicksRef.current < ROBOTS_UNCONFIRMED_RECHECK_TICKS;
+      runCreates.length > 0 && directiveRecheckTicksRef.current < ROBOTS_UNCONFIRMED_RECHECK_TICKS;
     if (
       inFlight.length === 0 &&
       activeRuns.length === 0 &&
@@ -645,16 +534,12 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
     }
 
     pollTimerRef.current = setTimeout(() => {
-      if (pendingCreate) createRecheckTicksRef.current += 1;
-      if (pendingDirectiveRun) directiveRecheckTicksRef.current += 1;
-      // Ticks the nonce both re-checks key off, so it runs even on a directive-only tick. The
-      // run list is not read here: the re-check effect reads it itself, and paying for both
-      // would double what an unconfirmed run costs per tick.
+      if (jobCreates.length > 0) createRecheckTicksRef.current += 1;
+      if (runCreates.length > 0) directiveRecheckTicksRef.current += 1;
       refresh({ silent: true });
-      // Re-read the runs only while one is live: it costs a call per directive, and it is also the
-      // only way an active run is ever seen to reach a terminal status — i.e. the only way this
-      // loop stops.
-      if (activeRuns.length > 0) loadDirectiveRuns();
+      // Re-read the runs only while one is live or one is being looked for: it costs a call per
+      // directive, and it is the only way an active run is ever seen to finish.
+      if (activeRuns.length > 0 || isRecheckingDirectiveRun) loadDirectiveRuns();
     }, ROBOTS_POLL_INTERVAL_MS);
 
     return () => {
@@ -665,8 +550,8 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
     hasLoadedOnce,
     inFlight.length,
     activeRuns.length,
-    pendingCreate,
-    pendingDirectiveRun,
+    jobCreates.length,
+    runCreates.length,
     pollNonce,
     refresh,
     loadDirectiveRuns,
@@ -684,60 +569,164 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
     else if (capabilityFromError(error)) void refresh({ silent: true });
   };
 
-  const handleRun = async (workflow: RobotsWorkflow, parameters: Record<string, unknown>) => {
-    if (!muxApi) return;
-    setIsStartingRun(true);
+  /** Sets the phase of this tab's own create, if it still holds that create. */
+  const setLocalPhase = (requestId: string, phase: PendingCreatePhase) => {
+    if (!isMountedRef.current) return;
+    const update = (local?: LocalPendingCreate) =>
+      local?.pending.requestId === requestId ? { ...local, phase } : local;
+    setLocalJobCreate(update);
+    setLocalRunCreate(update);
+  };
+
+  const dropLocal = (requestId: string) => {
+    if (!isMountedRef.current) return;
+    const drop = (local?: LocalPendingCreate) =>
+      local?.pending.requestId === requestId ? undefined : local;
+    setLocalJobCreate(drop);
+    setLocalRunCreate(drop);
+  };
+
+  /** Hides these rows and gives Run back at once, even while their removal waits behind a publish. */
+  const settle = (requestIds: string[]) => {
+    if (!isMountedRef.current || requestIds.length === 0) return;
+    setSettledRequestIds((previous) => new Set([...previous, ...requestIds]));
+    requestIds.forEach(dropLocal);
+  };
+
+  const removePlaceholders = (requestIds: string[]) =>
+    updateField(
+      (current) => removePendingCreates(current, (entry) => requestIds.includes(entry.requestId)),
+      { save: true }
+    ).catch((error) => console.error('[robots] Could not remove a settled placeholder', error));
+
+  /**
+   * Saves the placeholder for a create, and says whether to send it. No durable guard, no spend:
+   * nothing is sent if the save fails, if the editor withdrew the create while the save waited
+   * behind a publish, or if the panel has gone. A save still parked when the editor closes is
+   * dropped rather than flushed, because a closing editor sends nothing (ADR-0003, ADR-0010).
+   */
+  const savePlaceholder = async (pending: RobotsPendingCreate): Promise<boolean> => {
+    const isWithdrawn = () => withdrawnRef.current.has(pending.requestId);
     try {
-      const job = await createRobotsJobWithReconciliation(
-        muxApi,
-        workflow,
-        assetId,
-        parameters,
-        scope
+      await updateField(
+        (current) => (isWithdrawn() ? current : addPendingCreate(current, pending, assetId)),
+        {
+          save: true,
+          flushOnUnmount: false,
+          onParked: () => setLocalPhase(pending.requestId, 'waiting-for-publish'),
+        }
+      );
+    } catch (error) {
+      dropLocal(pending.requestId);
+      if (isWithdrawn()) return false;
+      console.error('[robots] Could not record a run on the entry before starting it', error);
+      sdk.notifier.error('Could not record this run on the entry, so it was not started.');
+      return false;
+    }
+    if (isWithdrawn() || !isMountedRef.current) {
+      void removePlaceholders([pending.requestId]);
+      dropLocal(pending.requestId);
+      return false;
+    }
+    setLocalPhase(pending.requestId, 'sending');
+    return true;
+  };
+
+  /** Mux said no: nothing started, so the placeholder has nothing left to guard. */
+  const settleRefusal = (
+    pending: RobotsPendingCreate,
+    error: MuxApiError,
+    alreadyRunning: string,
+    reread: () => void
+  ) => {
+    settle([pending.requestId]);
+    void removePlaceholders([pending.requestId]);
+    if (!isMountedRef.current) return;
+    if (error.status === 409) {
+      sdk.notifier.warning(alreadyRunning);
+      reread();
+    } else {
+      sdk.notifier.error(error.message);
+      noteRefusal(error);
+    }
+  };
+
+  /** The created job or run replaces its placeholder. A failure is logged, never a failed run. */
+  const recordCreated = (
+    mutate: (current?: MuxContentfulObject) => MuxContentfulObject | undefined
+  ) =>
+    updateField(mutate, { save: true }).catch((error) =>
+      console.error('[robots] Started a run but could not record it on the entry', error)
+    );
+
+  /** Withdraws a create whose placeholder is still waiting behind a publish. Nothing was sent. */
+  const handleDontStart = (requestId: string) => {
+    withdrawnRef.current.add(requestId);
+    if (startingJobRef.current === requestId) startingJobRef.current = undefined;
+    if (startingDirectiveRef.current === requestId) startingDirectiveRef.current = undefined;
+    settle([requestId]);
+  };
+
+  /** "Nothing is running": clears exactly the placeholders the note names. */
+  const clearUnconfirmed = (rows: PendingCreateRow[]) => {
+    const named = rows.map((row) => row.pending.requestId);
+    settle(named);
+    void removePlaceholders(named);
+  };
+
+  /**
+   * Starts a workflow. The modal has already closed; the job table shows the run from here on.
+   * See ADR-0003.
+   */
+  const handleRun = async (workflow: RobotsWorkflow, parameters: Record<string, unknown>) => {
+    if (!muxApi || startingJobRef.current) return;
+    const pending = newPendingJobCreate(workflow);
+    startingJobRef.current = pending.requestId;
+    setLocalJobCreate({ pending, phase: 'saving' });
+
+    try {
+      if (!(await savePlaceholder(pending))) return;
+
+      let job: RobotsJob;
+      try {
+        job = await startRobotsJob(muxApi, workflow, parameters);
+      } catch (error) {
+        if (error instanceof MuxApiError && error.muxAnswered) {
+          settleRefusal(
+            pending,
+            error,
+            'This workflow is already running on this video with the same settings.',
+            () => void refresh({ silent: true })
+          );
+          return;
+        }
+        // Unknown: it may be running and billing. The placeholder stays and the loop looks.
+        if (!isMountedRef.current) return;
+        setLocalPhase(pending.requestId, 'unconfirmed');
+        createRecheckTicksRef.current = 0;
+        sdk.notifier.warning(
+          `Mux has not answered about the ${workflowLabel(
+            workflow
+          )} run yet. The Robots tab keeps checking.`
+        );
+        void refresh({ silent: true });
+        return;
+      }
+
+      // In this order, so the job is on screen before anything removes its pending row.
+      createdForRequestRef.current.set(pending.requestId, job.id);
+      // Now rather than at the first list read, which a fast job could beat.
+      seenRunningJobIdsRef.current.add(job.id);
+      if (isMountedRef.current) addCreatedJob(job);
+      dropLocal(pending.requestId);
+      await recordCreated((current) =>
+        resolvePendingJobCreate(current, pending.requestId, job, assetId)
       );
       if (!isMountedRef.current) return;
-      setStartedHereIds((previous) => new Set(previous).add(job.id));
       setAdvisory(undefined);
-
-      // Recorded now, while we still hold the create response — the only moment ownership is
-      // unambiguous, because the job *list* carries no passthrough. Caught separately on purpose:
-      // the job is already billing, so a failed *write* must never be reported as a failed *run*.
-      // `save: true` because `setValue` only reaches the web app's autosave, and closing the tab
-      // inside that window orphans a job that is already charging.
-      try {
-        await updateField(
-          (current) =>
-            applyRobotsJobsToValue(current, [job], undefined, {
-              scope,
-              ownJobIds: new Set([job.id]),
-            }),
-          { save: true }
-        );
-      } catch (writeError) {
-        console.error('[robots] Started a job but could not record it on the entry', writeError);
-      }
-
-      addCreatedJob(job);
-      // We started it, so whatever it changes on the asset changed while the editor was here.
-      // Recorded now rather than left to the first list read, which a fast job could beat.
-      seenRunningJobIdsRef.current.add(job.id);
       sdk.notifier.success(`Started ${workflow}. This can take a few minutes.`);
-    } catch (error) {
-      if (!isMountedRef.current) return;
-      if (error instanceof RobotsUnconfirmedCreateError) {
-        // Not an error toast with a retry: the job may be running and billing.
-        createRecheckTicksRef.current = 0;
-        setPendingCreate({ passthrough: error.passthrough, workflow: error.workflow });
-        sdk.notifier.warning(error.message);
-        await refresh({ silent: true });
-      } else if (error instanceof MuxApiError) {
-        sdk.notifier.error(error.message);
-        noteRefusal(error);
-      } else {
-        sdk.notifier.error('Could not start this Robots job.');
-      }
     } finally {
-      if (isMountedRef.current) setIsStartingRun(false);
+      if (startingJobRef.current === pending.requestId) startingJobRef.current = undefined;
     }
   };
 
@@ -760,63 +749,57 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
 
   /**
    * The most expensive click in this tab — a directive dispatches several billable workflows in
-   * sequence — so it mirrors `handleRun` exactly: reconcile an unknown outcome, record the run at
-   * creation, and fall back to a guard rather than a retryable error.
+   * sequence — on the same path as `handleRun`.
    */
   const handleRunDirective = async () => {
-    if (!muxApi || !selectedDirectiveId) return;
-    // Not only the button's `isDisabled`: React processes state updates asynchronously, and two
-    // clicks inside one frame would otherwise both fire a POST.
-    if (isStartingDirectiveRun) return;
-    setIsStartingDirectiveRun(true);
+    if (!muxApi || !selectedDirectiveId || startingDirectiveRef.current) return;
     const directiveId = selectedDirectiveId;
+    const pending = newPendingDirectiveRunCreate(directiveId);
+    startingDirectiveRef.current = pending.requestId;
+    setLocalRunCreate({ pending, phase: 'saving' });
 
     try {
-      const run = await createRobotsDirectiveRunWithReconciliation(muxApi, directiveId, assetId);
+      if (!(await savePlaceholder(pending))) return;
+
+      let run: RobotsDirectiveRun;
+      try {
+        run = await startRobotsDirectiveRun(muxApi, directiveId, assetId);
+      } catch (error) {
+        if (error instanceof MuxApiError && error.muxAnswered) {
+          settleRefusal(
+            pending,
+            error,
+            'That directive is already running on this video.',
+            () => void loadDirectiveRuns()
+          );
+          return;
+        }
+        if (!isMountedRef.current) return;
+        setLocalPhase(pending.requestId, 'unconfirmed');
+        directiveRecheckTicksRef.current = 0;
+        sdk.notifier.warning(
+          'Mux has not answered about this directive run yet. The Robots tab keeps checking.'
+        );
+        void loadDirectiveRuns();
+        return;
+      }
+
+      createdForRequestRef.current.set(pending.requestId, run.run_id);
+      // The row the create response gives is also what arms the poll from the moment of the
+      // click: `POST .../runs` answers before the run is listable.
+      if (isMountedRef.current) addDirectiveRun(run);
+      dropLocal(pending.requestId);
+      await recordCreated((current) =>
+        resolvePendingDirectiveRunCreate(current, pending.requestId, run, assetId)
+      );
       if (!isMountedRef.current) return;
       setAdvisory(undefined);
       sdk.notifier.success('Directive run started.');
-
-      // The only place a run is added to the entry. Without it, ownership of everything this run
-      // dispatches depends on the run still being inside the newest 25 that `GET .../runs`
-      // returns, and a busy directive pushes it out within hours. See ADR-0009.
-      try {
-        await updateField((current) => recordRobotsDirectiveRun(current, run), { save: true });
-      } catch (writeError) {
-        console.error(
-          '[robots] Started a directive run but could not record it on the entry',
-          writeError
-        );
-      }
-
-      // Optimistic row, and what arms the poll loop from the moment of the click: `POST .../runs`
-      // answers 202 before the run is necessarily visible in `GET .../runs`, so listing straight
-      // afterwards can come back empty and leave the loop with nothing to stay alive for.
-      addDirectiveRun(run);
-      await refresh({ silent: true });
-    } catch (error) {
-      if (!isMountedRef.current) return;
-      if (error instanceof RobotsUnconfirmedDirectiveRunError) {
-        // A fresh budget of ticks to find the run on, the same as the job path.
-        directiveRecheckTicksRef.current = 0;
-        setPendingDirectiveRun(error.directiveId);
-        sdk.notifier.warning(error.message);
-        await loadDirectiveRuns();
-        return;
-      }
-      if (error instanceof MuxApiError && error.status === 409) {
-        sdk.notifier.warning('That directive is already running on this video.');
-        await loadDirectiveRuns();
-        return;
-      }
-      if (error instanceof MuxApiError) {
-        sdk.notifier.error(error.message);
-        noteRefusal(error);
-      } else {
-        sdk.notifier.error('Could not start this directive run.');
-      }
+      void refresh({ silent: true });
     } finally {
-      if (isMountedRef.current) setIsStartingDirectiveRun(false);
+      if (startingDirectiveRef.current === pending.requestId) {
+        startingDirectiveRef.current = undefined;
+      }
     }
   };
 
@@ -851,20 +834,54 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
 
   // Who sees the run controls at all is `canRunRobots`: space admins, and everyone else once an
   // admin turns on "Let everyone run Robots". UI-only — `muxProxy` forwards any path, so it hides
-  // controls rather than refusing calls. See ADR-0016. The reasons below are for those who can.
-  const runDisabledReason = isAssetPendingDelete
-    ? 'This video is marked for deletion at the next publish.'
-    : pendingCreate
-    ? 'A run started but Mux never confirmed it. Refresh to check whether it is already going — starting another could bill you twice.'
-    : undefined;
+  // controls rather than refusing calls. See ADR-0016.
+  //
+  // One rule for the buttons and the tables: a Run button is blocked exactly while its table shows
+  // a pending row, so it is never disabled for a create nobody can see. An unconfirmed job create
+  // blocks directives too.
+  const nowS = Math.floor(Date.now() / 1000);
+  const links = createdForRequestRef.current;
+  const jobRows = pendingCreateRows({
+    stored: jobCreates,
+    local: localJobCreate,
+    settled: settledRequestIds,
+    links,
+    jobs: enrichedJobs,
+    runs: [],
+    value,
+    nowS,
+  });
+  const runRows = pendingCreateRows({
+    stored: runCreates,
+    local: localRunCreate,
+    settled: settledRequestIds,
+    links,
+    jobs: [],
+    runs: directiveRuns,
+    value,
+    nowS,
+  });
+  const unconfirmedJobRows = jobRows.filter((row) => row.phase === 'unconfirmed');
+  const unconfirmedRunRows = runRows.filter((row) => row.phase === 'unconfirmed');
 
-  // Separate from the job guard because the two spends are separate: a workflow whose outcome is
-  // unknown says nothing about whether a directive can safely be run.
+  const deleteReason = isAssetPendingDelete
+    ? 'This video is marked for deletion at the next publish.'
+    : undefined;
+  const pendingReason = (
+    rows: PendingCreateRow[],
+    unconfirmed: PendingCreateRow[],
+    where: string
+  ) =>
+    rows.length === 0
+      ? undefined
+      : unconfirmed.length > 0
+      ? `Mux has not confirmed the last run. See the note above the ${where}.`
+      : 'A run is starting on this video.';
+  const runDisabledReason = deleteReason ?? pendingReason(jobRows, unconfirmedJobRows, 'jobs');
   const directiveRunDisabledReason =
-    runDisabledReason ??
-    (pendingDirectiveRun
-      ? 'A directive run started but Mux never confirmed it. Refresh to check whether it is already going — starting another could bill you several times over.'
-      : undefined);
+    deleteReason ??
+    pendingReason(runRows, unconfirmedRunRows, 'directive runs') ??
+    pendingReason(jobRows, unconfirmedJobRows, 'jobs');
 
   // Not a spend guard like the two above — there is simply nothing to apply yet. It reads as a
   // reason rather than a boolean because it is what the tooltip says.
@@ -905,7 +922,7 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
           {canRunRobots && (
             <Button
               variant="primary"
-              isDisabled={!!runDisabledReason || isStartingRun}
+              isDisabled={!!runDisabledReason}
               title={runDisabledReason}
               onClick={() => setIsRunModalShown(true)}>
               Run a workflow
@@ -944,24 +961,19 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
 
       {!canRunRobots && <RobotsAdminsOnlyNote />}
 
-      {canRunRobots && runDisabledReason && (
+      {canRunRobots && deleteReason && (
         <Box marginBottom="spacingM">
-          <Note variant={pendingCreate ? 'warning' : 'neutral'}>
-            {runDisabledReason}
-            {pendingCreate && (
-              <Box marginTop="spacingS">
-                {/* The escape hatch is explicit and informed, never automatic — and no longer the
-                    only way out: the reconcile effect resolves the guard by finding the job. */}
-                <Button
-                  size="small"
-                  variant="secondary"
-                  onClick={() => setPendingCreate(undefined)}>
-                  Nothing is running — let me try again
-                </Button>
-              </Box>
-            )}
-          </Note>
+          <Note variant="neutral">{deleteReason}</Note>
         </Box>
+      )}
+
+      {canRunRobots && (
+        <RobotsUnconfirmedNote
+          rows={unconfirmedJobRows}
+          directiveNames={directiveNames}
+          onClear={() => clearUnconfirmed(unconfirmedJobRows)}
+          testId="robots-job-unconfirmed"
+        />
       )}
 
       {loadError && (
@@ -974,10 +986,12 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
 
       {/* A list that failed is not a list with nothing in it: the note above says what happened,
           and "No Robots jobs have run on this video yet" would be a claim nobody checked. */}
-      {!(loadError && enrichedJobs.length === 0) && (
+      {!(loadError && enrichedJobs.length === 0 && jobRows.length === 0) && (
         <RobotsJobTable
           jobs={enrichedJobs}
-          startedElsewhereIds={startedElsewhereIds}
+          pendingRows={jobRows}
+          onDontStart={canRunRobots ? handleDontStart : undefined}
+          pointsToNote={canRunRobots}
           detailedJobIds={detailedJobIds}
           unreadableJobIds={failedDetailIds}
           onCancel={canRunRobots ? handleCancel : undefined}
@@ -1018,37 +1032,27 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
               </Box>
               <Button
                 variant="secondary"
-                isDisabled={
-                  !chosenDirectiveId || !!directiveRunDisabledReason || isStartingDirectiveRun
-                }
+                isDisabled={!chosenDirectiveId || !!directiveRunDisabledReason}
                 title={directiveRunDisabledReason}
                 onClick={handleRunDirective}>
                 Run directive
               </Button>
             </Flex>
 
-            {pendingDirectiveRun && (
-              <Box marginBottom="spacingM">
-                <Note variant="warning" data-testid="robots-directive-run-unconfirmed">
-                  {directiveRunDisabledReason}
-                  <Box marginTop="spacingS">
-                    {/* As on the job guard: explicit, informed, and not the only way out — the
-                        re-check above resolves this by finding the run. */}
-                    <Button
-                      size="small"
-                      variant="secondary"
-                      onClick={() => setPendingDirectiveRun(undefined)}>
-                      Nothing is running — let me try again
-                    </Button>
-                  </Box>
-                </Note>
-              </Box>
-            )}
+            <RobotsUnconfirmedNote
+              rows={unconfirmedRunRows}
+              directiveNames={directiveNames}
+              onClear={() => clearUnconfirmed(unconfirmedRunRows)}
+              testId="robots-directive-run-unconfirmed"
+            />
           </>
         )}
 
         <RobotsDirectiveRunTable
           runs={directiveRuns}
+          pendingRows={runRows}
+          onDontStart={canRunRobots ? handleDontStart : undefined}
+          pointsToNote={canRunRobots}
           directiveNames={directiveNames}
           isLoading={areDirectiveRunsPending}
         />
@@ -1064,7 +1068,7 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
           audioTracks={audioTracks}
           isAudioOnly={value?.audioOnly}
           duration={value?.is_live ? undefined : value?.duration}
-          isRunDisabled={!!runDisabledReason || isStartingRun}
+          isRunDisabled={!!runDisabledReason}
           runDisabledReason={runDisabledReason}
         />
       )}

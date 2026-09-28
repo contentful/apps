@@ -75,6 +75,18 @@ describe('RobotsRunModal', () => {
     renderModal({ isRunDisabled: true, runDisabledReason: 'Nope' });
     expect(screen.getByRole('button', { name: 'Continue' })).toBeDisabled();
   });
+
+  it('closes on confirm without waiting for the run to start', async () => {
+    // The job table shows the run from here on, including while it waits behind a publish.
+    const onRun = vi.fn(() => new Promise<void>(() => undefined));
+    const { onClose } = renderModal({ onRun });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Run Summarize' }));
+
+    expect(onRun).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
 });
 
 /**

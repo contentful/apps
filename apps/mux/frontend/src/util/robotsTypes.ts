@@ -46,14 +46,13 @@ export interface RobotsJob {
   status: RobotsJobStatus;
   created_at?: number;
   updated_at?: number;
-  passthrough?: string;
   units_consumed?: number;
   /** Not on the list summary. `asset_id` is the asset the job ran on — see `mergeRobotsOutputs`. */
   parameters?: Record<string, unknown>;
   outputs?: Record<string, unknown>;
   errors?: unknown;
   resources?: unknown;
-  /** Single-job GET only, like `passthrough`. Absent for a job created by a direct POST. */
+  /** Single-job GET only, like `parameters`. Absent for a job created by a direct POST. */
   directive?: RobotsJobDirective;
 }
 
@@ -170,22 +169,13 @@ export type RobotsAdvisory = 'units-exhausted';
 // --- Persisted shapes (ours, camelCase) ---
 
 /**
- * The record mirrored onto the entry field for a job this plugin started.
+ * The record mirrored onto the entry field for every Robots job the tab reads for the asset,
+ * whoever started it. See ADR-0005.
  *
- * Recorded from the moment it is created, not only once it finishes. An earlier version stored
- * terminal states only, to avoid flipping a published entry to "Changed" for a status badge
- * moving — but that reasoning does not survive contact with two facts:
- *
- * - Clicking Run is a deliberate, billable act. An entry marked as changed because the editor
- *   just started an AI job on it is not a surprise; it is a record of what they did. The rule was
- *   protecting against writes the user did not cause, and this is not one.
- * - Ownership has to be durable. `GET /robots/v0/jobs` returns a summary with no `passthrough`,
- *   so a job started here is indistinguishable from one run in the Mux dashboard unless we wrote
- *   it down. Recording it at creation is what makes the entry the source of truth for "we started
- *   this", and it survives a reload.
- *
- * The cost is bounded: a job passes through at most `pending → processing → completed`, so three
- * writes, and `updateField` skips any poll tick that learns nothing.
+ * Recorded while in flight as well as once finished. Each status change is a write, and so a
+ * "Changed" entry: a job passes through at most `pending → processing → completed`, and
+ * `updateField` skips any poll tick that learns nothing. Records are append-and-update, so they
+ * outlive Mux's 30-day purge.
  */
 export interface RobotsJobRecord {
   id: string;
@@ -194,27 +184,15 @@ export interface RobotsJobRecord {
   created_at?: number;
   updated_at?: number;
   units_consumed?: number;
-  passthrough?: string;
   /** First error message, when the job errored. */
   error?: string;
 }
 
 /**
- * The record mirrored onto the entry field for a directive run this app started.
- *
- * Written at creation, for the same reason `RobotsJobRecord` is: it is the only moment ownership
- * is unambiguous, and it is what makes the run survive a reload.
- *
- * Before this existed, a directive's jobs were claimed as ours only by matching them against a
- * *freshly listed* run — `GET /robots/v0/directives/{id}/runs` capped at the newest 25, filtered
- * client-side by `subject_id`, because the API cannot filter by asset. A busy directive pushes
- * this asset's run out of that window within hours and a deleted directive removes it outright,
- * and at that point the jobs it dispatched become permanently unclaimable: they are shown in the
- * tab and can never reach the entry. Recording the run removes the list window from the ownership
- * path entirely. See ADR-0009.
- *
- * `jobIds` fills in as `node_states` reveals them — the create response is a `run_id` and
- * `pending`, nothing more — and is append-only, like every other record on this field.
+ * The record mirrored onto the entry field for a directive run started from this entry: written
+ * when its create is confirmed, or when a read resolves its placeholder, and updated after. It is
+ * the entry's history of automation started here, and it keeps the tab polling that directive
+ * whether or not it is still configured. See ADR-0009.
  */
 export interface RobotsDirectiveRunRecord {
   runId: string;
@@ -222,9 +200,34 @@ export interface RobotsDirectiveRunRecord {
   status?: RobotsDirectiveRunStatus;
   startedAt?: number;
   completedAt?: number;
-  /** Ids of the jobs this run dispatched, as they become known. Append-only. */
+  /**
+   * Ids of the jobs this run dispatched, as `node_states` reveals them. Append-only history;
+   * nothing in the app reads it.
+   */
   jobIds?: string[];
 }
+
+/**
+ * A Robots create this entry asked for whose outcome is not known yet: written, and saved, before
+ * the create is sent, and removed once the job or run it asked for is found. See ADR-0003.
+ *
+ * `requestedAt` is Unix seconds from the browser clock, the unit of Mux's `created_at`.
+ */
+export interface RobotsPendingJobCreate {
+  requestId: string;
+  kind: 'job';
+  workflow: RobotsWorkflow;
+  requestedAt: number;
+}
+
+export interface RobotsPendingDirectiveRunCreate {
+  requestId: string;
+  kind: 'directive-run';
+  directiveId: string;
+  requestedAt: number;
+}
+
+export type RobotsPendingCreate = RobotsPendingJobCreate | RobotsPendingDirectiveRunCreate;
 
 export interface RobotsSummarizeOutput {
   /** Provenance lives inside the output so it survives independently of `robotsJobs`. */

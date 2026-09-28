@@ -1,8 +1,7 @@
 # ADR-0012: A controlled vocabulary is one atomic field, and a documented cross-field rule is a shape, not an error
 
-**Date:** 2026-09-15
+**Date:** 2026-09-24
 **Status:** Accepted
-**Deciders:** Renzo Delfino
 
 ## Context
 
@@ -19,9 +18,11 @@ Three Robots workflows take a controlled vocabulary under `output_steering`:
   up to 100 characters."
 
 All three share one shape: `{ name?, values: [{ label, description?, aliases? }], allow_other? }`.
-None of the three pages marks a single sub-field `Required` — the reference renders no required
-badge anywhere in these request bodies — so "which parts are mandatory once the object is present"
-is not answerable from the docs.
+The reference renders no *Required* badge on any sub-field of these request bodies, and that
+absence carries no information: the running API refuses a `summarize` run whose `tag_taxonomy`
+has no `allow_other`, with `parameters.output_steering.tag_taxonomy.allow_other: Invalid input:
+expected boolean, received undefined`. Which parts are mandatory once the object is present is
+answered by the API, not by the page.
 
 Separately, two workflows document a rule that spans two parameters:
 
@@ -32,9 +33,12 @@ Separately, two workflows document a rule that spans two parameters:
 - `edit-captions`' `delete_original_track`: "Whether to delete the original source text track after
   the edited track upload succeeds. Has effect only when `upload_to_mux` is true. Defaults to true."
 
-The form rendered both pairs as independent checkboxes, and `validateParams` raised an error on the
-first combination after the fact. So the editor could tick two individually reasonable boxes and
-then be refused for it, which is the form describing a request it will not let them make.
+Rendered as independent checkboxes, each pair lets an editor tick two individually reasonable boxes
+and then be refused for it — the form describing a request it will not let them make. The same
+problem has two more shapes: a well-formed request this asset cannot satisfy (a workflow that reads
+the transcript, on an asset with no caption track), and a whole workflow the asset cannot run
+(`find-scenes` on an audio-only video). The first is accepted by Mux and errors minutes later, after
+the editor has been told the run started and has been charged for finding out.
 
 Alternatives considered for the vocabularies:
 
@@ -44,9 +48,8 @@ Alternatives considered for the vocabularies:
   `tag_taxonomy: { name: 'x', allow_other: false }` — a controlled vocabulary with nothing in it,
   against a schema that says "Supports 1-50 values". It also has nowhere to hang a cap that is
   about the object as a whole, like the 2000 serialized characters.
-- **A checkbox for `allow_other`.** No page documents a default for it. A checkbox has two states
-  and would have to pick one, silently answering the question for every run — the `NO_PREFERENCE`
-  argument from ADR-0011, one level up.
+- **A tri-state `allow_other` with a "No preference" member that omits it.** Absence is not an
+  outcome the API accepts, so the third state would only produce refused runs.
 - **Borrow `summarize`'s caps for `topic_taxonomy`.** Tempting, since the shape matches. But those
   numbers belong to a different workflow's schema, and a cap we invent blocks a run Mux accepts.
 - **Leave `find-key-moments`' `topic_taxonomy` out, since its shape is undocumented.** The
@@ -59,52 +62,21 @@ Alternatives considered for the vocabularies:
 **A taxonomy is one form field of kind `taxonomy`, holding one `TaxonomyValue`.** Rows are edited
 as flat strings (`aliases` is a comma-separated box, exactly like `ask-questions`' answer options)
 and converted in `toApiParamValue`, so the renderer stays generic and the conversion is testable
-without mounting a component — the same split `questions` and `replacements` already use.
+without mounting a component — the same split `questions` and `replacements` use.
 
 **The object is sent only when it has at least one labelled value, and `values` is always present
-when it is.** That resolves the unanswerable required-ness question by never testing it: whichever
-reading is right, what we send is valid. A name or an `allow_other` with no values is reported to
-the editor rather than dropped in silence.
+when it is.** A name with no values is reported to the editor by `validateParams`, naming the name,
+rather than dropped in silence.
 
-**`allowOther` is a tri-state string (`''` / `'true'` / `'false'`), sent as a boolean or not at
-all.** `''` is "No preference", which is absence.
-
-> **Superseded 2026-09-17.** `allowOther` is a plain boolean, always sent, defaulting to `true`.
-> The tri-state was built on the reading recorded above — that no page marks a sub-field
-> *Required*, so absence must be a legal outcome. The running API disagrees: a `summarize` run
-> carrying a filled-in `tag_taxonomy` and no `allow_other` is refused with
-> `parameters.output_steering.tag_taxonomy.allow_other: Invalid input: expected boolean, received
-> undefined`. "No preference" was never one of the three outcomes; it was a fourth that does not
-> exist, and the control offering it made the feature unusable for the one workflow whose caps we
-> had gone to the trouble of transcribing.
->
-> **The general lesson, which outlives this parameter: the reference's rendered *Required* markers
-> are not evidence for these nested objects, and the API is the authority.** This is the second
-> time a careful reading of these pages was wrong in a way only a real request revealed — the
-> first was every `''` select claiming "Default" (ADR-0011). A page that renders no badge
-> anywhere renders none on the required fields either, so "no badge" carries no information. Where
-> a sub-field's required-ness decides the shape, the safe move is to send it unconditionally, or
-> to make the form incapable of leaving it out — the same move this ADR already made for `values`,
-> applied to one more key.
->
-> The default is `true` rather than `false` because `false` is documented on `summarize` as a hard
-> filter — "generated tags are filtered to taxonomy labels and aliases". With no third state left,
-> some editor's untouched runs get whichever side we pick, and the side that silently discards
-> model output is the worse one to hand someone who never opened the control. Clearing the
-> checkbox is a deliberate act; having your tags filtered because you typed a vocabulary is not.
->
-> Two consequences elsewhere. `validateParams` no longer treats `allowOther` as a sign the editor
-> engaged with the taxonomy — a boolean always holds one of its values, so only a typed `name`
-> can still mean "you started something you did not finish"; the message names the name. And
-> `asTaxonomyValue` reads anything non-boolean as `true`, which covers both an untouched field and
-> a form value left over from the tri-state.
->
-> **Not changed, and worth naming as the untested part.** `name`, `values[].description` and
-> `values[].aliases` are still omitted when empty. We have a real response for `allow_other` and
-> for nothing else, and requiring a name on no evidence would block a run Mux may well accept —
-> which is the same class of mistake as inventing a default, one level up. `values` is safe
-> already: it is always present when the object is. If one of the three ever comes back with its
-> own `received undefined`, that response is the evidence, and the fix is this one again.
+**`allowOther` is a plain boolean, defaulting to `true`, and always sent with the object.** Where a
+sub-field's required-ness decides the shape, the form sends it unconditionally or cannot leave it
+out; a badge the reference does not render is not evidence either way. The default is `true`
+because `false` is documented on `summarize` as a hard filter — "generated tags are filtered to
+taxonomy labels and aliases" — and an editor who adds a vocabulary without touching the control
+must not have the rest of the model's output discarded for it. `asTaxonomyValue` reads anything
+non-boolean as `true`. `name`, `values[].description` and `values[].aliases` are still omitted when
+empty: there is no API response showing any of them is required, and requiring one on no evidence
+would block a run Mux may accept.
 
 **Caps are declared as data per field, in `taxonomyLimits`, and an absent limit means the reference
 states none.** `summarize` gets all six documented figures plus the serialized-size cap, measured
@@ -113,11 +85,10 @@ over `JSON.stringify` of the object actually sent. `find-scenes` and `find-key-m
 **`find-key-moments`' `topic_taxonomy` uses `find-scenes`' documented sub-schema**, as one shared
 descriptor, and inherits no caps from `summarize`.
 
-**A documented cross-field rule is expressed as `showWhen`, not as a validation error.**
+**A request Mux documents as invalid is made unconstructable with `showWhen`.**
 `replace_existing` and `delete_original_track` are hidden — and therefore unsent — while
-`upload_to_mux` is off, and each now sits below the checkbox that gates it. The
-`generate-premium-captions` validation rule is deleted: with the combination unconstructable, it
-was unreachable code describing a state the form can no longer reach.
+`upload_to_mux` is off, and each sits below the checkbox that gates it. `validateParams` has no rule
+for the `generate-premium-captions` combination, because the form cannot build it.
 
 **`showWhen` can key off what the asset is, not only off another field.** `moderate`'s
 `language_code` — "Used only for audio-only assets; ignored for video assets with visual content" —
@@ -125,17 +96,53 @@ declares `{ context: 'isAudioOnly', notEquals: false }`. The condition is `notEq
 `equals` on purpose: `isAudioOnly` is tri-state, and an unknown asset kind must still render the
 control. Hiding a usable control on missing information is the worse of the two failures.
 
+**A well-formed request this asset cannot satisfy is refused by `validateParams` before Continue.**
+`find-key-moments` without `use_shots`, and `generate-chapters` always, need a caption track and are
+refused on `RobotsAssetContext.hasCaptions === false`; chapters' message does not offer visual
+evidence as the way out, because it has no `use_shots`. The reference calls chapters'
+`language_code` "the caption track to analyze". `summarize`, `ask-questions` and `find-scenes` pick
+a caption track the same way and are not gated: a field that selects captions is not a documented
+prerequisite, and a restriction we invent blocks a run Mux accepts. `translate-audio`'s documented
+"The run is rejected if the video has no audio track" is not enforced either: the API rejects that
+create synchronously, so the editor learns at once, and the asset context has no audio-track key.
+
+**Continue is disabled while `validateParams` reports anything**, with the first error as its
+title. `handleContinue` keeps the same check, which is what stops a keyboard or programmatic
+activation getting past the disabled button.
+
+**A workflow the asset cannot run is offered disabled, not refused.** The catalog's
+`requiresVideoTrack` marks `find-scenes` — documented: "Audio-only assets are not supported." — and
+`find-best-thumbnails`, which is **a product decision, not a documented restriction**: the reference
+says nothing about audio-only assets, but the workflow ranks frames and such an asset has none.
+`workflowUnavailableReason` is the one place that reads the flag. The picker lists every workflow
+and shows these two as "… (not available for audio-only)" on a known audio-only asset; an unknown
+kind disables nothing. The form never holds an unavailable workflow: `availableWorkflow` swaps it
+for the default — a preselected `initialWorkflow`, or a choice made before the asset turned out to
+be audio-only — and the swap sticks. The confirm step is tied to the workflow it was reached for,
+so it cannot survive the swap and confirm the default by accident. `find-key-moments`' `use_shots`
+on an audio-only asset stays a `validateParams` refusal: it is a parameter the asset restricts, and
+the rest of that form is still usable.
+
+**The scope window is refused by `validateParams`, because there is nothing to hide.** Six
+workflows take `output_steering.scope`, "an optional execution window in seconds on the original
+asset timeline". A start at or past the end is an empty window and is refused, keyed on the
+parameters rather than on workflow names so a workflow that gains a scope gains the rule. When the
+asset's duration is known, a *start* past the end of the video is refused too. An *end* past it is
+not: the window still covers real content, and the reference does not say Mux rejects one. A live
+stream's duration is still growing, so it is not passed.
+
 ## Consequences
 
 ### Positive
 - The three documented controlled vocabularies are usable, and each workflow is held to its own
   documented limits rather than a shared guess.
-- A request that Mux documents as invalid can no longer be built, so it can no longer be refused.
-  The two mechanisms this rests on — hidden means unsent, and one predicate drives both — already
-  existed for the profanity toggle.
-- Asset facts and form values now gate fields through the same declarative mechanism, so
+- A request that Mux documents as invalid cannot be built, so it cannot be refused. Hidden means
+  unsent, and one predicate drives both, as for the profanity toggle (ADR-0011).
+- Asset facts and form values gate fields through the same declarative mechanism, so
   `RobotsParamFields`, `validateParams` and `paramsFromFormValues` stay in agreement by
   construction. All three take the same `RobotsAssetContext`.
+- A prerequisite is stated where it can still be acted on, and a form that refuses a run looks like
+  it refuses it. Nothing on offer in the picker is refused later.
 
 ### Negative
 - `taxonomy` is the first field whose form value is a nested object rather than a scalar or a row
@@ -147,123 +154,27 @@ control. Hiding a usable control on missing information is the worse of the two 
   on a run the editor already confirmed.
 - `find-key-moments`' taxonomy is built on a sibling page's schema. If Mux documents that page
   properly and the shape differs, this is where it breaks.
+- The empty-omitted taxonomy keys are the untested part. If one comes back with its own
+  `received undefined`, that response is the evidence, and the fix is the one made for
+  `allow_other`.
+- A chapters run on an asset whose caption track exists but is not mirrored yet is blocked by us
+  rather than by Mux. `isCaptionTrack` admits `preparing`, so the window is the seconds between a
+  track being attached and the asset poll seeing it, and Refresh closes it.
+- An audio-only video whose editor wanted scenes meets a disabled option; the suffix is the whole
+  of the explanation. If Mux documents a video-less path for thumbnails, the flag is the one line
+  to remove.
 
 ### Neutral
-- `topic_taxonomy` and `tag_taxonomy` came off the catalog header's "deliberately omitted" list.
-  `prompt_overrides` stays on it, now with the reference's own wording: "Legacy/internal
+- `prompt_overrides` stays off the catalog, with the reference's own wording: "Legacy/internal
   prompt-section overrides. Prefer output_steering for new integrations." It is documented on
   `summarize` and `generate-chapters`, exposed on neither, and a test asserts no catalog parameter
   path begins with it.
-- `edit-captions`' `delete_original_track` got the same treatment as `replace_existing` despite a
-  weaker rule — "has effect only when" is an ignore, not a rejection. Nothing was broken; a
-  checkbox that provably does nothing is still worth removing.
-
-## Amendment, 2026-09-21: chapters has the same prerequisite, and Continue now says so
-
-The Decision above is about requests Mux documents as *invalid*, made unconstructable through
-`showWhen`. This is the other half of the same problem and it needs the other mechanism: a
-request that is perfectly well-formed and that this asset cannot satisfy.
-
-`find-key-moments` has had that treatment since it was written — without `use_shots` the
-selection reads the transcript, so the asset needs a caption track, and `validateParams` says so
-against `RobotsAssetContext.hasCaptions` before Continue. `generate-chapters` has the identical
-prerequisite and had none of it. Its own `language_code` is labelled "Caption track language",
-which is this catalog saying the workflow picks a caption track; with no track there is nothing
-to chapter, the POST is accepted, and the job errors minutes later — after the editor has been
-told the run started and after they have been charged for finding out. It is the worst shape of
-failure and it was one `if` away from the shape we already had.
-
-So `generate-chapters` is gated on `hasCaptions === false`, with a message that does not offer
-visual evidence as the way out, because chapters has no `use_shots`.
-
-**Three other workflows were checked and deliberately left alone.** `summarize`, `ask-questions`
-and `find-scenes` carry the same "Caption track language" / "Transcript language" label and no
-more. A label is not a documented prerequisite, and this catalog's standing rule is that a
-restriction we invent blocks a run Mux accepts — the same class of mistake as inventing a
-default (ADR-0011) or borrowing another workflow's caps (above). `summarize` is the flagship
-workflow and `Apply summary` depends on it; gating it on a label would be the most expensive
-possible way to be wrong. If one of them comes back with a real failure on a caption-less asset,
-that response is the evidence and the fix is this one again, one `if` at a time.
-
-Also found and not changed: `translate-audio` documents a genuine prerequisite in `notes` — "The
-run is rejected if the video has no audio track" — and nothing enforces it. Different mechanism
-(the API rejects the create synchronously, so the editor learns immediately rather than minutes
-later), different context key (`hasAudioTrack`, which does not exist), and the second half of
-that sentence is not checkable from here. Left as a documented gap.
-
-**And Continue is disabled now, not merely inert.** `handleContinue` early-returned on
-`errors.length > 0` while the button stayed enabled, so a run the form had already refused
-presented an available Continue that did nothing when pressed. That reads as a broken button,
-and the next move it invites is pressing it again rather than scrolling up to the note that says
-why. The guard in the handler stays — it is what stops a keyboard or programmatic activation
-getting past a disabled button — but the button now carries the same condition, with the first
-error as its title.
-
-### Consequences of this amendment
-
-**Positive.** The prerequisite is stated where it can still be acted on, for both workflows that
-have it, through one mechanism. A form that refuses a run looks like it refuses it.
-
-**Negative.** A chapters run on an asset whose caption track exists but is not mirrored yet is
-now blocked by us rather than by Mux. `isCaptionTrack` admits `preparing`, so the window is the
-seconds between a track being attached and the asset poll seeing it, and Refresh closes it.
-
-**Neutral.** `validateParams` is still a list of `if (definition.key === …)` blocks rather than
-anything data-driven. Three preconditions across twelve workflows does not pay for a mechanism,
-and every one of them has been a different shape so far.
-
-## Amendment, 2026-09-24: a workflow the asset cannot run is offered disabled, not refused
-
-The Decision above made a request Mux documents as invalid unconstructable, through `showWhen`,
-and the 2026-09-21 amendment kept `validateParams` for a well-formed request this asset cannot
-satisfy. There was a third case sitting in the second mechanism: a whole workflow the asset cannot
-run. `find-scenes` on an audio-only video could be picked, filled in, and only then refused by
-`validateParams` — the form describing a run it will not let anyone make, which is the problem this
-ADR opened with.
-
-**So the picker offers it disabled.** The catalog's `requiresVideoTrack` marks the workflows that
-cannot run on an audio-only asset, and `workflowUnavailableReason` is the one place that reads it.
-The dropdown still lists every workflow — so an editor can see it exists — and shows those two as
-"… (not available for audio-only)". The `validateParams` branch for `find-scenes` is deleted: a
-workflow the form can no longer hold cannot need refusing.
-
-**Which two, and why the second one.** `find-scenes` is documented: "Audio-only assets are not
-supported." `find-best-thumbnails` is **a product decision, not a documented restriction** — the
-reference says nothing about audio-only assets, but the workflow ranks frames, and an audio-only
-asset has none. Recorded here and on the flag so it is not mistaken for a missing citation and
-removed.
-
-**The form never holds an unavailable workflow.** `availableWorkflow` swaps one for the default —
-a preselected `initialWorkflow`, or a choice made before the asset turned out to be audio-only,
-which is how an entry whose value predates `audioOnly` learns it — and the swap sticks. The confirm
-step is tied to the workflow it was reached for, so it cannot survive the swap and confirm the
-default by accident. An unknown asset kind disables nothing, the same tri-state rule as the
-`notEquals: false` condition above.
-
-`find-key-moments`' `use_shots` refusal on an audio-only asset stays in `validateParams`: it is a
-parameter the asset restricts, not a workflow, and the rest of that form is still usable.
-
-**The scope window is refused the old way, because there is nothing to hide.** Six workflows take
-`output_steering.scope`, "an optional execution window in seconds on the original asset timeline".
-A start at or past the end is an empty window, and `validateParams` now refuses it before Continue,
-keyed on the parameters rather than on workflow names so a workflow that gains a scope gains the
-rule — the same mechanism as `find-key-moments`' highlight bounds. When the asset's duration is
-known, a *start* past the end of the video is refused too. An *end* past it is not: the window
-still covers real content, and the reference does not say Mux rejects one, so refusing it would be
-the invented restriction this catalog keeps ruling out. A live stream's duration is still growing,
-so it is not passed.
-
-### Consequences of this amendment
-
-**Positive.** Nothing on offer in the picker is refused later, and the one rule that decides what
-is on offer lives in the catalog beside the reason for it.
-
-**Negative.** An audio-only video whose editor wanted scenes now meets a disabled option rather
-than an explanation after picking it; the suffix is the whole of the explanation. If Mux documents
-a video-less path for thumbnails, the flag is the one line to remove.
-
-**Neutral.** `validateParams` loses one workflow-level block and gains a parameter-keyed one. Its
-`definition.key` checks are otherwise unchanged. The "Caption track language" label the
-2026-09-21 amendment reasons from is now "Captions to read" on all five fields that pick a caption
-track, because editors read the old one as the language of the result. The reference's own
-wording — "the caption track to analyze" — says the same thing as the label did, more firmly.
+- `edit-captions`' `delete_original_track` gets the same treatment as `replace_existing` despite a
+  weaker rule — "has effect only when" is an ignore, not a rejection. A checkbox that provably does
+  nothing is still worth removing.
+- `validateParams` is a list of `if (definition.key === …)` blocks plus the parameter-keyed scope
+  rule, rather than anything data-driven. A handful of preconditions across twelve workflows does
+  not pay for a mechanism, and each has been a different shape.
+- The five `language_code` fields that pick a caption track are labelled "Captions to read", which
+  is what the reference means by "the caption track to analyze"; a language label reads as the
+  language of the result.

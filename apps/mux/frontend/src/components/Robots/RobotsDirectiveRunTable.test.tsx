@@ -1,8 +1,22 @@
-import { describe, expect, it } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import RobotsDirectiveRunTable from './RobotsDirectiveRunTable';
 import { RobotsDirectiveRun } from '../../util/robotsTypes';
+import { PendingCreateRow } from '../../util/robotsField';
+
+type TableProps = Parameters<typeof RobotsDirectiveRunTable>[0];
+
+const showRuns = (runs: RobotsDirectiveRun[], props: Partial<TableProps> = {}) =>
+  render(
+    <RobotsDirectiveRunTable
+      runs={runs}
+      pendingRows={[]}
+      pointsToNote
+      directiveNames={{ drv_1: 'Ingest' }}
+      {...props}
+    />
+  );
 
 const run = (overrides: Partial<RobotsDirectiveRun> = {}): RobotsDirectiveRun => ({
   run_id: 'drvrun_1',
@@ -19,7 +33,7 @@ const run = (overrides: Partial<RobotsDirectiveRun> = {}): RobotsDirectiveRun =>
 
 describe('RobotsDirectiveRunTable', () => {
   it('centres a run row’s cells, the steps count with its arrow included', () => {
-    render(<RobotsDirectiveRunTable runs={[run()]} directiveNames={{ drv_1: 'Ingest' }} />);
+    showRuns([run()]);
 
     const cells = screen.getByTestId('robots_directive_run_table').querySelectorAll('tbody td');
     for (const cell of Array.from(cells)) expect(cell).toHaveStyle({ verticalAlign: 'middle' });
@@ -30,7 +44,7 @@ describe('RobotsDirectiveRunTable', () => {
   });
 
   it('centres the expanded steps too', () => {
-    render(<RobotsDirectiveRunTable runs={[run()]} directiveNames={{ drv_1: 'Ingest' }} />);
+    showRuns([run()]);
     fireEvent.click(screen.getByRole('button', { name: 'Show steps' }));
 
     const stepCell = screen.getByText('Nope').closest('td') as HTMLElement;
@@ -39,18 +53,89 @@ describe('RobotsDirectiveRunTable', () => {
 
   it('wraps a directive shown by its id, which has no spaces to break at', () => {
     const id = `drv_${'x'.repeat(80)}`;
-    render(<RobotsDirectiveRunTable runs={[run({ directive_id: id })]} directiveNames={{}} />);
+    showRuns([run({ directive_id: id })], { directiveNames: {} });
     expect(screen.getByText(id).closest('td')).toHaveStyle({ wordBreak: 'break-word' });
   });
 
   it('says it is still reading rather than that there are no runs', () => {
-    render(<RobotsDirectiveRunTable runs={[]} directiveNames={{}} isLoading />);
+    showRuns([], { isLoading: true });
     expect(screen.getByTestId('robots_directive_run_table_loading')).toBeInTheDocument();
     expect(screen.queryByText(/No directive runs for this video yet/)).not.toBeInTheDocument();
   });
 
   it('shows the runs it has, even while it is still reading', () => {
-    render(<RobotsDirectiveRunTable runs={[run()]} directiveNames={{}} isLoading />);
+    showRuns([run()], { isLoading: true });
     expect(screen.getByTestId('robots_directive_run_table')).toBeInTheDocument();
+  });
+});
+
+describe('a pending directive run', () => {
+  const pendingRun = (phase: PendingCreateRow['phase']): PendingCreateRow => ({
+    pending: {
+      requestId: 'req_run',
+      kind: 'directive-run',
+      directiveId: 'drv_1',
+      requestedAt: 1_700_000_500,
+    },
+    phase,
+  });
+
+  it.each([
+    ['waiting-for-publish', 'Waiting for publish', 'Starts after the publish finishes'],
+    ['starting', 'Starting…', 'Waiting for Mux'],
+    ['unconfirmed', 'Not confirmed', 'See the note above'],
+  ] as const)(
+    'reads as %s, with its status in the Steps cell and no expander',
+    (phase, badge, last) => {
+      showRuns([], { pendingRows: [pendingRun(phase)] });
+
+      const row = screen.getByText(badge).closest('tr') as HTMLElement;
+      expect(within(row).getByText('Ingest')).toBeInTheDocument();
+      expect(row).toHaveTextContent(/Requested /);
+      expect(screen.getByTestId('robots-pending-req_run')).toHaveTextContent(last);
+      expect(within(row).queryByRole('button', { name: 'Show steps' })).not.toBeInTheDocument();
+    }
+  );
+
+  it('names a directive it has no name for by its id', () => {
+    showRuns([], { pendingRows: [pendingRun('starting')], directiveNames: {} });
+    expect(screen.getByText('drv_1')).toBeInTheDocument();
+  });
+
+  it('offers "Don’t start" only while waiting, only with the handler', () => {
+    const onDontStart = vi.fn();
+    showRuns([], { pendingRows: [pendingRun('waiting-for-publish')], onDontStart });
+    fireEvent.click(screen.getByRole('button', { name: 'Don’t start' }));
+    expect(onDontStart).toHaveBeenCalledWith('req_run');
+  });
+
+  it('is a row, not the empty state, and shows even while the runs are being read', () => {
+    showRuns([], { pendingRows: [pendingRun('starting')], isLoading: true });
+    expect(screen.getByTestId('robots_directive_run_table')).toBeInTheDocument();
+    expect(screen.queryByText(/No directive runs for this video yet/)).not.toBeInTheDocument();
+  });
+
+  it('gives its place to the run that resolves it', () => {
+    const older = run({ run_id: 'drvrun_older', started_at: 1_700_000_000 });
+    const newer = run({ run_id: 'drvrun_newer', started_at: 1_700_001_000 });
+    const { rerender } = showRuns([older, newer], { pendingRows: [pendingRun('starting')] });
+    const rows = () =>
+      screen.getByTestId('robots_directive_run_table').querySelectorAll('tbody tr');
+    expect(rows()[1]).toHaveTextContent('Starting…');
+
+    rerender(
+      <RobotsDirectiveRunTable
+        runs={[
+          older,
+          run({ run_id: 'drvrun_resolved', status: 'pending', started_at: 1_700_000_503 }),
+          newer,
+        ]}
+        pendingRows={[]}
+        pointsToNote
+        directiveNames={{ drv_1: 'Ingest' }}
+      />
+    );
+    expect(rows()).toHaveLength(3);
+    expect(rows()[1]).toHaveTextContent('pending');
   });
 });

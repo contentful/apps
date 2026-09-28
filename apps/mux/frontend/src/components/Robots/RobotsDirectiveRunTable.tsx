@@ -4,7 +4,9 @@ import { ChevronDownIcon, ChevronUpIcon } from '@contentful/f36-icons';
 import { RobotsDirectiveRun, RobotsNodeState } from '../../util/robotsTypes';
 import { workflowLabel } from '../../util/robotsCatalog';
 import { EM_DASH, formatTimestamp } from '../../util/robotsFormat';
+import { PendingCreateRow, runTableRows } from '../../util/robotsField';
 import EmptyTableNote from './EmptyTableNote';
+import PendingCreateCell from './PendingCreateCell';
 import RobotsStatusBadge from './RobotsStatusBadge';
 
 /**
@@ -16,6 +18,10 @@ import RobotsStatusBadge from './RobotsStatusBadge';
 
 interface RobotsDirectiveRunTableProps {
   runs: RobotsDirectiveRun[];
+  /** Directive-run creates still pending. See `pendingCreateRows`. */
+  pendingRows: PendingCreateRow[];
+  onDontStart?: (requestId: string) => void;
+  pointsToNote: boolean;
   directiveNames: Record<string, string>;
   /** Still reading the runs for the first time, so no runs is not yet an answer. */
   isLoading?: boolean;
@@ -58,6 +64,9 @@ const NodeStateRows: FC<{ nodeStates: RobotsNodeState[] }> = ({ nodeStates }) =>
 
 const RobotsDirectiveRunTable: FC<RobotsDirectiveRunTableProps> = ({
   runs,
+  pendingRows,
+  onDontStart,
+  pointsToNote,
   directiveNames,
   isLoading = false,
 }) => {
@@ -73,7 +82,11 @@ const RobotsDirectiveRunTable: FC<RobotsDirectiveRunTableProps> = ({
     </Table.Head>
   );
 
-  if (runs.length === 0 && isLoading) {
+  const rows = runTableRows(pendingRows, runs);
+  const nameOf = (directiveId?: string) =>
+    directiveNames[directiveId ?? ''] ?? directiveId ?? EM_DASH;
+
+  if (rows.length === 0 && isLoading) {
     return (
       <Box marginBottom="spacingM">
         <Table data-testid="robots_directive_run_table_loading" verticalAlign="middle">
@@ -86,7 +99,7 @@ const RobotsDirectiveRunTable: FC<RobotsDirectiveRunTableProps> = ({
     );
   }
 
-  if (runs.length === 0) {
+  if (rows.length === 0) {
     return <EmptyTableNote>No directive runs for this video yet.</EmptyTableNote>;
   }
 
@@ -97,18 +110,41 @@ const RobotsDirectiveRunTable: FC<RobotsDirectiveRunTableProps> = ({
       <Table data-testid="robots_directive_run_table" verticalAlign="middle">
         {head}
         <Table.Body>
-          {runs.map((run) => {
+          {rows.map(({ key, pending, item: run }) => {
+            if (pending) {
+              // Its Steps cell carries its status: there are no steps, and nothing to expand.
+              return (
+                <Table.Row key={key}>
+                  <Table.Cell isWordBreak>
+                    <Text>
+                      {pending.pending.kind === 'directive-run' &&
+                        nameOf(pending.pending.directiveId)}
+                    </Text>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <RobotsStatusBadge kind="create" status={pending.phase} />
+                  </Table.Cell>
+                  <Table.Cell>Requested {formatTimestamp(pending.pending.requestedAt)}</Table.Cell>
+                  <Table.Cell>
+                    <PendingCreateCell
+                      row={pending}
+                      onDontStart={onDontStart}
+                      pointsToNote={pointsToNote}
+                    />
+                  </Table.Cell>
+                </Table.Row>
+              );
+            }
+
             const isExpanded = expandedId === run.run_id;
             const nodeStates = run.node_states ?? [];
 
             return (
-              <Fragment key={run.run_id}>
+              <Fragment key={key}>
                 <Table.Row>
                   {/* A directive with no name shows its id, which has no spaces to wrap at. */}
                   <Table.Cell isWordBreak>
-                    <Text>
-                      {directiveNames[run.directive_id ?? ''] ?? run.directive_id ?? EM_DASH}
-                    </Text>
+                    <Text>{nameOf(run.directive_id)}</Text>
                   </Table.Cell>
                   <Table.Cell>
                     <RobotsStatusBadge kind="run" status={run.status} />

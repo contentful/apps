@@ -319,19 +319,21 @@ export class MuxApiService {
   // others is how the existing inconsistency got there.
 
   /**
-   * Starts a job. `passthrough` is a top-level field (not part of `parameters`) and is how the
-   * app both attributes the job to this plugin and recognises it again if the call's outcome is
-   * unknown — see `createRobotsJobWithReconciliation`.
+   * Starts a job. Nothing in the app reads a job's `passthrough`, which is the customer's field:
+   * Mux attributes the call by the `x-source-platform` header `muxProxy` sends. The one line
+   * below is an interim marker until Mux confirms it counts by that header (ADR-0003).
    */
   async createRobotsJob(
     workflow: RobotsWorkflow,
-    parameters: Record<string, unknown>,
-    passthrough?: string
+    parameters: Record<string, unknown>
   ): Promise<MuxDataResponse<RobotsJob>> {
     return this.callProxy(
       'POST',
       `/robots/v0/jobs/${workflow}`,
-      JSON.stringify(passthrough ? { parameters, passthrough } : { parameters })
+      JSON.stringify({
+        parameters,
+        passthrough: 'mux:cms:contentful:', // interim marker, see ADR-0003; nothing reads it
+      })
     );
   }
 

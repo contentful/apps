@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  BASE_FIELD_VERSION,
-  FIELD_VERSION_WITH_ROBOTS,
-  deriveFieldVersion,
-} from './muxField';
+import { BASE_FIELD_VERSION, FIELD_VERSION_WITH_ROBOTS, deriveFieldVersion } from './muxField';
 
 /**
  * The mirror of `frontend/src/util/muxFieldVersionParity.test.ts`.
@@ -57,7 +53,18 @@ describe('the two copies of the field-version rule agree', () => {
     // tested truthiness rather than `Array.isArray` would raise the version here; one that did
     // not would leave it — which is exactly the shape of disagreement that never converges.
     ['robotsJobs corrupted to a string', { version: 3, robotsJobs: 'nonsense' }, 3],
-    ['robotsDirectiveRuns corrupted to an object', { version: 3, robotsDirectiveRuns: { a: 1 } }, 3],
+    [
+      'robotsDirectiveRuns corrupted to an object',
+      { version: 3, robotsDirectiveRuns: { a: 1 } },
+      3,
+    ],
+    ['an empty pending-create array', { version: 3, robotsPendingCreates: [] }, 3],
+    ['one pending create', { version: 3, robotsPendingCreates: [{ requestId: 'q' }] }, 4],
+    [
+      'robotsPendingCreates corrupted to an object',
+      { version: 3, robotsPendingCreates: { a: 1 } },
+      3,
+    ],
     ['robotsOutputs corrupted to a string', { version: 3, robotsOutputs: 'nonsense' }, 4],
     ['a non-numeric version', { version: '4', robotsJobs: [{ id: 'j' }] }, 4],
   ];

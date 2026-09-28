@@ -7,7 +7,7 @@ import { RobotsJob } from '../../util/robotsTypes';
  * The job detail cache.
  *
  * `GET /robots/v0/jobs` returns a six-field summary; `outputs`, `units_consumed`, `errors` and
- * `passthrough` only exist on `GET /robots/v0/jobs/{workflow}/{id}`. Terminal detail never
+ * `parameters` only exist on `GET /robots/v0/jobs/{workflow}/{id}`. Terminal detail never
  * changes, so it is fetched once and cached for the life of the component.
  *
  * Three ways in, all bounded:
@@ -16,10 +16,9 @@ import { RobotsJob } from '../../util/robotsTypes';
  * - `loadJobDetail`, one row, because the editor clicked the Units cell on a row past that window;
  * - `rememberJobDetail`, keeping what the output modal already paid for.
  *
- * Ownership is not consulted. The tab *shows* every job on the asset, and reading one is a GET that
- * charges nobody — a row with a permanently blank Units column looks like a bug. It is also where
- * every summarize and moderate output comes from, whoever started the job. Which job records reach
- * the entry is decided in `applyRobotsJobsToValue`.
+ * Every terminal job on the asset qualifies: reading one is a GET that charges nobody, a row with
+ * a permanently blank Units column looks like a bug, and it is where every summarize and moderate
+ * output comes from.
  */
 export interface RobotsJobDetails {
   /** The list summary, overlaid with whatever detail has been read for each job. */
@@ -34,9 +33,9 @@ export interface RobotsJobDetails {
   pendingDetailIds: Set<string>;
   loadJobDetail: (job: RobotsJob) => Promise<void>;
   /**
-   * Keeps a record the caller already holds — what the output modal fetched, or a job adopted by
-   * reconciliation. Both have already been paid for; throwing them away sent the row behind the
-   * modal back to saying it knew nothing about its own Units.
+   * Keeps a record the caller already holds: what the output modal fetched. It has already been
+   * paid for; throwing it away sent the row behind the modal back to saying it knew nothing about
+   * its own Units.
    */
   rememberJobDetail: (job: RobotsJob) => void;
 }

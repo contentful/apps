@@ -1,8 +1,7 @@
 # ADR-0002: The publish function merges the field value instead of replacing it
 
-**Date:** 2026-09-09
+**Date:** 2026-09-28
 **Status:** Accepted
-**Deciders:** Renzo Delfino
 
 ## Context
 
@@ -10,21 +9,26 @@
 the browser. When an entry is published carrying `pendingActions`, the function runs those actions
 against Mux and then refreshes the field from a fresh `GET /video/v1/assets/{id}`.
 
-That refresh constructed a brand new object from a fixed key list and **assigned** it over every
-locale of the field. Three consequences, all silent:
+Several forces meet in that refresh:
 
-1. Any key not on the list was destroyed. `robotsJobs` and `robotsOutputs` are written only by the
-   browser, so "editor deletes a caption → publishes" would wipe them and publish the wiped value.
-2. It wrote `version: 1`, downgrading a v3 record on every publish that carried a pending action.
-3. It wrote one shared object to *every* locale, flattening per-locale values.
+1. Some keys exist only because the browser wrote them: `robotsJobs`, `robotsOutputs`,
+   `robotsDirectiveRuns` and `robotsPendingCreates`. A refresh that builds a fresh object from a
+   fixed key list and assigns it over the field destroys them, and publishes the result.
+2. The field carries a version. A refresh that asserts one downgrades newer records or bumps older
+   ones, and either makes the browser's next diff see a change that is not one.
+3. Each locale holds its own value. One object assigned to every locale flattens them.
+4. Both writers derive the same mirror keys from the same asset. If they filter differently, a
+   publish swaps the field's `captions` for a differently filtered list — an errored track, or a
+   non-subtitle text track such as `cues`, reappears on the entry — and keeps it until the next
+   browser resync.
+5. A mirror key clears only if it is written as `undefined`, which JSON drops on the way to the
+   CMA. A key merely absent from the mirror keeps whatever the entry already held.
+6. The function runs in two cycles — clear `pendingActions` and update, then rebuild the field and
+   republish — so a browser guard keyed off `pendingActions` still being present lifts one cycle
+   before the rewrite lands.
 
-Alongside those, only the first locale of the field is scanned for pending actions — so actions
-queued from any other locale never run.
-
-There is also a timing problem. The function runs in two cycles — clear `pendingActions` and
-update, then rebuild the field and republish — while the browser's existing guard keyed off
-`pendingActions` still being present. So the guard lifted one cycle *before* the destructive write
-landed, leaving a window in which a browser write was overwritten and then published.
+Only the first locale of the field is scanned for pending actions, so actions queued from any
+other locale never run.
 
 Alternatives considered:
 
@@ -35,167 +39,91 @@ Alternatives considered:
   refresh is what makes a publish leave correct data behind for consumers even if the editor closes
   the tab immediately.
 - **Reconcile Robots outputs inside the function**, so a directive that ran unattended lands its
-  output at publish time. Rejected for now: the function early-returns unless there are
-  `pendingActions`, so it would only help on the narrow subset of publishes that carry one. Making
-  it run on *every* publish means an entry update plus republish on every publish, which re-triggers
-  the same event — a loop that needs its own guard, for a case the browser already covers on the
-  next entry open.
-
-  > **See also, 2026-09-17.** This rejection stands, and it is what leaves a publish mid-job
-  > carrying the job's unfinished state until somebody publishes again. **ADR-0013** takes that up:
-  > it explains why blocking Contentful's Publish button is not available to this app, and adds the
-  > editor notice and the resumed poll that make the second publish an informed, prompt one rather
-  > than an accident.
+  output at publish time. Rejected: the function early-returns unless there are `pendingActions`,
+  so it would only help on the narrow subset of publishes that carry one. Making it run on every
+  publish means an entry update plus republish on every publish, which re-triggers the same event —
+  a loop that needs its own guard, for a case the browser covers on its next read. What this
+  leaves, a publish mid-job carrying the job's unfinished state, is the subject of ADR-0013.
+- **Make the browser's caption filter match the function's** (`type === 'text'`, any status).
+  Rejected: it would put errored tracks on every entry, which is what the browser filter exists to
+  avoid, and it would rewrite the `captions` array of every entry on its next resync.
+- **Share the caption predicate through a build step.** Rejected: `frontend/` and `functions/` are
+  separate packages with independent builds, and a build dependency between them is a much larger
+  commitment than a few duplicated lines.
+- **Write `captions: []` when the asset has no tracks.** Rejected: it would differ from what the
+  browser stores for the same asset, so the next browser diff would see a change and write the
+  field again (ADR-0006).
 
 ## Decision
 
 `mergeMuxAssetIntoField` (in `functions/src/helpers/muxField.ts`) spreads the existing locale value,
 overlays only the keys the function owns, derives the version rather than asserting it, and is
-called once per locale with *that locale's* value. `pendingActions` is set only when actions
-actually failed, and **deleted** otherwise — not set to `null`. That matters twice: every
-published entry out there already has the key absent once its actions have run, and `null` would
-both differ from that (making the browser's next diff see a change and bump the entry version for
-nothing) and make the *next* publish's pending-action scan index into `null` and throw from
-outside the handler's try block.
+called once per locale with *that locale's* value. Every browser-owned key survives, including
+`robotsPendingCreates`. `pendingActions` is set only when actions actually failed, and **deleted**
+otherwise — not set to `null`. Every published entry already has the key absent once its actions
+have run, and `null` would both differ from that (the browser's next diff would see a change and
+bump the entry version for nothing) and make the next publish's pending-action scan index into
+`null` and throw from outside the handler's try block.
 
-The first-locale-only pending-action scan is **left exactly as it is**. Fixing it was tempting and
-is unrelated to Robots, but it would mean the next publish suddenly executes actions queued in a
-non-default locale that have never run — including asset deletes an editor queued long ago and
-forgot about. That is a destructive surprise to ship to installs that already exist, so it stays a
-documented limitation with its own follow-up. The scan is only hardened against a `null`
-`pendingActions`, which it could already encounter and would already have thrown on.
+The keys the function owns are `MUX_ASSET_MIRROR_KEYS`, and the mirror is built by iterating them:
+`buildMuxAssetMirror` in `functions/src/onPublish.ts` supplies one value per key as a
+`Record<MuxAssetMirrorKey, unknown>`, and `buildAssetMirror` writes every listed key, `undefined`
+included. A key listed but not supplied is a compile error, and a key whose value is gone clears.
+`captions` and `audioTracks` are `undefined` rather than `[]` when the asset has none, which is what
+the browser stores.
 
-Alongside it, the browser holds a **publish gate**: when a sys change shows the entry was published
-while `pendingActions` were present, browser writes are queued until the function's own publish
-lands (or a 90 s timeout). Queued mutators are then re-applied against the value the function left
-behind.
+Which tracks go into `captions` is decided by `isCaptionTrack`: `text_type === 'subtitles'` with
+status `ready` or `preparing`. It is defined twice, in `frontend/src/index.tsx` and
+`functions/src/onPublish.ts`, with each copy's comment naming the other. The browser's filter is
+the definition, because it is the one every existing entry was written with.
 
-Outputs from jobs that completed with nobody watching are reconciled in the browser on the next
-entry open, not at publish time.
+A 404 from Mux is the one case that does not merge. `fetchMuxAsset` returns nothing on a 404 and
+throws on every other failure; `updateEntryFieldWithMuxAsset` then sets the whole field to
+`undefined`, Robots keys included, while a thrown error is caught per field and leaves it as it
+was. The field is a mirror of a Mux asset: if Mux says the asset does not exist, there is nothing
+for the entry to describe, and keeping provenance and outputs for a video that cannot be played,
+resynced or re-run would make every consumer tell that state apart from a live one. ADR-0010's
+argument that Robots data is unrecoverable is about losing it by accident; this loses it because
+the asset it describes was deleted, and only on a positive answer that it was.
+
+The first-locale-only scans are left as they are. The pending-action scan reads the first locale
+only; widening it would make the next publish execute actions queued in a non-default locale that
+have never run, including asset deletes queued long ago and forgotten, which is a destructive
+surprise to ship to installs that already exist. It is only hardened against a `null`
+`pendingActions`, which the first cycle writes. The 404 has the same shape: it is decided from the
+first locale's `assetId` and applied to every locale.
+
+Alongside the merge, the browser holds a **publish gate**: when a sys change shows the entry was
+published while `pendingActions` were present, browser writes are parked until the function's own
+publish lands, or `PUBLISH_GATE_TIMEOUT_MS` (90 s) passes. Parked mutators are then re-applied
+against the value the function left behind (ADR-0001).
+
+Outputs from jobs that completed with nobody watching are reconciled in the browser on its next
+Robots read, not at publish time.
 
 ## Consequences
 
 ### Positive
-- The worst case in the publish window stops being "destroyed" and becomes "briefly stale": the
-  function overwrites the asset mirror, Robots keys survive, and the next poll reconciles.
-- Two standing bugs fixed on the way — the `version: 1` downgrade and the per-locale flattening.
-- `functions/` has its first tests.
+- The worst case in the publish window is "briefly stale", not "destroyed": the function overwrites
+  the asset mirror, Robots keys survive, and the next poll reconciles.
+- A publish never downgrades the version and never flattens per-locale values.
+- A publish leaves exactly the caption list the app itself would have written, and a deleted last
+  track clears instead of lingering.
+- A key added to `MUX_ASSET_MIRROR_KEYS` and forgotten in the mirror stops type-checking.
 
 ### Negative
 - The gate is a heuristic, not a lock. It narrows the window; the merge is what makes the remainder
   survivable. Both are needed and neither is sufficient alone.
-- A directive that runs unattended lands its output on the next entry *open*, which produces a
-  draft change the editor did not ask for. Unavoidable while the field JSON is the delivery path.
+- A directive that runs unattended lands its output on the next Robots read, which produces a draft
+  change the editor did not ask for. Unavoidable while the field JSON is the delivery path.
+- An asset deleted from the Mux dashboard, followed by a publish carrying any unrelated pending
+  action, clears the field's Robots history along with the mirror. A field whose locales point at
+  different Mux assets loses the live ones alongside the dead one.
 
 ### Neutral
-- The per-locale pending-action scan is still wrong, just no more wrong than before.
-- `deriveFieldVersion` is duplicated between `functions/` and `frontend/`. The two are separate
-  packages with independent builds — the same split that already exists between `util/apiClient.tsx`
-  and `functions/src/helpers/muxClient.ts`.
-
-## Amendment, 2026-09-11: the two writers disagreed about captions, and two mirror keys never cleared
-
-The merge fixed *which keys* the function may touch. It did not look at whether the values it puts
-in them match what the browser would have put there. Two ways they did not.
-
-**The caption filter had drifted.** The browser mirrors a track into `captions` when
-`text_type === 'subtitles'` and its status is `ready` or `preparing`. The function took
-`type === 'text'` at any status. So a publish swapped the field's caption list for a
-differently-filtered one: an errored caption track, or a non-subtitle text track such as `cues`,
-reappeared on the entry that the app had already filtered out — and stayed there, published, until
-someone opened the entry and the mount resync removed it again.
-
-The browser's filter wins, because it is the one the app actually applies and the one every
-existing entry was written with. The two live in separate packages with independent builds, so
-there is no module to share: the predicate is now a named `isCaptionTrack` on each side, and each
-one's comment names the other. Small enough to state twice; too load-bearing to let drift again.
-
-**`captions` and `audioTracks` were the only mirror keys that could not clear.** They were spread
-in conditionally — `...(captions?.length && { captions })` — so an asset with no tracks left
-produced a mirror with the key *absent*, and `{ ...existing, ...assetMirror }` then kept whatever
-the entry already held. Every other mirror key is written as an explicit `undefined`, which JSON
-drops on the way to the CMA, which is how a key clears.
-
-Be accurate about how bad this is, because a first pass overstated it. **It is a correction that
-fails to happen, not a resurrection of deleted data.** For the function to run at all the entry
-must carry `pendingActions`, which means the field editor was mounted, which means the mount
-resync has already corrected `captions` — so `existing` is normally already right and there is
-nothing stale to preserve. The window is narrow and specific: open the entry (resync runs), stay
-off the Robots tab, a directive deletes a track in Mux, stage a pending action, publish. The
-function then holds the true asset, sees zero captions, and declines to clear. The entry publishes
-with a phantom track, and it self-heals on the next reload.
-
-It is worth fixing anyway, for the asymmetry rather than the blast radius: the code promised one
-thing and did another, silently, in the one place where a stale array reaches the Delivery API.
-
-The reason it was invisible is the more interesting half. `MUX_ASSET_MIRROR_KEYS` documented both
-keys as mirror-owned, and **nothing read that constant** — so the list and the object could
-disagree with nothing to notice. Decorative documentation about a data-loss boundary is worse than
-none, because it is read as a guarantee. So the mirror is now built by iterating the list
-(`buildAssetMirror`), typed by it (`Record<MuxAssetMirrorKey, unknown>`), and a key that is listed
-but not supplied is a compile error rather than a key that silently never clears.
-
-Alternatives considered:
-
-- **Make the browser match the function** (`type === 'text'`, any status). Rejected: it would put
-  errored tracks on every entry, which is precisely what the browser filter exists to avoid, and
-  it would rewrite the `captions` array of every entry on its next resync.
-- **Share the predicate through a build step.** Rejected for the same reason `deriveFieldVersion`
-  is duplicated: `frontend/` and `functions/` are separate packages with independent builds, and
-  the split already exists between `util/apiClient.tsx` and `helpers/muxClient.ts`. A build
-  dependency between them is a much larger commitment than eight duplicated lines.
-- **Delete `MUX_ASSET_MIRROR_KEYS`.** Genuinely viable — a constant nobody reads is dead weight,
-  and deleting it is honest. Rejected because the mirror keys *are* the contract between the two
-  writers, and enforcing it costs one loop.
-- **Write `captions: []` rather than `undefined` when the asset has no tracks.** Rejected: it
-  would differ from what the browser stores for the same asset, so the next browser diff would see
-  a change and write the field again — entry churn for nothing, which is the ADR-0006 property.
-
-### Consequences
-
-- A publish now leaves exactly the caption list the app itself would have written, and a deleted
-  last track clears instead of lingering.
-- A key added to `MUX_ASSET_MIRROR_KEYS` and forgotten in the mirror stops type-checking, and the
-  tests assert the two agree by iteration rather than by a list someone has to maintain twice.
-- The duplicated predicate is still duplicated. It is now duplicated *on purpose*, named the same
-  on both sides, with each copy pointing at the other.
-
-## Amendment, 2026-09-21: a 404 from Mux clears the whole field, and that is the intended behaviour
-
-Recorded here because this is the one place the function does **not** merge, which is a
-qualification of the decision above rather than a bug against it.
-
-`updateEntryFieldWithMuxAsset` reads the field's `assetId` and calls
-`GET /video/v1/assets/{id}`. On a 404 it does not merge anything — it sets the entire field to
-`undefined` and publishes that. Every key goes, including the three that ADR-0010 says exist
-nowhere else: `robotsJobs`, `robotsOutputs` and `robotsDirectiveRuns`.
-
-A previous pass flagged this as an open product question, because the 404 branch does not ask
-*why* the asset is missing. It fires whether or not a delete was the pending action that brought
-the function here. So the reachable case is not "the editor deleted the video": it is an asset
-deleted from the Mux dashboard, followed by a publish carrying any unrelated pending action — a
-caption removal, a metadata edit — which then takes the Robots history with it.
-
-**The decision is that this is correct and stays.** The field is a mirror of a Mux asset. If the
-asset is gone from Mux there is no asset for the entry to describe, and no reason for its data to
-outlive it. Keeping `robotsJobs` and `robotsOutputs` against a deleted asset would leave an entry
-holding provenance and outputs for a video that cannot be played, resynced or re-run, and every
-consumer reading the field would have to learn to distinguish that state from a live one.
-ADR-0010's claim is that this data is unrecoverable, which is an argument for not losing it by
-*accident* — a dropped write, a pasted asset ID, an unmount. Losing it because the thing it
-describes was deliberately deleted is not that.
-
-What makes it safe enough to leave alone is that the 404 is authoritative and the clear is
-therefore never speculative: `fetchMuxAsset` distinguishes 404 from every other failure and
-throws on the rest, and the throw is caught per field, so a Mux outage or a bad token leaves the
-field exactly as it was. Only a positive "this asset does not exist" clears anything.
-
-**The related limitation, which does not change.** The 404 is decided from **one** locale and
-applied to **all** of them: the loop reads `Object.entries(fieldValue)[0]` to find an `assetId`,
-and on a 404 assigns `undefined` to the whole field rather than to that locale. A field whose
-locales point at different Mux assets therefore loses the live ones alongside the dead one. This
-is the same first-locale-only shape as the pending-action scan documented above, in a different
-function, and it is left for the same reason: the fix belongs with that one, as its own change,
-not smuggled in beside a decision to keep existing behaviour.
-
-No code changes with this amendment.
+- The pending-action scan still reads one locale, as it always has.
+- `deriveFieldVersion` and `isCaptionTrack` each exist in both `functions/` and `frontend/`. The two
+  are separate packages with independent builds — the same split as `util/apiClient.tsx` and
+  `functions/src/helpers/muxClient.ts`. The version rule is held together by the mirrored
+  `muxFieldVersionParity.test.ts` tables on each side; the caption filter by the comments that
+  name each other.

@@ -15,6 +15,7 @@ import {
   recordRobotsCapability,
   resetRobotsCapabilityCache,
 } from '../../util/robots';
+import { RobotsPendingCreate } from '../../util/robotsTypes';
 import { MuxContentfulObject } from '../../util/types';
 
 /**
@@ -25,7 +26,7 @@ import { MuxContentfulObject } from '../../util/types';
  * generic 403 and these tests are what would catch it.
  */
 
-/** The install these tests run as. Scoped passthroughs are matched against exactly this. */
+/** The entry these tests run in. */
 const ids = { space: 'space-1', environment: 'master', entry: 'entry-1' };
 
 const sdk = {
@@ -36,14 +37,6 @@ const sdk = {
   entry: { fields: {} },
   notifier: { success: vi.fn(), error: vi.fn(), warning: vi.fn() },
 } as unknown as FieldExtensionSDK;
-
-/** A passthrough stamped by this install, for this entry. */
-const ourPassthrough = (requestId = 'abcdef0123456789') =>
-  `mux:cms:contentful:2.0.0|${ids.space}:${ids.environment}:${ids.entry}|${requestId}`;
-
-/** The same, as it was stamped before Mux's prefix. Jobs created then still carry it. */
-const ourLegacyPassthrough = (requestId = 'abcdef0123456789') =>
-  `contentful@2.0.0|${ids.space}:${ids.environment}:${ids.entry}|${requestId}`;
 
 const value = (extra: Partial<MuxContentfulObject> = {}): MuxContentfulObject =>
   ({ version: 3, assetId: 'asset-1', ready: true, ...extra } as MuxContentfulObject);
@@ -71,7 +64,7 @@ const apiThatFailsWith = (error: unknown) => ({
 });
 
 /**
- * `GET /robots/v0/jobs` returns a six-field summary — no `outputs`, `passthrough`,
+ * `GET /robots/v0/jobs` returns a six-field summary — no `outputs`, `parameters`,
  * `units_consumed` or `errors`. `getRobotsJob` is where those live, so it is mocked separately
  * and deliberately returns nothing extra unless a test says otherwise.
  */
@@ -83,6 +76,87 @@ const apiThatReturns = (jobs: unknown[], details: Record<string, unknown> = {}) 
   listRobotsDirectives: vi.fn(async () => ({ data: [] })),
   listRobotsDirectiveRuns: vi.fn(async () => ({ data: [] })),
 });
+
+type Mutator = (current: MuxContentfulObject | undefined) => MuxContentfulObject | undefined;
+
+interface PanelWrite {
+  mutate: Mutator;
+  options?: { save?: boolean; onParked?: () => void; flushOnUnmount?: boolean };
+}
+
+/**
+ * `updateField` the way `App` runs it: each write applies its mutator to what is stored, and the
+ * panel renders the result. `land` decides when a write lands — at once by default; a test can
+ * hold one, or make it fail, the way the publish gate or a refused save would.
+ */
+const renderWithStore = (
+  initial: MuxContentfulObject | undefined,
+  {
+    land,
+    ...props
+  }: Record<string, any> & {
+    land?: (write: PanelWrite, apply: () => void) => Promise<void> | void;
+  } = {}
+) => {
+  let stored = initial;
+  const writes: PanelWrite[] = [];
+  let show: (next: MuxContentfulObject | undefined) => void = () => undefined;
+  let activate: () => void = () => undefined;
+
+  const Harness: FC = () => {
+    const [value, setValue] = useState(initial);
+    const [isActive, setIsActive] = useState<boolean>(props.isActive ?? true);
+    show = setValue;
+    activate = () => setIsActive(true);
+    const updateField = useCallback(async (mutate: Mutator, options?: PanelWrite['options']) => {
+      const write = { mutate, options };
+      writes.push(write);
+      const apply = () => {
+        stored = mutate(stored);
+        setValue(stored);
+      };
+      if (land) return land(write, apply);
+      apply();
+    }, []);
+    return (
+      <RobotsPanel
+        sdk={props.sdk ?? sdk}
+        muxApi={props.muxApi}
+        value={value}
+        isActive={isActive}
+        updateField={updateField}
+        resync={noResync}
+        defaultDirectiveIds={props.defaultDirectiveIds ?? noDirectives}
+        canRunRobots={props.canRunRobots ?? true}
+      />
+    );
+  };
+
+  const view = render(<Harness />);
+  return {
+    ...view,
+    read: () => stored,
+    writes,
+    savedWrites: () => writes.filter((write) => write.options?.save),
+    /** Another tab's write, arriving the way `onValueChanged` delivers it. */
+    replace: (next: MuxContentfulObject | undefined) =>
+      act(() => {
+        stored = next;
+        show(next);
+      }),
+    activate: () => act(() => activate()),
+  };
+};
+
+/** A placeholder as the panel stores it. */
+const pendingJob = (overrides: Partial<RobotsPendingCreate> = {}): RobotsPendingCreate =>
+  ({
+    requestId: '9f2c0b7a41d3e865',
+    kind: 'job',
+    workflow: 'summarize',
+    requestedAt: Math.floor(Date.now() / 1000),
+    ...overrides,
+  } as RobotsPendingCreate);
 
 describe('RobotsPanel capability states', () => {
   beforeEach(() => {
@@ -325,19 +399,18 @@ describe('RobotsPanel field writes', () => {
     expect(typeof updateField.mock.calls[0][0]).toBe('function');
   });
 
-  it('leaves an entry with no Robots data untouched, so it cannot flip to Changed', async () => {
+  it('hands back the stored value untouched when a read says nothing new, so it cannot flip to Changed', async () => {
+    const recorded = { id: 'rjob_1', workflow: 'summarize', status: 'processing' } as const;
+    const stored = value({ version: 4, robotsJobs: [recorded] });
+    const results: unknown[] = [];
     const updateField = vi.fn(async (mutate: any) => {
-      // The mutator must hand back the identical object when the API reports nothing terminal.
-      const current = value();
-      expect(mutate(current)).toBe(current);
+      results.push(mutate(stored));
     });
 
-    renderPanel({
-      muxApi: apiThatReturns([{ id: 'rjob_1', workflow: 'summarize', status: 'processing' }]),
-      updateField,
-    });
+    renderPanel({ muxApi: apiThatReturns([{ ...recorded }]), value: stored, updateField });
 
-    await waitFor(() => expect(updateField).toHaveBeenCalled());
+    await waitFor(() => expect(results.length).toBeGreaterThan(0));
+    for (const result of results) expect(result).toBe(stored);
   });
 
   it('resyncs the asset once when a track-producing workflow finishes', async () => {
@@ -434,111 +507,712 @@ describe('RobotsPanel field writes', () => {
   });
 });
 
-describe('RobotsPanel unconfirmed creates', () => {
+describe('RobotsPanel — a job create is guarded by a placeholder on the entry', () => {
   beforeEach(() => {
     resetRobotsCapabilityCache();
     vi.clearAllMocks();
   });
 
-  it('keeps Run blocked after a create Mux never confirmed, and offers an informed way out', async () => {
-    // The cold-start case: the app action lost its caller, so we do not know whether the job
-    // started. It may be running and billing.
-    const muxApi = {
-      ...apiThatReturns([]),
-      createRobotsJob: vi.fn(async () => {
-        throw new Error('The app action response is taking longer than expected to process.');
-      }),
-    };
+  const createdJob = () => ({
+    id: 'rjob_new',
+    workflow: 'summarize',
+    status: 'pending',
+    created_at: Math.floor(Date.now() / 1000),
+  });
 
-    renderPanel({ muxApi });
+  it('saves the placeholder before anything is sent to Mux', async () => {
+    let release: () => void = () => undefined;
+    const createRobotsJob = vi.fn(async () => ({ data: createdJob() }));
+    const store = renderWithStore(value(), {
+      muxApi: { ...apiThatReturns([]), createRobotsJob },
+      land: (write: PanelWrite, apply: () => void) =>
+        write.options?.save && !store.read()?.robotsPendingCreates
+          ? new Promise<void>((resolve) => {
+              release = () => {
+                apply();
+                resolve();
+              };
+            })
+          : apply(),
+    });
+
+    await runSummarize();
+    await waitFor(() => expect(store.savedWrites()).toHaveLength(1));
+    // Saved at once; dropped rather than flushed if the editor closes before it lands; and it
+    // says when it is waiting behind a publish.
+    expect(store.savedWrites()[0].options).toEqual({
+      save: true,
+      flushOnUnmount: false,
+      onParked: expect.any(Function),
+    });
+    expect(store.savedWrites()[0].mutate(value())?.robotsPendingCreates).toEqual([
+      expect.objectContaining({ kind: 'job', workflow: 'summarize' }),
+    ]);
+    // Held: nothing has been sent.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(createRobotsJob).not.toHaveBeenCalled();
+
+    await act(async () => release());
+    await waitFor(() => expect(createRobotsJob).toHaveBeenCalledTimes(1));
+  });
+
+  it('sends nothing, and says so, when the placeholder cannot be saved', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const createRobotsJob = vi.fn(async () => ({ data: createdJob() }));
+    renderWithStore(value(), {
+      muxApi: { ...apiThatReturns([]), createRobotsJob },
+      land: (write: PanelWrite, apply: () => void) => {
+        if (write.options?.save) throw new Error('This entry is archived.');
+        apply();
+      },
+    });
+
+    await runSummarize();
+    await waitFor(() =>
+      expect(sdk.notifier.error).toHaveBeenCalledWith(
+        'Could not record this run on the entry, so it was not started.'
+      )
+    );
+    expect(createRobotsJob).not.toHaveBeenCalled();
+    consoleError.mockRestore();
+  });
+
+  it('replaces the placeholder with the job record in one saved write', async () => {
+    const store = renderWithStore(value(), {
+      muxApi: {
+        ...apiThatReturns([]),
+        createRobotsJob: vi.fn(async () => ({ data: createdJob() })),
+      },
+    });
+
+    await runSummarize();
+    await waitFor(() =>
+      expect(store.read()?.robotsJobs?.map(({ id }) => id)).toEqual(['rjob_new'])
+    );
+    expect(store.read()?.robotsPendingCreates).toBeUndefined();
+    expect(store.read()?.version).toBe(4);
+
+    // The second saved write is the resolution: on its own it turns the placeholder into the job.
+    const [placeholder, resolution] = store.savedWrites();
+    const withPlaceholder = placeholder.mutate(value());
+    const resolved = resolution.mutate(withPlaceholder);
+    expect(resolved?.robotsPendingCreates).toBeUndefined();
+    expect(resolved?.robotsJobs?.map(({ id }) => id)).toEqual(['rjob_new']);
+    expect(resolution.options).toEqual({ save: true });
+  });
+
+  it('removes the placeholder when Mux refuses the run, and says why', async () => {
+    const store = renderWithStore(value(), {
+      muxApi: {
+        ...apiThatReturns([]),
+        createRobotsJob: vi.fn(async () => {
+          throw new MuxApiError('The tone parameter is not valid.', 400);
+        }),
+      },
+    });
+
+    await runSummarize();
+    await waitFor(() =>
+      expect(sdk.notifier.error).toHaveBeenCalledWith('The tone parameter is not valid.')
+    );
+    await waitFor(() => expect(store.savedWrites()).toHaveLength(2));
+    expect(store.savedWrites()[1].options).toEqual({ save: true });
+    expect(store.read()?.robotsPendingCreates).toBeUndefined();
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'Run a workflow' })).toBeEnabled()
     );
+  });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Run a workflow' }));
-    fireEvent.click(await screen.findByRole('button', { name: 'Continue' }));
-    fireEvent.click(await screen.findByRole('button', { name: 'Run Summarize' }));
+  it('reads a 409 as an identical run already going, removes the placeholder and re-reads', async () => {
+    const muxApi = {
+      ...apiThatReturns([]),
+      createRobotsJob: vi.fn(async () => {
+        throw new MuxApiError(
+          'A job with the same workflow and parameters is already pending or processing.',
+          409
+        );
+      }),
+    };
+    const store = renderWithStore(value(), { muxApi });
 
-    await waitFor(
-      () => expect(screen.getByText(/Mux never confirmed it/)).toBeInTheDocument(),
-      // Reconciliation retries the job list a few times before giving up, which is real time.
-      { timeout: 15000 }
+    await runSummarize();
+    const readsBefore = muxApi.listRobotsJobs.mock.calls.length;
+    await waitFor(() =>
+      expect(sdk.notifier.warning).toHaveBeenCalledWith(
+        'This workflow is already running on this video with the same settings.'
+      )
     );
+    await waitFor(() => expect(store.read()?.robotsPendingCreates).toBeUndefined());
+    await waitFor(() =>
+      expect(muxApi.listRobotsJobs.mock.calls.length).toBeGreaterThan(readsBefore)
+    );
+    expect(sdk.notifier.error).not.toHaveBeenCalled();
+  });
+
+  it('keeps the placeholder when the outcome is unknown, and offers an informed way out', async () => {
+    const store = renderWithStore(value(), {
+      muxApi: {
+        ...apiThatReturns([]),
+        createRobotsJob: vi.fn(async () => {
+          throw new Error('The app action response is taking longer than expected to process.');
+        }),
+      },
+    });
+
+    await runSummarize();
+    expect(await screen.findByTestId('robots-job-unconfirmed')).toHaveTextContent(
+      /Mux has not confirmed the Summarize run requested at .+\. It may already be running and billing, so nothing was retried\./
+    );
+    expect(sdk.notifier.warning).toHaveBeenCalledWith(
+      'Mux has not answered about the Summarize run yet. The Robots tab keeps checking.'
+    );
+    expect(pendingCreatesIn(store.read())).toHaveLength(1);
     expect(screen.getByRole('button', { name: 'Run a workflow' })).toBeDisabled();
 
-    // Nothing re-enables Run on its own — not a timer, not a refresh that fails to find the job.
-    // Only the editor saying so.
+    // Only the editor clears it, and the clearing is saved.
+    const writesBefore = store.writes.length;
     fireEvent.click(screen.getByRole('button', { name: 'Nothing is running — let me try again' }));
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'Run a workflow' })).toBeEnabled()
     );
-  }, 20000);
+    expect(store.read()?.robotsPendingCreates).toBeUndefined();
+    expect(store.writes.slice(writesBefore).map(({ options }) => options)).toEqual([
+      { save: true },
+    ]);
+  });
 
-  it('clears the guard by finding the job, not only by the button that duplicates it', async () => {
-    // ADR-0003 always said the passthrough would be "re-checked on every subsequent refresh". It
-    // never was: the refresh path tested `fetched.some((job) => job.passthrough === pending)`
-    // against a list that carries no passthrough, so the predicate could not be true. Run stayed
-    // disabled for the whole session even after the job was listed and completed, and the only
-    // way out was "Nothing is running — let me try again" — the one button that creates a
-    // duplicate. The guard against double-billing could only be dismissed by double-billing.
-    const nowSeconds = Math.floor(Date.now() / 1000);
-    let stamped = '';
-    let listed: unknown[] = [];
-
-    const muxApi = {
-      listRobotsJobs: vi.fn(async () => ({ data: listed.map((row) => ({ ...(row as object) })) })),
-      getRobotsJob: vi.fn(async (_workflow: string, id: string) => ({
-        data: {
-          id,
-          workflow: 'summarize',
-          status: 'completed',
-          created_at: nowSeconds,
-          // The single-job GET is the only place a passthrough exists, which is why resolving
-          // this costs more than reading the list.
-          passthrough: stamped,
-        },
-      })),
-      listRobotsDirectives: vi.fn(async () => ({ data: [] })),
-      listRobotsDirectiveRuns: vi.fn(async () => ({ data: [] })),
-      createRobotsJob: vi.fn(async (_workflow: string, _params: unknown, passthrough: string) => {
-        stamped = passthrough;
-        throw new Error('The app action response is taking longer than expected to process.');
-      }),
-    };
-
-    let stored: any = value();
-    const updateField = vi.fn(async (mutate: (current: any) => any) => {
-      stored = mutate(stored);
+  it('shows no warning while its own create is still on its way', async () => {
+    const store = renderWithStore(value(), {
+      muxApi: {
+        ...apiThatReturns([]),
+        createRobotsJob: vi.fn(() => new Promise(() => undefined)),
+      },
     });
 
-    renderPanel({ muxApi, updateField });
+    await runSummarize();
+    await waitFor(() => expect(pendingCreatesIn(store.read())).toHaveLength(1));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(screen.queryByTestId('robots-job-unconfirmed')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Run a workflow' })).toBeDisabled();
+  });
+
+  it('blocks Run on first paint for an entry that already holds a placeholder', () => {
+    recordRobotsCapability({ state: 'enabled' });
+    renderWithStore(value({ version: 4, robotsPendingCreates: [pendingJob()] }), {
+      muxApi: apiThatReturns([]),
+    });
+    expect(screen.getByRole('button', { name: 'Run a workflow' })).toBeDisabled();
+  });
+
+  it('reads the list for a fresh placeholder without the tab being open', async () => {
+    const muxApi = apiThatReturns([]);
+    renderWithStore(value({ version: 4, robotsPendingCreates: [pendingJob()] }), {
+      muxApi,
+      isActive: false,
+    });
+    await waitFor(() => expect(muxApi.listRobotsJobs).toHaveBeenCalled());
+  });
+
+  it('does not resume for a placeholder older than six hours, and still blocks Run', async () => {
+    const muxApi = apiThatReturns([]);
+    const store = renderWithStore(
+      value({
+        version: 4,
+        robotsPendingCreates: [
+          pendingJob({ requestedAt: Math.floor(Date.now() / 1000) - 7 * 60 * 60 }),
+        ],
+      }),
+      { muxApi, isActive: false }
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(muxApi.listRobotsJobs).not.toHaveBeenCalled();
+
+    store.activate();
+    await waitFor(() => expect(muxApi.listRobotsJobs).toHaveBeenCalled());
+    expect(await screen.findByRole('button', { name: 'Run a workflow' })).toBeDisabled();
+  });
+
+  it("blocks Run as soon as another tab's placeholder arrives", async () => {
+    const store = renderWithStore(value(), { muxApi: apiThatReturns([]) });
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'Run a workflow' })).toBeEnabled()
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Run a workflow' }));
-    fireEvent.click(await screen.findByRole('button', { name: 'Continue' }));
-    fireEvent.click(await screen.findByRole('button', { name: 'Run Summarize' }));
-
-    await waitFor(() => expect(screen.getByText(/Mux never confirmed it/)).toBeInTheDocument(), {
-      timeout: 15000,
-    });
+    store.replace(value({ version: 4, robotsPendingCreates: [pendingJob()] }));
     expect(screen.getByRole('button', { name: 'Run a workflow' })).toBeDisabled();
+  });
+
+  it('resolves the placeholder from a list read that shows the job, and gives Run back', async () => {
+    const requestedAt = Math.floor(Date.now() / 1000) - 60;
+    let listed: unknown[] = [];
+    const muxApi = {
+      ...apiThatReturns([]),
+      listRobotsJobs: vi.fn(async () => ({ data: listed.map((row) => ({ ...(row as object) })) })),
+    };
+    const store = renderWithStore(
+      value({ version: 4, robotsPendingCreates: [pendingJob({ requestedAt })] }),
+      { muxApi }
+    );
+    expect(await screen.findByTestId('robots-job-unconfirmed')).toBeInTheDocument();
 
     // It was running the whole time, and now it is in the list.
     listed = [
-      { id: 'rjob_found', workflow: 'summarize', status: 'completed', created_at: nowSeconds },
+      {
+        id: 'rjob_found',
+        workflow: 'summarize',
+        status: 'processing',
+        created_at: requestedAt + 4,
+      },
     ];
     fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
 
-    await waitFor(
-      () => expect(screen.getByRole('button', { name: 'Run a workflow' })).toBeEnabled(),
-      { timeout: 10000 }
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Run a workflow' })).toBeEnabled()
     );
-    // Adopted, not merely forgotten: the job it found is on the entry.
-    expect(stored?.robotsJobs?.map((record: any) => record.id)).toEqual(['rjob_found']);
-  }, 30000);
+    expect(store.read()?.robotsPendingCreates).toBeUndefined();
+    expect(store.read()?.robotsJobs?.map(({ id }) => id)).toEqual(['rjob_found']);
+  });
 });
+
+/**
+ * What the editor sees while a run starts: a row in the table where the job will appear, from the
+ * click until the job or run replaces it, in every tab and after a reload. See ADR-0003.
+ */
+describe('RobotsPanel — what the editor sees while a run starts', () => {
+  beforeEach(() => {
+    resetRobotsCapabilityCache();
+    vi.clearAllMocks();
+  });
+
+  const nowSeconds = () => Math.floor(Date.now() / 1000);
+  const createdJob = () => ({
+    id: 'rjob_new',
+    workflow: 'summarize',
+    status: 'pending',
+    created_at: nowSeconds(),
+  });
+  const pendingCells = () => screen.queryAllByTestId(/^robots-pending-/);
+  const jobTable = () => screen.getByTestId('robots_job_table');
+  const isPlaceholderSave = (write: PanelWrite) => write.options?.flushOnUnmount === false;
+  const runButton = () => screen.getByRole('button', { name: 'Run a workflow' });
+
+  /** Holds the placeholder save the way the publish gate does: parked, told so, applied later. */
+  const parkPlaceholder = () => {
+    const held: { release: () => void; write?: PanelWrite; reject: (error: Error) => void } = {
+      release: () => undefined,
+      reject: () => undefined,
+    };
+    const land = (write: PanelWrite, apply: () => void) => {
+      if (!isPlaceholderSave(write)) return apply();
+      held.write = write;
+      write.options?.onParked?.();
+      return new Promise<void>((resolve, reject) => {
+        held.release = () => {
+          apply();
+          resolve();
+        };
+        held.reject = reject;
+      });
+    };
+    return { held, land };
+  };
+
+  it('shows Starting… at once, while the placeholder is still being saved, with the modal closed', async () => {
+    // The save never lands.
+    const land = (write: PanelWrite, apply: () => void) =>
+      isPlaceholderSave(write) ? new Promise<void>(() => undefined) : apply();
+    renderWithStore(value(), { muxApi: { ...apiThatReturns([]), createRobotsJob: vi.fn() }, land });
+
+    await runSummarize();
+
+    expect(within(jobTable()).getByText('Starting…')).toBeInTheDocument();
+    expect(pendingCells()[0]).toHaveTextContent('Waiting for Mux');
+    expect(screen.queryByRole('button', { name: 'Run Summarize' })).not.toBeInTheDocument();
+    expect(runButton()).toBeDisabled();
+    expect(runButton()).toHaveAttribute('title', 'A run is starting on this video.');
+  });
+
+  it('starts one run for two confirms in one frame', async () => {
+    const createRobotsJob = vi.fn(async () => ({ data: createdJob() }));
+    const store = renderWithStore(value(), {
+      muxApi: { ...apiThatReturns([]), createRobotsJob },
+    });
+    await waitFor(() => expect(runButton()).toBeEnabled());
+    fireEvent.click(runButton());
+    fireEvent.click(await screen.findByRole('button', { name: 'Continue' }));
+    const confirm = await screen.findByRole('button', { name: 'Run Summarize' });
+    fireEvent.click(confirm);
+    fireEvent.click(confirm);
+
+    await waitFor(() => expect(store.read()?.robotsJobs).toHaveLength(1));
+    expect(createRobotsJob).toHaveBeenCalledTimes(1);
+    expect(store.writes.filter(isPlaceholderSave)).toHaveLength(1);
+  });
+
+  it('says it waits for the publish, and sends nothing, while the placeholder is parked', async () => {
+    const { land } = parkPlaceholder();
+    const createRobotsJob = vi.fn();
+    renderWithStore(value(), { muxApi: { ...apiThatReturns([]), createRobotsJob }, land });
+
+    await runSummarize();
+
+    expect(await within(jobTable()).findByText('Waiting for publish')).toBeInTheDocument();
+    expect(pendingCells()[0]).toHaveTextContent('Starts after the publish finishes');
+    expect(screen.getByRole('button', { name: 'Don’t start' })).toBeInTheDocument();
+    expect(runButton()).toBeDisabled();
+    expect(screen.queryByTestId('robots-job-unconfirmed')).not.toBeInTheDocument();
+    expect(sdk.notifier.warning).not.toHaveBeenCalled();
+    expect(sdk.notifier.success).not.toHaveBeenCalled();
+    expect(createRobotsJob).not.toHaveBeenCalled();
+  });
+
+  it('sends nothing and writes nothing for a create withdrawn while parked', async () => {
+    const { held, land } = parkPlaceholder();
+    const createRobotsJob = vi.fn();
+    const store = renderWithStore(value(), {
+      muxApi: { ...apiThatReturns([]), createRobotsJob },
+      land,
+    });
+    await runSummarize();
+    fireEvent.click(await screen.findByRole('button', { name: 'Don’t start' }));
+
+    expect(pendingCells()).toHaveLength(0);
+    expect(runButton()).toBeEnabled();
+
+    // The publish lands later and releases the write: its mutator now changes nothing.
+    const before = store.read();
+    expect(held.write?.mutate(before)).toBe(before);
+    await act(async () => held.release());
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(createRobotsJob).not.toHaveBeenCalled();
+    expect(store.read()?.robotsPendingCreates).toBeUndefined();
+    expect(sdk.notifier.error).not.toHaveBeenCalled();
+  });
+
+  it('lets the editor start again straight after withdrawing, while the gate still holds', async () => {
+    const { land } = parkPlaceholder();
+    const store = renderWithStore(value(), {
+      muxApi: { ...apiThatReturns([]), createRobotsJob: vi.fn() },
+      land,
+    });
+    await runSummarize();
+    fireEvent.click(await screen.findByRole('button', { name: 'Don’t start' }));
+
+    await runSummarize();
+    await waitFor(() => expect(store.writes.filter(isPlaceholderSave)).toHaveLength(2));
+    expect(await within(jobTable()).findByText('Waiting for publish')).toBeInTheDocument();
+  });
+
+  it('sends nothing, and says why, when the editor closes before the parked save lands', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const { held, land } = parkPlaceholder();
+    const createRobotsJob = vi.fn();
+    renderWithStore(value(), { muxApi: { ...apiThatReturns([]), createRobotsJob }, land });
+    await runSummarize();
+    await within(jobTable()).findByText('Waiting for publish');
+
+    // What `updateField` does to a `flushOnUnmount: false` write at unmount.
+    await act(async () =>
+      held.reject(
+        Object.assign(new Error('The editor closed before this write could be made.'), {
+          name: 'DiscardedFieldWriteError',
+        })
+      )
+    );
+
+    await waitFor(() =>
+      expect(sdk.notifier.error).toHaveBeenCalledWith(
+        'Could not record this run on the entry, so it was not started.'
+      )
+    );
+    expect(createRobotsJob).not.toHaveBeenCalled();
+    expect(pendingCells()).toHaveLength(0);
+    consoleError.mockRestore();
+  });
+
+  it('turns the row into the job from the 202, before the resolution write lands', async () => {
+    let releaseResolution: () => void = () => undefined;
+    const store = renderWithStore(value(), {
+      muxApi: {
+        ...apiThatReturns([]),
+        createRobotsJob: vi.fn(async () => ({ data: createdJob() })),
+      },
+      land: (write: PanelWrite, apply: () => void) => {
+        const isResolution =
+          write.options?.save && !isPlaceholderSave(write) && !!store.read()?.robotsPendingCreates;
+        if (!isResolution) return apply();
+        return new Promise<void>((resolve) => {
+          releaseResolution = () => {
+            apply();
+            resolve();
+          };
+        });
+      },
+    });
+
+    await runSummarize();
+    await waitFor(() => expect(within(jobTable()).getByText('pending')).toBeInTheDocument());
+    expect(pendingCells()).toHaveLength(0);
+
+    await act(async () => releaseResolution());
+    expect(jobTable().querySelectorAll('tbody tr')).toHaveLength(1);
+    expect(store.read()?.robotsPendingCreates).toBeUndefined();
+  });
+
+  it('explains an unknown outcome once, in the note, and only points at it from the row', async () => {
+    renderWithStore(value(), {
+      muxApi: {
+        ...apiThatReturns([]),
+        createRobotsJob: vi.fn(async () => {
+          throw new Error('The app action response is taking longer than expected to process.');
+        }),
+      },
+    });
+
+    await runSummarize();
+
+    const note = await screen.findByTestId('robots-job-unconfirmed');
+    const row = within(jobTable()).getByText('Not confirmed').closest('tr') as HTMLElement;
+    expect(pendingCells()[0]).toHaveTextContent('See the note above');
+    expect(screen.getAllByTestId('robots-job-unconfirmed')).toHaveLength(1);
+    expect(within(note).getByRole('button', { name: /Nothing is running/ })).toBeInTheDocument();
+    expect(row).not.toHaveTextContent(/billing|retried|refuses/);
+    expect(sdk.notifier.warning).toHaveBeenCalledWith(
+      'Mux has not answered about the Summarize run yet. The Robots tab keeps checking.'
+    );
+    expect(runButton()).toHaveAttribute(
+      'title',
+      'Mux has not confirmed the last run. See the note above the jobs.'
+    );
+  });
+
+  it('replaces the Not confirmed row with the job, and the note goes with it', async () => {
+    let listed: unknown[] = [];
+    const muxApi = {
+      ...apiThatReturns([]),
+      listRobotsJobs: vi.fn(async () => ({ data: listed.map((row) => ({ ...(row as object) })) })),
+      createRobotsJob: vi.fn(async () => {
+        throw new Error('The app action response is taking longer than expected to process.');
+      }),
+    };
+    renderWithStore(value(), { muxApi });
+    await runSummarize();
+    await screen.findByTestId('robots-job-unconfirmed');
+
+    listed = [createdJob()];
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+
+    await waitFor(() => expect(within(jobTable()).getByText('pending')).toBeInTheDocument());
+    expect(pendingCells()).toHaveLength(0);
+    expect(screen.queryByTestId('robots-job-unconfirmed')).not.toBeInTheDocument();
+    expect(runButton()).toBeEnabled();
+  });
+
+  it("shows another tab's create as Starting…, then as Not confirmed without a list read", async () => {
+    vi.useFakeTimers();
+    try {
+      // The first read answers; every later one hangs, so no read can be what relabels the row.
+      const listRobotsJobs = vi
+        .fn()
+        .mockImplementationOnce(async () => ({ data: [] }))
+        .mockImplementation(() => new Promise(() => undefined));
+      const store = renderWithStore(value(), { muxApi: { ...apiThatReturns([]), listRobotsJobs } });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(50);
+      });
+
+      store.replace(
+        value({
+          version: 4,
+          robotsPendingCreates: [pendingJob({ requestedAt: nowSeconds() - 10 })],
+        })
+      );
+      expect(within(jobTable()).getByText('Starting…')).toBeInTheDocument();
+      expect(screen.queryByTestId('robots-job-unconfirmed')).not.toBeInTheDocument();
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(34_000);
+      });
+      expect(within(jobTable()).getByText('Starting…')).toBeInTheDocument();
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(2_000);
+      });
+      expect(within(jobTable()).getByText('Not confirmed')).toBeInTheDocument();
+      expect(screen.getByTestId('robots-job-unconfirmed')).toBeInTheDocument();
+      expect(listRobotsJobs.mock.calls.length).toBeLessThanOrEqual(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('shows a placeholder saved minutes ago as Not confirmed once the tab has loaded', async () => {
+    renderWithStore(
+      value({
+        version: 4,
+        robotsPendingCreates: [pendingJob({ requestedAt: nowSeconds() - 300 })],
+      }),
+      { muxApi: apiThatReturns([]) }
+    );
+    expect(
+      await within(await screen.findByTestId('robots_job_table')).findByText('Not confirmed')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('robots-job-unconfirmed')).toBeInTheDocument();
+  });
+
+  it('shows someone who cannot run Robots the row, and nothing to act on', async () => {
+    renderWithStore(
+      value({
+        version: 4,
+        robotsPendingCreates: [pendingJob({ requestedAt: nowSeconds() - 300 })],
+      }),
+      { muxApi: apiThatReturns([]), canRunRobots: false }
+    );
+    expect(
+      await within(await screen.findByTestId('robots_job_table')).findByText('Not confirmed')
+    ).toBeInTheDocument();
+    expect(pendingCells()[0]).toHaveTextContent('Waiting for Mux');
+    expect(screen.queryByTestId('robots-job-unconfirmed')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Don’t start' })).not.toBeInTheDocument();
+  });
+
+  it('drops the row and gives Run back at once on a refusal, even while its removal waits', async () => {
+    const store = renderWithStore(value(), {
+      muxApi: {
+        ...apiThatReturns([]),
+        createRobotsJob: vi.fn(async () => {
+          throw new MuxApiError('The tone parameter is not valid.', 400);
+        }),
+      },
+      // Anything saved after the placeholder is the removal, and it is held.
+      land: (write: PanelWrite, apply: () => void) =>
+        write.options?.save && !isPlaceholderSave(write) ? new Promise(() => undefined) : apply(),
+    });
+
+    await runSummarize();
+    await waitFor(() => expect(sdk.notifier.error).toHaveBeenCalled());
+    expect(pendingCreatesIn(store.read())).toHaveLength(1);
+    expect(pendingCells()).toHaveLength(0);
+    expect(runButton()).toBeEnabled();
+  });
+
+  it('clears exactly the placeholders the note names', async () => {
+    const unconfirmed = pendingJob({ requestId: 'req_old', requestedAt: nowSeconds() - 300 });
+    const starting = pendingJob({ requestId: 'req_fresh', requestedAt: nowSeconds() });
+    const store = renderWithStore(
+      value({ version: 4, robotsPendingCreates: [unconfirmed, starting] }),
+      { muxApi: apiThatReturns([]) }
+    );
+
+    const note = await screen.findByTestId('robots-job-unconfirmed');
+    fireEvent.click(within(note).getByRole('button', { name: /Nothing is running/ }));
+
+    await waitFor(() =>
+      expect(pendingCreatesIn(store.read()).map(({ requestId }) => requestId)).toEqual([
+        'req_fresh',
+      ])
+    );
+    expect(within(jobTable()).getByText('Starting…')).toBeInTheDocument();
+    expect(within(jobTable()).queryByText('Not confirmed')).not.toBeInTheDocument();
+    expect(runButton()).toBeDisabled();
+  });
+
+  it('still shows a pending row when the job list cannot be read', async () => {
+    renderWithStore(value({ version: 4, robotsPendingCreates: [pendingJob()] }), {
+      muxApi: apiThatFailsWith(new Error('502 from the app-action bridge')),
+    });
+    expect(await screen.findByText('502 from the app-action bridge')).toBeInTheDocument();
+    expect(within(jobTable()).getByText('Starting…')).toBeInTheDocument();
+  });
+
+  describe('directive runs', () => {
+    const directiveApi = (overrides: Record<string, any> = {}) => ({
+      ...apiThatReturns([]),
+      listRobotsDirectives: vi.fn(async () => ({ data: [{ id: 'drv_1', name: 'Ingest' }] })),
+      listRobotsDirectiveRuns: vi.fn(async () => ({ data: [] })),
+      createRobotsDirectiveRun: vi.fn(async () => ({
+        data: {
+          run_id: 'drvrun_1',
+          subject_id: 'asset-1',
+          status: 'pending',
+          started_at: nowSeconds(),
+        },
+      })),
+      ...overrides,
+    });
+    const runsTable = () => screen.getByTestId('robots_directive_run_table');
+    const runDirective = async () => {
+      await waitFor(() => expect(screen.getByRole('combobox')).toBeInTheDocument());
+      fireEvent.change(screen.getByRole('combobox'), { target: { value: 'drv_1' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Run directive' }));
+    };
+
+    it('shows the row while parked, and a withdrawn run is never asked for', async () => {
+      const { held, land } = parkPlaceholder();
+      const muxApi = directiveApi();
+      renderWithStore(value(), { muxApi, defaultDirectiveIds: ['drv_1'], land });
+      await runDirective();
+
+      expect(await within(runsTable()).findByText('Waiting for publish')).toBeInTheDocument();
+      expect(within(runsTable()).getByText('Ingest')).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: 'Don’t start' }));
+      expect(pendingCells()).toHaveLength(0);
+
+      await act(async () => held.release());
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(muxApi.createRobotsDirectiveRun).not.toHaveBeenCalled();
+    });
+
+    it('turns the row into the run from the 202', async () => {
+      const store = renderWithStore(value(), {
+        muxApi: directiveApi(),
+        defaultDirectiveIds: ['drv_1'],
+      });
+      await runDirective();
+
+      await waitFor(() => expect(within(runsTable()).getByText('pending')).toBeInTheDocument());
+      expect(pendingCells()).toHaveLength(0);
+      await waitFor(() => expect(store.read()?.robotsDirectiveRuns).toHaveLength(1));
+      expect(store.read()?.robotsPendingCreates).toBeUndefined();
+    });
+
+    it('explains an unknown outcome in its note, and turns the row into the run once listed', async () => {
+      let listed: unknown[] = [];
+      const muxApi = directiveApi({
+        listRobotsDirectiveRuns: vi.fn(async () => ({ data: listed })),
+        createRobotsDirectiveRun: vi.fn(async () => {
+          throw new Error('The app action response is taking longer than expected to process.');
+        }),
+      });
+      renderWithStore(value(), { muxApi, defaultDirectiveIds: ['drv_1'] });
+      await runDirective();
+
+      const note = await screen.findByTestId('robots-directive-run-unconfirmed');
+      expect(note).toHaveTextContent(/Mux has not confirmed the run of Ingest requested at/);
+      expect(within(runsTable()).getByText('Not confirmed')).toBeInTheDocument();
+      expect(pendingCells()[0]).toHaveTextContent('See the note above');
+
+      listed = [
+        {
+          run_id: 'drvrun_late',
+          subject_id: 'asset-1',
+          status: 'running',
+          started_at: nowSeconds(),
+          node_states: [],
+        },
+      ];
+      fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+      await waitFor(() => expect(within(runsTable()).getByText('running')).toBeInTheDocument());
+      expect(pendingCells()).toHaveLength(0);
+      expect(screen.queryByTestId('robots-directive-run-unconfirmed')).not.toBeInTheDocument();
+    });
+  });
+});
+
+/** The placeholders stored on a value, however the test got it. */
+const pendingCreatesIn = (stored: MuxContentfulObject | undefined) =>
+  stored?.robotsPendingCreates ?? [];
 
 describe('RobotsErrorBoundary', () => {
   it('keeps a fault in the Robots tab from unmounting the field editor', () => {
@@ -582,7 +1256,7 @@ describe('RobotsPanel persistence', () => {
     return { updateField, read: () => stored };
   };
 
-  /** What the API really returns from `GET /robots/v0/jobs`: no passthrough, no outputs. */
+  /** What the API really returns from `GET /robots/v0/jobs`: no parameters, no outputs. */
   const summaryRow = (overrides: Record<string, unknown> = {}) => ({
     id: 'rjob_1',
     workflow: 'ask-questions',
@@ -593,7 +1267,7 @@ describe('RobotsPanel persistence', () => {
 
   it('records a job the editor starts here, immediately', async () => {
     const { updateField, read } = withStoredValue(value());
-    const created = { ...summaryRow({ status: 'pending' }), passthrough: 'contentful@x|req-1' };
+    const created = summaryRow({ status: 'pending' });
 
     renderPanel({
       muxApi: {
@@ -612,11 +1286,12 @@ describe('RobotsPanel persistence', () => {
 
     await waitFor(() => expect(read()?.robotsJobs).toHaveLength(1));
     expect(read()?.robotsJobs?.[0]).toMatchObject({ id: 'rjob_1', status: 'pending' });
+    expect(read()?.robotsPendingCreates).toBeUndefined();
     // v4 is asserted only because the value now genuinely holds v4 data.
     expect(read()?.version).toBe(4);
   });
 
-  it('updates a recorded job from a later summary that omits the passthrough', async () => {
+  it('updates a recorded job from a later summary, thin as it is', async () => {
     const { updateField, read } = withStoredValue(
       value({
         robotsJobs: [{ id: 'rjob_1', workflow: 'ask-questions', status: 'processing' }],
@@ -628,40 +1303,23 @@ describe('RobotsPanel persistence', () => {
     await waitFor(() => expect(read()?.robotsJobs?.[0].status).toBe('completed'));
   });
 
-  it('does not record a job someone ran in the Mux dashboard', async () => {
+  it('records a job someone ran in the Mux dashboard', async () => {
     const { updateField, read } = withStoredValue(value());
 
     renderPanel({ muxApi: apiThatReturns([summaryRow({ id: 'rjob_theirs' })]), updateField });
 
-    await waitFor(() => expect(screen.getByTestId('robots_job_table')).toBeInTheDocument());
-    // Shown in the table, absent from the entry.
-    expect(read()?.robotsJobs).toBeUndefined();
+    await waitFor(() => expect(read()?.robotsJobs?.map(({ id }) => id)).toEqual(['rjob_theirs']));
   });
 
-  it('claims a directive-dispatched job once its run is known, whatever the order', async () => {
+  it('records a directive-dispatched job with no run listed', async () => {
     const { updateField, read } = withStoredValue(value());
 
     renderPanel({
-      muxApi: {
-        listRobotsJobs: vi.fn(async () => ({ data: [summaryRow({ id: 'rjob_auto' })] })),
-        listRobotsDirectives: vi.fn(async () => ({ data: [{ id: 'drv_1', name: 'Ingest' }] })),
-        listRobotsDirectiveRuns: vi.fn(async () => ({
-          data: [
-            {
-              run_id: 'drvrun_1',
-              subject_id: 'asset-1',
-              status: 'completed',
-              node_states: [{ job_id: 'rjob_auto', workflow_name: 'ask-questions' }],
-            },
-          ],
-        })),
-      },
+      muxApi: apiThatReturns([summaryRow({ id: 'rjob_auto' })]),
       defaultDirectiveIds: ['drv_1'],
       updateField,
     });
 
-    // Persistence is its own effect keyed on both lists, so it re-runs when the runs arrive —
-    // whichever of the two fetches lands first.
     await waitFor(() => expect(read()?.robotsJobs).toHaveLength(1));
     expect(read()?.robotsJobs?.[0].id).toBe('rjob_auto');
   });
@@ -670,9 +1328,11 @@ describe('RobotsPanel persistence', () => {
     const original = value();
     const { updateField, read } = withStoredValue(original);
 
-    renderPanel({ muxApi: apiThatReturns([summaryRow({ id: 'rjob_theirs' })]), updateField });
+    renderPanel({ muxApi: apiThatReturns([]), updateField });
 
-    await waitFor(() => expect(screen.getByTestId('robots_job_table')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText('No Robots jobs have run on this video yet.')).toBeInTheDocument()
+    );
     expect(read()).toBe(original);
   });
 });
@@ -687,33 +1347,28 @@ describe('RobotsPanel — a started job is never reported as failed', () => {
     // The job is running and billing. A failed write is our problem, not something to tell the
     // editor a run failed over — they would pay for it twice.
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    const created = {
-      id: 'rjob_1',
-      workflow: 'summarize',
-      status: 'pending',
-      passthrough: 'contentful@x|req-1',
-    };
-
-    renderPanel({
+    let saves = 0;
+    renderWithStore(value(), {
       muxApi: {
         ...apiThatReturns([]),
-        createRobotsJob: vi.fn(async () => ({ data: created })),
+        createRobotsJob: vi.fn(async () => ({
+          data: { id: 'rjob_1', workflow: 'summarize', status: 'pending' },
+        })),
       },
-      updateField: vi.fn(async () => {
-        throw new Error('version conflict');
-      }),
+      // The placeholder lands; the resolution write after the 202 does not.
+      land: (write: PanelWrite, apply: () => void) => {
+        if (write.options?.save && (saves += 1) === 2) throw new Error('version conflict');
+        apply();
+      },
     });
 
-    await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Run a workflow' })).toBeEnabled()
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Run a workflow' }));
-    fireEvent.click(await screen.findByRole('button', { name: 'Continue' }));
-    fireEvent.click(await screen.findByRole('button', { name: 'Run Summarize' }));
+    await runSummarize();
 
     await waitFor(() => expect(sdk.notifier.success).toHaveBeenCalled());
     expect(sdk.notifier.error).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: 'Run a workflow' })).toBeEnabled();
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Run a workflow' })).toBeEnabled()
+    );
     consoleError.mockRestore();
   });
 });
@@ -729,7 +1384,6 @@ describe('RobotsPanel — the fields the list leaves out', () => {
     const updateField = vi.fn(async (mutate: (current: any) => any) => {
       stored = mutate(stored);
     });
-    // `value` is also the prop the panel reads ownership from, so it has to be handed over too.
     return { updateField, value: initial, read: () => stored };
   };
 
@@ -752,7 +1406,6 @@ describe('RobotsPanel — the fields the list leaves out', () => {
         rjob_sum: {
           ...summary(),
           units_consumed: 4,
-          passthrough: 'contentful@x|req-1',
           parameters: { asset_id: 'asset-1' },
           outputs: { title: 'A generated title', tags: ['alpha'] },
         },
@@ -791,27 +1444,8 @@ describe('RobotsPanel — the fields the list leaves out', () => {
     expect(read()?.robotsJobs?.[0].units_consumed).toBe(2);
   });
 
-  it('marks the rows the entry does not hold, and only those', async () => {
-    // After the units fix an external row looks identical to one of ours, so nothing on screen
-    // explained why it was missing from the entry's data. This is that explanation.
-    const stored = withStored(
-      value({ robotsJobs: [{ id: 'rjob_sum', workflow: 'summarize', status: 'completed' }] })
-    );
-
-    renderPanel({
-      muxApi: apiThatReturns([summary(), summary({ id: 'rjob_theirs' })]),
-      value: stored.value,
-      updateField: stored.updateField,
-    });
-
-    await waitFor(() => expect(screen.getByTestId('robots_job_table')).toBeInTheDocument());
-    expect(screen.getAllByText('Started elsewhere')).toHaveLength(1);
-  });
-
-  it('opens a job that is not ours, so its units and output are not left blank', async () => {
-    // Ownership is a persistence rule, not a read gate. A dashboard job is shown in the table,
-    // and a row whose Units column can never be filled in looks like a bug. Reading a job costs
-    // nothing and charges nobody.
+  it('opens a job started elsewhere, so its units and output are not left blank', async () => {
+    // Reading a job costs nothing and charges nobody.
     const muxApi = apiThatReturns([summary({ id: 'rjob_theirs' })], {
       rjob_theirs: { ...summary({ id: 'rjob_theirs' }), units_consumed: 7 },
     });
@@ -822,85 +1456,23 @@ describe('RobotsPanel — the fields the list leaves out', () => {
       expect(muxApi.getRobotsJob).toHaveBeenCalledWith('summarize', 'rjob_theirs')
     );
     expect(await screen.findByText('7')).toBeInTheDocument();
-
-    // But it is still never recorded.
-    expect(read()?.robotsJobs).toBeUndefined();
+    await waitFor(() => expect(read()?.robotsJobs?.[0]).toMatchObject({ units_consumed: 7 }));
   });
 
-  it("does not adopt another install's job just because it fetched its passthrough", async () => {
-    // The prefix identifies the integration, not the install. Now that detail is fetched for jobs
-    // we do not own, a second Contentful install pointed at the same Mux account would otherwise
-    // have its jobs copied onto this entry. Every shape is refused: the pre-scope format, which
-    // names nothing, and a scoped one naming a different space under either prefix.
-    const foreign = summary({ id: 'rjob_other_space' });
-    const foreignOld = summary({ id: 'rjob_other_space_old' });
-    const legacy = summary({ id: 'rjob_legacy' });
-    const muxApi = apiThatReturns([foreign, foreignOld, legacy], {
-      rjob_other_space: {
-        ...foreign,
-        passthrough: 'mux:cms:contentful:9.9.9|other-space:master:other-entry|0123456789abcdef',
-        units_consumed: 11,
-      },
-      rjob_other_space_old: {
-        ...foreignOld,
-        passthrough: 'contentful@9.9.9|other-space:master:other-entry|0123456789abcdef',
-        units_consumed: 13,
-      },
-      rjob_legacy: {
-        ...legacy,
-        passthrough: 'contentful@9.9.9|req-from-before-the-scope',
-        units_consumed: 3,
-      },
-    });
-    const { updateField, read } = withStored(value());
-    renderPanel({ muxApi, updateField });
-
-    await waitFor(() =>
-      expect(muxApi.getRobotsJob).toHaveBeenCalledWith('summarize', 'rjob_other_space')
-    );
-    expect(await screen.findByText('11')).toBeInTheDocument();
-    expect(await screen.findByText('13')).toBeInTheDocument();
-    expect(read()?.robotsJobs).toBeUndefined();
-  });
-
-  it('adopts a job of ours that was never recorded, which nothing else could claim', async () => {
-    // The orphan case, and the reason the scope segment exists at all. The page was closed
-    // during the cold-start window, so the create was never written to the entry. Under
-    // `trustPassthrough: false` this job ran, it billed, and it belonged to nobody for good. One
-    // stamped before Mux's prefix is just as much ours.
-    const orphan = summary({ id: 'rjob_orphan' });
-    const oldOrphan = summary({ id: 'rjob_old_orphan' });
-    const muxApi = apiThatReturns([orphan, oldOrphan], {
-      rjob_orphan: { ...orphan, passthrough: ourPassthrough(), units_consumed: 5 },
-      rjob_old_orphan: { ...oldOrphan, passthrough: ourLegacyPassthrough(), units_consumed: 6 },
-    });
-    const { updateField, read } = withStored(value());
-    renderPanel({ muxApi, updateField });
-
-    await waitFor(() => expect(read()?.robotsJobs).toHaveLength(2));
-    const adopted = (read()?.robotsJobs ?? []).map((record) => record.id);
-    expect(adopted.sort()).toEqual(['rjob_old_orphan', 'rjob_orphan']);
-  });
-
-  it('stamps the space, environment and entry onto the jobs it creates', async () => {
+  it('hands Mux the workflow and its parameters, and nothing else', async () => {
+    // The body, interim marker included, is pinned in `muxApi.test.ts`.
     const createRobotsJob = vi.fn(async () => ({
       data: { id: 'rjob_new', workflow: 'summarize', status: 'pending' },
     }));
     renderPanel({ muxApi: { ...apiThatReturns([]), createRobotsJob } });
 
-    await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Run a workflow' })).toBeEnabled()
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Run a workflow' }));
-    fireEvent.click(await screen.findByRole('button', { name: 'Continue' }));
-    fireEvent.click(await screen.findByRole('button', { name: 'Run Summarize' }));
+    await runSummarize();
 
     await waitFor(() => expect(createRobotsJob).toHaveBeenCalled());
-    const [, , stamped] = createRobotsJob.mock.calls[0] as unknown[];
-    const passthrough = String(stamped);
-    expect(passthrough.startsWith('mux:cms:contentful:')).toBe(true);
-    expect(passthrough).toContain(`|${ids.space}:${ids.environment}:${ids.entry}|`);
-    expect(passthrough.length).toBeLessThanOrEqual(255);
+    expect(createRobotsJob.mock.calls[0]).toEqual([
+      'summarize',
+      expect.objectContaining({ asset_id: 'asset-1' }),
+    ]);
   });
 
   it('stops re-reading a job whose detail fetch failed', async () => {
@@ -1104,10 +1676,8 @@ describe('RobotsPanel — directive runs', () => {
     vi.clearAllMocks();
   });
 
-  it('opens a run whose listing omits node_states, so automated jobs are still claimed', async () => {
-    // A safety net rather than a normal path: the list does carry node_states. But it is the
-    // ownership signal — without it a directive's jobs look like a stranger's and are never
-    // recorded — so a run that arrives without one is opened rather than guessed at.
+  it('opens a run whose listing omits node_states, so its steps can be shown', async () => {
+    // A safety net rather than a normal path: the list does carry node_states.
     const getRobotsDirectiveRun = vi.fn(async () => ({
       data: {
         run_id: 'drvrun_1',
@@ -1143,8 +1713,10 @@ describe('RobotsPanel — directive runs', () => {
     });
 
     await waitFor(() => expect(getRobotsDirectiveRun).toHaveBeenCalledWith('drv_1', 'drvrun_1'));
-    await waitFor(() => expect(stored?.robotsJobs).toHaveLength(1));
-    expect(stored?.robotsJobs?.[0].id).toBe('rjob_auto');
+    const table = await screen.findByTestId('robots_directive_run_table');
+    await waitFor(() =>
+      expect(within(table).getByRole('button', { name: 'Show steps' })).toBeEnabled()
+    );
   });
 
   it('does not open a run that already carries its node_states', async () => {
@@ -1275,7 +1847,7 @@ describe('RobotsPanel — the shape the runs endpoint actually returns', () => {
     expect(within(table).getByText('Summarize')).toBeInTheDocument();
   });
 
-  it('claims a directive-dispatched job from a run in the real wire shape', async () => {
+  it('records a directive-dispatched job from a run in the real wire shape', async () => {
     let stored: any = value();
     const updateField = vi.fn(async (mutate: (current: any) => any) => {
       stored = mutate(stored);
@@ -1528,14 +2100,14 @@ describe('RobotsPanel — starting a directive run', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Run directive' }));
   };
 
-  it('records the run on the entry at creation', async () => {
-    // Without this, ownership of everything the run dispatches depends on the run still being
-    // among the newest 25 the API returns for that directive. A busy directive pushes it out
-    // within hours; a deleted directive does it at once.
+  it('records the run on the entry at creation, in place of its placeholder', async () => {
+    // The history of what this entry started, whether or not the run is still among the newest
+    // 25 the API returns for that directive.
     const stored = withStoredValue(value());
     await start(directiveApi(), { updateField: stored.updateField, value: stored.value });
 
     await waitFor(() => expect(stored.read()?.robotsDirectiveRuns).toHaveLength(1));
+    expect(stored.read()?.robotsPendingCreates).toBeUndefined();
     expect(stored.read()?.robotsDirectiveRuns?.[0]).toMatchObject({
       runId: 'drvrun_1',
       directiveId: 'drv_1',
@@ -1571,33 +2143,35 @@ describe('RobotsPanel — starting a directive run', () => {
     await waitFor(() => expect(stored.read()?.robotsDirectiveRuns?.[0].jobIds).toEqual(['rjob_a']));
   });
 
-  it("claims a job after its run has fallen out of the API's list window", async () => {
-    // The structural point. `GET .../runs` is capped at 25 and cannot filter by asset, so a busy
-    // or deleted directive makes this run invisible — and before the run was recorded, its jobs
-    // then became permanently unclaimable.
-    const stored = withStoredValue(
-      value({
-        robotsDirectiveRuns: [
-          { runId: 'drvrun_gone', directiveId: 'drv_1', jobIds: ['rjob_auto'] },
-        ],
-      })
-    );
-
-    renderPanel({
-      muxApi: {
-        ...apiThatReturns([
-          { id: 'rjob_auto', workflow: 'summarize', status: 'completed', created_at: nowSeconds },
-        ]),
-        // The directive is gone: nothing to list.
-        listRobotsDirectiveRuns: vi.fn(async () => ({ data: [] })),
-      },
+  it('saves the placeholder before the run is asked for', async () => {
+    let release: () => void = () => undefined;
+    const muxApi = directiveApi();
+    const store = renderWithStore(value(), {
+      muxApi,
       defaultDirectiveIds: ['drv_1'],
-      updateField: stored.updateField,
-      value: stored.value,
+      land: (write: PanelWrite, apply: () => void) =>
+        write.options?.save && !store.read()?.robotsPendingCreates
+          ? new Promise<void>((resolve) => {
+              release = () => {
+                apply();
+                resolve();
+              };
+            })
+          : apply(),
     });
+    await waitFor(() => expect(screen.getByRole('combobox')).toBeInTheDocument());
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'drv_1' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Run directive' }));
 
-    await waitFor(() => expect(stored.read()?.robotsJobs).toHaveLength(1));
-    expect(stored.read()?.robotsJobs?.[0].id).toBe('rjob_auto');
+    await waitFor(() => expect(store.savedWrites()).toHaveLength(1));
+    expect(store.savedWrites()[0].mutate(value())?.robotsPendingCreates).toEqual([
+      expect.objectContaining({ kind: 'directive-run', directiveId: 'drv_1' }),
+    ]);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(muxApi.createRobotsDirectiveRun).not.toHaveBeenCalled();
+
+    await act(async () => release());
+    await waitFor(() => expect(muxApi.createRobotsDirectiveRun).toHaveBeenCalledTimes(1));
   });
 
   it('holds a guard instead of an error when Mux never confirms the run', async () => {
@@ -1609,37 +2183,46 @@ describe('RobotsPanel — starting a directive run', () => {
         }),
       });
 
-      renderPanel({ muxApi, defaultDirectiveIds: ['drv_1'] });
+      const store = renderWithStore(value(), { muxApi, defaultDirectiveIds: ['drv_1'] });
       await act(async () => {
         await vi.advanceTimersByTimeAsync(50);
       });
       fireEvent.change(screen.getByRole('combobox'), { target: { value: 'drv_1' } });
       fireEvent.click(screen.getByRole('button', { name: 'Run directive' }));
-      // Reconciliation retries the run list three times on a short backoff before giving up.
       await act(async () => {
-        await vi.advanceTimersByTimeAsync(10_000);
+        await vi.advanceTimersByTimeAsync(50);
       });
 
       expect(screen.getByTestId('robots-directive-run-unconfirmed')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Run directive' })).toBeDisabled();
       expect(sdk.notifier.error).not.toHaveBeenCalled();
+      expect(pendingCreatesIn(store.read())).toEqual([
+        expect.objectContaining({ kind: 'directive-run', directiveId: 'drv_1' }),
+      ]);
       // The create is never retried on the app's own initiative.
       expect(muxApi.createRobotsDirectiveRun).toHaveBeenCalledTimes(1);
 
-      // And the way out is the editor's decision, with the situation explained.
+      // And the way out is the editor's decision, with the situation explained, and it is saved.
+      const writesBefore = store.writes.length;
       fireEvent.click(
         screen.getByRole('button', { name: 'Nothing is running — let me try again' })
       );
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(10);
+      });
       expect(screen.getByRole('button', { name: 'Run directive' })).toBeEnabled();
+      expect(store.read()?.robotsPendingCreates).toBeUndefined();
+      expect(store.writes.slice(writesBefore).map(({ options }) => options)).toEqual([
+        { save: true },
+      ]);
     } finally {
       vi.useRealTimers();
     }
   });
 
-  it('adopts a run that did start, rather than guarding on it', async () => {
+  it('resolves the placeholder from the runs list when the run did start', async () => {
     vi.useFakeTimers();
     try {
-      const stored = withStoredValue(value());
       const muxApi = directiveApi({
         createRobotsDirectiveRun: vi.fn(async () => {
           throw new Error('taking longer than expected');
@@ -1650,29 +2233,25 @@ describe('RobotsPanel — starting a directive run', () => {
               run_id: 'drvrun_started',
               subject_id: 'asset-1',
               status: 'pending',
-              started_at: nowSeconds,
+              started_at: Math.floor(Date.now() / 1000),
             },
           ],
         })),
       });
 
-      renderPanel({
-        muxApi,
-        defaultDirectiveIds: ['drv_1'],
-        updateField: stored.updateField,
-        value: stored.value,
-      });
+      const store = renderWithStore(value(), { muxApi, defaultDirectiveIds: ['drv_1'] });
       await act(async () => {
         await vi.advanceTimersByTimeAsync(50);
       });
       fireEvent.change(screen.getByRole('combobox'), { target: { value: 'drv_1' } });
       fireEvent.click(screen.getByRole('button', { name: 'Run directive' }));
       await act(async () => {
-        await vi.advanceTimersByTimeAsync(10_000);
+        await vi.advanceTimersByTimeAsync(50);
       });
 
       expect(screen.queryByTestId('robots-directive-run-unconfirmed')).not.toBeInTheDocument();
-      expect(stored.read()?.robotsDirectiveRuns?.[0].runId).toBe('drvrun_started');
+      expect(store.read()?.robotsDirectiveRuns?.[0].runId).toBe('drvrun_started');
+      expect(store.read()?.robotsPendingCreates).toBeUndefined();
     } finally {
       vi.useRealTimers();
     }
@@ -1687,14 +2266,17 @@ describe('RobotsPanel — starting a directive run', () => {
         })
     );
     const muxApi = directiveApi({ createRobotsDirectiveRun });
-
-    await start(muxApi);
+    renderWithStore(value(), { muxApi, defaultDirectiveIds: ['drv_1'] });
+    await waitFor(() => expect(screen.getByRole('combobox')).toBeInTheDocument());
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'drv_1' } });
+    // Twice in one frame: the second is refused by the ref, before any state has rendered.
+    fireEvent.click(screen.getByRole('button', { name: 'Run directive' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Run directive' }));
 
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'Run directive' })).toBeDisabled()
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Run directive' }));
-    expect(createRobotsDirectiveRun).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(createRobotsDirectiveRun).toHaveBeenCalledTimes(1));
 
     await act(async () => {
       release({
@@ -1711,13 +2293,29 @@ describe('RobotsPanel — starting a directive run', () => {
     );
   });
 
+  it('shows no warning while its own run is still on its way', async () => {
+    const store = renderWithStore(value(), {
+      muxApi: directiveApi({ createRobotsDirectiveRun: vi.fn(() => new Promise(() => undefined)) }),
+      defaultDirectiveIds: ['drv_1'],
+    });
+    await waitFor(() => expect(screen.getByRole('combobox')).toBeInTheDocument());
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'drv_1' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Run directive' }));
+
+    await waitFor(() => expect(pendingCreatesIn(store.read())).toHaveLength(1));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(screen.queryByTestId('robots-directive-run-unconfirmed')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Run directive' })).toBeDisabled();
+  });
+
   it('reports success even if recording the run on the entry fails', async () => {
     // Same rule as the job path: the run has started and is billing, so a failed *write* must
-    // never be reported as a failed *run*.
+    // never be reported as a failed *run*. The placeholder lands; the resolution does not.
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    let saves = 0;
     await start(directiveApi(), {
-      updateField: vi.fn(async () => {
-        throw new Error('version conflict');
+      updateField: vi.fn(async (_mutate: unknown, options?: { save?: boolean }) => {
+        if (options?.save && (saves += 1) === 2) throw new Error('version conflict');
       }),
     });
 
@@ -1728,21 +2326,48 @@ describe('RobotsPanel — starting a directive run', () => {
     consoleError.mockRestore();
   });
 
-  it('still reports a 409 as "already running" rather than reconciling it', async () => {
+  it('reports a 409 as "already running", and removes the placeholder', async () => {
     const muxApi = directiveApi({
       createRobotsDirectiveRun: vi.fn(async () => {
         throw new MuxApiError('Already running', 409);
       }),
     });
-
-    await start(muxApi);
+    const store = renderWithStore(value(), { muxApi, defaultDirectiveIds: ['drv_1'] });
+    await waitFor(() => expect(screen.getByRole('combobox')).toBeInTheDocument());
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'drv_1' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Run directive' }));
 
     await waitFor(() =>
       expect(sdk.notifier.warning).toHaveBeenCalledWith(
         'That directive is already running on this video.'
       )
     );
+    await waitFor(() => expect(store.read()?.robotsPendingCreates).toBeUndefined());
     expect(screen.queryByTestId('robots-directive-run-unconfirmed')).not.toBeInTheDocument();
+  });
+
+  it('lists the runs of a directive with a create pending, even one that is not configured', async () => {
+    const muxApi = directiveApi();
+    renderWithStore(
+      value({
+        version: 4,
+        robotsPendingCreates: [
+          {
+            requestId: 'req_run',
+            kind: 'directive-run',
+            directiveId: 'drv_elsewhere',
+            requestedAt: nowSeconds,
+          },
+        ],
+      }),
+      { muxApi, defaultDirectiveIds: [] }
+    );
+
+    await waitFor(() =>
+      expect(muxApi.listRobotsDirectiveRuns).toHaveBeenCalledWith('drv_elsewhere', {
+        limit: 25,
+      })
+    );
   });
 });
 
@@ -2264,7 +2889,7 @@ describe('RobotsPanel concurrency', () => {
     const muxApi = {
       listRobotsJobs: vi.fn(async () => ({ data: [{ ...job, status }] })),
       getRobotsJob: vi.fn(async () => ({
-        data: { ...job, status, passthrough: ourPassthrough() },
+        data: { ...job, status },
       })),
       listRobotsDirectives: vi.fn(async () => ({ data: [] })),
       listRobotsDirectiveRuns: vi.fn(async () => ({ data: [] })),
@@ -2421,21 +3046,18 @@ describe('RobotsPanel — when the asset goes away', () => {
   });
 
   it("never writes one asset's jobs onto another asset's entry", async () => {
-    // The reachable version of the leak: pasting a different Mux asset ID replaces the whole
-    // value without unmounting this panel. The old asset's jobs carry a scope-matching
-    // passthrough, so nothing downstream would have refused them.
-    const ourJob = {
+    // Pasting a different Mux asset ID replaces the whole value without unmounting this panel.
+    const oldJob = {
       id: 'rjob_old',
       workflow: 'summarize',
       status: 'completed',
       created_at: Math.floor(Date.now() / 1000),
-      passthrough: ourPassthrough(),
     };
     const muxApi = {
       listRobotsJobs: vi.fn(async (query: { asset_id?: string }) =>
-        query.asset_id === 'asset-1' ? { data: [ourJob] } : { data: [] }
+        query.asset_id === 'asset-1' ? { data: [oldJob] } : { data: [] }
       ),
-      getRobotsJob: vi.fn(async () => ({ data: ourJob })),
+      getRobotsJob: vi.fn(async () => ({ data: oldJob })),
       listRobotsDirectives: vi.fn(async () => ({ data: [] })),
       listRobotsDirectiveRuns: vi.fn(async () => ({ data: [] })),
     };
@@ -2466,6 +3088,27 @@ describe('RobotsPanel — when the asset goes away', () => {
     // Every mutator queued after the swap, applied to the new asset's value, must be a no-op.
     const queued = updateField.mock.calls as unknown as Array<[(v: unknown) => unknown]>;
     for (const [mutate] of queued) {
+      expect(mutate(swapped)).toBe(swapped);
+    }
+  });
+
+  it('a mutator queued before an asset swap writes nothing when applied after it', async () => {
+    const oldJob = {
+      id: 'rjob_old',
+      workflow: 'summarize',
+      status: 'completed',
+      created_at: Math.floor(Date.now() / 1000),
+    };
+    // Held, the way the publish gate holds a write: applied later, to whatever is stored then.
+    const held: Array<(current: MuxContentfulObject | undefined) => unknown> = [];
+    const updateField = vi.fn(async (mutate: (current: any) => any) => {
+      held.push(mutate);
+    });
+    renderPanel({ muxApi: apiThatReturns([oldJob]), updateField });
+
+    await waitFor(() => expect(held.length).toBeGreaterThan(0));
+    const swapped = value({ assetId: 'asset-2' });
+    for (const mutate of held) {
       expect(mutate(swapped)).toBe(swapped);
     }
   });
@@ -2717,25 +3360,6 @@ describe('RobotsPanel — what the tab shows before everything is read', () => {
     expect(screen.getByTestId('robots-load-units-rjob_0')).toHaveTextContent('Loading…');
   });
 
-  it('holds "Started elsewhere" back until the row’s detail has been read', async () => {
-    const reads: Array<(value: unknown) => void> = [];
-    const muxApi = {
-      ...apiThatReturns([completed('rjob_theirs')]),
-      getRobotsJob: vi.fn(() => new Promise((resolve) => reads.push(resolve))),
-    };
-    renderPanel({ muxApi });
-
-    await screen.findByTestId('robots_job_table');
-    // The detail could still carry this entry's passthrough, so saying it now could be a claim
-    // taken back a second later.
-    expect(screen.queryByText('Started elsewhere')).not.toBeInTheDocument();
-
-    await act(async () => {
-      reads[0]({ data: completed('rjob_theirs') });
-    });
-    expect(await screen.findByText('Started elsewhere')).toBeInTheDocument();
-  });
-
   it('does not say "no directive runs" until it has read them', async () => {
     let release: (value: unknown) => void = () => undefined;
     const muxApi = {
@@ -2900,13 +3524,9 @@ describe('RobotsPanel — an unconfirmed create does not block every workflow fo
   });
 
   /**
-   * The client report behind this: `generate-premium-captions` completed, and afterwards
-   * `edit-captions` and `generate-chapters` could not be run. `runDisabledReason` is not
-   * per-workflow — an unresolved create disables **Run a workflow** outright, for every workflow
-   * in the catalog — and its only automatic exit is the per-refresh re-check, which is keyed on
-   * `pollNonce`. `pollNonce` only advances when the poll loop calls `refresh`, and the loop used
-   * to arm only on work in flight. An unconfirmed create is exactly the case with nothing in
-   * flight, so the re-check ran once, found a job Mux had not listed yet, and never ran again.
+   * A placeholder blocks **Run a workflow** outright, for every workflow in the catalog, and its
+   * only automatic exit is a list read that finds its job. With nothing in flight the loop would
+   * not tick, so the placeholder arms it — for a bounded number of ticks.
    */
   const created = () => Math.floor(Date.now() / 1000);
 
@@ -2924,37 +3544,27 @@ describe('RobotsPanel — an unconfirmed create does not block every workflow fo
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
     await settle(10);
     fireEvent.click(screen.getByRole('button', { name: 'Run Summarize' }));
-    // Reconciliation sleeps between its attempts before giving up.
-    await settle(10_000);
-    expect(screen.getByText(/Mux never confirmed it/)).toBeInTheDocument();
+    await settle(50);
+    expect(screen.getByTestId('robots-job-unconfirmed')).toBeInTheDocument();
   };
 
+  const timingOut = () =>
+    vi.fn(async () => {
+      throw new Error('The app action response is taking longer than expected to process.');
+    });
+
   it('keeps looking for the job with nothing in flight, and lifts the guard when it appears', async () => {
-    const passthroughs: string[] = [];
     /** The job Mux did create, but had not listed when the create timed out. */
     let listed: unknown[] = [];
     const muxApi = {
+      ...apiThatReturns([]),
       listRobotsJobs: vi.fn(async () => ({ data: listed.map((row) => ({ ...(row as object) })) })),
-      getRobotsJob: vi.fn(async () => ({
-        data: {
-          id: 'rjob_late',
-          workflow: 'summarize',
-          status: 'completed',
-          created_at: created(),
-          passthrough: passthroughs[0],
-        },
-      })),
-      createRobotsJob: vi.fn(async (_workflow: string, _params: unknown, passthrough: string) => {
-        passthroughs.push(passthrough);
-        throw new Error('The app action response is taking longer than expected to process.');
-      }),
-      listRobotsDirectives: vi.fn(async () => ({ data: [] })),
-      listRobotsDirectiveRuns: vi.fn(async () => ({ data: [] })),
+      createRobotsJob: timingOut(),
     };
 
     vi.useFakeTimers();
     try {
-      renderPanel({ muxApi });
+      const store = renderWithStore(value(), { muxApi });
       await startAnUnconfirmedRun();
 
       // Nothing is in flight — the whole point. The loop has to keep ticking on the guard alone.
@@ -2965,49 +3575,65 @@ describe('RobotsPanel — an unconfirmed create does not block every workflow fo
       // Mux catches up and lists it. The guard lifts without the editor touching anything, and
       // in particular without the one button that would create a second billable job.
       listed = [
-        { id: 'rjob_late', workflow: 'summarize', status: 'completed', created_at: created() },
+        { id: 'rjob_late', workflow: 'summarize', status: 'processing', created_at: created() },
       ];
       await settle(ROBOTS_POLL_INTERVAL_MS + 100);
-      expect(screen.queryByText(/Mux never confirmed it/)).toBeNull();
+      expect(screen.queryByTestId('robots-job-unconfirmed')).toBeNull();
       expect(screen.getByRole('button', { name: 'Run a workflow' })).toBeEnabled();
+      expect(store.read()?.robotsPendingCreates).toBeUndefined();
+      expect(store.read()?.robotsJobs?.map(({ id }) => id)).toEqual(['rjob_late']);
     } finally {
       vi.useRealTimers();
     }
   });
 
   it('stops looking after a bounded number of ticks, rather than polling an open tab forever', async () => {
-    const muxApi = {
-      listRobotsJobs: vi.fn(async () => ({ data: [] })),
-      getRobotsJob: vi.fn(async () => ({ data: undefined })),
-      createRobotsJob: vi.fn(async () => {
-        throw new Error('The app action response is taking longer than expected to process.');
-      }),
-      listRobotsDirectives: vi.fn(async () => ({ data: [] })),
-      listRobotsDirectiveRuns: vi.fn(async () => ({ data: [] })),
-    };
+    const muxApi = { ...apiThatReturns([]), createRobotsJob: timingOut() };
 
     vi.useFakeTimers();
     try {
-      renderPanel({ muxApi });
+      renderWithStore(value(), { muxApi });
       await startAnUnconfirmedRun();
 
-      /** A poll tick is a plain list read; the re-check pass narrows by workflow as well. */
-      const pollTicks = () =>
-        (muxApi.listRobotsJobs.mock.calls as unknown as Array<[{ workflow?: string }]>).filter(
-          ([query]) => query?.workflow === undefined
-        ).length;
-      const afterCreate = pollTicks();
-
+      const afterCreate = muxApi.listRobotsJobs.mock.calls.length;
       for (let tick = 0; tick < ROBOTS_UNCONFIRMED_RECHECK_TICKS + 5; tick += 1) {
         await settle(ROBOTS_POLL_INTERVAL_MS + 100);
       }
 
-      const ticksSpent = pollTicks() - afterCreate;
+      const ticksSpent = muxApi.listRobotsJobs.mock.calls.length - afterCreate;
       expect(ticksSpent).toBeGreaterThan(0);
       expect(ticksSpent).toBeLessThanOrEqual(ROBOTS_UNCONFIRMED_RECHECK_TICKS);
       // And the guard is still up: the bound ends the looking, never the protection.
-      expect(screen.getByText(/Mux never confirmed it/)).toBeInTheDocument();
+      expect(screen.getByTestId('robots-job-unconfirmed')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Run a workflow' })).toBeDisabled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('gives a placeholder from another tab its own budget to be looked for on', async () => {
+    const muxApi = { ...apiThatReturns([]), createRobotsJob: timingOut() };
+
+    vi.useFakeTimers();
+    try {
+      const store = renderWithStore(value(), { muxApi });
+      await startAnUnconfirmedRun();
+      for (let tick = 0; tick < ROBOTS_UNCONFIRMED_RECHECK_TICKS + 2; tick += 1) {
+        await settle(ROBOTS_POLL_INTERVAL_MS + 100);
+      }
+      const spent = muxApi.listRobotsJobs.mock.calls.length;
+
+      store.replace({
+        ...(store.read() as MuxContentfulObject),
+        robotsPendingCreates: [
+          ...pendingCreatesIn(store.read()),
+          pendingJob({ requestId: 'from_another_tab', requestedAt: created() }),
+        ],
+      });
+      for (let tick = 0; tick < 3; tick += 1) {
+        await settle(ROBOTS_POLL_INTERVAL_MS + 100);
+      }
+      expect(muxApi.listRobotsJobs.mock.calls.length).toBeGreaterThan(spent);
     } finally {
       vi.useRealTimers();
     }
@@ -3020,30 +3646,14 @@ describe('RobotsPanel — an unconfirmed directive run does not block the button
     vi.clearAllMocks();
   });
 
-  /**
-   * The job guard's twin, and the same gap: the directive re-check is keyed on `pollNonce` too,
-   * and `pollNonce` only advances when the poll loop calls `refresh`. An unconfirmed run is
-   * precisely the state with nothing in flight, so the loop stayed quiet and **Run directive**
-   * stayed disabled until the editor reloaded or clicked the button that pays twice.
-   *
-   * Narrower blast radius than the job one — it disables the directive button alone — which is
-   * why it was left out of that fix and why it is fixed here.
-   */
+  /** The job guard's twin: the placeholder arms the loop, for a bounded number of ticks. */
   const settle = async (ms: number) => {
     await act(async () => {
       await vi.advanceTimersByTimeAsync(ms);
     });
   };
 
-  const withStoredValue = (initial: MuxContentfulObject | undefined) => {
-    let stored = initial;
-    const updateField = vi.fn(async (mutate: (current: any) => any) => {
-      stored = mutate(stored);
-    });
-    return { updateField, value: initial, read: () => stored };
-  };
-
-  /** A run that started just now, whenever "now" is — the adoption window is measured per pass. */
+  /** A run that started just now, whenever "now" is. */
   const runStartedNow = () => ({
     run_id: 'drvrun_late',
     subject_id: 'asset-1',
@@ -3069,25 +3679,18 @@ describe('RobotsPanel — an unconfirmed directive run does not block the button
     await settle(50);
     fireEvent.change(screen.getByRole('combobox'), { target: { value: 'drv_1' } });
     fireEvent.click(screen.getByRole('button', { name: 'Run directive' }));
-    // Reconciliation retries the run list three times on a short backoff before giving up.
-    await settle(10_000);
+    await settle(50);
     expect(screen.getByTestId('robots-directive-run-unconfirmed')).toBeInTheDocument();
   };
 
   it('keeps looking for the run with nothing in flight, and adopts it when it appears', async () => {
     /** The run Mux did start, but had not listed when the create timed out. */
     let listed: unknown[] = [];
-    const stored = withStoredValue(value());
     const muxApi = unconfirmedApi(() => listed);
 
     vi.useFakeTimers();
     try {
-      renderPanel({
-        muxApi,
-        defaultDirectiveIds: ['drv_1'],
-        updateField: stored.updateField,
-        value: stored.value,
-      });
+      const stored = renderWithStore(value(), { muxApi, defaultDirectiveIds: ['drv_1'] });
       await startAnUnconfirmedDirectiveRun();
 
       // Nothing is in flight — the whole point. The loop has to keep ticking on the guard alone.
@@ -3101,8 +3704,9 @@ describe('RobotsPanel — an unconfirmed directive run does not block the button
       await settle(ROBOTS_POLL_INTERVAL_MS + 100);
       expect(screen.queryByTestId('robots-directive-run-unconfirmed')).not.toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Run directive' })).toBeEnabled();
-      // Adopted the way the create path adopts: recorded on the entry, and on screen.
+      // Recorded on the entry in place of its placeholder, and on screen.
       expect(stored.read()?.robotsDirectiveRuns?.[0].runId).toBe('drvrun_late');
+      expect(stored.read()?.robotsPendingCreates).toBeUndefined();
       expect(screen.queryByText('No directive runs for this video yet.')).toBeNull();
       // And never retried on the app's own initiative.
       expect(muxApi.createRobotsDirectiveRun).toHaveBeenCalledTimes(1);
@@ -3116,7 +3720,7 @@ describe('RobotsPanel — an unconfirmed directive run does not block the button
 
     vi.useFakeTimers();
     try {
-      renderPanel({ muxApi, defaultDirectiveIds: ['drv_1'] });
+      renderWithStore(value(), { muxApi, defaultDirectiveIds: ['drv_1'] });
       await startAnUnconfirmedDirectiveRun();
 
       const afterGuard = muxApi.listRobotsDirectiveRuns.mock.calls.length;
@@ -3144,7 +3748,7 @@ describe('RobotsPanel — an unconfirmed directive run does not block the button
 
     vi.useFakeTimers();
     try {
-      renderPanel({ muxApi, defaultDirectiveIds: ['drv_1'] });
+      renderWithStore(value(), { muxApi, defaultDirectiveIds: ['drv_1'] });
       await startAnUnconfirmedDirectiveRun();
 
       for (let tick = 0; tick < ROBOTS_UNCONFIRMED_RECHECK_TICKS + 2; tick += 1) {
@@ -3156,7 +3760,7 @@ describe('RobotsPanel — an unconfirmed directive run does not block the button
       await settle(10);
 
       fireEvent.click(screen.getByRole('button', { name: 'Run directive' }));
-      await settle(10_000);
+      await settle(50);
       expect(screen.getByTestId('robots-directive-run-unconfirmed')).toBeInTheDocument();
 
       const afterSecondGuard = muxApi.listRobotsDirectiveRuns.mock.calls.length;
@@ -3167,45 +3771,16 @@ describe('RobotsPanel — an unconfirmed directive run does not block the button
     }
   });
 
-  it('lifts the guard even when recording the adopted run fails', async () => {
-    // Same rule as everywhere else on this path: the run is already billing, so a failed *write*
-    // must not leave the editor stuck behind a guard on a run we have positively identified.
-    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    let listed: unknown[] = [];
-    const muxApi = unconfirmedApi(() => listed);
-
-    vi.useFakeTimers();
-    try {
-      renderPanel({
-        muxApi,
-        defaultDirectiveIds: ['drv_1'],
-        updateField: vi.fn(async () => {
-          throw new Error('version conflict');
-        }),
-      });
-      await startAnUnconfirmedDirectiveRun();
-
-      listed = [runStartedNow()];
-      await settle(ROBOTS_POLL_INTERVAL_MS + 100);
-      expect(screen.queryByTestId('robots-directive-run-unconfirmed')).not.toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Run directive' })).toBeEnabled();
-    } finally {
-      vi.useRealTimers();
-      consoleError.mockRestore();
-    }
-  });
-
   it('never adopts a run with no start time, however long it keeps looking', async () => {
     // The directive match is asset + recency, with no token to make it exact — so the one thing
-    // holding it closed is that a run without `started_at` is not a candidate. Loosening that to
-    // make the re-check succeed more often would drop the guard on a run that never started.
+    // holding it closed is that a run without `started_at` is not a candidate.
     const muxApi = unconfirmedApi(() => [
       { run_id: 'drvrun_no_start', subject_id: 'asset-1', status: 'pending' },
     ]);
 
     vi.useFakeTimers();
     try {
-      renderPanel({ muxApi, defaultDirectiveIds: ['drv_1'] });
+      renderWithStore(value(), { muxApi, defaultDirectiveIds: ['drv_1'] });
       await startAnUnconfirmedDirectiveRun();
 
       for (let tick = 0; tick < ROBOTS_UNCONFIRMED_RECHECK_TICKS + 2; tick += 1) {
@@ -3634,7 +4209,7 @@ describe('RobotsPanel — a directive run started outside Contentful', () => {
     expect(muxApi.getRobotsDirectiveRun).not.toHaveBeenCalled();
   });
 
-  it('never shows or claims a run that turns out to be on another asset', async () => {
+  it('never shows a run that turns out to be on another asset', async () => {
     // The same narrowing the listing applies by `subject_id`, applied to a run read by id.
     const stored = withStoredValue(value());
     const muxApi = importedApi({ id: 'drv_cfg', run_id: 'drvrun_mux' }, () =>
@@ -3650,7 +4225,7 @@ describe('RobotsPanel — a directive run started outside Contentful', () => {
     await waitFor(() => expect(muxApi.getRobotsDirectiveRun).toHaveBeenCalled());
     await new Promise((resolve) => setTimeout(resolve, 50));
     expect(screen.getByText('No directive runs for this video yet.')).toBeInTheDocument();
-    expect(stored.read()?.robotsJobs).toBeUndefined();
+    expect(stored.read()?.robotsDirectiveRuns).toBeUndefined();
   });
 
   it('shows the jobs and no run when the run cannot be read', async () => {
@@ -3670,19 +4245,22 @@ describe('RobotsPanel — a directive run started outside Contentful', () => {
     consoleError.mockRestore();
   });
 
-  it('stores nothing about it: not the run, and not the jobs it dispatched', async () => {
-    // ADR-0009: a run reaches the entry only at creation, from this tab. Its jobs are no more
-    // this entry's than the run is — both are shown, neither is recorded, and with no output
-    // among them the entry stays byte-identical.
-    const original = value();
-    const stored = withStoredValue(original);
+  it('stores the jobs it dispatched and not the run', async () => {
+    // ADR-0009: a run reaches the entry only at creation, from this tab. Its jobs are recorded
+    // like every other job on the asset.
+    const stored = withStoredValue(value());
     renderPanel({ muxApi: importedApi(), updateField: stored.updateField, value: stored.value });
 
     await screen.findByTestId('robots_directive_run_table');
-    await new Promise((resolve) => setTimeout(resolve, 50));
-
-    expect(stored.read()).toBe(original);
-    expect(screen.getAllByText('Started elsewhere')).toHaveLength(2);
+    await waitFor(() =>
+      expect(
+        stored
+          .read()
+          ?.robotsJobs?.map((record) => record.id)
+          .sort()
+      ).toEqual(['rjob_a', 'rjob_b'])
+    );
+    expect(stored.read()?.robotsDirectiveRuns).toBeUndefined();
   });
 
   it('keeps reading a run that is still going, and stops once it has finished', async () => {
@@ -3762,31 +4340,6 @@ describe('RobotsPanel — a directive run started outside Contentful', () => {
     }
   });
 
-  it("claims the jobs of a configured directive's run once it has left the listing window", async () => {
-    // ADR-0009's documented gap: a busy directive pushes this asset's run out of the newest 25
-    // within hours, and its jobs became unclaimable. A job that names its run needs no window —
-    // and adding the jobs is not adding the run, which still happens at creation only.
-    const stored = withStoredValue(value());
-    renderPanel({
-      muxApi: importedApi({ id: 'drv_cfg', run_id: 'drvrun_old' }, () =>
-        importedRun({ run_id: 'drvrun_old' })
-      ),
-      defaultDirectiveIds: ['drv_cfg'],
-      updateField: stored.updateField,
-      value: stored.value,
-    });
-
-    await waitFor(() =>
-      expect(
-        stored
-          .read()
-          ?.robotsJobs?.map((record) => record.id)
-          .sort()
-      ).toEqual(['rjob_a', 'rjob_b'])
-    );
-    expect(stored.read()?.robotsDirectiveRuns).toBeUndefined();
-  });
-
   it('reads a named run that turns up while the first pass is still listing', async () => {
     // Job detail routinely lands before a slow runs listing does. That request used to be dropped
     // by the one-pass-at-a-time guard, and nothing asked again.
@@ -3814,74 +4367,6 @@ describe('RobotsPanel — a directive run started outside Contentful', () => {
       expect(muxApi.getRobotsDirectiveRun).toHaveBeenCalledWith('drv_mux', 'drvrun_mux')
     );
     expect(await screen.findByTestId('robots_directive_run_table')).toBeInTheDocument();
-  });
-});
-
-/**
- * The badge is read off the rule the persist effect stores by, not off what the stored value
- * happens to hold this instant: the two differ exactly when "started elsewhere" would be false.
- */
-describe('RobotsPanel — which rows say they were started elsewhere', () => {
-  beforeEach(() => {
-    resetRobotsCapabilityCache();
-    vi.clearAllMocks();
-  });
-
-  it('never says it of a job this tab just started, while its record is still on its way', async () => {
-    // A write parked behind the publish gate holds for up to 90 s. The list can show the job in
-    // the meantime, as a summary with no passthrough — and the job is ours.
-    const nowSeconds = Math.floor(Date.now() / 1000);
-    let listed: unknown[] = [];
-    const muxApi = {
-      ...apiThatReturns([]),
-      listRobotsJobs: vi.fn(async () => ({ data: listed.map((row) => ({ ...(row as object) })) })),
-      createRobotsJob: vi.fn(async (_workflow: string, _params: unknown, passthrough: string) => {
-        listed = [
-          { id: 'rjob_new', workflow: 'summarize', status: 'pending', created_at: nowSeconds },
-        ];
-        return {
-          data: { id: 'rjob_new', workflow: 'summarize', status: 'pending', passthrough },
-        };
-      }),
-    };
-    renderPanel({ muxApi, updateField: vi.fn(() => new Promise<void>(() => undefined)) });
-
-    await runSummarize();
-    await waitFor(() => expect(muxApi.createRobotsJob).toHaveBeenCalled());
-    fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
-
-    await waitFor(() =>
-      expect(screen.getByTestId('robots_job_table').textContent).toContain('Summarize')
-    );
-    expect(screen.queryByText('Started elsewhere')).not.toBeInTheDocument();
-  });
-
-  it('never says it of a job a claimed directive run dispatched, before its record lands', async () => {
-    const muxApi = {
-      ...apiThatReturns([
-        { id: 'rjob_auto', workflow: 'summarize', status: 'completed', created_at: 1_700_000_000 },
-      ]),
-      listRobotsDirectiveRuns: vi.fn(async () => ({
-        data: [
-          {
-            run_id: 'drvrun_1',
-            subject_id: 'asset-1',
-            status: 'completed',
-            node_states: [{ job_id: 'rjob_auto', workflow_name: 'summarize' }],
-          },
-        ],
-      })),
-    };
-    // The write never reaches the value this panel is rendered with.
-    renderPanel({
-      muxApi,
-      defaultDirectiveIds: ['drv_1'],
-      updateField: vi.fn(async () => undefined),
-    });
-
-    await screen.findByTestId('robots_directive_run_table');
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    expect(screen.queryByText('Started elsewhere')).not.toBeInTheDocument();
   });
 });
 
@@ -3920,11 +4405,7 @@ const StatefulPanel: FC<{
   );
 };
 
-/**
- * `robotsOutputs` describes the video, so a summarize or moderate job reaches it whoever started
- * it; the job itself is still recorded only when this entry claims it. ADR-0005's 2026-09-25
- * amendment.
- */
+/** `robotsOutputs` describes the video, so a summarize or moderate job reaches it whoever started it. */
 describe('RobotsPanel — outputs of jobs started elsewhere', () => {
   beforeEach(() => {
     resetRobotsCapabilityCache();
@@ -3964,7 +4445,7 @@ describe('RobotsPanel — outputs of jobs started elsewhere', () => {
     outputs,
   });
 
-  it('keeps the summary of a job run from the Mux dashboard, and records nothing about the job', async () => {
+  it('keeps the summary of a job run from the Mux dashboard, and records the job', async () => {
     const row = listed();
     const muxApi = apiThatReturns([row], {
       rjob_theirs: detailed(row, { title: 'A dashboard title', tags: ['alpha'] }),
@@ -3979,9 +4460,8 @@ describe('RobotsPanel — outputs of jobs started elsewhere', () => {
         tags: ['alpha'],
       })
     );
-    expect(stored.read()?.robotsJobs).toBeUndefined();
+    expect(stored.read()?.robotsJobs?.map(({ id }) => id)).toEqual(['rjob_theirs']);
     expect(stored.read()?.version).toBe(4);
-    expect(await screen.findByText('Started elsewhere')).toBeInTheDocument();
     // The reads the Units column was already making, and no others.
     expect(muxApi.listRobotsJobs).toHaveBeenCalledTimes(1);
     expect(muxApi.getRobotsJob).toHaveBeenCalledTimes(1);
@@ -4006,12 +4486,12 @@ describe('RobotsPanel — outputs of jobs started elsewhere', () => {
         maxScores: { sexual: 0.02, violence: 0.4 },
       })
     );
-    expect(stored.read()?.robotsJobs).toBeUndefined();
+    expect(stored.read()?.robotsJobs?.map(({ id }) => id)).toEqual(['rjob_mod']);
   });
 
-  it('keeps the summary a directive run nobody here started produced, and records neither', async () => {
-    // A directive this entry neither started nor runs on upload: the run is shown and its jobs
-    // are started elsewhere (ADR-0009). The summary its step wrote is still this video's.
+  it('keeps the summary a directive run nobody here started produced, and records its job', async () => {
+    // A directive this entry neither started nor runs on upload: the run is shown and not
+    // recorded (ADR-0009); its job is recorded like any other.
     const row = listed({ id: 'rjob_auto' });
     const run = {
       run_id: 'drvrun_mux',
@@ -4044,11 +4524,11 @@ describe('RobotsPanel — outputs of jobs started elsewhere', () => {
     await waitFor(() =>
       expect(stored.read()?.robotsOutputs?.summarize?.title).toBe('Automated title')
     );
-    expect(stored.read()?.robotsJobs).toBeUndefined();
+    expect(stored.read()?.robotsJobs?.map(({ id }) => id)).toEqual(['rjob_auto']);
     expect(stored.read()?.robotsDirectiveRuns).toBeUndefined();
   });
 
-  it('keeps nothing from a listed job whose own record names another asset, or none', async () => {
+  it('keeps no output from a listed job whose own record names another asset, or none', async () => {
     // The list is filtered by asset and the panel is keyed by it. Neither is taken on trust.
     const elsewhere = listed({ id: 'rjob_other_asset' });
     const unnamed = listed({ id: 'rjob_unnamed', workflow: 'moderate' });
@@ -4056,17 +4536,16 @@ describe('RobotsPanel — outputs of jobs started elsewhere', () => {
       rjob_other_asset: detailed(elsewhere, { title: 'Another video' }, 'asset-2'),
       rjob_unnamed: detailed(unnamed, { exceeds_threshold: true }, null),
     });
-    const original = value();
-    const stored = withStoredValue(original);
+    const stored = withStoredValue(value());
     renderPanel({ muxApi, updateField: stored.updateField, value: stored.value });
 
     await waitFor(() => expect(muxApi.getRobotsJob).toHaveBeenCalledTimes(2));
-    await waitFor(() => expect(stored.updateField).toHaveBeenCalled());
+    await waitFor(() => expect(stored.read()?.robotsJobs).toHaveLength(2));
     await new Promise((resolve) => setTimeout(resolve, 50));
-    expect(stored.read()).toBe(original);
+    expect(stored.read()?.robotsOutputs).toBeUndefined();
   });
 
-  it('lets the newest completed summary win, and still records only the job that is ours', async () => {
+  it('lets the newest completed summary win, and records every job', async () => {
     const ours = {
       id: 'rjob_ours',
       workflow: 'summarize',
@@ -4105,7 +4584,11 @@ describe('RobotsPanel — outputs of jobs started elsewhere', () => {
     );
     await new Promise((resolve) => setTimeout(resolve, 50));
     expect(stored.read()?.robotsOutputs?.summarize?.jobId).toBe('rjob_later');
-    expect(stored.read()?.robotsJobs?.map((record) => record.id)).toEqual(['rjob_ours']);
+    expect(stored.read()?.robotsJobs?.map((record) => record.id)).toEqual([
+      'rjob_later',
+      'rjob_ours',
+      'rjob_earlier',
+    ]);
   });
 
   it('enables Apply summary with a summary from elsewhere, and says what is already applied', async () => {

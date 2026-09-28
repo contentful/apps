@@ -103,6 +103,20 @@ export interface UpdateFieldOptions {
    * mean an entry save several times a second while an asset prepares.
    */
   save?: boolean;
+  /**
+   * Called when this write is parked behind the publish gate, and again if a second publish parks
+   * it once more. The returned promise still settles with the real outcome. It reports the gate
+   * to the one caller whose write it holds, so no copy of the gate has to live anywhere else.
+   */
+  onParked?: () => void;
+  /**
+   * `false` drops this write, rather than flushing it, if it is still parked when the editor
+   * closes: it rejects with `DiscardedFieldWriteError`. For a write that only makes sense if the
+   * caller then goes on to act — the placeholder saved before a Robots create is sent — flushing
+   * would leave a guard with nothing behind it, because a closing editor sends nothing. Default
+   * `true`.
+   */
+  flushOnUnmount?: boolean;
 }
 
 /**
@@ -310,6 +324,7 @@ export class App extends React.Component<AppProps, AppState> {
         parked = new Promise<void>((resolve, reject) => {
           this.deferredMutations.push({ mutate, options, resolve, reject });
         });
+        options?.onParked?.();
         return;
       }
 
@@ -403,10 +418,16 @@ export class App extends React.Component<AppProps, AppState> {
    *
    * Best effort, and deliberately *not* routed through `writeChain`: a promise chained during
    * unmount may never get a turn. What it does guarantee is that every parked caller learns
-   * whether its change was written.
+   * whether its change was written. A write that asked for `flushOnUnmount: false` is dropped.
    */
   private flushDeferredMutations = (): void => {
-    const queued = this.deferredMutations;
+    const queued = this.deferredMutations.filter((deferred) => {
+      if (deferred.options?.flushOnUnmount !== false) return true;
+      deferred.reject(
+        new DiscardedFieldWriteError('The editor closed before this write could be made.')
+      );
+      return false;
+    });
     this.deferredMutations = [];
     if (queued.length === 0) return;
 
@@ -1986,11 +2007,10 @@ export class App extends React.Component<AppProps, AppState> {
 
                 {/* `forceMount` because this panel holds state that must outlive a tab switch.
                     f36's `Tabs.Panel` forwards it to Radix, which otherwise *unmounts* an
-                    inactive panel rather than hiding it — and the guard that stops a job being
-                    created twice lives in this component's state. Without this, clicking away to
-                    Captions and back re-enables Run on a create whose outcome is still unknown,
-                    which is two clicks away from paying for the same job twice. Costs nothing in
-                    requests: `isActive` already gates every fetch and the poll loop.
+                    inactive panel rather than hiding it — and the poll loop, which notices a
+                    job finishing while the editor watches Captions, and the create this tab may
+                    be making, both live in this component. Costs nothing in requests: `isActive`
+                    already gates the first fetch.
 
                     `hidden` has to be ours. Radix reads `forceMount` as "mounted *and* rendered"
                     — it sets `hidden={!present}` and `forceMount` is what makes `present` true —

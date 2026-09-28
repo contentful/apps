@@ -77,7 +77,11 @@ const mount = (initial: Partial<MuxContentfulObject>, writeDelayMs = 5): Harness
   const sdk = {
     ids: { environment: 'env', space: 'space', organization: 'org', app: 'app' },
     parameters: {
-      installation: { muxAccessTokenId: 'id', muxAccessTokenSecret: 'secret', muxDomain: 'mux.com' },
+      installation: {
+        muxAccessTokenId: 'id',
+        muxAccessTokenSecret: 'secret',
+        muxDomain: 'mux.com',
+      },
     },
     field: {
       id: 'muxVideo',
@@ -347,7 +351,10 @@ describe('App.updateField — writes parked behind the publish gate', () => {
     }));
     const second = harness.app.updateField((current) => ({
       ...(current as MuxContentfulObject),
-      robotsJobs: [...((current as MuxContentfulObject).robotsJobs ?? []), { ...job, id: 'rjob_2' }],
+      robotsJobs: [
+        ...((current as MuxContentfulObject).robotsJobs ?? []),
+        { ...job, id: 'rjob_2' },
+      ],
     }));
     await tick();
 
@@ -399,6 +406,98 @@ describe('App.updateField — writes parked behind the publish gate', () => {
     expect(await broken).toHaveProperty('message', 'bad mutator');
     await expect(good).resolves.toBeUndefined();
     expect(harness.read()?.robotsJobs).toHaveLength(1);
+  });
+
+  it('says a write is parked the moment it is, before the promise settles', async () => {
+    const harness = await gated();
+    const onParked = vi.fn();
+
+    const write = harness.app.updateField(
+      (current) => ({ ...(current as MuxContentfulObject), robotsJobs: [job] }),
+      { onParked }
+    );
+    await tick();
+
+    expect(onParked).toHaveBeenCalledTimes(1);
+    expect(await settlementOf(write)).toBe('pending');
+
+    // Released by the function's republish, the promise resolves with the write made.
+    harness.write({ version: 3, assetId: 'asset-1', ready: true } as MuxContentfulObject);
+    harness.publish();
+    await expect(write).resolves.toBeUndefined();
+    expect(harness.read()?.robotsJobs).toHaveLength(1);
+    expect(onParked).toHaveBeenCalledTimes(1);
+  });
+
+  it('never says so for a write made with the gate shut', async () => {
+    const harness = mount({ version: 3, assetId: 'asset-1', ready: true });
+    await tick();
+    const onParked = vi.fn();
+
+    await harness.app.updateField(
+      (current) => ({ ...(current as MuxContentfulObject), robotsJobs: [job] }),
+      { onParked }
+    );
+
+    expect(onParked).not.toHaveBeenCalled();
+    expect(harness.read()?.robotsJobs).toHaveLength(1);
+  });
+
+  it('says so again when a second publish parks the released write once more', async () => {
+    const harness = await gated();
+    const onParked = vi.fn();
+
+    const write = harness.app.updateField(
+      (current) => ({ ...(current as MuxContentfulObject), robotsJobs: [job] }),
+      { onParked }
+    );
+    await tick();
+    expect(onParked).toHaveBeenCalledTimes(1);
+
+    // The republish releases it, and before the chain applies it another publish with pending
+    // actions shuts the gate again.
+    harness.write({ version: 3, assetId: 'asset-1', ready: true } as MuxContentfulObject);
+    harness.publish();
+    harness.write({
+      version: 3,
+      assetId: 'asset-1',
+      ready: true,
+      pendingActions,
+    } as Partial<MuxContentfulObject> as MuxContentfulObject);
+    harness.publish();
+    await tick();
+
+    expect(onParked).toHaveBeenCalledTimes(2);
+    expect(await settlementOf(write)).toBe('pending');
+    harness.app.componentWillUnmount();
+    await write;
+  });
+
+  it('drops a parked write that asked not to be flushed, and flushes the rest', async () => {
+    const harness = await gated();
+
+    const dropped = outcomeOf(
+      harness.app.updateField(
+        (current) => ({ ...(current as MuxContentfulObject), robotsPendingCreates: [] }),
+        { flushOnUnmount: false, save: true }
+      )
+    );
+    const flushed = harness.app.updateField((current) => ({
+      ...(current as MuxContentfulObject),
+      robotsJobs: [job],
+    }));
+    await tick();
+
+    harness.app.componentWillUnmount();
+
+    const error = await dropped;
+    expect(error).toBeInstanceOf(DiscardedFieldWriteError);
+    expect((error as Error).message).toBe('The editor closed before this write could be made.');
+    await expect(flushed).resolves.toBeUndefined();
+    expect(harness.read()?.robotsJobs).toHaveLength(1);
+    expect(harness.read() && 'robotsPendingCreates' in (harness.read() as object)).toBe(false);
+    // The dropped write asked for a save; nothing that was flushed did.
+    expect(harness.save).not.toHaveBeenCalled();
   });
 
   it('does not deadlock when writes queue up behind a parked one', async () => {

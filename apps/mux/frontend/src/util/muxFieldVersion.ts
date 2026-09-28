@@ -14,9 +14,9 @@ export const BASE_FIELD_VERSION = 3;
 /**
  * One version for all of Robots, not one per key.
  *
- * `robotsJobs`, `robotsOutputs` and `robotsDirectiveRuns` all ship in the same release, so no
- * build ever writes one without knowing about the others. A version exists to tell apart shapes
- * written by *different* builds; three numbers here would describe a history that never happened,
+ * `robotsJobs`, `robotsOutputs`, `robotsDirectiveRuns` and `robotsPendingCreates` all ship in the
+ * same release, so no build ever writes one without knowing about the others. A version exists to tell apart shapes
+ * written by *different* builds; four numbers here would describe a history that never happened,
  * and every one of them is a number some future reader has to keep straight.
  */
 export const FIELD_VERSION_WITH_ROBOTS = 4;
@@ -41,6 +41,7 @@ export function deriveFieldVersion(value: Partial<MuxContentfulObject> | undefin
   // which is what would re-draft every entry that predates Robots.
   const jobs = value?.robotsJobs;
   const directiveRuns = value?.robotsDirectiveRuns;
+  const pendingCreates = value?.robotsPendingCreates;
 
   // `Array.isArray` rather than a truthy `.length`, to match the functions copy exactly. The
   // field JSON is user-reachable data, and a string has a `length` too — an implementation that
@@ -49,7 +50,8 @@ export function deriveFieldVersion(value: Partial<MuxContentfulObject> | undefin
   const holdsRobotsData =
     (Array.isArray(jobs) && jobs.length > 0) ||
     !!value?.robotsOutputs ||
-    (Array.isArray(directiveRuns) && directiveRuns.length > 0);
+    (Array.isArray(directiveRuns) && directiveRuns.length > 0) ||
+    (Array.isArray(pendingCreates) && pendingCreates.length > 0);
 
   return Math.max(carried, holdsRobotsData ? FIELD_VERSION_WITH_ROBOTS : 0);
 }

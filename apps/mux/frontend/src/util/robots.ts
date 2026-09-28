@@ -1,9 +1,8 @@
 /**
  * The Robots utility surface, in one import.
  *
- * Split in two behind this barrel: `robotsPassthrough` decides what is *ours* — the scoped
- * passthrough, ownership, and reconciling a create whose outcome Mux never confirmed —
- * while `robotsField` turns what the API says into what the entry stores.
+ * `robotsRequests`: what the tab sends Mux and how it reads the answers. `robotsField`: turning
+ * what Mux says into what the entry stores, pending creates included.
  */
-export * from './robotsPassthrough';
+export * from './robotsRequests';
 export * from './robotsField';

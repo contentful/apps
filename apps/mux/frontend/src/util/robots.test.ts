@@ -1,54 +1,51 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MuxApiError, muxApiErrorFromResponse } from './muxApi';
 import {
-  RobotsUnconfirmedCreateError,
-  RobotsUnconfirmedDirectiveRunError,
   activeDirectiveRuns,
   activeJobs,
   advisoryFromError,
   applyRobotsDirectiveRunsToValue,
   applyRobotsJobsToValue,
-  buildJobPassthrough,
   capabilityFromError,
-  createRobotsDirectiveRunWithReconciliation,
-  createRobotsJobWithReconciliation,
   directiveRunRefsFromJobs,
-  findRecentDirectiveRun,
-  isOwnPassthrough,
-  isPluginOriginatedJob,
-  jobIdsFromDirectiveRuns,
-  jobsClaimedByEntry,
   jobsNeedingDetail,
   mergeDirectiveRunRecords,
   mergeJobRecords,
   mergeRobotsOutputs,
-  parseJobPassthrough,
   cachedRobotsCapability,
   recordRobotsCapability,
   recordRobotsDirectiveRun,
   resetRobotsCapabilityCache,
+  LocalPendingCreate,
+  PendingCreateRow,
+  ROBOTS_CREATE_CONFIRM_GRACE_S,
+  ROBOTS_CREATE_MATCH_AFTER_S,
+  ROBOTS_CREATE_MATCH_BEFORE_S,
+  jobTableRows,
+  pendingCreateRows,
+  runTableRows,
+  addPendingCreate,
+  freshPendingCreates,
+  matchPendingCreates,
+  newPendingDirectiveRunCreate,
+  newPendingJobCreate,
+  pendingCreatesOf,
+  removePendingCreates,
+  resolvePendingCreatesFromReads,
+  resolvePendingDirectiveRunCreate,
+  resolvePendingJobCreate,
+  startRobotsDirectiveRun,
+  startRobotsJob,
 } from './robots';
-import { RobotsDirectiveRun, RobotsJob } from './robotsTypes';
+import {
+  RobotsDirectiveRun,
+  RobotsJob,
+  RobotsPendingDirectiveRunCreate,
+  RobotsPendingJobCreate,
+} from './robotsTypes';
 import { MuxContentfulObject } from './types';
 
-/** The install every fixture below belongs to. */
-const scope = { space: 'space-1', environment: 'master', entry: 'entry-1' };
-
-/** Ownership options exactly as the panel passes them. */
-const ours = { scope };
-
-/** A passthrough stamped by *this* install for *this* entry — the only kind that is trusted. */
-const ourPassthrough = (requestId = 'abcdef0123456789') =>
-  `mux:cms:contentful:2.0.0|${scope.space}:${scope.environment}:${scope.entry}|${requestId}`;
-
-/** The same stamp as this install wrote it before Mux's prefix, which jobs still carry. */
-const ourLegacyPassthrough = (requestId = 'abcdef0123456789') =>
-  `contentful@2.0.0|${scope.space}:${scope.environment}:${scope.entry}|${requestId}`;
-
-/**
- * A job this plugin started, as the single-job GET returns it: our passthrough, and the asset it
- * ran on in `parameters`.
- */
+/** A job as the single-job GET returns it, with the asset it ran on in `parameters`. */
 const job = (overrides: Partial<RobotsJob> = {}): RobotsJob =>
   ({
     id: 'rjob_1',
@@ -56,154 +53,16 @@ const job = (overrides: Partial<RobotsJob> = {}): RobotsJob =>
     status: 'completed',
     created_at: 1_700_000_000,
     updated_at: 1_700_000_100,
-    passthrough: ourPassthrough('req-1-0000000000'),
     parameters: { asset_id: 'asset-1' },
     ...overrides,
   } as RobotsJob);
 
 /** A job someone ran from the Mux dashboard against the same asset. */
 const foreignJob = (overrides: Partial<RobotsJob> = {}): RobotsJob =>
-  job({ id: 'rjob_dashboard', passthrough: undefined, ...overrides });
+  job({ id: 'rjob_dashboard', ...overrides });
 
 const baseValue = (extra: Partial<MuxContentfulObject> = {}): MuxContentfulObject =>
   ({ version: 3, assetId: 'asset-1', ready: true, ...extra } as MuxContentfulObject);
-
-describe('buildJobPassthrough', () => {
-  it('opens with the prefix Mux counts CMS integrations by, then a unique request id', () => {
-    const first = buildJobPassthrough(scope);
-    const second = buildJobPassthrough(scope);
-
-    // Mux's analytics matches the prefix; everything after its colon is ours.
-    expect(first).toMatch(/^mux:cms:contentful:[^|]+\|space-1:master:entry-1\|[0-9a-f]{16}$/);
-    expect(first).not.toBe(second);
-  });
-
-  it('names the space, environment and entry, so the tag identifies the install', () => {
-    const parsed = parseJobPassthrough(buildJobPassthrough(scope));
-    expect(parsed?.scope).toEqual(scope);
-  });
-
-  it('stays inside 255 characters with every id at its limit and a 20-character version', () => {
-    // The budget, with Contentful's 64-character id limit spent three times over:
-    //   "mux:cms:contentful:" 19 + version 20 + "|" + space 64 + ":" + environment 64 + ":"
-    //   + entry 64 + "|" + request id 16  =  251.
-    // A 36-character UUID in that last slot makes it 271, which is why the request id is 16 hex.
-    const requestId = buildJobPassthrough(scope).split('|')[2];
-    expect(requestId).toMatch(/^[0-9a-f]{16}$/);
-
-    const longIds = {
-      space: 'a'.repeat(64),
-      environment: 'b'.repeat(64),
-      entry: 'c'.repeat(64),
-    };
-    const worst = buildJobPassthrough(longIds);
-    const version = parseJobPassthrough(worst)?.version ?? '';
-    // The version is this build's, so hold it to its line of the budget and price in the rest.
-    expect(version.length).toBeGreaterThan(0);
-    expect(version.length).toBeLessThanOrEqual(20);
-    expect(worst.length - version.length + 20).toBeLessThanOrEqual(255);
-  });
-
-  it('falls back to two segments with no scope, still attributed and trusted by nothing', () => {
-    const unscoped = buildJobPassthrough();
-    expect(unscoped.startsWith('mux:cms:contentful:')).toBe(true);
-    expect(unscoped.split('|')).toHaveLength(2);
-    expect(parseJobPassthrough(unscoped)?.scope).toBeUndefined();
-  });
-});
-
-describe('parseJobPassthrough', () => {
-  it('never throws, whatever it is handed', () => {
-    for (const input of [
-      undefined,
-      null,
-      42,
-      {},
-      ['mux:cms:contentful:2.0.0|a:b:c|req'],
-      '',
-      'contentful@',
-      'contentful@2.0.0|',
-      'contentful@2.0.0||',
-      'contentful@2.0.0|a:b|req',
-      'contentful@2.0.0|a:b:c:d|req',
-      'contentful@2.0.0|::|req',
-      'mux:cms:contentful:',
-      'mux:cms:contentful:|',
-      'mux:cms:contentful:2.0.0||',
-      'mux:cms:contentful:2.0.0|a:b|req',
-      'mux:cms:contentful:2.0.0|::|req',
-      'mux:cms:contentful:2.0.0|a:b:c',
-      'someone-else|a:b:c|req',
-    ]) {
-      expect(() => parseJobPassthrough(input)).not.toThrow();
-    }
-  });
-
-  it('reads nothing out of a passthrough that is not ours', () => {
-    expect(parseJobPassthrough('mux-dashboard|whatever')).toBeUndefined();
-    // Another CMS integration in Mux's namespace, and the namespace without its closing colon.
-    expect(parseJobPassthrough('mux:cms:sanity:1.0.0|a:b:c|req')).toBeUndefined();
-    expect(parseJobPassthrough('mux:cms:contentful2.0.0|a:b:c|req')).toBeUndefined();
-    // Either prefix has to open the value; one that merely contains ours is someone else's.
-    expect(
-      parseJobPassthrough('order-42 mux:cms:contentful:2.0.0|space-1:master:entry-1|req')
-    ).toBeUndefined();
-    expect(parseJobPassthrough('x-contentful@2.0.0|space-1:master:entry-1|req')).toBeUndefined();
-  });
-
-  it('reads both prefixes it has written the same way', () => {
-    // A job stamped before the prefix changed must parse exactly as it did, or its orphan is lost.
-    expect(parseJobPassthrough(ourPassthrough())).toEqual({ version: '2.0.0', scope });
-    expect(parseJobPassthrough(ourLegacyPassthrough())).toEqual({ version: '2.0.0', scope });
-    expect(parseJobPassthrough('contentful@2.0.0|abcdef0123456789')).toEqual({ version: '2.0.0' });
-  });
-
-  it('reads the version but no scope from a malformed scope segment', () => {
-    expect(parseJobPassthrough('contentful@2.0.0|only-two-parts:here|req')).toEqual({
-      version: '2.0.0',
-    });
-    expect(parseJobPassthrough('mux:cms:contentful:2.0.0|only-two-parts:here|req')).toEqual({
-      version: '2.0.0',
-    });
-  });
-});
-
-describe('isOwnPassthrough', () => {
-  it('trusts a passthrough that names this exact install', () => {
-    expect(isOwnPassthrough(buildJobPassthrough(scope), scope)).toBe(true);
-  });
-
-  it('still trusts one this install stamped before the prefix changed', () => {
-    expect(isOwnPassthrough(ourLegacyPassthrough(), scope)).toBe(true);
-  });
-
-  it('refuses another space, environment or entry', () => {
-    const stamped = buildJobPassthrough(scope);
-    expect(isOwnPassthrough(stamped, { ...scope, space: 'space-2' })).toBe(false);
-    expect(isOwnPassthrough(stamped, { ...scope, environment: 'staging' })).toBe(false);
-    expect(isOwnPassthrough(stamped, { ...scope, entry: 'entry-2' })).toBe(false);
-    expect(isOwnPassthrough(ourLegacyPassthrough(), { ...scope, space: 'space-2' })).toBe(false);
-  });
-
-  it('refuses the two-segment format under either prefix, which names only the integration', () => {
-    expect(isOwnPassthrough('contentful@2.0.0|abcdef0123456789', scope)).toBe(false);
-    expect(isOwnPassthrough('mux:cms:contentful:2.0.0|abcdef0123456789', scope)).toBe(false);
-  });
-
-  it('trusts nothing at all when there is no scope to compare against', () => {
-    // The default has to fail closed. "No identity" meaning "trust everything" would adopt every
-    // Contentful install's jobs onto this entry, silently.
-    expect(isOwnPassthrough(buildJobPassthrough(scope), undefined)).toBe(false);
-  });
-
-  it('refuses junk without throwing', () => {
-    expect(isOwnPassthrough(undefined, scope)).toBe(false);
-    expect(isOwnPassthrough('contentful@', scope)).toBe(false);
-    // Mux's example value, verbatim: the prefix alone, as anyone copying the example would send.
-    expect(isOwnPassthrough('mux:cms:contentful:', scope)).toBe(false);
-    expect(isOwnPassthrough(12345, scope)).toBe(false);
-  });
-});
 
 /**
  * The terms-not-accepted 403, exactly as Mux sends it. Same `type` as every other 403 of its kind,
@@ -397,167 +256,65 @@ describe('directiveRunRefsFromJobs', () => {
   });
 });
 
-describe('jobsClaimedByEntry', () => {
-  it('is exactly what applyRobotsJobsToValue stores', () => {
-    // One rule behind two things: what the entry records, and which rows the table marks as
-    // started elsewhere. If they ever disagreed, a row would say "no record" about a job with one.
-    const value = baseValue({
-      robotsDirectiveRuns: [{ runId: 'drvrun_1', directiveId: 'drv_1', jobIds: ['rjob_run'] }],
-    });
-    const jobs = [job(), foreignJob(), job({ id: 'rjob_run', passthrough: undefined })];
+describe('startRobotsJob', () => {
+  const apiThatAnswers = (answer: () => Promise<unknown>) => {
+    const createRobotsJob = vi.fn(answer);
+    return { muxApi: { createRobotsJob } as never, createRobotsJob };
+  };
 
-    const claimed = jobsClaimedByEntry(value, jobs, undefined, ours).map(({ id }) => id);
-    const stored = applyRobotsJobsToValue(value, jobs, undefined, ours)?.robotsJobs?.map(
-      ({ id }) => id
+  it('returns the job Mux created, and creates it once', async () => {
+    const { muxApi, createRobotsJob } = apiThatAnswers(async () => ({ data: job() }));
+    await expect(startRobotsJob(muxApi, 'summarize', { asset_id: 'asset-1' })).resolves.toEqual(
+      job()
     );
-
-    expect(claimed).toEqual(['rjob_1', 'rjob_run']);
-    expect([...(stored ?? [])].sort()).toEqual([...claimed].sort());
-  });
-});
-
-describe('createRobotsJobWithReconciliation', () => {
-  it('stamps a passthrough on the created job', async () => {
-    const createRobotsJob = vi.fn(async () => ({ data: job() }));
-    await createRobotsJobWithReconciliation(
-      { createRobotsJob } as never,
-      'summarize',
-      'asset-1',
-      { asset_id: 'asset-1' },
-      scope
-    );
-
-    const [, , passthrough] = createRobotsJob.mock.calls[0] as unknown[];
-    expect(String(passthrough).startsWith('mux:cms:contentful:')).toBe(true);
-    expect(isOwnPassthrough(passthrough, scope)).toBe(true);
+    expect(createRobotsJob).toHaveBeenCalledTimes(1);
+    expect(createRobotsJob).toHaveBeenCalledWith('summarize', { asset_id: 'asset-1' });
   });
 
-  it('surfaces a failure Mux actually answered, without reconciling', async () => {
-    const listRobotsJobs = vi.fn();
-    const muxApi = {
-      createRobotsJob: vi.fn(async () => {
-        throw new MuxApiError('Limit reached', 403, 'robots_units_limit_exceeded');
-      }),
-      listRobotsJobs,
-    } as never;
-
-    await expect(
-      createRobotsJobWithReconciliation(muxApi, 'summarize', 'asset-1', {})
-    ).rejects.toBeInstanceOf(MuxApiError);
-    // Nothing started, so there is nothing to reconcile against.
-    expect(listRobotsJobs).not.toHaveBeenCalled();
-  });
-
-  it('recovers the job by passthrough when the app-action call timed out', async () => {
-    // Modelled on the real API: the list is a six-field summary with no `passthrough`, so the
-    // match can only be made by opening each candidate.
-    let stamped = '';
-    const listRobotsJobs = vi.fn(async () => ({
-      data: [
-        { id: 'rjob_older', workflow: 'summarize', status: 'completed', created_at: 1 },
-        { id: 'rjob_started', workflow: 'summarize', status: 'processing', created_at: 99 },
-      ],
+  it('reads an error in a 2xx body as Mux answering no, with every message', async () => {
+    const { muxApi, createRobotsJob } = apiThatAnswers(async () => ({
+      data: undefined,
+      error: { type: 'invalid_parameters', messages: ['Bad tone.', ' ', 'Bad length.'] },
     }));
-    const getRobotsJob = vi.fn(async (_workflow: string, jobId: string) => ({
-      data: {
-        id: jobId,
-        workflow: 'summarize',
-        status: 'processing',
-        passthrough: jobId === 'rjob_started' ? stamped : 'someone-else',
-      },
-    }));
+    const error = await startRobotsJob(muxApi, 'summarize', {}).catch((caught) => caught);
+    expect(error).toBeInstanceOf(MuxApiError);
+    expect(error).toMatchObject({ message: 'Bad tone. Bad length.', status: 400 });
+    expect((error as MuxApiError).muxAnswered).toBe(true);
+    expect(createRobotsJob).toHaveBeenCalledTimes(1);
+  });
 
-    const muxApi = {
-      createRobotsJob: vi.fn(async (_workflow, _parameters, passthrough: string) => {
-        stamped = passthrough;
-        // What `appActionCall.createWithResponse` throws after 15 polls: a plain Error, no status.
-        throw new Error('The app action response is taking longer than expected to process.');
-      }),
-      listRobotsJobs,
-      getRobotsJob,
-    } as never;
-
-    const recovered = await createRobotsJobWithReconciliation(muxApi, 'summarize', 'asset-1', {});
-
-    expect(recovered.id).toBe('rjob_started');
-    // Narrowed server-side by workflow, so we never open a candidate we know cannot match.
-    expect(listRobotsJobs).toHaveBeenCalledWith(
-      expect.objectContaining({ asset_id: 'asset-1', workflow: 'summarize' })
+  it('says Mux gave no reason when the body error carries no message', async () => {
+    const { muxApi } = apiThatAnswers(async () => ({ data: undefined, error: { messages: [] } }));
+    await expect(startRobotsJob(muxApi, 'summarize', {})).rejects.toThrow(
+      'Mux rejected this job but gave no reason.'
     );
-    // Newest first, so the job we just created is the first one opened.
-    expect(getRobotsJob.mock.calls[0][1]).toBe('rjob_started');
   });
 
-  it('does not claim success when reconciliation finds no matching job', async () => {
-    vi.useFakeTimers();
-    const muxApi = {
-      createRobotsJob: vi.fn(async () => {
-        throw new Error('taking longer than expected');
-      }),
-      listRobotsJobs: vi.fn(async () => ({
-        data: [{ id: 'rjob_other', workflow: 'summarize', status: 'completed', created_at: 1 }],
-      })),
-      // Somebody else's job on the same asset must not be mistaken for ours.
-      getRobotsJob: vi.fn(async () => ({
-        data: { id: 'rjob_other', workflow: 'summarize', status: 'completed', passthrough: 'x' },
-      })),
-    } as never;
-
-    const pending = expect(
-      createRobotsJobWithReconciliation(muxApi, 'summarize', 'asset-1', {})
-    ).rejects.toBeInstanceOf(RobotsUnconfirmedCreateError);
-    await vi.runAllTimersAsync();
-    await pending;
-    vi.useRealTimers();
+  it('treats a 2xx that names no job as an unknown outcome, not a refusal', async () => {
+    const { muxApi, createRobotsJob } = apiThatAnswers(async () => ({ data: {} }));
+    const error = await startRobotsJob(muxApi, 'summarize', {}).catch((caught) => caught);
+    expect(error).toBeInstanceOf(Error);
+    expect(error).not.toBeInstanceOf(MuxApiError);
+    expect(createRobotsJob).toHaveBeenCalledTimes(1);
   });
 
-  it('reports unknown rather than failed when reconciliation itself fails', async () => {
-    vi.useFakeTimers();
-    vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    const muxApi = {
-      createRobotsJob: vi.fn(async () => {
-        throw new Error('taking longer than expected');
-      }),
-      listRobotsJobs: vi.fn(async () => {
-        throw new Error('also offline');
-      }),
-    } as never;
-
-    const pending = expect(
-      createRobotsJobWithReconciliation(muxApi, 'summarize', 'asset-1', {})
-    ).rejects.toBeInstanceOf(RobotsUnconfirmedCreateError);
-    await vi.runAllTimersAsync();
-    await pending;
-    vi.useRealTimers();
-  });
-
-  it('hands the passthrough back so the caller can keep checking for that exact job', async () => {
-    vi.useFakeTimers();
-    let stamped = '';
-    const muxApi = {
-      createRobotsJob: vi.fn(async (_w, _p, passthrough: string) => {
-        stamped = passthrough;
-        throw new Error('taking longer than expected');
-      }),
-      listRobotsJobs: vi.fn(async () => ({ data: [] })),
-    } as never;
-
-    const pending = createRobotsJobWithReconciliation(muxApi, 'summarize', 'asset-1', {}).catch(
-      (error) => error
-    );
-    await vi.runAllTimersAsync();
-    const error = await pending;
-    vi.useRealTimers();
-
-    expect(error).toBeInstanceOf(RobotsUnconfirmedCreateError);
-    expect((error as RobotsUnconfirmedCreateError).passthrough).toBe(stamped);
+  it('passes a proxy error through untouched, and never retries', async () => {
+    for (const thrown of [
+      new MuxApiError('Limit reached', 403, 'robots_units_limit_exceeded'),
+      new Error('The app action response is taking longer than expected to process.'),
+    ]) {
+      const { muxApi, createRobotsJob } = apiThatAnswers(async () => {
+        throw thrown;
+      });
+      await expect(startRobotsJob(muxApi, 'summarize', {})).rejects.toBe(thrown);
+      expect(createRobotsJob).toHaveBeenCalledTimes(1);
+    }
   });
 });
 
 describe('mergeJobRecords', () => {
   it('stores a job at every stage of its life, not only once it finishes', () => {
-    // Recording from creation is what makes ownership durable: the list omits `passthrough`, so
-    // an unrecorded job is indistinguishable from a stranger's after a reload.
+    // In flight as well as finished: the record is what the entry shows after a reload.
     const merged = mergeJobRecords(undefined, [
       job({ id: 'a', status: 'processing' }),
       job({ id: 'b', status: 'completed' }),
@@ -577,20 +334,17 @@ describe('mergeJobRecords', () => {
   });
 
   it('keeps what only the richer response knew when a summary comes back thinner', () => {
-    // The create response has `passthrough` and `units_consumed`; the list does not. Merging
-    // rather than replacing is what stops a poll tick from erasing them.
+    // Detail has `units_consumed` and the failure; the list does not. Merging rather than
+    // replacing is what stops a poll tick from erasing them.
     const existing = mergeJobRecords(undefined, [
-      job({ status: 'processing', units_consumed: 12, passthrough: 'contentful@2.0.0|req-1' }),
+      job({ status: 'errored', units_consumed: 12, errors: [{ message: 'Too quiet' }] }),
     ]);
     const merged = mergeJobRecords(existing, [
-      { id: 'rjob_1', workflow: 'summarize', status: 'completed' } as never,
+      { id: 'rjob_1', workflow: 'summarize', status: 'errored' } as never,
     ]);
 
-    expect(merged?.[0]).toMatchObject({
-      status: 'completed',
-      units_consumed: 12,
-      passthrough: 'contentful@2.0.0|req-1',
-    });
+    expect(merged).toBe(existing);
+    expect(merged?.[0]).toMatchObject({ units_consumed: 12, error: 'Too quiet' });
   });
 
   it('lets the API win when a stored record disagrees', () => {
@@ -770,23 +524,12 @@ describe('mergeRobotsOutputs', () => {
 describe('applyRobotsJobsToValue', () => {
   it('returns the identical value when there is nothing new — no write, no "Changed" entry', () => {
     const value = baseValue();
-    expect(applyRobotsJobsToValue(value, [], undefined, ours)).toBe(value);
-    // A job that is not ours changes nothing, whatever its status.
-    expect(
-      applyRobotsJobsToValue(value, [foreignJob({ status: 'pending' })], undefined, ours)
-    ).toBe(value);
+    expect(applyRobotsJobsToValue(value, [], 'asset-1')).toBe(value);
   });
 
   it('returns the identical value when a stored job reports the same state again', () => {
-    const stored = applyRobotsJobsToValue(
-      baseValue(),
-      [job({ status: 'processing' })],
-      undefined,
-      ours
-    );
-    expect(applyRobotsJobsToValue(stored, [job({ status: 'processing' })], undefined, ours)).toBe(
-      stored
-    );
+    const stored = applyRobotsJobsToValue(baseValue(), [job({ status: 'processing' })], 'asset-1');
+    expect(applyRobotsJobsToValue(stored, [job({ status: 'processing' })], 'asset-1')).toBe(stored);
   });
 
   it('leaves every other key alone when it does write', () => {
@@ -795,7 +538,7 @@ describe('applyRobotsJobsToValue', () => {
       pendingActions: { delete: [], create: [], update: [] },
     });
 
-    const next = applyRobotsJobsToValue(value, [job({ outputs: { title: 'A' } })], undefined, ours);
+    const next = applyRobotsJobsToValue(value, [job({ outputs: { title: 'A' } })], 'asset-1');
 
     expect(next).not.toBe(value);
     expect(next?.captions).toBe(value.captions);
@@ -805,7 +548,18 @@ describe('applyRobotsJobsToValue', () => {
   });
 
   it('does nothing when the field has no value at all', () => {
-    expect(applyRobotsJobsToValue(undefined, [job()], undefined, ours)).toBeUndefined();
+    expect(applyRobotsJobsToValue(undefined, [job()], 'asset-1')).toBeUndefined();
+  });
+
+  it('writes nothing onto a value whose assetId is not the listed asset', () => {
+    // A mutator queued for one asset and applied after the value was replaced with another: a
+    // pasted asset ID, or a write parked behind the publish gate.
+    const other = baseValue({ assetId: 'asset-2' });
+    expect(applyRobotsJobsToValue(other, [job({ outputs: { title: 'A' } })], 'asset-1')).toBe(
+      other
+    );
+    const none = baseValue({ assetId: undefined });
+    expect(applyRobotsJobsToValue(none, [job()], 'asset-1')).toBe(none);
   });
 });
 
@@ -875,90 +629,32 @@ describe('activeDirectiveRuns', () => {
   });
 });
 
-describe('job ownership — what gets written to the entry', () => {
-  it('recognises a job this plugin started', () => {
-    expect(isPluginOriginatedJob(job(), undefined, undefined, ours)).toBe(true);
-  });
-
-  it('does not claim a job someone ran from the Mux dashboard', () => {
-    expect(isPluginOriginatedJob(foreignJob(), undefined, undefined, ours)).toBe(false);
-    expect(
-      isPluginOriginatedJob(
-        foreignJob({ passthrough: 'someone-elses-tag' }),
-        undefined,
-        undefined,
-        ours
-      )
-    ).toBe(false);
-  });
-
-  it("takes the caller's word for a job it just created", () => {
-    // The create path holds the response to its own POST. It should not have to prove ownership
-    // by parsing a string back out — and this is what keeps the record being written even where
-    // `sdk.ids` handed us no scope at all.
-    expect(
-      isPluginOriginatedJob(foreignJob(), undefined, undefined, {
-        ownJobIds: new Set(['rjob_dashboard']),
-      })
-    ).toBe(true);
-  });
-
-  it('claims a job dispatched by a directive run we can see', () => {
-    const runs = [
-      {
-        run_id: 'drvrun_1',
-        node_states: [{ job_id: 'rjob_dashboard', workflow_name: 'summarize' }],
-      },
-    ];
-    expect(isPluginOriginatedJob(foreignJob(), jobIdsFromDirectiveRuns(runs))).toBe(true);
-  });
-
-  it('collects job ids across every node of every run', () => {
-    expect(
-      jobIdsFromDirectiveRuns([
-        { run_id: 'r1', node_states: [{ job_id: 'a' }, { job_id: 'b' }] },
-        { run_id: 'r2', node_states: [{ job_id: 'c' }, {}] },
-        { run_id: 'r3' },
-      ])
-    ).toEqual(new Set(['a', 'b', 'c']));
-  });
-
-  it('shows a dashboard job but never records it', () => {
-    const value = baseValue();
-    // Displaying everything is what makes the list honest; the entry records only what was done
-    // through Contentful. A workflow with no persisted output, so there is nothing else to keep.
-    expect(
-      applyRobotsJobsToValue(
-        value,
-        [foreignJob({ workflow: 'find-scenes', outputs: { scenes: [] } })],
-        undefined,
-        ours
-      )
-    ).toBe(value);
-  });
-
-  it('records a directive job once its run identifies it as ours', () => {
-    const value = baseValue();
-    const runs = [{ run_id: 'drvrun_1', node_states: [{ job_id: 'rjob_dashboard' }] }];
-
+describe('every job on the asset is recorded', () => {
+  it('records a job someone ran from the Mux dashboard', () => {
     const next = applyRobotsJobsToValue(
-      value,
-      [foreignJob({ outputs: { title: 'Automated' } })],
-      jobIdsFromDirectiveRuns(runs)
+      baseValue(),
+      [foreignJob({ workflow: 'find-scenes', outputs: { scenes: [] } })],
+      'asset-1'
     );
-
     expect(next?.robotsJobs?.map(({ id }) => id)).toEqual(['rjob_dashboard']);
-    expect(next?.robotsOutputs?.summarize?.title).toBe('Automated');
+    expect(next?.version).toBe(4);
+  });
+
+  it('records a job a directive dispatched, with no run in sight', () => {
+    const next = applyRobotsJobsToValue(
+      baseValue(),
+      [{ id: 'rjob_auto', workflow: 'summarize', status: 'completed' }] as never as RobotsJob[],
+      'asset-1'
+    );
+    expect(next?.robotsJobs?.map(({ id }) => id)).toEqual(['rjob_auto']);
   });
 
   it('keeps a stored record the API no longer returns', () => {
-    // Robots purges jobs after 30 days, and a job deleted upstream must not vanish from the
-    // entry: once a run finished, that is a fact about this entry's history.
-    const withRecord = applyRobotsJobsToValue(baseValue(), [job()], undefined, ours);
+    // Robots purges jobs after 30 days, and the entry's history has to outlive that.
+    const withRecord = applyRobotsJobsToValue(baseValue(), [job()], 'asset-1');
     expect(withRecord?.robotsJobs).toHaveLength(1);
 
-    const afterPurge = applyRobotsJobsToValue(withRecord, [], undefined, ours);
-    expect(afterPurge?.robotsJobs).toHaveLength(1);
+    const afterPurge = applyRobotsJobsToValue(withRecord, [], 'asset-1');
     expect(afterPurge).toBe(withRecord);
   });
 
@@ -966,21 +662,16 @@ describe('job ownership — what gets written to the entry', () => {
     const withOutput = applyRobotsJobsToValue(
       baseValue(),
       [job({ outputs: { title: 'Kept' } })],
-      undefined,
-      ours
+      'asset-1'
     );
-    const afterPurge = applyRobotsJobsToValue(withOutput, [], undefined, ours);
+    const afterPurge = applyRobotsJobsToValue(withOutput, [], 'asset-1');
     expect(afterPurge?.robotsOutputs?.summarize?.title).toBe('Kept');
   });
 });
 
-/**
- * `robotsJobs` is what this entry did; `robotsOutputs` describes the video. So outputs are kept
- * whoever started the job, and the job itself is still recorded only when the entry claims it.
- * See ADR-0005's 2026-09-25 amendment.
- */
+/** Outputs describe the video, so they are kept whoever started the job, and only for its asset. */
 describe('applyRobotsJobsToValue — outputs, whoever started the job', () => {
-  it('keeps the summary and moderation result of jobs run elsewhere, and records neither job', () => {
+  it('keeps the summary and moderation result of jobs run elsewhere, and records both jobs', () => {
     const next = applyRobotsJobsToValue(
       baseValue(),
       [
@@ -991,8 +682,7 @@ describe('applyRobotsJobsToValue — outputs, whoever started the job', () => {
           outputs: { exceeds_threshold: true, max_scores: { sexual: 0.9, violence: 0.1 } },
         }),
       ],
-      undefined,
-      ours
+      'asset-1'
     );
 
     expect(next?.robotsOutputs?.summarize).toMatchObject({
@@ -1003,67 +693,47 @@ describe('applyRobotsJobsToValue — outputs, whoever started the job', () => {
       jobId: 'rjob_dashboard_mod',
       exceedsThreshold: true,
     });
-    expect(next?.robotsJobs).toBeUndefined();
+    expect(next?.robotsJobs?.map(({ id }) => id).sort()).toEqual([
+      'rjob_dashboard',
+      'rjob_dashboard_mod',
+    ]);
     expect(next?.version).toBe(4);
   });
 
-  it('keeps the output of a job a directive dispatched on a run this entry does not claim', () => {
-    const dispatched = foreignJob({
-      id: 'rjob_auto',
-      directive: { id: 'drv_elsewhere', run_id: 'drvrun_elsewhere' },
-      outputs: { title: 'Automated' },
-    });
-
-    const next = applyRobotsJobsToValue(baseValue(), [dispatched], new Set(), ours);
-
-    expect(next?.robotsOutputs?.summarize?.jobId).toBe('rjob_auto');
-    expect(next?.robotsJobs).toBeUndefined();
-  });
-
-  it('keeps no output of another asset, even from a job of ours', () => {
-    // The passthrough scopes a job to this entry, not to its asset — ownership says nothing about
-    // which video a summary describes.
+  it('keeps no output from a job whose own record names another asset', () => {
     const next = applyRobotsJobsToValue(
       baseValue(),
       [job({ parameters: { asset_id: 'asset-2' }, outputs: { title: 'Another video' } })],
-      undefined,
-      ours
+      'asset-1'
     );
     expect(next?.robotsOutputs).toBeUndefined();
   });
 
-  it('lets the newest completed run win, whether it ran here or elsewhere', () => {
-    const oursEarlier = job({
-      id: 'rjob_ours',
-      updated_at: 1_700_000_100,
-      outputs: { title: 'Ours' },
-    });
-    const theirsLater = foreignJob({
+  it('lets the newest completed run win, whoever started it', () => {
+    const earlier = job({ id: 'rjob_ours', updated_at: 1_700_000_100, outputs: { title: 'Ours' } });
+    const later = foreignJob({
       id: 'rjob_theirs',
       updated_at: 1_700_000_900,
       outputs: { title: 'Theirs' },
     });
-    const theirsEarliest = foreignJob({
+    const earliest = foreignJob({
       id: 'rjob_theirs_first',
       updated_at: 1_700_000_050,
       outputs: { title: 'Theirs, first' },
     });
 
-    const withOurs = applyRobotsJobsToValue(baseValue(), [oursEarlier], undefined, ours);
+    const withEarlier = applyRobotsJobsToValue(baseValue(), [earlier, earliest], 'asset-1');
     expect(
-      applyRobotsJobsToValue(withOurs, [theirsLater], undefined, ours)?.robotsOutputs?.summarize
-        ?.title
+      applyRobotsJobsToValue(withEarlier, [later], 'asset-1')?.robotsOutputs?.summarize?.title
     ).toBe('Theirs');
     // An older one read late — a row past the detail window, opened afterwards — changes nothing.
-    expect(applyRobotsJobsToValue(withOurs, [oursEarlier, theirsEarliest], undefined, ours)).toBe(
-      withOurs
-    );
+    expect(applyRobotsJobsToValue(withEarlier, [earlier, earliest], 'asset-1')).toBe(withEarlier);
     for (const jobs of [
-      [oursEarlier, theirsLater],
-      [theirsLater, oursEarlier],
+      [earlier, later],
+      [later, earlier],
     ]) {
       expect(
-        applyRobotsJobsToValue(baseValue(), jobs, undefined, ours)?.robotsOutputs?.summarize?.jobId
+        applyRobotsJobsToValue(baseValue(), jobs, 'asset-1')?.robotsOutputs?.summarize?.jobId
       ).toBe('rjob_theirs');
     }
   });
@@ -1071,9 +741,9 @@ describe('applyRobotsJobsToValue — outputs, whoever started the job', () => {
 
 describe('the shape the list endpoint actually returns', () => {
   /**
-   * `GET /robots/v0/jobs` returns a summary per job: no `outputs`, and — the part that broke
-   * persistence — no `passthrough`. Every other fixture in this file hand-supplies both, which is
-   * precisely why the original implementation passed its tests and stored nothing in production.
+   * `GET /robots/v0/jobs` returns a summary per job: no `outputs`, `parameters` or
+   * `units_consumed`. A fixture shaped like the full job hides exactly the bugs this feature has
+   * had.
    */
   const summaryJob = (overrides: Partial<RobotsJob> = {}): RobotsJob =>
     ({
@@ -1091,31 +761,23 @@ describe('the shape the list endpoint actually returns', () => {
       robotsJobs: [{ id: 'rjob_summary', workflow: 'ask-questions', status: 'processing' }],
     });
 
-    // Later poll: the same job comes back as a summary with no passthrough at all.
-    const next = applyRobotsJobsToValue(value, [summaryJob()]);
+    // Later poll: the same job comes back as a summary.
+    const next = applyRobotsJobsToValue(value, [summaryJob()], 'asset-1');
 
     expect(next).not.toBe(value);
     expect(next?.robotsJobs).toHaveLength(1);
     expect(next?.robotsJobs?.[0].status).toBe('completed');
   });
 
-  it('treats a job already on the entry as ours for good', () => {
-    expect(isPluginOriginatedJob(summaryJob(), undefined, new Set(['rjob_summary']))).toBe(true);
+  it('records a summary job the entry has never seen', () => {
+    const next = applyRobotsJobsToValue(baseValue(), [summaryJob()], 'asset-1');
+    expect(next?.robotsJobs?.map(({ id }) => id)).toEqual(['rjob_summary']);
   });
 
-  it('still ignores a summary job nothing has ever claimed', () => {
-    const value = baseValue();
-    expect(applyRobotsJobsToValue(value, [summaryJob()])).toBe(value);
-  });
+  it('records a job before it has finished', () => {
+    const created = summaryJob({ id: 'rjob_new', status: 'pending' });
 
-  it('records a job we just created, before it has finished', () => {
-    const created = summaryJob({
-      id: 'rjob_new',
-      status: 'pending',
-      passthrough: ourPassthrough('req-9-0000000000'),
-    });
-
-    const next = applyRobotsJobsToValue(baseValue(), [created], undefined, ours);
+    const next = applyRobotsJobsToValue(baseValue(), [created], 'asset-1');
 
     expect(next?.robotsJobs).toEqual([
       expect.objectContaining({ id: 'rjob_new', status: 'pending' }),
@@ -1125,16 +787,10 @@ describe('the shape the list endpoint actually returns', () => {
   it('carries a stored job through a poll that reports no change', () => {
     const first = applyRobotsJobsToValue(
       baseValue(),
-      [summaryJob({ status: 'pending', passthrough: ourPassthrough('req-9-0000000000') })],
-      undefined,
-      ours
-    );
-    const second = applyRobotsJobsToValue(
-      first,
       [summaryJob({ status: 'pending' })],
-      undefined,
-      ours
+      'asset-1'
     );
+    const second = applyRobotsJobsToValue(first, [summaryJob({ status: 'pending' })], 'asset-1');
     expect(second).toBe(first);
   });
 });
@@ -1161,10 +817,9 @@ describe('jobsNeedingDetail', () => {
 
   it('fetches detail for jobs run outside the plugin too', () => {
     // Reading a job costs nothing and charges nobody, and a dashboard job with a permanently
-    // blank Units column and no output looks broken. Ownership is a persistence rule, enforced
-    // in `applyRobotsJobsToValue` — not a reason to leave a visible row half-rendered.
+    // blank Units column and no output looks broken.
     const foreign = [
-      { id: 'a', workflow: 'summarize', status: 'completed', passthrough: 'someone-else' },
+      { id: 'a', workflow: 'summarize', status: 'completed' },
     ] as never as RobotsJob[];
 
     expect(jobsNeedingDetail(foreign, new Set()).map((j) => j.id)).toEqual(['a']);
@@ -1208,117 +863,6 @@ describe('jobsNeedingDetail', () => {
 
     jobsNeedingDetail(jobs, new Set());
     expect(jobs.map((j) => j.id)).toEqual(['old', 'new']);
-  });
-});
-
-/**
- * Ownership on the polling path, which is where the scope segment earns its place.
- *
- * The polling path fetches detail for every terminal job on the asset — including jobs it does
- * not own — so it reads `passthrough` values it has no claim to. The old answer was
- * `trustPassthrough: false`: ignore the tag entirely. Safe, and expensive — a job this install
- * created but never managed to record could then never be claimed by anything, so it ran, it
- * billed, and it belonged to nobody. The scope segment makes the tag install-specific, so that
- * job comes home and a stranger's still does not.
- */
-describe('applyRobotsJobsToValue — ownership from a scoped passthrough', () => {
-  const value = () => ({ assetId: 'asset-1', version: 3 } as never as MuxContentfulObject);
-
-  const listed = (passthrough?: string, id = 'rjob_listed') =>
-    [{ id, workflow: 'summarize', status: 'completed', passthrough }] as never as RobotsJob[];
-
-  it('adopts an orphan of ours, which nothing else could ever claim', () => {
-    // The page was closed during the cold-start window, so the create was never recorded. Before
-    // the scope segment this job was unclaimable for good.
-    const next = applyRobotsJobsToValue(value(), listed(ourPassthrough()), undefined, ours);
-    expect(next?.robotsJobs?.map((record) => record.id)).toEqual(['rjob_listed']);
-  });
-
-  it('adopts an orphan stamped before the prefix changed, just the same', () => {
-    const next = applyRobotsJobsToValue(value(), listed(ourLegacyPassthrough()), undefined, ours);
-    expect(next?.robotsJobs?.map((record) => record.id)).toEqual(['rjob_listed']);
-    // Stored as Mux returned it: nothing rewrites an old stamp into the new prefix.
-    expect(next?.robotsJobs?.[0].passthrough).toBe(ourLegacyPassthrough());
-  });
-
-  it('refuses another Contentful install on the same Mux account, under either prefix', () => {
-    // Mux's prefix names the integration, so every install writes it; the scope tells them apart.
-    // The entry id alone does not: a space imported from this one, or an environment cloned from
-    // it, holds this very entry id.
-    for (const prefix of ['mux:cms:contentful:2.0.0', 'contentful@2.0.0']) {
-      for (const foreignScope of ['other-space:master:entry-1', 'space-1:staging:entry-1']) {
-        const foreign = `${prefix}|${foreignScope}|0123456789abcdef`;
-        expect(applyRobotsJobsToValue(value(), listed(foreign), undefined, ours)).toEqual(value());
-      }
-    }
-  });
-
-  it('refuses another entry in this very space and environment', () => {
-    const sibling = `mux:cms:contentful:2.0.0|${scope.space}:${scope.environment}:entry-2|0123abcd`;
-    expect(applyRobotsJobsToValue(value(), listed(sibling), undefined, ours)).toEqual(value());
-  });
-
-  it('refuses a pre-scope passthrough, exactly as trustPassthrough: false did', () => {
-    // Not a regression: any pre-change job of ours is already recorded on the entry, which is a
-    // stronger signal, and a pre-change orphan was already lost.
-    const legacy = 'contentful@2.0.0|req-from-before-the-scope';
-    expect(applyRobotsJobsToValue(value(), listed(legacy), undefined, ours)).toEqual(value());
-  });
-
-  it('trusts nothing when there is no identity, rather than everything', () => {
-    expect(applyRobotsJobsToValue(value(), listed(ourPassthrough()))).toEqual(value());
-    expect(applyRobotsJobsToValue(value(), listed(ourPassthrough()), undefined, {})).toEqual(
-      value()
-    );
-  });
-
-  it('still records a job the entry already knows about', () => {
-    const withRecord = {
-      assetId: 'asset-1',
-      version: 4,
-      robotsJobs: [{ id: 'rjob_ours', workflow: 'summarize', status: 'pending' }],
-    } as never as MuxContentfulObject;
-
-    const next = applyRobotsJobsToValue(
-      withRecord,
-      [{ id: 'rjob_ours', workflow: 'summarize', status: 'completed' }] as never as RobotsJob[],
-      undefined,
-      ours
-    );
-
-    expect(next?.robotsJobs?.[0].status).toBe('completed');
-  });
-
-  it('keeps owning a recorded job by id, and never rewrites its stamp', () => {
-    // Recorded jobs are owned by id, never by their tag: a stamp naming another entry — the records
-    // of a duplicated entry, say — changes nothing, and neither does the old prefix.
-    const stamp = 'contentful@2.0.0|space-1:master:the-original-entry|0123456789abcdef';
-    const record = { id: 'rjob_recorded', workflow: 'summarize', passthrough: stamp };
-    const withRecord = {
-      assetId: 'asset-1',
-      version: 4,
-      robotsJobs: [{ ...record, status: 'processing' }],
-    } as never as MuxContentfulObject;
-    const polled = [{ ...record, status: 'completed' }] as never as RobotsJob[];
-
-    const next = applyRobotsJobsToValue(withRecord, polled, undefined, ours);
-
-    expect(next?.robotsJobs).toEqual([{ ...record, status: 'completed' }]);
-    // And a poll that learns nothing new writes nothing.
-    expect(applyRobotsJobsToValue(next, polled, undefined, ours)).toBe(next);
-  });
-
-  it('still records a job a directive run on this asset dispatched', () => {
-    const next = applyRobotsJobsToValue(
-      value(),
-      [
-        { id: 'rjob_directive', workflow: 'summarize', status: 'completed' },
-      ] as never as RobotsJob[],
-      new Set(['rjob_directive']),
-      ours
-    );
-
-    expect(next?.robotsJobs?.map((r) => r.id)).toEqual(['rjob_directive']);
   });
 });
 
@@ -1430,40 +974,6 @@ describe('recordRobotsDirectiveRun', () => {
   });
 });
 
-describe('ownership from a recorded directive run', () => {
-  it('claims a dispatched job with no live run in sight', () => {
-    // The point of the whole thing: the run has fallen out of the list window, or the directive
-    // has been deleted. The entry still knows which jobs it dispatched.
-    const value = baseValue({
-      robotsDirectiveRuns: [{ runId: 'drvrun_1', directiveId: 'drv_1', jobIds: ['rjob_auto'] }],
-    });
-
-    const next = applyRobotsJobsToValue(
-      value,
-      [{ id: 'rjob_auto', workflow: 'summarize', status: 'completed' }] as never as RobotsJob[],
-      undefined,
-      ours
-    );
-
-    expect(next?.robotsJobs?.map((record) => record.id)).toEqual(['rjob_auto']);
-  });
-
-  it('still refuses a job no recorded run names', () => {
-    const value = baseValue({
-      robotsDirectiveRuns: [{ runId: 'drvrun_1', directiveId: 'drv_1', jobIds: ['rjob_auto'] }],
-    });
-
-    expect(
-      applyRobotsJobsToValue(
-        value,
-        [{ id: 'rjob_theirs', workflow: 'summarize', status: 'completed' }] as never as RobotsJob[],
-        undefined,
-        ours
-      )
-    ).toBe(value);
-  });
-});
-
 describe('applyRobotsDirectiveRunsToValue', () => {
   it('updates a recorded run without adding an unrecorded one', () => {
     const value = baseValue({
@@ -1497,189 +1007,596 @@ describe('applyRobotsDirectiveRunsToValue', () => {
   });
 });
 
-/**
- * The directive path had no reconciliation at all: a cold-start timeout produced an error toast,
- * and clicking again ran the whole directive a second time. It is the *more* expensive path —
- * several billable workflows per run — so it was the wrong one to leave unprotected.
- */
-describe('createRobotsDirectiveRunWithReconciliation', () => {
-  const nowSeconds = Math.floor(Date.now() / 1000);
-
-  it('returns the created run, tagged with the directive that started it', async () => {
-    const muxApi = {
-      createRobotsDirectiveRun: vi.fn(async () => ({
-        data: { run_id: 'drvrun_1', subject_id: 'asset-1', status: 'pending' },
-      })),
-    } as never;
-
-    const run = await createRobotsDirectiveRunWithReconciliation(muxApi, 'drv_1', 'asset-1');
+describe('startRobotsDirectiveRun', () => {
+  it('returns the created run, tagged with the directive that started it, and starts it once', async () => {
+    const createRobotsDirectiveRun = vi.fn(async () => ({
+      data: { run_id: 'drvrun_1', subject_id: 'asset-1', status: 'pending' },
+    }));
+    const run = await startRobotsDirectiveRun(
+      { createRobotsDirectiveRun } as never,
+      'drv_1',
+      'asset-1'
+    );
     expect(run).toMatchObject({ run_id: 'drvrun_1', directive_id: 'drv_1' });
+    expect(createRobotsDirectiveRun).toHaveBeenCalledTimes(1);
+    expect(createRobotsDirectiveRun).toHaveBeenCalledWith('drv_1', 'asset-1');
   });
 
-  it('surfaces a failure Mux actually answered, without reconciling', async () => {
-    // A 409 is the "already running on this video" case, and the caller has copy for it.
-    const listRobotsDirectiveRuns = vi.fn();
-    const muxApi = {
-      createRobotsDirectiveRun: vi.fn(async () => {
-        throw new MuxApiError('Already running', 409);
-      }),
-      listRobotsDirectiveRuns,
-    } as never;
-
-    await expect(
-      createRobotsDirectiveRunWithReconciliation(muxApi, 'drv_1', 'asset-1')
-    ).rejects.toBeInstanceOf(MuxApiError);
-    expect(listRobotsDirectiveRuns).not.toHaveBeenCalled();
+  it('treats a 2xx that names no run as an unknown outcome, not a refusal', async () => {
+    const muxApi = { createRobotsDirectiveRun: vi.fn(async () => ({ data: {} })) } as never;
+    const error = await startRobotsDirectiveRun(muxApi, 'drv_1', 'asset-1').catch(
+      (caught) => caught
+    );
+    expect(error).toBeInstanceOf(Error);
+    expect(error).not.toBeInstanceOf(MuxApiError);
   });
 
-  it('adopts the run it just started when the app-action call timed out', async () => {
-    vi.useFakeTimers();
-    try {
-      const muxApi = {
-        createRobotsDirectiveRun: vi.fn(async () => {
-          // What `appActionCall.createWithResponse` throws after 15 polls: no status, so Mux may
-          // well have received the request and started billing.
-          throw new Error('The app action response is taking longer than expected to process.');
-        }),
-        listRobotsDirectiveRuns: vi.fn(async () => ({
-          data: [
-            { run_id: 'drvrun_old', subject_id: 'asset-1', started_at: nowSeconds - 86_400 },
-            { run_id: 'drvrun_new', subject_id: 'asset-1', started_at: nowSeconds },
-          ],
-        })),
-      } as never;
-
-      const pending = createRobotsDirectiveRunWithReconciliation(muxApi, 'drv_1', 'asset-1');
-      await vi.runAllTimersAsync();
-      const run = await pending;
-
-      // Never the old one: adopting a run from yesterday would drop the guard on a run that never
-      // started.
-      expect(run.run_id).toBe('drvrun_new');
-      expect(run.directive_id).toBe('drv_1');
-    } finally {
-      vi.useRealTimers();
-    }
-  });
-
-  it('reports unknown rather than failed when no recent run turns up', async () => {
-    vi.useFakeTimers();
-    try {
-      const muxApi = {
-        createRobotsDirectiveRun: vi.fn(async () => {
-          throw new Error('taking longer than expected');
-        }),
-        listRobotsDirectiveRuns: vi.fn(async () => ({
-          data: [{ run_id: 'drvrun_old', subject_id: 'asset-1', started_at: nowSeconds - 86_400 }],
-        })),
-      } as never;
-
-      const pending = createRobotsDirectiveRunWithReconciliation(muxApi, 'drv_1', 'asset-1').catch(
-        (error) => error
-      );
-      await vi.runAllTimersAsync();
-      const error = await pending;
-
-      expect(error).toBeInstanceOf(RobotsUnconfirmedDirectiveRunError);
-      expect((error as RobotsUnconfirmedDirectiveRunError).directiveId).toBe('drv_1');
-    } finally {
-      vi.useRealTimers();
-    }
-  });
-
-  it('reports unknown when the reconciliation read itself fails', async () => {
-    vi.useFakeTimers();
-    vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    try {
-      const muxApi = {
-        createRobotsDirectiveRun: vi.fn(async () => {
-          throw new Error('taking longer than expected');
-        }),
-        listRobotsDirectiveRuns: vi.fn(async () => {
-          throw new Error('also offline');
-        }),
-      } as never;
-
-      const pending = createRobotsDirectiveRunWithReconciliation(muxApi, 'drv_1', 'asset-1').catch(
-        (error) => error
-      );
-      await vi.runAllTimersAsync();
-      expect(await pending).toBeInstanceOf(RobotsUnconfirmedDirectiveRunError);
-    } finally {
-      vi.useRealTimers();
-    }
-  });
-
-  it('never retries the create, whatever happens', async () => {
-    vi.useFakeTimers();
-    try {
+  it('passes an answered refusal and an unknown outcome through, and never retries', async () => {
+    for (const thrown of [
+      new MuxApiError('Already running', 409),
+      new Error('The app action response is taking longer than expected to process.'),
+    ]) {
       const createRobotsDirectiveRun = vi.fn(async () => {
-        throw new Error('taking longer than expected');
+        throw thrown;
       });
-      const muxApi = {
-        createRobotsDirectiveRun,
-        listRobotsDirectiveRuns: vi.fn(async () => ({ data: [] })),
-      } as never;
-
-      const pending = createRobotsDirectiveRunWithReconciliation(muxApi, 'drv_1', 'asset-1').catch(
-        () => undefined
-      );
-      await vi.runAllTimersAsync();
-      await pending;
-
+      await expect(
+        startRobotsDirectiveRun({ createRobotsDirectiveRun } as never, 'drv_1', 'asset-1')
+      ).rejects.toBe(thrown);
       expect(createRobotsDirectiveRun).toHaveBeenCalledTimes(1);
-    } finally {
-      vi.useRealTimers();
     }
   });
 });
 
-describe('findRecentDirectiveRun', () => {
-  const now = 1_700_000_000_000;
-  const nowSeconds = now / 1000;
+describe('pending creates', () => {
+  const requestedAt = 1_700_000_000;
 
-  const listing = (runs: unknown[]) =>
-    ({ listRobotsDirectiveRuns: vi.fn(async () => ({ data: runs })) } as never);
-
-  it('ignores a run against a different asset', async () => {
-    const found = await findRecentDirectiveRun(
-      listing([{ run_id: 'drvrun_1', subject_id: 'asset-2', started_at: nowSeconds }]),
-      'drv_1',
-      'asset-1',
-      { now }
-    );
-    expect(found).toBeUndefined();
+  const pendingJob = (overrides: Partial<RobotsPendingJobCreate> = {}): RobotsPendingJobCreate => ({
+    requestId: 'req_job_1',
+    kind: 'job',
+    workflow: 'summarize',
+    requestedAt,
+    ...overrides,
   });
 
-  it('ignores a run that started before the adoption window', async () => {
-    const found = await findRecentDirectiveRun(
-      listing([{ run_id: 'drvrun_1', subject_id: 'asset-1', started_at: nowSeconds - 600 }]),
-      'drv_1',
-      'asset-1',
-      { now }
-    );
-    expect(found).toBeUndefined();
+  const pendingRun = (
+    overrides: Partial<RobotsPendingDirectiveRunCreate> = {}
+  ): RobotsPendingDirectiveRunCreate => ({
+    requestId: 'req_run_1',
+    kind: 'directive-run',
+    directiveId: 'drv_1',
+    requestedAt,
+    ...overrides,
   });
 
-  it('ignores a run with no start time, because it cannot be dated', async () => {
-    // Failing to adopt costs one informed click; adopting the wrong run drops the guard on a run
-    // that never started, and that costs money.
-    const found = await findRecentDirectiveRun(
-      listing([{ run_id: 'drvrun_1', subject_id: 'asset-1' }]),
-      'drv_1',
-      'asset-1',
-      { now }
-    );
-    expect(found).toBeUndefined();
+  /** A list summary: six fields, no detail. */
+  const listed = (id: string, createdAt: number | undefined, workflow = 'summarize'): RobotsJob =>
+    ({ id, workflow, status: 'pending', created_at: createdAt } as RobotsJob);
+
+  const run = (overrides: Partial<RobotsDirectiveRun> = {}): RobotsDirectiveRun => ({
+    run_id: 'drvrun_1',
+    directive_id: 'drv_1',
+    subject_id: 'asset-1',
+    status: 'pending',
+    started_at: requestedAt,
+    ...overrides,
   });
 
-  it('tolerates a clock a little ahead of ours', async () => {
-    const found = await findRecentDirectiveRun(
-      listing([{ run_id: 'drvrun_1', subject_id: 'asset-1', started_at: nowSeconds + 30 }]),
-      'drv_1',
-      'asset-1',
-      { now }
-    );
-    expect(found?.run_id).toBe('drvrun_1');
+  describe('newPendingJobCreate and newPendingDirectiveRunCreate', () => {
+    it('stamp a 16-hex request id and the time in Unix seconds, as Mux dates jobs', () => {
+      const job = newPendingJobCreate('summarize', 1_700_000_000_999);
+      expect(job).toEqual({
+        requestId: expect.stringMatching(/^[0-9a-f]{16}$/),
+        kind: 'job',
+        workflow: 'summarize',
+        requestedAt: 1_700_000_000,
+      });
+      expect(newPendingJobCreate('summarize').requestId).not.toBe(job.requestId);
+      expect(newPendingDirectiveRunCreate('drv_1', 1_700_000_000_500)).toEqual({
+        requestId: expect.stringMatching(/^[0-9a-f]{16}$/),
+        kind: 'directive-run',
+        directiveId: 'drv_1',
+        requestedAt: 1_700_000_000,
+      });
+    });
+  });
+
+  describe('pendingCreatesOf', () => {
+    it('never throws on what a person can type into the JSON', () => {
+      for (const stored of ['nonsense', { a: 1 }, 42, null]) {
+        expect(pendingCreatesOf(baseValue({ robotsPendingCreates: stored as never }))).toEqual([]);
+      }
+      expect(pendingCreatesOf(undefined)).toEqual([]);
+    });
+
+    it('skips entries it cannot read and keeps the rest', () => {
+      const value = baseValue({
+        robotsPendingCreates: [
+          pendingJob(),
+          { kind: 'job', workflow: 'summarize', requestedAt } as never,
+          { requestId: 'q', kind: 'thumbnail', requestedAt } as never,
+          { requestId: 'q', kind: 'job', workflow: 'summarize', requestedAt: 'now' } as never,
+          { requestId: 'q', kind: 'directive-run', requestedAt } as never,
+          'q' as never,
+          pendingRun(),
+        ],
+      });
+      expect(pendingCreatesOf(value)).toEqual([pendingJob(), pendingRun()]);
+    });
+  });
+
+  describe('freshPendingCreates', () => {
+    it('drops placeholders older than six hours', () => {
+      const nowMs = requestedAt * 1000;
+      const value = baseValue({
+        robotsPendingCreates: [
+          pendingJob({ requestId: 'fresh', requestedAt: requestedAt - 6 * 3600 + 1 }),
+          pendingJob({ requestId: 'stale', requestedAt: requestedAt - 6 * 3600 }),
+        ],
+      });
+      expect(freshPendingCreates(value, nowMs).map(({ requestId }) => requestId)).toEqual([
+        'fresh',
+      ]);
+    });
+  });
+
+  describe('addPendingCreate and removePendingCreates', () => {
+    it('raises a v3 value to v4 when it adds a placeholder', () => {
+      const next = addPendingCreate(baseValue(), pendingJob(), 'asset-1');
+      expect(next?.robotsPendingCreates).toEqual([pendingJob()]);
+      expect(next?.version).toBe(4);
+    });
+
+    it('returns the same reference for a placeholder already stored', () => {
+      const once = addPendingCreate(baseValue(), pendingJob(), 'asset-1');
+      expect(addPendingCreate(once, pendingJob(), 'asset-1')).toBe(once);
+    });
+
+    it('writes nothing onto another asset, or onto no value', () => {
+      const other = baseValue({ assetId: 'asset-2' });
+      expect(addPendingCreate(other, pendingJob(), 'asset-1')).toBe(other);
+      expect(addPendingCreate(undefined, pendingJob(), 'asset-1')).toBeUndefined();
+    });
+
+    it('deletes the key with the last placeholder rather than leaving []', () => {
+      const withOne = addPendingCreate(baseValue(), pendingJob(), 'asset-1');
+      const emptied = removePendingCreates(withOne, () => true);
+      expect(emptied && 'robotsPendingCreates' in emptied).toBe(false);
+    });
+
+    it('removes only what the predicate names, and keeps entries it cannot read', () => {
+      const unreadable = { requestId: 'future', kind: 'thumbnail', requestedAt } as never;
+      const value = baseValue({
+        version: 4,
+        robotsPendingCreates: [pendingJob(), unreadable, pendingRun()],
+      });
+      const next = removePendingCreates(value, (pending) => pending.kind === 'job');
+      expect(next?.robotsPendingCreates).toEqual([unreadable, pendingRun()]);
+    });
+
+    it('returns the same reference when nothing is removed, whatever is stored', () => {
+      for (const stored of [[pendingJob()], 'nonsense', { a: 1 }, undefined]) {
+        const value = baseValue({ robotsPendingCreates: stored as never });
+        expect(removePendingCreates(value, (pending) => pending.kind === 'directive-run')).toBe(
+          value
+        );
+      }
+      expect(removePendingCreates(undefined, () => true)).toBeUndefined();
+    });
+  });
+
+  describe('resolvePendingJobCreate and resolvePendingDirectiveRunCreate', () => {
+    it('replace a job placeholder with the job record in one write', () => {
+      const value = baseValue({ version: 4, robotsPendingCreates: [pendingJob(), pendingRun()] });
+      const next = resolvePendingJobCreate(
+        value,
+        'req_job_1',
+        listed('rjob_new', requestedAt),
+        'asset-1'
+      );
+      expect(next?.robotsPendingCreates).toEqual([pendingRun()]);
+      expect(next?.robotsJobs?.map(({ id }) => id)).toEqual(['rjob_new']);
+    });
+
+    it('still record the job when the placeholder has already gone', () => {
+      const next = resolvePendingJobCreate(
+        baseValue(),
+        'req_job_1',
+        listed('rjob_new', requestedAt),
+        'asset-1'
+      );
+      expect(next?.robotsJobs?.map(({ id }) => id)).toEqual(['rjob_new']);
+    });
+
+    it('replace a run placeholder with the run record in one write', () => {
+      const value = baseValue({ version: 4, robotsPendingCreates: [pendingRun()] });
+      const next = resolvePendingDirectiveRunCreate(value, 'req_run_1', run(), 'asset-1');
+      expect(next && 'robotsPendingCreates' in next).toBe(false);
+      expect(next?.robotsDirectiveRuns?.map(({ runId }) => runId)).toEqual(['drvrun_1']);
+    });
+
+    it('write nothing onto another asset, or onto no value', () => {
+      const other = baseValue({ assetId: 'asset-2', robotsPendingCreates: [pendingJob()] });
+      expect(resolvePendingJobCreate(other, 'req_job_1', listed('j', requestedAt), 'asset-1')).toBe(
+        other
+      );
+      expect(resolvePendingDirectiveRunCreate(other, 'req_run_1', run(), 'asset-1')).toBe(other);
+      expect(
+        resolvePendingJobCreate(undefined, 'req_job_1', listed('j', requestedAt), 'asset-1')
+      ).toBeUndefined();
+      expect(
+        resolvePendingDirectiveRunCreate(undefined, 'req_run_1', run(), 'asset-1')
+      ).toBeUndefined();
+    });
+  });
+
+  describe('matchPendingCreates', () => {
+    const match = (
+      pendings: Parameters<typeof matchPendingCreates>[0],
+      jobs: RobotsJob[],
+      runs: RobotsDirectiveRun[] = [],
+      value: MuxContentfulObject = baseValue(),
+      links?: Map<string, string>
+    ) => Object.fromEntries(matchPendingCreates(pendings, jobs, runs, value, links));
+
+    it('matches a job at either edge of the window, and not one second outside it', () => {
+      expect(ROBOTS_CREATE_MATCH_BEFORE_S).toBe(15);
+      expect(ROBOTS_CREATE_MATCH_AFTER_S).toBe(120);
+      expect(match([pendingJob()], [listed('early', requestedAt - 15)])).toEqual({
+        req_job_1: 'early',
+      });
+      expect(match([pendingJob()], [listed('late', requestedAt + 120)])).toEqual({
+        req_job_1: 'late',
+      });
+      expect(match([pendingJob()], [listed('too_early', requestedAt - 16)])).toEqual({});
+      expect(match([pendingJob()], [listed('too_late', requestedAt + 121)])).toEqual({});
+    });
+
+    it('matches a run at either edge of the window, and not one second outside it', () => {
+      const at = (startedAt: number) => [run({ run_id: `r${startedAt}`, started_at: startedAt })];
+      expect(match([pendingRun()], [], at(requestedAt - 15))).toEqual({
+        req_run_1: `r${requestedAt - 15}`,
+      });
+      expect(match([pendingRun()], [], at(requestedAt + 120))).toEqual({
+        req_run_1: `r${requestedAt + 120}`,
+      });
+      expect(match([pendingRun()], [], at(requestedAt - 16))).toEqual({});
+      expect(match([pendingRun()], [], at(requestedAt + 121))).toEqual({});
+    });
+
+    it('resolves a linked placeholder to its link, even with another job closer', () => {
+      const jobs = [listed('closer', requestedAt), listed('linked', requestedAt + 60)];
+      expect(
+        match([pendingJob()], jobs, [], baseValue(), new Map([['req_job_1', 'linked']]))
+      ).toEqual({ req_job_1: 'linked' });
+    });
+
+    it('never lets a linked job resolve another placeholder', () => {
+      const second = pendingJob({ requestId: 'req_job_2' });
+      const jobs = [listed('linked', requestedAt)];
+      expect(
+        match([pendingJob(), second], jobs, [], baseValue(), new Map([['req_job_1', 'linked']]))
+      ).toEqual({ req_job_1: 'linked' });
+    });
+
+    it('never matches a job the entry already records', () => {
+      const value = baseValue({
+        robotsJobs: [{ id: 'recorded', workflow: 'summarize', status: 'completed' }],
+      });
+      expect(match([pendingJob()], [listed('recorded', requestedAt)], [], value)).toEqual({});
+    });
+
+    it('never matches another workflow, or a job with no creation time', () => {
+      expect(
+        match(
+          [pendingJob()],
+          [listed('other', requestedAt, 'moderate'), listed('untimed', undefined)]
+        )
+      ).toEqual({});
+    });
+
+    it('lets one job resolve one placeholder, oldest placeholder first', () => {
+      const older = pendingJob({ requestId: 'older', requestedAt: requestedAt - 5 });
+      const newer = pendingJob({ requestId: 'newer', requestedAt });
+      expect(match([newer, older], [listed('only', requestedAt)])).toEqual({ older: 'only' });
+    });
+
+    it('takes the closest job, ties to the earlier time and then the smaller id', () => {
+      expect(
+        match([pendingJob()], [listed('far', requestedAt + 30), listed('near', requestedAt + 2)])
+      ).toEqual({ req_job_1: 'near' });
+      expect(
+        match([pendingJob()], [listed('after', requestedAt + 3), listed('before', requestedAt - 3)])
+      ).toEqual({ req_job_1: 'before' });
+      expect(match([pendingJob()], [listed('b', requestedAt), listed('a', requestedAt)])).toEqual({
+        req_job_1: 'a',
+      });
+    });
+
+    it('never matches a run on another asset, with no start time, or already recorded', () => {
+      expect(match([pendingRun()], [], [run({ subject_id: 'asset-2' })])).toEqual({});
+      expect(match([pendingRun()], [], [run({ started_at: undefined })])).toEqual({});
+      expect(match([pendingRun()], [], [run({ directive_id: 'drv_2' })])).toEqual({});
+      const recorded = baseValue({
+        robotsDirectiveRuns: [{ runId: 'drvrun_1', directiveId: 'drv_1' }],
+      });
+      expect(match([pendingRun()], [], [run()], recorded)).toEqual({});
+    });
+
+    it('tolerates a Mux clock a little ahead of the browser, and fails closed past that', () => {
+      // `requestedAt` is the browser's clock and `started_at` is Mux's.
+      expect(match([pendingRun()], [], [run({ started_at: requestedAt + 30 })])).toEqual({
+        req_run_1: 'drvrun_1',
+      });
+      expect(match([pendingRun()], [], [run({ started_at: requestedAt - 600 })])).toEqual({});
+    });
+
+    it('tolerates recorded ids stored as something other than an array', () => {
+      const garbled = baseValue({ robotsJobs: 'nonsense' as never });
+      expect(match([pendingJob()], [listed('j', requestedAt)], [], garbled)).toEqual({
+        req_job_1: 'j',
+      });
+    });
+  });
+
+  describe('resolvePendingCreatesFromReads', () => {
+    it('removes the placeholder a listed job resolves, and leaves the job to be recorded after', () => {
+      const value = baseValue({ version: 4, robotsPendingCreates: [pendingJob()] });
+      const next = resolvePendingCreatesFromReads(
+        value,
+        [listed('rjob_1', requestedAt)],
+        [],
+        'asset-1'
+      );
+      expect(next && 'robotsPendingCreates' in next).toBe(false);
+      expect(next?.robotsJobs).toBeUndefined();
+    });
+
+    it('records the run that resolves a directive placeholder', () => {
+      const value = baseValue({ version: 4, robotsPendingCreates: [pendingRun()] });
+      const next = resolvePendingCreatesFromReads(value, [], [run()], 'asset-1');
+      expect(next && 'robotsPendingCreates' in next).toBe(false);
+      expect(next?.robotsDirectiveRuns?.map(({ runId }) => runId)).toEqual(['drvrun_1']);
+    });
+
+    it('removes a linked placeholder whether or not the read shows its job yet', () => {
+      const value = baseValue({ version: 4, robotsPendingCreates: [pendingJob()] });
+      const next = resolvePendingCreatesFromReads(
+        value,
+        [],
+        [],
+        'asset-1',
+        new Map([['req_job_1', 'rjob_created']])
+      );
+      expect(next && 'robotsPendingCreates' in next).toBe(false);
+    });
+
+    it('returns the same reference when nothing resolves', () => {
+      const value = baseValue({ version: 4, robotsPendingCreates: [pendingJob()] });
+      expect(resolvePendingCreatesFromReads(value, [], [], 'asset-1')).toBe(value);
+      const none = baseValue();
+      expect(resolvePendingCreatesFromReads(none, [listed('j', requestedAt)], [], 'asset-1')).toBe(
+        none
+      );
+    });
+
+    it('writes nothing onto another asset, or onto no value', () => {
+      const other = baseValue({ assetId: 'asset-2', robotsPendingCreates: [pendingJob()] });
+      expect(resolvePendingCreatesFromReads(other, [listed('j', requestedAt)], [], 'asset-1')).toBe(
+        other
+      );
+      expect(resolvePendingCreatesFromReads(undefined, [], [], 'asset-1')).toBeUndefined();
+    });
+  });
+});
+
+describe('pending creates on screen', () => {
+  const requestedAt = 1_700_000_000;
+  const placeholder = (
+    overrides: Partial<RobotsPendingJobCreate> = {}
+  ): RobotsPendingJobCreate => ({
+    requestId: 'req_1',
+    kind: 'job',
+    workflow: 'summarize',
+    requestedAt,
+    ...overrides,
+  });
+  const listedJob = (id: string, createdAt: number | undefined): RobotsJob =>
+    ({ id, workflow: 'summarize', status: 'pending', created_at: createdAt } as RobotsJob);
+
+  const rows = (overrides: Partial<Parameters<typeof pendingCreateRows>[0]> = {}) =>
+    pendingCreateRows({
+      stored: [],
+      settled: new Set(),
+      links: new Map(),
+      jobs: [],
+      runs: [],
+      value: baseValue(),
+      nowS: requestedAt + 1,
+      ...overrides,
+    }).map(({ pending, phase }) => [pending.requestId, phase]);
+
+  const local = (phase: LocalPendingCreate['phase'], pending = placeholder()) => ({
+    pending,
+    phase,
+  });
+
+  describe('pendingCreateRows', () => {
+    it('shows a create that is saving, or waiting for a publish, before anything is stored', () => {
+      expect(rows({ local: local('saving') })).toEqual([['req_1', 'starting']]);
+      expect(rows({ local: local('waiting-for-publish') })).toEqual([
+        ['req_1', 'waiting-for-publish'],
+      ]);
+    });
+
+    it('shows nothing for a sent create whose placeholder has gone', () => {
+      expect(rows({ local: local('sending') })).toEqual([]);
+      expect(rows({ local: local('unconfirmed') })).toEqual([]);
+    });
+
+    it('takes the local phase over the stored one, and never shows a request twice', () => {
+      expect(
+        rows({ stored: [placeholder()], local: local('sending'), nowS: requestedAt + 60 })
+      ).toEqual([['req_1', 'starting']]);
+      expect(rows({ stored: [placeholder()], local: local('unconfirmed') })).toEqual([
+        ['req_1', 'unconfirmed'],
+      ]);
+      expect(rows({ stored: [placeholder()], local: local('saving') })).toEqual([
+        ['req_1', 'starting'],
+      ]);
+    });
+
+    it('hides what this tab has settled', () => {
+      expect(
+        rows({
+          stored: [placeholder()],
+          local: local('waiting-for-publish'),
+          settled: new Set(['req_1']),
+        })
+      ).toEqual([]);
+    });
+
+    it('hides a row whose linked or matched job is on screen', () => {
+      const shown = [listedJob('rjob_new', requestedAt + 3)];
+      expect(rows({ stored: [placeholder()], jobs: shown })).toEqual([]);
+      expect(
+        rows({
+          stored: [placeholder()],
+          jobs: [listedJob('rjob_linked', requestedAt + 500)],
+          links: new Map([['req_1', 'rjob_linked']]),
+        })
+      ).toEqual([]);
+      // A link to a job not on screen yet keeps the row, so there is never neither.
+      expect(
+        rows({ stored: [placeholder()], links: new Map([['req_1', 'rjob_elsewhere']]) })
+      ).toEqual([['req_1', 'starting']]);
+    });
+
+    it('never matches a create that has not been sent, even with a fresh job of its workflow', () => {
+      const earlier = [listedJob('rjob_dashboard', requestedAt - 5)];
+      expect(rows({ local: local('saving'), jobs: earlier })).toEqual([['req_1', 'starting']]);
+      expect(
+        rows({ stored: [placeholder()], local: local('waiting-for-publish'), jobs: earlier })
+      ).toEqual([['req_1', 'waiting-for-publish']]);
+    });
+
+    it('reads a stored placeholder as starting for the grace period, then as not confirmed', () => {
+      expect(ROBOTS_CREATE_CONFIRM_GRACE_S).toBe(45);
+      expect(rows({ stored: [placeholder()], nowS: requestedAt + 44 })).toEqual([
+        ['req_1', 'starting'],
+      ]);
+      expect(rows({ stored: [placeholder()], nowS: requestedAt + 45 })).toEqual([
+        ['req_1', 'unconfirmed'],
+      ]);
+    });
+  });
+
+  describe('jobTableRows and runTableRows', () => {
+    const pendingAt = (requestId: string, at: number): PendingCreateRow => ({
+      pending: placeholder({ requestId, requestedAt: at }),
+      phase: 'starting',
+    });
+
+    it('sort newest first, missing times last, pending first on a tie and then by id', () => {
+      const ordered = jobTableRows(
+        [pendingAt('req_b', 20), pendingAt('req_a', 20)],
+        [
+          listedJob('j_untimed', undefined),
+          listedJob('j_old', 10),
+          listedJob('j_tie', 20),
+          listedJob('j_new', 30),
+        ]
+      ).map(({ key }) => key);
+      expect(ordered).toEqual([
+        'j_new',
+        'create:req_a',
+        'create:req_b',
+        'j_tie',
+        'j_old',
+        'j_untimed',
+      ]);
+    });
+
+    it('order runs by when they started, the same way', () => {
+      const pendingRun: PendingCreateRow = {
+        pending: {
+          requestId: 'req_run',
+          kind: 'directive-run',
+          directiveId: 'drv_1',
+          requestedAt: 20,
+        },
+        phase: 'starting',
+      };
+      const ordered = runTableRows([pendingRun], [
+        { run_id: 'r_untimed' },
+        { run_id: 'r_old', started_at: 10 },
+        { run_id: 'r_new', started_at: 30 },
+      ] as RobotsDirectiveRun[]).map(({ key }) => key);
+      expect(ordered).toEqual(['r_new', 'create:req_run', 'r_old', 'r_untimed']);
+    });
+  });
+
+  /**
+   * Testing Library cannot see intermediate renders, so the property "never both rows, never
+   * neither" is held here, over every state a create can pass through on its way to its job.
+   */
+  describe('the swap from pending row to job row', () => {
+    const others = [
+      listedJob('j_older', requestedAt - 600),
+      listedJob('j_newer', requestedAt + 600),
+    ];
+    const created = listedJob('rjob_created', requestedAt + 2);
+    const pending = placeholder();
+    const stored = baseValue({ version: 4, robotsPendingCreates: [pending] });
+    const recorded = baseValue({
+      version: 4,
+      robotsJobs: [{ id: 'rjob_created', workflow: 'summarize', status: 'pending' }],
+    });
+
+    const tableAt = (state: {
+      value: MuxContentfulObject;
+      local?: LocalPendingCreate;
+      links?: Map<string, string>;
+      jobs: RobotsJob[];
+    }) =>
+      jobTableRows(
+        pendingCreateRows({
+          stored: pendingCreatesOf(state.value),
+          local: state.local,
+          settled: new Set(),
+          links: state.links ?? new Map(),
+          jobs: state.jobs,
+          runs: [],
+          value: state.value,
+          nowS: requestedAt + 5,
+        }),
+        state.jobs
+      ).map(({ key }) => key);
+
+    const expectOneAtIndex = (keys: string[]) => {
+      const pendingIndex = keys.indexOf('create:req_1');
+      const jobIndex = keys.indexOf('rjob_created');
+      expect([pendingIndex, jobIndex].filter((index) => index >= 0)).toHaveLength(1);
+      expect(Math.max(pendingIndex, jobIndex)).toBe(1);
+    };
+
+    it('holds through a create that ends in a 202', () => {
+      const links = new Map([['req_1', 'rjob_created']]);
+      const states = [
+        { value: stored, local: local('sending', pending), jobs: others },
+        { value: stored, local: local('sending', pending), links, jobs: [created, ...others] },
+        { value: stored, links, jobs: [created, ...others] },
+        { value: recorded, links, jobs: [created, ...others] },
+      ];
+      for (const state of states) expectOneAtIndex(tableAt(state));
+    });
+
+    it('holds through a create resolved by a list read', () => {
+      const states = [
+        { value: stored, jobs: others },
+        { value: stored, jobs: [created, ...others] },
+        { value: recorded, jobs: [created, ...others] },
+      ];
+      for (const state of states) expectOneAtIndex(tableAt(state));
+    });
   });
 });
