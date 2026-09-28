@@ -362,6 +362,34 @@ async function resolveDependencyNames(
   );
 }
 
+// Mirrors `resolveDependencyNames`: Asana's nested `tags.name` opt_fields expansion doesn't
+// reliably populate `name` on a task's `tags` array in production (same gap as `dependencies.name`),
+// so any tag missing a name is resolved with an individual lookup.
+async function resolveTagNames(
+  accessToken: string,
+  tags: Array<{ gid?: string; name?: string }>
+): Promise<AsanaTaskOption[]> {
+  return Promise.all(
+    tags
+      .filter((tag): tag is { gid: string; name?: string } => Boolean(tag.gid))
+      .map(async (tag) => {
+        if (typeof tag.name === 'string' && tag.name.trim()) {
+          return { gid: tag.gid, name: tag.name };
+        }
+
+        try {
+          const tagRecord = await callAsana<{ gid: string; name?: string }>(
+            `/tags/${tag.gid}?opt_fields=gid,name`,
+            accessToken
+          );
+          return { gid: tag.gid, name: tagRecord.name?.trim() || tag.gid };
+        } catch {
+          return { gid: tag.gid, name: tag.gid };
+        }
+      })
+  );
+}
+
 async function mapAsanaTask(
   accessToken: string,
   task: AsanaTaskRecord
@@ -382,15 +410,7 @@ async function mapAsanaTask(
     ...(typeof task.due_on === 'string' ? { dueDate: task.due_on } : {}),
     ...(typeof task.created_at === 'string' ? { createdAt: task.created_at } : {}),
     ...(typeof task.modified_at === 'string' ? { modifiedAt: task.modified_at } : {}),
-    ...(Array.isArray(task.tags)
-      ? {
-          tags: task.tags
-            .filter(
-              (tag): tag is { gid: string; name: string } => Boolean(tag.gid) && Boolean(tag.name)
-            )
-            .map((tag) => ({ gid: tag.gid, name: tag.name })),
-        }
-      : {}),
+    ...(Array.isArray(task.tags) ? { tags: await resolveTagNames(accessToken, task.tags) } : {}),
     ...(Array.isArray(task.dependencies)
       ? { dependencies: await resolveDependencyNames(accessToken, task.dependencies) }
       : {}),
