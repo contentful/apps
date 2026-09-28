@@ -1178,7 +1178,7 @@ const Dialog = () => {
         </FormControl>
 
         <Box>
-          <FormControl marginBottom="spacingM">
+          <FormControl marginBottom="spacingXs">
             <FormControl.Label>Add comment</FormControl.Label>
             <Textarea
               value={comment}
@@ -1191,6 +1191,16 @@ const Dialog = () => {
               Posts a new comment to the linked Asana task.
             </FormControl.HelpText>
           </FormControl>
+
+          <Flex justifyContent="flex-end" marginBottom="spacingM">
+            <Button
+              variant="secondary"
+              onClick={handleAddComment}
+              isLoading={isPostingComment}
+              isDisabled={isBusy}>
+              Add comment
+            </Button>
+          </Flex>
 
           <Flex justifyContent="space-between" alignItems="center" marginBottom="spacingXs">
             <Text fontColor="gray600" fontWeight="fontWeightMedium">
@@ -1263,13 +1273,6 @@ const Dialog = () => {
         style={{ flexShrink: 0, paddingTop: tokens.spacingM }}>
         <Button variant="secondary" onClick={handleClose} isDisabled={isBusy}>
           Close
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={handleAddComment}
-          isLoading={isPostingComment}
-          isDisabled={isBusy}>
-          Add comment
         </Button>
         <Button
           onClick={handleSaveDetails}
