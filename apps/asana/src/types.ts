@@ -188,6 +188,23 @@ export interface GetAsanaSectionsRequest {
   projectGid?: string;
 }
 
+export type AsanaSubtask = {
+  gid: string;
+  name: string;
+  completed: boolean;
+  permalinkUrl: string;
+};
+
+export interface GetAsanaSubtasksRequest {
+  taskId?: string;
+}
+
+export type GetAsanaSubtasksResponse = Record<string, unknown> & {
+  success: boolean;
+  message: string;
+  subtasks?: AsanaSubtask[];
+};
+
 export type ValidateAsanaCredentialsResponse = Record<string, unknown> & {
   valid: boolean;
   message: string;

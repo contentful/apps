@@ -4,6 +4,7 @@ import type {
   AsanaCustomField,
   AsanaProject,
   AsanaSection,
+  AsanaSubtask,
   AsanaTask,
   AsanaTaskOption,
   AsanaUserOption,
@@ -699,4 +700,25 @@ export async function getTaskComments(
       authorName: story.created_by?.name?.trim() || 'Unknown',
       createdAt: story.created_at ?? '',
     }));
+}
+
+type AsanaSubtaskRecord = {
+  gid: string;
+  name: string;
+  completed?: boolean;
+  permalink_url?: string;
+};
+
+export async function getSubtasks(accessToken: string, taskGid: string): Promise<AsanaSubtask[]> {
+  const subtasks = await callAsanaList<AsanaSubtaskRecord>(
+    `/tasks/${taskGid}/subtasks?opt_fields=gid,name,completed,permalink_url&limit=100`,
+    accessToken
+  );
+
+  return subtasks.map((subtask) => ({
+    gid: subtask.gid,
+    name: subtask.name,
+    completed: Boolean(subtask.completed),
+    permalinkUrl: subtask.permalink_url ?? '',
+  }));
 }

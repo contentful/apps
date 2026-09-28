@@ -2,6 +2,7 @@ import { DialogAppSDK } from '@contentful/app-sdk';
 import {
   Box,
   Button,
+  Checkbox,
   Flex,
   FormControl,
   Paragraph,
@@ -22,10 +23,12 @@ import type {
   AsanaComment,
   AsanaCustomFieldValue,
   AsanaSection,
+  AsanaSubtask,
   AsanaTaskOption,
   AsanaUserOption,
   GetAsanaCommentsResponse,
   GetAsanaSectionsResponse,
+  GetAsanaSubtasksResponse,
   GetAsanaTasksResponse,
   GetAsanaUsersResponse,
   TaskDetailsDialogParameters,
@@ -178,7 +181,7 @@ type CustomFieldEditorProps = {
   isDisabled: boolean;
   callAction: <TResult>(
     appActionId: string,
-    actionParameters?: Record<string, string>
+    actionParameters?: Record<string, string | boolean>
   ) => Promise<TResult>;
   onChange: (fieldGid: string, patch: Partial<AsanaCustomFieldValue>) => void;
 };
@@ -465,6 +468,10 @@ const Dialog = () => {
   const [comments, setComments] = useState<AsanaComment[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [commentsError, setCommentsError] = useState<string | null>(null);
+  const [subtasks, setSubtasks] = useState<AsanaSubtask[]>([]);
+  const [isLoadingSubtasks, setIsLoadingSubtasks] = useState(false);
+  const [subtasksError, setSubtasksError] = useState<string | null>(null);
+  const [pendingSubtaskGids, setPendingSubtaskGids] = useState<Set<string>>(new Set());
   const [commentSortOrder, setCommentSortOrder] = useState<'oldest' | 'newest'>('oldest');
   const [areAllCommentsShown, setAreAllCommentsShown] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -534,7 +541,7 @@ const Dialog = () => {
 
   const callAction = async <TResult,>(
     appActionId: string,
-    actionParameters: Record<string, string> = {}
+    actionParameters: Record<string, string | boolean> = {}
   ): Promise<TResult> => {
     // Uses createWithResult (not createWithResponse) because createWithResponse's
     // polling hits a legacy endpoint that has a call-not-found race right after
@@ -705,6 +712,78 @@ const Dialog = () => {
   useEffect(() => {
     void loadComments();
   }, [task?.taskGid]);
+
+  const loadSubtasks = async () => {
+    if (!task) {
+      return;
+    }
+
+    setIsLoadingSubtasks(true);
+    setSubtasksError(null);
+    try {
+      const response = await callAction<GetAsanaSubtasksResponse>('getAsanaSubtasksAction', {
+        taskId: task.taskGid,
+      });
+
+      if (!response.success) {
+        setSubtasks([]);
+        setSubtasksError(response.message || VALIDATION_MESSAGES.subtasksFailed);
+        return;
+      }
+
+      setSubtasks(response.subtasks ?? []);
+    } catch (error) {
+      setSubtasks([]);
+      setSubtasksError(
+        error instanceof Error && error.message ? error.message : VALIDATION_MESSAGES.subtasksFailed
+      );
+    } finally {
+      setIsLoadingSubtasks(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadSubtasks();
+  }, [task?.taskGid]);
+
+  const handleToggleSubtask = async (subtaskGid: string, completed: boolean) => {
+    setPendingSubtaskGids((current) => {
+      const next = new Set(current);
+      next.add(subtaskGid);
+      return next;
+    });
+    setSubtasks((current) =>
+      current.map((subtask) => (subtask.gid === subtaskGid ? { ...subtask, completed } : subtask))
+    );
+
+    try {
+      const response = await callAction<UpdateAsanaTaskResponse>('updateAsanaTaskAction', {
+        taskId: subtaskGid,
+        completed,
+      });
+
+      if (!response.success) {
+        throw new Error(response.message || VALIDATION_MESSAGES.taskUpdateFailed);
+      }
+    } catch (error) {
+      setSubtasks((current) =>
+        current.map((subtask) =>
+          subtask.gid === subtaskGid ? { ...subtask, completed: !completed } : subtask
+        )
+      );
+      sdk.notifier.error(
+        error instanceof Error && error.message
+          ? error.message
+          : VALIDATION_MESSAGES.taskUpdateFailed
+      );
+    } finally {
+      setPendingSubtaskGids((current) => {
+        const next = new Set(current);
+        next.delete(subtaskGid);
+        return next;
+      });
+    }
+  };
 
   const handleSaveDetails = async () => {
     if (!task || !hasDetailChanges) {
@@ -1101,6 +1180,47 @@ const Dialog = () => {
               </Box>
             </FormControl>
           ) : null}
+        </Box>
+
+        <Box>
+          <Text as="div" marginBottom="spacingXs" fontColor="gray600">
+            Subtasks
+          </Text>
+          {isLoadingSubtasks ? (
+            <Box marginBottom="spacingS">
+              <LoadingDots />
+            </Box>
+          ) : subtasksError ? (
+            <Text fontColor="red600" as="div">
+              {subtasksError}
+            </Text>
+          ) : subtasks.length ? (
+            <Flex flexDirection="column" gap="spacingXs">
+              {subtasks.map((subtask) => (
+                <Flex key={subtask.gid} gap="spacingXs" alignItems="center">
+                  <Checkbox
+                    isChecked={subtask.completed}
+                    isDisabled={isBusy || pendingSubtaskGids.has(subtask.gid)}
+                    onChange={(event) => handleToggleSubtask(subtask.gid, event.target.checked)}
+                    aria-label={`Mark ${subtask.name} as ${
+                      subtask.completed ? 'incomplete' : 'complete'
+                    }`}
+                  />
+                  <Text
+                    as="span"
+                    style={subtask.completed ? { textDecoration: 'line-through' } : undefined}
+                    fontColor={subtask.completed ? 'gray500' : undefined}>
+                    {subtask.name}
+                  </Text>
+                  <TextLink href={subtask.permalinkUrl} target="_blank" rel="noreferrer">
+                    Open in Asana
+                  </TextLink>
+                </Flex>
+              ))}
+            </Flex>
+          ) : (
+            <Text fontColor="gray500">No subtasks.</Text>
+          )}
         </Box>
 
         <Box>

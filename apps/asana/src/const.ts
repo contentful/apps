@@ -16,6 +16,7 @@ export const VALIDATION_MESSAGES = {
   projectsFailed: 'Could not load Asana projects.',
   sectionsFailed: 'Could not load Asana sections.',
   commentsFailed: 'Could not load Asana comments.',
+  subtasksFailed: 'Could not load Asana subtasks.',
   customFieldsFailed: 'Could not load Asana custom fields.',
   customFieldRequired: 'Provide a custom field to update.',
   customFieldInvalidValue: 'Provide a valid value for the custom field.',

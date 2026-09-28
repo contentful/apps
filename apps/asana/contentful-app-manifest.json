@@ -181,6 +181,19 @@
       ]
     },
     {
+      "id": "getAsanaSubtasksFunction",
+      "name": "Get Asana subtasks",
+      "description": "Loads the subtasks for an existing Asana task.",
+      "path": "functions/getAsanaSubtasks.js",
+      "entryFile": "functions/getAsanaSubtasks.ts",
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
       "id": "appEventHandler",
       "name": "App event handler function",
       "description": "Function to handle Contentful app events.",
@@ -846,6 +859,62 @@
                 "text",
                 "authorName",
                 "createdAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      }
+    },
+    {
+      "id": "getAsanaSubtasksAction",
+      "name": "Get Asana subtasks",
+      "type": "function-invocation",
+      "functionId": "getAsanaSubtasksFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "taskId",
+          "name": "Task GID or URL",
+          "type": "Symbol",
+          "required": true
+        }
+      ],
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "subtasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "gid": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "completed": {
+                  "type": "boolean"
+                },
+                "permalinkUrl": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "gid",
+                "name",
+                "completed",
+                "permalinkUrl"
               ]
             }
           }
