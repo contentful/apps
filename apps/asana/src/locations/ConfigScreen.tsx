@@ -15,6 +15,11 @@ import {
   Select,
   Spinner,
   Subheading,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useEffect, useRef, useState } from 'react';
@@ -26,12 +31,15 @@ import {
 } from '../const';
 import {
   AppInstallationParameters,
+  AsanaCustomField,
+  AsanaFieldMapping,
   AsanaProject,
   AsanaWorkspace,
   CheckAsanaStatusResponse,
   CompleteAsanaOAuthResponse,
   ContentTypeOption,
   DisconnectAsanaResponse,
+  GetAsanaCustomFieldsResponse,
   GetAsanaProjectsResponse,
   GetAsanaWorkspacesResponse,
   InitiateAsanaOAuthResponse,
@@ -62,6 +70,14 @@ const ConfigScreen = () => {
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [isCheckingStatus, setIsCheckingStatus] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
+  const [fieldMappings, setFieldMappings] = useState<AsanaFieldMapping[]>([]);
+  const [customFields, setCustomFields] = useState<AsanaCustomField[]>([]);
+  const [isLoadingCustomFields, setIsLoadingCustomFields] = useState(false);
+  const [mappingContentTypeId, setMappingContentTypeId] = useState('');
+  const [mappingContentTypeFields, setMappingContentTypeFields] = useState<ContentTypeOption[]>([]);
+  const [isLoadingMappingFields, setIsLoadingMappingFields] = useState(false);
+  const [mappingFieldId, setMappingFieldId] = useState('');
+  const [mappingCustomFieldGid, setMappingCustomFieldGid] = useState('');
   const popupWindowRef = useRef<Window | null>(null);
 
   const callAction = async <TResult,>(
@@ -115,6 +131,45 @@ const ConfigScreen = () => {
       setProjects([]);
     } finally {
       setIsLoadingProjects(false);
+    }
+  };
+
+  const loadCustomFields = async (projectGid: string) => {
+    if (!projectGid) {
+      setCustomFields([]);
+      return;
+    }
+
+    setIsLoadingCustomFields(true);
+    try {
+      const data = await callAction<GetAsanaCustomFieldsResponse>('getAsanaCustomFieldsAction', {
+        projectGid,
+      });
+      setCustomFields(data.customFields ?? []);
+    } catch {
+      sdk.notifier.error(VALIDATION_MESSAGES.customFieldsFailed);
+      setCustomFields([]);
+    } finally {
+      setIsLoadingCustomFields(false);
+    }
+  };
+
+  const loadContentTypeFields = async (contentTypeId: string) => {
+    if (!contentTypeId) {
+      setMappingContentTypeFields([]);
+      return;
+    }
+
+    setIsLoadingMappingFields(true);
+    try {
+      const contentType = await sdk.cma.contentType.get({ contentTypeId });
+      setMappingContentTypeFields(
+        contentType.fields.map((field) => ({ id: field.id, name: field.name }))
+      );
+    } catch {
+      setMappingContentTypeFields([]);
+    } finally {
+      setIsLoadingMappingFields(false);
     }
   };
 
@@ -272,6 +327,7 @@ const ConfigScreen = () => {
       }));
       setWorkspaces([]);
       setProjects([]);
+      setCustomFields([]);
 
       if (result.success) {
         sdk.notifier.success(result.message);
@@ -309,11 +365,12 @@ const ConfigScreen = () => {
       const currentEditorInterface = (currentState?.EditorInterface ?? {}) as EditorInterfaceState;
       const selectedIds = new Set(selectedContentTypes.map((contentType) => contentType.id));
 
-      // enabledContentTypeIds is declared as a Symbol (string) installation parameter in the
-      // app definition, so it must be sent as a JSON string.
+      // enabledContentTypeIds/fieldMappings are declared as Symbol (string) installation
+      // parameters in the app definition, so they must be sent as JSON strings.
       const parametersToSave = {
         ...parameters,
         enabledContentTypeIds: JSON.stringify([...selectedIds]),
+        fieldMappings: JSON.stringify(fieldMappings),
       } as unknown as AppInstallationParameters;
 
       return {
@@ -331,7 +388,7 @@ const ConfigScreen = () => {
         sdk.notifier.error(VALIDATION_MESSAGES.saveFailed);
       }
     });
-  }, [isConnected, parameters, sdk, selectedContentTypes]);
+  }, [isConnected, parameters, sdk, selectedContentTypes, fieldMappings]);
 
   useEffect(() => {
     (async () => {
@@ -347,6 +404,7 @@ const ConfigScreen = () => {
       );
 
       setParameters(nextParameters);
+      setFieldMappings(nextParameters.fieldMappings ?? []);
       setIsInstalled(installed);
       setAvailableContentTypes(contentTypes);
 
@@ -374,6 +432,9 @@ const ConfigScreen = () => {
           loadedWorkspaces.some((workspace) => workspace.gid === nextParameters.defaultWorkspaceGid)
         ) {
           await loadProjects(nextParameters.defaultWorkspaceGid);
+          if (nextParameters.defaultProjectGid) {
+            await loadCustomFields(nextParameters.defaultProjectGid);
+          }
         }
       }
 
@@ -400,6 +461,7 @@ const ConfigScreen = () => {
     }));
     setProjects([]);
     setProjectSearchQuery('');
+    setCustomFields([]);
 
     if (workspaceGid) {
       await loadProjects(workspaceGid);
@@ -414,6 +476,65 @@ const ConfigScreen = () => {
       defaultProjectName: selectedProject?.name ?? '',
     }));
     setProjectSearchQuery('');
+    void loadCustomFields(projectGid);
+  };
+
+  const handleMappingContentTypeChange = (contentTypeId: string) => {
+    setMappingContentTypeId(contentTypeId);
+    setMappingFieldId('');
+    void loadContentTypeFields(contentTypeId);
+  };
+
+  const handleAddFieldMapping = () => {
+    const contentType = selectedContentTypes.find(
+      (candidate) => candidate.id === mappingContentTypeId
+    );
+    const contentfulField = mappingContentTypeFields.find(
+      (candidate) => candidate.id === mappingFieldId
+    );
+    const customField = customFields.find((candidate) => candidate.gid === mappingCustomFieldGid);
+
+    if (!contentType || !contentfulField || !customField) {
+      return;
+    }
+
+    const isDuplicate = fieldMappings.some(
+      (mapping) =>
+        mapping.contentTypeId === contentType.id &&
+        mapping.contentfulFieldId === contentfulField.id &&
+        mapping.asanaCustomFieldGid === customField.gid
+    );
+
+    if (isDuplicate) {
+      return;
+    }
+
+    setFieldMappings((prev) => [
+      ...prev,
+      {
+        contentTypeId: contentType.id,
+        contentTypeName: contentType.name,
+        contentfulFieldId: contentfulField.id,
+        contentfulFieldName: contentfulField.name,
+        asanaCustomFieldGid: customField.gid,
+        asanaCustomFieldName: customField.name,
+      },
+    ]);
+    setMappingFieldId('');
+    setMappingCustomFieldGid('');
+  };
+
+  const handleRemoveFieldMapping = (mappingToRemove: AsanaFieldMapping) => {
+    setFieldMappings((prev) =>
+      prev.filter(
+        (mapping) =>
+          !(
+            mapping.contentTypeId === mappingToRemove.contentTypeId &&
+            mapping.contentfulFieldId === mappingToRemove.contentfulFieldId &&
+            mapping.asanaCustomFieldGid === mappingToRemove.asanaCustomFieldGid
+          )
+      )
+    );
   };
 
   const filteredProjects = projects.filter((project) =>
@@ -564,6 +685,115 @@ const ConfigScreen = () => {
                     : 'Loading workspaces from Asana...'}
                 </Paragraph>
               </Flex>
+            ) : null}
+          </Card>
+
+          <Card marginTop="spacingL">
+            <Subheading marginBottom="spacingM">Field mapping</Subheading>
+            <Paragraph marginBottom="spacingM">
+              Push a Contentful field&apos;s value into an Asana custom field whenever a task is
+              created or updated for that content type. For example, map an entry&apos;s status
+              field to an Asana custom field to trigger Asana-side rules.
+            </Paragraph>
+
+            {!parameters.defaultProjectGid ? (
+              <Box marginBottom="spacingM">
+                <Note variant="neutral">
+                  Select a default project above to choose which Asana custom fields are available
+                  to map.
+                </Note>
+              </Box>
+            ) : null}
+
+            <Flex gap="spacingM" flexWrap="wrap" marginBottom="spacingM">
+              <FormControl style={{ minWidth: '200px', flex: 1 }}>
+                <FormControl.Label>Content type</FormControl.Label>
+                <Select
+                  value={mappingContentTypeId}
+                  onChange={(event) => handleMappingContentTypeChange(event.target.value)}
+                  isDisabled={!selectedContentTypes.length}>
+                  <Select.Option value="">Select a content type</Select.Option>
+                  {selectedContentTypes.map((contentType) => (
+                    <Select.Option key={contentType.id} value={contentType.id}>
+                      {contentType.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl style={{ minWidth: '200px', flex: 1 }}>
+                <FormControl.Label>Contentful field</FormControl.Label>
+                <Select
+                  value={mappingFieldId}
+                  onChange={(event) => setMappingFieldId(event.target.value)}
+                  isDisabled={!mappingContentTypeId || isLoadingMappingFields}>
+                  <Select.Option value="">
+                    {isLoadingMappingFields ? 'Loading fields...' : 'Select a field'}
+                  </Select.Option>
+                  {mappingContentTypeFields.map((field) => (
+                    <Select.Option key={field.id} value={field.id}>
+                      {field.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl style={{ minWidth: '200px', flex: 1 }}>
+                <FormControl.Label>Asana custom field</FormControl.Label>
+                <Select
+                  value={mappingCustomFieldGid}
+                  onChange={(event) => setMappingCustomFieldGid(event.target.value)}
+                  isDisabled={!parameters.defaultProjectGid || isLoadingCustomFields}>
+                  <Select.Option value="">
+                    {isLoadingCustomFields ? 'Loading custom fields...' : 'Select a custom field'}
+                  </Select.Option>
+                  {customFields.map((field) => (
+                    <Select.Option key={field.gid} value={field.gid}>
+                      {field.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </FormControl>
+            </Flex>
+
+            <Button
+              variant="secondary"
+              onClick={handleAddFieldMapping}
+              isDisabled={!mappingContentTypeId || !mappingFieldId || !mappingCustomFieldGid}>
+              Add mapping
+            </Button>
+
+            {fieldMappings.length ? (
+              <Box marginTop="spacingM">
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Content type</TableCell>
+                      <TableCell>Contentful field</TableCell>
+                      <TableCell>Asana custom field</TableCell>
+                      <TableCell></TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {fieldMappings.map((mapping) => (
+                      <TableRow
+                        key={`${mapping.contentTypeId}:${mapping.contentfulFieldId}:${mapping.asanaCustomFieldGid}`}>
+                        <TableCell>{mapping.contentTypeName}</TableCell>
+                        <TableCell>{mapping.contentfulFieldName}</TableCell>
+                        <TableCell>{mapping.asanaCustomFieldName}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="transparent"
+                            size="small"
+                            onClick={() => handleRemoveFieldMapping(mapping)}>
+                            Remove
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
             ) : null}
           </Card>
         </Form>

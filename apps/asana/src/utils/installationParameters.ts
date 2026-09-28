@@ -1,4 +1,4 @@
-import type { AppInstallationParameters } from '../types';
+import type { AppInstallationParameters, AsanaFieldMapping } from '../types';
 
 const parseJsonField = <T>(value: unknown): T | undefined => {
   if (typeof value !== 'string' || !value.trim()) {
@@ -25,4 +25,7 @@ export const parseInstallationParameters = (
   enabledContentTypeIds:
     parseJsonField<string[]>(parameters.enabledContentTypeIds) ??
     (Array.isArray(parameters.enabledContentTypeIds) ? parameters.enabledContentTypeIds : []),
+  fieldMappings:
+    parseJsonField<AsanaFieldMapping[]>(parameters.fieldMappings) ??
+    (Array.isArray(parameters.fieldMappings) ? parameters.fieldMappings : []),
 });

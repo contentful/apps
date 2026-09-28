@@ -4,8 +4,17 @@ import ConfigScreen from '../src/locations/ConfigScreen';
 import { VALIDATION_MESSAGES } from '../src/const';
 import { mockCma, mockSdk } from './mocks/mockSdk';
 
+// Return a stable object reference (not a fresh literal per call) so components that depend on
+// `sdk` in a useEffect dependency array don't see it as changing on every render. Built lazily
+// (rather than at vi.mock's hoisted factory-eval time) since `mockSdk`/`mockCma` aren't
+// initialized yet when the factory itself runs.
+let sdkForTests: (typeof mockSdk & { cma: typeof mockCma }) | undefined;
+
 vi.mock('@contentful/react-apps-toolkit', () => ({
-  useSDK: () => ({ ...mockSdk, cma: mockCma }),
+  useSDK: () => {
+    sdkForTests ??= { ...mockSdk, cma: mockCma };
+    return sdkForTests;
+  },
 }));
 
 vi.mock('../src/components/ContentTypeMultiSelect', () => ({
@@ -80,6 +89,14 @@ describe('Asana ConfigScreen', () => {
       if (appActionId === 'getAsanaProjectsAction') {
         return succeeded({
           projects: [{ gid: 'project-1', name: 'Launch project' }],
+        });
+      }
+
+      if (appActionId === 'getAsanaCustomFieldsAction') {
+        return succeeded({
+          success: true,
+          message: 'ok',
+          customFields: [{ gid: 'custom-field-1', name: 'Priority', type: 'text' }],
         });
       }
 
@@ -213,6 +230,63 @@ describe('Asana ConfigScreen', () => {
     });
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Connect to Asana' })).toBeInTheDocument();
+    });
+  });
+
+  it('adds a field mapping and persists it as JSON on configure', async () => {
+    isConnected = true;
+    mockSdk.app.getParameters.mockResolvedValue({
+      defaultWorkspaceGid: 'workspace-1',
+      defaultWorkspaceName: 'Marketing workspace',
+      defaultProjectGid: 'project-1',
+      defaultProjectName: 'Launch project',
+      enabledContentTypeIds: ['blogPost'],
+    });
+    mockCma.contentType.get.mockImplementation(({ contentTypeId }: { contentTypeId: string }) => {
+      if (contentTypeId === 'blogPost') {
+        return Promise.resolve({
+          fields: [{ id: 'status', name: 'Status' }],
+        });
+      }
+      return Promise.reject(new Error('not found'));
+    });
+
+    await renderAndWaitReady();
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Asana custom field')).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByLabelText('Content type'), { target: { value: 'blogPost' } });
+
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: 'Status' })).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByLabelText('Contentful field'), { target: { value: 'status' } });
+    fireEvent.change(screen.getByLabelText('Asana custom field'), {
+      target: { value: 'custom-field-1' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Add mapping' }));
+
+    expect(await screen.findByRole('button', { name: 'Remove' })).toBeInTheDocument();
+
+    const callback = mockSdk.app.onConfigure.mock.calls.at(-1)?.[0];
+    const result = callback ? await callback() : undefined;
+
+    expect(result).toMatchObject({
+      parameters: {
+        fieldMappings: JSON.stringify([
+          {
+            contentTypeId: 'blogPost',
+            contentTypeName: 'Blog Post',
+            contentfulFieldId: 'status',
+            contentfulFieldName: 'Status',
+            asanaCustomFieldGid: 'custom-field-1',
+            asanaCustomFieldName: 'Priority',
+          },
+        ]),
+      },
     });
   });
 });
