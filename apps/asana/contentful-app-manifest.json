@@ -451,6 +451,30 @@
                     "name"
                   ]
                 }
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "modifiedAt": {
+                "type": "string"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "gid": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "gid",
+                    "name"
+                  ]
+                }
               }
             },
             "required": [
@@ -699,6 +723,30 @@
                     "gid",
                     "name",
                     "type"
+                  ]
+                }
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "modifiedAt": {
+                "type": "string"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "gid": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "gid",
+                    "name"
                   ]
                 }
               }
@@ -992,6 +1040,30 @@
                     "type"
                   ]
                 }
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "modifiedAt": {
+                "type": "string"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "gid": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "gid",
+                    "name"
+                  ]
+                }
               }
             },
             "required": [
@@ -1177,6 +1249,30 @@
               },
               "permalinkUrl": {
                 "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "modifiedAt": {
+                "type": "string"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "gid": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "gid",
+                    "name"
+                  ]
+                }
               }
             },
             "required": [

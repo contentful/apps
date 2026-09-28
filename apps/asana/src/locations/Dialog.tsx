@@ -34,6 +34,19 @@ import type {
   UpdateAsanaTaskResponse,
 } from '../types';
 
+function formatFullDate(isoDate?: string) {
+  if (!isoDate) {
+    return '';
+  }
+
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
 function formatCommentTimestamp(isoDate: string) {
   if (!isoDate) {
     return '';
@@ -421,6 +434,9 @@ const Dialog = () => {
         status: invocation.status,
         assigneeName: invocation.assigneeName,
         dueDate: invocation.dueDate,
+        createdAt: invocation.createdAt,
+        modifiedAt: invocation.modifiedAt,
+        tags: invocation.tags,
       }
     : null;
   const workspaceGid = invocation.workspaceGid ?? '';
@@ -892,6 +908,34 @@ const Dialog = () => {
             Status
           </Text>
           <Text>{task.status || 'Unknown'}</Text>
+        </Box>
+
+        <Flex gap="spacingL" flexWrap="wrap">
+          <Box>
+            <Text as="div" marginBottom="spacing2Xs" fontColor="gray600">
+              Created on
+            </Text>
+            <Text>{formatFullDate(task.createdAt) || 'Unknown'}</Text>
+          </Box>
+          <Box>
+            <Text as="div" marginBottom="spacing2Xs" fontColor="gray600">
+              Last modified
+            </Text>
+            <Text>{formatFullDate(task.modifiedAt) || 'Unknown'}</Text>
+          </Box>
+        </Flex>
+
+        <Box>
+          <Text as="div" marginBottom="spacingXs" fontColor="gray600">
+            Tags
+          </Text>
+          <Flex gap="spacingXs" flexWrap="wrap">
+            {task.tags && task.tags.length ? (
+              task.tags.map((tag) => <Pill key={tag.gid} label={tag.name} />)
+            ) : (
+              <Text fontColor="gray500">No tags.</Text>
+            )}
+          </Flex>
         </Box>
 
         <Flex gap="spacingL" flexWrap="wrap">

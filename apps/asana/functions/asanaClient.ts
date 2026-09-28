@@ -242,11 +242,14 @@ type AsanaTaskRecord = {
   notes?: string;
   completed?: boolean;
   due_on?: string | null;
+  created_at?: string;
+  modified_at?: string;
   assignee?: {
     gid?: string;
     name?: string;
   } | null;
   dependencies?: Array<{ gid: string; name?: string }>;
+  tags?: Array<{ gid?: string; name?: string }>;
   workspace?: {
     gid?: string;
   } | null;
@@ -289,7 +292,7 @@ type UpdateTaskPayload = {
 };
 
 const TASK_OPT_FIELDS =
-  'gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name,' +
+  'gid,name,permalink_url,notes,completed,due_on,created_at,modified_at,assignee.gid,assignee.name,dependencies.gid,dependencies.name,tags.gid,tags.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name,' +
   'custom_fields.gid,custom_fields.name,custom_fields.type,custom_fields.enum_options.gid,custom_fields.enum_options.name,custom_fields.enum_options.enabled,' +
   'custom_fields.text_value,custom_fields.number_value,custom_fields.precision,custom_fields.enum_value.gid,custom_fields.enum_value.name,' +
   'custom_fields.multi_enum_values.gid,custom_fields.multi_enum_values.name,custom_fields.date_value.date,' +
@@ -377,6 +380,17 @@ async function mapAsanaTask(
     ...(typeof task.assignee?.name === 'string' ? { assigneeName: task.assignee.name } : {}),
     ...(typeof task.assignee?.gid === 'string' ? { assigneeGid: task.assignee.gid } : {}),
     ...(typeof task.due_on === 'string' ? { dueDate: task.due_on } : {}),
+    ...(typeof task.created_at === 'string' ? { createdAt: task.created_at } : {}),
+    ...(typeof task.modified_at === 'string' ? { modifiedAt: task.modified_at } : {}),
+    ...(Array.isArray(task.tags)
+      ? {
+          tags: task.tags
+            .filter(
+              (tag): tag is { gid: string; name: string } => Boolean(tag.gid) && Boolean(tag.name)
+            )
+            .map((tag) => ({ gid: tag.gid, name: tag.name })),
+        }
+      : {}),
     ...(Array.isArray(task.dependencies)
       ? { dependencies: await resolveDependencyNames(accessToken, task.dependencies) }
       : {}),

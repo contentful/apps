@@ -114,6 +114,9 @@ export interface AsanaTask {
   sectionGid?: string;
   sectionName?: string;
   customFields?: AsanaCustomFieldValue[];
+  createdAt?: string;
+  modifiedAt?: string;
+  tags?: AsanaTaskOption[];
 }
 
 export interface PrimaryAsanaTaskLink {
@@ -280,6 +283,9 @@ export interface TaskDetailsDialogParameters {
   sectionGid?: string;
   sectionName?: string;
   customFields?: AsanaCustomFieldValue[];
+  createdAt?: string;
+  modifiedAt?: string;
+  tags?: AsanaTaskOption[];
 }
 
 export interface TaskDetailsDialogResult {

@@ -206,6 +206,9 @@ const Sidebar = () => {
             ...(latestTask.sectionGid ? { sectionGid: latestTask.sectionGid } : {}),
             ...(latestTask.sectionName ? { sectionName: latestTask.sectionName } : {}),
             ...(latestTask.customFields ? { customFields: latestTask.customFields } : {}),
+            ...(latestTask.createdAt ? { createdAt: latestTask.createdAt } : {}),
+            ...(latestTask.modifiedAt ? { modifiedAt: latestTask.modifiedAt } : {}),
+            ...(latestTask.tags ? { tags: latestTask.tags } : {}),
           }
         : {
             taskGid: taskLink.taskGid,

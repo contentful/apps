@@ -107,7 +107,7 @@ describe('createAsanaTask', () => {
     });
     expect(mockCma.entry.get).not.toHaveBeenCalled();
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name,custom_fields.gid,custom_fields.name,custom_fields.type,custom_fields.enum_options.gid,custom_fields.enum_options.name,custom_fields.enum_options.enabled,custom_fields.text_value,custom_fields.number_value,custom_fields.precision,custom_fields.enum_value.gid,custom_fields.enum_value.name,custom_fields.multi_enum_values.gid,custom_fields.multi_enum_values.name,custom_fields.date_value.date,custom_fields.people_value.gid,custom_fields.people_value.name,custom_fields.display_value',
+      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url,notes,completed,due_on,created_at,modified_at,assignee.gid,assignee.name,dependencies.gid,dependencies.name,tags.gid,tags.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name,custom_fields.gid,custom_fields.name,custom_fields.type,custom_fields.enum_options.gid,custom_fields.enum_options.name,custom_fields.enum_options.enabled,custom_fields.text_value,custom_fields.number_value,custom_fields.precision,custom_fields.enum_value.gid,custom_fields.enum_value.name,custom_fields.multi_enum_values.gid,custom_fields.multi_enum_values.name,custom_fields.date_value.date,custom_fields.people_value.gid,custom_fields.people_value.name,custom_fields.display_value',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({
@@ -164,7 +164,7 @@ describe('createAsanaTask', () => {
     );
     expect(mockCma.entry.publish).toHaveBeenCalled();
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name,custom_fields.gid,custom_fields.name,custom_fields.type,custom_fields.enum_options.gid,custom_fields.enum_options.name,custom_fields.enum_options.enabled,custom_fields.text_value,custom_fields.number_value,custom_fields.precision,custom_fields.enum_value.gid,custom_fields.enum_value.name,custom_fields.multi_enum_values.gid,custom_fields.multi_enum_values.name,custom_fields.date_value.date,custom_fields.people_value.gid,custom_fields.people_value.name,custom_fields.display_value',
+      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url,notes,completed,due_on,created_at,modified_at,assignee.gid,assignee.name,dependencies.gid,dependencies.name,tags.gid,tags.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name,custom_fields.gid,custom_fields.name,custom_fields.type,custom_fields.enum_options.gid,custom_fields.enum_options.name,custom_fields.enum_options.enabled,custom_fields.text_value,custom_fields.number_value,custom_fields.precision,custom_fields.enum_value.gid,custom_fields.enum_value.name,custom_fields.multi_enum_values.gid,custom_fields.multi_enum_values.name,custom_fields.date_value.date,custom_fields.people_value.gid,custom_fields.people_value.name,custom_fields.display_value',
       expect.objectContaining({
         body: JSON.stringify({
           data: {
@@ -207,7 +207,7 @@ describe('createAsanaTask', () => {
 
     expect(mockCma.contentType.get).toHaveBeenCalledWith({ contentTypeId: 'landingPage' });
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name,custom_fields.gid,custom_fields.name,custom_fields.type,custom_fields.enum_options.gid,custom_fields.enum_options.name,custom_fields.enum_options.enabled,custom_fields.text_value,custom_fields.number_value,custom_fields.precision,custom_fields.enum_value.gid,custom_fields.enum_value.name,custom_fields.multi_enum_values.gid,custom_fields.multi_enum_values.name,custom_fields.date_value.date,custom_fields.people_value.gid,custom_fields.people_value.name,custom_fields.display_value',
+      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url,notes,completed,due_on,created_at,modified_at,assignee.gid,assignee.name,dependencies.gid,dependencies.name,tags.gid,tags.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name,custom_fields.gid,custom_fields.name,custom_fields.type,custom_fields.enum_options.gid,custom_fields.enum_options.name,custom_fields.enum_options.enabled,custom_fields.text_value,custom_fields.number_value,custom_fields.precision,custom_fields.enum_value.gid,custom_fields.enum_value.name,custom_fields.multi_enum_values.gid,custom_fields.multi_enum_values.name,custom_fields.date_value.date,custom_fields.people_value.gid,custom_fields.people_value.name,custom_fields.display_value',
       expect.objectContaining({
         body: JSON.stringify({
           data: {
