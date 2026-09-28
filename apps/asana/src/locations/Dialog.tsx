@@ -938,6 +938,34 @@ const Dialog = () => {
           </Flex>
         </Box>
 
+        {customFields.length ? (
+          <Box>
+            <Text as="div" marginBottom="spacingXs" fontColor="gray600">
+              Custom fields
+            </Text>
+            <Flex flexDirection="column" gap="spacingM">
+              {customFields.map((field) => (
+                <FormControl key={field.gid} marginBottom="none">
+                  <FormControl.Label>{field.name}</FormControl.Label>
+                  <CustomFieldEditor
+                    field={field}
+                    workspaceGid={workspaceGid}
+                    isDisabled={isBusy}
+                    callAction={callAction}
+                    onChange={handleCustomFieldChange}
+                  />
+                  {!EDITABLE_CUSTOM_FIELD_TYPES.has(field.type) ? (
+                    <FormControl.HelpText>
+                      {CUSTOM_FIELD_TYPE_LABELS[field.type] || field.type} fields aren&apos;t
+                      editable in this app yet.
+                    </FormControl.HelpText>
+                  ) : null}
+                </FormControl>
+              ))}
+            </Flex>
+          </Box>
+        ) : null}
+
         <Flex gap="spacingL" flexWrap="wrap">
           <FormControl style={{ minWidth: '260px', flex: 1 }}>
             <Flex justifyContent="space-between" alignItems="center">
@@ -1137,34 +1165,6 @@ const Dialog = () => {
             </FormControl>
           ) : null}
         </Box>
-
-        {customFields.length ? (
-          <Box>
-            <Text as="div" marginBottom="spacingXs" fontColor="gray600">
-              Custom fields
-            </Text>
-            <Flex flexDirection="column" gap="spacingM">
-              {customFields.map((field) => (
-                <FormControl key={field.gid} marginBottom="none">
-                  <FormControl.Label>{field.name}</FormControl.Label>
-                  <CustomFieldEditor
-                    field={field}
-                    workspaceGid={workspaceGid}
-                    isDisabled={isBusy}
-                    callAction={callAction}
-                    onChange={handleCustomFieldChange}
-                  />
-                  {!EDITABLE_CUSTOM_FIELD_TYPES.has(field.type) ? (
-                    <FormControl.HelpText>
-                      {CUSTOM_FIELD_TYPE_LABELS[field.type] || field.type} fields aren&apos;t
-                      editable in this app yet.
-                    </FormControl.HelpText>
-                  ) : null}
-                </FormControl>
-              ))}
-            </Flex>
-          </Box>
-        ) : null}
 
         <Box>
           <FormControl marginBottom="spacingM">
