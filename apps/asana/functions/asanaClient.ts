@@ -257,6 +257,10 @@ type AsanaTaskRecord = {
     enum_options?: Array<{ gid?: string; name?: string; enabled?: boolean }>;
     text_value?: string | null;
     number_value?: number | null;
+    // Decimal places Asana displays/expects for this number field (e.g. 2 for a currency field
+    // like "$1,000.00"). Used to round values client-side before writing them back, since Asana
+    // rejects number values that don't conform to the field's configured precision.
+    precision?: number | null;
     enum_value?: { gid?: string; name?: string } | null;
     multi_enum_values?: Array<{ gid?: string; name?: string }>;
     date_value?: { date?: string; date_time?: string } | null;
@@ -283,7 +287,7 @@ type UpdateTaskPayload = {
 const TASK_OPT_FIELDS =
   'gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name,' +
   'custom_fields.gid,custom_fields.name,custom_fields.type,custom_fields.enum_options.gid,custom_fields.enum_options.name,custom_fields.enum_options.enabled,' +
-  'custom_fields.text_value,custom_fields.number_value,custom_fields.enum_value.gid,custom_fields.enum_value.name,' +
+  'custom_fields.text_value,custom_fields.number_value,custom_fields.precision,custom_fields.enum_value.gid,custom_fields.enum_value.name,' +
   'custom_fields.multi_enum_values.gid,custom_fields.multi_enum_values.name,custom_fields.date_value.date,' +
   'custom_fields.people_value.gid,custom_fields.people_value.name,custom_fields.display_value';
 
@@ -381,6 +385,7 @@ async function mapAsanaTask(
               ...(typeof field.number_value === 'number'
                 ? { numberValue: field.number_value }
                 : {}),
+              ...(typeof field.precision === 'number' ? { precision: field.precision } : {}),
               ...(field.enum_value?.gid
                 ? { enumValue: { gid: field.enum_value.gid, name: field.enum_value.name ?? '' } }
                 : {}),

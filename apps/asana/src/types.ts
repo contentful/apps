@@ -59,6 +59,8 @@ export interface AsanaCustomFieldValue {
   enumOptions?: AsanaCustomFieldOption[];
   textValue?: string;
   numberValue?: number;
+  // Decimal places Asana expects for this number field (e.g. 2 for a currency-formatted field).
+  precision?: number;
   enumValue?: AsanaCustomFieldOption | null;
   multiEnumValues?: AsanaCustomFieldOption[];
   dateValue?: string;

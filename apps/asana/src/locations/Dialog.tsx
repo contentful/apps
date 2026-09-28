@@ -127,12 +127,21 @@ const EDITABLE_CUSTOM_FIELD_TYPES = new Set(Object.keys(CUSTOM_FIELD_TYPE_LABELS
 
 // Shapes a custom field's local draft value into the JSON string the
 // `updateAsanaCustomFieldAction` App Action expects for that field's type.
-function buildCustomFieldValuePayload(field: AsanaCustomFieldValue): string {
+export function buildCustomFieldValuePayload(field: AsanaCustomFieldValue): string {
   switch (field.type) {
     case 'text':
       return JSON.stringify(field.textValue?.trim() ?? '');
-    case 'number':
-      return JSON.stringify(typeof field.numberValue === 'number' ? field.numberValue : null);
+    case 'number': {
+      if (typeof field.numberValue !== 'number' || Number.isNaN(field.numberValue)) {
+        return JSON.stringify(null);
+      }
+      // Asana rejects number values that don't conform to the field's configured precision
+      // (e.g. a currency field with 2 decimal places), so round to match it before sending.
+      const precision = typeof field.precision === 'number' ? field.precision : null;
+      const value =
+        precision === null ? field.numberValue : Number(field.numberValue.toFixed(precision));
+      return JSON.stringify(value);
+    }
     case 'enum':
       return JSON.stringify(field.enumValue?.gid ?? null);
     case 'multi_enum':
@@ -213,6 +222,7 @@ const CustomFieldEditor = ({
     return (
       <TextInput
         type="number"
+        step={typeof field.precision === 'number' ? Math.pow(10, -field.precision) : 'any'}
         value={typeof field.numberValue === 'number' ? String(field.numberValue) : ''}
         onChange={(event) =>
           onChange(field.gid, {

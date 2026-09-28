@@ -635,6 +635,9 @@
                     "numberValue": {
                       "type": "number"
                     },
+                    "precision": {
+                      "type": "number"
+                    },
                     "enumValue": {
                       "type": "object",
                       "properties": {
@@ -921,6 +924,9 @@
                       "type": "string"
                     },
                     "numberValue": {
+                      "type": "number"
+                    },
+                    "precision": {
                       "type": "number"
                     },
                     "enumValue": {
