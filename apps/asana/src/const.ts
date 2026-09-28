@@ -15,6 +15,7 @@ export const VALIDATION_MESSAGES = {
   workspacesFailed: 'Could not load Asana workspaces.',
   projectsFailed: 'Could not load Asana projects.',
   sectionsFailed: 'Could not load Asana sections.',
+  commentsFailed: 'Could not load Asana comments.',
   taskTitleRequired: 'Enter an Asana task title.',
   taskIdRequired: 'Enter an Asana task GID or Asana task URL.',
   taskUpdateFieldsRequired: 'Provide at least one task field to update.',

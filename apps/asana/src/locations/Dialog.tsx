@@ -18,9 +18,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { VALIDATION_MESSAGES } from '../const';
 import type {
   AddAsanaCommentResponse,
+  AsanaComment,
   AsanaSection,
   AsanaTaskOption,
   AsanaUserOption,
+  GetAsanaCommentsResponse,
   GetAsanaSectionsResponse,
   GetAsanaTasksResponse,
   GetAsanaUsersResponse,
@@ -28,6 +30,38 @@ import type {
   TaskDetailsDialogResult,
   UpdateAsanaTaskResponse,
 } from '../types';
+
+function formatCommentTimestamp(isoDate: string) {
+  if (!isoDate) {
+    return '';
+  }
+
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  const diffMinutes = Math.floor((Date.now() - date.getTime()) / 60000);
+
+  if (diffMinutes < 1) {
+    return 'Just now';
+  }
+  if (diffMinutes < 60) {
+    return `${diffMinutes} minute${diffMinutes === 1 ? '' : 's'} ago`;
+  }
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) {
+    return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+  }
+
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) {
+    return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+  }
+
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
 
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
@@ -64,6 +98,9 @@ const Dialog = () => {
   const [dependencyResults, setDependencyResults] = useState<AsanaTaskOption[]>([]);
   const [isSearchingDependencies, setIsSearchingDependencies] = useState(false);
   const [comment, setComment] = useState('');
+  const [comments, setComments] = useState<AsanaComment[]>([]);
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
+  const [commentsError, setCommentsError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isPostingComment, setIsPostingComment] = useState(false);
 
@@ -234,6 +271,39 @@ const Dialog = () => {
     };
   }, [projectGid]);
 
+  const loadComments = async () => {
+    if (!task) {
+      return;
+    }
+
+    setIsLoadingComments(true);
+    setCommentsError(null);
+    try {
+      const response = await callAction<GetAsanaCommentsResponse>('getAsanaCommentsAction', {
+        taskId: task.taskGid,
+      });
+
+      if (!response.success) {
+        setComments([]);
+        setCommentsError(response.message || VALIDATION_MESSAGES.commentsFailed);
+        return;
+      }
+
+      setComments(response.comments ?? []);
+    } catch (error) {
+      setComments([]);
+      setCommentsError(
+        error instanceof Error && error.message ? error.message : VALIDATION_MESSAGES.commentsFailed
+      );
+    } finally {
+      setIsLoadingComments(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadComments();
+  }, [task?.taskGid]);
+
   const handleSaveDetails = async () => {
     if (!task || !hasDetailChanges) {
       return;
@@ -365,6 +435,7 @@ const Dialog = () => {
       }
 
       setComment('');
+      await loadComments();
       sdk.notifier.success(VALIDATION_MESSAGES.taskCommentAdded);
     } catch (error) {
       const message =
@@ -611,6 +682,40 @@ const Dialog = () => {
         </Box>
 
         <Box>
+          <Text as="div" marginBottom="spacingXs" fontColor="gray600">
+            Comments
+          </Text>
+          {isLoadingComments ? (
+            <Paragraph marginBottom="spacingS">Loading comments...</Paragraph>
+          ) : commentsError ? (
+            <Text fontColor="red600" as="div" marginBottom="spacingS">
+              {commentsError}
+            </Text>
+          ) : comments.length ? (
+            <Flex
+              flexDirection="column"
+              gap="spacingS"
+              marginBottom="spacingS"
+              style={{ maxHeight: '260px', overflowY: 'auto' }}>
+              {comments.map((commentItem) => (
+                <Box
+                  key={commentItem.gid}
+                  style={{ borderBottom: '1px solid #e5ebed', paddingBottom: '8px' }}>
+                  <Flex justifyContent="space-between" alignItems="baseline" gap="spacingXs">
+                    <Text fontWeight="fontWeightMedium">{commentItem.authorName}</Text>
+                    <Text fontColor="gray500" fontSize="fontSizeS">
+                      {formatCommentTimestamp(commentItem.createdAt)}
+                    </Text>
+                  </Flex>
+                  <Text as="div">{commentItem.text}</Text>
+                </Box>
+              ))}
+            </Flex>
+          ) : (
+            <Text fontColor="gray500" as="div" marginBottom="spacingS">
+              No comments yet.
+            </Text>
+          )}
           <FormControl marginBottom="none">
             <FormControl.Label>Add comment</FormControl.Label>
             <Textarea

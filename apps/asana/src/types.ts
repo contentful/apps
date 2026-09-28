@@ -114,6 +114,17 @@ export interface AddAsanaCommentRequest {
   comment?: string;
 }
 
+export type AsanaComment = {
+  gid: string;
+  text: string;
+  authorName: string;
+  createdAt: string;
+};
+
+export interface GetAsanaCommentsRequest {
+  taskId?: string;
+}
+
 export interface GetAsanaSectionsRequest {
   projectGid?: string;
 }
@@ -191,6 +202,12 @@ export type GetAsanaTaskResponse = Record<string, unknown> & {
 export type AddAsanaCommentResponse = Record<string, unknown> & {
   success: boolean;
   message: string;
+};
+
+export type GetAsanaCommentsResponse = Record<string, unknown> & {
+  success: boolean;
+  message: string;
+  comments?: AsanaComment[];
 };
 
 export interface TaskDetailsDialogParameters {
