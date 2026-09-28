@@ -11,18 +11,6 @@ export interface AppInstallationParameters {
   defaultProjectGid: string;
   defaultProjectName: string;
   enabledContentTypeIds?: string[];
-  fieldMappings?: AsanaFieldMapping[];
-}
-
-// Maps a Contentful field to an Asana custom field on the default project, so task create/update
-// actions can push the Contentful field's current value into that Asana custom field.
-export interface AsanaFieldMapping {
-  contentTypeId: string;
-  contentTypeName: string;
-  contentfulFieldId: string;
-  contentfulFieldName: string;
-  asanaCustomFieldGid: string;
-  asanaCustomFieldName: string;
 }
 
 export interface AsanaWorkspace {
