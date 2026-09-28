@@ -153,12 +153,15 @@ const Dialog = () => {
     : chronologicalComments.slice(-VISIBLE_COMMENT_COUNT);
   const orderedComments =
     commentSortOrder === 'newest' ? [...displayedComments].reverse() : displayedComments;
-  const moreCommentsLink =
-    !areAllCommentsShown && hiddenCommentCount ? (
-      <TextLink as="button" variant="secondary" onClick={() => setAreAllCommentsShown(true)}>
-        {hiddenCommentCount} more comment{hiddenCommentCount === 1 ? '' : 's'}
-      </TextLink>
-    ) : null;
+  const moreCommentsLink = !hiddenCommentCount ? null : areAllCommentsShown ? (
+    <TextLink as="button" variant="secondary" onClick={() => setAreAllCommentsShown(false)}>
+      Hide earlier comments
+    </TextLink>
+  ) : (
+    <TextLink as="button" variant="secondary" onClick={() => setAreAllCommentsShown(true)}>
+      {hiddenCommentCount} more comment{hiddenCommentCount === 1 ? '' : 's'}
+    </TextLink>
+  );
   const hasDueDateChanges = dueDate !== (invocation.dueDate ?? '');
   const hasAssigneeChanges = Boolean(selectedAssignee) || assigneeCleared;
   const hasDependencyChanges =
