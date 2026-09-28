@@ -1,6 +1,7 @@
 import type { AppActionRequest, FunctionEventContext } from '@contentful/node-apps-toolkit';
 import type {
   AsanaComment,
+  AsanaCustomField,
   AsanaProject,
   AsanaSection,
   AsanaTask,
@@ -256,6 +257,9 @@ type CreateTaskPayload = {
   notes?: string;
   projects?: string[];
   workspace?: string;
+  // Keyed by Asana custom field gid. Not yet wired to an App Action parameter -
+  // callers can pass this once a field-mapping configuration UI selects values.
+  custom_fields?: Record<string, string>;
 };
 
 type UpdateTaskPayload = {
@@ -264,6 +268,9 @@ type UpdateTaskPayload = {
   completed?: boolean;
   assignee?: string | null;
   due_on?: string | null;
+  // Keyed by Asana custom field gid. Not yet wired to an App Action parameter -
+  // callers can pass this once a field-mapping configuration UI selects values.
+  custom_fields?: Record<string, string>;
 };
 
 const TASK_OPT_FIELDS =
@@ -416,6 +423,44 @@ type AsanaTaskMembershipRecord = {
     section?: { gid?: string; name?: string } | null;
   }>;
 };
+
+type AsanaCustomFieldSettingRecord = {
+  custom_field?: {
+    gid?: string;
+    name?: string;
+    type?: string;
+    enum_options?: Array<{ gid?: string; name?: string; enabled?: boolean }>;
+  } | null;
+};
+
+export async function getProjectCustomFields(
+  accessToken: string,
+  projectGid: string
+): Promise<AsanaCustomField[]> {
+  const settings = await callAsanaList<AsanaCustomFieldSettingRecord>(
+    `/projects/${projectGid}/custom_field_settings?opt_fields=custom_field.gid,custom_field.name,custom_field.type,custom_field.enum_options.gid,custom_field.enum_options.name,custom_field.enum_options.enabled&limit=100`,
+    accessToken
+  );
+
+  return settings
+    .map((setting) => setting.custom_field)
+    .filter(
+      (customField): customField is NonNullable<typeof customField> =>
+        Boolean(customField?.gid) && Boolean(customField?.name)
+    )
+    .map((customField) => ({
+      gid: customField.gid!,
+      name: customField.name!,
+      type: customField.type ?? 'text',
+      ...(customField.enum_options
+        ? {
+            enumOptions: customField.enum_options
+              .filter((option) => option.enabled !== false && option.gid && option.name)
+              .map((option) => ({ gid: option.gid!, name: option.name! })),
+          }
+        : {}),
+    }));
+}
 
 export async function getProjectSections(
   accessToken: string,

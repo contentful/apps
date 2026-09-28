@@ -28,6 +28,28 @@ export interface AsanaSection {
   name: string;
 }
 
+export interface AsanaCustomFieldOption {
+  gid: string;
+  name: string;
+}
+
+export interface AsanaCustomField {
+  gid: string;
+  name: string;
+  type: string;
+  enumOptions?: AsanaCustomFieldOption[];
+}
+
+export interface GetAsanaCustomFieldsRequest {
+  projectGid?: string;
+}
+
+export type GetAsanaCustomFieldsResponse = Record<string, unknown> & {
+  success: boolean;
+  message: string;
+  customFields?: AsanaCustomField[];
+};
+
 export type AsanaTaskOption = {
   gid: string;
   name: string;
