@@ -41,4 +41,16 @@ describe('buildCustomFieldValuePayload', () => {
 
     expect(payload).toBe(JSON.stringify('hello'));
   });
+
+  it('sends null instead of an empty string when a text value is cleared', () => {
+    const payload = buildCustomFieldValuePayload(baseField({ type: 'text', textValue: '   ' }));
+
+    expect(payload).toBe(JSON.stringify(null));
+  });
+
+  it('sends null when a text value was never set', () => {
+    const payload = buildCustomFieldValuePayload(baseField({ type: 'text', textValue: undefined }));
+
+    expect(payload).toBe(JSON.stringify(null));
+  });
 });

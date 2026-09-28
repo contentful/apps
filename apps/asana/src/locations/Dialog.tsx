@@ -129,8 +129,12 @@ const EDITABLE_CUSTOM_FIELD_TYPES = new Set(Object.keys(CUSTOM_FIELD_TYPE_LABELS
 // `updateAsanaCustomFieldAction` App Action expects for that field's type.
 export function buildCustomFieldValuePayload(field: AsanaCustomFieldValue): string {
   switch (field.type) {
-    case 'text':
-      return JSON.stringify(field.textValue?.trim() ?? '');
+    case 'text': {
+      // Asana expects `null` to clear a Text custom field; sending an empty string
+      // instead triggers a generic server error, so only send a non-empty value.
+      const trimmed = field.textValue?.trim();
+      return JSON.stringify(trimmed ? trimmed : null);
+    }
     case 'number': {
       if (typeof field.numberValue !== 'number' || Number.isNaN(field.numberValue)) {
         return JSON.stringify(null);

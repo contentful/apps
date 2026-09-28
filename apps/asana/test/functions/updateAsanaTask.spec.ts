@@ -57,6 +57,16 @@ describe('updateAsanaTask handler', () => {
           gid: '1214128635770001',
           name: 'Updated launch brief',
           permalink_url: 'https://app.asana.com/0/1/1214128635770001/f',
+        },
+      }),
+    } as Response);
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: {
+          gid: '1214128635770001',
+          name: 'Updated launch brief',
+          permalink_url: 'https://app.asana.com/0/1/1214128635770001/f',
           notes: 'Updated by the app action.',
           assignee: { name: 'Alex Doe' },
           due_on: '2026-05-02',
@@ -88,8 +98,9 @@ describe('updateAsanaTask handler', () => {
         completed: false,
       },
     });
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://app.asana.com/api/1.0/tasks/1214128635770001?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name,custom_fields.gid,custom_fields.name,custom_fields.type,custom_fields.enum_options.gid,custom_fields.enum_options.name,custom_fields.enum_options.enabled,custom_fields.text_value,custom_fields.number_value,custom_fields.precision,custom_fields.enum_value.gid,custom_fields.enum_value.name,custom_fields.multi_enum_values.gid,custom_fields.multi_enum_values.name,custom_fields.date_value.date,custom_fields.people_value.gid,custom_fields.people_value.name,custom_fields.display_value',
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      1,
+      'https://app.asana.com/api/1.0/tasks/1214128635770001?opt_fields=gid,name,permalink_url',
       {
         method: 'PUT',
         headers: {
@@ -105,9 +116,24 @@ describe('updateAsanaTask handler', () => {
         }),
       }
     );
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      2,
+      'https://app.asana.com/api/1.0/tasks/1214128635770001?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name,custom_fields.gid,custom_fields.name,custom_fields.type,custom_fields.enum_options.gid,custom_fields.enum_options.name,custom_fields.enum_options.enabled,custom_fields.text_value,custom_fields.number_value,custom_fields.precision,custom_fields.enum_value.gid,custom_fields.enum_value.name,custom_fields.multi_enum_values.gid,custom_fields.multi_enum_values.name,custom_fields.date_value.date,custom_fields.people_value.gid,custom_fields.people_value.name,custom_fields.display_value',
+      expect.objectContaining({ method: 'GET' })
+    );
   });
 
   it('accepts an Asana task URL', async () => {
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: {
+          gid: '1214128635770002',
+          name: 'Completed task',
+          permalink_url: 'https://app.asana.com/0/1/1214128635770002/f',
+        },
+      }),
+    } as Response);
     vi.mocked(globalThis.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({
@@ -130,8 +156,9 @@ describe('updateAsanaTask handler', () => {
       mockContext
     );
 
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://app.asana.com/api/1.0/tasks/1214128635770002?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name,custom_fields.gid,custom_fields.name,custom_fields.type,custom_fields.enum_options.gid,custom_fields.enum_options.name,custom_fields.enum_options.enabled,custom_fields.text_value,custom_fields.number_value,custom_fields.precision,custom_fields.enum_value.gid,custom_fields.enum_value.name,custom_fields.multi_enum_values.gid,custom_fields.multi_enum_values.name,custom_fields.date_value.date,custom_fields.people_value.gid,custom_fields.people_value.name,custom_fields.display_value',
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      1,
+      'https://app.asana.com/api/1.0/tasks/1214128635770002?opt_fields=gid,name,permalink_url',
       expect.objectContaining({
         body: JSON.stringify({
           data: {
@@ -180,6 +207,16 @@ describe('updateAsanaTask handler', () => {
           gid: '1214128635770003',
           name: 'Task with cleared notes',
           permalink_url: 'https://app.asana.com/0/1/1214128635770003/f',
+        },
+      }),
+    } as Response);
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: {
+          gid: '1214128635770003',
+          name: 'Task with cleared notes',
+          permalink_url: 'https://app.asana.com/0/1/1214128635770003/f',
           notes: '',
           completed: false,
         },
@@ -194,8 +231,9 @@ describe('updateAsanaTask handler', () => {
       mockContext
     );
 
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://app.asana.com/api/1.0/tasks/1214128635770003?opt_fields=gid,name,permalink_url,notes,completed,due_on,assignee.gid,assignee.name,dependencies.gid,dependencies.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name,custom_fields.gid,custom_fields.name,custom_fields.type,custom_fields.enum_options.gid,custom_fields.enum_options.name,custom_fields.enum_options.enabled,custom_fields.text_value,custom_fields.number_value,custom_fields.precision,custom_fields.enum_value.gid,custom_fields.enum_value.name,custom_fields.multi_enum_values.gid,custom_fields.multi_enum_values.name,custom_fields.date_value.date,custom_fields.people_value.gid,custom_fields.people_value.name,custom_fields.display_value',
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      1,
+      'https://app.asana.com/api/1.0/tasks/1214128635770003?opt_fields=gid,name,permalink_url',
       expect.objectContaining({
         body: JSON.stringify({
           data: {
@@ -207,6 +245,16 @@ describe('updateAsanaTask handler', () => {
   });
 
   it('updates the assignee and due date', async () => {
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: {
+          gid: '1214128635770004',
+          name: 'Reassigned task',
+          permalink_url: 'https://app.asana.com/0/1/1214128635770004/f',
+        },
+      }),
+    } as Response);
     vi.mocked(globalThis.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({
@@ -259,6 +307,16 @@ describe('updateAsanaTask handler', () => {
   });
 
   it('clears the assignee and due date when empty strings are provided', async () => {
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: {
+          gid: '1214128635770005',
+          name: 'Unassigned task',
+          permalink_url: 'https://app.asana.com/0/1/1214128635770005/f',
+        },
+      }),
+    } as Response);
     vi.mocked(globalThis.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({

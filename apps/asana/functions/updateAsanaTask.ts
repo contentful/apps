@@ -13,6 +13,7 @@ import {
   getTask,
   moveTaskToSection,
   removeTaskDependency,
+  TaskRefreshFailedError,
   updateTask,
 } from './asanaClient';
 
@@ -95,6 +96,14 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
       task,
     };
   } catch (error) {
+    if (error instanceof TaskRefreshFailedError) {
+      return {
+        success: true,
+        message: error.message,
+        task: error.task,
+      };
+    }
+
     return {
       success: false,
       message:

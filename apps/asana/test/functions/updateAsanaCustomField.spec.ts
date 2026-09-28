@@ -57,6 +57,16 @@ describe('updateAsanaCustomField handler', () => {
           gid: '1214128635770001',
           name: 'Task with updated field',
           permalink_url: 'https://app.asana.com/0/1/1214128635770001/f',
+        },
+      }),
+    } as Response);
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: {
+          gid: '1214128635770001',
+          name: 'Task with updated field',
+          permalink_url: 'https://app.asana.com/0/1/1214128635770001/f',
           completed: false,
           custom_fields: [
             {
@@ -95,8 +105,9 @@ describe('updateAsanaCustomField handler', () => {
         ],
       }),
     });
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/tasks/1214128635770001?opt_fields='),
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining('/tasks/1214128635770001?opt_fields=gid,name,permalink_url'),
       expect.objectContaining({
         method: 'PUT',
         headers: {
@@ -109,9 +120,24 @@ describe('updateAsanaCustomField handler', () => {
         }),
       })
     );
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining('/tasks/1214128635770001?opt_fields=gid,name,permalink_url,notes'),
+      expect.objectContaining({ method: 'GET' })
+    );
   });
 
   it('accepts an Asana task URL', async () => {
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: {
+          gid: '1214128635770002',
+          name: 'Task via URL',
+          permalink_url: 'https://app.asana.com/0/1/1214128635770002/f',
+        },
+      }),
+    } as Response);
     vi.mocked(globalThis.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({
@@ -135,8 +161,9 @@ describe('updateAsanaCustomField handler', () => {
       mockContext
     );
 
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/tasks/1214128635770002?opt_fields='),
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining('/tasks/1214128635770002?opt_fields=gid,name,permalink_url'),
       expect.objectContaining({
         body: JSON.stringify({
           data: { custom_fields: { 'field-2': 42 } },
@@ -146,6 +173,16 @@ describe('updateAsanaCustomField handler', () => {
   });
 
   it('clears an enum field when the value is null', async () => {
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: {
+          gid: '1214128635770003',
+          name: 'Task with cleared field',
+          permalink_url: 'https://app.asana.com/0/1/1214128635770003/f',
+        },
+      }),
+    } as Response);
     vi.mocked(globalThis.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({
@@ -168,8 +205,9 @@ describe('updateAsanaCustomField handler', () => {
       mockContext
     );
 
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/tasks/1214128635770003?opt_fields='),
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining('/tasks/1214128635770003?opt_fields=gid,name,permalink_url'),
       expect.objectContaining({
         body: JSON.stringify({
           data: { custom_fields: { 'field-3': null } },

@@ -6,7 +6,12 @@ import type {
 } from '@contentful/node-apps-toolkit';
 import { VALIDATION_MESSAGES } from '../src/const';
 import type { UpdateAsanaCustomFieldRequest, UpdateAsanaCustomFieldResponse } from '../src/types';
-import { extractTaskGid, getAsanaAccessToken, updateTaskCustomField } from './asanaClient';
+import {
+  extractTaskGid,
+  getAsanaAccessToken,
+  TaskRefreshFailedError,
+  updateTaskCustomField,
+} from './asanaClient';
 
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
   event: AppActionRequest<'Custom'>,
@@ -57,6 +62,14 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
       task,
     };
   } catch (error) {
+    if (error instanceof TaskRefreshFailedError) {
+      return {
+        success: true,
+        message: error.message,
+        task: error.task,
+      };
+    }
+
     return {
       success: false,
       message:

@@ -45,7 +45,10 @@ export async function getAsanaAccessToken(
 export async function callAsana<TData>(
   path: string,
   accessToken: string,
-  init?: RequestInit
+  init?: RequestInit,
+  // TEMPORARY DEBUG HOOK: lets a caller observe the raw status/body on failure without
+  // changing the thrown error message for existing callers. Remove once root-caused.
+  onErrorDebug?: (status: number, body: unknown) => void
 ): Promise<TData> {
   const requestUrl = path.startsWith('https://app.asana.com/api/1.0')
     ? path
@@ -64,6 +67,7 @@ export async function callAsana<TData>(
 
   const body = (await response.json()) as AsanaEnvelope<TData>;
   if (!response.ok) {
+    onErrorDebug?.(response.status, body);
     throw new Error(
       getAsanaErrorMessage(body) ||
         `${VALIDATION_MESSAGES.invalidCredentials} (Asana returned ${response.status})`
@@ -291,6 +295,34 @@ const TASK_OPT_FIELDS =
   'custom_fields.multi_enum_values.gid,custom_fields.multi_enum_values.name,custom_fields.date_value.date,' +
   'custom_fields.people_value.gid,custom_fields.people_value.name,custom_fields.display_value';
 
+// Used for the PUT itself so that a write isn't blocked by Asana's server-side crash when
+// serializing a response with the full custom_fields.* expansion (seen when a task has stale/
+// corrupted custom field metadata, e.g. a deleted or duplicate enum option). The full task
+// details are re-fetched separately via `getTask` after a successful write.
+const TASK_WRITE_OPT_FIELDS = 'gid,name,permalink_url';
+
+// Thrown when a write to Asana succeeds but the follow-up fetch of the fully expanded task
+// (used to refresh the UI) fails. Callers should treat this as a partial success: the change
+// was saved, but the returned `task` only has the minimal fields from the write response.
+export class TaskRefreshFailedError extends Error {
+  constructor(public readonly task: AsanaTask & { completed?: boolean }) {
+    super(VALIDATION_MESSAGES.taskRefreshFailed);
+    this.name = 'TaskRefreshFailedError';
+  }
+}
+
+async function refreshTaskAfterWrite(
+  accessToken: string,
+  taskGid: string,
+  fallbackTask: AsanaTask & { completed?: boolean }
+): Promise<AsanaTask & { completed?: boolean }> {
+  try {
+    return await getTask(accessToken, taskGid);
+  } catch {
+    throw new TaskRefreshFailedError(fallbackTask);
+  }
+}
+
 export async function createTask(
   accessToken: string,
   payload: CreateTaskPayload
@@ -438,7 +470,7 @@ export async function updateTask(
   payload: UpdateTaskPayload
 ): Promise<AsanaTask & { completed?: boolean }> {
   const task = await callAsana<AsanaTaskRecord>(
-    `/tasks/${taskGid}?opt_fields=${TASK_OPT_FIELDS}`,
+    `/tasks/${taskGid}?opt_fields=${TASK_WRITE_OPT_FIELDS}`,
     accessToken,
     {
       method: 'PUT',
@@ -446,7 +478,8 @@ export async function updateTask(
     }
   );
 
-  return mapAsanaTask(accessToken, task);
+  const fallbackTask = await mapAsanaTask(accessToken, task);
+  return refreshTaskAfterWrite(accessToken, taskGid, fallbackTask);
 }
 
 // `value` must already be shaped for `fieldType`: a gid string for enum, an array of gids for
@@ -459,7 +492,7 @@ export async function updateTaskCustomField(
   value: unknown
 ): Promise<AsanaTask & { completed?: boolean }> {
   const task = await callAsana<AsanaTaskRecord>(
-    `/tasks/${taskGid}?opt_fields=${TASK_OPT_FIELDS}`,
+    `/tasks/${taskGid}?opt_fields=${TASK_WRITE_OPT_FIELDS}`,
     accessToken,
     {
       method: 'PUT',
@@ -467,7 +500,8 @@ export async function updateTaskCustomField(
     }
   );
 
-  return mapAsanaTask(accessToken, task);
+  const fallbackTask = await mapAsanaTask(accessToken, task);
+  return refreshTaskAfterWrite(accessToken, taskGid, fallbackTask);
 }
 
 export async function getTask(

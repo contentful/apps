@@ -30,6 +30,8 @@ export const VALIDATION_MESSAGES = {
   taskCreateFailed: 'Could not create the Asana task.',
   taskUpdated: 'Asana task updated successfully.',
   taskUpdateFailed: 'Could not update the Asana task.',
+  taskRefreshFailed:
+    'Your change was saved to Asana, but the updated task details could not be loaded back. This usually means one of this task\u2019s custom fields has invalid data in Asana (for example, a deleted or duplicate option) \u2014 check its custom fields in Asana directly.',
   taskCommentRequired: 'Enter a comment before posting to Asana.',
   taskCommentAdded: 'Asana comment added successfully.',
   taskCommentFailed: 'Could not add the Asana comment.',
