@@ -100,10 +100,25 @@ const Dialog = () => {
     // Uses createWithResult (not createWithResponse) because createWithResponse's
     // polling hits a legacy endpoint that has a call-not-found race right after
     // creation, which the currently bundled web app CMA client doesn't retry.
-    const call = await sdk.cma.appActionCall.createWithResult(
-      { appDefinitionId: sdk.ids.app!, appActionId },
-      { parameters: actionParameters }
-    );
+    let call;
+    try {
+      call = await sdk.cma.appActionCall.createWithResult(
+        { appDefinitionId: sdk.ids.app!, appActionId },
+        { parameters: actionParameters }
+      );
+    } catch (error) {
+      const detail =
+        error instanceof Error && error.message
+          ? error.message
+          : (() => {
+              try {
+                return JSON.stringify(error);
+              } catch {
+                return String(error);
+              }
+            })();
+      throw new Error(`App action call request failed (${detail})`);
+    }
 
     if (call.sys.status === 'failed') {
       throw new Error(
