@@ -480,14 +480,8 @@
           "required": false
         },
         {
-          "id": "addDependencyGid",
-          "name": "Dependency task GID to add",
-          "type": "Symbol",
-          "required": false
-        },
-        {
-          "id": "removeDependencyGid",
-          "name": "Dependency task GID to remove",
+          "id": "dependencyGid",
+          "name": "Dependency task GID to add or remove (prefix with - to remove)",
           "type": "Symbol",
           "required": false
         },

@@ -314,7 +314,7 @@ describe('updateAsanaTask handler', () => {
     const result = await handler(
       createEvent({
         taskId: '1214128635770006',
-        addDependencyGid: 'dep-1',
+        dependencyGid: 'dep-1',
       }) as Parameters<typeof handler>[0],
       mockContext
     );
@@ -363,7 +363,7 @@ describe('updateAsanaTask handler', () => {
     const result = await handler(
       createEvent({
         taskId: '1214128635770008',
-        addDependencyGid: 'dep-2',
+        dependencyGid: 'dep-2',
       }) as Parameters<typeof handler>[0],
       mockContext
     );
@@ -408,7 +408,7 @@ describe('updateAsanaTask handler', () => {
     await handler(
       createEvent({
         taskId: '1214128635770007',
-        removeDependencyGid: 'dep-1',
+        dependencyGid: '-dep-1',
       }) as Parameters<typeof handler>[0],
       mockContext
     );

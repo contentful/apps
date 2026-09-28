@@ -249,18 +249,12 @@ const Dialog = () => {
         ...(hasSectionChanges ? { sectionGid: selectedSectionGid } : {}),
       };
 
-      const dependencyOps: Array<Record<string, string>> = [];
-      const maxOps = Math.max(pendingDependencyAdds.length, pendingDependencyRemovals.length);
-      for (let index = 0; index < maxOps; index += 1) {
-        const op: Record<string, string> = {};
-        if (pendingDependencyAdds[index]) {
-          op.addDependencyGid = pendingDependencyAdds[index].gid;
-        }
-        if (pendingDependencyRemovals[index]) {
-          op.removeDependencyGid = pendingDependencyRemovals[index];
-        }
-        dependencyOps.push(op);
-      }
+      // dependencyGid encodes add vs. remove in a single param (prefix "-" to remove) since
+      // App Actions cap parameter count at 8. One op per add/remove, sent as separate calls.
+      const dependencyOps: Array<Record<string, string>> = [
+        ...pendingDependencyAdds.map((dependency) => ({ dependencyGid: dependency.gid })),
+        ...pendingDependencyRemovals.map((gid) => ({ dependencyGid: `-${gid}` })),
+      ];
 
       let latestTask: UpdateAsanaTaskResponse['task'] | undefined;
 

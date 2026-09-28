@@ -38,8 +38,9 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   const notes = getTrimmedValue(body.notes);
   const assignee = getTrimmedValue(body.assignee);
   const dueDate = getTrimmedValue(body.dueDate);
-  const addDependencyGid = getTrimmedValue(body.addDependencyGid);
-  const removeDependencyGid = getTrimmedValue(body.removeDependencyGid);
+  const dependencyGid = getTrimmedValue(body.dependencyGid);
+  const addDependencyGid = dependencyGid.startsWith('-') ? '' : dependencyGid;
+  const removeDependencyGid = dependencyGid.startsWith('-') ? dependencyGid.slice(1) : '';
   const sectionGid = getTrimmedValue(body.sectionGid);
   const hasTitleUpdate = typeof body.title === 'string';
   const hasNotesUpdate = typeof body.notes === 'string';

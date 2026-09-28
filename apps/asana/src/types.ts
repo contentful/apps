@@ -99,8 +99,9 @@ export interface UpdateAsanaTaskRequest {
   completed?: boolean;
   assignee?: string;
   dueDate?: string;
-  addDependencyGid?: string;
-  removeDependencyGid?: string;
+  // Dependency task GID to add or remove. Prefix with "-" to remove (e.g. "-1234") since
+  // App Actions cap parameter count at 8 and separate add/remove params would exceed it.
+  dependencyGid?: string;
   sectionGid?: string;
 }
 
