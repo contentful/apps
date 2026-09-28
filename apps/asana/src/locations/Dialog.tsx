@@ -13,6 +13,7 @@ import {
   TextLink,
   Textarea,
 } from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { useEffect, useMemo, useState } from 'react';
 import { VALIDATION_MESSAGES } from '../const';
@@ -84,6 +85,32 @@ function getCommentAvatarColor(name: string) {
   }
   return COMMENT_AVATAR_COLORS[Math.abs(hash) % COMMENT_AVATAR_COLORS.length];
 }
+
+const LOADING_DOT_KEYFRAMES = `
+  @keyframes asanaCommentsLoadingBounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+`;
+
+const LoadingDots = () => (
+  <Flex alignItems="center" gap="spacingXs" style={{ height: '20px' }}>
+    <style>{LOADING_DOT_KEYFRAMES}</style>
+    {[0, 1, 2].map((index) => (
+      <Box
+        key={index}
+        style={{
+          width: '6px',
+          height: '6px',
+          borderRadius: '50%',
+          backgroundColor: tokens.gray400,
+          animation: 'asanaCommentsLoadingBounce 1.4s ease-in-out infinite',
+          animationDelay: `${index * 0.16}s`,
+        }}
+      />
+    ))}
+  </Flex>
+);
 
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
@@ -759,7 +786,9 @@ const Dialog = () => {
             ) : null}
           </Flex>
           {isLoadingComments ? (
-            <Paragraph marginBottom="spacingS">Loading comments...</Paragraph>
+            <Box marginBottom="spacingS">
+              <LoadingDots />
+            </Box>
           ) : commentsError ? (
             <Text fontColor="red600" as="div" marginBottom="spacingS">
               {commentsError}
