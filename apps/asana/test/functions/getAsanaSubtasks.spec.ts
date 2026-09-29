@@ -49,7 +49,7 @@ describe('getAsanaSubtasks handler', () => {
     });
   });
 
-  it('loads subtasks for a task', async () => {
+  it('loads subtasks for a task, including assignee and due date metadata', async () => {
     vi.mocked(globalThis.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({
@@ -59,12 +59,16 @@ describe('getAsanaSubtasks handler', () => {
             name: 'First subtask',
             completed: false,
             permalink_url: 'https://app.asana.com/1/1/task/subtask-1',
+            assignee: { name: 'Alex Doe' },
+            due_on: '2026-10-01',
           },
           {
             gid: 'subtask-2',
             name: 'Second subtask',
             completed: true,
             permalink_url: 'https://app.asana.com/1/1/task/subtask-2',
+            assignee: null,
+            due_on: null,
           },
         ],
       }),
@@ -86,6 +90,8 @@ describe('getAsanaSubtasks handler', () => {
           name: 'First subtask',
           completed: false,
           permalinkUrl: 'https://app.asana.com/1/1/task/subtask-1',
+          assigneeName: 'Alex Doe',
+          dueDate: '2026-10-01',
         },
         {
           gid: 'subtask-2',
@@ -112,7 +118,7 @@ describe('getAsanaSubtasks handler', () => {
     );
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://app.asana.com/api/1.0/tasks/1214128635770002/subtasks?opt_fields=gid,name,completed,permalink_url&limit=100',
+      'https://app.asana.com/api/1.0/tasks/1214128635770002/subtasks?opt_fields=gid,name,completed,permalink_url,assignee.name,due_on&limit=100',
       {
         headers: {
           Authorization: 'Bearer test-access-token',

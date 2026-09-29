@@ -1195,26 +1195,38 @@ const Dialog = () => {
               {subtasksError}
             </Text>
           ) : subtasks.length ? (
-            <Flex flexDirection="column" gap="spacingXs">
+            <Flex flexDirection="column" gap="spacingS">
               {subtasks.map((subtask) => (
-                <Flex key={subtask.gid} gap="spacingXs" alignItems="center">
-                  <Checkbox
-                    isChecked={subtask.completed}
-                    isDisabled={isBusy || pendingSubtaskGids.has(subtask.gid)}
-                    onChange={(event) => handleToggleSubtask(subtask.gid, event.target.checked)}
-                    aria-label={`Mark ${subtask.name} as ${
-                      subtask.completed ? 'incomplete' : 'complete'
-                    }`}
-                  />
-                  <Text
-                    as="span"
-                    style={subtask.completed ? { textDecoration: 'line-through' } : undefined}
-                    fontColor={subtask.completed ? 'gray500' : undefined}>
-                    {subtask.name}
-                  </Text>
-                  <TextLink href={subtask.permalinkUrl} target="_blank" rel="noreferrer">
-                    Open in Asana
-                  </TextLink>
+                <Flex key={subtask.gid} gap="spacingXs" alignItems="flex-start">
+                  <Box style={{ paddingTop: '2px' }}>
+                    <Checkbox
+                      isChecked={subtask.completed}
+                      isDisabled={isBusy || pendingSubtaskGids.has(subtask.gid)}
+                      onChange={(event) => handleToggleSubtask(subtask.gid, event.target.checked)}
+                      aria-label={`Mark ${subtask.name} as ${
+                        subtask.completed ? 'incomplete' : 'complete'
+                      }`}
+                    />
+                  </Box>
+                  <Box style={{ flexGrow: 1 }}>
+                    <TextLink
+                      href={subtask.permalinkUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={subtask.completed ? { textDecoration: 'line-through' } : undefined}>
+                      {subtask.name}
+                    </TextLink>
+                    {subtask.assigneeName || subtask.dueDate ? (
+                      <Text as="div" fontColor="gray500" fontSize="fontSizeS">
+                        {[
+                          subtask.assigneeName,
+                          subtask.dueDate ? `Due ${formatFullDate(subtask.dueDate)}` : null,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </Text>
+                    ) : null}
+                  </Box>
                 </Flex>
               ))}
             </Flex>

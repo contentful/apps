@@ -908,6 +908,12 @@
                 },
                 "permalinkUrl": {
                   "type": "string"
+                },
+                "assigneeName": {
+                  "type": "string"
+                },
+                "dueDate": {
+                  "type": "string"
                 }
               },
               "required": [

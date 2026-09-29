@@ -193,6 +193,8 @@ export type AsanaSubtask = {
   name: string;
   completed: boolean;
   permalinkUrl: string;
+  assigneeName?: string;
+  dueDate?: string;
 };
 
 export interface GetAsanaSubtasksRequest {

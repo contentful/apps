@@ -707,11 +707,15 @@ type AsanaSubtaskRecord = {
   name: string;
   completed?: boolean;
   permalink_url?: string;
+  assignee?: {
+    name?: string;
+  } | null;
+  due_on?: string | null;
 };
 
 export async function getSubtasks(accessToken: string, taskGid: string): Promise<AsanaSubtask[]> {
   const subtasks = await callAsanaList<AsanaSubtaskRecord>(
-    `/tasks/${taskGid}/subtasks?opt_fields=gid,name,completed,permalink_url&limit=100`,
+    `/tasks/${taskGid}/subtasks?opt_fields=gid,name,completed,permalink_url,assignee.name,due_on&limit=100`,
     accessToken
   );
 
@@ -720,5 +724,7 @@ export async function getSubtasks(accessToken: string, taskGid: string): Promise
     name: subtask.name,
     completed: Boolean(subtask.completed),
     permalinkUrl: subtask.permalink_url ?? '',
+    ...(typeof subtask.assignee?.name === 'string' ? { assigneeName: subtask.assignee.name } : {}),
+    ...(typeof subtask.due_on === 'string' ? { dueDate: subtask.due_on } : {}),
   }));
 }
