@@ -5,9 +5,9 @@ import type {
   FunctionTypeEnum,
 } from '@contentful/node-apps-toolkit';
 import type { EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
-import { ASANA_AUTOMATION_CONFIG } from '../src/const';
+import { ASANA_AUTOMATION_CONFIG, VALIDATION_MESSAGES } from '../src/const';
 import type { AppInstallationParameters } from '../src/types';
-import { getOAuthSdk } from './initiateOauth';
+import { getAsanaAccessToken } from './asanaClient';
 import { createTaskFromParameters } from './createTaskFromParameters';
 
 type LocalizedFieldValue = Record<string, string | undefined> | undefined;
@@ -66,9 +66,11 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = a
   const installationParameters = (context.appInstallationParameters ??
     {}) as AppInstallationParameters;
 
-  const sdk = getOAuthSdk(context);
-  const token = await sdk.token();
-  const accessToken = token.accessToken;
+  const accessToken = await getAsanaAccessToken(event, context);
+  if (!accessToken) {
+    throw new Error(VALIDATION_MESSAGES.tokenRequired);
+  }
+
   const result = await createTaskFromParameters({
     accessToken,
     title: getFirstLocalizedValue(

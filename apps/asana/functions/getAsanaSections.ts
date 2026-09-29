@@ -24,10 +24,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
 
   const accessToken = await getAsanaAccessToken(event, context);
   if (!accessToken) {
-    return {
-      success: false,
-      message: VALIDATION_MESSAGES.tokenRequired,
-    };
+    throw new Error(VALIDATION_MESSAGES.tokenRequired);
   }
 
   try {

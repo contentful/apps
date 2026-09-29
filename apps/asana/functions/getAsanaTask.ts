@@ -6,7 +6,7 @@ import type {
 } from '@contentful/node-apps-toolkit';
 import { VALIDATION_MESSAGES } from '../src/const';
 import type { GetAsanaTaskRequest, GetAsanaTaskResponse } from '../src/types';
-import { extractTaskGid, getAsanaAccessToken, getTask } from './asanaClient';
+import { AsanaNotFoundError, extractTaskGid, getAsanaAccessToken, getTask } from './asanaClient';
 
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
   event: AppActionRequest<'Custom'>,
@@ -24,10 +24,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
 
   const accessToken = await getAsanaAccessToken(event, context);
   if (!accessToken) {
-    return {
-      success: false,
-      message: VALIDATION_MESSAGES.tokenRequired,
-    };
+    throw new Error(VALIDATION_MESSAGES.tokenRequired);
   }
 
   try {
@@ -39,6 +36,14 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
       task,
     };
   } catch (error) {
+    if (error instanceof AsanaNotFoundError) {
+      return {
+        success: false,
+        message: VALIDATION_MESSAGES.taskNotFound,
+        taskDeleted: true,
+      };
+    }
+
     return {
       success: false,
       message:

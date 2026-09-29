@@ -11,6 +11,10 @@ export interface AppInstallationParameters {
   defaultProjectGid: string;
   defaultProjectName: string;
   enabledContentTypeIds?: string[];
+  // Optional shared Asana Personal Access Token, used as a fallback token source for calls that
+  // have no connected-user OAuth session available (Automations, App Event Handlers). Per-user
+  // OAuth (Sidebar "Connect to Asana") is tried first; this is only used when that fails.
+  asanaApiKey?: string;
 }
 
 export interface AsanaWorkspace {
@@ -70,6 +74,9 @@ export interface AsanaCustomFieldValue {
 
 export interface UpdateAsanaCustomFieldRequest {
   taskId?: string;
+  // Contentful entry ID. Used to look up the linked Asana task when an automation trigger only
+  // has the entry (not a task GID/URL) available. Ignored if taskId is also provided.
+  entryId?: string;
   fieldGid?: string;
   fieldType?: string;
   // JSON-encoded value shaped for `fieldType` (e.g. a gid string for enum, an array of gids for
@@ -168,8 +175,34 @@ export interface GetAsanaTaskRequest {
   taskId?: string;
 }
 
+// Purpose-built for Studio Automations triggered off an existing entry (e.g. "Entry updated",
+// "Entry published"), which only have the Contentful entry ID available, not the Asana task GID.
+// Kept as its own action (rather than adding entryId to UpdateAsanaTaskRequest) because
+// updateAsanaTaskAction is already at the 8-parameter cap Contentful enforces on App Actions.
+// Omits dependencyGid (not needed for entry-triggered automations) to stay under that same cap.
+export interface SyncAsanaTaskFromEntryRequest {
+  entryId?: string;
+  completed?: boolean;
+  sectionGid?: string;
+  title?: string;
+  notes?: string;
+  assignee?: string;
+  dueDate?: string;
+}
+
+export type SyncAsanaTaskFromEntryResponse = Record<string, unknown> & {
+  success: boolean;
+  message: string;
+  task?: AsanaTask & {
+    completed?: boolean;
+  };
+};
+
 export interface AddAsanaCommentRequest {
   taskId?: string;
+  // Contentful entry ID. Used to look up the linked Asana task when an automation trigger only
+  // has the entry (not a task GID/URL) available. Ignored if taskId is also provided.
+  entryId?: string;
   comment?: string;
 }
 
@@ -275,6 +308,9 @@ export type GetAsanaTaskResponse = Record<string, unknown> & {
   task?: AsanaTask & {
     completed?: boolean;
   };
+  // Set when the Asana task no longer exists (deleted in Asana). Callers should treat this as a
+  // signal to unlink the task from the Contentful entry rather than surfacing a generic error.
+  taskDeleted?: boolean;
 };
 
 export type AddAsanaCommentResponse = Record<string, unknown> & {

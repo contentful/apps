@@ -142,17 +142,14 @@ describe('getAsanaSubtasks handler', () => {
       undefined as unknown as Awaited<ReturnType<typeof mockOauthSdk.token>>
     );
 
-    const result = await handler(
-      createEvent({
-        taskId: '1214128635770001',
-      }) as Parameters<typeof handler>[0],
-      mockContext
-    );
-
-    expect(result).toEqual({
-      success: false,
-      message: VALIDATION_MESSAGES.tokenRequired,
-    });
+    await expect(
+      handler(
+        createEvent({
+          taskId: '1214128635770001',
+        }) as Parameters<typeof handler>[0],
+        mockContext
+      )
+    ).rejects.toThrow(VALIDATION_MESSAGES.tokenRequired);
   });
 
   it('returns the Asana API error message on failure', async () => {

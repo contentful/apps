@@ -1091,7 +1091,7 @@ const Dialog = () => {
                 </Box>
               ) : null}
             </Box>
-            <FormControl.HelpText>
+            <FormControl.HelpText style={{ minHeight: '2.5em' }}>
               Currently: {task.assigneeName || 'Unassigned'}. Search by name or email to reassign.
             </FormControl.HelpText>
           </FormControl>
@@ -1103,7 +1103,9 @@ const Dialog = () => {
               onChange={(event) => setDueDate(event.target.value)}
               isDisabled={isBusy}
             />
-            <FormControl.HelpText>Clear the date to remove the due date.</FormControl.HelpText>
+            <FormControl.HelpText style={{ minHeight: '2.5em' }}>
+              Clear the date to remove the due date.
+            </FormControl.HelpText>
           </FormControl>
         </Flex>
 

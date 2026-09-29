@@ -1,6 +1,6 @@
 import { VALIDATION_MESSAGES } from '../src/const';
 import type { AppInstallationParameters, CreateAsanaTaskResponse } from '../src/types';
-import { createTask } from './asanaClient';
+import { createTask, TaskRefreshFailedError } from './asanaClient';
 
 type CreateTaskFromParametersInput = {
   accessToken: string;
@@ -32,10 +32,7 @@ export async function createTaskFromParameters({
     getTrimmedValue(workspaceGid) || getTrimmedValue(installationParameters?.defaultWorkspaceGid);
 
   if (!trimmedToken) {
-    return {
-      success: false,
-      message: VALIDATION_MESSAGES.tokenRequired,
-    };
+    throw new Error(VALIDATION_MESSAGES.tokenRequired);
   }
 
   if (!trimmedTitle) {
@@ -63,24 +60,22 @@ export async function createTaskFromParameters({
     return {
       success: true,
       message: VALIDATION_MESSAGES.taskCreated,
-      task: {
-        gid: task.gid,
-        name: task.name,
-        permalinkUrl: task.permalink_url,
-        ...(typeof task.notes === 'string' ? { description: task.notes } : {}),
-        ...(typeof task.completed === 'boolean'
-          ? {
-              completed: task.completed,
-              status: task.completed ? 'Completed' : 'Open',
-            }
-          : {}),
-        ...(typeof task.assignee?.name === 'string' ? { assigneeName: task.assignee.name } : {}),
-        ...(typeof task.due_on === 'string' ? { dueDate: task.due_on } : {}),
-      },
+      task,
       ...(resolvedProjectGid ? { projectGid: resolvedProjectGid } : {}),
       ...(resolvedWorkspaceGid ? { workspaceGid: resolvedWorkspaceGid } : {}),
     };
   } catch (error) {
+    if (error instanceof TaskRefreshFailedError) {
+      // The task was created successfully; only the follow-up full-detail fetch failed.
+      return {
+        success: true,
+        message: error.message,
+        task: error.task,
+        ...(resolvedProjectGid ? { projectGid: resolvedProjectGid } : {}),
+        ...(resolvedWorkspaceGid ? { workspaceGid: resolvedWorkspaceGid } : {}),
+      };
+    }
+
     return {
       success: false,
       message:

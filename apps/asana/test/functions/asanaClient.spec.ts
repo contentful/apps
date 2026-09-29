@@ -88,4 +88,38 @@ describe('getAsanaAccessToken', () => {
       getAsanaAccessToken({} as Parameters<typeof getAsanaAccessToken>[0], context)
     ).rejects.toThrow('OAuth SDK is not available in this function context.');
   });
+
+  it('falls back to the installation-level API key when there is no connected-user OAuth session', async () => {
+    const context = {
+      oauthSdk: {
+        token: vi.fn().mockRejectedValue(new Error('not connected')),
+      },
+      appInstallationParameters: {
+        asanaApiKey: '  shared-api-key  ',
+      },
+    } as unknown as Parameters<typeof getAsanaAccessToken>[1];
+
+    const result = await getAsanaAccessToken(
+      {} as Parameters<typeof getAsanaAccessToken>[0],
+      context
+    );
+
+    expect(result).toEqual('shared-api-key');
+  });
+
+  it('returns an empty string when neither OAuth nor an API key is available', async () => {
+    const context = {
+      oauthSdk: {
+        token: vi.fn().mockRejectedValue(new Error('not connected')),
+      },
+      appInstallationParameters: {},
+    } as unknown as Parameters<typeof getAsanaAccessToken>[1];
+
+    const result = await getAsanaAccessToken(
+      {} as Parameters<typeof getAsanaAccessToken>[0],
+      context
+    );
+
+    expect(result).toEqual('');
+  });
 });

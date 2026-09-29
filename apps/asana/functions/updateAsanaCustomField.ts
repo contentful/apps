@@ -6,6 +6,7 @@ import type {
 } from '@contentful/node-apps-toolkit';
 import { VALIDATION_MESSAGES } from '../src/const';
 import type { UpdateAsanaCustomFieldRequest, UpdateAsanaCustomFieldResponse } from '../src/types';
+import { getTaskLinkForEntry } from '../src/utils/taskLinkStore';
 import {
   extractTaskGid,
   getAsanaAccessToken,
@@ -19,11 +20,17 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
 ): Promise<UpdateAsanaCustomFieldResponse> => {
   const body = (event.body as UpdateAsanaCustomFieldRequest | undefined) ?? {};
 
-  const taskGid = extractTaskGid(body.taskId);
+  let taskGid = extractTaskGid(body.taskId);
+  const entryId = body.entryId?.trim() ?? '';
+  if (!taskGid && entryId && context.cma) {
+    const taskLink = await getTaskLinkForEntry(context.cma, entryId);
+    taskGid = taskLink?.taskGid ?? '';
+  }
+
   if (!taskGid) {
     return {
       success: false,
-      message: VALIDATION_MESSAGES.taskIdRequired,
+      message: entryId ? VALIDATION_MESSAGES.entryNotLinked : VALIDATION_MESSAGES.taskIdRequired,
     };
   }
 
@@ -47,10 +54,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
 
   const accessToken = await getAsanaAccessToken(event, context);
   if (!accessToken) {
-    return {
-      success: false,
-      message: VALIDATION_MESSAGES.tokenRequired,
-    };
+    throw new Error(VALIDATION_MESSAGES.tokenRequired);
   }
 
   try {

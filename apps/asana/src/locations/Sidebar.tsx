@@ -12,15 +12,17 @@ import {
   TextLink,
 } from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import { useEffect, useState, type MouseEvent } from 'react';
+import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { ASANA_AUTOMATION_CONFIG, VALIDATION_MESSAGES } from '../const';
 import {
   type AppInstallationParameters,
   type AsanaTask,
   type CheckAsanaStatusResponse,
+  type CompleteAsanaOAuthResponse,
   type CreateAsanaTaskResponse,
   type GetAsanaTaskResponse,
   type GetAsanaTasksResponse,
+  type InitiateAsanaOAuthResponse,
   type PrimaryAsanaTaskLink,
   type TaskDetailsDialogResult,
   type TaskDetailsDialogParameters,
@@ -47,6 +49,8 @@ const Sidebar = () => {
   const hasDefaultProject = Boolean(installationParameters?.defaultProjectGid);
   const [isUserConnected, setIsUserConnected] = useState(false);
   const [isCheckingUserConnection, setIsCheckingUserConnection] = useState(true);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const popupWindowRef = useRef<Window | null>(null);
   const hasConnection = hasDefaultProject && isUserConnected;
   const [taskLink, setTaskLink] = useState<PrimaryAsanaTaskLink | null>(null);
   const [isLoadingTaskLink, setIsLoadingTaskLink] = useState(true);
@@ -149,6 +153,95 @@ const Sidebar = () => {
     };
   }, [sdk]);
 
+  const cleanupOAuthPopup = () => {
+    window.removeEventListener('message', oauthMessageHandler);
+    if (popupWindowRef.current && !popupWindowRef.current.closed) {
+      popupWindowRef.current.close();
+    }
+    popupWindowRef.current = null;
+  };
+
+  const oauthMessageHandler = async (event: MessageEvent) => {
+    if (event.data?.type !== 'oauth:complete') {
+      return;
+    }
+
+    const { code, state, error } = event.data as {
+      code?: string;
+      state?: string;
+      error?: string;
+    };
+
+    if (error) {
+      cleanupOAuthPopup();
+      setIsConnecting(false);
+      sdk.notifier.error(`Asana denied the connection: ${error}`);
+      return;
+    }
+
+    if (!code || !state) {
+      cleanupOAuthPopup();
+      setIsConnecting(false);
+      sdk.notifier.error('The Asana connection response was invalid. Please try again.');
+      return;
+    }
+
+    try {
+      const result = await callAction<CompleteAsanaOAuthResponse>('completeOauthAction', {
+        code,
+        state,
+      });
+
+      const status = await callAction<CheckAsanaStatusResponse>('checkStatusAction');
+      setIsUserConnected(status.connected);
+
+      if (result.success) {
+        sdk.notifier.success(result.message);
+      } else {
+        sdk.notifier.error(result.message);
+      }
+    } catch (err) {
+      sdk.notifier.error(err instanceof Error ? err.message : 'Could not connect to Asana.');
+    } finally {
+      cleanupOAuthPopup();
+      setIsConnecting(false);
+    }
+  };
+
+  const handleConnectToAsana = async () => {
+    setIsConnecting(true);
+    window.removeEventListener('message', oauthMessageHandler);
+    window.addEventListener('message', oauthMessageHandler);
+
+    // Open the popup synchronously, in direct response to the click, before any
+    // await - some browsers only allow window.open() to navigate to the target
+    // URL when called synchronously from a user gesture.
+    const popup = window.open('', 'asana-oauth', 'width=600,height=700');
+    popupWindowRef.current = popup;
+
+    if (!popup) {
+      cleanupOAuthPopup();
+      setIsConnecting(false);
+      sdk.notifier.error(VALIDATION_MESSAGES.popupBlocked);
+      return;
+    }
+
+    try {
+      const data = await callAction<InitiateAsanaOAuthResponse>('initiateOauthAction');
+      popup.location.href = data.authorizationUrl;
+    } catch {
+      cleanupOAuthPopup();
+      setIsConnecting(false);
+      sdk.notifier.error('Could not start the Asana connection.');
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      cleanupOAuthPopup();
+    };
+  }, []);
+
   const entryUrl = `https://app.contentful.com/spaces/${sdk.ids.space}/environments/${sdk.ids.environment}/entries/${entrySys.id}`;
   const taskNameFieldValue = sdk.entry.fields[ASANA_AUTOMATION_CONFIG.taskNameFieldId]?.getValue();
 
@@ -161,7 +254,7 @@ const Sidebar = () => {
   const buildInitialTaskDescription = () =>
     `Contentful entry: ${entryUrl}\nContent type: ${sdk.contentType.name}`;
 
-  const refreshLinkedTask = async () => {
+  const refreshLinkedTask = async (): Promise<AsanaTask | null | 'unlinked'> => {
     if (!taskLink) {
       return null;
     }
@@ -170,6 +263,12 @@ const Sidebar = () => {
       const response = await callAction<GetAsanaTaskResponse>('getAsanaTaskAction', {
         taskId: taskLink.taskGid,
       });
+
+      if (response.taskDeleted) {
+        await clearPrimaryTaskLink();
+        sdk.notifier.warning(VALIDATION_MESSAGES.taskUnlinkedDeleted);
+        return 'unlinked';
+      }
 
       if (!response.success || !response.task) {
         throw new Error(response.message || 'Could not refresh the Asana task.');
@@ -184,6 +283,18 @@ const Sidebar = () => {
     }
   };
 
+  // Detect a task that was deleted in Asana while unlinked from Contentful (e.g. the user didn't
+  // notice until reopening this entry). Only runs once per sidebar mount so it doesn't spam the
+  // Asana API - `refreshLinkedTask` already unlinks and notifies when it finds the task is gone.
+  const hasCheckedTaskExistenceRef = useRef(false);
+  useEffect(() => {
+    if (!taskLink || hasCheckedTaskExistenceRef.current) {
+      return;
+    }
+    hasCheckedTaskExistenceRef.current = true;
+    void refreshLinkedTask();
+  }, [taskLink]);
+
   const openTaskDetailsDialog = async () => {
     if (!taskLink || isOpeningTaskDetails) {
       return;
@@ -193,6 +304,10 @@ const Sidebar = () => {
 
     try {
       const latestTask = await refreshLinkedTask();
+      if (latestTask === 'unlinked') {
+        return;
+      }
+
       const dialogTask = latestTask
         ? {
             taskGid: latestTask.gid,
@@ -394,11 +509,16 @@ const Sidebar = () => {
     <Stack flexDirection="column" spacing="spacingM">
       {isCheckingUserConnection ? null : !isUserConnected ? (
         <Note variant="warning" title="Connect your Asana account">
-          You haven&apos;t connected your Asana account yet. Connect in the app config before
-          building entry-to-task linking.
-          <TextLink href="#" onClick={openAppConfig}>
-            Open app configuration
-          </TextLink>
+          <Paragraph marginBottom="spacingS">
+            You haven&apos;t connected your Asana account yet.
+          </Paragraph>
+          <Button
+            size="small"
+            onClick={handleConnectToAsana}
+            isLoading={isConnecting}
+            isDisabled={isConnecting}>
+            Connect to Asana
+          </Button>
         </Note>
       ) : !hasConnection ? (
         <Note variant="warning" title="Finish Asana setup first">

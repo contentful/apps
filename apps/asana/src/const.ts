@@ -1,8 +1,9 @@
 export const VALIDATION_MESSAGES = {
-  tokenRequired: 'Connect this app to Asana before using this action.',
+  tokenRequired:
+    'Connect this app to Asana in the Sidebar, or add an Asana API key in the app configuration screen, to use this action.',
   saveRequired: 'Please fill in the required fields before saving.',
   saveFailed: 'Configuration could not be saved.',
-  connectionRequired: 'Connect to Asana before testing the connection.',
+  connectionRequired: 'Connect to Asana, or add an Asana API key, before saving.',
   installRequired: 'Please install the app before testing the connection.',
   popupBlocked: 'Enable popups for this site to connect to Asana.',
   validCredentials: 'Your Asana token is valid.',
@@ -24,6 +25,8 @@ export const VALIDATION_MESSAGES = {
   customFieldUpdateFailed: 'Could not update the Asana custom field.',
   taskTitleRequired: 'Enter an Asana task title.',
   taskIdRequired: 'Enter an Asana task GID or Asana task URL.',
+  entryIdRequired: 'Provide the Contentful entry ID to sync.',
+  entryNotLinked: 'No Asana task is linked to this entry yet. Create one first.',
   taskUpdateFieldsRequired: 'Provide at least one task field to update.',
   taskDestinationRequired:
     'Provide an Asana project or workspace, or configure a default destination first.',
@@ -36,6 +39,9 @@ export const VALIDATION_MESSAGES = {
   taskCommentRequired: 'Enter a comment before posting to Asana.',
   taskCommentAdded: 'Asana comment added successfully.',
   taskCommentFailed: 'Could not add the Asana comment.',
+  taskNotFound: 'This Asana task no longer exists.',
+  taskUnlinkedDeleted:
+    'The linked Asana task no longer exists in Asana, so it was unlinked from this entry.',
 };
 
 export const ASANA_AUTOMATION_CONFIG = {

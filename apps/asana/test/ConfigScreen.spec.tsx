@@ -83,6 +83,10 @@ describe('Asana ConfigScreen', () => {
         });
       }
 
+      if (appActionId === 'validateAsanaCredentialsAction') {
+        return succeeded({ valid: true, message: VALIDATION_MESSAGES.validCredentials });
+      }
+
       return Promise.reject(new Error(`Unhandled app action ${appActionId}`));
     });
   });
@@ -214,5 +218,38 @@ describe('Asana ConfigScreen', () => {
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Connect to Asana' })).toBeInTheDocument();
     });
+  });
+
+  it('tests the Asana API key and shows the result', async () => {
+    await renderAndWaitReady();
+
+    fireEvent.change(screen.getByLabelText('Asana API key'), {
+      target: { value: 'shared-api-key' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Test key' }));
+
+    await waitFor(() => {
+      expect(mockCma.appActionCall.createWithResult).toHaveBeenCalledWith(
+        expect.objectContaining({ appActionId: 'validateAsanaCredentialsAction' }),
+        { parameters: { apiKey: 'shared-api-key' } }
+      );
+    });
+    await waitFor(() => {
+      expect(screen.getByText(VALIDATION_MESSAGES.validCredentials)).toBeInTheDocument();
+    });
+  });
+
+  it('allows saving with only an API key, without an OAuth connection', async () => {
+    await renderAndWaitReady();
+
+    fireEvent.change(screen.getByLabelText('Asana API key'), {
+      target: { value: 'shared-api-key' },
+    });
+
+    const callback = mockSdk.app.onConfigure.mock.calls.at(-1)?.[0];
+    const result = callback ? await callback() : undefined;
+
+    expect(result).not.toBe(false);
+    expect(mockSdk.notifier.error).not.toHaveBeenCalledWith(VALIDATION_MESSAGES.connectionRequired);
   });
 });

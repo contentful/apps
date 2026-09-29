@@ -1,4 +1,4 @@
-import type { AppActionRequest, FunctionEventContext } from '@contentful/node-apps-toolkit';
+import type { FunctionEventContext } from '@contentful/node-apps-toolkit';
 import type {
   AsanaComment,
   AsanaCustomField,
@@ -28,8 +28,22 @@ function getAsanaErrorMessage<TData>(response: AsanaEnvelope<TData>) {
     .join(', ');
 }
 
+// Thrown instead of a generic Error when Asana returns a 404 or 403, e.g. because the task was
+// deleted (deleted/trashed tasks come back as 403 "you do not have access", not 404). Callers can
+// use this to distinguish "no longer exists" from other failures (auth, rate limiting, etc.) and
+// react accordingly, such as unlinking a deleted task in Contentful.
+export class AsanaNotFoundError extends Error {
+  constructor(message?: string) {
+    super(message || 'Asana resource not found.');
+    this.name = 'AsanaNotFoundError';
+  }
+}
+
+// `_event` is unused but kept for signature compatibility across both App Action Call handlers
+// (event typed as AppActionRequest<'Custom'>) and the App Event Handler (event typed as
+// AppEventRequest) - both share the same `FunctionEventContext` shape, which is all this needs.
 export async function getAsanaAccessToken(
-  _event: AppActionRequest<'Custom'>,
+  _event: unknown,
   context: FunctionEventContext
 ): Promise<string> {
   const sdk = getOAuthSdk(context);
@@ -38,8 +52,14 @@ export async function getAsanaAccessToken(
     const token = await sdk.token();
     return token.accessToken;
   } catch {
-    // sdk.token() throws when the current user hasn't connected Asana yet.
-    return '';
+    // sdk.token() throws when there's no connected-user OAuth session for this call - e.g. the
+    // current user hasn't connected Asana yet, or (structurally, always) an Automation/App Event
+    // Handler invocation, which has no bound user identity at all. Fall back to the shared
+    // installation-level API key, if one has been configured in the app's Config Screen.
+    const installationParameters = (context.appInstallationParameters ?? {}) as {
+      asanaApiKey?: string;
+    };
+    return installationParameters.asanaApiKey?.trim() ?? '';
   }
 }
 
@@ -69,10 +89,18 @@ export async function callAsana<TData>(
   const body = (await response.json()) as AsanaEnvelope<TData>;
   if (!response.ok) {
     onErrorDebug?.(response.status, body);
-    throw new Error(
+    const message =
       getAsanaErrorMessage(body) ||
-        `${VALIDATION_MESSAGES.invalidCredentials} (Asana returned ${response.status})`
-    );
+      `${VALIDATION_MESSAGES.invalidCredentials} (Asana returned ${response.status})`;
+
+    // Asana returns 403 (not 404) for trashed/deleted tasks - "Not Found" is reserved for gids
+    // that never existed at all, while a deleted task instead comes back as "you do not have
+    // access to this task". Treat both the same way so deleted tasks are reliably detected.
+    if (response.status === 404 || response.status === 403) {
+      throw new AsanaNotFoundError(message);
+    }
+
+    throw new Error(message);
   }
 
   if (!body.data) {
@@ -327,14 +355,24 @@ async function refreshTaskAfterWrite(
   }
 }
 
+// Mirrors `updateTask`: the create write itself only requests the minimal fields so it isn't
+// blocked by Asana's server-side crash when serializing the full opt_fields expansion for a
+// task that was just created. The full task details are re-fetched separately via `getTask`.
 export async function createTask(
   accessToken: string,
   payload: CreateTaskPayload
-): Promise<AsanaTaskRecord> {
-  return callAsana<AsanaTaskRecord>(`/tasks?opt_fields=${TASK_OPT_FIELDS}`, accessToken, {
-    method: 'POST',
-    body: JSON.stringify({ data: payload }),
-  });
+): Promise<AsanaTask & { completed?: boolean }> {
+  const task = await callAsana<AsanaTaskRecord>(
+    `/tasks?opt_fields=${TASK_WRITE_OPT_FIELDS}`,
+    accessToken,
+    {
+      method: 'POST',
+      body: JSON.stringify({ data: payload }),
+    }
+  );
+
+  const fallbackTask = await mapAsanaTask(accessToken, task);
+  return refreshTaskAfterWrite(accessToken, task.gid, fallbackTask);
 }
 
 // Asana's task API doesn't always expand `dependencies.name` (dependencies are returned as

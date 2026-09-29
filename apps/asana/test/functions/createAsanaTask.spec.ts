@@ -106,8 +106,9 @@ describe('createAsanaTask', () => {
       },
     });
     expect(mockCma.entry.get).not.toHaveBeenCalled();
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url,notes,completed,due_on,created_at,modified_at,assignee.gid,assignee.name,dependencies.gid,dependencies.name,tags.gid,tags.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name,custom_fields.gid,custom_fields.name,custom_fields.type,custom_fields.enum_options.gid,custom_fields.enum_options.name,custom_fields.enum_options.enabled,custom_fields.text_value,custom_fields.number_value,custom_fields.precision,custom_fields.enum_value.gid,custom_fields.enum_value.name,custom_fields.multi_enum_values.gid,custom_fields.multi_enum_values.name,custom_fields.date_value.date,custom_fields.people_value.gid,custom_fields.people_value.name,custom_fields.display_value',
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      1,
+      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({
@@ -163,9 +164,11 @@ describe('createAsanaTask', () => {
       })
     );
     expect(mockCma.entry.publish).toHaveBeenCalled();
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url,notes,completed,due_on,created_at,modified_at,assignee.gid,assignee.name,dependencies.gid,dependencies.name,tags.gid,tags.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name,custom_fields.gid,custom_fields.name,custom_fields.type,custom_fields.enum_options.gid,custom_fields.enum_options.name,custom_fields.enum_options.enabled,custom_fields.text_value,custom_fields.number_value,custom_fields.precision,custom_fields.enum_value.gid,custom_fields.enum_value.name,custom_fields.multi_enum_values.gid,custom_fields.multi_enum_values.name,custom_fields.date_value.date,custom_fields.people_value.gid,custom_fields.people_value.name,custom_fields.display_value',
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      1,
+      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url',
       expect.objectContaining({
+        method: 'POST',
         body: JSON.stringify({
           data: {
             name: 'Dynamic entry title',
@@ -206,9 +209,11 @@ describe('createAsanaTask', () => {
     );
 
     expect(mockCma.contentType.get).toHaveBeenCalledWith({ contentTypeId: 'landingPage' });
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url,notes,completed,due_on,created_at,modified_at,assignee.gid,assignee.name,dependencies.gid,dependencies.name,tags.gid,tags.name,workspace.gid,memberships.project.gid,memberships.section.gid,memberships.section.name,custom_fields.gid,custom_fields.name,custom_fields.type,custom_fields.enum_options.gid,custom_fields.enum_options.name,custom_fields.enum_options.enabled,custom_fields.text_value,custom_fields.number_value,custom_fields.precision,custom_fields.enum_value.gid,custom_fields.enum_value.name,custom_fields.multi_enum_values.gid,custom_fields.multi_enum_values.name,custom_fields.date_value.date,custom_fields.people_value.gid,custom_fields.people_value.name,custom_fields.display_value',
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      1,
+      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url',
       expect.objectContaining({
+        method: 'POST',
         body: JSON.stringify({
           data: {
             name: 'Launch headline',
@@ -271,5 +276,43 @@ describe('createAsanaTask', () => {
     });
     expect(globalThis.fetch).not.toHaveBeenCalled();
     expect(mockCma.entry.create).not.toHaveBeenCalled();
+  });
+
+  it('still reports success when the task is created but the follow-up detail fetch fails', async () => {
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: {
+          gid: 'task-1',
+          name: 'Created task',
+          permalink_url: 'https://app.asana.com/0/1/task-1/f',
+        },
+      }),
+    } as Response);
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({
+        errors: [{ message: 'Oops! An unexpected error occurred while processing this request.' }],
+      }),
+    } as Response);
+
+    const result = await handler(
+      {
+        type: FunctionTypeEnum.AppActionCall,
+        body: {
+          title: 'Static automation title',
+        },
+      } as Parameters<typeof handler>[0],
+      mockContext
+    );
+
+    expect(result).toMatchObject({
+      success: true,
+      task: {
+        gid: 'task-1',
+        permalinkUrl: 'https://app.asana.com/0/1/task-1/f',
+      },
+    });
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2);
   });
 });

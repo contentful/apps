@@ -152,4 +152,50 @@ describe('getAsanaTask handler', () => {
       message: 'Task not found',
     });
   });
+
+  it('flags the task as deleted when Asana returns a 404', async () => {
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: false,
+      status: 404,
+      json: async () => ({
+        errors: [{ message: 'Not Found: task' }],
+      }),
+    } as Response);
+
+    const result = await handler(
+      createEvent({
+        taskId: '1214128635770999',
+      }) as Parameters<typeof handler>[0],
+      mockContext
+    );
+
+    expect(result).toEqual({
+      success: false,
+      message: VALIDATION_MESSAGES.taskNotFound,
+      taskDeleted: true,
+    });
+  });
+
+  it('flags the task as deleted when Asana returns a 403 (trashed task)', async () => {
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: false,
+      status: 403,
+      json: async () => ({
+        errors: [{ message: 'You do not have access to this task.' }],
+      }),
+    } as Response);
+
+    const result = await handler(
+      createEvent({
+        taskId: '1214128635770999',
+      }) as Parameters<typeof handler>[0],
+      mockContext
+    );
+
+    expect(result).toEqual({
+      success: false,
+      message: VALIDATION_MESSAGES.taskNotFound,
+      taskDeleted: true,
+    });
+  });
 });

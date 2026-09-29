@@ -15,6 +15,7 @@ import {
   Select,
   Spinner,
   Subheading,
+  TextInput,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useEffect, useRef, useState } from 'react';
@@ -30,11 +31,13 @@ import {
   AsanaWorkspace,
   CheckAsanaStatusResponse,
   CompleteAsanaOAuthResponse,
+  ConnectionStatus,
   ContentTypeOption,
   DisconnectAsanaResponse,
   GetAsanaProjectsResponse,
   GetAsanaWorkspacesResponse,
   InitiateAsanaOAuthResponse,
+  ValidateAsanaCredentialsResponse,
 } from '../types';
 import { buildEditorInterfaceTargetState, EditorInterfaceState } from '../utils/editorInterface';
 import { parseInstallationParameters } from '../utils/installationParameters';
@@ -45,6 +48,7 @@ const emptyParameters: AppInstallationParameters = {
   defaultWorkspaceName: '',
   defaultProjectGid: '',
   defaultProjectName: '',
+  asanaApiKey: '',
 };
 
 const ConfigScreen = () => {
@@ -62,6 +66,8 @@ const ConfigScreen = () => {
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [isCheckingStatus, setIsCheckingStatus] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
+  const [apiKeyStatus, setApiKeyStatus] = useState<ConnectionStatus>(ConnectionStatus.None);
+  const [apiKeyMessage, setApiKeyMessage] = useState('');
   const popupWindowRef = useRef<Window | null>(null);
 
   const callAction = async <TResult,>(
@@ -287,9 +293,40 @@ const ConfigScreen = () => {
     }
   };
 
+  const handleApiKeyChange = (value: string) => {
+    setApiKeyStatus(ConnectionStatus.None);
+    setApiKeyMessage('');
+    setParameters((prev) => ({ ...prev, asanaApiKey: value }));
+  };
+
+  const testApiKey = async () => {
+    const apiKey = parameters.asanaApiKey?.trim();
+    if (!apiKey) {
+      setApiKeyStatus(ConnectionStatus.Error);
+      setApiKeyMessage('Enter an Asana API key first.');
+      return;
+    }
+
+    setApiKeyStatus(ConnectionStatus.Testing);
+    setApiKeyMessage('');
+    try {
+      const data = await callAction<ValidateAsanaCredentialsResponse>(
+        'validateAsanaCredentialsAction',
+        { apiKey }
+      );
+      setApiKeyStatus(data.valid ? ConnectionStatus.Success : ConnectionStatus.Error);
+      setApiKeyMessage(data.message);
+    } catch (error) {
+      setApiKeyStatus(ConnectionStatus.Error);
+      setApiKeyMessage(
+        error instanceof Error ? error.message : VALIDATION_MESSAGES.invalidCredentials
+      );
+    }
+  };
+
   useEffect(() => {
     sdk.app.onConfigure(async () => {
-      if (!isConnected) {
+      if (!isConnected && !parameters.asanaApiKey?.trim()) {
         sdk.notifier.error(VALIDATION_MESSAGES.connectionRequired);
         return false;
       }
@@ -476,6 +513,46 @@ const ConfigScreen = () => {
               ) : (
                 <Badge variant="negative">Not connected</Badge>
               )}
+            </Flex>
+          </Card>
+
+          <Card marginBottom="spacingL">
+            <Subheading marginBottom="spacingM">
+              Automations &amp; App Actions access (optional)
+            </Subheading>
+            <Paragraph marginBottom="spacingM">
+              Studio Automations and App Events run without a connected user, so they can&apos;t use
+              the OAuth connection above. Add a shared Asana Personal Access Token here to let those
+              trigger Asana actions (e.g. creating a task when an entry is published).
+            </Paragraph>
+
+            <FormControl marginBottom="spacingM">
+              <FormControl.Label>Asana API key</FormControl.Label>
+              <TextInput
+                type="password"
+                value={parameters.asanaApiKey ?? ''}
+                onChange={(event) => handleApiKeyChange(event.target.value)}
+              />
+              <FormControl.HelpText>
+                Used only as a fallback when no connected user is available.
+              </FormControl.HelpText>
+            </FormControl>
+
+            <Flex alignItems="center" gap="spacingM">
+              <Button
+                onClick={testApiKey}
+                isLoading={apiKeyStatus === ConnectionStatus.Testing}
+                isDisabled={
+                  apiKeyStatus === ConnectionStatus.Testing || !parameters.asanaApiKey?.trim()
+                }>
+                Test key
+              </Button>
+              {apiKeyStatus === ConnectionStatus.Success ? (
+                <Badge variant="positive">{apiKeyMessage}</Badge>
+              ) : null}
+              {apiKeyStatus === ConnectionStatus.Error ? (
+                <Badge variant="negative">{apiKeyMessage}</Badge>
+              ) : null}
             </Flex>
           </Card>
 

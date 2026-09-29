@@ -6,6 +6,7 @@ import type {
 } from '@contentful/node-apps-toolkit';
 import { VALIDATION_MESSAGES } from '../src/const';
 import type { AddAsanaCommentRequest, AddAsanaCommentResponse } from '../src/types';
+import { getTaskLinkForEntry } from '../src/utils/taskLinkStore';
 import { addCommentToTask, extractTaskGid, getAsanaAccessToken } from './asanaClient';
 
 function getTrimmedValue(value?: string) {
@@ -18,11 +19,17 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
 ): Promise<AddAsanaCommentResponse> => {
   const body = (event.body as AddAsanaCommentRequest | undefined) ?? {};
 
-  const taskGid = extractTaskGid(body.taskId);
+  let taskGid = extractTaskGid(body.taskId);
+  const entryId = getTrimmedValue(body.entryId);
+  if (!taskGid && entryId && context.cma) {
+    const taskLink = await getTaskLinkForEntry(context.cma, entryId);
+    taskGid = taskLink?.taskGid ?? '';
+  }
+
   if (!taskGid) {
     return {
       success: false,
-      message: VALIDATION_MESSAGES.taskIdRequired,
+      message: entryId ? VALIDATION_MESSAGES.entryNotLinked : VALIDATION_MESSAGES.taskIdRequired,
     };
   }
 
@@ -36,10 +43,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
 
   const accessToken = await getAsanaAccessToken(event, context);
   if (!accessToken) {
-    return {
-      success: false,
-      message: VALIDATION_MESSAGES.tokenRequired,
-    };
+    throw new Error(VALIDATION_MESSAGES.tokenRequired);
   }
 
   try {

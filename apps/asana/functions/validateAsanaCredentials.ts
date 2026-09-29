@@ -12,13 +12,15 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   event: AppActionRequest<'Custom'>,
   context: FunctionEventContext
 ): Promise<ValidateAsanaCredentialsResponse> => {
-  const accessToken = await getAsanaAccessToken(event, context);
+  // Config Screen "Test key" passes the not-yet-saved API key value directly so it can be
+  // validated before the installation parameters are persisted.
+  const body = (event.body as { apiKey?: string } | undefined) ?? {};
+  const providedApiKey = body.apiKey?.trim();
+
+  const accessToken = providedApiKey || (await getAsanaAccessToken(event, context));
 
   if (!accessToken) {
-    return {
-      valid: false,
-      message: VALIDATION_MESSAGES.tokenRequired,
-    };
+    throw new Error(VALIDATION_MESSAGES.tokenRequired);
   }
 
   try {
