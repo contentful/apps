@@ -189,14 +189,39 @@ const ASK_QUESTIONS: OutputView = {
   ),
 };
 
+/**
+ * What Mux reports about writing the chapters onto the video. `asset_update` is present only
+ * when the job ran with `update_asset_chapters`; the write is best-effort, so a job can complete
+ * with it `failed`.
+ */
+const ChaptersAssetUpdateNote: FC<{ assetUpdate: unknown }> = ({ assetUpdate }) => {
+  const status = (assetUpdate as { status?: unknown } | undefined)?.status;
+  if (status === 'created') {
+    return (
+      <Note variant="positive">
+        The chapters were added to the Mux video as its chapters track.
+      </Note>
+    );
+  }
+  if (status === 'failed') {
+    return (
+      <Note variant="warning">
+        Mux could not add these chapters to the video. They are still listed below.
+      </Note>
+    );
+  }
+  return (
+    <Note variant="neutral">
+      These chapters were not added to the Mux video; they are listed below.
+    </Note>
+  );
+};
+
 const GENERATE_CHAPTERS: OutputView = {
   hasContent: (outputs) => asRows(outputs.chapters).length > 0,
   render: (outputs) => (
     <>
-      <Note variant="neutral">
-        Chapters are returned with the job. Mux does not store them on the video, so copy them
-        wherever your player reads chapters from.
-      </Note>
+      <ChaptersAssetUpdateNote assetUpdate={outputs.asset_update} />
       <Box marginTop="spacingM">
         <SimpleTable columns={['Start', 'Title']}>
           {asRows(outputs.chapters).map((chapter, index) => (

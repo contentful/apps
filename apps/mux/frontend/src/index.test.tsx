@@ -640,9 +640,7 @@ describe('a video whose playback IDs have all been deleted', () => {
 
   it('still shows the uploader for a genuinely empty field', () => {
     const dom = render(
-      <App
-        sdk={{ ...SDK_MOCK, field: { ...SDK_MOCK.field, getValue: () => ({}) } } as any}
-      />
+      <App sdk={{ ...SDK_MOCK, field: { ...SDK_MOCK.field, getValue: () => ({}) } } as any} />
     );
 
     expect(getById(dom.container, 'uploaderDropzone')).toBeVisible();
@@ -772,7 +770,9 @@ describe('switching playback policy on an asset with no playback IDs', () => {
       ready: true,
       pendingActions: {
         delete: [],
-        create: [{ type: 'playback', data: { policy: 'public', assetId: 'asset-test-123' }, retry: 0 }],
+        create: [
+          { type: 'playback', data: { policy: 'public', assetId: 'asset-test-123' }, retry: 0 },
+        ],
         update: [],
       },
     };
@@ -946,6 +946,17 @@ describe('polling while a track is preparing', () => {
 
     expect(read().captions?.map((caption) => caption.id)).toEqual(['subtitles-ready']);
   });
+
+  it('mirrors the chapters track on its own, not among the captions', async () => {
+    // What Mux returns after generate-chapters with update_asset_chapters.
+    const { read } = await pollUntilSettled([
+      track('subtitles-ready', 'ready'),
+      { ...track('chapters-ready', 'ready'), text_type: 'chapters' },
+    ]);
+
+    expect(read().captions?.map((caption) => caption.id)).toEqual(['subtitles-ready']);
+    expect(read().chaptersTrack?.id).toBe('chapters-ready');
+  });
 });
 
 /**
@@ -1103,9 +1114,7 @@ describe('a video that loses its playback IDs mid-session', () => {
   });
 
   it('says nothing when the video still has a playback ID', async () => {
-    const { warning, app } = await mountWithAsset([
-      { id: 'public-playback-id', policy: 'public' },
-    ]);
+    const { warning, app } = await mountWithAsset([{ id: 'public-playback-id', policy: 'public' }]);
 
     expect(warning).not.toHaveBeenCalled();
     expect(app.state.playerPlaybackId).toBe('public-playback-id');
@@ -1220,10 +1229,7 @@ describe('telling the editor that an upload already has Robots working on it', (
 
   const readyAsset = { id: 'asset-test-123', status: 'ready', tracks: [] };
 
-  const runPollWith = async (
-    robots: Record<string, any>,
-    directiveIds: string[] | undefined
-  ) => {
+  const runPollWith = async (robots: Record<string, any>, directiveIds: string[] | undefined) => {
     const { app, notifier } = buildApp();
     await new Promise((resolve) => setTimeout(resolve, 50));
     const instance = app();

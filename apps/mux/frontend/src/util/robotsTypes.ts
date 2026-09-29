@@ -249,10 +249,11 @@ export interface RobotsModerateOutput {
  * Outputs written onto the field JSON so the Delivery API returns them with the entry: the newest
  * completed run of each workflow on this asset, whoever started it (ADR-0005, ADR-0008).
  *
- * Only summarize and moderation live here, per the spec: captions and dubs stay Mux tracks, and
- * chapters and best thumbnails arrive through the existing asset mirror. That also keeps this
- * object small — scenes and key moments, the two outputs that could realistically approach
- * Contentful's JSON-field size limit, are never persisted.
+ * Only summarize and moderation live here. The other workflows' results live on the Mux asset:
+ * captions and dubs as tracks, chapters as its chapters track (`update_asset_chapters`), and the
+ * best thumbnail as `thumbnail_time`. That also keeps this object small — scenes and key
+ * moments, the two outputs that could realistically approach Contentful's JSON-field size limit,
+ * are never persisted.
  */
 export interface RobotsOutputs {
   summarize?: RobotsSummarizeOutput;

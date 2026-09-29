@@ -883,7 +883,6 @@ export const ROBOTS_CATALOG: RobotsWorkflowDefinition[] = [
     label: 'Generate chapters',
     category: 'Structure',
     description: 'Create timestamped chapters from the video content.',
-    notes: ['Chapters are returned with the job. Mux does not write them onto the asset.'],
     params: [
       {
         // "When omitted, the SDK prefers English if available."
@@ -932,6 +931,19 @@ export const ROBOTS_CATALOG: RobotsWorkflowDefinition[] = [
         kind: 'stringList',
         name: 'output_steering.brand_terms',
         label: 'Brand terms',
+      },
+      {
+        // On by default: putting the chapters on the video is why this workflow is run from a
+        // CMS. The reference is explicit that an asset holds a single chapters track, so any
+        // existing one is replaced, and that the write is best-effort (`asset_update` in the
+        // job's outputs says how it went) — hence the help text.
+        kind: 'boolean',
+        name: 'update_asset_chapters',
+        label: 'Add the chapters to the Mux video',
+        helpText:
+          'Writes them as the video’s chapters track when the job finishes. Replaces any ' +
+          'chapters track the video already has, including one added by hand.',
+        defaultValue: true,
       },
     ],
   },

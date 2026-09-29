@@ -180,6 +180,30 @@ describe('buildMuxAssetMirror', () => {
     expect((mirror.captions as { id: string }[]).map((t) => t.id)).toEqual(['ready', 'preparing']);
   });
 
+  it('keeps the chapters track apart from the captions', () => {
+    // The shape Mux returns after generate-chapters with update_asset_chapters: a text track
+    // with text_type "chapters", which must neither vanish nor turn up as a caption.
+    const tracks = [
+      captionTrack({ id: 'subtitles' }),
+      captionTrack({ id: 'chapters', text_type: 'chapters', name: 'Chapters (Generated)' }),
+    ];
+
+    const mirror = buildMuxAssetMirror(asset({ tracks }));
+
+    expect((mirror.captions as { id: string }[]).map((t) => t.id)).toEqual(['subtitles']);
+    expect((mirror.chaptersTrack as { id: string }).id).toBe('chapters');
+  });
+
+  it('clears the chapters track once the asset no longer has a usable one', () => {
+    const errored = [captionTrack({ id: 'chapters', text_type: 'chapters', status: 'errored' })];
+
+    expect(buildMuxAssetMirror(asset({ tracks: errored }))).toHaveProperty(
+      'chaptersTrack',
+      undefined
+    );
+    expect(buildMuxAssetMirror(asset({ tracks: [] }))).toHaveProperty('chaptersTrack', undefined);
+  });
+
   it('survives an asset with no tracks and no playback ids at all', () => {
     const mirror = buildMuxAssetMirror({ id: 'asset-1', status: 'preparing' });
 

@@ -180,6 +180,18 @@ function isCaptionTrack(track: { text_type?: string; status?: string }): boolean
   );
 }
 
+/**
+ * Which Mux track belongs in `chaptersTrack`. An asset holds a single chapters track, which
+ * `generate-chapters` writes when `update_asset_chapters` is on. Same status rule as captions.
+ *
+ * **Duplicated in `functions/src/onPublish.ts` — change one, change the other.**
+ */
+function isChaptersTrack(track: { text_type?: string; status?: string }): boolean {
+  return (
+    track.text_type === 'chapters' && (track.status === 'ready' || track.status === 'preparing')
+  );
+}
+
 function sameNormalized(a: unknown, b: unknown): boolean {
   return JSON.stringify(normalizeForDiff(a)) === JSON.stringify(normalizeForDiff(b));
 }
@@ -1037,6 +1049,7 @@ export class App extends React.Component<AppProps, AppState> {
 
       let audioTracks: Track[] | undefined = undefined;
       let captions: Track[] | undefined = undefined;
+      let chaptersTrack: Track | undefined = undefined;
       let trackPreparing = false;
       if (asset.tracks) {
         asset.tracks.forEach((track) => {
@@ -1049,6 +1062,8 @@ export class App extends React.Component<AppProps, AppState> {
             audioTracks = [...(audioTracks || []), track];
           } else if (isCaptionTrack(track)) {
             captions = [...(captions || []), track];
+          } else if (!chaptersTrack && isChaptersTrack(track)) {
+            chaptersTrack = track;
           }
         });
       }
@@ -1079,6 +1094,7 @@ export class App extends React.Component<AppProps, AppState> {
           created_at: asset.created_at ? Number(asset.created_at) : undefined,
           captions: captions,
           audioTracks: audioTracks,
+          chaptersTrack: chaptersTrack,
           static_renditions: asset.static_renditions?.files || undefined,
           is_live: asset.is_live || undefined,
           live_stream_id: asset.live_stream_id || undefined,

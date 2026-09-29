@@ -55,6 +55,7 @@ export const MUX_ASSET_MIRROR_KEYS = [
   'created_at',
   'captions',
   'audioTracks',
+  'chaptersTrack',
   'static_renditions',
   'is_live',
   'live_stream_id',

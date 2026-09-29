@@ -208,6 +208,17 @@ table even though the app has written them for some time.
       "closed_captions": boolean
     }
   ],
+  // The asset's single chapters track (text_type "chapters"), when it has one — for example
+  // written by generate-chapters with update_asset_chapters.
+  "chaptersTrack": {
+    "type": "text",
+    "text_type": "chapters",
+    "text_source": string,
+    "status": string,
+    "name": string,
+    "language_code": string,
+    "id": string
+  },
   "pendingActions": {
     // Destructive changes queue here and execute server-side in the onPublish function.
     "delete": [{ "type": string, "id": string, "retry": number }],

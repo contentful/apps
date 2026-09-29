@@ -18,6 +18,17 @@ function isCaptionTrack(track: MuxTrack | undefined): boolean {
 }
 
 /**
+ * Which Mux track belongs in the field's `chaptersTrack` — an asset holds a single one.
+ *
+ * **Duplicated in `frontend/src/index.tsx` — change one, change the other.**
+ */
+function isChaptersTrack(track: MuxTrack | undefined): boolean {
+  return (
+    track?.text_type === 'chapters' && (track.status === 'ready' || track.status === 'preparing')
+  );
+}
+
+/**
  * The keys `onPublish` re-derives from a fresh `GET /video/v1/assets/{id}`.
  *
  * Exported for tests: it is a pure function of the Mux asset, and it is where both the caption
@@ -33,6 +44,7 @@ export function buildMuxAssetMirror(muxAsset: MuxAsset): Record<string, unknown>
 
   const audioTracks = muxAsset.tracks?.filter((t) => t.type === 'audio');
   const captions = muxAsset.tracks?.filter(isCaptionTrack);
+  const chaptersTrack = muxAsset.tracks?.find(isChaptersTrack);
 
   // Only the keys this function owns. Notably absent: `version` (derived per locale from what the
   // value actually holds, so a publish never bumps or downgrades it) and `robotsJobs` /
@@ -57,6 +69,7 @@ export function buildMuxAssetMirror(muxAsset: MuxAsset): Record<string, unknown>
     // make the browser's next diff write the field again for nothing.
     captions: captions?.length ? captions : undefined,
     audioTracks: audioTracks?.length ? audioTracks : undefined,
+    chaptersTrack: chaptersTrack || undefined,
     static_renditions: muxAsset.static_renditions?.files || undefined,
     is_live: muxAsset.is_live || undefined,
     live_stream_id: muxAsset.live_stream_id || undefined,

@@ -678,3 +678,32 @@ describe('the job facts', () => {
     expect(Object.keys(facts())).not.toContain('Workflow');
   });
 });
+
+describe('generate-chapters output', () => {
+  const chaptersJob = (assetUpdate?: unknown) =>
+    job({
+      workflow: 'generate-chapters',
+      outputs: {
+        chapters: [{ start_time: 0, title: 'Intro' }],
+        ...(assetUpdate !== undefined && { asset_update: assetUpdate }),
+      },
+    });
+
+  it('says the chapters are on the video when Mux wrote them', () => {
+    show(chaptersJob({ status: 'created', track_id: 'track_chapters_1' }));
+    expect(screen.getByText(/added to the Mux video as its chapters track/)).toBeInTheDocument();
+  });
+
+  it('says the write failed, since a job completes even when it does', () => {
+    // The write is best-effort: the job reports `completed` either way, so the outcome has to
+    // come from `asset_update`, not from the status.
+    show(chaptersJob({ status: 'failed' }));
+    expect(screen.getByText(/could not add these chapters/)).toBeInTheDocument();
+  });
+
+  it('says nothing was written for a job run without the option', () => {
+    show(chaptersJob());
+    expect(screen.getByText(/were not added to the Mux video/)).toBeInTheDocument();
+    expect(screen.getByText('Intro')).toBeInTheDocument();
+  });
+});

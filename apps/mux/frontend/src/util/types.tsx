@@ -91,6 +91,8 @@ export interface MuxContentfulObject {
   created_at?: number;
   captions?: Array<Track>;
   audioTracks?: Array<Track>;
+  /** The asset's chapters track, e.g. from `generate-chapters` with `update_asset_chapters`. */
+  chaptersTrack?: Track;
   is_live?: boolean;
   live_stream_id?: string;
   static_renditions?: Array<StaticRendition>;

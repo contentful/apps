@@ -1579,3 +1579,32 @@ describe('what an empty field is said to do', () => {
     expect(labels).not.toContain('Transcript language');
   });
 });
+
+describe('generate-chapters writes its chapters onto the video', () => {
+  const chapters = ROBOTS_CATALOG_BY_KEY['generate-chapters'];
+
+  it('sends update_asset_chapters: true for a run nobody changed', () => {
+    // Putting the chapters on the video is the point of running this from a CMS, so it is on
+    // from the start and survives into the request rather than being dropped as untouched.
+    const parameters = paramsFromFormValues(
+      chapters,
+      'asset-1',
+      defaultParamValues(chapters.params)
+    );
+    expect(parameters.update_asset_chapters).toBe(true);
+  });
+
+  it('still sends false when the editor turns it off', () => {
+    const values = { ...defaultParamValues(chapters.params), update_asset_chapters: false };
+    expect(paramsFromFormValues(chapters, 'asset-1', values).update_asset_chapters).toBe(false);
+  });
+
+  it('warns that it replaces the chapters track the video already has', () => {
+    const field = chapters.params.find((param) => param.name === 'update_asset_chapters');
+    expect(field?.helpText).toMatch(/Replaces any chapters track/);
+  });
+
+  it('no longer claims Mux leaves the chapters off the video', () => {
+    expect(JSON.stringify(chapters.notes ?? [])).not.toMatch(/does not write/i);
+  });
+});
