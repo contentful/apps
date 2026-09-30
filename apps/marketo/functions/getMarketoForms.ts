@@ -31,15 +31,35 @@ const marketoGet = async <T>(
 
 // Marketo archives at the folder level (folder.isArchive), never on the form
 // itself, so a form's own status can still read "approved" while its folder
-// is archived. Cross-referencing each form's folder is the only way to keep
-// archived forms out of the picker.
-const isFolderArchived = async (baseUrl: string, accessToken: string, folderId: number) => {
+// is archived. isArchive also doesn't cascade onto subfolders when a parent
+// is archived, so a form in an unarchived subfolder of an archived folder
+// stays "live" unless we walk the parent chain ourselves.
+const fetchFolder = async (baseUrl: string, accessToken: string, folderId: number) => {
   const { body } = await marketoGet<MarketoFolderRecord>(
     baseUrl,
     `/rest/asset/v1/folder/${folderId}.json?type=Folder`,
     accessToken
   );
-  return Boolean(body.success && body.result?.[0]?.isArchive);
+  return body.result?.[0];
+};
+
+const isFolderArchived = async (
+  baseUrl: string,
+  accessToken: string,
+  folderId: number,
+  cache: Map<number, boolean>
+): Promise<boolean> => {
+  const cached = cache.get(folderId);
+  if (cached != null) return cached;
+
+  const folder = await fetchFolder(baseUrl, accessToken, folderId);
+  const result =
+    Boolean(folder?.isArchive) ||
+    (folder?.parent != null &&
+      (await isFolderArchived(baseUrl, accessToken, folder.parent.id, cache)));
+
+  cache.set(folderId, result);
+  return result;
 };
 
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
@@ -70,10 +90,14 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
     ...new Set(forms.map((form) => form.folder?.value).filter((id): id is number => id != null)),
   ];
 
+  const folderArchiveCache = new Map<number, boolean>();
   const folderArchiveChecks = await Promise.all(
     folderIds.map(
       async (folderId) =>
-        [folderId, await isFolderArchived(baseUrl, auth.access_token, folderId)] as const
+        [
+          folderId,
+          await isFolderArchived(baseUrl, auth.access_token, folderId, folderArchiveCache),
+        ] as const
     )
   );
   const archivedFolderIds = new Set(
