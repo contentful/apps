@@ -1,6 +1,12 @@
 import { FieldExtensionSDK } from '@contentful/app-sdk';
 import { ModalData } from '../components/AssetConfiguration/MuxAssetConfigurationModal';
 import { MuxApiService } from './muxApi';
+import {
+  RobotsDirectiveRunRecord,
+  RobotsJobRecord,
+  RobotsOutputs,
+  RobotsPendingCreate,
+} from './robotsTypes';
 
 export interface AppProps {
   sdk: FieldExtensionSDK;
@@ -16,6 +22,10 @@ export interface InstallationParams {
   muxDomain?: string;
   muxEnableDRM?: boolean;
   muxDRMConfigurationId?: string;
+  /** Robots directives attached to every asset this app creates. */
+  muxDefaultDirectiveIds?: string[];
+  /** Lets non-admins run Robots. Unset means admins only — see `canRunRobots`, ADR-0016. */
+  muxRobotsAllowEveryone?: boolean;
 }
 
 export interface AppState {
@@ -39,6 +49,8 @@ export interface AppState {
   pendingUploadURL: string | null;
   isPolling: boolean;
   initialResyncDone: boolean;
+  /** Lifted out of `<Tabs>` so the Robots tab only fetches once it is actually looked at. */
+  selectedTab: string;
 }
 
 export type ResolutionType = 'highest' | 'audio-only';
@@ -79,6 +91,8 @@ export interface MuxContentfulObject {
   created_at?: number;
   captions?: Array<Track>;
   audioTracks?: Array<Track>;
+  /** The asset's chapters track, e.g. from `generate-chapters` with `update_asset_chapters`. */
+  chaptersTrack?: Track;
   is_live?: boolean;
   live_stream_id?: string;
   static_renditions?: Array<StaticRendition>;
@@ -89,6 +103,14 @@ export interface MuxContentfulObject {
   };
   passthrough?: string;
   pendingActions?: PendingActions;
+  /** v4. Every Robots job read for this asset, in flight or finished — see ADR-0005. */
+  robotsJobs?: Array<RobotsJobRecord>;
+  /** v4. Summary and moderation output, so the Delivery API returns it with the entry. */
+  robotsOutputs?: RobotsOutputs;
+  /** v4. Directive runs started from this entry — see ADR-0009. */
+  robotsDirectiveRuns?: Array<RobotsDirectiveRunRecord>;
+  /** v4. Robots creates asked for here whose outcome is not known yet — see ADR-0003. */
+  robotsPendingCreates?: Array<RobotsPendingCreate>;
 }
 
 export interface Error {

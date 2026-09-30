@@ -1,13 +1,6 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Switch,
-  Tabs,
-  Textarea,
-  CopyButton,
-  TextLink,
-  Flex,
-} from '@contentful/f36-components';
+import { Box, Switch, Tabs, TextLink, Flex } from '@contentful/f36-components';
+import CodeBlock from './CodeBlock';
 
 interface PlayerCodeProps {
   params: { name: string; value: string | undefined }[];
@@ -98,10 +91,7 @@ const PlayerCode: React.FC<PlayerCodeProps> = ({ params }) => {
           <Tabs.Tab panelId="iframe">iframe</Tabs.Tab>
         </Tabs.List>
       </Tabs>
-      <Box marginTop="spacingM" marginBottom="spacingS">
-        <Textarea value={codeSnippet} isReadOnly={true} className="copycodearea" />
-      </Box>
-      <CopyButton
+      <CodeBlock
         value={codeSnippet}
         tooltipCopiedText="Snippet Copied"
         tooltipText="Copy Player Snippet"

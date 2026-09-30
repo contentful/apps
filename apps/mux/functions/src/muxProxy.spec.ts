@@ -57,7 +57,31 @@ describe('muxProxy handler', () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  it('rejects a path outside the /video/v1/ allowlist with 403 before calling fetch', async () => {
+  it('forwards a Robots path, the other API the app calls', async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify({ data: [] }), { status: 200 }) as Response
+    );
+
+    const result = await handler(
+      makeEvent({ method: 'GET', path: '/robots/v0/jobs?asset_id=abc123' }),
+      validContext()
+    );
+
+    expect(result).toEqual({ ok: true, data: { data: [] } });
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects a path that traverses out of /robots/v0/ after normalization', async () => {
+    const result = await handler(
+      makeEvent({ method: 'GET', path: '/robots/v0/../../system/v1/signing-keys' }),
+      validContext()
+    );
+
+    expect(result).toEqual({ ok: false, error: 'Path not permitted', status: 403 });
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('rejects a path outside the allowlist with 403 before calling fetch', async () => {
     const result = await handler(
       makeEvent({ method: 'GET', path: '/other/v1/endpoint' }),
       validContext()

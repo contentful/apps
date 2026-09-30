@@ -1,10 +1,19 @@
 import { AppExtensionSDK, FieldExtensionSDK } from '@contentful/app-sdk';
 import { PlainClientAPI } from 'contentful-management';
 import { ModalData } from '../components/AssetConfiguration/MuxAssetConfigurationModal';
-import { InstallationParams, ResolutionType, Track } from './types';
+import { InstallationParams, ResolutionType, StaticRendition, Track } from './types';
+import {
+  RobotsDirective,
+  RobotsDirectiveRun,
+  RobotsJob,
+  RobotsJobStatus,
+  RobotsWorkflow,
+} from './robotsTypes';
 
 export interface AssetSettings {
   passthrough?: string;
+  /** Robots directives to run once the asset is ingested. */
+  directives?: Array<{ id: string }>;
   playback_policies?: string[];
   advanced_playback_policies?: Array<{
     policy: string;
@@ -53,11 +62,56 @@ export interface SignedTokens {
 
 export class MuxApiError extends Error {
   status?: number;
-  constructor(message: string, status?: number) {
+  /**
+   * Mux's machine-readable error discriminator, forwarded by `muxProxy`. The Robots tab needs it
+   * to tell Mux refusing one run (`robots_*`) from Robots being off for the account (`forbidden`)
+   * — both are 403s.
+   */
+  errorType?: string;
+
+  constructor(message: string, status?: number, errorType?: string) {
     super(message);
     this.name = 'MuxApiError';
     this.status = status;
+    this.errorType = errorType;
   }
+
+  /**
+   * True when Mux itself answered — even with an error. `muxProxy` returns those over HTTP 200 as
+   * `{ ok: false, status }`, so a status means the request definitely reached Mux and definitely
+   * did not do anything. Anything else (an app-action timeout, a killed function) leaves the
+   * outcome unknown, which for a billable Robots job is a different problem entirely.
+   */
+  get muxAnswered(): boolean {
+    return typeof this.status === 'number';
+  }
+}
+
+/**
+ * A Mux error response read in the browser, as the same `MuxApiError` `muxProxy` hands the rest of
+ * the app — so the config screen, which calls `api.mux.com` directly, classifies with
+ * `capabilityFromError` rather than a copy of it. The two body shapes are the ones
+ * `readMuxErrorMessage` in `functions/src/muxProxy.ts` reads first: Mux sends `messages`, and its
+ * reference documents `message`.
+ */
+export async function muxApiErrorFromResponse(response: Response): Promise<MuxApiError> {
+  const body: unknown = await response.json().catch(() => undefined);
+  const error = isRecord(body) && isRecord(body.error) ? body.error : undefined;
+  const messages: unknown[] =
+    error && Array.isArray(error.messages) ? error.messages : [error?.message];
+  const text = messages
+    .filter((message): message is string => typeof message === 'string' && message.trim() !== '')
+    .join(' ');
+
+  return new MuxApiError(
+    text || `Mux rejected this request (HTTP ${response.status})`,
+    response.status,
+    typeof error?.type === 'string' ? error.type : undefined
+  );
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object';
 }
 
 interface MuxErrorBody {
@@ -71,6 +125,23 @@ interface MuxAssetData {
   tracks?: Track[];
   max_stored_resolution?: string;
   errors?: MuxErrorBody;
+  // The rest of the asset fields the app actually mirrors onto the entry. They used to fall
+  // through to the index signature as `unknown`, which typechecked only because the field value
+  // was built as an untyped object literal.
+  upload_id?: string;
+  aspect_ratio?: string;
+  max_stored_frame_rate?: number;
+  duration?: number;
+  created_at?: string | number;
+  is_live?: boolean;
+  live_stream_id?: string;
+  meta?: {
+    title?: string;
+    creator_id?: string;
+    external_id?: string;
+  };
+  passthrough?: string;
+  static_renditions?: { files?: StaticRendition[] };
   [key: string]: unknown;
 }
 
@@ -145,7 +216,7 @@ export class MuxApiService {
 
     const parsed = JSON.parse(body);
     if (!parsed.ok) {
-      throw new MuxApiError(parsed.error || 'Unknown error', parsed.status);
+      throw new MuxApiError(parsed.error || 'Unknown error', parsed.status, parsed.errorType);
     }
     return parsed.data as T;
   }
@@ -240,11 +311,104 @@ export class MuxApiService {
     );
   }
 
+  // --- Robots operations ---
+  //
+  // All of these return the `MuxDataResponse<T>` envelope, matching `getAsset` / `createAsset`
+  // rather than unwrapping the way `createUpload` does. `muxProxy` hands back Mux's whole
+  // response body, so the envelope is what actually arrives; unwrapping some methods and not
+  // others is how the existing inconsistency got there.
+
+  /**
+   * Starts a job. Nothing in the app reads a job's `passthrough`, which is the customer's field:
+   * Mux attributes the call by the `x-source-platform` header `muxProxy` sends. The one line
+   * below is an interim marker until Mux confirms it counts by that header (ADR-0003).
+   */
+  async createRobotsJob(
+    workflow: RobotsWorkflow,
+    parameters: Record<string, unknown>
+  ): Promise<MuxDataResponse<RobotsJob>> {
+    return this.callProxy(
+      'POST',
+      `/robots/v0/jobs/${workflow}`,
+      JSON.stringify({
+        parameters,
+        passthrough: 'mux:cms:contentful:', // interim marker, see ADR-0003; nothing reads it
+      })
+    );
+  }
+
+  async getRobotsJob(
+    workflow: RobotsWorkflow,
+    jobId: string
+  ): Promise<MuxDataResponse<RobotsJob>> {
+    return this.callProxy('GET', `/robots/v0/jobs/${workflow}/${jobId}`);
+  }
+
+  async listRobotsJobs(query: {
+    asset_id?: string;
+    workflow?: RobotsWorkflow;
+    status?: RobotsJobStatus;
+    limit?: number;
+    page?: number;
+  }): Promise<MuxDataResponse<RobotsJob[]>> {
+    return this.callProxy('GET', `/robots/v0/jobs${buildQueryString(query)}`);
+  }
+
+  /** Note the path asymmetry with `getRobotsJob`: cancel takes no workflow segment. */
+  async cancelRobotsJob(jobId: string): Promise<MuxDataResponse<RobotsJob>> {
+    return this.callProxy('POST', `/robots/v0/jobs/${jobId}/cancel`);
+  }
+
+  async listRobotsDirectives(
+    query: { limit?: number; page?: number } = {}
+  ): Promise<MuxDataResponse<RobotsDirective[]>> {
+    return this.callProxy('GET', `/robots/v0/directives${buildQueryString(query)}`);
+  }
+
+  /** 409 when a run for this directive/asset pair is already in progress. */
+  async createRobotsDirectiveRun(
+    directiveId: string,
+    assetId: string
+  ): Promise<MuxDataResponse<RobotsDirectiveRun>> {
+    return this.callProxy(
+      'POST',
+      `/robots/v0/directives/${directiveId}/runs`,
+      JSON.stringify({ asset_id: assetId })
+    );
+  }
+
+  async listRobotsDirectiveRuns(
+    directiveId: string,
+    query: { limit?: number; page?: number } = {}
+  ): Promise<MuxDataResponse<RobotsDirectiveRun[]>> {
+    return this.callProxy(
+      'GET',
+      `/robots/v0/directives/${directiveId}/runs${buildQueryString(query)}`
+    );
+  }
+
+  async getRobotsDirectiveRun(
+    directiveId: string,
+    runId: string
+  ): Promise<MuxDataResponse<RobotsDirectiveRun>> {
+    return this.callProxy('GET', `/robots/v0/directives/${directiveId}/runs/${runId}`);
+  }
+
   // --- Signed URL tokens ---
 
   async getSignedUrlTokens(playbackId: string, isDRM = false): Promise<SignedTokens> {
     return this.callAction<SignedTokens>('getSignedUrlTokens', { playbackId, isDRM });
   }
+}
+
+function buildQueryString(query: Record<string, string | number | undefined>): string {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value === undefined || value === null || value === '') continue;
+    params.set(key, String(value));
+  }
+  const serialized = params.toString();
+  return serialized ? `?${serialized}` : '';
 }
 
 // --- Helper functions (pure data transformation, stays in frontend) ---
@@ -256,6 +420,13 @@ export function buildAssetSettings(options: ModalData, drmConfigurationId?: stri
     video_quality: options.videoQuality,
     inputs: [],
   };
+
+  // Reaches both *creating* ingest paths for free, because both build their request from here.
+  // The third path — pasting an existing Mux asset ID into the field — creates no asset, so
+  // there are no `new_asset_settings` to carry a directive on.
+  if (options.directiveIds?.length) {
+    settings.directives = options.directiveIds.map((id) => ({ id }));
+  }
 
   if (hasDRM && drmConfigurationId) {
     settings.advanced_playback_policies = [

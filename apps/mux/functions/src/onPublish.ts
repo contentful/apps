@@ -1,5 +1,84 @@
 import * as contentful from 'contentful-management';
 import { muxFetch } from './helpers/muxClient';
+import { buildAssetMirror, mergeMuxAssetIntoField, MuxAssetMirrorKey } from './helpers/muxField';
+import { MuxAsset, MuxAssetMetaUpdate, MuxPlaybackId, MuxTrack } from './helpers/muxTypes';
+
+/**
+ * Which Mux tracks belong in the field's `captions`.
+ *
+ * **Duplicated in `frontend/src/index.tsx` — change one, change the other.** Separate packages
+ * with independent builds, so there is no module to share. It has drifted before: this side took
+ * `type === 'text'` at any status, so a publish swapped the caption list for a differently
+ * filtered one and errored text tracks reappeared on the entry. The browser's filter wins.
+ */
+function isCaptionTrack(track: MuxTrack | undefined): boolean {
+  return (
+    track?.text_type === 'subtitles' && (track.status === 'ready' || track.status === 'preparing')
+  );
+}
+
+/**
+ * Which Mux track belongs in the field's `chaptersTrack` — an asset holds a single one.
+ *
+ * **Duplicated in `frontend/src/index.tsx` — change one, change the other.**
+ */
+function isChaptersTrack(track: MuxTrack | undefined): boolean {
+  return (
+    track?.text_type === 'chapters' && (track.status === 'ready' || track.status === 'preparing')
+  );
+}
+
+/**
+ * The keys `onPublish` re-derives from a fresh `GET /video/v1/assets/{id}`.
+ *
+ * Exported for tests: it is a pure function of the Mux asset, and it is where both the caption
+ * filter and the "every mirror key is written, `undefined` included" rule are enforced.
+ */
+export function buildMuxAssetMirror(muxAsset: MuxAsset): Record<string, unknown> {
+  const playbackIds: MuxPlaybackId[] = Array.isArray(muxAsset.playback_ids)
+    ? muxAsset.playback_ids
+    : [];
+  const publicPlayback = playbackIds.find((p) => p.policy === 'public');
+  const signedPlayback = playbackIds.find((p) => p.policy === 'signed');
+  const drmPlayback = playbackIds.find((p) => p.policy === 'drm');
+
+  const audioTracks = muxAsset.tracks?.filter((t) => t.type === 'audio');
+  const captions = muxAsset.tracks?.filter(isCaptionTrack);
+  const chaptersTrack = muxAsset.tracks?.find(isChaptersTrack);
+
+  // Only the keys this function owns. Notably absent: `version` (derived per locale from what the
+  // value actually holds, so a publish never bumps or downgrades it) and `robotsJobs` /
+  // `robotsOutputs` (browser-owned — they must survive this write).
+  const values: Record<MuxAssetMirrorKey, unknown> = {
+    uploadId: muxAsset.upload_id || undefined,
+    assetId: muxAsset.id,
+    playbackId: publicPlayback?.id || undefined,
+    signedPlaybackId: signedPlayback?.id || undefined,
+    drmPlaybackId: drmPlayback?.id || undefined,
+    ready: muxAsset.status === 'ready',
+    ratio: muxAsset.aspect_ratio || undefined,
+    max_stored_resolution: muxAsset.max_stored_resolution || undefined,
+    max_stored_frame_rate: muxAsset.max_stored_frame_rate || undefined,
+    duration: muxAsset.duration || undefined,
+    audioOnly:
+      'max_stored_resolution' in muxAsset && muxAsset.max_stored_resolution === 'Audio only',
+    error: muxAsset.errors?.length ? muxAsset.errors[0].message : undefined,
+    created_at: muxAsset.created_at ? Number(muxAsset.created_at) : undefined,
+    // `undefined` rather than `[]` when the asset has no tracks left, matching exactly what the
+    // browser stores for the same asset. An empty array would differ from what is on disk and
+    // make the browser's next diff write the field again for nothing.
+    captions: captions?.length ? captions : undefined,
+    audioTracks: audioTracks?.length ? audioTracks : undefined,
+    chaptersTrack: chaptersTrack || undefined,
+    static_renditions: muxAsset.static_renditions?.files || undefined,
+    is_live: muxAsset.is_live || undefined,
+    live_stream_id: muxAsset.live_stream_id || undefined,
+    meta: muxAsset.meta || undefined,
+    passthrough: muxAsset.passthrough || undefined,
+  };
+
+  return buildAssetMirror(values);
+}
 
 function getCredentials(context: any) {
   const { muxAccessTokenId, muxAccessTokenSecret } = context.appInstallationParameters;
@@ -178,14 +257,23 @@ async function runPendingActionsFromEntry(
           try {
             switch (createAction.type) {
               case 'playback':
+                // A create with no policy POSTs `{}`, which is Mux's choice of policy rather than
+                // the editor's — on an asset whose playback may have just been deleted by a
+                // moderation run, that is the wrong thing to guess. Dropped rather than retried:
+                // no number of publishes adds a policy to an action that never had one. The delete
+                // side had the same hole with a missing `id`, fixed where the action is queued.
+                if (!createAction.data?.policy) {
+                  console.warn('Skipping playback create with no policy:', createAction);
+                  break;
+                }
                 await createMuxPlaybackId(
                   pendingActions.assetId,
-                  createAction.data?.policy,
+                  createAction.data.policy,
                   context
                 );
                 break;
               default:
-                console.warn(`Unsupported deleteAction type: ${createAction.type}`);
+                console.warn(`Unsupported createAction type: ${createAction.type}`);
             }
           } catch (err) {
             console.error(`Error in create of Mux for ${fieldKey}:`, err);
@@ -233,7 +321,7 @@ async function runPendingActionsFromEntry(
   return failedPendingActions;
 }
 
-async function fetchMuxAsset(assetId: string, context: any) {
+async function fetchMuxAsset(assetId: string, context: any): Promise<MuxAsset | undefined> {
   const res = await muxFetch(getCredentials(context), 'GET', `/video/v1/assets/${assetId}`);
   if (res.status === 404) {
     return undefined;
@@ -286,50 +374,17 @@ async function updateEntryFieldWithMuxAsset(
             continue;
           }
 
-          const publicPlayback = Array.isArray(muxAsset.playback_ids)
-            ? muxAsset.playback_ids.find((p: any) => p.policy === 'public')
-            : undefined;
-          const signedPlayback = Array.isArray(muxAsset.playback_ids)
-            ? muxAsset.playback_ids.find((p: any) => p.policy === 'signed')
-            : undefined;
-          const drmPlayback = Array.isArray(muxAsset.playback_ids)
-            ? muxAsset.playback_ids.find((p: any) => p.policy === 'drm')
-            : undefined;
+          const assetMirror = buildMuxAssetMirror(muxAsset);
 
-          const audioTracks = muxAsset.tracks?.filter((t: any) => t.type === 'audio');
-          const captions = muxAsset.tracks?.filter((t: any) => t.type === 'text');
-
-          let updatedField: any = {
-            version: 1,
-            uploadId: muxAsset.upload_id || undefined,
-            assetId: muxAsset.id,
-            playbackId: publicPlayback?.id || undefined,
-            signedPlaybackId: signedPlayback?.id || undefined,
-            drmPlaybackId: drmPlayback?.id || undefined,
-            ready: muxAsset.status === 'ready',
-            ratio: muxAsset.aspect_ratio || undefined,
-            max_stored_resolution: muxAsset.max_stored_resolution || undefined,
-            max_stored_frame_rate: muxAsset.max_stored_frame_rate || undefined,
-            duration: muxAsset.duration || undefined,
-            audioOnly:
-              'max_stored_resolution' in muxAsset &&
-              muxAsset.max_stored_resolution === 'Audio only',
-            error: muxAsset.errors?.length ? muxAsset.errors[0].message : undefined,
-            created_at: muxAsset.created_at ? Number(muxAsset.created_at) : undefined,
-            ...(captions?.length && { captions }),
-            ...(audioTracks?.length && { audioTracks }),
-            static_renditions: muxAsset.static_renditions?.files || undefined,
-            is_live: muxAsset.is_live || undefined,
-            live_stream_id: muxAsset.live_stream_id || undefined,
-            meta: muxAsset.meta || undefined,
-            passthrough: muxAsset.passthrough || undefined,
-            ...(entriesWithFailedActions[fieldId] && {
-              pendingActions: entriesWithFailedActions[fieldId],
-            }),
-          };
-
+          // One merged object per locale, built from *that locale's* existing value. The previous
+          // version of this loop assigned a single shared object to every locale, so per-locale
+          // data was flattened as well as overwritten.
           for (const locale of Object.keys(entryFromContentful.fields[fieldId])) {
-            entryFromContentful.fields[fieldId][locale] = updatedField;
+            entryFromContentful.fields[fieldId][locale] = mergeMuxAssetIntoField(
+              entryFromContentful.fields[fieldId][locale],
+              assetMirror,
+              entriesWithFailedActions[fieldId]
+            );
           }
         } catch (err) {
           console.error(`Error updating field ${fieldId} with assetId ${assetId}:`, err);
@@ -346,42 +401,53 @@ async function updateEntryFieldWithMuxAsset(
   console.log('Entry updated and published with fresh Mux data');
 }
 
-function findPendingActionsInMuxFields(fields: any): Record<string, any> {
+export function findPendingActionsInMuxFields(fields: any): Record<string, any> {
   const pendingActionsMap: Record<string, any> = {};
   if (!fields || typeof fields !== 'object') {
     return pendingActionsMap;
   }
 
   for (const [fieldKey, fieldValue] of Object.entries(fields)) {
-    if (fieldValue && typeof fieldValue === 'object') {
-      const firstLocaleValue = Object.values(fieldValue)[0];
-      if (
-        firstLocaleValue &&
-        typeof firstLocaleValue === 'object' &&
-        'assetId' in firstLocaleValue &&
-        'pendingActions' in firstLocaleValue
-      ) {
-        const pendingActions = firstLocaleValue.pendingActions;
-        const filteredActions: any = {};
-        let hasValidAction = false;
-        ['delete', 'create', 'update'].forEach((actionType) => {
-          if (Array.isArray(pendingActions[actionType])) {
-            const filtered = pendingActions[actionType].filter(
-              (action: any) => typeof action.retry === 'number' && action.retry <= 3
-            );
-            if (filtered.length > 0) {
-              filteredActions[actionType] = filtered;
-              hasValidAction = true;
-            }
-          }
-        });
-        if (hasValidAction) {
-          pendingActionsMap[fieldKey] = {
-            ...filteredActions,
-            assetId: firstLocaleValue.assetId,
-          };
-        }
+    if (!fieldValue || typeof fieldValue !== 'object') continue;
+
+    // Only the first locale is read. That is a known limitation, not an oversight: a localized
+    // Mux field can hold pending actions in a non-default locale that have never run, and
+    // scanning every locale would make the next publish suddenly execute them — including asset
+    // deletes an editor queued long ago and forgot about. Robots does not need this scan to be
+    // fixed (only the *write* side of this function had to change), so the behaviour is left
+    // exactly as it is rather than shipping a destructive surprise to installs that already
+    // exist. Worth fixing on its own, with its own migration thinking.
+    const firstLocaleValue = Object.values(fieldValue)[0] as Record<string, any> | undefined;
+    if (!firstLocaleValue || typeof firstLocaleValue !== 'object') continue;
+    if (!('assetId' in firstLocaleValue)) continue;
+
+    const pendingActions = firstLocaleValue.pendingActions;
+    // Guarded rather than `'pendingActions' in value`: the key can legitimately be present and
+    // `null` — `removePendingActionsFromAllLocalesAndUpdate` writes exactly that, and an entry
+    // can be published in between this function's two cycles. Indexing `null` here would throw
+    // from outside the handler's try block and fail the whole event.
+    if (!pendingActions || typeof pendingActions !== 'object') continue;
+
+    const filteredActions: any = {};
+    let hasValidAction = false;
+
+    for (const actionType of ['delete', 'create', 'update']) {
+      if (!Array.isArray(pendingActions[actionType])) continue;
+      const filtered = pendingActions[actionType].filter(
+        // `retry` counts attempts already made; > 3 means we've given up on it.
+        (action: any) => typeof action.retry === 'number' && action.retry <= 3
+      );
+      if (filtered.length > 0) {
+        filteredActions[actionType] = filtered;
+        hasValidAction = true;
       }
+    }
+
+    if (hasValidAction) {
+      pendingActionsMap[fieldKey] = {
+        ...filteredActions,
+        assetId: firstLocaleValue.assetId,
+      };
     }
   }
 
@@ -393,7 +459,7 @@ async function createMuxPlaybackId(assetId: string, policy: string, context: any
   console.log(`Creating playbackId for assetId ${assetId} with policy ${policy}`);
   const { muxDRMConfigurationId } = context.appInstallationParameters;
 
-  const body: any = { policy };
+  const body: { policy: string; drm_configuration_id?: string } = { policy };
   if (policy === 'drm') {
     body.drm_configuration_id = muxDRMConfigurationId;
   }
@@ -409,7 +475,7 @@ async function createMuxPlaybackId(assetId: string, policy: string, context: any
   }
 }
 
-async function updateMuxAsset(assetId: string, data: any, context: any) {
+async function updateMuxAsset(assetId: string, data: MuxAssetMetaUpdate, context: any) {
   console.log(`Updating Mux asset for assetId ${assetId} with data ${data}`);
 
   const requestBody = JSON.stringify({

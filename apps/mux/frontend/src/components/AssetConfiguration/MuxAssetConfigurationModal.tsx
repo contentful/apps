@@ -5,8 +5,12 @@ import { PlaybackPolicySelector } from './PlaybackPolicySelector';
 import { CaptionsConfiguration, CaptionsConfig } from './CaptionsConfiguration';
 import Mp4RenditionsConfiguration, { Mp4RenditionsConfig } from './Mp4RenditionsConfiguration';
 import MetadataConfiguration, { MetadataConfig } from './MetadataConfiguration';
+import AutomationConfiguration from './AutomationConfiguration';
 import { MuxContentfulObject, PolicyType } from '../../util/types';
 import { FieldExtensionSDK } from '@contentful/app-sdk';
+import { MuxApiService } from '../../util/muxApi';
+import { useRobotsDirectiveNames } from '../Robots/useRobotsDirectiveNames';
+import FieldModal from '../FieldModal';
 
 // Audio file extensions for detection
 const AUDIO_EXTENSIONS = [
@@ -49,6 +53,12 @@ export interface ModalData {
   captionsConfig: CaptionsConfig;
   mp4Config: Mp4RenditionsConfig;
   metadataConfig: MetadataConfig;
+  /**
+   * Robots directives to attach at asset creation, pre-filled from the installation parameters
+   * and deselectable per upload by anyone who can run Robots. Empty means no automation on this
+   * upload.
+   */
+  directiveIds: string[];
 }
 
 interface MuxAssetConfigurationModalProps {
@@ -58,10 +68,18 @@ interface MuxAssetConfigurationModalProps {
   installationParams: {
     muxEnableSignedUrls: boolean;
     muxEnableDRM?: boolean;
+    muxDefaultDirectiveIds?: string[];
   };
   isEditMode?: boolean;
   asset?: MuxContentfulObject;
   sdk: FieldExtensionSDK;
+  /**
+   * Whether this person may change which directives run on the upload. When not, the configured
+   * defaults are listed read-only and still attached. See `canRunRobots`, ADR-0016.
+   */
+  canChooseDirectives: boolean;
+  /** Only used to put names on the configured Robots directives. Absent until the app has one. */
+  muxApi?: MuxApiService;
   /** File being uploaded (from drag & drop or file picker) */
   file?: File | null;
   /** URL for remote upload */
@@ -76,15 +94,29 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
   isEditMode = false,
   asset,
   sdk,
+  canChooseDirectives,
+  muxApi,
   file = null,
   pendingUploadURL = null,
 }) => {
   // Use explicit defaults to handle undefined values from SDK
   const muxEnableSignedUrls = installationParams.muxEnableSignedUrls ?? false;
   const muxEnableDRM = installationParams.muxEnableDRM ?? false;
+  const defaultDirectiveIds = useMemo(
+    () => installationParams.muxDefaultDirectiveIds ?? [],
+    [installationParams.muxDefaultDirectiveIds]
+  );
 
   // Detect if the input is an audio-only file
   const isAudioOnly = useMemo(() => isAudioFile(file, pendingUploadURL), [file, pendingUploadURL]);
+
+  // Resolved only for a real upload — editing an existing asset creates nothing, so it has no
+  // Automation section to label. Not awaited anywhere: the ids render until the names arrive.
+  const { names: directiveNames, missingIds: missingDirectiveIds } = useRobotsDirectiveNames(
+    muxApi,
+    defaultDirectiveIds,
+    !isEditMode
+  );
 
   // DRM is disabled for audio files
   const effectiveDRMEnabled = muxEnableDRM && !isAudioOnly;
@@ -116,7 +148,28 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
         externalId: undefined,
       },
     },
+    directiveIds: defaultDirectiveIds,
   });
+
+  // The configured defaults arrive from installation parameters, which are not available on the
+  // very first render in every location, so re-seed the selection when they turn up.
+  useEffect(() => {
+    setModalData((prev) =>
+      prev.directiveIds.length === 0 && defaultDirectiveIds.length > 0
+        ? { ...prev, directiveIds: defaultDirectiveIds }
+        : prev
+    );
+  }, [defaultDirectiveIds]);
+
+  // Those parameters are a snapshot from when this page loaded, and can name a directive Mux no
+  // longer has. It cannot run, so it is not attached — as soon as a complete listing says so.
+  useEffect(() => {
+    if (missingDirectiveIds.length === 0) return;
+    setModalData((prev) => {
+      const kept = prev.directiveIds.filter((id) => !missingDirectiveIds.includes(id));
+      return kept.length === prev.directiveIds.length ? prev : { ...prev, directiveIds: kept };
+    });
+  }, [missingDirectiveIds]);
 
   // Update policy when audio detection changes (e.g., when modal opens with new file)
   useEffect(() => {
@@ -159,6 +212,9 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
             externalId: asset.meta?.external_id,
           },
         },
+        // Editing an existing asset creates nothing, so there is no `new_asset_settings` for a
+        // directive to ride on. Ad-hoc runs live in the Robots tab instead.
+        directiveIds: [],
       });
     }
   }, [isEditMode, asset]);
@@ -182,7 +238,7 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
   const isFormValid = Object.values(validationState).every((isValid) => isValid);
 
   return (
-    <Modal isShown={isShown} onClose={onClose}>
+    <FieldModal isShown={isShown} onClose={onClose}>
       <Modal.Header
         title={isEditMode ? 'Edit Mux Asset' : 'Configure Mux Upload'}
         onClose={onClose}
@@ -266,6 +322,17 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
                   }
                 />
               </Accordion.Item>
+
+              <Accordion.Item title="Automation">
+                <AutomationConfiguration
+                  availableDirectiveIds={defaultDirectiveIds}
+                  selectedDirectiveIds={modalData.directiveIds}
+                  missingDirectiveIds={missingDirectiveIds}
+                  directiveNames={directiveNames}
+                  isReadOnly={!canChooseDirectives}
+                  onChange={(directiveIds) => setModalData((prev) => ({ ...prev, directiveIds }))}
+                />
+              </Accordion.Item>
             </>
           )}
         </Accordion>
@@ -283,7 +350,7 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
           {isEditMode ? 'Update' : 'Upload'}
         </Button>
       </Modal.Controls>
-    </Modal>
+    </FieldModal>
   );
 };
 

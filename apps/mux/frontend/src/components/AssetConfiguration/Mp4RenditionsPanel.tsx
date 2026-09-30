@@ -15,14 +15,21 @@ interface Mp4RenditionsPanelProps extends RenditionActionsProps {
 const mapRendition = (
   files: Array<StaticRendition> | undefined,
   type: ResolutionType,
-  baseStaticRenditionURL: string
+  baseStaticRenditionURL: string | undefined
 ): RenditionInfo => {
   const file = files?.find((f) => f.resolution === type);
   let response: RenditionInfo = { status: 'none' };
 
   if (file) {
     if (file.status === 'ready')
-      response = { status: 'ready', url: `${baseStaticRenditionURL}/${file.name}`, id: file.id };
+      response = {
+        status: 'ready',
+        // No playback ID, no download URL. A rendition can outlive every playback ID on the asset
+        // — a `moderate` directive deletes those and leaves the MP4s — and the list renders a "-"
+        // for a missing URL, which is better than a link to `stream.mux.com/undefined`.
+        url: baseStaticRenditionURL ? `${baseStaticRenditionURL}/${file.name}` : undefined,
+        id: file.id,
+      };
     else if (file.status === 'preparing') response = { status: 'inProgress', id: file.id };
     else if (file.status === 'skipped') response = { status: 'skipped', id: file.id };
     else response = { status: 'none', id: file.id };
@@ -37,9 +44,8 @@ const Mp4RenditionsPanel: FC<Mp4RenditionsPanelProps> = ({
   onUndoDeleteRendition,
   isRenditionPendingDelete,
 }) => {
-  const baseStaticRenditionURL = `https://stream.mux.com/${
-    asset.playbackId ?? asset.signedPlaybackId
-  }`;
+  const playbackId = asset.playbackId ?? asset.signedPlaybackId;
+  const baseStaticRenditionURL = playbackId ? `https://stream.mux.com/${playbackId}` : undefined;
   const files = asset?.static_renditions || [];
   const highest = mapRendition(files, 'highest', baseStaticRenditionURL);
   const audioOnly = mapRendition(files, 'audio-only', baseStaticRenditionURL);

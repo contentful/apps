@@ -14,6 +14,8 @@ import {
 import MuxLogoSvg from '../images/mux-logo.svg';
 import './config.css';
 import ApiClient from '../util/apiClient';
+import { ROBOTS_ALLOW_EVERYONE_HELP_TEXT, ROBOTS_ALLOW_EVERYONE_LABEL } from '../util/robotsAccess';
+import RobotsConfiguration from '../components/RobotsConfiguration';
 
 import {
   Checkbox,
@@ -43,10 +45,22 @@ interface IParameters {
   muxDomain?: string;
   muxEnableDRM?: boolean;
   muxDRMConfigurationId?: string;
+  /**
+   * Robots directives attached to every asset this app creates.
+   *
+   * Duplicated with `InstallationParams` in `util/types.tsx` — the two shapes describe the same
+   * stored object from the config screen's and the field editor's side respectively, and were
+   * already duplicated before this key.
+   */
+  muxDefaultDirectiveIds?: string[];
+  /** Lets non-admins run Robots. Unset means admins only — see `canRunRobots`, ADR-0016. */
+  muxRobotsAllowEveryone?: boolean;
 }
 
 interface IState {
   parameters: IParameters;
+  /** As loaded, so the Robots section can tell when the token has been replaced. */
+  savedParameters: IParameters;
   contentTypes: ContentType[];
   compatibleFields: CompatibleFields;
   selectedFields: SelectedFields;
@@ -61,6 +75,7 @@ class Config extends React.Component<ConfigProps, IState> {
     super(props);
     this.state = {
       parameters: {},
+      savedParameters: {},
       contentTypes: [],
       compatibleFields: {},
       selectedFields: {},
@@ -94,6 +109,7 @@ class Config extends React.Component<ConfigProps, IState> {
       // We default to an empty object in this case.
       {
         parameters: parameters || {},
+        savedParameters: parameters || {},
         compatibleFields,
         contentTypes: contentTypesRes.items as ContentType[],
         selectedFields,
@@ -224,6 +240,8 @@ class Config extends React.Component<ConfigProps, IState> {
         muxDomain,
         muxEnableDRM,
         muxDRMConfigurationId,
+        muxDefaultDirectiveIds,
+        muxRobotsAllowEveryone,
       },
       contentTypes,
       compatibleFields,
@@ -420,6 +438,47 @@ class Config extends React.Component<ConfigProps, IState> {
                 </FormControl.HelpText>
               </FormControl>
             )}
+          </Form>
+          <hr className="config-splitter" />
+          <Form>
+            <Heading marginBottom="none">Robots: automatic AI workflows</Heading>
+            <Box marginTop="spacingM">
+              <RobotsConfiguration
+                tokenId={muxAccessTokenId}
+                tokenSecret={muxAccessTokenSecret}
+                savedTokenId={this.state.savedParameters.muxAccessTokenId}
+                savedTokenSecret={this.state.savedParameters.muxAccessTokenSecret}
+                directiveIds={muxDefaultDirectiveIds ?? []}
+                onChange={(ids) =>
+                  this.setState({
+                    parameters: {
+                      ...this.state.parameters,
+                      // Stored as `undefined` rather than `[]` when empty, so an installation that
+                      // never touches Robots keeps exactly the parameters it has today.
+                      muxDefaultDirectiveIds: ids.length > 0 ? ids : undefined,
+                    },
+                  })
+                }
+              />
+            </Box>
+            <Box marginTop="spacingL">
+              <Subheading>Who can run Robots</Subheading>
+              <Checkbox
+                id="mux-robots-allow-everyone"
+                helpText={ROBOTS_ALLOW_EVERYONE_HELP_TEXT}
+                name="mux-robots-allow-everyone"
+                isChecked={muxRobotsAllowEveryone === true}
+                onChange={(e) =>
+                  this.setState({
+                    parameters: {
+                      ...this.state.parameters,
+                      muxRobotsAllowEveryone: (e.target as HTMLInputElement).checked,
+                    },
+                  })
+                }>
+                {ROBOTS_ALLOW_EVERYONE_LABEL}
+              </Checkbox>
+            </Box>
           </Form>
           <hr className="config-splitter" />
           <Checkbox

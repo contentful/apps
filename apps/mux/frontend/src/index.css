@@ -51,30 +51,35 @@ body {
   margin-left: 10px;
 }
 
+/*
+ * The tab strip, which is wider than the field area it sits in.
+ *
+ * Eight tabs come to roughly 860px and the entry editor's field column is routinely half that,
+ * so this scrolls horizontally rather than letting F36 squeeze the labels. `flex: 0 0 auto` is
+ * what stops the squeeze; without it the tabs shrink and the longest labels wrap or clip.
+ *
+ * There used to be a `mask-image` gradient here fading the last 20% of the strip to transparent.
+ * It was meant to hint at more tabs, and it did three things instead: it faded whichever tab sat
+ * on the boundary to unreadable *mid-word* — which is how "Data" and "Metadata" were being
+ * reported as cut off — it did so at every width, including widths where nothing overflowed and
+ * there was empty space beside the last tab, and it hid the scrollbar underneath itself, so the
+ * one honest signal that the strip scrolls was the one thing it erased. An affordance that lies
+ * about whether there is anything to scroll to is worse than none.
+ *
+ * The scrollbar is the affordance now. It is styled thin and always visible rather than left to
+ * the platform's overlay behaviour, because an overlay scrollbar appears only once you are
+ * already scrolling — and it appears only when there is something to scroll, which is exactly
+ * the condition the gradient could not express.
+ */
 .tabs-scroll {
   overflow-x: auto;
   white-space: nowrap;
   scrollbar-width: thin;
-  position: relative;
-  mask-image: linear-gradient(to right, black 80%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to right, black 80%, transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0%, black 5%, black 80%, transparent 100%);
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    black 5%,
-    black 80%,
-    transparent 100%
-  );
+  scrollbar-color: rgba(0, 0, 0, 0.25) rgba(0, 0, 0, 0.05);
 }
 
 .tabs-scroll > [role='tab'] {
   flex: 0 0 auto;
-}
-
-.tabs-scroll:not(:hover) {
-  mask-image: linear-gradient(to right, black 80%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to right, black 80%, transparent 100%);
 }
 
 .tabs-scroll::-webkit-scrollbar {
@@ -82,72 +87,10 @@ body {
 }
 
 .tabs-scroll::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.25);
   border-radius: 4px;
 }
 
 .tabs-scroll::-webkit-scrollbar-track {
   background-color: rgba(0, 0, 0, 0.05);
-}
-
-.tab-nowrap {
-  flex: 0 0 auto;
-}
-
-.tabs-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.tabs-scroll-button {
-  position: absolute;
-  z-index: 1;
-  background: white;
-  border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.tabs-container:hover .tabs-scroll-button {
-  opacity: 1;
-}
-
-.tabs-scroll-button-left {
-  left: 0;
-}
-
-.tabs-scroll-button-right {
-  right: 0;
-}
-
-.tabs-scroll-button:disabled {
-  opacity: 0;
-  cursor: default;
-}
-
-.tabs-scroll-button-icon {
-  width: 12px;
-  height: 12px;
-  border-style: solid;
-  border-width: 2px 2px 0 0;
-  border-color: #6b7280;
-}
-
-.tabs-scroll-button-left .tabs-scroll-button-icon {
-  transform: rotate(-135deg);
-  margin-left: 4px;
-}
-
-.tabs-scroll-button-right .tabs-scroll-button-icon {
-  transform: rotate(45deg);
-  margin-right: 4px;
 }

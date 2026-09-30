@@ -79,19 +79,31 @@ const TrackList: React.FC<TrackListProps> = ({
                 {type === 'caption' && (
                   <>
                     <Table.Cell>
-                      {track.type === 'text' && track.status === 'ready' && (
-                        <TextLink
-                          href={getDownloadUrl(track, 'vtt')}
-                          target="_blank"
-                          rel="noopener noreferrer">
-                          Download
-                        </TextLink>
-                      )}
+                      {track.type === 'text' &&
+                        track.status === 'ready' &&
+                        // A track is served from a playback ID, so an asset that has lost all of
+                        // them has no URL to offer. Saying why beats a link that goes nowhere.
+                        (getDownloadUrl(track, 'vtt') ? (
+                          <TextLink
+                            href={getDownloadUrl(track, 'vtt')}
+                            target="_blank"
+                            rel="noopener noreferrer">
+                            Download
+                          </TextLink>
+                        ) : (
+                          <Tooltip
+                            content="This video has no playback ID, so its caption file cannot be downloaded"
+                            placement="top">
+                            <TextLink isDisabled href="#" onClick={(e) => e.preventDefault()}>
+                              Download
+                            </TextLink>
+                          </Tooltip>
+                        ))}
                     </Table.Cell>
                     <Table.Cell>
                       {track.type === 'text' &&
                         track.status === 'ready' &&
-                        (track.text_source === 'generated_vod' ? (
+                        (track.text_source === 'generated_vod' && getDownloadUrl(track, 'txt') ? (
                           <TextLink
                             href={getDownloadUrl(track, 'txt')}
                             target="_blank"

@@ -9,10 +9,10 @@
   "scripts": {
     "deploy": "npm run build && npm run upload",
     "build": "npm run build:functions",
-    "upload": "contentful-app-scripts upload --ci --bundle-dir ./build",
     "build:functions": "contentful-app-scripts build-functions --ci",
     "test": "vitest",
-    "test:ci": "vitest run"
+    "test:ci": "CI=true vitest run",
+    "upload": "contentful-app-scripts upload --ci --bundle-dir ./build"
   },
   "eslintConfig": {
     "extends": "react-app"
