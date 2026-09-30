@@ -1,10 +1,10 @@
 import * as nodeFetch from 'node-fetch';
 import { default as sharp } from 'sharp';
-import { areEqualColors, constrainDimensions, toDimensions, toRGBA, toSharp } from '../utils';
+import { areEqualColors, constrainDimensions, RGBA, toDimensions, toRGBA, toSharp } from '../utils';
 import { Dimensions } from '../types';
 
-export const ERASE_COLOR: sharp.RGBA = { r: 231, g: 235, b: 238 };
-export const BAR_COLOR: sharp.RGBA = { r: 0, g: 0, b: 0, alpha: 1 };
+export const ERASE_COLOR: RGBA = { r: 231, g: 235, b: 238 };
+export const BAR_COLOR: RGBA = { r: 0, g: 0, b: 0, alpha: 1 };
 export const MAX_SIDE = 1024;
 
 interface PreparedImageData {
@@ -91,13 +91,12 @@ export class PrepareImageForEdit {
   }
 
   private async replaceColorWithTransparent(
-    colorToReplace: sharp.RGBA,
+    colorToReplace: RGBA,
     sharpImage: sharp.Sharp
   ): Promise<sharp.Sharp> {
     const { data: imagePixels, info } = await sharpImage
       .ensureAlpha()
       .raw()
-      .pipe(this.maskImage)
       .toBuffer({ resolveWithObject: true });
 
     for (let i = 0; i < imagePixels.length; i += 4) {
