@@ -30,7 +30,7 @@ async function upsertAppEventSubscription() {
       appDefinitionId,
     },
     {
-      topics: ['Entry.publish'],
+      topics: ['Entry.publish', 'Entry.auto_save'],
       functions: {
         handler: {
           sys: {
@@ -43,7 +43,7 @@ async function upsertAppEventSubscription() {
     }
   );
 
-  console.log('Subscription to Entry.publish successfully upserted');
+  console.log('Subscription to Entry.publish, Entry.auto_save successfully upserted');
   console.dir(eventSubscription, { depth: 5 });
 }
 
