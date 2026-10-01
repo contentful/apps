@@ -67,4 +67,16 @@ export const TASK_LINK_FIELD_IDS = {
   assigneeName: 'assigneeName',
   dueDate: 'dueDate',
   lastSyncedAt: 'lastSyncedAt',
+  lastAutosaveCommentAt: 'lastAutosaveCommentAt',
+} as const;
+
+// Settings for the "post a comment in Asana when a linked entry is autosaved" app event handler.
+// Autosave fires per-field-blur, not per-keystroke, but a single editing session can still blur
+// several fields in quick succession, so a cooldown prevents one comment per field. The cooldown
+// is intentionally long (vs. a "debounce until quiet" design) because Functions/App Events only
+// run in reaction to an event - there's no scheduled check to fire once editing goes quiet, so we
+// comment on the first autosave of a session and then suppress further comments for the cooldown.
+export const AUTOSAVE_COMMENT_CONFIG = {
+  cooldownMs: 60 * 60 * 1000, // 1 hour
+  commentText: 'This entry was edited in Contentful.',
 } as const;

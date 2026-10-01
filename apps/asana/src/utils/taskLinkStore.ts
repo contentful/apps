@@ -30,16 +30,109 @@ async function getDefaultLocale(cma: any): Promise<string> {
   }
 }
 
+const TASK_LINK_FIELD_DEFINITIONS = [
+  {
+    id: TASK_LINK_FIELD_IDS.contentfulEntryId,
+    name: 'Contentful Entry ID',
+    type: 'Symbol',
+    required: true,
+  },
+  {
+    id: TASK_LINK_FIELD_IDS.contentTypeId,
+    name: 'Contentful Content Type ID',
+    type: 'Symbol',
+    required: false,
+  },
+  {
+    id: TASK_LINK_FIELD_IDS.taskGid,
+    name: 'Asana Task GID',
+    type: 'Symbol',
+    required: true,
+  },
+  {
+    id: TASK_LINK_FIELD_IDS.taskUrl,
+    name: 'Asana Task URL',
+    type: 'Symbol',
+    required: false,
+  },
+  {
+    id: TASK_LINK_FIELD_IDS.taskName,
+    name: 'Asana Task Name',
+    type: 'Symbol',
+    required: false,
+  },
+  {
+    id: TASK_LINK_FIELD_IDS.taskDescription,
+    name: 'Asana Task Description',
+    type: 'Text',
+    required: false,
+  },
+  {
+    id: TASK_LINK_FIELD_IDS.status,
+    name: 'Asana Task Status',
+    type: 'Symbol',
+    required: false,
+  },
+  {
+    id: TASK_LINK_FIELD_IDS.assigneeName,
+    name: 'Asana Assignee Name',
+    type: 'Symbol',
+    required: false,
+  },
+  {
+    id: TASK_LINK_FIELD_IDS.dueDate,
+    name: 'Asana Due Date',
+    type: 'Symbol',
+    required: false,
+  },
+  {
+    id: TASK_LINK_FIELD_IDS.lastSyncedAt,
+    name: 'Last Synced At',
+    type: 'Symbol',
+    required: false,
+  },
+  {
+    id: TASK_LINK_FIELD_IDS.lastAutosaveCommentAt,
+    name: 'Last Autosave Comment At',
+    type: 'Symbol',
+    required: false,
+  },
+] as const;
+
 /**
  * Ensures the "Asana Integration (do not delete)" content type exists, creating and publishing
- * it if necessary. Safe to call repeatedly (e.g. on every configure).
+ * it if necessary, and patches in any fields that were added to the schema after an installation
+ * already created it (e.g. `lastAutosaveCommentAt`). Safe to call repeatedly (e.g. on every
+ * configure, or before every autosave comment check).
  */
 export async function ensureTaskLinkContentType(cma: any): Promise<void> {
+  let existingContentType: { fields?: Array<{ id: string }> } | undefined;
   try {
-    await cma.contentType.get({ contentTypeId: TASK_LINK_CONTENT_TYPE_ID });
-    return;
+    existingContentType = await cma.contentType.get({ contentTypeId: TASK_LINK_CONTENT_TYPE_ID });
   } catch {
     // Content type does not exist yet, fall through to create it.
+  }
+
+  if (existingContentType) {
+    const existingFields = existingContentType.fields ?? [];
+    const existingFieldIds = new Set(existingFields.map((field) => field.id));
+    const missingFields = TASK_LINK_FIELD_DEFINITIONS.filter(
+      (field) => !existingFieldIds.has(field.id)
+    );
+
+    if (missingFields.length === 0) {
+      return;
+    }
+
+    const updatedContentType = await cma.contentType.update(
+      { contentTypeId: TASK_LINK_CONTENT_TYPE_ID },
+      {
+        ...existingContentType,
+        fields: [...existingFields, ...missingFields],
+      }
+    );
+    await cma.contentType.publish({ contentTypeId: TASK_LINK_CONTENT_TYPE_ID }, updatedContentType);
+    return;
   }
 
   const contentType = await cma.contentType.createWithId(
@@ -49,68 +142,7 @@ export async function ensureTaskLinkContentType(cma: any): Promise<void> {
       description:
         'Created automatically by the Asana app to store links between Contentful entries and Asana tasks. Do not delete or modify manually.',
       displayField: TASK_LINK_FIELD_IDS.taskName,
-      fields: [
-        {
-          id: TASK_LINK_FIELD_IDS.contentfulEntryId,
-          name: 'Contentful Entry ID',
-          type: 'Symbol',
-          required: true,
-        },
-        {
-          id: TASK_LINK_FIELD_IDS.contentTypeId,
-          name: 'Contentful Content Type ID',
-          type: 'Symbol',
-          required: false,
-        },
-        {
-          id: TASK_LINK_FIELD_IDS.taskGid,
-          name: 'Asana Task GID',
-          type: 'Symbol',
-          required: true,
-        },
-        {
-          id: TASK_LINK_FIELD_IDS.taskUrl,
-          name: 'Asana Task URL',
-          type: 'Symbol',
-          required: false,
-        },
-        {
-          id: TASK_LINK_FIELD_IDS.taskName,
-          name: 'Asana Task Name',
-          type: 'Symbol',
-          required: false,
-        },
-        {
-          id: TASK_LINK_FIELD_IDS.taskDescription,
-          name: 'Asana Task Description',
-          type: 'Text',
-          required: false,
-        },
-        {
-          id: TASK_LINK_FIELD_IDS.status,
-          name: 'Asana Task Status',
-          type: 'Symbol',
-          required: false,
-        },
-        {
-          id: TASK_LINK_FIELD_IDS.assigneeName,
-          name: 'Asana Assignee Name',
-          type: 'Symbol',
-          required: false,
-        },
-        {
-          id: TASK_LINK_FIELD_IDS.dueDate,
-          name: 'Asana Due Date',
-          type: 'Symbol',
-          required: false,
-        },
-        {
-          id: TASK_LINK_FIELD_IDS.lastSyncedAt,
-          name: 'Last Synced At',
-          type: 'Symbol',
-          required: false,
-        },
-      ],
+      fields: TASK_LINK_FIELD_DEFINITIONS,
     }
   );
 
@@ -140,6 +172,7 @@ function toPrimaryTaskLink(entry: any, locale: string): PrimaryAsanaTaskLink | n
     assigneeName: getValue(TASK_LINK_FIELD_IDS.assigneeName) || undefined,
     dueDate: getValue(TASK_LINK_FIELD_IDS.dueDate) || undefined,
     lastSyncedAt: getValue(TASK_LINK_FIELD_IDS.lastSyncedAt) || undefined,
+    lastAutosaveCommentAt: getValue(TASK_LINK_FIELD_IDS.lastAutosaveCommentAt) || undefined,
   };
 }
 
@@ -220,6 +253,35 @@ export async function saveTaskLinkForEntry(
   const publishedEntry = await cma.entry.publish({ entryId: entry.sys.id }, entry);
 
   return toPrimaryTaskLink(publishedEntry, defaultLocale);
+}
+
+/**
+ * Records that an autosave-triggered comment was just posted for a linked entry, so the
+ * app event handler's cooldown check can see it on the next autosave. No-op if the entry
+ * isn't linked to a task (shouldn't happen - callers only invoke this after a successful post).
+ */
+export async function recordAutosaveComment(cma: any, entryId: string): Promise<void> {
+  const existingEntry = await findTaskLinkEntry(cma, entryId);
+  if (!existingEntry) {
+    return;
+  }
+
+  const defaultLocale = await getDefaultLocale(cma);
+  const updatedEntry = await cma.entry.update(
+    { entryId: existingEntry.sys.id },
+    {
+      ...existingEntry,
+      fields: {
+        ...existingEntry.fields,
+        [TASK_LINK_FIELD_IDS.lastAutosaveCommentAt]: {
+          ...existingEntry.fields[TASK_LINK_FIELD_IDS.lastAutosaveCommentAt],
+          [defaultLocale]: new Date().toISOString(),
+        },
+      },
+    }
+  );
+
+  await cma.entry.publish({ entryId: updatedEntry.sys.id }, updatedEntry);
 }
 
 /**

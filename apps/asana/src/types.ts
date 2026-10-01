@@ -136,6 +136,7 @@ export interface PrimaryAsanaTaskLink {
   assigneeName?: string;
   dueDate?: string;
   lastSyncedAt?: string;
+  lastAutosaveCommentAt?: string;
 }
 
 export interface PrimaryAsanaTaskLinkValue {
@@ -147,6 +148,7 @@ export interface PrimaryAsanaTaskLinkValue {
   assigneeName?: string;
   dueDate?: string;
   lastSyncedAt?: string;
+  lastAutosaveCommentAt?: string;
 }
 
 export interface CreateAsanaTaskRequest {

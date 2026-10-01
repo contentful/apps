@@ -21,6 +21,7 @@ describe('createAsanaTask', () => {
     contentType: {
       get: vi.fn(),
       createWithId: vi.fn(),
+      update: vi.fn(),
       publish: vi.fn(),
     },
     locale: {
@@ -70,7 +71,22 @@ describe('createAsanaTask', () => {
     // display field so title resolution keeps working.
     vi.mocked(mockCma.contentType.get).mockImplementation(async ({ contentTypeId }) => {
       if (contentTypeId === 'asanaTaskLink') {
-        return { sys: { id: 'asanaTaskLink' } } as never;
+        return {
+          sys: { id: 'asanaTaskLink' },
+          fields: [
+            { id: 'contentfulEntryId' },
+            { id: 'contentTypeId' },
+            { id: 'taskGid' },
+            { id: 'taskUrl' },
+            { id: 'taskName' },
+            { id: 'taskDescription' },
+            { id: 'status' },
+            { id: 'assigneeName' },
+            { id: 'dueDate' },
+            { id: 'lastSyncedAt' },
+            { id: 'lastAutosaveCommentAt' },
+          ],
+        } as never;
       }
       return { displayField: 'title' } as never;
     });
