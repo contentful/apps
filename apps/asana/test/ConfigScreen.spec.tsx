@@ -223,6 +223,8 @@ describe('Asana ConfigScreen', () => {
   it('tests the Asana API key and shows the result', async () => {
     await renderAndWaitReady();
 
+    fireEvent.click(screen.getByRole('button', { name: 'Add an API key' }));
+
     fireEvent.change(screen.getByLabelText('Asana API key'), {
       target: { value: 'shared-api-key' },
     });
@@ -241,6 +243,8 @@ describe('Asana ConfigScreen', () => {
 
   it('allows saving with only an API key, without an OAuth connection', async () => {
     await renderAndWaitReady();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add an API key' }));
 
     fireEvent.change(screen.getByLabelText('Asana API key'), {
       target: { value: 'shared-api-key' },

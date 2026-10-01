@@ -22,8 +22,12 @@ type EntryContext = {
   displayFieldId: string;
 };
 
-const ENTRY_TITLE_RETRY_ATTEMPTS = 8;
-const ENTRY_TITLE_RETRY_DELAY_MS = 1500;
+// Contentful Functions have a hard 30s wall-clock execution ceiling with no retry on timeout,
+// so this budget is intentionally kept well under that: ~18s of sleep here, leaving headroom
+// for the CMA lookups already happening each iteration plus the Asana task creation call that
+// still has to run after this loop finishes.
+const ENTRY_TITLE_RETRY_ATTEMPTS = 10;
+const ENTRY_TITLE_RETRY_DELAY_MS = 1800;
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));

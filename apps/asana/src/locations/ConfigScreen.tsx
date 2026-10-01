@@ -16,6 +16,7 @@ import {
   Spinner,
   Subheading,
   TextInput,
+  TextLink,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useEffect, useRef, useState } from 'react';
@@ -68,6 +69,7 @@ const ConfigScreen = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [apiKeyStatus, setApiKeyStatus] = useState<ConnectionStatus>(ConnectionStatus.None);
   const [apiKeyMessage, setApiKeyMessage] = useState('');
+  const [showApiKeySection, setShowApiKeySection] = useState(false);
   const popupWindowRef = useRef<Window | null>(null);
 
   const callAction = async <TResult,>(
@@ -386,6 +388,9 @@ const ConfigScreen = () => {
       setParameters(nextParameters);
       setIsInstalled(installed);
       setAvailableContentTypes(contentTypes);
+      if (nextParameters.asanaApiKey?.trim()) {
+        setShowApiKeySection(true);
+      }
 
       const selectedIds = nextParameters.enabledContentTypeIds?.length
         ? nextParameters.enabledContentTypeIds
@@ -521,39 +526,52 @@ const ConfigScreen = () => {
               Automations &amp; App Actions access (optional)
             </Subheading>
             <Paragraph marginBottom="spacingM">
-              Studio Automations and App Events run without a connected user, so they can&apos;t use
-              the OAuth connection above. Add a shared Asana Personal Access Token here to let those
+              Automations and App Events run without a connected user, so they can&apos;t use the
+              OAuth connection above. Add a shared Asana Personal Access Token here to let those
               trigger Asana actions (e.g. creating a task when an entry is published).
             </Paragraph>
 
-            <FormControl marginBottom="spacingM">
-              <FormControl.Label>Asana API key</FormControl.Label>
-              <TextInput
-                type="password"
-                value={parameters.asanaApiKey ?? ''}
-                onChange={(event) => handleApiKeyChange(event.target.value)}
-              />
-              <FormControl.HelpText>
-                Used only as a fallback when no connected user is available.
-              </FormControl.HelpText>
-            </FormControl>
+            <Box marginBottom={showApiKeySection ? 'spacingM' : 'none'}>
+              <TextLink
+                as="button"
+                type="button"
+                onClick={() => setShowApiKeySection((isVisible) => !isVisible)}>
+                {showApiKeySection ? 'Hide API key' : 'Add an API key'}
+              </TextLink>
+            </Box>
 
-            <Flex alignItems="center" gap="spacingM">
-              <Button
-                onClick={testApiKey}
-                isLoading={apiKeyStatus === ConnectionStatus.Testing}
-                isDisabled={
-                  apiKeyStatus === ConnectionStatus.Testing || !parameters.asanaApiKey?.trim()
-                }>
-                Test key
-              </Button>
-              {apiKeyStatus === ConnectionStatus.Success ? (
-                <Badge variant="positive">{apiKeyMessage}</Badge>
-              ) : null}
-              {apiKeyStatus === ConnectionStatus.Error ? (
-                <Badge variant="negative">{apiKeyMessage}</Badge>
-              ) : null}
-            </Flex>
+            {showApiKeySection ? (
+              <>
+                <FormControl marginBottom="spacingM">
+                  <FormControl.Label>Asana API key</FormControl.Label>
+                  <TextInput
+                    type="password"
+                    value={parameters.asanaApiKey ?? ''}
+                    onChange={(event) => handleApiKeyChange(event.target.value)}
+                  />
+                  <FormControl.HelpText>
+                    Used only as a fallback when no connected user is available.
+                  </FormControl.HelpText>
+                </FormControl>
+
+                <Flex alignItems="center" gap="spacingM">
+                  <Button
+                    onClick={testApiKey}
+                    isLoading={apiKeyStatus === ConnectionStatus.Testing}
+                    isDisabled={
+                      apiKeyStatus === ConnectionStatus.Testing || !parameters.asanaApiKey?.trim()
+                    }>
+                    Test key
+                  </Button>
+                  {apiKeyStatus === ConnectionStatus.Success ? (
+                    <Badge variant="positive">{apiKeyMessage}</Badge>
+                  ) : null}
+                  {apiKeyStatus === ConnectionStatus.Error ? (
+                    <Badge variant="negative">{apiKeyMessage}</Badge>
+                  ) : null}
+                </Flex>
+              </>
+            ) : null}
           </Card>
 
           <Card marginBottom="spacingL">
