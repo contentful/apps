@@ -47,7 +47,7 @@ import {
 } from './util/types';
 
 import './index.css';
-import { createClient, PlainClientAPI } from 'contentful-management';
+import { PlainClientAPI } from 'contentful-management';
 import {
   MuxApiService,
   MuxApiError,
@@ -257,16 +257,7 @@ export class App extends React.Component<AppProps, AppState> {
     const { muxAccessTokenId, muxAccessTokenSecret } = installation;
     this.userCanRunRobots = canRunRobots(isSpaceAdmin(this.props.sdk.user), installation);
 
-    this.cmaClient = createClient(
-      { apiAdapter: this.props.sdk.cmaAdapter },
-      {
-        type: 'plain',
-        defaults: {
-          environmentId: this.props.sdk.ids.environmentAlias ?? this.props.sdk.ids.environment,
-          spaceId: this.props.sdk.ids.space,
-        },
-      }
-    );
+    this.cmaClient = this.props.sdk.cma;
 
     const field = props.sdk.field.getValue();
 
