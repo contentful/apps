@@ -772,7 +772,6 @@ const Sidebar = () => {
                 return (
                   <Card
                     key={link.linkEntryId || 'primary'}
-                    title={link.taskName}
                     badge={
                       link.isPrimary ? (
                         <Badge variant="primary" size="small">
@@ -797,6 +796,9 @@ const Sidebar = () => {
                       </Menu.Item>,
                     ]}>
                     <Stack flexDirection="column" spacing="spacing2Xs" alignItems="flex-start">
+                      <Text fontWeight="fontWeightDemiBold" fontColor="gray900">
+                        {link.taskName}
+                      </Text>
                       {link.status || link.assigneeName ? (
                         <Text fontColor="gray600" fontSize="fontSizeS">
                           {[link.status, link.assigneeName].filter(Boolean).join(' · ')}
