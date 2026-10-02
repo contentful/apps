@@ -1,8 +1,11 @@
 import { SidebarAppSDK } from '@contentful/app-sdk';
 import {
+  Badge,
   Box,
   Button,
+  Card,
   FormControl,
+  Menu,
   Note,
   Paragraph,
   SectionHeading,
@@ -757,100 +760,82 @@ const Sidebar = () => {
       )}
 
       <Box>
-        <SectionHeading>Primary Asana Task</SectionHeading>
+        <SectionHeading>Asana Tasks</SectionHeading>
         {isLoadingTaskLink ? null : taskLink ? (
           <Stack flexDirection="column" spacing="spacingM" alignItems="stretch">
-            <Box>
-              <Text as="div" marginBottom="spacing2Xs" fontColor="gray600">
-                Linked task
-              </Text>
-              <Paragraph marginBottom="spacing2Xs">{taskLink.taskName}</Paragraph>
-              <TextLink href={taskLink.taskUrl} target="_blank" rel="noreferrer">
-                Open in Asana
-              </TextLink>
-            </Box>
             <Stack flexDirection="column" spacing="spacingS" alignItems="stretch">
+              {[taskLink, ...secondaryTasks].map((link) => {
+                const isUnlinkingThis = link.isPrimary
+                  ? isUnlinkingTask
+                  : unlinkingSecondaryId === link.linkEntryId;
+
+                return (
+                  <Card
+                    key={link.linkEntryId || 'primary'}
+                    title={link.taskName}
+                    badge={
+                      link.isPrimary ? (
+                        <Badge variant="primary" size="small">
+                          Primary
+                        </Badge>
+                      ) : undefined
+                    }
+                    actions={[
+                      <Menu.Item
+                        key="manage"
+                        onClick={() => void openTaskDetailsDialog(link)}
+                        isDisabled={isOpeningTaskDetails || isUnlinkingThis}>
+                        Manage task
+                      </Menu.Item>,
+                      <Menu.Item
+                        key="unlink"
+                        onClick={() =>
+                          void (link.isPrimary ? unlinkTask() : removeSecondaryTask(link))
+                        }
+                        isDisabled={isUnlinkingThis}>
+                        Unlink task
+                      </Menu.Item>,
+                    ]}>
+                    <Stack flexDirection="column" spacing="spacing2Xs" alignItems="flex-start">
+                      {link.status || link.assigneeName ? (
+                        <Text fontColor="gray600" fontSize="fontSizeS">
+                          {[link.status, link.assigneeName].filter(Boolean).join(' · ')}
+                        </Text>
+                      ) : null}
+                      <TextLink href={link.taskUrl} target="_blank" rel="noreferrer">
+                        Open in Asana
+                      </TextLink>
+                    </Stack>
+                  </Card>
+                );
+              })}
+            </Stack>
+
+            {isAddingSecondaryTask ? (
+              <Stack flexDirection="column" spacing="spacingM" alignItems="stretch">
+                {renderCreateOrLinkForm()}
+                <TextLink
+                  as="button"
+                  type="button"
+                  onClick={cancelAddingSecondaryTask}
+                  style={{ fontSize: '14px' }}>
+                  Cancel
+                </TextLink>
+              </Stack>
+            ) : (
               <Button
                 isFullWidth
                 variant="secondary"
-                onClick={() => void openTaskDetailsDialog(taskLink)}
-                isLoading={isOpeningTaskDetails}
-                isDisabled={isOpeningTaskDetails || isUnlinkingTask}>
-                Manage task
+                onClick={startAddingSecondaryTask}
+                isDisabled={!hasConnection || isCreatingTask || isLinkingTask}>
+                Add another task
               </Button>
-              <Button
-                isFullWidth
-                variant="negative"
-                onClick={unlinkTask}
-                isLoading={isUnlinkingTask}
-                isDisabled={isUnlinkingTask}>
-                Unlink task
-              </Button>
-            </Stack>
+            )}
           </Stack>
         ) : (
           renderCreateOrLinkForm()
         )}
       </Box>
-
-      {!isLoadingTaskLink && taskLink ? (
-        <Box>
-          <SectionHeading>Additional Tasks</SectionHeading>
-          {secondaryTasks.map((link) => (
-            <Box key={link.linkEntryId} marginBottom="spacingM">
-              <Stack flexDirection="column" spacing="spacingS" alignItems="stretch">
-                <Box>
-                  <Paragraph marginBottom="spacing2Xs">{link.taskName}</Paragraph>
-                  <TextLink href={link.taskUrl} target="_blank" rel="noreferrer">
-                    Open in Asana
-                  </TextLink>
-                </Box>
-                <Stack flexDirection="column" spacing="spacingXs" alignItems="stretch">
-                  <Button
-                    isFullWidth
-                    size="small"
-                    variant="secondary"
-                    onClick={() => void openTaskDetailsDialog(link)}
-                    isLoading={isOpeningTaskDetails}
-                    isDisabled={isOpeningTaskDetails || unlinkingSecondaryId === link.linkEntryId}>
-                    Manage task
-                  </Button>
-                  <Button
-                    isFullWidth
-                    size="small"
-                    variant="negative"
-                    onClick={() => void removeSecondaryTask(link)}
-                    isLoading={unlinkingSecondaryId === link.linkEntryId}
-                    isDisabled={unlinkingSecondaryId === link.linkEntryId}>
-                    Unlink task
-                  </Button>
-                </Stack>
-              </Stack>
-            </Box>
-          ))}
-
-          {isAddingSecondaryTask ? (
-            <Stack flexDirection="column" spacing="spacingM" alignItems="stretch">
-              {renderCreateOrLinkForm()}
-              <TextLink
-                as="button"
-                type="button"
-                onClick={cancelAddingSecondaryTask}
-                style={{ fontSize: '14px' }}>
-                Cancel
-              </TextLink>
-            </Stack>
-          ) : (
-            <Button
-              isFullWidth
-              variant="secondary"
-              onClick={startAddingSecondaryTask}
-              isDisabled={!hasConnection || isCreatingTask || isLinkingTask}>
-              Add another task
-            </Button>
-          )}
-        </Box>
-      ) : null}
     </Stack>
   );
 };
