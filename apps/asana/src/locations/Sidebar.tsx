@@ -656,7 +656,12 @@ const Sidebar = () => {
         </FormControl>
         {duplicateTaskWarning ? (
           <Box marginBottom="spacingS">
-            <Note variant="warning" title="A task with this name already exists">
+            <Note
+              variant="warning"
+              title="A task with this name already exists"
+              withCloseButton
+              closeButtonAriaLabel="Dismiss"
+              onClose={() => setDuplicateTaskWarning(null)}>
               <Paragraph marginBottom="spacingXs">
                 There&apos;s already an Asana task named &ldquo;
                 {duplicateTaskWarning.existingTaskName}&rdquo;
