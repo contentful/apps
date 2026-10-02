@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getAsanaAccessToken, getProjects } from '../../functions/asanaClient';
+import {
+  findDuplicateTaskByName,
+  getAsanaAccessToken,
+  getProjects,
+} from '../../functions/asanaClient';
 
 globalThis.fetch = vi.fn();
 
@@ -54,6 +58,89 @@ describe('asanaClient pagination', () => {
         },
       }
     );
+  });
+});
+
+describe('findDuplicateTaskByName', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('returns a matching incomplete task in the project, case-insensitively', async () => {
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: [
+          { gid: 'task-1', name: 'Other task' },
+          {
+            gid: 'task-2',
+            name: 'Launch Campaign',
+            permalink_url: 'https://app.asana.com/0/1/task-2',
+          },
+        ],
+        next_page: null,
+      }),
+    } as Response);
+
+    const match = await findDuplicateTaskByName(
+      'pat-123',
+      { projectGid: 'project-1' },
+      'launch campaign'
+    );
+
+    expect(match).toEqual({
+      gid: 'task-2',
+      name: 'Launch Campaign',
+      permalinkUrl: 'https://app.asana.com/0/1/task-2',
+    });
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      'https://app.asana.com/api/1.0/projects/project-1/tasks?opt_fields=gid,name,permalink_url&completed_since=now&limit=100',
+      expect.objectContaining({ headers: expect.anything() })
+    );
+  });
+
+  it('returns null when no task in the project matches the name', async () => {
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ data: [{ gid: 'task-1', name: 'Other task' }], next_page: null }),
+    } as Response);
+
+    const match = await findDuplicateTaskByName(
+      'pat-123',
+      { projectGid: 'project-1' },
+      'Launch Campaign'
+    );
+
+    expect(match).toBeNull();
+  });
+
+  it('falls back to a workspace typeahead search when no project is given', async () => {
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: [{ gid: 'task-9', name: 'Launch Campaign', resource_type: 'task' }],
+        next_page: null,
+      }),
+    } as Response);
+
+    const match = await findDuplicateTaskByName(
+      'pat-123',
+      { workspaceGid: 'workspace-1' },
+      'Launch Campaign'
+    );
+
+    expect(match).toEqual({ gid: 'task-9', name: 'Launch Campaign' });
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/workspaces/workspace-1/typeahead?'),
+      expect.objectContaining({ headers: expect.anything() })
+    );
+  });
+
+  it('returns null when neither a project nor a workspace is given', async () => {
+    const match = await findDuplicateTaskByName('pat-123', {}, 'Launch Campaign');
+
+    expect(match).toBeNull();
+    expect(globalThis.fetch).not.toHaveBeenCalled();
   });
 });
 

@@ -263,6 +263,67 @@ export async function getProjectTasks(
     .slice(0, 20);
 }
 
+export type AsanaTaskNameMatch = { gid: string; name: string; permalinkUrl?: string };
+
+// Looks for an existing task with an exact (case-insensitive) name match, scoped to a project if
+// given, otherwise falling back to a workspace-wide typeahead search. Used to warn a user before
+// they create a second task with the same name. Only considers incomplete tasks, matching
+// `getProjectTasks`'s existing convention of ignoring completed/archived tasks.
+export async function findDuplicateTaskByName(
+  accessToken: string,
+  scope: { projectGid?: string; workspaceGid?: string },
+  name: string
+): Promise<AsanaTaskNameMatch | null> {
+  const normalizedName = name.trim().toLowerCase();
+  if (!normalizedName) {
+    return null;
+  }
+
+  if (scope.projectGid) {
+    const tasks = await callAsanaList<{ gid: string; name: string; permalink_url?: string }>(
+      `/projects/${scope.projectGid}/tasks?opt_fields=gid,name,permalink_url&completed_since=now&limit=100`,
+      accessToken
+    );
+    const match = tasks.find((task) => task.name?.trim().toLowerCase() === normalizedName);
+    return match
+      ? {
+          gid: match.gid,
+          name: match.name,
+          ...(match.permalink_url ? { permalinkUrl: match.permalink_url } : {}),
+        }
+      : null;
+  }
+
+  if (scope.workspaceGid) {
+    const params = new URLSearchParams({
+      resource_type: 'task',
+      count: '20',
+      query: name.trim(),
+      opt_fields: 'gid,name,permalink_url,resource_type',
+    });
+
+    const results = await callAsana<
+      Array<{ gid: string; name: string; permalink_url?: string; resource_type?: string }>
+    >(`/workspaces/${scope.workspaceGid}/typeahead?${params.toString()}`, accessToken);
+
+    const match = results.find(
+      (item) =>
+        (!item.resource_type || item.resource_type === 'task') &&
+        item.name?.trim().toLowerCase() === normalizedName
+    );
+
+    return match
+      ? {
+          gid: match.gid,
+          name: match.name,
+          ...(match.permalink_url ? { permalinkUrl: match.permalink_url } : {}),
+        }
+      : null;
+  }
+
+  return null;
+}
+
 type AsanaTaskRecord = {
   gid: string;
   name: string;

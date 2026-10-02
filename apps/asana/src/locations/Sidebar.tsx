@@ -76,6 +76,11 @@ const Sidebar = () => {
   );
   const [isSearchingTasks, setIsSearchingTasks] = useState(false);
   const [showManualLinkInput, setShowManualLinkInput] = useState(false);
+  const [taskTitleDraft, setTaskTitleDraft] = useState('');
+  const [duplicateTaskWarning, setDuplicateTaskWarning] = useState<{
+    existingTaskName: string;
+    existingTaskUrl?: string;
+  } | null>(null);
 
   useEffect(() => {
     let isCancelled = false;
@@ -119,7 +124,7 @@ const Sidebar = () => {
 
   const callAction = async <TResult,>(
     appActionId: string,
-    actionParameters: Record<string, string> = {}
+    actionParameters: Record<string, string | boolean> = {}
   ): Promise<TResult> => {
     // Uses createWithResult (not createWithResponse) because createWithResponse's
     // polling hits a legacy endpoint that has a call-not-found race right after
@@ -475,6 +480,8 @@ const Sidebar = () => {
     setTaskSearchQuery('');
     setTaskSearchResults([]);
     setShowManualLinkInput(false);
+    setTaskTitleDraft('');
+    setDuplicateTaskWarning(null);
     setIsAddingSecondaryTask(true);
   };
 
@@ -484,28 +491,42 @@ const Sidebar = () => {
     setTaskSearchQuery('');
     setTaskSearchResults([]);
     setShowManualLinkInput(false);
+    setTaskTitleDraft('');
+    setDuplicateTaskWarning(null);
   };
 
-  const createTask = async () => {
-    const taskTitle = buildTaskTitle();
+  const createTask = async (options?: { allowDuplicateName?: boolean }) => {
+    const taskTitle = taskTitleDraft.trim() || buildTaskTitle();
     if (!taskTitle) {
       sdk.notifier.error(VALIDATION_MESSAGES.taskTitleRequired);
       return;
     }
 
     setIsCreatingTask(true);
+    setDuplicateTaskWarning(null);
 
     try {
       const response = await callAction<CreateAsanaTaskResponse>('createAsanaTaskAction', {
         title: taskTitle,
         notes: buildInitialTaskDescription(),
+        checkDuplicateName: true,
+        ...(options?.allowDuplicateName ? { allowDuplicateName: true } : {}),
       });
+
+      if (response.duplicateTaskName) {
+        setDuplicateTaskWarning({
+          existingTaskName: response.duplicateTask?.name || taskTitle,
+          existingTaskUrl: response.duplicateTask?.permalinkUrl,
+        });
+        return;
+      }
 
       if (!response.success || !response.task) {
         throw new Error(response.message || VALIDATION_MESSAGES.taskCreateFailed);
       }
       await persistNewTaskLink(response.task);
       setIsAddingSecondaryTask(false);
+      setTaskTitleDraft('');
       sdk.notifier.success(VALIDATION_MESSAGES.taskCreated);
     } catch (error) {
       const message = error instanceof Error ? error.message : VALIDATION_MESSAGES.taskCreateFailed;
@@ -620,9 +641,54 @@ const Sidebar = () => {
           Creates {isAddingSecondaryTask ? 'an additional' : 'a primary'} Asana task in the
           configured default project.
         </Paragraph>
+        <FormControl style={{ width: '100%' }} marginBottom="spacingS">
+          <FormControl.Label>Task name</FormControl.Label>
+          <TextInput
+            value={taskTitleDraft}
+            onChange={(event) => {
+              setTaskTitleDraft(event.target.value);
+              setDuplicateTaskWarning(null);
+            }}
+            placeholder={buildTaskTitle()}
+            isDisabled={isCreatingTask || isLinkingTask || isUnlinkingTask}
+            style={{ width: '100%' }}
+          />
+        </FormControl>
+        {duplicateTaskWarning ? (
+          <Box marginBottom="spacingS">
+            <Note variant="warning" title="A task with this name already exists">
+              <Paragraph marginBottom="spacingXs">
+                There&apos;s already an Asana task named &ldquo;
+                {duplicateTaskWarning.existingTaskName}&rdquo;
+                {duplicateTaskWarning.existingTaskUrl ? (
+                  <>
+                    {' '}
+                    (
+                    <TextLink
+                      href={duplicateTaskWarning.existingTaskUrl}
+                      target="_blank"
+                      rel="noreferrer">
+                      view in Asana
+                    </TextLink>
+                    )
+                  </>
+                ) : null}
+                . Rename the task above, or create it anyway.
+              </Paragraph>
+              <Button
+                size="small"
+                variant="secondary"
+                onClick={() => void createTask({ allowDuplicateName: true })}
+                isLoading={isCreatingTask}
+                isDisabled={isCreatingTask || isLinkingTask || isUnlinkingTask}>
+                Create anyway
+              </Button>
+            </Note>
+          </Box>
+        ) : null}
         <Button
           isFullWidth
-          onClick={createTask}
+          onClick={() => void createTask()}
           isLoading={isCreatingTask}
           isDisabled={!hasConnection || isCreatingTask || isLinkingTask || isUnlinkingTask}>
           Create Asana task

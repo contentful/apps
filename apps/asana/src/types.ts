@@ -150,6 +150,14 @@ export interface CreateAsanaTaskRequest {
   titleFieldId?: string;
   projectGid?: string;
   workspaceGid?: string;
+  // When true, checks whether a task with the same name already exists (in the target project,
+  // or workspace if no project is set) before creating, and returns `duplicateTaskName: true`
+  // instead of creating a second task with that name. Opt-in so existing callers (e.g.
+  // Automations/App Event Handlers with no user present to respond to the warning) are unaffected.
+  checkDuplicateName?: boolean;
+  // Set to skip the duplicate-name check above and create the task regardless - used when the
+  // user has seen the warning and chosen to proceed anyway.
+  allowDuplicateName?: boolean;
 }
 
 export interface UpdateAsanaTaskRequest {
@@ -265,6 +273,11 @@ export type CreateAsanaTaskResponse = Record<string, unknown> & {
   projectGid?: string;
   workspaceGid?: string;
   entryLinked?: boolean;
+  // Set when `checkDuplicateName` was requested and a task with the same name already exists.
+  // The task is NOT created in this case; `duplicateTask` identifies the existing match so the
+  // caller can offer to open it, and `success` is false since no new task was created.
+  duplicateTaskName?: boolean;
+  duplicateTask?: { gid: string; name: string; permalinkUrl?: string };
 };
 
 export type UpdateAsanaTaskResponse = Record<string, unknown> & {

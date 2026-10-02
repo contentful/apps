@@ -1,6 +1,6 @@
 import { VALIDATION_MESSAGES } from '../src/const';
 import type { AppInstallationParameters, CreateAsanaTaskResponse } from '../src/types';
-import { createTask, TaskRefreshFailedError } from './asanaClient';
+import { createTask, findDuplicateTaskByName, TaskRefreshFailedError } from './asanaClient';
 
 type CreateTaskFromParametersInput = {
   accessToken: string;
@@ -9,6 +9,8 @@ type CreateTaskFromParametersInput = {
   projectGid?: string;
   workspaceGid?: string;
   installationParameters?: Partial<AppInstallationParameters>;
+  checkDuplicateName?: boolean;
+  allowDuplicateName?: boolean;
 };
 
 function getTrimmedValue(value?: string) {
@@ -22,6 +24,8 @@ export async function createTaskFromParameters({
   projectGid,
   workspaceGid,
   installationParameters,
+  checkDuplicateName,
+  allowDuplicateName,
 }: CreateTaskFromParametersInput): Promise<CreateAsanaTaskResponse> {
   const trimmedToken = getTrimmedValue(accessToken);
   const trimmedTitle = getTrimmedValue(title);
@@ -47,6 +51,30 @@ export async function createTaskFromParameters({
       success: false,
       message: VALIDATION_MESSAGES.taskDestinationRequired,
     };
+  }
+
+  if (checkDuplicateName && !allowDuplicateName) {
+    try {
+      const duplicate = await findDuplicateTaskByName(
+        trimmedToken,
+        resolvedProjectGid
+          ? { projectGid: resolvedProjectGid }
+          : { workspaceGid: resolvedWorkspaceGid },
+        trimmedTitle
+      );
+
+      if (duplicate) {
+        return {
+          success: false,
+          duplicateTaskName: true,
+          duplicateTask: duplicate,
+          message: `A task named "${duplicate.name}" already exists in Asana.`,
+        };
+      }
+    } catch {
+      // Best-effort duplicate check; if it fails (rate limit, transient error), fall through and
+      // create the task normally rather than blocking task creation on it.
+    }
   }
 
   try {

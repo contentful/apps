@@ -331,4 +331,73 @@ describe('createAsanaTask', () => {
     });
     expect(globalThis.fetch).toHaveBeenCalledTimes(2);
   });
+
+  it('reports a duplicate task name instead of creating a second task, when requested', async () => {
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: [
+          {
+            gid: 'task-existing',
+            name: 'Launch Campaign',
+            permalink_url: 'https://app.asana.com/0/1/task-existing',
+          },
+        ],
+        next_page: null,
+      }),
+    } as Response);
+
+    const result = await handler(
+      {
+        type: FunctionTypeEnum.AppActionCall,
+        body: {
+          title: 'Launch Campaign',
+          checkDuplicateName: true,
+        },
+      } as Parameters<typeof handler>[0],
+      mockContext
+    );
+
+    expect(result).toMatchObject({
+      success: false,
+      duplicateTaskName: true,
+      duplicateTask: {
+        gid: 'task-existing',
+        name: 'Launch Campaign',
+        permalinkUrl: 'https://app.asana.com/0/1/task-existing',
+      },
+    });
+    // Only the duplicate-check lookup should have run - no task-creation POST.
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/projects/project-1/tasks'),
+      expect.anything()
+    );
+  });
+
+  it('creates the task anyway when allowDuplicateName is set', async () => {
+    const result = await handler(
+      {
+        type: FunctionTypeEnum.AppActionCall,
+        body: {
+          title: 'Launch Campaign',
+          checkDuplicateName: true,
+          allowDuplicateName: true,
+        },
+      } as Parameters<typeof handler>[0],
+      mockContext
+    );
+
+    expect(result).toMatchObject({
+      success: true,
+      task: { gid: 'task-1' },
+    });
+    // No duplicate-check lookup; straight to task creation (POST + the follow-up detail refetch).
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      1,
+      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url',
+      expect.objectContaining({ method: 'POST' })
+    );
+  });
 });

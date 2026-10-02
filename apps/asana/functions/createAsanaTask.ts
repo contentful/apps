@@ -216,6 +216,8 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
     projectGid: body.projectGid,
     workspaceGid: body.workspaceGid,
     installationParameters,
+    checkDuplicateName: body.checkDuplicateName,
+    allowDuplicateName: body.allowDuplicateName,
   });
 
   if (!result.success || !result.task || !cma || !entryContext) {

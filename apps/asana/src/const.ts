@@ -31,6 +31,7 @@ export const VALIDATION_MESSAGES = {
     'Provide an Asana project or workspace, or configure a default destination first.',
   taskCreated: 'Asana task created successfully.',
   taskCreateFailed: 'Could not create the Asana task.',
+  taskNameDuplicateFallback: 'A task with this name already exists in Asana.',
   taskUpdated: 'Asana task updated successfully.',
   taskUpdateFailed: 'Could not update the Asana task.',
   taskRefreshFailed:
