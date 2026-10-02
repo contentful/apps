@@ -525,56 +525,47 @@
       "type": "function-invocation",
       "functionId": "updateAsanaTaskFunction",
       "category": "Custom",
-      "parameters": [
-        {
-          "id": "taskId",
-          "name": "Task GID or URL",
-          "type": "Symbol",
-          "required": true
-        },
-        {
-          "id": "title",
-          "name": "Updated task title",
-          "type": "Symbol",
-          "required": false
-        },
-        {
-          "id": "notes",
-          "name": "Updated task notes",
-          "type": "Symbol",
-          "required": false
-        },
-        {
-          "id": "completed",
-          "name": "Completed",
-          "type": "Boolean",
-          "required": false
-        },
-        {
-          "id": "assignee",
-          "name": "Assignee email or GID",
-          "type": "Symbol",
-          "required": false
-        },
-        {
-          "id": "dueDate",
-          "name": "Due date (YYYY-MM-DD)",
-          "type": "Symbol",
-          "required": false
-        },
-        {
-          "id": "dependencyGid",
-          "name": "Dependency task GID to add or remove (prefix with - to remove)",
-          "type": "Symbol",
-          "required": false
-        },
-        {
-          "id": "sectionGid",
-          "name": "Section GID to move the task into",
-          "type": "Symbol",
-          "required": false
+      "parametersSchema": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "title": "Task GID or URL"
+          },
+          "entryId": {
+            "type": "string",
+            "title": "Contentful Entry ID (used to look up the linked task when Task GID/URL is omitted)"
+          },
+          "title": {
+            "type": "string",
+            "title": "Updated task title"
+          },
+          "notes": {
+            "type": "string",
+            "title": "Updated task notes"
+          },
+          "completed": {
+            "type": "boolean",
+            "title": "Completed"
+          },
+          "assignee": {
+            "type": "string",
+            "title": "Assignee email or GID"
+          },
+          "dueDate": {
+            "type": "string",
+            "title": "Due date (YYYY-MM-DD)"
+          },
+          "dependencyGid": {
+            "type": "string",
+            "title": "Dependency task GID to add or remove (prefix with - to remove)"
+          },
+          "sectionGid": {
+            "type": "string",
+            "title": "Section GID to move the task into"
+          }
         }
-      ],
+      },
       "resultSchema": {
         "type": "object",
         "properties": {

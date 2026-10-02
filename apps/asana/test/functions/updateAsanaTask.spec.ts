@@ -3,6 +3,7 @@ import {
   FunctionEventContext,
   FunctionTypeEnum,
 } from '@contentful/node-apps-toolkit';
+import type { PlainClientAPI } from 'contentful-management';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { VALIDATION_MESSAGES } from '../../src/const';
 import type { AppInstallationParameters, UpdateAsanaTaskRequest } from '../../src/types';
@@ -11,6 +12,15 @@ import { handler } from '../../functions/updateAsanaTask';
 globalThis.fetch = vi.fn();
 
 describe('updateAsanaTask handler', () => {
+  const mockCma = {
+    entry: {
+      getMany: vi.fn(),
+    },
+    locale: {
+      getMany: vi.fn(),
+    },
+  } as unknown as PlainClientAPI;
+
   const mockOauthSdk = {
     token: vi.fn().mockResolvedValue({
       tokenType: 'bearer',
@@ -26,6 +36,7 @@ describe('updateAsanaTask handler', () => {
       defaultProjectGid: 'project-1',
       defaultProjectName: 'Project',
     } satisfies AppInstallationParameters,
+    cma: mockCma,
     spaceId: 'test-space',
     environmentId: 'test-env',
     oauthSdk: mockOauthSdk,
@@ -47,6 +58,10 @@ describe('updateAsanaTask handler', () => {
       accessToken: 'test-access-token',
       expiry: 3600,
     });
+    vi.mocked(mockCma.entry.getMany).mockResolvedValue({ items: [] } as never);
+    vi.mocked(mockCma.locale.getMany).mockResolvedValue({
+      items: [{ code: 'en-US', default: true }],
+    } as never);
   });
 
   it('updates a task by gid', async () => {
@@ -548,5 +563,69 @@ describe('updateAsanaTask handler', () => {
       success: false,
       message: 'Task not found',
     });
+  });
+
+  it('resolves the task via a linked entry id when no task id is provided', async () => {
+    vi.mocked(mockCma.entry.getMany).mockResolvedValue({
+      items: [
+        {
+          sys: { id: 'link-entry-1' },
+          fields: {
+            contentfulEntryId: { 'en-US': 'entry-1' },
+            taskGid: { 'en-US': 'task-linked' },
+            taskUrl: { 'en-US': 'https://app.asana.com/0/1/task-linked/f' },
+            taskName: { 'en-US': 'Linked task' },
+          },
+        },
+      ],
+    } as never);
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: {
+          gid: 'task-linked',
+          name: 'Linked task',
+          permalink_url: 'https://app.asana.com/0/1/task-linked/f',
+          completed: true,
+        },
+      }),
+    } as Response);
+
+    const result = await handler(
+      createEvent({
+        entryId: 'entry-1',
+        completed: true,
+      }) as Parameters<typeof handler>[0],
+      mockContext
+    );
+
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      1,
+      'https://app.asana.com/api/1.0/tasks/task-linked?opt_fields=gid,name,permalink_url',
+      expect.objectContaining({
+        method: 'PUT',
+        body: JSON.stringify({ data: { completed: true } }),
+      })
+    );
+    expect(result).toMatchObject({
+      success: true,
+      task: { gid: 'task-linked', completed: true },
+    });
+  });
+
+  it('returns an entryNotLinked error when the entry has no linked task', async () => {
+    const result = await handler(
+      createEvent({
+        entryId: 'entry-unlinked',
+        completed: true,
+      }) as Parameters<typeof handler>[0],
+      mockContext
+    );
+
+    expect(result).toEqual({
+      success: false,
+      message: VALIDATION_MESSAGES.entryNotLinked,
+    });
+    expect(globalThis.fetch).not.toHaveBeenCalled();
   });
 });

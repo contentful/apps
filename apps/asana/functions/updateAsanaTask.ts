@@ -6,6 +6,7 @@ import type {
 } from '@contentful/node-apps-toolkit';
 import { VALIDATION_MESSAGES } from '../src/const';
 import type { UpdateAsanaTaskRequest, UpdateAsanaTaskResponse } from '../src/types';
+import { getTaskLinkForEntry } from '../src/utils/taskLinkStore';
 import {
   addTaskDependency,
   extractTaskGid,
@@ -27,11 +28,17 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
 ): Promise<UpdateAsanaTaskResponse> => {
   const body = (event.body as UpdateAsanaTaskRequest | undefined) ?? {};
 
-  const taskGid = extractTaskGid(body.taskId);
+  let taskGid = extractTaskGid(body.taskId);
+  const entryId = getTrimmedValue(body.entryId);
+  if (!taskGid && entryId && context.cma) {
+    const taskLink = await getTaskLinkForEntry(context.cma, entryId);
+    taskGid = taskLink?.taskGid ?? '';
+  }
+
   if (!taskGid) {
     return {
       success: false,
-      message: VALIDATION_MESSAGES.taskIdRequired,
+      message: entryId ? VALIDATION_MESSAGES.entryNotLinked : VALIDATION_MESSAGES.taskIdRequired,
     };
   }
 

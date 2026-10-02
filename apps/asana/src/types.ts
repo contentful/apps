@@ -145,13 +145,15 @@ export interface CreateAsanaTaskRequest {
 
 export interface UpdateAsanaTaskRequest {
   taskId?: string;
+  // Contentful entry ID. Used to look up the linked Asana task when an automation trigger only
+  // has the entry (not a task GID/URL) available. Ignored if taskId is also provided.
+  entryId?: string;
   title?: string;
   notes?: string;
   completed?: boolean;
   assignee?: string;
   dueDate?: string;
-  // Dependency task GID to add or remove. Prefix with "-" to remove (e.g. "-1234") since
-  // App Actions cap parameter count at 8 and separate add/remove params would exceed it.
+  // Dependency task GID to add or remove. Prefix with "-" to remove (e.g. "-1234").
   dependencyGid?: string;
   sectionGid?: string;
 }
@@ -160,11 +162,9 @@ export interface GetAsanaTaskRequest {
   taskId?: string;
 }
 
-// Purpose-built for Studio Automations triggered off an existing entry (e.g. "Entry updated",
-// "Entry published"), which only have the Contentful entry ID available, not the Asana task GID.
-// Kept as its own action (rather than adding entryId to UpdateAsanaTaskRequest) because
-// updateAsanaTaskAction is already at the 8-parameter cap Contentful enforces on App Actions.
-// Omits dependencyGid (not needed for entry-triggered automations) to stay under that same cap.
+// Superseded by entryId support on UpdateAsanaTaskRequest/updateAsanaTaskAction (which moved to
+// parametersSchema and is no longer subject to the legacy 8-parameter cap). Kept for backward
+// compatibility with the live "Asana Task Complete" automation until that's migrated over.
 export interface SyncAsanaTaskFromEntryRequest {
   entryId?: string;
   completed?: boolean;
