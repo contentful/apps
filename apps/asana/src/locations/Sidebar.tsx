@@ -571,10 +571,20 @@ const Sidebar = () => {
         });
         if (updateResponse.success && updateResponse.task) {
           linkedTask = updateResponse.task;
+        } else {
+          // Don't block the link on this - still proceed using the details we already have - but
+          // surface it, since a silently-failed append means the task's Asana description won't
+          // reference this entry.
+          sdk.notifier.error(
+            updateResponse.message || "Linked the task, but couldn't update its Asana description."
+          );
         }
-      } catch {
-        // Best-effort - if this fails, still proceed to link the task using the details we
-        // already have, rather than blocking the link on it.
+      } catch (updateError) {
+        sdk.notifier.error(
+          updateError instanceof Error && updateError.message
+            ? updateError.message
+            : "Linked the task, but couldn't update its Asana description."
+        );
       }
 
       await persistNewTaskLink(linkedTask);
