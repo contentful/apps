@@ -103,19 +103,6 @@
       ]
     },
     {
-      "id": "getAsanaCustomFieldsFunction",
-      "name": "Get Asana project custom fields",
-      "description": "Lists the custom field definitions configured on an Asana project.",
-      "path": "functions/getAsanaCustomFields.js",
-      "entryFile": "functions/getAsanaCustomFields.ts",
-      "allowNetworks": [
-        "https://app.asana.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
-    },
-    {
       "id": "updateAsanaCustomFieldFunction",
       "name": "Update Asana custom field",
       "description": "Sets a custom field's value on an existing Asana task.",
@@ -1218,76 +1205,6 @@
               "required": [
                 "gid",
                 "name"
-              ]
-            }
-          }
-        },
-        "required": [
-          "success",
-          "message"
-        ]
-      }
-    },
-    {
-      "id": "getAsanaCustomFieldsAction",
-      "name": "List Asana project custom fields",
-      "type": "function-invocation",
-      "functionId": "getAsanaCustomFieldsFunction",
-      "category": "Custom",
-      "parameters": [
-        {
-          "id": "projectGid",
-          "name": "Project GID",
-          "type": "Symbol",
-          "required": true
-        }
-      ],
-      "resultSchema": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "message": {
-            "type": "string"
-          },
-          "customFields": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "gid": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "type": {
-                  "type": "string"
-                },
-                "enumOptions": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "gid": {
-                        "type": "string"
-                      },
-                      "name": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "gid",
-                      "name"
-                    ]
-                  }
-                }
-              },
-              "required": [
-                "gid",
-                "name",
-                "type"
               ]
             }
           }

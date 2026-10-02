@@ -37,23 +37,6 @@ export interface AsanaCustomFieldOption {
   name: string;
 }
 
-export interface AsanaCustomField {
-  gid: string;
-  name: string;
-  type: string;
-  enumOptions?: AsanaCustomFieldOption[];
-}
-
-export interface GetAsanaCustomFieldsRequest {
-  projectGid?: string;
-}
-
-export type GetAsanaCustomFieldsResponse = Record<string, unknown> & {
-  success: boolean;
-  message: string;
-  customFields?: AsanaCustomField[];
-};
-
 // A custom field's current value on a specific task. Only the value key matching `type` is
 // populated (e.g. a `text` field only sets `textValue`), mirroring Asana's own task response shape.
 export interface AsanaCustomFieldValue {
