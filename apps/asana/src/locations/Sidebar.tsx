@@ -3,8 +3,9 @@ import {
   Badge,
   Box,
   Button,
-  Card,
+  Flex,
   FormControl,
+  IconButton,
   Menu,
   Note,
   Paragraph,
@@ -14,6 +15,7 @@ import {
   TextInput,
   TextLink,
 } from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { ASANA_AUTOMATION_CONFIG, VALIDATION_MESSAGES } from '../const';
@@ -770,35 +772,69 @@ const Sidebar = () => {
                   : unlinkingSecondaryId === link.linkEntryId;
 
                 return (
-                  <Card
+                  <Box
                     key={link.linkEntryId || 'primary'}
-                    badge={
-                      link.isPrimary ? (
-                        <Badge variant="primary" size="small">
-                          Primary
-                        </Badge>
-                      ) : undefined
-                    }
-                    actions={[
-                      <Menu.Item
-                        key="manage"
-                        onClick={() => void openTaskDetailsDialog(link)}
-                        isDisabled={isOpeningTaskDetails || isUnlinkingThis}>
-                        Manage task
-                      </Menu.Item>,
-                      <Menu.Item
-                        key="unlink"
-                        onClick={() =>
-                          void (link.isPrimary ? unlinkTask() : removeSecondaryTask(link))
-                        }
-                        isDisabled={isUnlinkingThis}>
-                        Unlink task
-                      </Menu.Item>,
-                    ]}>
-                    <Stack flexDirection="column" spacing="spacing2Xs" alignItems="flex-start">
-                      <Text fontWeight="fontWeightDemiBold" fontColor="gray900">
+                    style={{
+                      border: `1px solid ${tokens.gray300}`,
+                      borderRadius: tokens.borderRadiusMedium,
+                      overflow: 'hidden',
+                    }}>
+                    <Flex
+                      alignItems="center"
+                      justifyContent="space-between"
+                      gap="spacingXs"
+                      paddingTop="spacingXs"
+                      paddingBottom="spacingXs"
+                      paddingLeft="spacingM"
+                      paddingRight="spacingS"
+                      style={{ borderBottom: `1px solid ${tokens.gray200}` }}>
+                      <Text
+                        fontWeight="fontWeightDemiBold"
+                        fontColor="gray900"
+                        fontSize="fontSizeM"
+                        isWordBreak>
                         {link.taskName}
                       </Text>
+                      <Flex alignItems="center" gap="spacingXs" style={{ flexShrink: 0 }}>
+                        {link.isPrimary ? (
+                          <Badge variant="primary" size="small">
+                            Primary
+                          </Badge>
+                        ) : null}
+                        <Menu>
+                          <Menu.Trigger>
+                            <IconButton
+                              aria-label="Task actions"
+                              icon={<Text fontColor="gray600">⋯</Text>}
+                              variant="transparent"
+                              size="small"
+                            />
+                          </Menu.Trigger>
+                          <Menu.List>
+                            <Menu.Item
+                              onClick={() => void openTaskDetailsDialog(link)}
+                              isDisabled={isOpeningTaskDetails || isUnlinkingThis}>
+                              Manage task
+                            </Menu.Item>
+                            <Menu.Item
+                              onClick={() =>
+                                void (link.isPrimary ? unlinkTask() : removeSecondaryTask(link))
+                              }
+                              isDisabled={isUnlinkingThis}>
+                              Unlink task
+                            </Menu.Item>
+                          </Menu.List>
+                        </Menu>
+                      </Flex>
+                    </Flex>
+                    <Stack
+                      flexDirection="column"
+                      spacing="spacing2Xs"
+                      alignItems="flex-start"
+                      paddingTop="spacingS"
+                      paddingBottom="spacingS"
+                      paddingLeft="spacingM"
+                      paddingRight="spacingM">
                       {link.status || link.assigneeName ? (
                         <Text fontColor="gray600" fontSize="fontSizeS">
                           {[link.status, link.assigneeName].filter(Boolean).join(' · ')}
@@ -808,7 +844,7 @@ const Sidebar = () => {
                         Open in Asana
                       </TextLink>
                     </Stack>
-                  </Card>
+                  </Box>
                 );
               })}
             </Stack>
