@@ -188,6 +188,8 @@ describe('createAsanaTask', () => {
         body: JSON.stringify({
           data: {
             name: 'Dynamic entry title',
+            notes:
+              'Contentful entry: https://app.contentful.com/spaces/test-space/environments/test-env/entries/entry-1',
             projects: ['project-1'],
             workspace: 'workspace-1',
           },
@@ -233,6 +235,85 @@ describe('createAsanaTask', () => {
         body: JSON.stringify({
           data: {
             name: 'Launch headline',
+            notes:
+              'Contentful entry: https://app.contentful.com/spaces/test-space/environments/test-env/entries/entry-1',
+            projects: ['project-1'],
+            workspace: 'workspace-1',
+          },
+        }),
+      })
+    );
+  });
+
+  it('appends the Contentful entry link to caller-supplied notes without duplicating an existing link', async () => {
+    vi.mocked(mockCma.entry.get).mockResolvedValue({
+      sys: {
+        id: 'entry-1',
+        contentType: {
+          sys: {
+            id: 'blogPost',
+          },
+        },
+      },
+      fields: {
+        title: {
+          'en-US': 'Dynamic entry title',
+        },
+      },
+    } as unknown as EntryProps<KeyValueMap>);
+
+    await handler(
+      {
+        type: FunctionTypeEnum.AppActionCall,
+        body: {
+          entryId: 'entry-1',
+          notes: 'Please prioritize this.',
+        },
+      } as Parameters<typeof handler>[0],
+      mockContext
+    );
+
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      1,
+      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({
+          data: {
+            name: 'Dynamic entry title',
+            notes:
+              'Please prioritize this.\n\nContentful entry: https://app.contentful.com/spaces/test-space/environments/test-env/entries/entry-1',
+            projects: ['project-1'],
+            workspace: 'workspace-1',
+          },
+        }),
+      })
+    );
+
+    vi.mocked(globalThis.fetch).mockClear();
+
+    await handler(
+      {
+        type: FunctionTypeEnum.AppActionCall,
+        body: {
+          entryId: 'entry-1',
+          notes:
+            'Please prioritize this.\n\nContentful entry: https://app.contentful.com/spaces/test-space/environments/test-env/entries/entry-1',
+        },
+      } as Parameters<typeof handler>[0],
+      mockContext
+    );
+
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      1,
+      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({
+          data: {
+            name: 'Dynamic entry title',
+            notes:
+              'Please prioritize this.\n\nContentful entry: https://app.contentful.com/spaces/test-space/environments/test-env/entries/entry-1',
             projects: ['project-1'],
             workspace: 'workspace-1',
           },
