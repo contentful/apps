@@ -46,6 +46,7 @@ describe('ensureTaskLinkContentType', () => {
         { id: 'dueDate' },
         { id: 'lastSyncedAt' },
         { id: 'lastAutosaveCommentAt' },
+        { id: 'isPrimary' },
       ],
     });
 

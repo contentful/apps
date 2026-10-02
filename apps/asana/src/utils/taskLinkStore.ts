@@ -3,7 +3,7 @@ import {
   TASK_LINK_CONTENT_TYPE_NAME,
   TASK_LINK_FIELD_IDS,
 } from '../const';
-import type { AsanaTask, PrimaryAsanaTaskLink } from '../types';
+import type { AsanaTask, AsanaTaskLink, PrimaryAsanaTaskLink } from '../types';
 
 /**
  * The Asana app stores entry <-> Asana task links in a dedicated, app-owned content type
@@ -97,6 +97,12 @@ const TASK_LINK_FIELD_DEFINITIONS = [
     type: 'Symbol',
     required: false,
   },
+  {
+    id: TASK_LINK_FIELD_IDS.isPrimary,
+    name: 'Is Primary Task',
+    type: 'Boolean',
+    required: false,
+  },
 ] as const;
 
 /**
@@ -177,26 +183,47 @@ function toPrimaryTaskLink(entry: any, locale: string): PrimaryAsanaTaskLink | n
 }
 
 /**
- * Finds the raw link entry for a given Contentful entry, or null if none exists.
+ * Finds every raw link entry for a given Contentful entry (the primary link plus any additional,
+ * secondary links), or an empty array if none exist.
  */
-export async function findTaskLinkEntry(cma: any, entryId: string): Promise<any | null> {
+async function findAllTaskLinkEntries(cma: any, entryId: string): Promise<any[]> {
   try {
     const response = await cma.entry.getMany({
       query: {
         content_type: TASK_LINK_CONTENT_TYPE_ID,
         [`fields.${TASK_LINK_FIELD_IDS.contentfulEntryId}`]: entryId,
-        limit: 1,
+        limit: 100,
       },
     });
-    return response.items?.[0] ?? null;
+    return response.items ?? [];
   } catch (error) {
-    console.error('Error finding Asana task link entry:', error);
-    return null;
+    console.error('Error finding Asana task link entries:', error);
+    return [];
   }
 }
 
+// Link entries created before the `isPrimary` field existed have no value for it - treat those
+// (and any explicit `true`) as the primary link, so pre-existing single-task links keep working.
+function isPrimaryLinkEntry(entry: any, locale: string): boolean {
+  return entry?.fields?.[TASK_LINK_FIELD_IDS.isPrimary]?.[locale] !== false;
+}
+
 /**
- * Returns the Asana task link for a given Contentful entry, or null if the entry isn't linked.
+ * Finds the raw primary link entry for a given Contentful entry, or null if none exists.
+ */
+export async function findTaskLinkEntry(cma: any, entryId: string): Promise<any | null> {
+  const entries = await findAllTaskLinkEntries(cma, entryId);
+  if (entries.length === 0) {
+    return null;
+  }
+
+  const defaultLocale = await getDefaultLocale(cma);
+  return entries.find((entry) => isPrimaryLinkEntry(entry, defaultLocale)) ?? null;
+}
+
+/**
+ * Returns the primary Asana task link for a given Contentful entry - the one automations resolve
+ * via `entryId` - or null if the entry isn't linked.
  */
 export async function getTaskLinkForEntry(
   cma: any,
@@ -211,26 +238,48 @@ export async function getTaskLinkForEntry(
   return toPrimaryTaskLink(entry, defaultLocale);
 }
 
+/**
+ * Returns every Asana task linked to a given Contentful entry - the primary link (if any) first,
+ * followed by any additional, secondary links.
+ */
+export async function getAllTaskLinksForEntry(cma: any, entryId: string): Promise<AsanaTaskLink[]> {
+  const entries = await findAllTaskLinkEntries(cma, entryId);
+  if (entries.length === 0) {
+    return [];
+  }
+
+  const defaultLocale = await getDefaultLocale(cma);
+
+  const links = entries
+    .map((entry) => {
+      const link = toPrimaryTaskLink(entry, defaultLocale);
+      if (!link) {
+        return null;
+      }
+      return {
+        ...link,
+        linkEntryId: entry.sys.id,
+        isPrimary: isPrimaryLinkEntry(entry, defaultLocale),
+      };
+    })
+    .filter((link): link is AsanaTaskLink => link !== null);
+
+  return links.sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary));
+}
+
 export interface SaveTaskLinkOptions {
   entryId: string;
   contentTypeId?: string;
   task: AsanaTask;
 }
 
-/**
- * Creates or updates the link entry for a given Contentful entry, publishing it so it's visible
- * to CMA reads that filter on published state.
- */
-export async function saveTaskLinkForEntry(
-  cma: any,
-  { entryId, contentTypeId, task }: SaveTaskLinkOptions
-): Promise<PrimaryAsanaTaskLink | null> {
-  await ensureTaskLinkContentType(cma);
-  const defaultLocale = await getDefaultLocale(cma);
-
-  const fields: Record<string, Record<string, unknown>> = {
-    [TASK_LINK_FIELD_IDS.contentfulEntryId]: { [defaultLocale]: entryId },
-    [TASK_LINK_FIELD_IDS.contentTypeId]: { [defaultLocale]: contentTypeId },
+// The task-derived fields shared by every link entry (primary or secondary), independent of
+// which Contentful entry it's attached to or whether it's the primary link.
+function buildTaskFields(
+  defaultLocale: string,
+  task: AsanaTask
+): Record<string, Record<string, unknown>> {
+  return {
     [TASK_LINK_FIELD_IDS.taskGid]: { [defaultLocale]: task.gid },
     [TASK_LINK_FIELD_IDS.taskUrl]: { [defaultLocale]: task.permalinkUrl },
     [TASK_LINK_FIELD_IDS.taskName]: { [defaultLocale]: task.name },
@@ -239,6 +288,26 @@ export async function saveTaskLinkForEntry(
     [TASK_LINK_FIELD_IDS.assigneeName]: { [defaultLocale]: task.assigneeName },
     [TASK_LINK_FIELD_IDS.dueDate]: { [defaultLocale]: task.dueDate },
     [TASK_LINK_FIELD_IDS.lastSyncedAt]: { [defaultLocale]: new Date().toISOString() },
+  };
+}
+
+/**
+ * Creates or updates the *primary* link entry for a given Contentful entry (the one automations
+ * resolve via `entryId`), publishing it so it's visible to CMA reads that filter on published
+ * state.
+ */
+export async function saveTaskLinkForEntry(
+  cma: any,
+  { entryId, contentTypeId, task }: SaveTaskLinkOptions
+): Promise<AsanaTaskLink | null> {
+  await ensureTaskLinkContentType(cma);
+  const defaultLocale = await getDefaultLocale(cma);
+
+  const fields: Record<string, Record<string, unknown>> = {
+    [TASK_LINK_FIELD_IDS.contentfulEntryId]: { [defaultLocale]: entryId },
+    [TASK_LINK_FIELD_IDS.contentTypeId]: { [defaultLocale]: contentTypeId },
+    [TASK_LINK_FIELD_IDS.isPrimary]: { [defaultLocale]: true },
+    ...buildTaskFields(defaultLocale, task),
   };
 
   const existingEntry = await findTaskLinkEntry(cma, entryId);
@@ -252,7 +321,84 @@ export async function saveTaskLinkForEntry(
 
   const publishedEntry = await cma.entry.publish({ entryId: entry.sys.id }, entry);
 
-  return toPrimaryTaskLink(publishedEntry, defaultLocale);
+  const link = toPrimaryTaskLink(publishedEntry, defaultLocale);
+  return link ? { ...link, linkEntryId: publishedEntry.sys.id, isPrimary: true } : null;
+}
+
+/**
+ * Creates an additional, secondary link entry for a given Contentful entry - unlike
+ * `saveTaskLinkForEntry`, this always creates a new link rather than updating an existing one,
+ * so an entry can accumulate more than one linked Asana task.
+ */
+export async function addSecondaryTaskLinkForEntry(
+  cma: any,
+  { entryId, contentTypeId, task }: SaveTaskLinkOptions
+): Promise<AsanaTaskLink | null> {
+  await ensureTaskLinkContentType(cma);
+  const defaultLocale = await getDefaultLocale(cma);
+
+  const fields: Record<string, Record<string, unknown>> = {
+    [TASK_LINK_FIELD_IDS.contentfulEntryId]: { [defaultLocale]: entryId },
+    [TASK_LINK_FIELD_IDS.contentTypeId]: { [defaultLocale]: contentTypeId },
+    [TASK_LINK_FIELD_IDS.isPrimary]: { [defaultLocale]: false },
+    ...buildTaskFields(defaultLocale, task),
+  };
+
+  const entry = await cma.entry.create({ contentTypeId: TASK_LINK_CONTENT_TYPE_ID }, { fields });
+  const publishedEntry = await cma.entry.publish({ entryId: entry.sys.id }, entry);
+
+  const link = toPrimaryTaskLink(publishedEntry, defaultLocale);
+  return link ? { ...link, linkEntryId: publishedEntry.sys.id, isPrimary: false } : null;
+}
+
+/**
+ * Refreshes the task-derived fields (name, status, assignee, etc.) on an existing link entry,
+ * identified by its own sys.id - works for either the primary link or a secondary one.
+ */
+export async function updateTaskLink(
+  cma: any,
+  linkEntryId: string,
+  task: AsanaTask
+): Promise<AsanaTaskLink | null> {
+  const defaultLocale = await getDefaultLocale(cma);
+  const existingEntry = await cma.entry.get({ entryId: linkEntryId });
+
+  const updatedEntry = await cma.entry.update(
+    { entryId: linkEntryId },
+    {
+      ...existingEntry,
+      fields: { ...existingEntry.fields, ...buildTaskFields(defaultLocale, task) },
+    }
+  );
+  const publishedEntry = await cma.entry.publish({ entryId: updatedEntry.sys.id }, updatedEntry);
+
+  const link = toPrimaryTaskLink(publishedEntry, defaultLocale);
+  if (!link) {
+    return null;
+  }
+  return {
+    ...link,
+    linkEntryId: publishedEntry.sys.id,
+    isPrimary: isPrimaryLinkEntry(publishedEntry, defaultLocale),
+  };
+}
+
+/**
+ * Removes a link entry identified by its own sys.id - works for either the primary link or a
+ * secondary one.
+ */
+export async function deleteTaskLinkEntry(cma: any, linkEntryId: string): Promise<void> {
+  const existingEntry = await cma.entry.get({ entryId: linkEntryId });
+
+  try {
+    if (existingEntry.sys.publishedVersion) {
+      await cma.entry.unpublish({ entryId: linkEntryId });
+    }
+  } catch (error) {
+    console.error('Error unpublishing Asana task link entry:', error);
+  }
+
+  await cma.entry.delete({ entryId: linkEntryId });
 }
 
 /**
@@ -285,7 +431,7 @@ export async function recordAutosaveComment(cma: any, entryId: string): Promise<
 }
 
 /**
- * Removes the link entry for a given Contentful entry, if one exists.
+ * Removes the *primary* link entry for a given Contentful entry, if one exists.
  */
 export async function deleteTaskLinkForEntry(cma: any, entryId: string): Promise<void> {
   const existingEntry = await findTaskLinkEntry(cma, entryId);
@@ -293,13 +439,5 @@ export async function deleteTaskLinkForEntry(cma: any, entryId: string): Promise
     return;
   }
 
-  try {
-    if (existingEntry.sys.publishedVersion) {
-      await cma.entry.unpublish({ entryId: existingEntry.sys.id });
-    }
-  } catch (error) {
-    console.error('Error unpublishing Asana task link entry:', error);
-  }
-
-  await cma.entry.delete({ entryId: existingEntry.sys.id });
+  await deleteTaskLinkEntry(cma, existingEntry.sys.id);
 }

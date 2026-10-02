@@ -122,6 +122,15 @@ export interface PrimaryAsanaTaskLink {
   lastAutosaveCommentAt?: string;
 }
 
+// An entry can have one primary task link (the one automations resolve via entryId) plus any
+// number of additional, secondary links. `linkEntryId` is the sys.id of the underlying
+// "Asana Integration (do not delete)" entry backing this specific link, needed to manage/unlink
+// a given task when an entry has more than one.
+export interface AsanaTaskLink extends PrimaryAsanaTaskLink {
+  linkEntryId: string;
+  isPrimary: boolean;
+}
+
 export interface PrimaryAsanaTaskLinkValue {
   taskGid?: string;
   taskUrl?: string;

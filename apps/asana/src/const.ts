@@ -67,6 +67,7 @@ export const TASK_LINK_FIELD_IDS = {
   dueDate: 'dueDate',
   lastSyncedAt: 'lastSyncedAt',
   lastAutosaveCommentAt: 'lastAutosaveCommentAt',
+  isPrimary: 'isPrimary',
 } as const;
 
 // Settings for the "post a comment in Asana when a linked entry is autosaved" app event handler.

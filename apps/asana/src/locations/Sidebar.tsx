@@ -17,21 +17,24 @@ import { ASANA_AUTOMATION_CONFIG, VALIDATION_MESSAGES } from '../const';
 import {
   type AppInstallationParameters,
   type AsanaTask,
+  type AsanaTaskLink,
   type CheckAsanaStatusResponse,
   type CompleteAsanaOAuthResponse,
   type CreateAsanaTaskResponse,
   type GetAsanaTaskResponse,
   type GetAsanaTasksResponse,
   type InitiateAsanaOAuthResponse,
-  type PrimaryAsanaTaskLink,
   type TaskDetailsDialogResult,
   type TaskDetailsDialogParameters,
 } from '../types';
 import { parseInstallationParameters } from '../utils/installationParameters';
 import {
+  addSecondaryTaskLinkForEntry,
+  deleteTaskLinkEntry,
   deleteTaskLinkForEntry,
-  getTaskLinkForEntry,
+  getAllTaskLinksForEntry,
   saveTaskLinkForEntry,
+  updateTaskLink,
 } from '../utils/taskLinkStore';
 
 const Sidebar = () => {
@@ -52,12 +55,15 @@ const Sidebar = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const popupWindowRef = useRef<Window | null>(null);
   const hasConnection = hasDefaultProject && isUserConnected;
-  const [taskLink, setTaskLink] = useState<PrimaryAsanaTaskLink | null>(null);
+  const [taskLink, setTaskLink] = useState<AsanaTaskLink | null>(null);
+  const [secondaryTasks, setSecondaryTasks] = useState<AsanaTaskLink[]>([]);
   const [isLoadingTaskLink, setIsLoadingTaskLink] = useState(true);
   const [isCreatingTask, setIsCreatingTask] = useState(false);
   const [isLinkingTask, setIsLinkingTask] = useState(false);
   const [isUnlinkingTask, setIsUnlinkingTask] = useState(false);
   const [isOpeningTaskDetails, setIsOpeningTaskDetails] = useState(false);
+  const [isAddingSecondaryTask, setIsAddingSecondaryTask] = useState(false);
+  const [unlinkingSecondaryId, setUnlinkingSecondaryId] = useState<string | null>(null);
   const [taskLinkInput, setTaskLinkInput] = useState('');
   const [taskSearchQuery, setTaskSearchQuery] = useState('');
   const [taskSearchResults, setTaskSearchResults] = useState<Array<{ gid: string; name: string }>>(
@@ -69,11 +75,12 @@ const Sidebar = () => {
   useEffect(() => {
     let isCancelled = false;
 
-    const loadTaskLink = async () => {
+    const loadTaskLinks = async () => {
       try {
-        const link = await getTaskLinkForEntry(sdk.cma, entrySys.id);
+        const links = await getAllTaskLinksForEntry(sdk.cma, entrySys.id);
         if (!isCancelled) {
-          setTaskLink(link);
+          setTaskLink(links.find((link) => link.isPrimary) ?? null);
+          setSecondaryTasks(links.filter((link) => !link.isPrimary));
         }
       } catch {
         // Best-effort load so a temporary CMA error doesn't block the sidebar.
@@ -84,13 +91,13 @@ const Sidebar = () => {
       }
     };
 
-    void loadTaskLink();
+    void loadTaskLinks();
 
     // Poll while unlinked so an open sidebar notices tasks created elsewhere
     // (e.g. by the automation-driven app function) without a manual refresh.
     const intervalId = window.setInterval(() => {
       if (!taskLink) {
-        void loadTaskLink();
+        void loadTaskLinks();
       }
     }, 3000);
 
@@ -254,18 +261,18 @@ const Sidebar = () => {
   const buildInitialTaskDescription = () =>
     `Contentful entry: ${entryUrl}\nContent type: ${sdk.contentType.name}`;
 
-  const refreshLinkedTask = async (): Promise<AsanaTask | null | 'unlinked'> => {
-    if (!taskLink) {
-      return null;
-    }
-
+  const refreshLinkedTask = async (link: AsanaTaskLink): Promise<AsanaTask | null | 'unlinked'> => {
     try {
       const response = await callAction<GetAsanaTaskResponse>('getAsanaTaskAction', {
-        taskId: taskLink.taskGid,
+        taskId: link.taskGid,
       });
 
       if (response.taskDeleted) {
-        await clearPrimaryTaskLink();
+        if (link.isPrimary) {
+          await clearPrimaryTaskLink();
+        } else {
+          await removeSecondaryTask(link);
+        }
         sdk.notifier.warning(VALIDATION_MESSAGES.taskUnlinkedDeleted);
         return 'unlinked';
       }
@@ -274,7 +281,11 @@ const Sidebar = () => {
         throw new Error(response.message || 'Could not refresh the Asana task.');
       }
 
-      await savePrimaryTaskLink(response.task);
+      if (link.isPrimary) {
+        await savePrimaryTaskLink(response.task);
+      } else {
+        await updateSecondaryTask(link, response.task);
+      }
       return response.task;
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Could not refresh the Asana task.';
@@ -284,26 +295,27 @@ const Sidebar = () => {
   };
 
   // Detect a task that was deleted in Asana while unlinked from Contentful (e.g. the user didn't
-  // notice until reopening this entry). Only runs once per sidebar mount so it doesn't spam the
-  // Asana API - `refreshLinkedTask` already unlinks and notifies when it finds the task is gone.
+  // notice until reopening this entry). Only runs once per sidebar mount, and only for the primary
+  // task, so it doesn't spam the Asana API - `refreshLinkedTask` already unlinks and notifies when
+  // it finds the task is gone.
   const hasCheckedTaskExistenceRef = useRef(false);
   useEffect(() => {
     if (!taskLink || hasCheckedTaskExistenceRef.current) {
       return;
     }
     hasCheckedTaskExistenceRef.current = true;
-    void refreshLinkedTask();
+    void refreshLinkedTask(taskLink);
   }, [taskLink]);
 
-  const openTaskDetailsDialog = async () => {
-    if (!taskLink || isOpeningTaskDetails) {
+  const openTaskDetailsDialog = async (link: AsanaTaskLink) => {
+    if (isOpeningTaskDetails) {
       return;
     }
 
     setIsOpeningTaskDetails(true);
 
     try {
-      const latestTask = await refreshLinkedTask();
+      const latestTask = await refreshLinkedTask(link);
       if (latestTask === 'unlinked') {
         return;
       }
@@ -326,13 +338,13 @@ const Sidebar = () => {
             ...(latestTask.tags ? { tags: latestTask.tags } : {}),
           }
         : {
-            taskGid: taskLink.taskGid,
-            taskName: taskLink.taskName,
-            taskUrl: taskLink.taskUrl,
-            ...(taskLink.taskDescription ? { taskDescription: taskLink.taskDescription } : {}),
-            ...(taskLink.status ? { status: taskLink.status } : {}),
-            ...(taskLink.assigneeName ? { assigneeName: taskLink.assigneeName } : {}),
-            ...(taskLink.dueDate ? { dueDate: taskLink.dueDate } : {}),
+            taskGid: link.taskGid,
+            taskName: link.taskName,
+            taskUrl: link.taskUrl,
+            ...(link.taskDescription ? { taskDescription: link.taskDescription } : {}),
+            ...(link.status ? { status: link.status } : {}),
+            ...(link.assigneeName ? { assigneeName: link.assigneeName } : {}),
+            ...(link.dueDate ? { dueDate: link.dueDate } : {}),
           };
 
       const workspaceGid = latestTask?.workspaceGid || installationParameters.defaultWorkspaceGid;
@@ -357,7 +369,11 @@ const Sidebar = () => {
       })) as TaskDetailsDialogResult | null;
 
       if (result?.updatedTask) {
-        await savePrimaryTaskLink(result.updatedTask);
+        if (link.isPrimary) {
+          await savePrimaryTaskLink(result.updatedTask);
+        } else {
+          await updateSecondaryTask(link, result.updatedTask);
+        }
       }
     } finally {
       setIsOpeningTaskDetails(false);
@@ -377,6 +393,8 @@ const Sidebar = () => {
         taskGid: task.gid,
         taskUrl: task.permalinkUrl,
         taskName: task.name,
+        linkEntryId: taskLink?.linkEntryId ?? '',
+        isPrimary: true,
         ...(typeof task.description === 'string' ? { taskDescription: task.description } : {}),
         ...(typeof task.status === 'string' ? { status: task.status } : {}),
         ...(typeof task.assigneeName === 'string' ? { assigneeName: task.assigneeName } : {}),
@@ -390,7 +408,80 @@ const Sidebar = () => {
     setTaskLink(null);
   };
 
-  const createPrimaryTask = async () => {
+  const updateSecondaryTask = async (link: AsanaTaskLink, task: AsanaTask) => {
+    const updatedLink = await updateTaskLink(sdk.cma, link.linkEntryId, task);
+    setSecondaryTasks((prev) =>
+      prev.map((item) =>
+        item.linkEntryId === link.linkEntryId
+          ? updatedLink ?? {
+              ...item,
+              taskGid: task.gid,
+              taskUrl: task.permalinkUrl,
+              taskName: task.name,
+              ...(typeof task.description === 'string'
+                ? { taskDescription: task.description }
+                : {}),
+              ...(typeof task.status === 'string' ? { status: task.status } : {}),
+              ...(typeof task.assigneeName === 'string' ? { assigneeName: task.assigneeName } : {}),
+              ...(typeof task.dueDate === 'string' ? { dueDate: task.dueDate } : {}),
+            }
+          : item
+      )
+    );
+  };
+
+  const removeSecondaryTask = async (link: AsanaTaskLink) => {
+    setUnlinkingSecondaryId(link.linkEntryId);
+
+    try {
+      await deleteTaskLinkEntry(sdk.cma, link.linkEntryId);
+      setSecondaryTasks((prev) => prev.filter((item) => item.linkEntryId !== link.linkEntryId));
+      sdk.notifier.success('Asana task unlinked successfully.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Could not unlink the Asana task.';
+      sdk.notifier.error(message);
+    } finally {
+      setUnlinkingSecondaryId(null);
+    }
+  };
+
+  const addSecondaryTask = async (task: AsanaTask) => {
+    const link = await addSecondaryTaskLinkForEntry(sdk.cma, {
+      entryId: entrySys.id,
+      contentTypeId,
+      task,
+    });
+
+    if (link) {
+      setSecondaryTasks((prev) => [...prev, link]);
+    }
+  };
+
+  const persistNewTaskLink = async (task: AsanaTask) => {
+    if (isAddingSecondaryTask) {
+      await addSecondaryTask(task);
+    } else {
+      await savePrimaryTaskLink(task);
+    }
+  };
+
+  const startAddingSecondaryTask = () => {
+    setTaskLinkInput('');
+    setTaskSearchQuery('');
+    setTaskSearchResults([]);
+    setShowManualLinkInput(false);
+    setIsAddingSecondaryTask(true);
+  };
+
+  const cancelAddingSecondaryTask = () => {
+    setIsAddingSecondaryTask(false);
+    setTaskLinkInput('');
+    setTaskSearchQuery('');
+    setTaskSearchResults([]);
+    setShowManualLinkInput(false);
+  };
+
+  const createTask = async () => {
     const taskTitle = buildTaskTitle();
     if (!taskTitle) {
       sdk.notifier.error(VALIDATION_MESSAGES.taskTitleRequired);
@@ -408,7 +499,8 @@ const Sidebar = () => {
       if (!response.success || !response.task) {
         throw new Error(response.message || VALIDATION_MESSAGES.taskCreateFailed);
       }
-      await savePrimaryTaskLink(response.task);
+      await persistNewTaskLink(response.task);
+      setIsAddingSecondaryTask(false);
       sdk.notifier.success(VALIDATION_MESSAGES.taskCreated);
     } catch (error) {
       const message = error instanceof Error ? error.message : VALIDATION_MESSAGES.taskCreateFailed;
@@ -440,7 +532,8 @@ const Sidebar = () => {
         throw new Error(response.message || 'Could not load the Asana task.');
       }
 
-      await savePrimaryTaskLink(response.task);
+      await persistNewTaskLink(response.task);
+      setIsAddingSecondaryTask(false);
       setTaskLinkInput('');
       setTaskSearchQuery('');
       setTaskSearchResults([]);
@@ -457,7 +550,7 @@ const Sidebar = () => {
     if (
       !hasConnection ||
       !installationParameters.defaultWorkspaceGid ||
-      taskLink ||
+      (taskLink && !isAddingSecondaryTask) ||
       !taskSearchQuery.trim()
     ) {
       setTaskSearchResults([]);
@@ -485,7 +578,14 @@ const Sidebar = () => {
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [hasConnection, installationParameters.defaultWorkspaceGid, sdk, taskLink, taskSearchQuery]);
+  }, [
+    hasConnection,
+    installationParameters.defaultWorkspaceGid,
+    isAddingSecondaryTask,
+    sdk,
+    taskLink,
+    taskSearchQuery,
+  ]);
 
   const unlinkTask = async () => {
     if (!taskLink) {
@@ -504,6 +604,129 @@ const Sidebar = () => {
       setIsUnlinkingTask(false);
     }
   };
+
+  const renderCreateOrLinkForm = () => (
+    <Stack flexDirection="column" spacing="spacingL" alignItems="stretch">
+      <Box>
+        <Text as="div" marginBottom="spacing2Xs" fontColor="gray600">
+          Create new task
+        </Text>
+        <Paragraph marginBottom="spacingS">
+          Creates {isAddingSecondaryTask ? 'an additional' : 'a primary'} Asana task in the
+          configured default project.
+        </Paragraph>
+        <Button
+          isFullWidth
+          onClick={createTask}
+          isLoading={isCreatingTask}
+          isDisabled={!hasConnection || isCreatingTask || isLinkingTask || isUnlinkingTask}>
+          Create Asana task
+        </Button>
+      </Box>
+
+      <Box>
+        <Text as="div" marginBottom="spacing2Xs" fontColor="gray600">
+          Link existing task
+        </Text>
+        <Paragraph marginBottom="none">
+          Search the default project and choose a task to link to this entry.
+        </Paragraph>
+      </Box>
+      {installationParameters.defaultProjectGid ? (
+        <FormControl style={{ width: '100%' }}>
+          <FormControl.Label>Search tasks</FormControl.Label>
+          <Box style={{ position: 'relative', width: '100%' }}>
+            <TextInput
+              value={taskSearchQuery}
+              onChange={(event) => setTaskSearchQuery(event.target.value)}
+              placeholder="Search tasks in the default project"
+              isDisabled={isCreatingTask || isLinkingTask || isUnlinkingTask}
+              style={{ width: '100%' }}
+            />
+            {(isSearchingTasks ||
+              (taskSearchQuery.trim() && taskSearchResults.length > 0) ||
+              (taskSearchQuery.trim() && !isSearchingTasks && !taskSearchResults.length)) && (
+              <Box
+                marginTop="spacing2Xs"
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  zIndex: 2,
+                  border: '1px solid #cfd9e0',
+                  borderRadius: '6px',
+                  backgroundColor: 'white',
+                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
+                  overflow: 'hidden',
+                }}>
+                {isSearchingTasks ? (
+                  <Paragraph margin="spacingS">Searching Asana tasks...</Paragraph>
+                ) : null}
+                {taskSearchQuery.trim() && taskSearchResults.length ? (
+                  <Stack
+                    flexDirection="column"
+                    spacing="none"
+                    style={{ maxHeight: '220px', overflowY: 'auto' }}>
+                    {taskSearchResults.map((task, index) => (
+                      <Button
+                        key={task.gid}
+                        variant="transparent"
+                        isFullWidth
+                        isDisabled={isCreatingTask || isLinkingTask || isUnlinkingTask}
+                        onClick={() => void linkTaskById(task.gid)}
+                        style={{
+                          justifyContent: 'flex-start',
+                          borderRadius: 0,
+                          borderTop: index === 0 ? 'none' : '1px solid #e5ebed',
+                        }}>
+                        {task.name}
+                      </Button>
+                    ))}
+                  </Stack>
+                ) : null}
+                {taskSearchQuery.trim() && !isSearchingTasks && !taskSearchResults.length ? (
+                  <Paragraph margin="spacingS">No matching tasks found.</Paragraph>
+                ) : null}
+              </Box>
+            )}
+          </Box>
+          <FormControl.HelpText>Select one result to link it to this entry.</FormControl.HelpText>
+        </FormControl>
+      ) : null}
+      <Box>
+        <TextLink
+          as="button"
+          type="button"
+          onClick={() => setShowManualLinkInput((isVisible) => !isVisible)}
+          style={{ fontSize: '14px' }}>
+          {showManualLinkInput ? 'Hide URL or GID linking' : 'Link by URL or GID'}
+        </TextLink>
+      </Box>
+      {showManualLinkInput ? (
+        <Stack flexDirection="column" spacing="spacingM" alignItems="stretch">
+          <FormControl style={{ width: '100%' }}>
+            <FormControl.Label>Task URL or GID</FormControl.Label>
+            <TextInput
+              value={taskLinkInput}
+              onChange={(event) => setTaskLinkInput(event.target.value)}
+              placeholder="Paste an Asana task URL or task GID"
+              isDisabled={isCreatingTask || isLinkingTask || isUnlinkingTask}
+              style={{ width: '100%' }}
+            />
+          </FormControl>
+          <Button
+            isFullWidth
+            variant="secondary"
+            onClick={linkExistingTask}
+            isLoading={isLinkingTask}
+            isDisabled={!hasConnection || isCreatingTask || isLinkingTask || isUnlinkingTask}>
+            Link pasted task
+          </Button>
+        </Stack>
+      ) : null}
+    </Stack>
+  );
 
   return (
     <Stack flexDirection="column" spacing="spacingM">
@@ -550,7 +773,7 @@ const Sidebar = () => {
               <Button
                 isFullWidth
                 variant="secondary"
-                onClick={openTaskDetailsDialog}
+                onClick={() => void openTaskDetailsDialog(taskLink)}
                 isLoading={isOpeningTaskDetails}
                 isDisabled={isOpeningTaskDetails || isUnlinkingTask}>
                 Manage task
@@ -566,129 +789,68 @@ const Sidebar = () => {
             </Stack>
           </Stack>
         ) : (
-          <Stack flexDirection="column" spacing="spacingL" alignItems="stretch">
-            <Box>
-              <Text as="div" marginBottom="spacing2Xs" fontColor="gray600">
-                Create new task
-              </Text>
-              <Paragraph marginBottom="spacingS">
-                Creates a primary Asana task in the configured default project.
-              </Paragraph>
-              <Button
-                isFullWidth
-                onClick={createPrimaryTask}
-                isLoading={isCreatingTask}
-                isDisabled={!hasConnection || isCreatingTask || isLinkingTask || isUnlinkingTask}>
-                Create Asana task
-              </Button>
-            </Box>
+          renderCreateOrLinkForm()
+        )}
+      </Box>
 
-            <Box>
-              <Text as="div" marginBottom="spacing2Xs" fontColor="gray600">
-                Link existing task
-              </Text>
-              <Paragraph marginBottom="none">
-                Search the default project and choose a task to link to this entry.
-              </Paragraph>
-            </Box>
-            {installationParameters.defaultProjectGid ? (
-              <FormControl style={{ width: '100%' }}>
-                <FormControl.Label>Search tasks</FormControl.Label>
-                <Box style={{ position: 'relative', width: '100%' }}>
-                  <TextInput
-                    value={taskSearchQuery}
-                    onChange={(event) => setTaskSearchQuery(event.target.value)}
-                    placeholder="Search tasks in the default project"
-                    isDisabled={isCreatingTask || isLinkingTask || isUnlinkingTask}
-                    style={{ width: '100%' }}
-                  />
-                  {(isSearchingTasks ||
-                    (taskSearchQuery.trim() && taskSearchResults.length > 0) ||
-                    (taskSearchQuery.trim() && !isSearchingTasks && !taskSearchResults.length)) && (
-                    <Box
-                      marginTop="spacing2Xs"
-                      style={{
-                        position: 'absolute',
-                        top: '100%',
-                        left: 0,
-                        right: 0,
-                        zIndex: 2,
-                        border: '1px solid #cfd9e0',
-                        borderRadius: '6px',
-                        backgroundColor: 'white',
-                        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
-                        overflow: 'hidden',
-                      }}>
-                      {isSearchingTasks ? (
-                        <Paragraph margin="spacingS">Searching Asana tasks...</Paragraph>
-                      ) : null}
-                      {taskSearchQuery.trim() && taskSearchResults.length ? (
-                        <Stack
-                          flexDirection="column"
-                          spacing="none"
-                          style={{ maxHeight: '220px', overflowY: 'auto' }}>
-                          {taskSearchResults.map((task, index) => (
-                            <Button
-                              key={task.gid}
-                              variant="transparent"
-                              isFullWidth
-                              isDisabled={isCreatingTask || isLinkingTask || isUnlinkingTask}
-                              onClick={() => void linkTaskById(task.gid)}
-                              style={{
-                                justifyContent: 'flex-start',
-                                borderRadius: 0,
-                                borderTop: index === 0 ? 'none' : '1px solid #e5ebed',
-                              }}>
-                              {task.name}
-                            </Button>
-                          ))}
-                        </Stack>
-                      ) : null}
-                      {taskSearchQuery.trim() && !isSearchingTasks && !taskSearchResults.length ? (
-                        <Paragraph margin="spacingS">No matching tasks found.</Paragraph>
-                      ) : null}
-                    </Box>
-                  )}
+      {!isLoadingTaskLink && taskLink ? (
+        <Box>
+          <SectionHeading>Additional Tasks</SectionHeading>
+          {secondaryTasks.map((link) => (
+            <Box key={link.linkEntryId} marginBottom="spacingM">
+              <Stack flexDirection="column" spacing="spacingS" alignItems="stretch">
+                <Box>
+                  <Paragraph marginBottom="spacing2Xs">{link.taskName}</Paragraph>
+                  <TextLink href={link.taskUrl} target="_blank" rel="noreferrer">
+                    Open in Asana
+                  </TextLink>
                 </Box>
-                <FormControl.HelpText>
-                  Select one result to link it to this entry.
-                </FormControl.HelpText>
-              </FormControl>
-            ) : null}
-            <Box>
+                <Stack flexDirection="column" spacing="spacingXs" alignItems="stretch">
+                  <Button
+                    isFullWidth
+                    size="small"
+                    variant="secondary"
+                    onClick={() => void openTaskDetailsDialog(link)}
+                    isLoading={isOpeningTaskDetails}
+                    isDisabled={isOpeningTaskDetails || unlinkingSecondaryId === link.linkEntryId}>
+                    Manage task
+                  </Button>
+                  <Button
+                    isFullWidth
+                    size="small"
+                    variant="negative"
+                    onClick={() => void removeSecondaryTask(link)}
+                    isLoading={unlinkingSecondaryId === link.linkEntryId}
+                    isDisabled={unlinkingSecondaryId === link.linkEntryId}>
+                    Unlink task
+                  </Button>
+                </Stack>
+              </Stack>
+            </Box>
+          ))}
+
+          {isAddingSecondaryTask ? (
+            <Stack flexDirection="column" spacing="spacingM" alignItems="stretch">
+              {renderCreateOrLinkForm()}
               <TextLink
                 as="button"
                 type="button"
-                onClick={() => setShowManualLinkInput((isVisible) => !isVisible)}
+                onClick={cancelAddingSecondaryTask}
                 style={{ fontSize: '14px' }}>
-                {showManualLinkInput ? 'Hide URL or GID linking' : 'Link by URL or GID'}
+                Cancel
               </TextLink>
-            </Box>
-            {showManualLinkInput ? (
-              <Stack flexDirection="column" spacing="spacingM" alignItems="stretch">
-                <FormControl style={{ width: '100%' }}>
-                  <FormControl.Label>Task URL or GID</FormControl.Label>
-                  <TextInput
-                    value={taskLinkInput}
-                    onChange={(event) => setTaskLinkInput(event.target.value)}
-                    placeholder="Paste an Asana task URL or task GID"
-                    isDisabled={isCreatingTask || isLinkingTask || isUnlinkingTask}
-                    style={{ width: '100%' }}
-                  />
-                </FormControl>
-                <Button
-                  isFullWidth
-                  variant="secondary"
-                  onClick={linkExistingTask}
-                  isLoading={isLinkingTask}
-                  isDisabled={!hasConnection || isCreatingTask || isLinkingTask || isUnlinkingTask}>
-                  Link pasted task
-                </Button>
-              </Stack>
-            ) : null}
-          </Stack>
-        )}
-      </Box>
+            </Stack>
+          ) : (
+            <Button
+              isFullWidth
+              variant="secondary"
+              onClick={startAddingSecondaryTask}
+              isDisabled={!hasConnection || isCreatingTask || isLinkingTask}>
+              Add another task
+            </Button>
+          )}
+        </Box>
+      ) : null}
     </Stack>
   );
 };
