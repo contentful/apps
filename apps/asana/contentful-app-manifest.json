@@ -400,6 +400,18 @@
           "name": "Workspace GID override",
           "type": "Symbol",
           "required": false
+        },
+        {
+          "id": "checkDuplicateName",
+          "name": "Check for a duplicate task name",
+          "type": "Boolean",
+          "required": false
+        },
+        {
+          "id": "allowDuplicateName",
+          "name": "Allow creating a task with a duplicate name",
+          "type": "Boolean",
+          "required": false
         }
       ],
       "resultSchema": {
@@ -498,6 +510,27 @@
           },
           "entryLinked": {
             "type": "boolean"
+          },
+          "duplicateTaskName": {
+            "type": "boolean"
+          },
+          "duplicateTask": {
+            "type": "object",
+            "properties": {
+              "gid": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "permalinkUrl": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "gid",
+              "name"
+            ]
           }
         },
         "required": [
