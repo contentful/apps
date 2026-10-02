@@ -173,6 +173,11 @@ export interface UpdateAsanaTaskRequest {
   // Dependency task GID to add or remove. Prefix with "-" to remove (e.g. "-1234").
   dependencyGid?: string;
   sectionGid?: string;
+  // Appends a "Contentful entry: <url>" line to the task's existing notes for `entryId`, instead
+  // of replacing notes outright. Used when linking an *existing* Asana task to an additional
+  // entry, so the task's description ends up referencing every entry it's linked to. Ignored
+  // (and an error is returned) if entryId is not provided. Takes precedence over `notes`.
+  appendEntryLink?: boolean;
 }
 
 export interface GetAsanaTaskRequest {

@@ -613,6 +613,154 @@ describe('updateAsanaTask handler', () => {
     });
   });
 
+  it('appends a Contentful entry link to the task notes instead of replacing them', async () => {
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: {
+          gid: '1214128635770011',
+          name: 'Shared task',
+          permalink_url: 'https://app.asana.com/0/1/1214128635770011/f',
+          notes:
+            'Contentful entry: https://app.contentful.com/spaces/test-space/environments/test-env/entries/entry-a',
+          completed: false,
+        },
+      }),
+    } as Response);
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: {
+          gid: '1214128635770011',
+          name: 'Shared task',
+          permalink_url: 'https://app.asana.com/0/1/1214128635770011/f',
+        },
+      }),
+    } as Response);
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: {
+          gid: '1214128635770011',
+          name: 'Shared task',
+          permalink_url: 'https://app.asana.com/0/1/1214128635770011/f',
+          notes:
+            'Contentful entry: https://app.contentful.com/spaces/test-space/environments/test-env/entries/entry-a\n\nContentful entry: https://app.contentful.com/spaces/test-space/environments/test-env/entries/entry-b',
+          completed: false,
+        },
+      }),
+    } as Response);
+
+    const result = await handler(
+      createEvent({
+        taskId: '1214128635770011',
+        entryId: 'entry-b',
+        appendEntryLink: true,
+      }) as Parameters<typeof handler>[0],
+      mockContext
+    );
+
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      2,
+      'https://app.asana.com/api/1.0/tasks/1214128635770011?opt_fields=gid,name,permalink_url',
+      expect.objectContaining({
+        method: 'PUT',
+        body: JSON.stringify({
+          data: {
+            notes:
+              'Contentful entry: https://app.contentful.com/spaces/test-space/environments/test-env/entries/entry-a\n\nContentful entry: https://app.contentful.com/spaces/test-space/environments/test-env/entries/entry-b',
+          },
+        }),
+      })
+    );
+    expect(result).toMatchObject({
+      success: true,
+      task: {
+        gid: '1214128635770011',
+        description:
+          'Contentful entry: https://app.contentful.com/spaces/test-space/environments/test-env/entries/entry-a\n\nContentful entry: https://app.contentful.com/spaces/test-space/environments/test-env/entries/entry-b',
+      },
+    });
+  });
+
+  it('does not duplicate the entry link when the task notes already contain it', async () => {
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: {
+          gid: '1214128635770012',
+          name: 'Shared task',
+          permalink_url: 'https://app.asana.com/0/1/1214128635770012/f',
+          notes:
+            'Contentful entry: https://app.contentful.com/spaces/test-space/environments/test-env/entries/entry-a',
+          completed: false,
+        },
+      }),
+    } as Response);
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: {
+          gid: '1214128635770012',
+          name: 'Shared task',
+          permalink_url: 'https://app.asana.com/0/1/1214128635770012/f',
+        },
+      }),
+    } as Response);
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: {
+          gid: '1214128635770012',
+          name: 'Shared task',
+          permalink_url: 'https://app.asana.com/0/1/1214128635770012/f',
+          notes:
+            'Contentful entry: https://app.contentful.com/spaces/test-space/environments/test-env/entries/entry-a',
+          completed: false,
+        },
+      }),
+    } as Response);
+
+    await handler(
+      createEvent({
+        taskId: '1214128635770012',
+        entryId: 'entry-a',
+        appendEntryLink: true,
+      }) as Parameters<typeof handler>[0],
+      mockContext
+    );
+
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      2,
+      'https://app.asana.com/api/1.0/tasks/1214128635770012?opt_fields=gid,name,permalink_url',
+      expect.objectContaining({
+        method: 'PUT',
+        body: JSON.stringify({
+          data: {
+            notes:
+              'Contentful entry: https://app.contentful.com/spaces/test-space/environments/test-env/entries/entry-a',
+          },
+        }),
+      })
+    );
+  });
+
+  it('returns an entryIdRequired error when appendEntryLink is requested without an entryId', async () => {
+    const result = await handler(
+      createEvent({
+        taskId: '1214128635770013',
+        appendEntryLink: true,
+      }) as Parameters<typeof handler>[0],
+      mockContext
+    );
+
+    expect(result).toEqual({
+      success: false,
+      message: VALIDATION_MESSAGES.entryIdRequired,
+    });
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
   it('returns an entryNotLinked error when the entry has no linked task', async () => {
     const result = await handler(
       createEvent({

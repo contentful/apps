@@ -17,6 +17,7 @@ import {
   TaskRefreshFailedError,
   updateTask,
 } from './asanaClient';
+import { appendEntryLink, buildEntryUrl } from './taskNotes';
 
 function getTrimmedValue(value?: string) {
   return value?.trim() ?? '';
@@ -42,6 +43,14 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
     };
   }
 
+  const shouldAppendEntryLink = body.appendEntryLink === true;
+  if (shouldAppendEntryLink && !entryId) {
+    return {
+      success: false,
+      message: VALIDATION_MESSAGES.entryIdRequired,
+    };
+  }
+
   const title = getTrimmedValue(body.title);
   const notes = getTrimmedValue(body.notes);
   const assignee = getTrimmedValue(body.assignee);
@@ -51,7 +60,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   const removeDependencyGid = dependencyGid.startsWith('-') ? dependencyGid.slice(1) : '';
   const sectionGid = getTrimmedValue(body.sectionGid);
   const hasTitleUpdate = typeof body.title === 'string';
-  const hasNotesUpdate = typeof body.notes === 'string';
+  const hasNotesUpdate = typeof body.notes === 'string' || shouldAppendEntryLink;
   const hasCompletedUpdate = typeof body.completed === 'boolean';
   const hasAssigneeUpdate = typeof body.assignee === 'string';
   const hasDueDateUpdate = typeof body.dueDate === 'string';
@@ -84,10 +93,19 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
       await moveTaskToSection(accessToken, taskGid, sectionGid);
     }
 
+    // Append rather than replace, so linking an existing task to another entry doesn't clobber
+    // whatever entry links (or other notes) are already in its description.
+    const notesUpdate = shouldAppendEntryLink
+      ? appendEntryLink(
+          (await getTask(accessToken, taskGid)).description,
+          buildEntryUrl(context, entryId)
+        )
+      : notes;
+
     const task = hasFieldUpdate
       ? await updateTask(accessToken, taskGid, {
           ...(hasTitleUpdate ? { name: title } : {}),
-          ...(hasNotesUpdate ? { notes } : {}),
+          ...(hasNotesUpdate ? { notes: notesUpdate } : {}),
           ...(hasCompletedUpdate ? { completed: body.completed } : {}),
           ...(hasAssigneeUpdate ? { assignee: assignee || null } : {}),
           ...(hasDueDateUpdate ? { due_on: dueDate || null } : {}),

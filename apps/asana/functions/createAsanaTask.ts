@@ -14,6 +14,7 @@ import type {
 import { getTaskLinkForEntry, saveTaskLinkForEntry } from '../src/utils/taskLinkStore';
 import { getAsanaAccessToken } from './asanaClient';
 import { createTaskFromParameters } from './createTaskFromParameters';
+import { appendEntryLink, buildEntryUrl } from './taskNotes';
 
 type LocalizedFieldValue = Record<string, unknown> | undefined;
 
@@ -35,23 +36,6 @@ function sleep(ms: number) {
 
 function getTrimmedValue(value?: string) {
   return value?.trim() ?? '';
-}
-
-function buildEntryUrl(context: FunctionEventContext, entryId: string) {
-  return `https://app.contentful.com/spaces/${context.spaceId}/environments/${context.environmentId}/entries/${entryId}`;
-}
-
-// Ensures every Asana task created for a Contentful entry links back to that entry, regardless of
-// whether the caller (Sidebar, Automation, etc.) already included a link in its own notes. Skips
-// appending if the link is already present to avoid duplicating it.
-function appendEntryLink(notes: string | undefined, entryUrl: string) {
-  const trimmedNotes = getTrimmedValue(notes);
-  if (trimmedNotes.includes(entryUrl)) {
-    return trimmedNotes;
-  }
-
-  const linkLine = `Contentful entry: ${entryUrl}`;
-  return trimmedNotes ? `${trimmedNotes}\n\n${linkLine}` : linkLine;
 }
 
 function getFirstLocalizedString(field: LocalizedFieldValue) {

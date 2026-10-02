@@ -583,6 +583,10 @@
           "sectionGid": {
             "type": "string",
             "title": "Section GID to move the task into"
+          },
+          "appendEntryLink": {
+            "type": "boolean",
+            "title": "Append a link to this Contentful entry to the task's notes, instead of replacing them"
           }
         }
       },

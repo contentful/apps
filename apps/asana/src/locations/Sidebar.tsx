@@ -31,6 +31,7 @@ import {
   type InitiateAsanaOAuthResponse,
   type TaskDetailsDialogResult,
   type TaskDetailsDialogParameters,
+  type UpdateAsanaTaskResponse,
 } from '../types';
 import { parseInstallationParameters } from '../utils/installationParameters';
 import {
@@ -558,7 +559,25 @@ const Sidebar = () => {
         throw new Error(response.message || 'Could not load the Asana task.');
       }
 
-      await persistNewTaskLink(response.task);
+      // Linking an existing task (rather than creating a new one) means it may already be linked
+      // to other entries - make sure its description also references this entry, so anyone
+      // looking at the task in Asana can see every entry it's tied to.
+      let linkedTask = response.task;
+      try {
+        const updateResponse = await callAction<UpdateAsanaTaskResponse>('updateAsanaTaskAction', {
+          taskId: linkedTask.gid,
+          entryId: entrySys.id,
+          appendEntryLink: true,
+        });
+        if (updateResponse.success && updateResponse.task) {
+          linkedTask = updateResponse.task;
+        }
+      } catch {
+        // Best-effort - if this fails, still proceed to link the task using the details we
+        // already have, rather than blocking the link on it.
+      }
+
+      await persistNewTaskLink(linkedTask);
       setIsAddingSecondaryTask(false);
       setTaskLinkInput('');
       setTaskSearchQuery('');
