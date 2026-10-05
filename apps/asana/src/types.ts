@@ -184,6 +184,27 @@ export interface GetAsanaTaskRequest {
   taskId?: string;
 }
 
+// Superseded by entryId support on UpdateAsanaTaskRequest/updateAsanaTaskAction (which moved to
+// parametersSchema and is no longer subject to the legacy 8-parameter cap). Kept for backward
+// compatibility with the live "Asana Task Complete" automation until that's migrated over.
+export interface SyncAsanaTaskFromEntryRequest {
+  entryId?: string;
+  completed?: boolean;
+  sectionGid?: string;
+  title?: string;
+  notes?: string;
+  assignee?: string;
+  dueDate?: string;
+}
+
+export type SyncAsanaTaskFromEntryResponse = Record<string, unknown> & {
+  success: boolean;
+  message: string;
+  task?: AsanaTask & {
+    completed?: boolean;
+  };
+};
+
 export interface AddAsanaCommentRequest {
   taskId?: string;
   // Contentful entry ID. Used to look up the linked Asana task when an automation trigger only

@@ -181,6 +181,19 @@
       ]
     },
     {
+      "id": "syncAsanaTaskFromEntryFunction",
+      "name": "Sync Asana task from entry",
+      "description": "Updates the completion state and/or section of the Asana task linked to a Contentful entry.",
+      "path": "functions/syncAsanaTaskFromEntry.js",
+      "entryFile": "functions/syncAsanaTaskFromEntry.ts",
+      "allowNetworks": [
+        "https://app.asana.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
       "id": "appEventHandler",
       "name": "App event handler function",
       "description": "Function to handle Contentful app events.",
@@ -1288,6 +1301,265 @@
               },
               "permalinkUrl": {
                 "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "modifiedAt": {
+                "type": "string"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "gid": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "gid",
+                    "name"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "gid",
+              "name",
+              "permalinkUrl"
+            ]
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      }
+    },
+    {
+      "id": "syncAsanaTaskFromEntryAction",
+      "name": "Sync Asana task from entry",
+      "type": "function-invocation",
+      "functionId": "syncAsanaTaskFromEntryFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "entryId",
+          "name": "Contentful Entry ID",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "completed",
+          "name": "Completed",
+          "type": "Boolean",
+          "required": false
+        },
+        {
+          "id": "sectionGid",
+          "name": "Section GID to move the task into",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "title",
+          "name": "Updated task title",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "notes",
+          "name": "Updated task notes",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "assignee",
+          "name": "Assignee email or GID",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "dueDate",
+          "name": "Due date (YYYY-MM-DD)",
+          "type": "Symbol",
+          "required": false
+        }
+      ],
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "task": {
+            "type": "object",
+            "properties": {
+              "gid": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "permalinkUrl": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "assigneeName": {
+                "type": "string"
+              },
+              "assigneeGid": {
+                "type": "string"
+              },
+              "dueDate": {
+                "type": "string"
+              },
+              "completed": {
+                "type": "boolean"
+              },
+              "dependencies": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "gid": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "gid",
+                    "name"
+                  ]
+                }
+              },
+              "projectGid": {
+                "type": "string"
+              },
+              "sectionGid": {
+                "type": "string"
+              },
+              "sectionName": {
+                "type": "string"
+              },
+              "customFields": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "gid": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "enumOptions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "gid": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "gid",
+                          "name"
+                        ]
+                      }
+                    },
+                    "textValue": {
+                      "type": "string"
+                    },
+                    "numberValue": {
+                      "type": "number"
+                    },
+                    "precision": {
+                      "type": "number"
+                    },
+                    "enumValue": {
+                      "type": "object",
+                      "properties": {
+                        "gid": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "multiEnumValues": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "gid": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "gid",
+                          "name"
+                        ]
+                      }
+                    },
+                    "dateValue": {
+                      "type": "string"
+                    },
+                    "peopleValue": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "gid": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "email": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "gid",
+                          "name"
+                        ]
+                      }
+                    },
+                    "displayValue": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "gid",
+                    "name",
+                    "type"
+                  ]
+                }
               },
               "createdAt": {
                 "type": "string"
