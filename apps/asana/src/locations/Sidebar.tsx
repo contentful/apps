@@ -10,6 +10,7 @@ import {
   Note,
   Paragraph,
   SectionHeading,
+  Spinner,
   Stack,
   Text,
   TextInput,
@@ -68,6 +69,9 @@ const Sidebar = () => {
   const [isLinkingTask, setIsLinkingTask] = useState(false);
   const [isUnlinkingTask, setIsUnlinkingTask] = useState(false);
   const [isOpeningTaskDetails, setIsOpeningTaskDetails] = useState(false);
+  // Tracks which row's kebab menu triggered "Manage task", so only that row's icon shows a
+  // loading state while `isOpeningTaskDetails` blocks every row from opening a second dialog.
+  const [openingTaskDetailsLinkId, setOpeningTaskDetailsLinkId] = useState<string | null>(null);
   const [isAddingSecondaryTask, setIsAddingSecondaryTask] = useState(false);
   const [unlinkingSecondaryId, setUnlinkingSecondaryId] = useState<string | null>(null);
   const [taskLinkInput, setTaskLinkInput] = useState('');
@@ -324,6 +328,7 @@ const Sidebar = () => {
     }
 
     setIsOpeningTaskDetails(true);
+    setOpeningTaskDetailsLinkId(link.linkEntryId || 'primary');
 
     try {
       const latestTask = await refreshLinkedTask(link);
@@ -388,6 +393,7 @@ const Sidebar = () => {
       }
     } finally {
       setIsOpeningTaskDetails(false);
+      setOpeningTaskDetailsLinkId(null);
     }
   };
 
@@ -870,6 +876,8 @@ const Sidebar = () => {
                 const isUnlinkingThis = link.isPrimary
                   ? isUnlinkingTask
                   : unlinkingSecondaryId === link.linkEntryId;
+                const isManagingThis = openingTaskDetailsLinkId === (link.linkEntryId || 'primary');
+                const isRowActionPending = isManagingThis || isUnlinkingThis;
 
                 return (
                   <Box
@@ -905,9 +913,16 @@ const Sidebar = () => {
                           <Menu.Trigger>
                             <IconButton
                               aria-label="Task actions"
-                              icon={<Text fontColor="gray600">⋯</Text>}
+                              icon={
+                                isRowActionPending ? (
+                                  <Spinner size="small" />
+                                ) : (
+                                  <Text fontColor="gray600">⋯</Text>
+                                )
+                              }
                               variant="transparent"
                               size="small"
+                              isDisabled={isRowActionPending}
                             />
                           </Menu.Trigger>
                           <Menu.List>
