@@ -18,4 +18,3 @@ examples/**/package-lock.json
 */example-app
 apps-migration-scripts/reports/
 apps-migration-scripts/logs/
-apps/google-docs/src/fixtures/googleDocsReview/fixture.json

@@ -122,9 +122,6 @@ jobs:
             VITE_ENV='test' \
             REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
             REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
-            VITE_GOOGLE_PICKER_API_KEY=$VITE_GOOGLE_PICKER_API_KEY \
-            VITE_GOOGLE_APP_ID=$VITE_GOOGLE_APP_ID \
-            VITE_LD_CLIENT_ID='588a047044b03e0b3211298d' \
             NODE_ENV='staging' \
             npm run build
       - run:
@@ -136,10 +133,6 @@ jobs:
             VITE_ENV='test' \
             REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
             REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
-            VITE_GOOGLE_PICKER_API_KEY=$VITE_GOOGLE_PICKER_API_KEY \
-            VITE_GOOGLE_APP_ID=$VITE_GOOGLE_APP_ID \
-            VITE_LD_CLIENT_ID='588a047044b03e0b3211298d' \
-            GOOGLE_DOCS_TEST_CLOUDFRONT_DIST_ID=$GOOGLE_DOCS_TEST_CLOUDFRONT_DIST_ID \
             STAGE='test' npm run deploy:test
       - run:
           name: Invalidate Slack staging cloudfront distribution
@@ -171,9 +164,6 @@ jobs:
           command: |
             REACT_APP_BACKEND_BASE_URL=$APP_SLACK_BACKEND_BASE_URL_PROD \
             REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_PROD \
-            VITE_GOOGLE_PICKER_API_KEY=$VITE_GOOGLE_PICKER_API_KEY \
-            VITE_GOOGLE_APP_ID=$VITE_GOOGLE_APP_ID \
-            VITE_LD_CLIENT_ID='588a047044b03e0b3211298e' \
             NODE_ENV='production' \
             npm run build
       - publish
@@ -185,10 +175,6 @@ jobs:
             STATIC_KLAVIYO_S3_BASE="s3://cf-apps-klaviyo/apps" \
             REACT_APP_BACKEND_BASE_URL=$APP_SLACK_BACKEND_BASE_URL_PROD \
             REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_PROD \
-            VITE_GOOGLE_PICKER_API_KEY=$VITE_GOOGLE_PICKER_API_KEY \
-            VITE_GOOGLE_APP_ID=$VITE_GOOGLE_APP_ID \
-            VITE_LD_CLIENT_ID='588a047044b03e0b3211298e' \
-            GOOGLE_DOCS_PROD_CLOUDFRONT_DIST_ID=$GOOGLE_DOCS_PROD_CLOUDFRONT_DIST_ID \
             STAGE='prd' npm run deploy
       - run:
           name: Post Deploy
