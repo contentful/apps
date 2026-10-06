@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mockCma } from '../mocks';
-import EntryCloner from '../../src/utils/EntryCloner';
+import EntryCloner, { ReferenceDiscoveryAbortedError } from '../../src/utils/EntryCloner';
 import type { AppParameters } from '../../src/vite-env';
 import { getMockContentType, getMockEntry } from './EntryClonerTestUtils';
 
@@ -789,6 +789,53 @@ describe('EntryCloner', () => {
           },
         })
       );
+    });
+  });
+
+  describe('getReferenceEntries', () => {
+    beforeEach(() => {
+      contentType = getMockContentType([{ id: 'title', type: 'Text' }]);
+      referencedEntry = getMockEntry('referenced-entry-id', {
+        title: { 'en-US': 'Referenced Entry Title' },
+      });
+      mainEntry = getMockEntry('main-entry-id', {
+        title: { 'en-US': 'Main Entry Title' },
+        reference: {
+          'en-US': {
+            sys: { type: 'Link', linkType: 'Entry', id: 'referenced-entry-id' },
+          },
+        },
+      });
+    });
+
+    it('returns one row per unique referenced entry with labels', async () => {
+      mockCma.contentType.get.mockResolvedValue(contentType);
+      mockCma.entry.get.mockResolvedValueOnce(mainEntry).mockResolvedValueOnce(referencedEntry);
+
+      const entries = await entryCloner.getReferenceEntries();
+
+      expect(entries).toHaveLength(2);
+      expect(entries[0].entryId).toBe('main-entry-id');
+      expect(entries.map((entry) => entry.entryId).sort()).toEqual([
+        'main-entry-id',
+        'referenced-entry-id',
+      ]);
+    });
+
+    it('stops discovery when the abort signal is triggered', async () => {
+      const abortController = new AbortController();
+      mockCma.contentType.get.mockResolvedValue(contentType);
+      mockCma.entry.get.mockImplementation(async ({ entryId }) => {
+        if (entryId === 'main-entry-id') {
+          abortController.abort();
+          return mainEntry;
+        }
+        return referencedEntry;
+      });
+
+      await expect(
+        entryCloner.getReferenceEntries({ signal: abortController.signal })
+      ).rejects.toBeInstanceOf(ReferenceDiscoveryAbortedError);
     });
   });
 });

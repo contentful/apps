@@ -11,6 +11,19 @@ export type CloneReferenceNode = {
   children: CloneReferenceNode[];
 };
 
+export type CloneReferenceEntry = {
+  entryId: string;
+  label: string;
+  contentTypeId: string;
+};
+
+export class ReferenceDiscoveryAbortedError extends Error {
+  constructor() {
+    super('Reference discovery was cancelled');
+    this.name = 'ReferenceDiscoveryAbortedError';
+  }
+}
+
 class EntryCloner {
   private references: ReferenceMap = {};
   private clones: ReferenceMap = {};
@@ -25,6 +38,7 @@ class EntryCloner {
   private setReferencesCount: (count: number) => void;
   private setClonesCount: (count: number) => void;
   private setUpdatesCount: (count: number) => void;
+  private abortSignal?: AbortSignal;
 
   constructor(
     cma: CMAClient,
@@ -76,7 +90,44 @@ class EntryCloner {
     return this.buildReferenceNode(this.entryId, new Set());
   }
 
+  async getReferenceEntries(options?: { signal?: AbortSignal }): Promise<CloneReferenceEntry[]> {
+    this.abortSignal = options?.signal;
+    try {
+      await this.findReferences(this.entryId);
+    } finally {
+      this.abortSignal = undefined;
+    }
+
+    const referenceEntries: CloneReferenceEntry[] = [];
+    for (const [entryId, entry] of Object.entries(this.references)) {
+      referenceEntries.push({
+        entryId,
+        label: await this.getEntryLabel(entry),
+        contentTypeId: entry.sys.contentType.sys.id,
+      });
+    }
+
+    referenceEntries.sort((left, right) => {
+      if (left.entryId === this.entryId) {
+        return -1;
+      }
+      if (right.entryId === this.entryId) {
+        return 1;
+      }
+      return left.label.localeCompare(right.label, undefined, { sensitivity: 'base' });
+    });
+
+    return referenceEntries;
+  }
+
+  private throwIfDiscoveryAborted(): void {
+    if (this.abortSignal?.aborted) {
+      throw new ReferenceDiscoveryAbortedError();
+    }
+  }
+
   private async findReferences(entryId: string, parentEntryId?: string): Promise<void> {
+    this.throwIfDiscoveryAborted();
     this.addChildReference(parentEntryId, entryId);
 
     if (this.references[entryId]) {
@@ -85,6 +136,7 @@ class EntryCloner {
 
     let entry;
     try {
+      this.throwIfDiscoveryAborted();
       entry = await this.cma.entry.get({ entryId: entryId });
     } catch (_error) {
       // Deleted entries are not found
