@@ -187,8 +187,8 @@ function Sidebar() {
             {isDiscovering && referencesCount === 0
               ? 'Discovering references…'
               : isDiscovering
-                ? `Discovering references… (${referencesCount} found so far)`
-                : `Found ${referencesCount} ${referencesCount === 1 ? 'reference' : 'references'}.`}
+              ? `Discovering references… (${referencesCount} found so far)`
+              : `Found ${referencesCount} ${referencesCount === 1 ? 'reference' : 'references'}.`}
           </Text>
         )}
         {(isCloning || isRedirecting || isFinished) && (

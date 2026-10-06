@@ -38,7 +38,6 @@ class EntryCloner {
   private setReferencesCount: (count: number) => void;
   private setClonesCount: (count: number) => void;
   private setUpdatesCount: (count: number) => void;
-  private abortSignal?: AbortSignal;
 
   constructor(
     cma: CMAClient,
@@ -91,12 +90,7 @@ class EntryCloner {
   }
 
   async getReferenceEntries(options?: { signal?: AbortSignal }): Promise<CloneReferenceEntry[]> {
-    this.abortSignal = options?.signal;
-    try {
-      await this.findReferences(this.entryId);
-    } finally {
-      this.abortSignal = undefined;
-    }
+    await this.findReferences(this.entryId, undefined, options?.signal);
 
     const referenceEntries: CloneReferenceEntry[] = [];
     for (const [entryId, entry] of Object.entries(this.references)) {
@@ -120,14 +114,18 @@ class EntryCloner {
     return referenceEntries;
   }
 
-  private throwIfDiscoveryAborted(): void {
-    if (this.abortSignal?.aborted) {
+  private throwIfDiscoveryAborted(signal?: AbortSignal): void {
+    if (signal?.aborted) {
       throw new ReferenceDiscoveryAbortedError();
     }
   }
 
-  private async findReferences(entryId: string, parentEntryId?: string): Promise<void> {
-    this.throwIfDiscoveryAborted();
+  private async findReferences(
+    entryId: string,
+    parentEntryId?: string,
+    signal?: AbortSignal
+  ): Promise<void> {
+    this.throwIfDiscoveryAborted(signal);
     this.addChildReference(parentEntryId, entryId);
 
     if (this.references[entryId]) {
@@ -136,7 +134,7 @@ class EntryCloner {
 
     let entry;
     try {
-      this.throwIfDiscoveryAborted();
+      this.throwIfDiscoveryAborted(signal);
       entry = await this.cma.entry.get({ entryId: entryId });
     } catch (_error) {
       // Deleted entries are not found
@@ -152,7 +150,7 @@ class EntryCloner {
 
         for (const locale in field) {
           const fieldValue = field[locale];
-          await this.inspectField(fieldValue, entryId);
+          await this.inspectField(fieldValue, entryId, signal);
         }
       }
     }
@@ -225,24 +223,28 @@ class EntryCloner {
     await Promise.all(updatePromises);
   }
 
-  private async inspectField(fieldValue: any, parentEntryId?: string): Promise<void> {
+  private async inspectField(
+    fieldValue: any,
+    parentEntryId?: string,
+    signal?: AbortSignal
+  ): Promise<void> {
     if (!fieldValue) return;
 
     if (this.isReference(fieldValue)) {
-      await this.findReferences(fieldValue.sys.id, parentEntryId);
+      await this.findReferences(fieldValue.sys.id, parentEntryId, signal);
       return;
     }
 
     if (Array.isArray(fieldValue)) {
       for (const value of fieldValue) {
-        await this.inspectField(value, parentEntryId);
+        await this.inspectField(value, parentEntryId, signal);
       }
       return;
     }
 
     if (this.isObject(fieldValue)) {
       for (const value of Object.values(fieldValue)) {
-        await this.inspectField(value, parentEntryId);
+        await this.inspectField(value, parentEntryId, signal);
       }
     }
   }
