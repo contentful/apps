@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Text, Button, Stack, Note } from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { SidebarAppSDK } from '@contentful/app-sdk';
-import EntryCloner from '../utils/EntryCloner';
+import EntryCloner, { ReferenceDiscoveryAbortedError } from '../utils/EntryCloner';
 import { useInstallationParameters } from '../utils/useInstallationParameters';
 import { AppParameters } from '@/vite-env';
 
@@ -17,12 +17,14 @@ function Sidebar() {
   const [countdown, setCountdown] = useState<number>(0);
   const parameters = useInstallationParameters(sdk) as AppParameters;
 
+  const [isDiscovering, setIsDiscovering] = useState<boolean>(false);
   const [isConfirming, setIsConfirming] = useState<boolean>(false);
   const [isCloning, setIsCloning] = useState<boolean>(false);
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [isRedirecting, setIsRedirecting] = useState<boolean>(false);
   const [cloneError, setCloneError] = useState<string | null>(null);
   const [cloneWarning, setCloneWarning] = useState<string | null>(null);
+  const discoveryAbortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (countdown === 0) return;
@@ -40,6 +42,7 @@ function Sidebar() {
   }, [countdown]);
 
   const resetState = () => {
+    setIsDiscovering(false);
     setIsConfirming(false);
     setIsCloning(false);
     setIsFinished(false);
@@ -49,11 +52,16 @@ function Sidebar() {
     setUpdatesCount(0);
     setCloneError(null);
     setCloneWarning(null);
+    discoveryAbortControllerRef.current = null;
+  };
+
+  const cancelDiscovery = () => {
+    discoveryAbortControllerRef.current?.abort();
   };
 
   const clone = async (): Promise<void> => {
     resetState();
-    setIsConfirming(true);
+    setIsDiscovering(true);
     await sdk.entry.save();
     const cloner = new EntryCloner(
       sdk.cma,
@@ -63,14 +71,39 @@ function Sidebar() {
       setClonesCount,
       setUpdatesCount
     );
-    const referenceTree = await cloner.getReferenceTree();
+
+    const discoveryAbortController = new AbortController();
+    discoveryAbortControllerRef.current = discoveryAbortController;
+
+    let referenceEntries;
+    try {
+      referenceEntries = await cloner.getReferenceEntries({
+        signal: discoveryAbortController.signal,
+      });
+    } catch (error) {
+      if (error instanceof ReferenceDiscoveryAbortedError) {
+        resetState();
+        return;
+      }
+      resetState();
+      setCloneError(
+        error instanceof Error ? error.message : 'An unexpected error occurred during discovery.'
+      );
+      sdk.notifier.error('Could not discover references for this entry.');
+      return;
+    }
+
+    setIsDiscovering(false);
+    setIsConfirming(true);
+
     const selectedEntryIds = await sdk.dialogs.openCurrentApp({
       title: 'Select entries to clone',
       width: 'large',
       shouldCloseOnEscapePress: true,
       shouldCloseOnOverlayClick: false,
       parameters: {
-        referenceTree,
+        rootEntryId: sdk.ids.entry,
+        referenceEntries,
       },
     });
 
@@ -116,6 +149,8 @@ function Sidebar() {
     sdk.notifier.success('Clone successful');
   };
 
+  const showProgress = isDiscovering || isConfirming || isCloning || isRedirecting || isFinished;
+
   return (
     <Stack spacing="spacingM" flexDirection="column" alignItems="start">
       <Text fontColor="gray500" fontWeight="fontWeightMedium">
@@ -124,11 +159,17 @@ function Sidebar() {
       <Button
         variant="secondary"
         isLoading={isCloning}
-        isDisabled={isConfirming || isCloning || isRedirecting}
+        isDisabled={isDiscovering || isConfirming || isCloning || isRedirecting}
         onClick={clone}
         isFullWidth>
         Clone entry
       </Button>
+
+      {isDiscovering && (
+        <Button variant="transparent" size="small" onClick={cancelDiscovery}>
+          Cancel discovery
+        </Button>
+      )}
 
       {cloneError && (
         <Note variant="negative" style={{ width: '100%' }}>
@@ -141,9 +182,13 @@ function Sidebar() {
         </Note>
       )}
       <Stack spacing="spacing2Xs" flexDirection="column" alignItems="start">
-        {(isConfirming || isCloning || isRedirecting || isFinished) && (
+        {showProgress && (
           <Text fontColor="gray500" fontWeight="fontWeightMedium">
-            {`Found ${referencesCount} ${referencesCount === 1 ? 'reference' : 'references'}.`}
+            {isDiscovering && referencesCount === 0
+              ? 'Discovering references…'
+              : isDiscovering
+              ? `Discovering references… (${referencesCount} found so far)`
+              : `Found ${referencesCount} ${referencesCount === 1 ? 'reference' : 'references'}.`}
           </Text>
         )}
         {(isCloning || isRedirecting || isFinished) && (

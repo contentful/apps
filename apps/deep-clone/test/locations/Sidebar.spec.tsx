@@ -29,11 +29,17 @@ vi.mock('../../src/utils/EntryCloner', () => {
       .fn()
       .mockImplementation(
         (cma, parameters, entryId, setReferencesCount, setClonesCount, setUpdatesCount) => ({
-          getReferenceTree: vi.fn().mockImplementation(async () => ({
-            entryId: 'test-entry',
-            label: 'Main Entry',
-            children: [{ entryId: 'referenced-entry-id', label: 'Referenced Entry', children: [] }],
-          })),
+          getReferenceEntries: vi.fn().mockImplementation(async () => {
+            setReferencesCount(2);
+            return [
+              { entryId: 'test-entry', label: 'Main Entry', contentTypeId: 'page' },
+              {
+                entryId: 'referenced-entry-id',
+                label: 'Referenced Entry',
+                contentTypeId: 'section',
+              },
+            ];
+          }),
           cloneEntry: mockCloneEntry.mockImplementation(async () => {
             setReferencesCount(2);
             setClonesCount(2);
@@ -158,11 +164,15 @@ describe('Sidebar component', () => {
       shouldCloseOnEscapePress: true,
       shouldCloseOnOverlayClick: false,
       parameters: {
-        referenceTree: {
-          entryId: 'test-entry',
-          label: 'Main Entry',
-          children: [{ entryId: 'referenced-entry-id', label: 'Referenced Entry', children: [] }],
-        },
+        rootEntryId: 'test-entry',
+        referenceEntries: [
+          { entryId: 'test-entry', label: 'Main Entry', contentTypeId: 'page' },
+          {
+            entryId: 'referenced-entry-id',
+            label: 'Referenced Entry',
+            contentTypeId: 'section',
+          },
+        ],
       },
     });
 

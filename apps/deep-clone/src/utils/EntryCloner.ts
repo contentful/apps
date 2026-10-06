@@ -11,6 +11,19 @@ export type CloneReferenceNode = {
   children: CloneReferenceNode[];
 };
 
+export type CloneReferenceEntry = {
+  entryId: string;
+  label: string;
+  contentTypeId: string;
+};
+
+export class ReferenceDiscoveryAbortedError extends Error {
+  constructor() {
+    super('Reference discovery was cancelled');
+    this.name = 'ReferenceDiscoveryAbortedError';
+  }
+}
+
 class EntryCloner {
   private references: ReferenceMap = {};
   private clones: ReferenceMap = {};
@@ -76,7 +89,43 @@ class EntryCloner {
     return this.buildReferenceNode(this.entryId, new Set());
   }
 
-  private async findReferences(entryId: string, parentEntryId?: string): Promise<void> {
+  async getReferenceEntries(options?: { signal?: AbortSignal }): Promise<CloneReferenceEntry[]> {
+    await this.findReferences(this.entryId, undefined, options?.signal);
+
+    const referenceEntries: CloneReferenceEntry[] = [];
+    for (const [entryId, entry] of Object.entries(this.references)) {
+      referenceEntries.push({
+        entryId,
+        label: await this.getEntryLabel(entry),
+        contentTypeId: entry.sys.contentType.sys.id,
+      });
+    }
+
+    referenceEntries.sort((left, right) => {
+      if (left.entryId === this.entryId) {
+        return -1;
+      }
+      if (right.entryId === this.entryId) {
+        return 1;
+      }
+      return left.label.localeCompare(right.label, undefined, { sensitivity: 'base' });
+    });
+
+    return referenceEntries;
+  }
+
+  private throwIfDiscoveryAborted(signal?: AbortSignal): void {
+    if (signal?.aborted) {
+      throw new ReferenceDiscoveryAbortedError();
+    }
+  }
+
+  private async findReferences(
+    entryId: string,
+    parentEntryId?: string,
+    signal?: AbortSignal
+  ): Promise<void> {
+    this.throwIfDiscoveryAborted(signal);
     this.addChildReference(parentEntryId, entryId);
 
     if (this.references[entryId]) {
@@ -85,6 +134,7 @@ class EntryCloner {
 
     let entry;
     try {
+      this.throwIfDiscoveryAborted(signal);
       entry = await this.cma.entry.get({ entryId: entryId });
     } catch (_error) {
       // Deleted entries are not found
@@ -100,7 +150,7 @@ class EntryCloner {
 
         for (const locale in field) {
           const fieldValue = field[locale];
-          await this.inspectField(fieldValue, entryId);
+          await this.inspectField(fieldValue, entryId, signal);
         }
       }
     }
@@ -173,24 +223,28 @@ class EntryCloner {
     await Promise.all(updatePromises);
   }
 
-  private async inspectField(fieldValue: any, parentEntryId?: string): Promise<void> {
+  private async inspectField(
+    fieldValue: any,
+    parentEntryId?: string,
+    signal?: AbortSignal
+  ): Promise<void> {
     if (!fieldValue) return;
 
     if (this.isReference(fieldValue)) {
-      await this.findReferences(fieldValue.sys.id, parentEntryId);
+      await this.findReferences(fieldValue.sys.id, parentEntryId, signal);
       return;
     }
 
     if (Array.isArray(fieldValue)) {
       for (const value of fieldValue) {
-        await this.inspectField(value, parentEntryId);
+        await this.inspectField(value, parentEntryId, signal);
       }
       return;
     }
 
     if (this.isObject(fieldValue)) {
       for (const value of Object.values(fieldValue)) {
-        await this.inspectField(value, parentEntryId);
+        await this.inspectField(value, parentEntryId, signal);
       }
     }
   }

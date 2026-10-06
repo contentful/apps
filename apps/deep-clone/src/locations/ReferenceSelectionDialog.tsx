@@ -12,10 +12,11 @@ import {
   Text,
 } from '@contentful/f36-components';
 import { css } from '@emotion/css';
-import { CloneReferenceNode } from '../utils/EntryCloner';
+import { CloneReferenceEntry } from '../utils/EntryCloner';
 
 type DialogInvocationParameters = {
-  referenceTree: CloneReferenceNode;
+  rootEntryId: string;
+  referenceEntries: CloneReferenceEntry[];
 };
 
 const styles = {
@@ -39,117 +40,42 @@ const styles = {
     borderTop: '1px solid #e5ebf1',
     backgroundColor: '#ffffff',
   }),
-  treeRow: css({
+  entryRow: css({
     width: '100%',
   }),
-  treeChildren: css({
-    marginLeft: '20px',
-    paddingLeft: '12px',
-    borderLeft: '1px solid #d3dce6',
-  }),
 };
-
-function collectEntryIds(node: CloneReferenceNode): string[] {
-  // The reference tree is built per-path (buildReferenceNode), so an entry
-  // referenced from multiple parents ("diamond" fan-in, no cycle required)
-  // appears as a separate node under each parent. Dedupe by entryId here so
-  // counts and selection state reflect unique entries, not tree nodes.
-  const seen = new Set<string>();
-  const collect = (currentNode: CloneReferenceNode) => {
-    seen.add(currentNode.entryId);
-    for (const child of currentNode.children) {
-      collect(child);
-    }
-  };
-  collect(node);
-  return Array.from(seen);
-}
-
-function toggleNodeSelection(
-  node: CloneReferenceNode,
-  nextChecked: boolean,
-  selectedEntryIds: Set<string>
-): Set<string> {
-  const nextSelectedEntryIds = new Set(selectedEntryIds);
-
-  for (const entryId of collectEntryIds(node)) {
-    if (nextChecked) {
-      nextSelectedEntryIds.add(entryId);
-    } else {
-      nextSelectedEntryIds.delete(entryId);
-    }
-  }
-
-  return nextSelectedEntryIds;
-}
-
-function TreeNode({
-  node,
-  selectedEntryIds,
-  rootEntryId,
-  onToggle,
-}: {
-  node: CloneReferenceNode;
-  selectedEntryIds: Set<string>;
-  rootEntryId: string;
-  onToggle: (node: CloneReferenceNode, checked: boolean) => void;
-}) {
-  const isRoot = node.entryId === rootEntryId;
-  const isChecked = selectedEntryIds.has(node.entryId);
-
-  return (
-    <Stack
-      spacing="spacingS"
-      flexDirection="column"
-      alignItems="stretch"
-      className={styles.treeRow}>
-      <Checkbox
-        isChecked={isChecked}
-        isDisabled={isRoot}
-        onChange={(event) => onToggle(node, event.target.checked)}>
-        <Text fontWeight={isRoot ? 'fontWeightDemiBold' : 'fontWeightMedium'}>{node.label}</Text>
-        <Text as="div" fontColor="gray500" fontSize="fontSizeS">
-          {isRoot ? 'Root entry' : node.entryId}
-        </Text>
-      </Checkbox>
-
-      {node.children.length > 0 && (
-        <Box className={styles.treeChildren}>
-          <Stack spacing="spacingS" flexDirection="column" alignItems="stretch">
-            {node.children.map((child) => (
-              <TreeNode
-                key={`${node.entryId}-${child.entryId}`}
-                node={child}
-                selectedEntryIds={selectedEntryIds}
-                rootEntryId={rootEntryId}
-                onToggle={onToggle}
-              />
-            ))}
-          </Stack>
-        </Box>
-      )}
-    </Stack>
-  );
-}
 
 function ReferenceSelectionDialog() {
   const sdk = useSDK<DialogAppSDK>();
   const invocationParameters = sdk.parameters.invocation as DialogInvocationParameters;
-  const referenceTree = invocationParameters.referenceTree;
+  const { rootEntryId, referenceEntries } = invocationParameters;
   useAutoResizer();
 
-  const allEntryIds = useMemo(() => collectEntryIds(referenceTree), [referenceTree]);
-  const rootEntryId = referenceTree.entryId;
+  const allEntryIds = useMemo(
+    () => referenceEntries.map((entry) => entry.entryId),
+    [referenceEntries]
+  );
   const [selectedEntryIds, setSelectedEntryIds] = useState<Set<string>>(new Set(allEntryIds));
 
   const selectedReferenceCount = selectedEntryIds.size - 1;
   const totalReferenceCount = allEntryIds.length - 1;
   const allReferencesSelected = selectedReferenceCount === totalReferenceCount;
 
-  const handleToggleNode = (node: CloneReferenceNode, checked: boolean) => {
-    setSelectedEntryIds((currentSelectedEntryIds) =>
-      toggleNodeSelection(node, checked, currentSelectedEntryIds)
-    );
+  const handleToggleEntry = (entryId: string, checked: boolean) => {
+    if (entryId === rootEntryId) {
+      return;
+    }
+
+    setSelectedEntryIds((currentSelectedEntryIds) => {
+      const nextSelectedEntryIds = new Set(currentSelectedEntryIds);
+      if (checked) {
+        nextSelectedEntryIds.add(entryId);
+      } else {
+        nextSelectedEntryIds.delete(entryId);
+      }
+      nextSelectedEntryIds.add(rootEntryId);
+      return nextSelectedEntryIds;
+    });
   };
 
   const handleToggleAllReferences = () => {
@@ -169,8 +95,8 @@ function ReferenceSelectionDialog() {
       <Box className={styles.header}>
         <Heading marginBottom="spacingXs">Select entries to clone</Heading>
         <Paragraph marginBottom="none">
-          Review the reference tree and deselect any entries you want to keep linked to the
-          originals instead of cloning.
+          Review referenced entries and deselect any you want to keep linked to the originals
+          instead of cloning.
         </Paragraph>
       </Box>
 
@@ -186,12 +112,28 @@ function ReferenceSelectionDialog() {
           </Button>
         </Flex>
 
-        <TreeNode
-          node={referenceTree}
-          selectedEntryIds={selectedEntryIds}
-          rootEntryId={rootEntryId}
-          onToggle={handleToggleNode}
-        />
+        <Stack spacing="spacingS" flexDirection="column" alignItems="stretch">
+          {referenceEntries.map((entry) => {
+            const isRoot = entry.entryId === rootEntryId;
+            const isChecked = selectedEntryIds.has(entry.entryId);
+
+            return (
+              <Checkbox
+                key={entry.entryId}
+                className={styles.entryRow}
+                isChecked={isChecked}
+                isDisabled={isRoot}
+                onChange={(event) => handleToggleEntry(entry.entryId, event.target.checked)}>
+                <Text fontWeight={isRoot ? 'fontWeightDemiBold' : 'fontWeightMedium'}>
+                  {entry.label}
+                </Text>
+                <Text as="div" fontColor="gray500" fontSize="fontSizeS">
+                  {isRoot ? 'Root entry' : `${entry.contentTypeId} · ${entry.entryId}`}
+                </Text>
+              </Checkbox>
+            );
+          })}
+        </Stack>
       </Box>
 
       <Flex justifyContent="flex-end" alignItems="center" className={styles.controls}>
