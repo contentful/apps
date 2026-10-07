@@ -57,6 +57,7 @@ export async function checkUrl(
   }
 
   const userAgent = resolveCheckLinkUserAgent(options.useCompatibilityUserAgentForChecks);
+  const userAgentMode = options.useCompatibilityUserAgentForChecks ? 'compatibility' : 'link-checker';
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
@@ -70,12 +71,12 @@ export async function checkUrl(
 
   try {
     let method: 'HEAD' | 'GET' = 'HEAD';
-    let response = await fetch(trimmed, { ...fetchOptions, method: 'HEAD' });
+    let response = await fetch(trimmed, { ...fetchOptions, method });
 
     // Some servers block or mishandle HEAD (e.g. return 403/503). Try GET and use status only.
     if (response.status >= 400) {
       method = 'GET';
-      const getResponse = await fetch(trimmed, { ...fetchOptions, method: 'GET' });
+      const getResponse = await fetch(trimmed, { ...fetchOptions, method });
       if (getResponse.ok || getResponse.status < 500) {
         response = getResponse;
       }
@@ -87,7 +88,7 @@ export async function checkUrl(
       method,
       status: response.status,
       responseUrl: response.url,
-      userAgentMode: options.useCompatibilityUserAgentForChecks ? 'compatibility' : 'link-checker',
+      userAgentMode,
     });
     return { status: response.status };
   } catch (err) {
@@ -96,7 +97,7 @@ export async function checkUrl(
     logProbe({
       url: trimmed,
       error: message,
-      userAgentMode: options.useCompatibilityUserAgentForChecks ? 'compatibility' : 'link-checker',
+      userAgentMode,
     });
     return { error: message };
   }
