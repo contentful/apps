@@ -57,7 +57,9 @@ export async function checkUrl(
   }
 
   const userAgent = resolveCheckLinkUserAgent(options.useCompatibilityUserAgentForChecks);
-  const userAgentMode = options.useCompatibilityUserAgentForChecks ? 'compatibility' : 'link-checker';
+  const userAgentMode = options.useCompatibilityUserAgentForChecks
+    ? 'compatibility'
+    : 'link-checker';
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
