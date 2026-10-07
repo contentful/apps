@@ -1,10 +1,22 @@
+import { FunctionEventContext } from '@contentful/node-apps-toolkit';
 import {
+  CheckLinkInstallationParameters,
   COMPATIBILITY_USER_AGENT,
   handler,
   LINK_CHECKER_USER_AGENT,
   resolveCheckLinkUserAgent,
 } from '../../functions/checkLink';
 import { vi } from 'vitest';
+
+function testContext(
+  appInstallationParameters: CheckLinkInstallationParameters = {}
+): FunctionEventContext<CheckLinkInstallationParameters> {
+  return {
+    spaceId: 'test-space',
+    environmentId: 'master',
+    appInstallationParameters,
+  };
+}
 
 const mockFetch = vi.fn();
 
@@ -56,7 +68,7 @@ describe('checkLink handler', () => {
     mockFetch.mockResolvedValueOnce({ status: 200, ok: true, url: 'https://example.com' });
     await handler(
       { body: { url: 'https://example.com' } },
-      { appInstallationParameters: { useCompatibilityUserAgentForChecks: true } }
+      testContext({ useCompatibilityUserAgentForChecks: true })
     );
     expect(mockFetch).toHaveBeenCalledWith(
       'https://example.com',

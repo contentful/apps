@@ -4,6 +4,8 @@
  * Invoked via App Action "checkLink" with parameters: { url: string }.
  */
 
+import { FunctionEventContext } from '@contentful/node-apps-toolkit';
+
 const TIMEOUT_MS = 10000;
 
 export const LINK_CHECKER_USER_AGENT =
@@ -113,13 +115,9 @@ export async function checkUrl(
   }
 }
 
-export interface CheckLinkHandlerContext {
-  appInstallationParameters?: CheckLinkInstallationParameters;
-}
-
 export const handler = async (
   event: CheckLinkEvent,
-  context?: CheckLinkHandlerContext
+  context?: FunctionEventContext<CheckLinkInstallationParameters>
 ): Promise<CheckLinkResult> => {
   const url = event?.body?.url;
   if (typeof url !== 'string' || !url.trim()) {
