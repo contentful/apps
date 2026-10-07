@@ -1,22 +1,5 @@
-import { FunctionEventContext } from '@contentful/node-apps-toolkit';
-import {
-  CheckLinkInstallationParameters,
-  COMPATIBILITY_USER_AGENT,
-  handler,
-  LINK_CHECKER_USER_AGENT,
-  resolveCheckLinkUserAgent,
-} from '../../functions/checkLink';
+import { handler, LINK_CHECKER_USER_AGENT } from '../../functions/checkLink';
 import { vi } from 'vitest';
-
-function testContext(
-  appInstallationParameters: CheckLinkInstallationParameters = {}
-): FunctionEventContext<CheckLinkInstallationParameters> {
-  return {
-    spaceId: 'test-space',
-    environmentId: 'master',
-    appInstallationParameters,
-  };
-}
 
 const mockFetch = vi.fn();
 
@@ -64,24 +47,9 @@ describe('checkLink handler', () => {
     );
   });
 
-  it('uses compatibility User-Agent when installation parameter is enabled', async () => {
-    mockFetch.mockResolvedValueOnce({ status: 200, ok: true, url: 'https://example.com' });
-    await handler(
-      { body: { url: 'https://example.com' } },
-      testContext({ useCompatibilityUserAgentForChecks: true })
-    );
-    expect(mockFetch).toHaveBeenCalledWith(
-      'https://example.com',
-      expect.objectContaining({
-        headers: { 'User-Agent': COMPATIBILITY_USER_AGENT },
-      })
-    );
-  });
-
-  it('resolveCheckLinkUserAgent switches modes', () => {
-    expect(resolveCheckLinkUserAgent(false)).toBe(LINK_CHECKER_USER_AGENT);
-    expect(resolveCheckLinkUserAgent(true)).toBe(COMPATIBILITY_USER_AGENT);
-    expect(resolveCheckLinkUserAgent()).toBe(LINK_CHECKER_USER_AGENT);
+  it('sends a User-Agent without the "linkchecker" token some WAFs block', () => {
+    expect(LINK_CHECKER_USER_AGENT.toLowerCase()).not.toContain('linkchecker');
+    expect(LINK_CHECKER_USER_AGENT).toContain('Contentful-Link-Checker');
   });
 
   it('returns status when fetch succeeds with 404', async () => {

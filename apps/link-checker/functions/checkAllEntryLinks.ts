@@ -2,7 +2,6 @@ import { FunctionEventContext } from '@contentful/node-apps-toolkit';
 import { PlainClientAPI } from 'contentful-management';
 import {
   checkAllEntryLinks,
-  type AppInstallationParameters,
   type CheckAllEntryLinksParameters,
   type CheckAllEntryLinksResponse,
 } from './checkEntryLinks';
@@ -15,7 +14,11 @@ export const handler = async (
   event: CheckAllEntryLinksEvent,
   context: FunctionEventContext & {
     cma?: PlainClientAPI;
-    appInstallationParameters?: AppInstallationParameters;
+    appInstallationParameters?: {
+      allowedUrlPatterns?: string;
+      forbiddenUrlPatterns?: string;
+      baseUrl?: string;
+    };
   }
 ): Promise<CheckAllEntryLinksResponse> => {
   const entryId = event?.body?.entryId?.trim();

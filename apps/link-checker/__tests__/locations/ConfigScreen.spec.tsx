@@ -36,7 +36,6 @@ describe('Config Screen component', () => {
     expect(getByPlaceholderText('https://www.example.com')).toBeInTheDocument();
     expect(getByPlaceholderText('Add allowed domain...')).toBeInTheDocument();
     expect(getByPlaceholderText('Add blocked domain...')).toBeInTheDocument();
-    expect(getByText('Use compatibility User-Agent for link checks')).toBeInTheDocument();
   });
 
   it('calls onConfigure and returns parameters and targetState', async () => {
