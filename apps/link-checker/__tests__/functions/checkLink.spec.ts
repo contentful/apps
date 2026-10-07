@@ -1,4 +1,9 @@
-import { handler } from '../../functions/checkLink';
+import {
+  COMPATIBILITY_USER_AGENT,
+  handler,
+  LINK_CHECKER_USER_AGENT,
+  resolveCheckLinkUserAgent,
+} from '../../functions/checkLink';
 import { vi } from 'vitest';
 
 const mockFetch = vi.fn();
@@ -34,7 +39,7 @@ describe('checkLink handler', () => {
   });
 
   it('returns status when fetch succeeds with 200', async () => {
-    mockFetch.mockResolvedValueOnce({ status: 200, ok: true });
+    mockFetch.mockResolvedValueOnce({ status: 200, ok: true, url: 'https://example.com' });
     const result = await handler({ body: { url: 'https://example.com' } });
     expect(result).toEqual({ status: 200 });
     expect(mockFetch).toHaveBeenCalledWith(
@@ -42,8 +47,29 @@ describe('checkLink handler', () => {
       expect.objectContaining({
         method: 'HEAD',
         redirect: 'follow',
+        headers: { 'User-Agent': LINK_CHECKER_USER_AGENT },
       })
     );
+  });
+
+  it('uses compatibility User-Agent when installation parameter is enabled', async () => {
+    mockFetch.mockResolvedValueOnce({ status: 200, ok: true, url: 'https://example.com' });
+    await handler(
+      { body: { url: 'https://example.com' } },
+      { appInstallationParameters: { useCompatibilityUserAgentForChecks: true } }
+    );
+    expect(mockFetch).toHaveBeenCalledWith(
+      'https://example.com',
+      expect.objectContaining({
+        headers: { 'User-Agent': COMPATIBILITY_USER_AGENT },
+      })
+    );
+  });
+
+  it('resolveCheckLinkUserAgent switches modes', () => {
+    expect(resolveCheckLinkUserAgent(false)).toBe(LINK_CHECKER_USER_AGENT);
+    expect(resolveCheckLinkUserAgent(true)).toBe(COMPATIBILITY_USER_AGENT);
+    expect(resolveCheckLinkUserAgent()).toBe(LINK_CHECKER_USER_AGENT);
   });
 
   it('returns status when fetch succeeds with 404', async () => {

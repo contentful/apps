@@ -51,6 +51,7 @@ interface AppInstallationParameters {
   allowedUrlPatterns?: string;
   forbiddenUrlPatterns?: string;
   baseUrl?: string;
+  useCompatibilityUserAgentForChecks?: boolean;
 }
 
 interface CheckEntryLinksResponse {
@@ -299,7 +300,9 @@ async function checkExtractedUrls(
       continue;
     }
 
-    const checkResult = await checkUrl(resolvedUrl);
+    const checkResult = await checkUrl(resolvedUrl, {
+      useCompatibilityUserAgentForChecks: installationParameters.useCompatibilityUserAgentForChecks,
+    });
     const isValid = checkResult.status != null ? isSuccessStatus(checkResult.status) : false;
 
     results.push({

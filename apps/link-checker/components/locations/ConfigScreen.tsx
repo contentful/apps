@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import {
   Button,
+  Checkbox,
   Flex,
   Form,
   FormControl,
@@ -24,6 +25,8 @@ export interface AppInstallationParameters {
   baseUrl?: string;
   /** Explicit content type ids assigned to the app from the configuration screen. */
   selectedContentTypeIds?: string[];
+  /** When true, HTTP probes use the hyphenated compatibility User-Agent (still identifies Contentful). */
+  useCompatibilityUserAgentForChecks?: boolean;
 }
 
 export interface ContentTypeItem {
@@ -252,6 +255,24 @@ function ConfigScreen() {
               <FormControl.HelpText>
                 Optional. Relative links such as <code>/support</code> are resolved against this
                 value before Link Checker validates them.
+              </FormControl.HelpText>
+            </FormControl>
+            <FormControl marginTop="spacingM">
+              <Checkbox
+                isChecked={parameters.useCompatibilityUserAgentForChecks ?? false}
+                onChange={(event) =>
+                  setParameters({
+                    ...parameters,
+                    useCompatibilityUserAgentForChecks: event.target.checked,
+                  })
+                }>
+                Use compatibility User-Agent for link checks
+              </Checkbox>
+              <FormControl.HelpText>
+                Off by default. Some WAF rules block the legacy <code>LinkChecker</code> token in
+                our standard User-Agent even when the URL works in a browser. Compatibility mode
+                still identifies Contentful (hyphenated product name + marketplace link) and can
+                reduce false 403/404 results on strict sites.
               </FormControl.HelpText>
             </FormControl>
           </Form>
