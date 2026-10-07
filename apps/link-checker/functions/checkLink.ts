@@ -41,6 +41,16 @@ export function resolveCheckLinkUserAgent(useCompatibilityUserAgentForChecks?: b
   return useCompatibilityUserAgentForChecks ? COMPATIBILITY_USER_AGENT : LINK_CHECKER_USER_AGENT;
 }
 
+// Query strings can carry signed tokens, so only origin + path reach the logs.
+function redactUrl(url: string): string {
+  try {
+    const { origin, pathname } = new URL(url);
+    return origin + pathname;
+  } catch {
+    return '[unparseable url]';
+  }
+}
+
 function logProbe(details: Record<string, unknown>): void {
   console.log(JSON.stringify({ source: 'checkLink', ...details }));
 }
@@ -75,19 +85,19 @@ export async function checkUrl(
 
     // Some servers block or mishandle HEAD (e.g. return 403/503). Try GET and use status only.
     if (response.status >= 400) {
-      method = 'GET';
-      const getResponse = await fetch(trimmed, { ...fetchOptions, method });
+      const getResponse = await fetch(trimmed, { ...fetchOptions, method: 'GET' });
       if (getResponse.ok || getResponse.status < 500) {
         response = getResponse;
+        method = 'GET';
       }
     }
 
     clearTimeout(timeout);
     logProbe({
-      url: trimmed,
+      url: redactUrl(trimmed),
       method,
       status: response.status,
-      responseUrl: response.url,
+      responseUrl: response.url ? redactUrl(response.url) : undefined,
       userAgentMode,
     });
     return { status: response.status };
@@ -95,7 +105,7 @@ export async function checkUrl(
     clearTimeout(timeout);
     const message = err instanceof Error ? err.message : 'Request failed';
     logProbe({
-      url: trimmed,
+      url: redactUrl(trimmed),
       error: message,
       userAgentMode,
     });

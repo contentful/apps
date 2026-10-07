@@ -93,6 +93,34 @@ describe('checkLink handler', () => {
     expect(result).toEqual({ error: 'Network error' });
   });
 
+  it('logs the HEAD method when the GET fallback is discarded', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    mockFetch
+      .mockResolvedValueOnce({ status: 403, ok: false, url: 'https://example.com' })
+      .mockResolvedValueOnce({ status: 503, ok: false, url: 'https://example.com' });
+    const result = await handler({ body: { url: 'https://example.com' } });
+    expect(result).toEqual({ status: 403 });
+    expect(JSON.parse(logSpy.mock.calls[0][0])).toMatchObject({ method: 'HEAD', status: 403 });
+    logSpy.mockRestore();
+  });
+
+  it('strips query strings from logged urls', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    mockFetch.mockResolvedValueOnce({
+      status: 200,
+      ok: true,
+      url: 'https://example.com/final?token=secret',
+    });
+    await handler({ body: { url: 'https://example.com/page?sig=secret#frag' } });
+    const logged = JSON.parse(logSpy.mock.calls[0][0]);
+    expect(logged).toMatchObject({
+      url: 'https://example.com/page',
+      responseUrl: 'https://example.com/final',
+    });
+    expect(logSpy.mock.calls[0][0]).not.toContain('secret');
+    logSpy.mockRestore();
+  });
+
   it('returns generic error when fetch throws non-Error', async () => {
     mockFetch.mockRejectedValueOnce('string error');
     const result = await handler({ body: { url: 'https://example.com' } });

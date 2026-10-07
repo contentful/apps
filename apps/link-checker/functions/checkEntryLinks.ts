@@ -47,7 +47,7 @@ interface EntryLinkResult extends CheckLinkResult {
   isOnDenyList: boolean;
 }
 
-interface AppInstallationParameters {
+export interface AppInstallationParameters {
   allowedUrlPatterns?: string;
   forbiddenUrlPatterns?: string;
   baseUrl?: string;
