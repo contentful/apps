@@ -93,11 +93,10 @@ describe('ReferenceSelectionDialog', () => {
   it('indents entries by depth', () => {
     render(<ReferenceSelectionDialog />);
 
-    const rowFor = (label: string) =>
-      screen.getByText(label).closest('[style*="margin-left"]') as HTMLElement;
-    expect(rowFor('Root').style.marginLeft).toBe('0px');
-    expect(rowFor('Branch 0').style.marginLeft).toBe('20px');
-    expect(rowFor('Shared Leaf').style.marginLeft).toBe('40px');
+    const rowFor = (entryId: string) => screen.getByTestId(`reference-row-${entryId}`);
+    expect(rowFor('root').style.marginLeft).toBe('0px');
+    expect(rowFor('branch0').style.marginLeft).toBe('20px');
+    expect(rowFor('shared').style.marginLeft).toBe('40px');
   });
 
   it('hints when an entry is referenced by multiple parents', () => {

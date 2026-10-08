@@ -32,11 +32,19 @@ vi.mock('../../src/utils/EntryCloner', () => {
           getReferenceEntries: vi.fn().mockImplementation(async () => {
             setReferencesCount(2);
             return [
-              { entryId: 'test-entry', label: 'Main Entry', contentTypeId: 'page' },
+              {
+                entryId: 'test-entry',
+                label: 'Main Entry',
+                contentTypeId: 'page',
+                depth: 0,
+                referencedByCount: 0,
+              },
               {
                 entryId: 'referenced-entry-id',
                 label: 'Referenced Entry',
                 contentTypeId: 'section',
+                depth: 1,
+                referencedByCount: 1,
               },
             ];
           }),
@@ -166,11 +174,19 @@ describe('Sidebar component', () => {
       parameters: {
         rootEntryId: 'test-entry',
         referenceEntries: [
-          { entryId: 'test-entry', label: 'Main Entry', contentTypeId: 'page' },
+          {
+            entryId: 'test-entry',
+            label: 'Main Entry',
+            contentTypeId: 'page',
+            depth: 0,
+            referencedByCount: 0,
+          },
           {
             entryId: 'referenced-entry-id',
             label: 'Referenced Entry',
             contentTypeId: 'section',
+            depth: 1,
+            referencedByCount: 1,
           },
         ],
       },

@@ -144,6 +144,7 @@ function ReferenceSelectionDialog() {
             return (
               <Box
                 key={entry.entryId}
+                testId={`reference-row-${entry.entryId}`}
                 className={indentDepth > 0 ? styles.nestedEntryRow : ''}
                 style={{ marginLeft: `${indentDepth * INDENT_PX}px` }}>
                 <Checkbox
