@@ -42,6 +42,22 @@ const styles = {
   }),
   entryRow: css({
     width: '100%',
+    // Top-align the checkbox so it stays with the name when the description wraps
+    '& label': {
+      alignItems: 'flex-start',
+    },
+    '& label > span:first-of-type': {
+      marginTop: '2px',
+    },
+  }),
+  // The description stays inline when it fits and drops below the name as a whole when it doesn't
+  entryText: css({
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignItems: 'baseline',
+    columnGap: '8px',
+    flex: '1 1 auto',
+    minWidth: 0,
   }),
   nestedEntryRow: css({
     paddingLeft: '12px',
@@ -207,17 +223,21 @@ function ReferenceSelectionDialog() {
                   className={styles.entryRow}
                   isChecked={isChecked}
                   isDisabled={isRoot}
-                  helpText={getEntryDescription(
-                    entry,
-                    isRoot,
-                    entry.parentEntryId === null
-                      ? undefined
-                      : entriesById.get(entry.parentEntryId)?.label
-                  )}
                   onChange={(event) => handleToggleEntry(entry.entryId, event.target.checked)}>
-                  <Text fontWeight={isRoot ? 'fontWeightDemiBold' : 'fontWeightMedium'}>
-                    {entry.label}
-                  </Text>
+                  <span className={styles.entryText}>
+                    <Text fontWeight={isRoot ? 'fontWeightDemiBold' : 'fontWeightMedium'}>
+                      {entry.label}
+                    </Text>
+                    <Text fontColor="gray500" fontSize="fontSizeS">
+                      {getEntryDescription(
+                        entry,
+                        isRoot,
+                        entry.parentEntryId === null
+                          ? undefined
+                          : entriesById.get(entry.parentEntryId)?.label
+                      )}
+                    </Text>
+                  </span>
                 </Checkbox>
               </Box>
             );
