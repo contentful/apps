@@ -208,4 +208,23 @@ describe('ReferenceSelectionDialog', () => {
       expect(checkboxFor('loop').checked).toBe(true);
     });
   });
+
+  it('names the parent on rows nested past the indent cap', () => {
+    const chain: CloneReferenceEntry[] = Array.from({ length: 11 }, (_, depth) => ({
+      entryId: `level${depth}`,
+      label: `Level ${depth}`,
+      contentTypeId: 'section',
+      depth,
+      referencedByCount: depth === 0 ? 0 : 1,
+      parentEntryId: depth === 0 ? null : `level${depth - 1}`,
+      childEntryIds: depth === 10 ? [] : [`level${depth + 1}`],
+    }));
+    invocationParameters = { rootEntryId: 'level0', referenceEntries: chain };
+    render(<ReferenceSelectionDialog />);
+
+    expect(screen.getByText('section · level8')).toBeDefined();
+    expect(screen.getByText('section · level9 · under Level 8')).toBeDefined();
+    expect(screen.getByText('section · level10 · under Level 9')).toBeDefined();
+    expect(screen.getByTestId('reference-row-level10').style.marginLeft).toBe('160px');
+  });
 });

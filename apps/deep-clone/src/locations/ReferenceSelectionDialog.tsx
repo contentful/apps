@@ -53,11 +53,19 @@ const INDENT_PX = 20;
 // Keeps very deep graphs readable in the dialog width
 const MAX_INDENT_DEPTH = 8;
 
-function getEntryDescription(entry: CloneReferenceEntry, isRoot: boolean): string {
+function getEntryDescription(
+  entry: CloneReferenceEntry,
+  isRoot: boolean,
+  parentLabel: string | undefined
+): string {
   if (isRoot) {
     return 'Root entry';
   }
-  const description = `${entry.contentTypeId} · ${entry.entryId}`;
+  let description = `${entry.contentTypeId} · ${entry.entryId}`;
+  // Past the indent cap rows stop shifting, so name the parent to keep the structure readable
+  if (entry.depth > MAX_INDENT_DEPTH && parentLabel) {
+    description = `${description} · under ${parentLabel}`;
+  }
   const otherParentCount = entry.referencedByCount - 1;
   if (otherParentCount > 0) {
     return `${description} · also referenced by ${otherParentCount} other ${
@@ -204,7 +212,13 @@ function ReferenceSelectionDialog() {
                     {entry.label}
                   </Text>
                   <Text as="div" fontColor="gray500" fontSize="fontSizeS">
-                    {getEntryDescription(entry, isRoot)}
+                    {getEntryDescription(
+                      entry,
+                      isRoot,
+                      entry.parentEntryId === null
+                        ? undefined
+                        : entriesById.get(entry.parentEntryId)?.label
+                    )}
                   </Text>
                 </Checkbox>
               </Box>
