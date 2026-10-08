@@ -43,7 +43,29 @@ const styles = {
   entryRow: css({
     width: '100%',
   }),
+  nestedEntryRow: css({
+    paddingLeft: '12px',
+    borderLeft: '1px solid #d3dce6',
+  }),
 };
+
+const INDENT_PX = 20;
+// Keeps very deep graphs readable in the dialog width
+const MAX_INDENT_DEPTH = 8;
+
+function getEntryDescription(entry: CloneReferenceEntry, isRoot: boolean): string {
+  if (isRoot) {
+    return 'Root entry';
+  }
+  const description = `${entry.contentTypeId} · ${entry.entryId}`;
+  const otherParentCount = entry.referencedByCount - 1;
+  if (otherParentCount > 0) {
+    return `${description} · also referenced by ${otherParentCount} other ${
+      otherParentCount === 1 ? 'entry' : 'entries'
+    }`;
+  }
+  return description;
+}
 
 function ReferenceSelectionDialog() {
   const sdk = useSDK<DialogAppSDK>();
@@ -117,20 +139,26 @@ function ReferenceSelectionDialog() {
             const isRoot = entry.entryId === rootEntryId;
             const isChecked = selectedEntryIds.has(entry.entryId);
 
+            const indentDepth = Math.min(entry.depth, MAX_INDENT_DEPTH);
+
             return (
-              <Checkbox
+              <Box
                 key={entry.entryId}
-                className={styles.entryRow}
-                isChecked={isChecked}
-                isDisabled={isRoot}
-                onChange={(event) => handleToggleEntry(entry.entryId, event.target.checked)}>
-                <Text fontWeight={isRoot ? 'fontWeightDemiBold' : 'fontWeightMedium'}>
-                  {entry.label}
-                </Text>
-                <Text as="div" fontColor="gray500" fontSize="fontSizeS">
-                  {isRoot ? 'Root entry' : `${entry.contentTypeId} · ${entry.entryId}`}
-                </Text>
-              </Checkbox>
+                className={indentDepth > 0 ? styles.nestedEntryRow : ''}
+                style={{ marginLeft: `${indentDepth * INDENT_PX}px` }}>
+                <Checkbox
+                  className={styles.entryRow}
+                  isChecked={isChecked}
+                  isDisabled={isRoot}
+                  onChange={(event) => handleToggleEntry(entry.entryId, event.target.checked)}>
+                  <Text fontWeight={isRoot ? 'fontWeightDemiBold' : 'fontWeightMedium'}>
+                    {entry.label}
+                  </Text>
+                  <Text as="div" fontColor="gray500" fontSize="fontSizeS">
+                    {getEntryDescription(entry, isRoot)}
+                  </Text>
+                </Checkbox>
+              </Box>
             );
           })}
         </Stack>

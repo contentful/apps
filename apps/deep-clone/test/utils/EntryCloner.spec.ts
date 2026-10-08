@@ -822,6 +822,50 @@ describe('EntryCloner', () => {
       ]);
     });
 
+    it('returns entries in discovery order with depth and fan-in counts', async () => {
+      const link = (id: string) => ({ sys: { type: 'Link', linkType: 'Entry', id } });
+      const entries: Record<string, ReturnType<typeof getMockEntry>> = {
+        root: getMockEntry('root', {
+          title: { 'en-US': 'Zulu Root' },
+          sections: { 'en-US': [link('section-b'), link('section-a')] },
+        }),
+        'section-b': getMockEntry('section-b', {
+          title: { 'en-US': 'Bravo Section' },
+          footer: { 'en-US': link('footer') },
+        }),
+        'section-a': getMockEntry('section-a', {
+          title: { 'en-US': 'Alpha Section' },
+          footer: { 'en-US': link('footer') },
+        }),
+        footer: getMockEntry('footer', { title: { 'en-US': 'Footer' } }),
+      };
+      entryCloner = new EntryCloner(
+        mockCma as any,
+        mockParameters,
+        'root',
+        setReferencesCount,
+        setClonesCount,
+        setUpdatesCount
+      );
+      mockCma.contentType.get.mockResolvedValue(contentType);
+      mockCma.entry.get.mockImplementation(async ({ entryId }) => entries[entryId]);
+
+      const result = await entryCloner.getReferenceEntries();
+
+      expect(
+        result.map(({ entryId, depth, referencedByCount }) => ({
+          entryId,
+          depth,
+          referencedByCount,
+        }))
+      ).toEqual([
+        { entryId: 'root', depth: 0, referencedByCount: 0 },
+        { entryId: 'section-b', depth: 1, referencedByCount: 1 },
+        { entryId: 'footer', depth: 2, referencedByCount: 2 },
+        { entryId: 'section-a', depth: 1, referencedByCount: 1 },
+      ]);
+    });
+
     it('stops discovery when the abort signal is triggered', async () => {
       const abortController = new AbortController();
       mockCma.contentType.get.mockResolvedValue(contentType);

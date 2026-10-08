@@ -21,10 +21,28 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 const referenceEntries: CloneReferenceEntry[] = [
-  { entryId: 'root', label: 'Root', contentTypeId: 'page' },
-  { entryId: 'branch0', label: 'Branch 0', contentTypeId: 'section' },
-  { entryId: 'branch1', label: 'Branch 1', contentTypeId: 'section' },
-  { entryId: 'shared', label: 'Shared Leaf', contentTypeId: 'block' },
+  { entryId: 'root', label: 'Root', contentTypeId: 'page', depth: 0, referencedByCount: 0 },
+  {
+    entryId: 'branch0',
+    label: 'Branch 0',
+    contentTypeId: 'section',
+    depth: 1,
+    referencedByCount: 1,
+  },
+  {
+    entryId: 'shared',
+    label: 'Shared Leaf',
+    contentTypeId: 'block',
+    depth: 2,
+    referencedByCount: 2,
+  },
+  {
+    entryId: 'branch1',
+    label: 'Branch 1',
+    contentTypeId: 'section',
+    depth: 1,
+    referencedByCount: 1,
+  },
 ];
 
 describe('ReferenceSelectionDialog', () => {
@@ -61,5 +79,31 @@ describe('ReferenceSelectionDialog', () => {
     expect(mockSdk.close).toHaveBeenCalledTimes(1);
     const closedWith = mockSdk.close.mock.calls[0][0] as string[];
     expect(closedWith.sort()).toEqual(['branch0', 'branch1', 'root', 'shared']);
+  });
+
+  it('renders entries in the provided structural order', () => {
+    render(<ReferenceSelectionDialog />);
+
+    const labels = screen
+      .getAllByText(/^(Root|Branch 0|Branch 1|Shared Leaf)$/)
+      .map((element) => element.textContent);
+    expect(labels).toEqual(['Root', 'Branch 0', 'Shared Leaf', 'Branch 1']);
+  });
+
+  it('indents entries by depth', () => {
+    render(<ReferenceSelectionDialog />);
+
+    const rowFor = (label: string) =>
+      screen.getByText(label).closest('[style*="margin-left"]') as HTMLElement;
+    expect(rowFor('Root').style.marginLeft).toBe('0px');
+    expect(rowFor('Branch 0').style.marginLeft).toBe('20px');
+    expect(rowFor('Shared Leaf').style.marginLeft).toBe('40px');
+  });
+
+  it('hints when an entry is referenced by multiple parents', () => {
+    render(<ReferenceSelectionDialog />);
+
+    expect(screen.getByText('block · shared · also referenced by 1 other entry')).toBeDefined();
+    expect(screen.getByText('section · branch0')).toBeDefined();
   });
 });
