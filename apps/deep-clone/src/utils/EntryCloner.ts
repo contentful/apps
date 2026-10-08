@@ -17,6 +17,8 @@ export type CloneReferenceEntry = {
   contentTypeId: string;
   depth: number;
   referencedByCount: number;
+  parentEntryId: string | null;
+  childEntryIds: string[];
 };
 
 export class ReferenceDiscoveryAbortedError extends Error {
@@ -34,6 +36,7 @@ class EntryCloner {
   private referenceChildren: ReferenceChildrenMap = {};
   private discoveryOrder: string[] = [];
   private discoveryDepths: Record<string, number> = {};
+  private discoveryParents: Record<string, string | null> = {};
   private contentTypes: { [id: string]: ContentTypeProps } = {};
   private updates: number = 0;
   private parameters: AppParameters;
@@ -116,6 +119,11 @@ class EntryCloner {
         contentTypeId: entry.sys.contentType.sys.id,
         depth: this.discoveryDepths[entryId] ?? 0,
         referencedByCount: referencedByCounts[entryId] || 0,
+        parentEntryId: this.discoveryParents[entryId] ?? null,
+        // Links to deleted entries were never fetched, so they cannot be selected
+        childEntryIds: (this.referenceChildren[entryId] || []).filter(
+          (childEntryId) => this.references[childEntryId] !== undefined
+        ),
       });
     }
 
@@ -151,6 +159,7 @@ class EntryCloner {
     if (entry !== undefined) {
       this.references[entryId] = entry;
       this.discoveryOrder.push(entryId);
+      this.discoveryParents[entryId] = parentEntryId ?? null;
       this.discoveryDepths[entryId] =
         parentEntryId === undefined ? 0 : (this.discoveryDepths[parentEntryId] ?? 0) + 1;
       this.setReferencesCount(Object.keys(this.references).length);

@@ -853,16 +853,42 @@ describe('EntryCloner', () => {
       const result = await entryCloner.getReferenceEntries();
 
       expect(
-        result.map(({ entryId, depth, referencedByCount }) => ({
+        result.map(({ entryId, depth, referencedByCount, parentEntryId, childEntryIds }) => ({
           entryId,
           depth,
           referencedByCount,
+          parentEntryId,
+          childEntryIds,
         }))
       ).toEqual([
-        { entryId: 'root', depth: 0, referencedByCount: 0 },
-        { entryId: 'section-b', depth: 1, referencedByCount: 1 },
-        { entryId: 'footer', depth: 2, referencedByCount: 2 },
-        { entryId: 'section-a', depth: 1, referencedByCount: 1 },
+        {
+          entryId: 'root',
+          depth: 0,
+          referencedByCount: 0,
+          parentEntryId: null,
+          childEntryIds: ['section-b', 'section-a'],
+        },
+        {
+          entryId: 'section-b',
+          depth: 1,
+          referencedByCount: 1,
+          parentEntryId: 'root',
+          childEntryIds: ['footer'],
+        },
+        {
+          entryId: 'footer',
+          depth: 2,
+          referencedByCount: 2,
+          parentEntryId: 'section-b',
+          childEntryIds: [],
+        },
+        {
+          entryId: 'section-a',
+          depth: 1,
+          referencedByCount: 1,
+          parentEntryId: 'root',
+          childEntryIds: ['footer'],
+        },
       ]);
     });
 

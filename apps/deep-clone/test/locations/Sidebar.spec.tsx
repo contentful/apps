@@ -38,6 +38,8 @@ vi.mock('../../src/utils/EntryCloner', () => {
                 contentTypeId: 'page',
                 depth: 0,
                 referencedByCount: 0,
+                parentEntryId: null,
+                childEntryIds: ['referenced-entry-id'],
               },
               {
                 entryId: 'referenced-entry-id',
@@ -45,6 +47,8 @@ vi.mock('../../src/utils/EntryCloner', () => {
                 contentTypeId: 'section',
                 depth: 1,
                 referencedByCount: 1,
+                parentEntryId: 'test-entry',
+                childEntryIds: [],
               },
             ];
           }),
@@ -180,6 +184,8 @@ describe('Sidebar component', () => {
             contentTypeId: 'page',
             depth: 0,
             referencedByCount: 0,
+            parentEntryId: null,
+            childEntryIds: ['referenced-entry-id'],
           },
           {
             entryId: 'referenced-entry-id',
@@ -187,6 +193,8 @@ describe('Sidebar component', () => {
             contentTypeId: 'section',
             depth: 1,
             referencedByCount: 1,
+            parentEntryId: 'test-entry',
+            childEntryIds: [],
           },
         ],
       },
