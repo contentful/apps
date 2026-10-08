@@ -207,18 +207,16 @@ function ReferenceSelectionDialog() {
                   className={styles.entryRow}
                   isChecked={isChecked}
                   isDisabled={isRoot}
+                  helpText={getEntryDescription(
+                    entry,
+                    isRoot,
+                    entry.parentEntryId === null
+                      ? undefined
+                      : entriesById.get(entry.parentEntryId)?.label
+                  )}
                   onChange={(event) => handleToggleEntry(entry.entryId, event.target.checked)}>
                   <Text fontWeight={isRoot ? 'fontWeightDemiBold' : 'fontWeightMedium'}>
                     {entry.label}
-                  </Text>
-                  <Text as="div" fontColor="gray500" fontSize="fontSizeS">
-                    {getEntryDescription(
-                      entry,
-                      isRoot,
-                      entry.parentEntryId === null
-                        ? undefined
-                        : entriesById.get(entry.parentEntryId)?.label
-                    )}
                   </Text>
                 </Checkbox>
               </Box>
