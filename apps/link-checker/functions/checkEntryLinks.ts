@@ -307,7 +307,10 @@ async function checkExtractedUrls(
     }
 
     const checkResult = await checkUrl(resolvedUrl);
-    const isValid = checkResult.status != null ? isSuccessStatus(checkResult.status) : false;
+    const isValid =
+      !checkResult.challenged && checkResult.status != null
+        ? isSuccessStatus(checkResult.status)
+        : false;
 
     results.push({
       ...item,

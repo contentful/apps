@@ -126,6 +126,37 @@ describe('checkEntryLinks handler', () => {
     );
   });
 
+  it('does not count a 2xx challenge as valid', async () => {
+    mockFetch.mockResolvedValueOnce({
+      status: 202,
+      ok: true,
+      headers: new Headers({ 'x-amzn-waf-action': 'challenge' }),
+    });
+
+    const mockCma = {
+      entry: {
+        get: vi.fn().mockResolvedValue({
+          sys: { contentType: { sys: { id: 'post' } } },
+          fields: { body: { 'en-US': 'See https://protected.example.com/' } },
+        }),
+      },
+      contentType: {
+        get: vi.fn().mockResolvedValue({
+          fields: [{ id: 'body', name: 'Body', type: 'Text' }],
+        }),
+      },
+    };
+
+    const result = await handler(
+      { body: { entryId: 'entry-123', fieldId: 'body', locale: 'en-US' } },
+      { cma: mockCma as any, appInstallationParameters: {} } as any
+    );
+
+    expect(result.validCount).toBe(0);
+    expect(result.invalidCount).toBe(0);
+    expect(result.unverifiedCount).toBe(1);
+  });
+
   it('resolves relative links with the configured base URL', async () => {
     mockFetch.mockResolvedValueOnce({ status: 200, ok: true });
 

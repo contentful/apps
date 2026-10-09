@@ -26,12 +26,18 @@ export interface CheckLinkResult {
 }
 
 // Interactive challenges need a JS-capable browser; no request header can pass them.
-const CHALLENGE_HEADERS = ['cf-mitigated', 'x-vercel-mitigated'];
+const CHALLENGE_HEADERS: Record<string, string[]> = {
+  'cf-mitigated': ['challenge'],
+  'x-vercel-mitigated': ['challenge'],
+  // AWS WAF answers a challenge with 202, which would otherwise read as a valid link.
+  'x-amzn-waf-action': ['challenge', 'captcha'],
+};
 
 export function isBotChallenge(response: Pick<Response, 'headers'>): boolean {
-  return CHALLENGE_HEADERS.some(
-    (header) => response.headers?.get(header)?.toLowerCase() === 'challenge'
-  );
+  return Object.entries(CHALLENGE_HEADERS).some(([header, values]) => {
+    const value = response.headers?.get(header)?.toLowerCase();
+    return value != null && values.includes(value);
+  });
 }
 
 // Query strings can carry signed tokens, so only origin + path reach the logs.

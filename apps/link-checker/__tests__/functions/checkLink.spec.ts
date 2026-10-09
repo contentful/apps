@@ -110,6 +110,16 @@ describe('checkLink handler', () => {
     }
   });
 
+  it('flags an AWS WAF challenge even though it returns 202', async () => {
+    mockFetch.mockResolvedValueOnce({
+      status: 202,
+      ok: true,
+      headers: new Headers({ 'x-amzn-waf-action': 'challenge' }),
+    });
+    const result = await handler({ body: { url: 'https://example.com' } });
+    expect(result).toEqual({ status: 202, challenged: true });
+  });
+
   it('does not flag a plain 403 as challenged', async () => {
     const forbidden = { status: 403, ok: false, headers: new Headers() };
     mockFetch.mockResolvedValueOnce(forbidden).mockResolvedValueOnce(forbidden);

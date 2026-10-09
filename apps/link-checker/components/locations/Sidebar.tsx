@@ -273,7 +273,7 @@ export default function Sidebar() {
                   status: data.status,
                   isBlockedByAllowList: false,
                   isOnDenyList: false,
-                  isValid: isSuccessStatus(data.status),
+                  isValid: data.challenged !== true && isSuccessStatus(data.status),
                   challenged: data.challenged === true,
                 };
               }
