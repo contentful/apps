@@ -120,6 +120,29 @@ describe('checkLink handler', () => {
     expect(result).toEqual({ status: 202, challenged: true });
   });
 
+  it('flags an AWS WAF captcha as challenged', async () => {
+    const captcha = {
+      status: 405,
+      ok: false,
+      headers: new Headers({ 'x-amzn-waf-action': 'captcha' }),
+    };
+    mockFetch.mockResolvedValueOnce(captcha).mockResolvedValueOnce(captcha);
+    const result = await handler({ body: { url: 'https://example.com' } });
+    expect(result).toEqual({ status: 405, challenged: true });
+  });
+
+  it('trusts a clean GET over a challenged HEAD', async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        status: 403,
+        ok: false,
+        headers: new Headers({ 'cf-mitigated': 'challenge' }),
+      })
+      .mockResolvedValueOnce({ status: 200, ok: true, headers: new Headers() });
+    const result = await handler({ body: { url: 'https://example.com' } });
+    expect(result).toEqual({ status: 200 });
+  });
+
   it('does not flag a plain 403 as challenged', async () => {
     const forbidden = { status: 403, ok: false, headers: new Headers() };
     mockFetch.mockResolvedValueOnce(forbidden).mockResolvedValueOnce(forbidden);
