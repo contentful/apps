@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import { Stack } from '@contentful/f36-components';
+import { Note, Stack } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { PermissionsSection } from '../components/access-config';
 import { usePermissions } from '../hooks/usePermissions';
@@ -111,6 +111,9 @@ const ConfigScreen = () => {
       />
       <Setup />
       <RolesPermissionsFooter />
+      <Note variant="neutral" style={{ width: '100%' }}>
+        Active sessions need to be reauthenticated to pick up permissions changes.
+      </Note>
     </Stack>
   );
 };
