@@ -322,6 +322,163 @@ describe('createAsanaTask', () => {
     );
   });
 
+  it('leaves notes blank with no extra entry lookups when no notesFieldId is mapped', async () => {
+    vi.mocked(mockCma.entry.get).mockResolvedValue({
+      sys: {
+        id: 'entry-1',
+        contentType: {
+          sys: {
+            id: 'blogPost',
+          },
+        },
+      },
+      fields: {
+        title: {
+          'en-US': 'Dynamic entry title',
+        },
+        // Present in the entry, but since no notesFieldId was mapped, this must NOT be guessed -
+        // and must not trigger any retry/wait either.
+        notes: {
+          'en-US': 'Should not be picked up implicitly',
+        },
+      },
+    } as unknown as EntryProps<KeyValueMap>);
+
+    await handler(
+      {
+        type: FunctionTypeEnum.AppActionCall,
+        body: {
+          entryId: 'entry-1',
+        },
+      } as Parameters<typeof handler>[0],
+      mockContext
+    );
+
+    // Only the one initial entry lookup - no retry/wait loop was entered for notes.
+    expect(mockCma.entry.get).toHaveBeenCalledTimes(1);
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      1,
+      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({
+          data: {
+            name: 'Dynamic entry title',
+            notes:
+              'Contentful entry: https://app.contentful.com/spaces/test-space/environments/test-env/entries/entry-1',
+            projects: ['project-1'],
+            workspace: 'workspace-1',
+          },
+        }),
+      })
+    );
+  });
+
+  it('resolves notes from the entry when the caller maps a notesFieldId', async () => {
+    vi.mocked(mockCma.entry.get).mockResolvedValue({
+      sys: {
+        id: 'entry-1',
+        contentType: {
+          sys: {
+            id: 'blogPost',
+          },
+        },
+      },
+      fields: {
+        title: {
+          'en-US': 'Dynamic entry title',
+        },
+        summaryText: {
+          'en-US': 'Custom notes field value',
+        },
+      },
+    } as unknown as EntryProps<KeyValueMap>);
+
+    await handler(
+      {
+        type: FunctionTypeEnum.AppActionCall,
+        body: {
+          entryId: 'entry-1',
+          notesFieldId: 'summaryText',
+        },
+      } as Parameters<typeof handler>[0],
+      mockContext
+    );
+
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      1,
+      'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({
+          data: {
+            name: 'Dynamic entry title',
+            notes:
+              'Custom notes field value\n\nContentful entry: https://app.contentful.com/spaces/test-space/environments/test-env/entries/entry-1',
+            projects: ['project-1'],
+            workspace: 'workspace-1',
+          },
+        }),
+      })
+    );
+  });
+
+  it('polls once, on a shared budget, for both title and notes when neither is present yet', async () => {
+    vi.useFakeTimers();
+    try {
+      // First lookup: entry exists but has no title/notes yet (e.g. "entry created" firing before
+      // field values are saved). Second lookup (after one retry sleep): both fields have landed.
+      vi.mocked(mockCma.entry.get)
+        .mockResolvedValueOnce({
+          sys: { id: 'entry-1', contentType: { sys: { id: 'blogPost' } } },
+          fields: {},
+        } as unknown as EntryProps<KeyValueMap>)
+        .mockResolvedValue({
+          sys: { id: 'entry-1', contentType: { sys: { id: 'blogPost' } } },
+          fields: {
+            title: { 'en-US': 'Late-arriving title' },
+            notes: { 'en-US': 'Late-arriving notes' },
+          },
+        } as unknown as EntryProps<KeyValueMap>);
+
+      const handlerPromise = handler(
+        {
+          type: FunctionTypeEnum.AppActionCall,
+          body: {
+            entryId: 'entry-1',
+            notesFieldId: 'notes',
+          },
+        } as Parameters<typeof handler>[0],
+        mockContext
+      );
+
+      // Let the single shared retry sleep elapse once, resolving both fields together.
+      await vi.advanceTimersByTimeAsync(1800);
+      await handlerPromise;
+
+      // One initial lookup + exactly one retry lookup - not two independent retry loops.
+      expect(mockCma.entry.get).toHaveBeenCalledTimes(2);
+      expect(globalThis.fetch).toHaveBeenNthCalledWith(
+        1,
+        'https://app.asana.com/api/1.0/tasks?opt_fields=gid,name,permalink_url',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({
+            data: {
+              name: 'Late-arriving title',
+              notes:
+                'Late-arriving notes\n\nContentful entry: https://app.contentful.com/spaces/test-space/environments/test-env/entries/entry-1',
+              projects: ['project-1'],
+              workspace: 'workspace-1',
+            },
+          }),
+        })
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('does not create another task when the entry is already linked', async () => {
     vi.mocked(mockCma.entry.get).mockResolvedValue({
       sys: {
@@ -456,14 +613,13 @@ describe('createAsanaTask', () => {
     );
   });
 
-  it('creates the task anyway when allowDuplicateName is set', async () => {
+  it('creates the task anyway when checkDuplicateName is false', async () => {
     const result = await handler(
       {
         type: FunctionTypeEnum.AppActionCall,
         body: {
           title: 'Launch Campaign',
-          checkDuplicateName: true,
-          allowDuplicateName: true,
+          checkDuplicateName: false,
         },
       } as Parameters<typeof handler>[0],
       mockContext

@@ -10,7 +10,6 @@ type CreateTaskFromParametersInput = {
   workspaceGid?: string;
   installationParameters?: Partial<AppInstallationParameters>;
   checkDuplicateName?: boolean;
-  allowDuplicateName?: boolean;
 };
 
 function getTrimmedValue(value?: string) {
@@ -25,7 +24,6 @@ export async function createTaskFromParameters({
   workspaceGid,
   installationParameters,
   checkDuplicateName,
-  allowDuplicateName,
 }: CreateTaskFromParametersInput): Promise<CreateAsanaTaskResponse> {
   const trimmedToken = getTrimmedValue(accessToken);
   const trimmedTitle = getTrimmedValue(title);
@@ -53,7 +51,7 @@ export async function createTaskFromParameters({
     };
   }
 
-  if (checkDuplicateName && !allowDuplicateName) {
+  if (checkDuplicateName) {
     try {
       const duplicate = await findDuplicateTaskByName(
         trimmedToken,

@@ -403,6 +403,12 @@
           "required": false
         },
         {
+          "id": "notesFieldId",
+          "name": "Notes field ID",
+          "type": "Symbol",
+          "required": false
+        },
+        {
           "id": "projectGid",
           "name": "Project GID override",
           "type": "Symbol",
@@ -417,12 +423,6 @@
         {
           "id": "checkDuplicateName",
           "name": "Check for a duplicate task name",
-          "type": "Boolean",
-          "required": false
-        },
-        {
-          "id": "allowDuplicateName",
-          "name": "Allow creating a task with a duplicate name",
           "type": "Boolean",
           "required": false
         }

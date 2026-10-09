@@ -26,9 +26,10 @@ type EntryContext = {
 // Contentful Functions have a hard 30s wall-clock execution ceiling with no retry on timeout,
 // so this budget is intentionally kept well under that: ~18s of sleep here, leaving headroom
 // for the CMA lookups already happening each iteration plus the Asana task creation call that
-// still has to run after this loop finishes.
-const ENTRY_TITLE_RETRY_ATTEMPTS = 10;
-const ENTRY_TITLE_RETRY_DELAY_MS = 1800;
+// still has to run after this loop finishes. Title and notes share this single budget (polled
+// together each iteration) rather than each getting their own ~18s, to stay under the ceiling.
+const ENTRY_FIELD_RETRY_ATTEMPTS = 10;
+const ENTRY_FIELD_RETRY_DELAY_MS = 1800;
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -84,55 +85,103 @@ async function getEntryContext(
   }
 }
 
-function getEntryTitle(entryContext: EntryContext | null, titleFieldId?: string) {
+function getEntryFieldValue(
+  entryContext: EntryContext | null,
+  fieldId: string | undefined,
+  defaultFieldId: string,
+  fallbackFieldIds: string[]
+) {
   if (!entryContext) {
     return '';
   }
 
-  const resolvedTitleFieldId = getTrimmedValue(titleFieldId) || entryContext.displayFieldId;
+  const resolvedFieldId = getTrimmedValue(fieldId) || defaultFieldId;
   const { entry } = entryContext;
-  const title = getFirstLocalizedString(entry.fields[resolvedTitleFieldId] as LocalizedFieldValue);
+  const value = getFirstLocalizedString(entry.fields[resolvedFieldId] as LocalizedFieldValue);
 
-  if (title) {
-    return title;
+  if (value) {
+    return value;
   }
 
-  for (const fallbackFieldId of ['title', 'name', 'heading', 'headline']) {
-    const fallbackTitle = getFirstLocalizedString(
+  for (const fallbackFieldId of fallbackFieldIds) {
+    const fallbackValue = getFirstLocalizedString(
       entry.fields[fallbackFieldId] as LocalizedFieldValue
     );
 
-    if (fallbackTitle) {
-      return fallbackTitle;
+    if (fallbackValue) {
+      return fallbackValue;
     }
   }
 
   return '';
 }
 
-async function waitForEntryTitle(
+function getEntryTitle(entryContext: EntryContext | null, titleFieldId?: string) {
+  if (!entryContext) {
+    return '';
+  }
+
+  return getEntryFieldValue(entryContext, titleFieldId, entryContext.displayFieldId, [
+    'title',
+    'name',
+    'heading',
+    'headline',
+  ]);
+}
+
+// Unlike title (which always has a reliable default via the content type's display field), notes
+// has no equivalent reliable default - most content types have no "notes"/"description" field at
+// all, so guessing one would mean every automation call with no notes mapped waits out the full
+// retry budget for a value that will never arrive. Resolution (and the wait/retry below) is only
+// attempted when the caller explicitly maps a notesFieldId.
+function getEntryNotes(entryContext: EntryContext | null, notesFieldId?: string) {
+  const trimmedNotesFieldId = getTrimmedValue(notesFieldId);
+  if (!entryContext || !trimmedNotesFieldId) {
+    return '';
+  }
+
+  return getFirstLocalizedString(
+    entryContext.entry.fields[trimmedNotesFieldId] as LocalizedFieldValue
+  );
+}
+
+// Polls for title and/or notes together (only the fields the caller still needs), on a single
+// shared retry budget, so an entry that's missing both doesn't wait twice as long as one missing
+// only the title.
+async function waitForEntryFields(
   cma: PlainClientAPI,
   entryContext: EntryContext | null,
   entryId: string,
-  titleFieldId?: string
+  titleFieldId: string | undefined,
+  notesFieldId: string | undefined,
+  needsTitle: boolean,
+  needsNotes: boolean
 ) {
   let nextEntryContext = entryContext;
-  let entryTitle = getEntryTitle(nextEntryContext, titleFieldId);
+  let entryTitle = needsTitle ? getEntryTitle(nextEntryContext, titleFieldId) : '';
+  let entryNotes = needsNotes ? getEntryNotes(nextEntryContext, notesFieldId) : '';
+  const isResolved = () => (!needsTitle || entryTitle) && (!needsNotes || entryNotes);
 
-  for (let attempt = 0; !entryTitle && attempt < ENTRY_TITLE_RETRY_ATTEMPTS; attempt += 1) {
-    await sleep(ENTRY_TITLE_RETRY_DELAY_MS);
+  for (let attempt = 0; !isResolved() && attempt < ENTRY_FIELD_RETRY_ATTEMPTS; attempt += 1) {
+    await sleep(ENTRY_FIELD_RETRY_DELAY_MS);
     nextEntryContext = await getEntryContext(cma, entryId);
 
     if (await getExistingTaskLink(cma, entryId)) {
       break;
     }
 
-    entryTitle = getEntryTitle(nextEntryContext, titleFieldId);
+    if (needsTitle) {
+      entryTitle = getEntryTitle(nextEntryContext, titleFieldId);
+    }
+    if (needsNotes) {
+      entryNotes = getEntryNotes(nextEntryContext, notesFieldId);
+    }
   }
 
   return {
     entryContext: nextEntryContext,
     entryTitle,
+    entryNotes,
   };
 }
 
@@ -167,6 +216,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   let entryContext: EntryContext | null = null;
 
   let entryTitle = '';
+  let entryNotes = '';
 
   try {
     if (body.entryId) {
@@ -177,17 +227,30 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
       entryContext = await getEntryContext(cma, body.entryId);
     }
 
-    entryTitle = getTrimmedValue(body.title) ? '' : getEntryTitle(entryContext, body.titleFieldId);
+    const needsTitle = !getTrimmedValue(body.title);
+    // Only attempt (and wait/retry for) notes resolution when the caller explicitly mapped a
+    // notesFieldId - see getEntryNotes for why there's no generic fallback guess here.
+    const needsNotes = !getTrimmedValue(body.notes) && !!getTrimmedValue(body.notesFieldId);
 
-    if (body.entryId && !getTrimmedValue(body.title) && !entryTitle && cma) {
-      const resolvedEntry = await waitForEntryTitle(
+    entryTitle = needsTitle ? getEntryTitle(entryContext, body.titleFieldId) : '';
+    entryNotes = needsNotes ? getEntryNotes(entryContext, body.notesFieldId) : '';
+
+    const stillNeedsTitle = needsTitle && !entryTitle;
+    const stillNeedsNotes = needsNotes && !entryNotes;
+
+    if (body.entryId && (stillNeedsTitle || stillNeedsNotes) && cma) {
+      const resolvedEntry = await waitForEntryFields(
         cma,
         entryContext,
         body.entryId,
-        body.titleFieldId
+        body.titleFieldId,
+        body.notesFieldId,
+        stillNeedsTitle,
+        stillNeedsNotes
       );
       entryContext = resolvedEntry.entryContext;
       entryTitle = resolvedEntry.entryTitle;
+      entryNotes = resolvedEntry.entryNotes;
     }
   } catch (error) {
     return {
@@ -211,8 +274,8 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
 
   const accessToken = await getAsanaAccessToken(event, context);
   const notes = body.entryId
-    ? appendEntryLink(body.notes, buildEntryUrl(context, body.entryId))
-    : body.notes;
+    ? appendEntryLink(body.notes || entryNotes, buildEntryUrl(context, body.entryId))
+    : body.notes || entryNotes;
   const result = await createTaskFromParameters({
     accessToken,
     title: body.title || entryTitle,
@@ -221,7 +284,6 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
     workspaceGid: body.workspaceGid,
     installationParameters,
     checkDuplicateName: body.checkDuplicateName,
-    allowDuplicateName: body.allowDuplicateName,
   });
 
   if (!result.success || !result.task || !cma || !entryContext) {

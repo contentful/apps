@@ -516,8 +516,10 @@ const Sidebar = () => {
       const response = await callAction<CreateAsanaTaskResponse>('createAsanaTaskAction', {
         title: taskTitle,
         notes: buildInitialTaskDescription(),
-        checkDuplicateName: true,
-        ...(options?.allowDuplicateName ? { allowDuplicateName: true } : {}),
+        // Skip the duplicate-name check on retry (user already saw the warning and chose to
+        // proceed anyway) - same net effect as the old allowDuplicateName flag, now folded into
+        // this one parameter to stay within the app action's 8-parameter limit.
+        checkDuplicateName: !options?.allowDuplicateName,
       });
 
       if (response.duplicateTaskName) {

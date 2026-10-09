@@ -148,16 +148,18 @@ export interface CreateAsanaTaskRequest {
   notes?: string;
   entryId?: string;
   titleFieldId?: string;
+  notesFieldId?: string;
   projectGid?: string;
   workspaceGid?: string;
   // When true, checks whether a task with the same name already exists (in the target project,
   // or workspace if no project is set) before creating, and returns `duplicateTaskName: true`
   // instead of creating a second task with that name. Opt-in so existing callers (e.g.
   // Automations/App Event Handlers with no user present to respond to the warning) are unaffected.
+  // Set to false (or omit) to skip the check and create the task regardless - e.g. when the user
+  // has already seen the warning once and chosen to proceed anyway. (Previously a separate
+  // `allowDuplicateName` flag; folded into this one parameter to stay within the app action's
+  // 8-parameter limit - the two states were never functionally distinct from this one.)
   checkDuplicateName?: boolean;
-  // Set to skip the duplicate-name check above and create the task regardless - used when the
-  // user has seen the warning and chosen to proceed anyway.
-  allowDuplicateName?: boolean;
 }
 
 export interface UpdateAsanaTaskRequest {

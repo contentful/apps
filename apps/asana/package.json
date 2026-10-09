@@ -32,7 +32,11 @@
     "upsert-actions": "contentful-app-scripts upsert-actions --ci --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
     "upsert-actions:dev": "source .env && contentful-app-scripts upsert-actions --ci --organization-id \"$CONTENTFUL_ORG_ID\" --definition-id \"$CONTENTFUL_APP_DEF_ID\" --token \"$CONTENTFUL_ACCESS_TOKEN\"",
     "upsert-events:dev": "set -a; source .env; set +a; node scripts/upsert-app-event-subscription.mjs",
-    "build:functions": "contentful-app-scripts build-functions --ci"
+    "build:functions": "contentful-app-scripts build-functions --ci",
+    "deploy:sync-dev": "aws s3 sync ./build ${STATIC_S3_BASE}/asana-dev/dev && aws cloudfront create-invalidation --distribution-id $ASANA_TEST_CLOUDFRONT_DIST_ID --paths \"/*\" > /dev/null 2>&1",
+    "deploy:dev": "npm run build && npm run upload-ci && npm run deploy:sync-dev",
+    "deploy:sync-prod": "aws s3 sync ./build ${PROD_STATIC_S3_BASE}/asana && aws cloudfront create-invalidation --distribution-id $ASANA_PROD_CLOUDFRONT_DIST_ID --paths \"/*\" > /dev/null 2>&1",
+    "deploy:prod": "npm run build && npm run upload-ci && npm run deploy:sync-prod"
   },
   "devDependencies": {
     "@contentful/app-scripts": "^4.1.12",
