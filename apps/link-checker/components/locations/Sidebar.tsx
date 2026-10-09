@@ -32,6 +32,8 @@ export interface LinkCheckResult {
   isBlockedByAllowList: boolean;
   isOnDenyList: boolean;
   isValid: boolean;
+  /** Blocked by a bot-protection challenge, so the real status is unknown. */
+  challenged?: boolean;
 }
 
 /** 2xx status codes (e.g. 200 OK, 204 No Content) indicate success. */
@@ -42,11 +44,12 @@ function isSuccessStatus(status: number): boolean {
 function ResultBadges({ result }: { result: LinkCheckResult }) {
   return (
     <Flex gap="spacing2Xs" flexWrap="wrap" marginTop="spacing2Xs">
-      {!result.isValid && <Badge variant="negative">Invalid</Badge>}
+      {result.challenged && <Badge variant="warning">Bot protection</Badge>}
+      {!result.isValid && !result.challenged && <Badge variant="negative">Invalid</Badge>}
       {result.isValid && <Badge variant="positive">Valid</Badge>}
       {result.isBlockedByAllowList && <Badge variant="negative">Not on allow list</Badge>}
       {result.isOnDenyList && <Badge variant="negative">On deny list</Badge>}
-      {result.status != null && (
+      {result.status != null && !result.challenged && (
         <Badge variant={result.isValid ? 'positive' : 'negative'}>{result.status}</Badge>
       )}
       {result.error && <Badge variant="negative">{result.error}</Badge>}
@@ -255,7 +258,11 @@ export default function Sidebar() {
           const body = (response as { response?: { body?: string } })?.response?.body;
           if (body) {
             try {
-              const data = JSON.parse(body) as { status?: number; error?: string };
+              const data = JSON.parse(body) as {
+                status?: number;
+                error?: string;
+                challenged?: boolean;
+              };
               if (typeof data.status === 'number') {
                 return {
                   url: item.url,
@@ -266,7 +273,8 @@ export default function Sidebar() {
                   status: data.status,
                   isBlockedByAllowList: false,
                   isOnDenyList: false,
-                  isValid: isSuccessStatus(data.status),
+                  isValid: data.challenged !== true && isSuccessStatus(data.status),
+                  challenged: data.challenged === true,
                 };
               }
               if (data.error) {
@@ -345,7 +353,8 @@ export default function Sidebar() {
     }
   }, [sdk, allowedPatterns, forbiddenPatterns, baseUrl]);
 
-  const invalidResults = results.filter((r) => !r.isValid);
+  const invalidResults = results.filter((r) => !r.isValid && !r.challenged);
+  const unverifiedResults = results.filter((r) => r.challenged);
   const remainingResults = results.filter((r) => r.isValid);
   const hasInvalid = invalidResults.length > 0;
 
@@ -399,6 +408,8 @@ export default function Sidebar() {
                   {invalidResults.length} invalid link{invalidResults.length !== 1 ? 's' : ''}
                 </Badge>
               </>
+            ) : unverifiedResults.length > 0 ? (
+              <Subheading marginBottom="none">No invalid links found</Subheading>
             ) : (
               <>
                 <Subheading marginBottom="none">All checked links passed</Subheading>
@@ -412,6 +423,30 @@ export default function Sidebar() {
               <Flex flexDirection="column" gap="spacing2Xs">
                 {invalidResults.map((r, i) => (
                   <Box key={`${r.url}-${r.fieldId}-${r.locale}-${i}`} style={{ width: '100%' }}>
+                    <ResultCard result={r} />
+                  </Box>
+                ))}
+              </Flex>
+            </Box>
+          )}
+
+          {unverifiedResults.length > 0 && (
+            <Box marginTop="spacingS">
+              <Flex alignItems="center" justifyContent="space-between" marginBottom="spacing2Xs">
+                <Text as="p" fontWeight="fontWeightMedium">
+                  Couldn&apos;t verify
+                </Text>
+                <Badge variant="warning">{unverifiedResults.length} unverified</Badge>
+              </Flex>
+              <Text as="p" fontSize="fontSizeS" fontColor="gray600" marginBottom="spacing2Xs">
+                These sites use bot protection that only lets browsers through. Open them to check
+                manually.
+              </Text>
+              <Flex flexDirection="column" gap="spacing2Xs">
+                {unverifiedResults.map((r, i) => (
+                  <Box
+                    key={`unverified-${r.url}-${r.fieldId}-${r.locale}-${i}`}
+                    style={{ width: '100%' }}>
                     <ResultCard result={r} />
                   </Box>
                 ))}

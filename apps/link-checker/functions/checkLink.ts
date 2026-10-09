@@ -21,6 +21,23 @@ export interface CheckLinkEvent {
 export interface CheckLinkResult {
   status?: number;
   error?: string;
+  /** The site answered with a bot-protection challenge, so the link's real status is unknown. */
+  challenged?: boolean;
+}
+
+// Interactive challenges need a JS-capable browser; no request header can pass them.
+const CHALLENGE_HEADERS: Record<string, string[]> = {
+  'cf-mitigated': ['challenge'],
+  'x-vercel-mitigated': ['challenge'],
+  // AWS WAF answers a challenge with 202, which would otherwise read as a valid link.
+  'x-amzn-waf-action': ['challenge', 'captcha'],
+};
+
+export function isBotChallenge(response: Pick<Response, 'headers'>): boolean {
+  return Object.entries(CHALLENGE_HEADERS).some(([header, values]) => {
+    const value = response.headers?.get(header)?.toLowerCase();
+    return value != null && values.includes(value);
+  });
 }
 
 // Query strings can carry signed tokens, so only origin + path reach the logs.
@@ -68,13 +85,15 @@ export async function checkUrl(url: string): Promise<CheckLinkResult> {
     }
 
     clearTimeout(timeout);
+    const challenged = isBotChallenge(response);
     logProbe({
       url: redactUrl(trimmed),
       method,
       status: response.status,
       responseUrl: response.url ? redactUrl(response.url) : undefined,
+      challenged,
     });
-    return { status: response.status };
+    return challenged ? { status: response.status, challenged } : { status: response.status };
   } catch (err) {
     clearTimeout(timeout);
     const message = err instanceof Error ? err.message : 'Request failed';

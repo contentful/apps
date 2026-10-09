@@ -101,6 +101,55 @@ describe('checkLink handler', () => {
     logSpy.mockRestore();
   });
 
+  it('flags Cloudflare and Vercel bot challenges as challenged', async () => {
+    for (const header of ['cf-mitigated', 'x-vercel-mitigated']) {
+      const challenge = { status: 403, ok: false, headers: new Headers({ [header]: 'challenge' }) };
+      mockFetch.mockReset().mockResolvedValueOnce(challenge).mockResolvedValueOnce(challenge);
+      const result = await handler({ body: { url: 'https://example.com' } });
+      expect(result).toEqual({ status: 403, challenged: true });
+    }
+  });
+
+  it('flags an AWS WAF challenge even though it returns 202', async () => {
+    mockFetch.mockResolvedValueOnce({
+      status: 202,
+      ok: true,
+      headers: new Headers({ 'x-amzn-waf-action': 'challenge' }),
+    });
+    const result = await handler({ body: { url: 'https://example.com' } });
+    expect(result).toEqual({ status: 202, challenged: true });
+  });
+
+  it('flags an AWS WAF captcha as challenged', async () => {
+    const captcha = {
+      status: 405,
+      ok: false,
+      headers: new Headers({ 'x-amzn-waf-action': 'captcha' }),
+    };
+    mockFetch.mockResolvedValueOnce(captcha).mockResolvedValueOnce(captcha);
+    const result = await handler({ body: { url: 'https://example.com' } });
+    expect(result).toEqual({ status: 405, challenged: true });
+  });
+
+  it('trusts a clean GET over a challenged HEAD', async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        status: 403,
+        ok: false,
+        headers: new Headers({ 'cf-mitigated': 'challenge' }),
+      })
+      .mockResolvedValueOnce({ status: 200, ok: true, headers: new Headers() });
+    const result = await handler({ body: { url: 'https://example.com' } });
+    expect(result).toEqual({ status: 200 });
+  });
+
+  it('does not flag a plain 403 as challenged', async () => {
+    const forbidden = { status: 403, ok: false, headers: new Headers() };
+    mockFetch.mockResolvedValueOnce(forbidden).mockResolvedValueOnce(forbidden);
+    const result = await handler({ body: { url: 'https://example.com' } });
+    expect(result).toEqual({ status: 403 });
+  });
+
   it('returns generic error when fetch throws non-Error', async () => {
     mockFetch.mockRejectedValueOnce('string error');
     const result = await handler({ body: { url: 'https://example.com' } });
