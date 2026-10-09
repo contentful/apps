@@ -15,6 +15,10 @@ export type CloneReferenceEntry = {
   entryId: string;
   label: string;
   contentTypeId: string;
+  depth: number;
+  referencedByCount: number;
+  parentEntryId: string | null;
+  childEntryIds: string[];
 };
 
 export class ReferenceDiscoveryAbortedError extends Error {
@@ -30,6 +34,9 @@ class EntryCloner {
   private failedCloneIds: string[] = [];
   private failedUpdateIds: string[] = [];
   private referenceChildren: ReferenceChildrenMap = {};
+  private discoveryOrder: string[] = [];
+  private discoveryDepths: Record<string, number> = {};
+  private discoveryParents: Record<string, string | null> = {};
   private contentTypes: { [id: string]: ContentTypeProps } = {};
   private updates: number = 0;
   private parameters: AppParameters;
@@ -92,24 +99,33 @@ class EntryCloner {
   async getReferenceEntries(options?: { signal?: AbortSignal }): Promise<CloneReferenceEntry[]> {
     await this.findReferences(this.entryId, undefined, options?.signal);
 
+    const referencedByCounts: Record<string, number> = {};
+    for (const childEntryIds of Object.values(this.referenceChildren)) {
+      for (const childEntryId of childEntryIds) {
+        referencedByCounts[childEntryId] = (referencedByCounts[childEntryId] || 0) + 1;
+      }
+    }
+
+    // Discovery order is a pre-order walk of the first-seen spanning tree, so it preserves structure
     const referenceEntries: CloneReferenceEntry[] = [];
-    for (const [entryId, entry] of Object.entries(this.references)) {
+    for (const entryId of this.discoveryOrder) {
+      const entry = this.references[entryId];
+      if (!entry) {
+        continue;
+      }
       referenceEntries.push({
         entryId,
         label: await this.getEntryLabel(entry),
         contentTypeId: entry.sys.contentType.sys.id,
+        depth: this.discoveryDepths[entryId] ?? 0,
+        referencedByCount: referencedByCounts[entryId] || 0,
+        parentEntryId: this.discoveryParents[entryId] ?? null,
+        // Links to deleted entries were never fetched, so they cannot be selected
+        childEntryIds: (this.referenceChildren[entryId] || []).filter(
+          (childEntryId) => this.references[childEntryId] !== undefined
+        ),
       });
     }
-
-    referenceEntries.sort((left, right) => {
-      if (left.entryId === this.entryId) {
-        return -1;
-      }
-      if (right.entryId === this.entryId) {
-        return 1;
-      }
-      return left.label.localeCompare(right.label, undefined, { sensitivity: 'base' });
-    });
 
     return referenceEntries;
   }
@@ -142,6 +158,10 @@ class EntryCloner {
 
     if (entry !== undefined) {
       this.references[entryId] = entry;
+      this.discoveryOrder.push(entryId);
+      this.discoveryParents[entryId] = parentEntryId ?? null;
+      this.discoveryDepths[entryId] =
+        parentEntryId === undefined ? 0 : (this.discoveryDepths[parentEntryId] ?? 0) + 1;
       this.setReferencesCount(Object.keys(this.references).length);
       this.referenceChildren[entryId] ||= [];
 
