@@ -85,6 +85,47 @@ describe('checkEntryLinks handler', () => {
     expect(result.summary).toContain('https://example.com/missing: HTTP 404');
   });
 
+  it('counts bot-challenged links as unverified rather than invalid', async () => {
+    const challenge = {
+      status: 403,
+      ok: false,
+      headers: new Headers({ 'cf-mitigated': 'challenge' }),
+    };
+    mockFetch
+      .mockResolvedValueOnce({ status: 200, ok: true })
+      .mockResolvedValueOnce(challenge)
+      .mockResolvedValueOnce(challenge);
+
+    const mockCma = {
+      entry: {
+        get: vi.fn().mockResolvedValue({
+          sys: { contentType: { sys: { id: 'post' } } },
+          fields: {
+            body: { 'en-US': 'See https://example.com/ok and https://protected.example.com/' },
+          },
+        }),
+      },
+      contentType: {
+        get: vi.fn().mockResolvedValue({
+          fields: [{ id: 'body', name: 'Body', type: 'Text' }],
+        }),
+      },
+    };
+
+    const result = await handler(
+      { body: { entryId: 'entry-123', fieldId: 'body', locale: 'en-US' } },
+      { cma: mockCma as any, appInstallationParameters: {} } as any
+    );
+
+    expect(result.validCount).toBe(1);
+    expect(result.invalidCount).toBe(0);
+    expect(result.unverifiedCount).toBe(1);
+    expect(result.summary).toContain('1 unverified');
+    expect(result.summary).toContain(
+      'https://protected.example.com/: could not verify (bot protection, HTTP 403)'
+    );
+  });
+
   it('resolves relative links with the configured base URL', async () => {
     mockFetch.mockResolvedValueOnce({ status: 200, ok: true });
 

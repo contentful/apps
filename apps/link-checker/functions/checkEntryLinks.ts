@@ -60,6 +60,8 @@ interface CheckEntryLinksResponse {
   checkedCount: number;
   validCount: number;
   invalidCount: number;
+  /** Links behind a bot-protection challenge; neither valid nor invalid. */
+  unverifiedCount: number;
   skippedCount: number;
   summary: string;
   results: EntryLinkResult[];
@@ -78,6 +80,8 @@ export interface CheckAllEntryLinksResponse {
   checkedCount: number;
   validCount: number;
   invalidCount: number;
+  /** Links behind a bot-protection challenge; neither valid nor invalid. */
+  unverifiedCount: number;
   skippedCount: number;
   summary: string;
   results: EntryLinkResult[];
@@ -221,7 +225,7 @@ function buildSummary(
 ): string {
   const localeText = response.locale ? ` (${response.locale})` : '';
   const headline = `Link Checker scanned ${response.checkedCount} link(s) in ${fieldName}${localeText} on entry ${entryId}.`;
-  const counts = `${response.validCount} valid, ${response.invalidCount} invalid, ${response.skippedCount} skipped.`;
+  const counts = `${response.validCount} valid, ${response.invalidCount} invalid, ${response.unverifiedCount} unverified, ${response.skippedCount} skipped.`;
 
   if (!response.results.length) {
     return `${headline} No links were found.`;
@@ -238,6 +242,9 @@ function buildSummary(
       }
       if (result.error) {
         return `- ${target}: ${result.error}`;
+      }
+      if (result.challenged) {
+        return `- ${target}: could not verify (bot protection, HTTP ${result.status})`;
       }
       if (result.status != null) {
         return `- ${target}: HTTP ${result.status}`;
@@ -313,11 +320,13 @@ async function checkExtractedUrls(
   }
 
   const validCount = results.filter((result) => result.isValid).length;
+  const unverifiedCount = results.filter((result) => result.challenged).length;
 
   return {
     checkedCount: results.length,
     validCount,
-    invalidCount: results.length - validCount,
+    invalidCount: results.length - validCount - unverifiedCount,
+    unverifiedCount,
     skippedCount,
     results,
   };
@@ -328,7 +337,7 @@ function buildAllFieldsSummary(response: CheckAllEntryLinksResponse): string {
   const fieldList =
     response.checkedFieldIds.length > 0 ? response.checkedFieldIds.join(', ') : 'no fields';
   const headline = `Link Checker scanned ${response.checkedCount} link(s) across ${response.checkedFieldIds.length} field(s)${localeText} on entry ${response.entryId}.`;
-  const counts = `${response.validCount} valid, ${response.invalidCount} invalid, ${response.skippedCount} skipped.`;
+  const counts = `${response.validCount} valid, ${response.invalidCount} invalid, ${response.unverifiedCount} unverified, ${response.skippedCount} skipped.`;
 
   if (!response.results.length) {
     return `${headline} Checked fields: ${fieldList}. No links were found.`;
@@ -345,6 +354,9 @@ function buildAllFieldsSummary(response: CheckAllEntryLinksResponse): string {
       }
       if (result.error) {
         return `- ${result.fieldName} (${result.locale}): ${target} ${result.error}`;
+      }
+      if (result.challenged) {
+        return `- ${result.fieldName} (${result.locale}): ${target} could not verify (bot protection, HTTP ${result.status})`;
       }
       if (result.status != null) {
         return `- ${result.fieldName} (${result.locale}): ${target} HTTP ${result.status}`;

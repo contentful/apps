@@ -101,6 +101,22 @@ describe('checkLink handler', () => {
     logSpy.mockRestore();
   });
 
+  it('flags Cloudflare and Vercel bot challenges as challenged', async () => {
+    for (const header of ['cf-mitigated', 'x-vercel-mitigated']) {
+      const challenge = { status: 403, ok: false, headers: new Headers({ [header]: 'challenge' }) };
+      mockFetch.mockReset().mockResolvedValueOnce(challenge).mockResolvedValueOnce(challenge);
+      const result = await handler({ body: { url: 'https://example.com' } });
+      expect(result).toEqual({ status: 403, challenged: true });
+    }
+  });
+
+  it('does not flag a plain 403 as challenged', async () => {
+    const forbidden = { status: 403, ok: false, headers: new Headers() };
+    mockFetch.mockResolvedValueOnce(forbidden).mockResolvedValueOnce(forbidden);
+    const result = await handler({ body: { url: 'https://example.com' } });
+    expect(result).toEqual({ status: 403 });
+  });
+
   it('returns generic error when fetch throws non-Error', async () => {
     mockFetch.mockRejectedValueOnce('string error');
     const result = await handler({ body: { url: 'https://example.com' } });

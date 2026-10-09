@@ -21,6 +21,17 @@ export interface CheckLinkEvent {
 export interface CheckLinkResult {
   status?: number;
   error?: string;
+  /** The site answered with a bot-protection challenge, so the link's real status is unknown. */
+  challenged?: boolean;
+}
+
+// Interactive challenges need a JS-capable browser; no request header can pass them.
+const CHALLENGE_HEADERS = ['cf-mitigated', 'x-vercel-mitigated'];
+
+export function isBotChallenge(response: Pick<Response, 'headers'>): boolean {
+  return CHALLENGE_HEADERS.some(
+    (header) => response.headers?.get(header)?.toLowerCase() === 'challenge'
+  );
 }
 
 // Query strings can carry signed tokens, so only origin + path reach the logs.
@@ -68,13 +79,15 @@ export async function checkUrl(url: string): Promise<CheckLinkResult> {
     }
 
     clearTimeout(timeout);
+    const challenged = isBotChallenge(response);
     logProbe({
       url: redactUrl(trimmed),
       method,
       status: response.status,
       responseUrl: response.url ? redactUrl(response.url) : undefined,
+      challenged,
     });
-    return { status: response.status };
+    return challenged ? { status: response.status, challenged } : { status: response.status };
   } catch (err) {
     clearTimeout(timeout);
     const message = err instanceof Error ? err.message : 'Request failed';

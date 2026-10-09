@@ -42,7 +42,7 @@ const SUPPORTED_FIELD_TYPES = ['Symbol', 'Text', 'RichText'];
 const RESULTS_FLUSH_INTERVAL_MS = 200;
 const ESTIMATED_ROW_HEIGHT = 64;
 
-type LinkStatus = 'valid' | 'invalid' | 'unchecked' | 'checking';
+type LinkStatus = 'valid' | 'invalid' | 'unverified' | 'unchecked' | 'checking';
 
 interface ContentTypeSummary {
   id: string;
@@ -85,6 +85,19 @@ interface PageLinkResult {
 
 function isSuccessStatus(status: number): boolean {
   return status >= 200 && status < 300;
+}
+
+interface CheckLinkResponse {
+  status?: number;
+  error?: string;
+  challenged?: boolean;
+}
+
+function toLinkStatus(response: CheckLinkResponse): LinkStatus {
+  if (response.challenged) return 'unverified';
+  return typeof response.status === 'number' && isSuccessStatus(response.status)
+    ? 'valid'
+    : 'invalid';
 }
 
 function getEntryTitle(
@@ -143,11 +156,21 @@ function StatusBadge({ result }: { result: PageLinkResult }) {
     return <Badge variant="negative">{result.reason ?? result.statusCode ?? 'Invalid'}</Badge>;
   }
 
+  if (result.status === 'unverified') {
+    return <Badge variant="warning">{result.reason ?? 'Unverified'}</Badge>;
+  }
+
   return <Badge variant="warning">{result.reason ?? 'Not scanned'}</Badge>;
 }
 
 function sortResults(results: PageLinkResult[]) {
-  const rank: Record<LinkStatus, number> = { invalid: 0, checking: 1, unchecked: 2, valid: 3 };
+  const rank: Record<LinkStatus, number> = {
+    invalid: 0,
+    unverified: 1,
+    checking: 2,
+    unchecked: 3,
+    valid: 4,
+  };
 
   return [...results].sort((left, right) => {
     if (left.status !== right.status) {
@@ -536,13 +559,13 @@ export default function Page() {
 
     const actionId = resolvedActionId;
     const resultMap = new Map(results.map((r) => [r.id, r]));
-    const requestCache = new Map<string, Promise<{ status?: number; error?: string }>>();
+    const requestCache = new Map<string, Promise<CheckLinkResponse>>();
 
     const runRequest = (urlToCheck: string) => {
       const existing = requestCache.get(urlToCheck);
       if (existing) return existing;
 
-      const request: Promise<{ status?: number; error?: string }> = sdk.cma.appActionCall
+      const request: Promise<CheckLinkResponse> = sdk.cma.appActionCall
         .createWithResponse(
           {
             spaceId: sdk.ids.space,
@@ -556,7 +579,7 @@ export default function Page() {
           const body = (response as { response?: { body?: string } })?.response?.body;
           if (!body) return {};
           try {
-            return JSON.parse(body) as { status?: number; error?: string };
+            return JSON.parse(body) as CheckLinkResponse;
           } catch {
             return { error: 'Invalid response body' };
           }
@@ -639,9 +662,9 @@ export default function Page() {
               locale: item.extractedUrl.locale,
               url: item.extractedUrl.url,
               resolvedUrl: item.resolvedUrl,
-              status: typeof status === 'number' && isSuccessStatus(status) ? 'valid' : 'invalid',
+              status: toLinkStatus(response),
               statusCode: status,
-              reason: response.error,
+              reason: response.challenged ? 'Bot protection' : response.error,
             };
           }
 
@@ -711,7 +734,7 @@ export default function Page() {
         acc[result.status] += 1;
         return acc;
       },
-      { valid: 0, invalid: 0, unchecked: 0, checking: 0 }
+      { valid: 0, invalid: 0, unverified: 0, unchecked: 0, checking: 0 }
     );
   }, [results]);
 
@@ -826,6 +849,9 @@ export default function Page() {
             {counts.checking > 0 && <Badge variant="primary">{counts.checking} checking</Badge>}
             {counts.unchecked > 0 && <Badge variant="warning">{counts.unchecked} unchecked</Badge>}
             <Badge variant="negative">{counts.invalid} invalid</Badge>
+            {counts.unverified > 0 && (
+              <Badge variant="warning">{counts.unverified} unverified</Badge>
+            )}
             <Badge variant="positive">{counts.valid} valid</Badge>
             <Badge variant="secondary">{results.length} total</Badge>
           </Flex>
@@ -858,6 +884,7 @@ export default function Page() {
                 <Option value="unchecked">Unchecked</Option>
                 <Option value="checking">Checking</Option>
                 <Option value="invalid">Invalid</Option>
+                <Option value="unverified">Unverified</Option>
                 <Option value="valid">Valid</Option>
               </Select>
             </Box>

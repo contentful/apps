@@ -230,6 +230,52 @@ describe('Sidebar component', () => {
     );
   });
 
+  it('lists bot-challenged links separately instead of as invalid', async () => {
+    const createWithResponse = vi.fn().mockResolvedValueOnce({
+      response: { body: JSON.stringify({ status: 403, challenged: true }) },
+    });
+
+    mockSdk.entry.fields = {
+      body: {
+        id: 'body',
+        name: 'Body',
+        type: 'Text',
+        locales: ['en-US'],
+        getValue: () => 'Protected https://protected.example.com',
+      },
+    };
+    mockSdk.cma = {
+      appAction: {
+        getMany: vi.fn().mockResolvedValue({
+          items: [
+            {
+              sys: {
+                id: 'check-link-action',
+                appDefinition: { sys: { id: mockSdk.ids.app } },
+              },
+              function: { sys: { id: 'checkLink' } },
+            },
+          ],
+        }),
+      },
+      appActionCall: {
+        createWithResponse,
+      },
+    };
+
+    render(<Sidebar />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /check links/i }));
+    });
+
+    await screen.findByText(/1 unverified/i);
+    expect(screen.getByText('No invalid links found')).toBeInTheDocument();
+    expect(screen.getByText('Bot protection')).toBeInTheDocument();
+    expect(screen.queryByText(/\d+ invalid link/i)).not.toBeInTheDocument();
+    expect(screen.queryByText('All valid')).not.toBeInTheDocument();
+  });
+
   it('shows only non-invalid results when remaining links are expanded', async () => {
     const createWithResponse = vi
       .fn()
