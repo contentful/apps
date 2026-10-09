@@ -49,6 +49,9 @@ export const PermissionsSection: FC<PermissionsSectionProps> = ({
     <Text marginBottom="spacingM">
       Allow the MCP server to access entities and features within your Contentful space.
     </Text>
+    <Note variant="neutral" style={{ marginBottom: '16px', width: '100%' }}>
+      Active sessions will need to be reauthenticated to pick up permissions changes.
+    </Note>
 
     <Accordion style={{ width: '100%', maxWidth: '100%' }}>
       <Accordion.Item

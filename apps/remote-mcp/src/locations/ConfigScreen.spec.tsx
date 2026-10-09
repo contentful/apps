@@ -41,6 +41,15 @@ describe('Config Screen component', () => {
     expect(getByText('Content lifecycle actions')).toBeInTheDocument();
   });
 
+  it('tells admins that active sessions must reauthenticate to pick up permission changes', async () => {
+    const { getByText } = render(<ConfigScreen />);
+    await waitFor(() => expect(mockSdk.app.setReady).toHaveBeenCalled());
+
+    expect(
+      getByText('Active sessions will need to be reauthenticated to pick up permissions changes.')
+    ).toBeInTheDocument();
+  });
+
   it('renders the Experience orchestration section', async () => {
     const { getByText } = render(<ConfigScreen />);
     await waitFor(() => expect(mockSdk.app.setReady).toHaveBeenCalled());
