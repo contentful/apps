@@ -46,7 +46,7 @@ describe('Config Screen component', () => {
     await waitFor(() => expect(mockSdk.app.setReady).toHaveBeenCalled());
 
     expect(
-      getByText('Active sessions will need to be reauthenticated to pick up permissions changes.')
+      getByText('Active sessions need to be reauthenticated to pick up permissions changes.')
     ).toBeInTheDocument();
   });
 
