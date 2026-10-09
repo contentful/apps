@@ -33,6 +33,42 @@ function makeThumbnail(attachment) {
   return [url, alt];
 }
 
+function formatFileSize(bytes) {
+  if (typeof bytes !== 'number' || bytes <= 0) {
+    return null;
+  }
+
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+
+  if (bytes < 1024 * 1024) {
+    return `${Math.round(bytes / 1024)} KB`;
+  }
+
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function getAdditionalData(attachment) {
+  const filename = attachment.filename || 'Untitled asset';
+  const dimensions =
+    attachment.width && attachment.height ? `${attachment.width} × ${attachment.height}` : null;
+  const size = formatFileSize(attachment.size);
+  const secondary = [dimensions, size, attachment.mimetype].filter(Boolean).join(' · ');
+  const href =
+    typeof attachment.cdn_url === 'string'
+      ? attachment.cdn_url
+      : typeof attachment.url === 'string'
+      ? attachment.url
+      : undefined;
+
+  return {
+    primary: filename,
+    ...(secondary ? { secondary } : {}),
+    ...(href ? { href } : {}),
+  };
+}
+
 function renderDialog(sdk) {
   const config = sdk.parameters.invocation;
 
@@ -127,6 +163,7 @@ setup({
   ],
   validateParameters: () => {},
   makeThumbnail,
+  getAdditionalData,
   renderDialog,
   openDialog,
   isDisabled: () => false,

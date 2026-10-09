@@ -135,16 +135,20 @@ export type CustomUpdateStateValueFn = (
 ) => Promise<void>;
 
 /**
- * Object containing additional data about the asset to display as primary and secondary information in the "more details" section
+ * Object containing additional data about the asset to display under the thumbnail.
  */
-export type AdditionalData = { primary: string; secondary: string };
+export type AdditionalData = {
+  primary: string;
+  secondary?: string;
+  /** Opens in a new tab when the filename label is rendered as a link. */
+  href?: string;
+};
 
 /**
- * Function that return an object that represents the primary and secondary data that should be displayed
- * in the "more details" section of the asset card
+ * Function that returns metadata to display inline beneath each asset thumbnail.
  *
  * @param asset an asset
- * @return object with primary and secondary properties that contain strings to display in the asset card
+ * @return object with primary label, optional secondary metadata, and optional href for the filename link
  */
 export type GetAdditionalDataFn = (asset: Asset) => AdditionalData;
 
@@ -255,10 +259,9 @@ export interface Integration {
   customUpdateStateValue?: CustomUpdateStateValueFn;
 
   /**
-   * Optional function to get additional data from the asset to be displayed in the asset card
-   * This function accepts asset info and returns an object that contains primary and secondary information to display
-   * When this function is used, a "more details" section will appear on the asset card
-   * This is optional and if not provided, the default look of the asset card will remain
+   * Optional function to get additional metadata for each asset card.
+   * When provided, filenames render inline beneath the thumbnail. If `href` is set on the
+   * returned object, the filename becomes an external link. `secondary` renders as muted metadata.
    */
   getAdditionalData?: GetAdditionalDataFn;
 }

@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.6](https://github.com/contentful/apps/compare/@contentful/dam-app-base@4.0.5...@contentful/dam-app-base@4.0.6) (2026-08-26)
+
+### Features
+
+- **dam-app-base:** redesign asset cards with a checkerboard thumbnail background, always-visible filename labels, and inline metadata display. Replaces the previous expandable "more details" pattern.
+- **dam-app-base:** add optional `AdditionalData.href` so integrations can render the filename as an external link without custom field UI.
+
 ## [4.0.5](https://github.com/contentful/apps/compare/@contentful/dam-app-base@4.0.4...@contentful/dam-app-base@4.0.5) (2026-04-22)
 
 ### Bug Fixes
