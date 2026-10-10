@@ -7,7 +7,7 @@ import logger from '../utils/logger';
 import {
   getEntryKlaviyoFieldMappings,
   setEntryKlaviyoFieldMappings,
-} from '../utils/field-mappings';
+} from '../utils/field-mappings-client';
 import { KlaviyoService } from '../utils/klaviyo-service';
 
 // Extend Window interface to allow our custom property
