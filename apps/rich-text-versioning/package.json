@@ -51,6 +51,6 @@
   "overrides": {
     "@contentful/rich-text-types": "^16.1.0",
     "slate": "0.131.0",
-    "slate-react": "0.102.0"
+    "slate-react": "0.131.0"
   }
 }
