@@ -12,6 +12,22 @@
       "enabled": false
     },
     {
+      "description": "Review rich-text editor, Slate and Plate updates manually for compatibility.",
+      "matchFileNames": ["apps/rich-text-versioning/package.json"],
+      "matchPackageNames": [
+        "@contentful/field-editor-rich-text",
+        "slate",
+        "slate-*",
+        "@udecode/slate",
+        "@udecode/slate-*",
+        "@udecode/plate",
+        "@udecode/plate-*",
+        "platejs",
+        "@platejs/*"
+      ],
+      "enabled": false
+    },
+    {
       "matchManagers": ["npm"],
       "matchDepTypes": ["dependencies"],
       "matchUpdateTypes": ["minor", "patch"],
