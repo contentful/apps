@@ -34,12 +34,15 @@ const marketoGet = async <T>(
 // Marketo only ever puts the archive flag (isArchive) on a Folder. A
 // Program has no archive flag of its own -- Adobe's documented Program
 // schema has no isArchive -- so a Program is archived only in the sense
-// that the Folder containing it is archived. The two container types also
-// use different field names for their upward pointer: a Folder's parent is
-// `parent` (Folder or Program), while a Program's parent is always `folder`
-// (always a Folder, never another Program). The walk must dispatch on
-// container type to follow the right edge, or it silently dead-ends at
-// every Program node and misses any archived ancestor above it.
+// that something above it in its ancestry is archived. The two container
+// types also use different field names for their upward pointer: a
+// Folder's parent is `parent`, a Program's is `folder` -- both can target
+// either a Folder or a Program (Adobe's example response for Program
+// happens to show a Folder, but nothing in the public spec rules out a
+// Program nested under another Program via the same field). The walk must
+// dispatch on container type to follow the right edge, or it silently
+// dead-ends at every Program node and misses any archived ancestor above
+// it; it must not assume Program's parent is always a Folder.
 const containerCacheKey = (containerType: MarketoAssetContainerType, containerId: number) =>
   `${containerType}:${containerId}`;
 
