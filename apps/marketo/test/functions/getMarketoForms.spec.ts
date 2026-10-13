@@ -11,11 +11,14 @@ import {
   AUTH_URL,
   FORMS_URL,
   folderUrl,
+  programUrl,
   mockAuthResponse,
   buildMarketoForm,
   buildMarketoFolder,
+  buildMarketoProgram,
   buildFormsApiResponse,
   buildFolderApiResponse,
+  buildProgramApiResponse,
   jsonResponse,
 } from '../mocks';
 
@@ -152,6 +155,148 @@ describe('getMarketoForms handler', () => {
     expect(result.forms).not.toContainEqual(
       expect.objectContaining({ id: 'form-nested-archived' })
     );
+  });
+
+  it('should exclude a form parented directly by a Program whose own folder is archived', async () => {
+    // Program has no isArchive of its own (Adobe's documented Program
+    // schema has no archive flag). Its upward pointer is `folder`, not
+    // `parent`, and always targets a Folder. A form sitting directly under
+    // a Program must still be excluded if that Program's containing Folder
+    // is archived.
+    const liveForm = buildMarketoForm({ id: 'form-live', name: 'Current Contact Form' });
+    const programForm = buildMarketoForm({
+      id: 'form-in-program',
+      name: 'DE Asset Form GDPR 2019',
+      url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/program.json',
+      folder: { type: 'Program', value: 50, folderName: '2019 Campaign' },
+    });
+
+    mockFetchRoutes({
+      [AUTH_URL]: mockAuthResponse,
+      [FORMS_URL]: buildFormsApiResponse([liveForm, programForm]),
+      [folderUrl(100)]: buildFolderApiResponse(buildMarketoFolder()),
+      [programUrl(50)]: buildProgramApiResponse(
+        buildMarketoProgram({
+          id: 50,
+          name: '2019 Campaign',
+          folder: { type: 'Folder', value: 25, folderName: '_Archive' },
+        })
+      ),
+      [folderUrl(25)]: buildFolderApiResponse(
+        buildMarketoFolder({ id: 25, name: '_Archive', isArchive: true })
+      ),
+    });
+
+    const result = await handler(mockEvent, mockContext);
+
+    expect(result.forms).toEqual([
+      { id: 'form-live', name: 'Current Contact Form', url: liveForm.url },
+    ]);
+    expect(result.forms).not.toContainEqual(expect.objectContaining({ id: 'form-in-program' }));
+  });
+
+  it('should exclude a form whose folder sits under a Program, several hops below an archived Folder', async () => {
+    // form -> Folder (not archived) -> Program (no isArchive, climbs via
+    // .folder) -> Folder (archived). The walk must keep climbing through the
+    // Program node instead of dead-ending there.
+    const liveForm = buildMarketoForm({ id: 'form-live', name: 'Current Contact Form' });
+    const nestedForm = buildMarketoForm({
+      id: 'form-nested-under-program',
+      name: '00976653 II',
+      url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/nested-program.json',
+      folder: { type: 'Folder', value: 60, folderName: 'Assets' },
+    });
+
+    mockFetchRoutes({
+      [AUTH_URL]: mockAuthResponse,
+      [FORMS_URL]: buildFormsApiResponse([liveForm, nestedForm]),
+      [folderUrl(100)]: buildFolderApiResponse(buildMarketoFolder()),
+      [folderUrl(60)]: buildFolderApiResponse(
+        buildMarketoFolder({
+          id: 60,
+          name: 'Assets',
+          isArchive: false,
+          parent: { id: 50, type: 'Program' },
+        })
+      ),
+      [programUrl(50)]: buildProgramApiResponse(
+        buildMarketoProgram({
+          id: 50,
+          name: '2019 Campaign',
+          folder: { type: 'Folder', value: 25, folderName: '_Archive' },
+        })
+      ),
+      [folderUrl(25)]: buildFolderApiResponse(
+        buildMarketoFolder({ id: 25, name: '_Archive', isArchive: true })
+      ),
+    });
+
+    const result = await handler(mockEvent, mockContext);
+
+    expect(result.forms).toEqual([
+      { id: 'form-live', name: 'Current Contact Form', url: liveForm.url },
+    ]);
+    expect(result.forms).not.toContainEqual(
+      expect.objectContaining({ id: 'form-nested-under-program' })
+    );
+  });
+
+  it('should keep a form under a Program whose folder is not archived', async () => {
+    // Negative case: a Program is never archived itself, so if its folder
+    // isn't archived either, the form must survive the filter.
+    const programForm = buildMarketoForm({
+      id: 'form-live-program',
+      name: 'Current Program Form',
+      url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/live-program.json',
+      folder: { type: 'Program', value: 51, folderName: 'Active Campaign' },
+    });
+
+    mockFetchRoutes({
+      [AUTH_URL]: mockAuthResponse,
+      [FORMS_URL]: buildFormsApiResponse([programForm]),
+      [programUrl(51)]: buildProgramApiResponse(
+        buildMarketoProgram({
+          id: 51,
+          name: 'Active Campaign',
+          folder: { type: 'Folder', value: 100, folderName: 'Landing Pages' },
+        })
+      ),
+      [folderUrl(100)]: buildFolderApiResponse(buildMarketoFolder()),
+    });
+
+    const result = await handler(mockEvent, mockContext);
+
+    expect(result.forms).toEqual([
+      { id: 'form-live-program', name: 'Current Program Form', url: programForm.url },
+    ]);
+  });
+
+  it('should not loop forever on a self-referential/circular container parent chain', async () => {
+    const circularForm = buildMarketoForm({
+      id: 'form-circular',
+      name: 'Weird Legacy Form',
+      url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/circular.json',
+      folder: { type: 'Folder', value: 70, folderName: 'Old Stuff' },
+    });
+
+    mockFetchRoutes({
+      [AUTH_URL]: mockAuthResponse,
+      [FORMS_URL]: buildFormsApiResponse([circularForm]),
+      [folderUrl(70)]: buildFolderApiResponse(
+        buildMarketoFolder({
+          id: 70,
+          name: 'Old Stuff',
+          isArchive: false,
+          parent: { id: 70, type: 'Folder' },
+        })
+      ),
+    });
+
+    const result = await handler(mockEvent, mockContext);
+
+    expect(result.forms).toEqual([
+      { id: 'form-circular', name: 'Weird Legacy Form', url: circularForm.url },
+    ]);
   });
 
   it('should not issue duplicate folder lookups when multiple forms share a folder', async () => {

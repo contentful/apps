@@ -9,9 +9,11 @@ import { getMarketoToken } from './getMarketoToken';
 import type {
   AppInstallationParameters,
   MarketoApiResponse,
+  MarketoAssetContainerType,
   MarketoFolderRecord,
   MarketoFormRecord,
   MarketoFormsResponse,
+  MarketoProgramRecord,
 } from '../src/types';
 
 const marketoGet = async <T>(
@@ -29,11 +31,18 @@ const marketoGet = async <T>(
   return { response, body: await response.json() };
 };
 
-// Marketo archives at the folder level (folder.isArchive), never on the form
-// itself, so a form's own status can still read "approved" while its folder
-// is archived. isArchive also doesn't cascade onto subfolders when a parent
-// is archived, so a form in an unarchived subfolder of an archived folder
-// stays "live" unless we walk the parent chain ourselves.
+// Marketo only ever puts the archive flag (isArchive) on a Folder. A
+// Program has no archive flag of its own -- Adobe's documented Program
+// schema has no isArchive -- so a Program is archived only in the sense
+// that the Folder containing it is archived. The two container types also
+// use different field names for their upward pointer: a Folder's parent is
+// `parent` (Folder or Program), while a Program's parent is always `folder`
+// (always a Folder, never another Program). The walk must dispatch on
+// container type to follow the right edge, or it silently dead-ends at
+// every Program node and misses any archived ancestor above it.
+const containerCacheKey = (containerType: MarketoAssetContainerType, containerId: number) =>
+  `${containerType}:${containerId}`;
+
 const fetchFolder = async (baseUrl: string, accessToken: string, folderId: number) => {
   const { body } = await marketoGet<MarketoFolderRecord>(
     baseUrl,
@@ -43,22 +52,65 @@ const fetchFolder = async (baseUrl: string, accessToken: string, folderId: numbe
   return body.result?.[0];
 };
 
-const isFolderArchived = async (
+const fetchProgram = async (baseUrl: string, accessToken: string, programId: number) => {
+  const { body } = await marketoGet<MarketoProgramRecord>(
+    baseUrl,
+    `/rest/asset/v1/program/${programId}.json`,
+    accessToken
+  );
+  return body.result?.[0];
+};
+
+const isContainerArchived = async (
   baseUrl: string,
   accessToken: string,
-  folderId: number,
-  cache: Map<number, boolean>
+  containerType: MarketoAssetContainerType,
+  containerId: number,
+  cache: Map<string, boolean>,
+  visited: Set<string> = new Set()
 ): Promise<boolean> => {
-  const cached = cache.get(folderId);
+  const key = containerCacheKey(containerType, containerId);
+  const cached = cache.get(key);
   if (cached != null) return cached;
 
-  const folder = await fetchFolder(baseUrl, accessToken, folderId);
-  const result =
-    Boolean(folder?.isArchive) ||
-    (folder?.parent != null &&
-      (await isFolderArchived(baseUrl, accessToken, folder.parent.id, cache)));
+  // Guard against a corrupt/self-referential parent chain (plausible in a
+  // long-lived Marketo instance) looping forever.
+  if (visited.has(key)) {
+    cache.set(key, false);
+    return false;
+  }
+  visited.add(key);
 
-  cache.set(folderId, result);
+  let result: boolean;
+  if (containerType === 'Program') {
+    const program = await fetchProgram(baseUrl, accessToken, containerId);
+    // A Program can never be archived itself -- only climb to its folder.
+    result =
+      program?.folder != null &&
+      (await isContainerArchived(
+        baseUrl,
+        accessToken,
+        program.folder.type,
+        program.folder.value,
+        cache,
+        visited
+      ));
+  } else {
+    const folder = await fetchFolder(baseUrl, accessToken, containerId);
+    result =
+      Boolean(folder?.isArchive) ||
+      (folder?.parent != null &&
+        (await isContainerArchived(
+          baseUrl,
+          accessToken,
+          folder.parent.type,
+          folder.parent.id,
+          cache,
+          visited
+        )));
+  }
+
+  cache.set(key, result);
   return result;
 };
 
@@ -86,26 +138,29 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   }
 
   const forms = formsResponse.result ?? [];
-  const folderIds = [
-    ...new Set(forms.map((form) => form.folder?.value).filter((id): id is number => id != null)),
-  ];
+  const containers = new Map<string, { type: MarketoAssetContainerType; id: number }>();
+  for (const form of forms) {
+    if (form.folder == null) continue;
+    const key = containerCacheKey(form.folder.type, form.folder.value);
+    containers.set(key, { type: form.folder.type, id: form.folder.value });
+  }
 
-  const folderArchiveCache = new Map<number, boolean>();
-  const folderArchiveChecks = await Promise.all(
-    folderIds.map(
-      async (folderId) =>
-        [
-          folderId,
-          await isFolderArchived(baseUrl, auth.access_token, folderId, folderArchiveCache),
-        ] as const
+  const folderArchiveCache = new Map<string, boolean>();
+  const archiveChecks = await Promise.all(
+    [...containers.entries()].map(
+      async ([key, { type, id }]) =>
+        [key, await isContainerArchived(baseUrl, auth.access_token, type, id, folderArchiveCache)] as const
     )
   );
-  const archivedFolderIds = new Set(
-    folderArchiveChecks.filter(([, isArchived]) => isArchived).map(([folderId]) => folderId)
+  const archivedContainerKeys = new Set(
+    archiveChecks.filter(([, isArchived]) => isArchived).map(([key]) => key)
   );
 
   const mappedResponse = forms
-    .filter((form) => !form.folder || !archivedFolderIds.has(form.folder.value))
+    .filter(
+      (form) =>
+        !form.folder || !archivedContainerKeys.has(containerCacheKey(form.folder.type, form.folder.value))
+    )
     .map(({ id, url, name }) => ({ id, url, name }));
 
   return {

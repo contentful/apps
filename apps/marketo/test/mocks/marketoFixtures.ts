@@ -1,4 +1,9 @@
-import type { MarketoApiResponse, MarketoFolderRecord, MarketoFormRecord } from '../../src/types';
+import type {
+  MarketoApiResponse,
+  MarketoFolderRecord,
+  MarketoFormRecord,
+  MarketoProgramRecord,
+} from '../../src/types';
 
 export const MUNCHKIN_ID = 'test-munchkin';
 
@@ -6,6 +11,8 @@ export const AUTH_URL = `https://${MUNCHKIN_ID}.mktorest.com/identity/oauth/toke
 export const FORMS_URL = `https://${MUNCHKIN_ID}.mktorest.com/rest/asset/v1/forms.json?maxReturn=200`;
 export const folderUrl = (folderId: number) =>
   `https://${MUNCHKIN_ID}.mktorest.com/rest/asset/v1/folder/${folderId}.json?type=Folder`;
+export const programUrl = (programId: number) =>
+  `https://${MUNCHKIN_ID}.mktorest.com/rest/asset/v1/program/${programId}.json`;
 
 export const mockAuthResponse = {
   access_token: 'test-access-token',
@@ -46,6 +53,24 @@ export const buildFolderApiResponse = (
 ): MarketoApiResponse<MarketoFolderRecord> => ({
   success: true,
   result: [folder],
+});
+
+// Program has no isArchive -- Adobe's documented schema has none -- and its
+// upward pointer is `folder` (always a Folder), not `parent`.
+export const buildMarketoProgram = (
+  overrides: Partial<MarketoProgramRecord> = {}
+): MarketoProgramRecord => ({
+  id: 50,
+  name: '2019 Campaign',
+  folder: undefined,
+  ...overrides,
+});
+
+export const buildProgramApiResponse = (
+  program: MarketoProgramRecord
+): MarketoApiResponse<MarketoProgramRecord> => ({
+  success: true,
+  result: [program],
 });
 
 export const jsonResponse = (body: unknown, ok = true) =>
