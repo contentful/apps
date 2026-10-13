@@ -372,9 +372,7 @@ describe('getMarketoForms handler', () => {
     expect(result.forms).toEqual([
       { id: 'form-live', name: 'Current Contact Form', url: liveForm.url },
     ]);
-    expect(result.forms).not.toContainEqual(
-      expect.objectContaining({ id: 'form-broken-program' })
-    );
+    expect(result.forms).not.toContainEqual(expect.objectContaining({ id: 'form-broken-program' }));
   });
 
   it('should exclude a form whose folder lookup returns success=true but an empty result array', async () => {
@@ -495,12 +493,8 @@ describe('getMarketoForms handler', () => {
     const result = await handler(mockEvent, mockContext);
 
     expect(result.forms).toHaveLength(PAGE_SIZE + 1);
-    expect(result.forms).toContainEqual(
-      expect.objectContaining({ id: 'form-page1-0' })
-    );
-    expect(result.forms).toContainEqual(
-      expect.objectContaining({ id: 'form-page2-0' })
-    );
+    expect(result.forms).toContainEqual(expect.objectContaining({ id: 'form-page1-0' }));
+    expect(result.forms).toContainEqual(expect.objectContaining({ id: 'form-page2-0' }));
   });
 
   it('should stop paging once a page is shorter than the page size (including empty)', async () => {

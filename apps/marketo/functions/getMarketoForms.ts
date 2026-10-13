@@ -228,7 +228,10 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   const archiveChecks = await Promise.all(
     [...containers.entries()].map(
       async ([key, { type, id }]) =>
-        [key, await isContainerArchived(baseUrl, auth.access_token, type, id, folderArchiveCache)] as const
+        [
+          key,
+          await isContainerArchived(baseUrl, auth.access_token, type, id, folderArchiveCache),
+        ] as const
     )
   );
   const archivedContainerKeys = new Set(
@@ -238,7 +241,8 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   const mappedResponse = forms
     .filter(
       (form) =>
-        !form.folder || !archivedContainerKeys.has(containerCacheKey(form.folder.type, form.folder.value))
+        !form.folder ||
+        !archivedContainerKeys.has(containerCacheKey(form.folder.type, form.folder.value))
     )
     .map(({ id, url, name }) => ({ id, url, name }));
 
