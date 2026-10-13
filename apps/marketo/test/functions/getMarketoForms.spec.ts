@@ -10,6 +10,7 @@ import type { MarketoFormsResponse } from '../../src/types';
 import {
   AUTH_URL,
   FORMS_URL,
+  formsUrl,
   folderUrl,
   programUrl,
   mockAuthResponse,
@@ -461,6 +462,89 @@ describe('getMarketoForms handler', () => {
     } as Response);
 
     await expect(handler(mockEvent, mockContext)).rejects.toThrow(MarketoAuthenticationError);
+  });
+
+  it('should page through forms.json when the first page is full-sized', async () => {
+    // forms.json has no total-count/more-results field, so a full-sized
+    // page (length === maxReturn) must be treated as "there might be more"
+    // and a next page fetched at the next offset, stopping only once a
+    // page comes back shorter than the page size.
+    const PAGE_SIZE = 200;
+    const page1Forms = Array.from({ length: PAGE_SIZE }, (_, i) =>
+      buildMarketoForm({
+        id: `form-page1-${i}`,
+        name: `Page 1 Form ${i}`,
+        url: `https://test-munchkin.mktorest.com/rest/asset/v1/form/page1-${i}.json`,
+      })
+    );
+    const page2Forms = [
+      buildMarketoForm({
+        id: 'form-page2-0',
+        name: 'Page 2 Form',
+        url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/page2-0.json',
+      }),
+    ];
+
+    mockFetchRoutes({
+      [AUTH_URL]: mockAuthResponse,
+      [formsUrl(0)]: buildFormsApiResponse(page1Forms),
+      [formsUrl(PAGE_SIZE)]: buildFormsApiResponse(page2Forms),
+      [folderUrl(100)]: buildFolderApiResponse(buildMarketoFolder()),
+    });
+
+    const result = await handler(mockEvent, mockContext);
+
+    expect(result.forms).toHaveLength(PAGE_SIZE + 1);
+    expect(result.forms).toContainEqual(
+      expect.objectContaining({ id: 'form-page1-0' })
+    );
+    expect(result.forms).toContainEqual(
+      expect.objectContaining({ id: 'form-page2-0' })
+    );
+  });
+
+  it('should stop paging once a page is shorter than the page size (including empty)', async () => {
+    const singleForm = buildMarketoForm({ id: 'form-only-one', name: 'Only Form' });
+
+    let secondPageRequested = false;
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      const url = String(input);
+      if (url === AUTH_URL) return jsonResponse(mockAuthResponse);
+      if (url === formsUrl(0)) return jsonResponse(buildFormsApiResponse([singleForm]));
+      if (url === formsUrl(200)) {
+        secondPageRequested = true;
+        return jsonResponse(buildFormsApiResponse([]));
+      }
+      if (url === folderUrl(100)) return jsonResponse(buildFolderApiResponse(buildMarketoFolder()));
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+
+    const result = await handler(mockEvent, mockContext);
+
+    expect(result.forms).toEqual([{ id: 'form-only-one', name: 'Only Form', url: singleForm.url }]);
+    expect(secondPageRequested).toBe(false);
+  });
+
+  it('should throw MarketoApiError when a later page of getForms fails', async () => {
+    const PAGE_SIZE = 200;
+    const page1Forms = Array.from({ length: PAGE_SIZE }, (_, i) =>
+      buildMarketoForm({ id: `form-${i}`, name: `Form ${i}` })
+    );
+
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      const url = String(input);
+      if (url === AUTH_URL) return jsonResponse(mockAuthResponse);
+      if (url === formsUrl(0)) return jsonResponse(buildFormsApiResponse(page1Forms));
+      if (url === formsUrl(PAGE_SIZE)) {
+        return jsonResponse(
+          { success: false, errors: [{ code: '606', message: 'Max rate limit exceeded' }] },
+          false
+        );
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+
+    await expect(handler(mockEvent, mockContext)).rejects.toThrow(MarketoApiError);
   });
 
   it('should throw MarketoApiError when getForms API call fails', async () => {

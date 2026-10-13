@@ -164,6 +164,45 @@ const isContainerArchived = async (
   return result;
 };
 
+const FORMS_PAGE_SIZE = 200;
+
+// forms.json has no total-count or "more results" field, so the only
+// reliable stop condition is a page coming back shorter than the requested
+// page size (including empty). A customer with more forms than one page's
+// worth would otherwise have everything past the first MAX_RETURN silently
+// dropped -- including forms whose archive status we'd never even get a
+// chance to check.
+const fetchAllForms = async (
+  baseUrl: string,
+  accessToken: string
+): Promise<MarketoFormRecord[]> => {
+  const forms: MarketoFormRecord[] = [];
+  let offset = 0;
+
+  while (true) {
+    const { response, body } = await marketoGet<MarketoFormRecord>(
+      baseUrl,
+      `/rest/asset/v1/forms.json?maxReturn=${FORMS_PAGE_SIZE}&offset=${offset}`,
+      accessToken
+    );
+
+    if (!response.ok || !body.success) {
+      throw new MarketoApiError(body.message || 'Marketo getForms request failed', {
+        statusCode: response.status,
+        errors: body.errors ?? [],
+      });
+    }
+
+    const page = body.result ?? [];
+    forms.push(...page);
+
+    if (page.length < FORMS_PAGE_SIZE) break;
+    offset += FORMS_PAGE_SIZE;
+  }
+
+  return forms;
+};
+
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
   _event: AppActionRequest<'Custom'>,
   context: FunctionEventContext
@@ -174,20 +213,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   const auth = await getMarketoToken(clientId, clientSecret, munchkinId);
   const baseUrl = `https://${munchkinId}.mktorest.com`;
 
-  const { response, body: formsResponse } = await marketoGet<MarketoFormRecord>(
-    baseUrl,
-    '/rest/asset/v1/forms.json?maxReturn=200',
-    auth.access_token
-  );
-
-  if (!response.ok || !formsResponse.success) {
-    throw new MarketoApiError(formsResponse.message || 'Marketo getForms request failed', {
-      statusCode: response.status,
-      errors: formsResponse.errors ?? [],
-    });
-  }
-
-  const forms = formsResponse.result ?? [];
+  const forms = await fetchAllForms(baseUrl, auth.access_token);
   const containers = new Map<string, { type: MarketoAssetContainerType; id: number }>();
   for (const form of forms) {
     if (form.folder == null) continue;
