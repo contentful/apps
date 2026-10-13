@@ -43,22 +43,60 @@ const marketoGet = async <T>(
 const containerCacheKey = (containerType: MarketoAssetContainerType, containerId: number) =>
   `${containerType}:${containerId}`;
 
-const fetchFolder = async (baseUrl: string, accessToken: string, folderId: number) => {
-  const { body } = await marketoGet<MarketoFolderRecord>(
-    baseUrl,
-    `/rest/asset/v1/folder/${folderId}.json?type=Folder`,
-    accessToken
-  );
-  return body.result?.[0];
+// A result of `null` means the lookup itself failed (non-OK response,
+// Marketo-level error, network error, or an empty/malformed body) -- as
+// opposed to a successful lookup that simply found nothing, which isn't a
+// case the Asset API actually returns for a valid id. Callers must treat
+// `null` as "unknown, assume archived" rather than "not archived": a form
+// whose container state can't be resolved is exactly the kind of stale
+// reference this filter exists to catch, so failing open here would
+// readmit the thing we're trying to exclude.
+const fetchFolder = async (
+  baseUrl: string,
+  accessToken: string,
+  folderId: number
+): Promise<MarketoFolderRecord | null> => {
+  try {
+    const { response, body } = await marketoGet<MarketoFolderRecord>(
+      baseUrl,
+      `/rest/asset/v1/folder/${folderId}.json?type=Folder`,
+      accessToken
+    );
+    if (!response.ok || !body.success || body.result?.[0] == null) {
+      console.error(
+        `Marketo folder lookup failed for folder ${folderId}: status=${response.status} success=${body.success} message=${body.message}`
+      );
+      return null;
+    }
+    return body.result[0];
+  } catch (error) {
+    console.error(`Marketo folder lookup threw for folder ${folderId}:`, error);
+    return null;
+  }
 };
 
-const fetchProgram = async (baseUrl: string, accessToken: string, programId: number) => {
-  const { body } = await marketoGet<MarketoProgramRecord>(
-    baseUrl,
-    `/rest/asset/v1/program/${programId}.json`,
-    accessToken
-  );
-  return body.result?.[0];
+const fetchProgram = async (
+  baseUrl: string,
+  accessToken: string,
+  programId: number
+): Promise<MarketoProgramRecord | null> => {
+  try {
+    const { response, body } = await marketoGet<MarketoProgramRecord>(
+      baseUrl,
+      `/rest/asset/v1/program/${programId}.json`,
+      accessToken
+    );
+    if (!response.ok || !body.success || body.result?.[0] == null) {
+      console.error(
+        `Marketo program lookup failed for program ${programId}: status=${response.status} success=${body.success} message=${body.message}`
+      );
+      return null;
+    }
+    return body.result[0];
+  } catch (error) {
+    console.error(`Marketo program lookup threw for program ${programId}:`, error);
+    return null;
+  }
 };
 
 const isContainerArchived = async (
@@ -84,30 +122,42 @@ const isContainerArchived = async (
   let result: boolean;
   if (containerType === 'Program') {
     const program = await fetchProgram(baseUrl, accessToken, containerId);
-    // A Program can never be archived itself -- only climb to its folder.
-    result =
-      program?.folder != null &&
-      (await isContainerArchived(
+    if (program == null) {
+      // Lookup failed outright -- fail closed rather than readmitting a
+      // form whose container state is unknown.
+      result = true;
+    } else if (program.folder == null) {
+      // A Program can never be archived itself -- only its folder chain
+      // can tell us. No folder reference at all means nothing above it to
+      // check, so it's not archived.
+      result = false;
+    } else {
+      result = await isContainerArchived(
         baseUrl,
         accessToken,
         program.folder.type,
         program.folder.value,
         cache,
         visited
-      ));
+      );
+    }
   } else {
     const folder = await fetchFolder(baseUrl, accessToken, containerId);
-    result =
-      Boolean(folder?.isArchive) ||
-      (folder?.parent != null &&
-        (await isContainerArchived(
-          baseUrl,
-          accessToken,
-          folder.parent.type,
-          folder.parent.id,
-          cache,
-          visited
-        )));
+    if (folder == null) {
+      result = true;
+    } else {
+      result =
+        Boolean(folder.isArchive) ||
+        (folder.parent != null &&
+          (await isContainerArchived(
+            baseUrl,
+            accessToken,
+            folder.parent.type,
+            folder.parent.id,
+            cache,
+            visited
+          )));
+    }
   }
 
   cache.set(key, result);

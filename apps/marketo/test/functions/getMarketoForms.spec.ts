@@ -299,6 +299,102 @@ describe('getMarketoForms handler', () => {
     ]);
   });
 
+  it('should exclude a form whose folder lookup fails (fail closed, not open)', async () => {
+    // If we can't determine a container's archive state, we must not
+    // readmit the form -- that's exactly the direction the ES-642 bug
+    // leaked in. A failed lookup is treated as archived.
+    const unresolvableForm = buildMarketoForm({
+      id: 'form-unresolvable',
+      name: 'Form With Broken Folder Ref',
+      url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/unresolvable.json',
+      folder: { type: 'Folder', value: 999, folderName: 'Gone' },
+    });
+
+    mockFetchRoutes({
+      [AUTH_URL]: mockAuthResponse,
+      [FORMS_URL]: buildFormsApiResponse([unresolvableForm]),
+      [folderUrl(999)]: { success: false, errors: [{ code: '610', message: 'Not Found' }] },
+    });
+
+    const result = await handler(mockEvent, mockContext);
+
+    expect(result.forms).toEqual([]);
+  });
+
+  it('should exclude a form whose folder lookup returns a non-OK HTTP status (e.g. 429 rate limit)', async () => {
+    const rateLimitedForm = buildMarketoForm({
+      id: 'form-rate-limited',
+      name: 'Form Behind Rate-Limited Folder',
+      url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/rate-limited.json',
+      folder: { type: 'Folder', value: 998, folderName: 'Throttled' },
+    });
+
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      const url = String(input);
+      if (url === AUTH_URL) return jsonResponse(mockAuthResponse);
+      if (url === FORMS_URL) return jsonResponse(buildFormsApiResponse([rateLimitedForm]));
+      if (url === folderUrl(998)) {
+        return jsonResponse(
+          { success: false, errors: [{ code: '606', message: 'Max rate limit exceeded' }] },
+          false
+        );
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+
+    const result = await handler(mockEvent, mockContext);
+
+    expect(result.forms).toEqual([]);
+  });
+
+  it('should exclude a form whose Program lookup throws (network error), while unrelated forms still resolve', async () => {
+    const liveForm = buildMarketoForm({ id: 'form-live', name: 'Current Contact Form' });
+    const brokenProgramForm = buildMarketoForm({
+      id: 'form-broken-program',
+      name: 'Form Under Unreachable Program',
+      url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/broken-program.json',
+      folder: { type: 'Program', value: 997, folderName: 'Unreachable' },
+    });
+
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      const url = String(input);
+      if (url === AUTH_URL) return jsonResponse(mockAuthResponse);
+      if (url === FORMS_URL)
+        return jsonResponse(buildFormsApiResponse([liveForm, brokenProgramForm]));
+      if (url === folderUrl(100)) return jsonResponse(buildFolderApiResponse(buildMarketoFolder()));
+      if (url === programUrl(997)) throw new Error('network error');
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+
+    const result = await handler(mockEvent, mockContext);
+
+    expect(result.forms).toEqual([
+      { id: 'form-live', name: 'Current Contact Form', url: liveForm.url },
+    ]);
+    expect(result.forms).not.toContainEqual(
+      expect.objectContaining({ id: 'form-broken-program' })
+    );
+  });
+
+  it('should exclude a form whose folder lookup returns success=true but an empty result array', async () => {
+    const malformedForm = buildMarketoForm({
+      id: 'form-malformed',
+      name: 'Form With Malformed Folder Response',
+      url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/malformed.json',
+      folder: { type: 'Folder', value: 996, folderName: 'Empty Result' },
+    });
+
+    mockFetchRoutes({
+      [AUTH_URL]: mockAuthResponse,
+      [FORMS_URL]: buildFormsApiResponse([malformedForm]),
+      [folderUrl(996)]: { success: true, result: [] },
+    });
+
+    const result = await handler(mockEvent, mockContext);
+
+    expect(result.forms).toEqual([]);
+  });
+
   it('should not issue duplicate folder lookups when multiple forms share a folder', async () => {
     const formA = buildMarketoForm({
       id: 'form-a',
