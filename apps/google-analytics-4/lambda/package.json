@@ -65,7 +65,7 @@
   },
   "overrides": {
     "axios": ">=1.16.0",
-    "fast-xml-parser": ">=4.5.5",
+    "fast-xml-parser": ">=5.11.2",
     "jws": ">=4.0.1",
     "lodash": ">=4.18.0",
     "minimatch": ">=10.2.6",
