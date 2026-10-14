@@ -12,6 +12,7 @@ import {
   isLinkArray,
 } from '../../utils/fieldTypes';
 import SingleAssetCard from './SingleAssetCard';
+import SingleEntryReferenceCard from './SingleEntryReferenceCard';
 import DiffText from './DiffText';
 import PreviewBox from './PreviewBox';
 import RichTextDiff from './RichTextDiff';
@@ -21,6 +22,7 @@ interface PreviewFieldProps {
   fieldDefinition: ContentTypeField;
   locale: string;
   compareValue?: unknown;
+  baseUrl: string;
 }
 
 /**
@@ -50,7 +52,7 @@ const valueToString = (value: unknown): string | null => {
   return String(value);
 };
 
-const PreviewField = ({ value, fieldDefinition, locale, compareValue }: PreviewFieldProps) => {
+const PreviewField = ({ value, fieldDefinition, locale, compareValue, baseUrl }: PreviewFieldProps) => {
   const valueStr = valueToString(value);
   const compareValueStr = compareValue === undefined ? null : valueToString(compareValue);
   const showDiff = valueStr !== null && compareValueStr !== null && valueStr !== compareValueStr;
@@ -90,7 +92,11 @@ const PreviewField = ({ value, fieldDefinition, locale, compareValue }: PreviewF
   }
 
   if (isEntryField(fieldDefinition) && isLinkValue(value)) {
-    return <PreviewBox>Reference</PreviewBox>;
+    return (
+      <PreviewBox>
+        <SingleEntryReferenceCard entryId={value.sys.id} locale={locale} baseUrl={baseUrl} />
+      </PreviewBox>
+    );
   }
 
   if (isAssetArrayField(fieldDefinition) && isLinkArray(value)) {
@@ -108,7 +114,16 @@ const PreviewField = ({ value, fieldDefinition, locale, compareValue }: PreviewF
   if (isEntryArrayField(fieldDefinition) && isLinkArray(value)) {
     return (
       <PreviewBox>
-        <Box>{'Reference array'}</Box>
+        <Flex flexDirection="column" gap="spacingXs">
+          {value.map((link) => (
+            <SingleEntryReferenceCard
+              key={link.sys.id}
+              entryId={link.sys.id}
+              locale={locale}
+              baseUrl={baseUrl}
+            />
+          ))}
+        </Flex>
       </PreviewBox>
     );
   }
