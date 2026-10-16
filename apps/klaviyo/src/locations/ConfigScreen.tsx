@@ -20,7 +20,7 @@ import { getContentTypes } from '../utils/contentful-helper';
 import {
   getEntryKlaviyoFieldMappings,
   setEntryKlaviyoFieldMappings,
-} from '../utils/field-mappings';
+} from '../utils/field-mappings-client';
 
 // Helper to ensure klaviyoFieldMappings entry exists
 const ensureKlaviyoFieldMappingsEntry = async (sdk: ConfigAppSDK) => {
