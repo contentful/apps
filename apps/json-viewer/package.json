@@ -43,12 +43,12 @@
     "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "12.1.5",
     "@tsconfig/create-react-app": "1.0.3",
-    "@types/jest": "29.2.0",
-    "@types/node": "18.11.5",
-    "@types/react": "18.0.9",
-    "@types/react-dom": "18.0.3",
+    "@types/jest": "29.5.14",
+    "@types/node": "18.19.130",
+    "@types/react": "18.3.31",
+    "@types/react-dom": "18.3.7",
     "jsdom": "^25.0.1",
-    "typescript": "4.8.4"
+    "typescript": "4.9.5"
   },
   "homepage": ".",
   "overrides": {

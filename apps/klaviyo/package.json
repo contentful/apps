@@ -59,16 +59,16 @@
     ]
   },
   "devDependencies": {
-    "@contentful/app-scripts": "^2.3.0",
+    "@contentful/app-scripts": "^2.5.12",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^14.3.1",
-    "@types/node": "^22.13.5",
-    "@types/react": "18.3.13",
-    "@types/react-dom": "18.3.1",
-    "@vitejs/plugin-react": "^4.0.3",
+    "@types/node": "^22.20.5",
+    "@types/react": "18.3.31",
+    "@types/react-dom": "18.3.7",
+    "@vitejs/plugin-react": "^4.7.0",
     "concurrently": "^8.2.2",
     "cross-env": "7.0.3",
-    "jsdom": "^26.0.0",
+    "jsdom": "^26.1.0",
     "typescript": "4.9.5",
     "vite": "^6.4.1",
     "vitest": "^3.0.9"

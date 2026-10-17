@@ -34,13 +34,13 @@
     "last 2 Chrome versions"
   ],
   "devDependencies": {
-    "@babel/plugin-transform-runtime": "^7.25.4",
-    "@types/jest": "27.4.1",
-    "@types/react": "17.0.43",
-    "@types/react-dom": "17.0.14",
-    "@types/regenerator-runtime": "^0.13.7",
+    "@babel/plugin-transform-runtime": "^7.29.7",
+    "@types/jest": "27.5.2",
+    "@types/react": "17.0.93",
+    "@types/react-dom": "17.0.26",
+    "@types/regenerator-runtime": "^0.13.8",
     "cross-env": "7.0.3",
-    "typescript": "4.6.3"
+    "typescript": "4.9.5"
   },
   "homepage": ".",
   "overrides": {
