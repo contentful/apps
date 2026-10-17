@@ -30,10 +30,10 @@
     ]
   },
   "devDependencies": {
-    "@contentful/app-scripts": "^2.5.5",
-    "@contentful/node-apps-toolkit": "^3.13.1",
-    "@tsconfig/recommended": "^1.0.8",
-    "@types/node": "^22.15.32",
+    "@contentful/app-scripts": "^2.5.12",
+    "@contentful/node-apps-toolkit": "^3.16.1",
+    "@tsconfig/recommended": "^1.0.13",
+    "@types/node": "^22.20.5",
     "cross-env": "7.0.3",
     "typescript": "4.9.5",
     "vite": "^6.4.1",

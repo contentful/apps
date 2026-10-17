@@ -3,8 +3,8 @@
   "version": "1.6.15",
   "private": true,
   "devDependencies": {
-    "@contentful/app-scripts": "^1.20.0",
-    "@testing-library/react": "^16.1.0",
+    "@contentful/app-scripts": "^1.33.2",
+    "@testing-library/react": "^16.3.3",
     "cross-env": "7.0.3",
     "happy-dom": "^15.7.4"
   },

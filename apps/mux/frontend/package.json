@@ -5,17 +5,17 @@
   "devDependencies": {
     "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "12.1.5",
-    "@testing-library/user-event": "14.4.3",
-    "@types/jest": "28.1.7",
-    "@types/node": "18.7.14",
-    "@types/react": "17.0.39",
-    "@types/react-dom": "17.0.11",
-    "@types/webpack-env": "1.18.5",
-    "@typescript-eslint/eslint-plugin": "^5.36.1",
-    "@typescript-eslint/parser": "^5.36.1",
+    "@testing-library/user-event": "14.6.8",
+    "@types/jest": "28.1.8",
+    "@types/node": "18.19.130",
+    "@types/react": "17.0.93",
+    "@types/react-dom": "17.0.26",
+    "@types/webpack-env": "1.18.8",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
     "cross-env": "7.0.3",
     "resize-observer-polyfill": "^1.5.1",
-    "typescript": "^4.7.4"
+    "typescript": "^4.9.5"
   },
   "dependencies": {
     "@contentful/app-scripts": "^1.29.0",
