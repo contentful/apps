@@ -3,16 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@contentful/app-scripts": "^1.29.0",
+    "@contentful/app-scripts": "^1.33.2",
     "@contentful/app-sdk": "4.22.0",
-    "@contentful/f36-components": "4.67.0",
-    "@contentful/f36-tokens": "4.0.5",
-    "@contentful/react-apps-toolkit": "1.2.16",
-    "@emotion/css": "^11.13.0",
-    "contentful-management": "^11.35.1",
+    "@contentful/f36-components": "4.81.1",
+    "@contentful/f36-tokens": "4.2.0",
+    "@contentful/react-apps-toolkit": "1.2.23",
+    "@emotion/css": "^11.13.5",
+    "contentful-management": "^11.76.0",
     "lodash": "^4.18.1",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
   },
   "lavamoat": {
     "allowScripts": {

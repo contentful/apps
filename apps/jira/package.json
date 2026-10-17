@@ -16,6 +16,6 @@
     "setup": "node ./scripts/setup.js"
   },
   "dependencies": {
-    "contentful-management": "11.48.0"
+    "contentful-management": "11.76.0"
   }
 }

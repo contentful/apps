@@ -14,8 +14,8 @@
     "setup": "npx tsx setup.ts"
   },
   "dependencies": {
-    "contentful-management": "^11.54.1",
-    "dotenv": "^17.2.0"
+    "contentful-management": "^11.76.0",
+    "dotenv": "^17.4.2"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
