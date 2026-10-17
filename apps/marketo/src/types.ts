@@ -20,6 +20,7 @@ export type MarketoFolderRecord = {
   id: number;
   name: string;
   isArchive: boolean;
+  parent?: { id: number; type: string };
 };
 
 export type MarketoApiResponse<T> = {

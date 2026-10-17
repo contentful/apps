@@ -30,6 +30,7 @@ export const buildMarketoFolder = (
   id: 100,
   name: 'Landing Pages',
   isArchive: false,
+  parent: undefined,
   ...overrides,
 });
 
