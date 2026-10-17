@@ -13,9 +13,9 @@
   },
   "dependencies": {
     "@contentful/app-sdk": "4.13.0",
-    "@contentful/f36-components": "^4.74.1",
-    "@contentful/f36-tokens": "^4.1.0",
-    "@emotion/css": "^11.13.4",
+    "@contentful/f36-components": "^4.81.1",
+    "@contentful/f36-tokens": "^4.2.0",
+    "@emotion/css": "^11.13.5",
     "lodash.camelcase": "4.3.0",
     "lodash.get": "4.4.2",
     "prop-types": "15.8.1",

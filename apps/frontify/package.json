@@ -6,9 +6,9 @@
     "cross-env": "7.0.3"
   },
   "dependencies": {
-    "@contentful/app-scripts": "^1.30.1",
-    "@contentful/dam-app-base": "^2.0.55",
-    "@vitejs/plugin-react": "^4.3.3",
+    "@contentful/app-scripts": "^1.33.2",
+    "@contentful/dam-app-base": "^2.3.2",
+    "@vitejs/plugin-react": "^4.7.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "vite": "^5.4.21"

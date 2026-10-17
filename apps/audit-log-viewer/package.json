@@ -3,19 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1078.0",
-    "@aws-sdk/client-sts": "^3.1078.0",
-    "@aws-sdk/s3-request-presigner": "^3.1078.0",
+    "@aws-sdk/client-s3": "^3.1152.0",
+    "@aws-sdk/client-sts": "^3.1152.0",
+    "@aws-sdk/s3-request-presigner": "^3.1152.0",
     "@contentful/app-sdk": "^4.29.1",
     "@contentful/f36-components": "4.81.1",
-    "@contentful/f36-tokens": "^6.2.1",
-    "@contentful/react-apps-toolkit": "1.2.16",
-    "@smithy/fetch-http-handler": "^5.6.2",
+    "@contentful/f36-tokens": "^6.3.1",
+    "@contentful/react-apps-toolkit": "1.2.23",
+    "@smithy/fetch-http-handler": "^5.8.0",
     "@xmldom/xmldom": "^0.9.10",
     "emotion": "10.0.27",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "recharts": "^3.9.1"
+    "recharts": "^3.10.1"
   },
   "scripts": {
     "start": "vite",
