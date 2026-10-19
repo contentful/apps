@@ -1,7 +1,7 @@
 # Agent Guide — salesforce-commerce-cloud
 
 ## What This App Does
-Integrates Salesforce Commerce Cloud (SFCC) with Contentful as a product picker. Lets editors select SFCC products/categories for use in Contentful fields. Published as `contentful-sfcc-vite`.
+Integrates Salesforce Commerce Cloud (SFCC) with Contentful as a product picker. Lets editors select SFCC products, categories, customer groups, promotions, campaigns, coupons and stores for use in Contentful fields. Field types are defined in `src/utils/resources.ts`; the server-side `sfccApi` App Function in `functions/index.ts` proxies all SCAPI Admin calls. Published as `contentful-sfcc-vite`.
 
 ## Archetype
 Standard Vite app.
@@ -43,4 +43,5 @@ src/
 ## Never / Always
 
 - **Never** log SFCC OAuth credentials or tokens.
+- **Always** request only the OAuth scope a resource needs (see `docs/ADRs/0001-per-action-oauth-scopes.md`).
 - **Always** handle SFCC API pagination — product catalogs can be very large.

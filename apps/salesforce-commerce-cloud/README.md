@@ -1,5 +1,30 @@
 This project was bootstrapped with [Create Contentful App](https://github.com/contentful/create-contentful-app).
 
+## Field types
+
+Each field using the app sets the `fieldType` instance parameter. Every type stores plain SFCC
+IDs (a Symbol, or a list of Symbols for array fields); fetch the full record at render time.
+
+| `fieldType` | Stored value | Account Manager scope |
+|---|---|---|
+| `product` | Product ID | `sfcc.products` |
+| `category` | `catalogId:categoryId` | `sfcc.catalogs` |
+| `customerGroup` | Customer group ID | `sfcc.customergroups` |
+| `promotion` | Promotion ID | `sfcc.promotions` |
+| `campaign` | Campaign ID | `sfcc.promotions` |
+| `coupon` | Coupon ID | `sfcc.promotions` |
+| `store` | Store ID | `sfcc.stores` |
+
+Optional instance parameters scope a single field:
+
+- `siteId`: use a different site than the installation default (multi-site / multi-brand).
+- `catalogId`: limit category search to one catalog.
+- `includeVariants`: let product fields select variants as well as masters.
+
+The field editor flags references that no longer resolve, and items the storefront would not
+show (offline, out of stock, disabled, archived, ended or not yet started). Names are resolved in
+the entry's locale where SFCC has a matching translation.
+
 ## How to use
 
 Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
