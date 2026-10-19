@@ -1,12 +1,5 @@
 import { BaseAppSDK, CMAClient } from '@contentful/app-sdk';
-import {
-  FieldType,
-  ResourceType,
-  ScopeOptions,
-  SearchPage,
-  SfccItem,
-  isResourceType,
-} from './resources';
+import { FieldType, ResourceType, ScopeOptions, SearchPage, SfccItem } from './resources';
 
 const APP_ACTION_ID = 'sfccApi';
 
@@ -105,18 +98,17 @@ class SfccClient {
   search = async (fieldType: FieldType, query?: string, offset = 0): Promise<SearchPage> => {
     if (fieldType === 'product') return { items: await this.searchProducts(query) };
     if (fieldType === 'category') return { items: await this.searchCategories(query) };
-    return this.searchResource(fieldType as ResourceType, query, offset);
+    return this.searchResource(fieldType, query, offset);
   };
 
   /** Fetches a stored field value (categories are stored as `catalogId:categoryId`). */
-  fetchByKey = (fieldType: FieldType, key: string) => {
+  fetchByKey = (fieldType: FieldType, key: string): Promise<SfccItem> => {
     if (fieldType === 'product') return this.fetchProduct(key);
     if (fieldType === 'category') {
       const [catalogId, categoryId] = key.split(':');
       return this.fetchCategory(catalogId, categoryId);
     }
-    if (isResourceType(fieldType)) return this.fetchResource(fieldType, key);
-    throw new Error(`Unsupported field type: ${fieldType}`);
+    return this.fetchResource(fieldType, key);
   };
 }
 

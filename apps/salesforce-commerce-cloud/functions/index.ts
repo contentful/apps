@@ -83,27 +83,27 @@ const BASE_SCOPES = ['sfcc.catalogs', 'sfcc.products'];
 // response far under the App Action platform's response size cap, regardless of how much
 // SFCC includes in the full representation.
 function toProductSummary(product: SfccRecord): ProductSummary {
-  const type = product?.type as { variant?: boolean } | undefined;
+  const type = product.type as { variant?: boolean } | undefined;
   return {
-    id: product?.id as string,
-    name: product?.name as SfccLocalizedText,
-    image: product?.image as SfccImage,
-    price: product?.price as number | undefined,
-    priceCurrency: product?.priceCurrency as string | undefined,
-    online: product?.online as boolean | undefined,
-    inStock: product?.inStock as boolean | undefined,
-    ats: product?.ats as number | undefined,
+    id: product.id as string,
+    name: product.name as SfccLocalizedText,
+    image: product.image as SfccImage,
+    price: product.price as number | undefined,
+    priceCurrency: product.priceCurrency as string | undefined,
+    online: product.online as boolean | undefined,
+    inStock: product.inStock as boolean | undefined,
+    ats: product.ats as number | undefined,
     isVariant: type?.variant,
-    variationValues: product?.variationValues as Record<string, string> | undefined,
+    variationValues: product.variationValues as Record<string, string> | undefined,
   };
 }
 
 function toCategorySummary(category: SfccRecord): CategorySummary {
   return {
-    id: category?.id as string,
-    catalogId: category?.catalogId as string,
-    name: category?.name as SfccLocalizedText,
-    online: category?.online as boolean | undefined,
+    id: category.id as string,
+    catalogId: category.catalogId as string,
+    name: category.name as SfccLocalizedText,
+    online: category.online as boolean | undefined,
   };
 }
 
@@ -190,6 +190,10 @@ const RESOURCES: Record<Resource, ResourceConfig> = {
     }),
   },
 };
+
+// Own-key check: a caller-supplied value like 'constructor' must not match inherited properties.
+const isResource = (value: unknown): value is Resource =>
+  typeof value === 'string' && Object.prototype.hasOwnProperty.call(RESOURCES, value);
 
 // Only request the scopes an action needs, so installations whose API client has not been
 // granted the newer scopes keep working for products and categories.
@@ -316,7 +320,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
 
   if (
     (action.type === 'searchResource' || action.type === 'fetchResource') &&
-    !RESOURCES[action.resource]
+    !isResource(action.resource)
   ) {
     return { ok: false, error: { type: 'UnknownAction', message: 'Unknown resource type' } };
   }

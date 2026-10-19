@@ -7,23 +7,6 @@ import SelectItemAction from '../components/field/SelectItemAction';
 import SingleItem from '../components/field/SingleItem';
 import MultipleItems from '../components/field/MultipleItems';
 import ReferenceHealthNote from '../components/field/ReferenceHealthNote';
-import { FieldType, ScopeOptions } from '../utils/resources';
-
-import { KeyValueMap } from 'contentful-management';
-
-export interface AppInstanceParameters extends KeyValueMap {
-  fieldType: FieldType;
-  // Optional per-field overrides of the installation's site / catalog scope.
-  siteId?: string;
-  catalogId?: string;
-  includeVariants?: boolean;
-}
-
-export const scopeOptionsFrom = (instance: AppInstanceParameters): ScopeOptions => ({
-  siteId: instance.siteId || undefined,
-  catalogId: instance.catalogId || undefined,
-  includeVariants: instance.includeVariants || undefined,
-});
 
 const Field = () => {
   useAutoResizer();

@@ -449,4 +449,93 @@ describe('sfccApi function handler', () => {
     expect(notFound.error.type).toBe('NotFound');
     expect(unknown.error.type).toBe('UnknownAction');
   });
+
+  it.each(['constructor', 'toString', '__proto__', 'hasOwnProperty'])(
+    'rejects inherited object key %s as an unknown resource before requesting a token',
+    async (resource) => {
+      const fetchMock = vi.fn();
+      vi.stubGlobal('fetch', fetchMock);
+      const result = await handler(
+        { body: { type: 'fetchResource', resource, resourceId: 'x' } } as any,
+        mockContext()
+      );
+      expect(result).toMatchObject({ ok: false, error: { type: 'UnknownAction' } });
+      expect(fetchMock).not.toHaveBeenCalled();
+    }
+  );
+
+  it('falls back to a full page heuristic when a search response omits total', async () => {
+    const respond = (count: number) =>
+      vi.fn(async (url: string) => {
+        if (url.includes('dwsso/oauth2/access_token')) return mockTokenResponse();
+        return {
+          ok: true,
+          json: async () => ({
+            hits: Array.from({ length: count }, (_, index) => ({ id: `promo-${index}` })),
+          }),
+        } as Response;
+      });
+
+    vi.stubGlobal('fetch', respond(50));
+    const full = await handler(
+      { body: { type: 'searchResource', resource: 'promotion' } } as any,
+      mockContext()
+    );
+    vi.stubGlobal('fetch', respond(10));
+    const partial = await handler(
+      { body: { type: 'searchResource', resource: 'promotion' } } as any,
+      mockContext()
+    );
+
+    expect(full).toMatchObject({ ok: true, data: { nextOffset: 50 } });
+    expect(partial).toMatchObject({ ok: true });
+    expect(partial).not.toHaveProperty('data.nextOffset');
+  });
+
+  it('filters category search by the field catalog override', async () => {
+    let searchBody: any;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (url.includes('dwsso/oauth2/access_token')) return mockTokenResponse();
+        searchBody = JSON.parse(String(init?.body));
+        return { ok: true, json: async () => ({ hits: [] }) } as Response;
+      })
+    );
+
+    await handler(
+      { body: { type: 'searchCategories', catalogId: 'brand-b' } } as any,
+      mockContext()
+    );
+
+    expect(searchBody.query.boolQuery.must).toContainEqual({
+      termQuery: { fields: ['catalogId'], operator: 'is', values: ['brand-b'] },
+    });
+  });
+
+  it('reports non-404 API failures as ApiError and token failures as AuthError', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (url.includes('dwsso/oauth2/access_token')) return mockTokenResponse();
+        return { ok: false, status: 500, text: async () => 'boom' } as Response;
+      })
+    );
+    const apiError = await handler(
+      { body: { type: 'fetchResource', resource: 'promotion', resourceId: 'p' } } as any,
+      mockContext()
+    );
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: false, status: 401, text: async () => 'denied' } as Response))
+    );
+    const authError = await handler(
+      { body: { type: 'searchProducts', query: 'shoe' } } as any,
+      mockContext()
+    );
+
+    expect(apiError).toMatchObject({ ok: false, error: { type: 'ApiError' } });
+    expect(authError).toMatchObject({ ok: false, error: { type: 'AuthError' } });
+  });
 });

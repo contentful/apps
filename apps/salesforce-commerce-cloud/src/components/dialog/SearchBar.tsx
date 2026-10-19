@@ -139,9 +139,8 @@ interface SelectionListProps {
 const SelectionList = (props: SelectionListProps) => {
   const items: string[] | undefined = typeof props.items === 'string' ? [props.items] : props.items;
 
-  // console.log(props)
   const findItemData = (itemId: string, fieldType: FieldType, itemsInfo?: SfccItem[]) =>
-    itemsInfo?.find((item) => item && itemKey(fieldType, item) === itemId);
+    itemsInfo?.find((item) => itemKey(fieldType, item) === itemId);
 
   return (
     <Flex gap="spacingXs" flexWrap="wrap" alignItems="center">
