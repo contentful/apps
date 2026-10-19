@@ -1,5 +1,5 @@
 import { QueryOptions } from 'contentful-management';
-import { FieldFilterValue } from '../types';
+import { ContentTypeField, FieldFilterValue } from '../types';
 import { isNumericSearch } from './entryUtils';
 import { ARCHIVED_STATUS, CHANGED_STATUS, DRAFT_STATUS, PUBLISHED_STATUS } from './constants';
 
@@ -10,6 +10,10 @@ const getOrder = (sortOption: string, displayField: string | null) => {
   else if (sortOption === 'displayName_asc') return `fields.${displayField}`;
   else if (sortOption === 'displayName_desc') return `-fields.${displayField}`;
 };
+
+// The CMA addresses a localized field as `fields.<id>.<locale>`, not by the app's `uniqueId`.
+const getFieldQueryPath = (field: ContentTypeField) =>
+  field.locale ? `fields.${field.id}.${field.locale}` : `fields.${field.id}`;
 
 const getStatusFilter = (statusLabels: string[]) => {
   // If no statuses selected, return a filter that matches nothing
@@ -79,6 +83,7 @@ export const fieldFilterValuesToQuery = (
       return;
     }
 
+    const fieldPath = getFieldQueryPath(fieldFilterValue.contentTypeField);
     let key: string | undefined;
     let value: string | undefined;
 
@@ -88,24 +93,6 @@ export const fieldFilterValuesToQuery = (
       fieldFilterValue.contentTypeField.type === 'Number' ||
       fieldFilterValue.contentTypeField.type === 'RichText'
     ) {
-      if (operator === 'exists') {
-        key = `fields.${fieldFilterValue.fieldUniqueId}[exists]`;
-        value = 'true';
-      } else if (operator === 'not exists') {
-        key = `fields.${fieldFilterValue.fieldUniqueId}[exists]`;
-        value = 'false';
-      } else {
-        key = `fields.${fieldFilterValue.fieldUniqueId}[${operator}]`;
-        value = Array.isArray(fieldFilterValue.value)
-          ? fieldFilterValue.value.join(',')
-          : fieldFilterValue.value ?? undefined;
-      }
-    } else if (fieldFilterValue.contentTypeField.type === 'Array') {
-      const isArrayOfLinks = fieldFilterValue.contentTypeField.items?.type === 'Link';
-      const fieldPath = isArrayOfLinks
-        ? `fields.${fieldFilterValue.fieldUniqueId}.sys.id`
-        : `fields.${fieldFilterValue.fieldUniqueId}`;
-
       if (operator === 'exists') {
         key = `${fieldPath}[exists]`;
         value = 'true';
@@ -118,15 +105,31 @@ export const fieldFilterValuesToQuery = (
           ? fieldFilterValue.value.join(',')
           : fieldFilterValue.value ?? undefined;
       }
-    } else if (fieldFilterValue.contentTypeField.type === 'Link') {
+    } else if (fieldFilterValue.contentTypeField.type === 'Array') {
+      const isArrayOfLinks = fieldFilterValue.contentTypeField.items?.type === 'Link';
+      const arrayFieldPath = isArrayOfLinks ? `${fieldPath}.sys.id` : fieldPath;
+
       if (operator === 'exists') {
-        key = `fields.${fieldFilterValue.fieldUniqueId}.sys.id[exists]`;
+        key = `${arrayFieldPath}[exists]`;
         value = 'true';
       } else if (operator === 'not exists') {
-        key = `fields.${fieldFilterValue.fieldUniqueId}.sys.id[exists]`;
+        key = `${arrayFieldPath}[exists]`;
         value = 'false';
       } else {
-        key = `fields.${fieldFilterValue.fieldUniqueId}.sys.id[${operator}]`;
+        key = `${arrayFieldPath}[${operator}]`;
+        value = Array.isArray(fieldFilterValue.value)
+          ? fieldFilterValue.value.join(',')
+          : fieldFilterValue.value ?? undefined;
+      }
+    } else if (fieldFilterValue.contentTypeField.type === 'Link') {
+      if (operator === 'exists') {
+        key = `${fieldPath}.sys.id[exists]`;
+        value = 'true';
+      } else if (operator === 'not exists') {
+        key = `${fieldPath}.sys.id[exists]`;
+        value = 'false';
+      } else {
+        key = `${fieldPath}.sys.id[${operator}]`;
         value = Array.isArray(fieldFilterValue.value)
           ? fieldFilterValue.value.join(',')
           : fieldFilterValue.value ?? undefined;

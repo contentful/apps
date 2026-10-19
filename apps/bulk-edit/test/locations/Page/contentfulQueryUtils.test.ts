@@ -164,4 +164,132 @@ describe('contentfulQueryUtils', () => {
       expect(fieldFilterValuesToQuery([buildFilter(field, 'match', null)]).query).toEqual({});
     });
   });
+
+  describe('localized fields', () => {
+    const buildLocalizedField = (
+      id: string,
+      type: string,
+      locale: string,
+      items?: ContentTypeField['items']
+    ): ContentTypeField => ({
+      contentTypeId: 'blogPost',
+      id,
+      uniqueId: `${id}-${locale}`,
+      name: id,
+      locale,
+      type,
+      required: false,
+      validations: [],
+      items,
+    });
+
+    const buildFilter = (
+      field: ContentTypeField,
+      operator: FieldFilterValue['operator'],
+      value: FieldFilterValue['value']
+    ): FieldFilterValue => ({
+      fieldUniqueId: field.uniqueId,
+      operator,
+      value,
+      contentTypeField: field,
+    });
+
+    it('serializes a Symbol match filter with the locale as a path segment', () => {
+      const field = buildLocalizedField('articleTitle', 'Symbol', 'en-US');
+
+      expect(fieldFilterValuesToQuery([buildFilter(field, 'match', 'hello')]).query).toEqual({
+        'fields.articleTitle.en-US[match]': 'hello',
+      });
+    });
+
+    it('serializes Symbol in and ne filters with the locale as a path segment', () => {
+      const field = buildLocalizedField('articleTitle', 'Symbol', 'en-US');
+
+      expect(fieldFilterValuesToQuery([buildFilter(field, 'in', 'a,b')]).query).toEqual({
+        'fields.articleTitle.en-US[in]': 'a,b',
+      });
+      expect(fieldFilterValuesToQuery([buildFilter(field, 'ne', 'a')]).query).toEqual({
+        'fields.articleTitle.en-US[ne]': 'a',
+      });
+    });
+
+    it('serializes exists and not exists for a Symbol', () => {
+      const field = buildLocalizedField('articleTitle', 'Symbol', 'en-US');
+
+      expect(fieldFilterValuesToQuery([buildFilter(field, 'exists', null)]).query).toEqual({
+        'fields.articleTitle.en-US[exists]': 'true',
+      });
+      expect(fieldFilterValuesToQuery([buildFilter(field, 'not exists', null)]).query).toEqual({
+        'fields.articleTitle.en-US[exists]': 'false',
+      });
+    });
+
+    it('serializes a RichText match filter', () => {
+      const field = buildLocalizedField('articleContent', 'RichText', 'es-US');
+
+      expect(fieldFilterValuesToQuery([buildFilter(field, 'match', 'lorem')]).query).toEqual({
+        'fields.articleContent.es-US[match]': 'lorem',
+      });
+    });
+
+    it('serializes an Integer gt filter', () => {
+      const field = buildLocalizedField('views', 'Integer', 'en-US');
+
+      expect(fieldFilterValuesToQuery([buildFilter(field, 'gt', '10')]).query).toEqual({
+        'fields.views.en-US[gt]': '10',
+      });
+    });
+
+    it('serializes a Number in filter by joining an array value with commas', () => {
+      const field = buildLocalizedField('price', 'Number', 'en-US');
+      const arrayValue = ['1.5', '2.5'] as unknown as string;
+
+      expect(fieldFilterValuesToQuery([buildFilter(field, 'in', arrayValue)]).query).toEqual({
+        'fields.price.en-US[in]': '1.5,2.5',
+      });
+    });
+
+    it('serializes a Link filter using a locale then sys.id path', () => {
+      const field = buildLocalizedField('author', 'Link', 'en-US');
+
+      expect(fieldFilterValuesToQuery([buildFilter(field, 'ne', 'author-1')]).query).toEqual({
+        'fields.author.en-US.sys.id[ne]': 'author-1',
+      });
+      expect(fieldFilterValuesToQuery([buildFilter(field, 'exists', null)]).query).toEqual({
+        'fields.author.en-US.sys.id[exists]': 'true',
+      });
+      expect(fieldFilterValuesToQuery([buildFilter(field, 'not exists', null)]).query).toEqual({
+        'fields.author.en-US.sys.id[exists]': 'false',
+      });
+    });
+
+    it('serializes an Array of Symbols filter with the locale as a path segment', () => {
+      const field = buildLocalizedField('tags', 'Array', 'en-US', { type: 'Symbol' });
+
+      expect(fieldFilterValuesToQuery([buildFilter(field, 'in', 'featured,launch')]).query).toEqual(
+        {
+          'fields.tags.en-US[in]': 'featured,launch',
+        }
+      );
+    });
+
+    it('serializes an Array of Links filter using a locale then sys.id path', () => {
+      const field = buildLocalizedField('authors', 'Array', 'es-US', {
+        type: 'Link',
+        linkType: 'Entry',
+      });
+
+      expect(
+        fieldFilterValuesToQuery([buildFilter(field, 'all', 'author-1,author-2')]).query
+      ).toEqual({
+        'fields.authors.es-US.sys.id[all]': 'author-1,author-2',
+      });
+      expect(fieldFilterValuesToQuery([buildFilter(field, 'exists', null)]).query).toEqual({
+        'fields.authors.es-US.sys.id[exists]': 'true',
+      });
+      expect(fieldFilterValuesToQuery([buildFilter(field, 'not exists', null)]).query).toEqual({
+        'fields.authors.es-US.sys.id[exists]': 'false',
+      });
+    });
+  });
 });
