@@ -57,7 +57,7 @@ class SfccClient {
   fetchProduct = (productId: string) =>
     callFunction<SfccItem>(this.cma, this.ids, {
       type: 'fetchProduct',
-      productId,
+      resourceId: productId,
       ...compact({ siteId: this.options.siteId }),
     });
 
@@ -76,7 +76,11 @@ class SfccClient {
     });
 
   fetchCategory = (catalogId: string, categoryId: string) =>
-    callFunction<SfccItem>(this.cma, this.ids, { type: 'fetchCategory', catalogId, categoryId });
+    callFunction<SfccItem>(this.cma, this.ids, {
+      type: 'fetchCategory',
+      catalogId,
+      resourceId: categoryId,
+    });
 
   searchResource = (resource: ResourceType, query?: string, offset = 0) =>
     callFunction<SearchPage>(this.cma, this.ids, {

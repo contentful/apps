@@ -18,8 +18,8 @@ interface ScopeOptions {
 type Action =
   | ({ type: 'searchProducts'; query?: string } & ScopeOptions)
   | ({ type: 'searchCategories'; query?: string } & ScopeOptions)
-  | ({ type: 'fetchProduct'; productId: string } & ScopeOptions)
-  | ({ type: 'fetchCategory'; catalogId: string; categoryId: string } & ScopeOptions)
+  | ({ type: 'fetchProduct'; resourceId: string } & ScopeOptions)
+  | ({ type: 'fetchCategory'; catalogId: string; resourceId: string } & ScopeOptions)
   | ({ type: 'searchResource'; resource: Resource; query?: string; offset?: number } & ScopeOptions)
   | ({ type: 'fetchResource'; resource: Resource; resourceId: string } & ScopeOptions);
 
@@ -361,7 +361,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
 
       case 'fetchProduct': {
         const url = `${base}/product/products/v1/organizations/${organizationId}/products/${encodeURIComponent(
-          action.productId
+          action.resourceId
         )}?siteId=${siteId}`;
         const data = (await sfccFetch(url, token, { method: 'GET' })) as SfccRecord;
         return { ok: true, data: toProductSummary(data) };
@@ -370,7 +370,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
       case 'fetchCategory': {
         const url = `${base}/product/catalogs/v1/organizations/${organizationId}/catalogs/${encodeURIComponent(
           action.catalogId
-        )}/categories/${encodeURIComponent(action.categoryId)}`;
+        )}/categories/${encodeURIComponent(action.resourceId)}`;
         const data = (await sfccFetch(url, token, { method: 'GET' })) as SfccRecord;
         return { ok: true, data: toCategorySummary(data) };
       }

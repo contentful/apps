@@ -105,7 +105,7 @@ describe('sfccApi function handler', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     const result: any = await handler(
-      { body: { type: 'fetchProduct', productId: 'prod-1' } } as any,
+      { body: { type: 'fetchProduct', resourceId: 'prod-1' } } as any,
       mockContext()
     );
 
@@ -128,7 +128,7 @@ describe('sfccApi function handler', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     const result: any = await handler(
-      { body: { type: 'fetchCategory', catalogId: 'catalog-1', categoryId: 'cat-1' } } as any,
+      { body: { type: 'fetchCategory', catalogId: 'catalog-1', resourceId: 'cat-1' } } as any,
       mockContext()
     );
 
@@ -183,7 +183,7 @@ describe('sfccApi function handler', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     const result: any = await handler(
-      { body: { type: 'fetchProduct', productId: 'prod-1' } } as any,
+      { body: { type: 'fetchProduct', resourceId: 'prod-1' } } as any,
       mockContext()
     );
 

@@ -58,7 +58,7 @@ describe('SfccClient fetchByKey', () => {
     expect(createWithResponse.mock.calls[0][1].parameters).toEqual({
       type: 'fetchCategory',
       catalogId: 'catalog-1',
-      categoryId: 'shoes',
+      resourceId: 'shoes',
     });
   });
 
@@ -67,7 +67,7 @@ describe('SfccClient fetchByKey', () => {
     await client.fetchByKey('product', 'sku-1');
     expect(createWithResponse.mock.calls[0][1].parameters).toEqual({
       type: 'fetchProduct',
-      productId: 'sku-1',
+      resourceId: 'sku-1',
       siteId: 'OtherSite',
     });
   });

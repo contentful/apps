@@ -43,20 +43,8 @@
           "required": false
         },
         {
-          "id": "productId",
-          "name": "Product ID",
-          "type": "Symbol",
-          "required": false
-        },
-        {
           "id": "catalogId",
           "name": "Catalog ID",
-          "type": "Symbol",
-          "required": false
-        },
-        {
-          "id": "categoryId",
-          "name": "Category ID",
           "type": "Symbol",
           "required": false
         },
@@ -68,7 +56,7 @@
         },
         {
           "id": "resourceId",
-          "name": "Resource ID",
+          "name": "Item ID",
           "type": "Symbol",
           "required": false
         },

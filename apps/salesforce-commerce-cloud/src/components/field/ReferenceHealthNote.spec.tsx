@@ -7,7 +7,7 @@ import ReferenceHealthNote from './ReferenceHealthNote';
 const items: Record<string, { ok: boolean; data?: unknown }> = {};
 
 const createWithResponse = vi.fn(async (_params: unknown, { parameters }: any) => {
-  const result = items[parameters.productId];
+  const result = items[parameters.resourceId];
   return {
     response: {
       body: JSON.stringify(
