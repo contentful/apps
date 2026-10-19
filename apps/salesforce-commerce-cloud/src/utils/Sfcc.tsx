@@ -1,4 +1,5 @@
 import { BaseAppSDK, CMAClient } from '@contentful/app-sdk';
+import { FieldType, ResourceType, ScopeOptions, SfccItem, isResourceType } from './resources';
 
 const APP_ACTION_ID = 'sfccApi';
 
@@ -35,26 +36,80 @@ async function callFunction<T>(
   return json.data;
 }
 
+// Drop unset options so the app action only receives parameters it declares values for.
+function compact(options: ScopeOptions = {}) {
+  return Object.fromEntries(
+    Object.entries(options).filter(([, value]) => value !== undefined && value !== '')
+  );
+}
+
 class SfccClient {
   private cma: CMAClient;
   private ids: BaseAppSDK['ids'];
+  private options: ScopeOptions;
 
-  constructor(cma: CMAClient, ids: BaseAppSDK['ids']) {
+  constructor(cma: CMAClient, ids: BaseAppSDK['ids'], options: ScopeOptions = {}) {
     this.cma = cma;
     this.ids = ids;
+    this.options = options;
   }
 
   fetchProduct = (productId: string) =>
-    callFunction(this.cma, this.ids, { type: 'fetchProduct', productId });
+    callFunction<SfccItem>(this.cma, this.ids, {
+      type: 'fetchProduct',
+      productId,
+      ...compact({ siteId: this.options.siteId }),
+    });
 
   searchProducts = (query?: string) =>
-    callFunction<unknown[]>(this.cma, this.ids, { type: 'searchProducts', query });
+    callFunction<SfccItem[]>(this.cma, this.ids, {
+      type: 'searchProducts',
+      query,
+      ...compact({ siteId: this.options.siteId, includeVariants: this.options.includeVariants }),
+    });
 
   searchCategories = (query?: string) =>
-    callFunction<unknown[]>(this.cma, this.ids, { type: 'searchCategories', query });
+    callFunction<SfccItem[]>(this.cma, this.ids, {
+      type: 'searchCategories',
+      query,
+      ...compact({ catalogId: this.options.catalogId }),
+    });
 
   fetchCategory = (catalogId: string, categoryId: string) =>
-    callFunction(this.cma, this.ids, { type: 'fetchCategory', catalogId, categoryId });
+    callFunction<SfccItem>(this.cma, this.ids, { type: 'fetchCategory', catalogId, categoryId });
+
+  searchResource = (resource: ResourceType, query?: string) =>
+    callFunction<SfccItem[]>(this.cma, this.ids, {
+      type: 'searchResource',
+      resource,
+      query,
+      ...compact({ siteId: this.options.siteId }),
+    });
+
+  fetchResource = (resource: ResourceType, resourceId: string) =>
+    callFunction<SfccItem>(this.cma, this.ids, {
+      type: 'fetchResource',
+      resource,
+      resourceId,
+      ...compact({ siteId: this.options.siteId }),
+    });
+
+  search = (fieldType: FieldType, query?: string) => {
+    if (fieldType === 'product') return this.searchProducts(query);
+    if (fieldType === 'category') return this.searchCategories(query);
+    return this.searchResource(fieldType as ResourceType, query);
+  };
+
+  /** Fetches a stored field value (categories are stored as `catalogId:categoryId`). */
+  fetchByKey = (fieldType: FieldType, key: string) => {
+    if (fieldType === 'product') return this.fetchProduct(key);
+    if (fieldType === 'category') {
+      const [catalogId, categoryId] = key.split(':');
+      return this.fetchCategory(catalogId, categoryId);
+    }
+    if (isResourceType(fieldType)) return this.fetchResource(fieldType, key);
+    throw new Error(`Unsupported field type: ${fieldType}`);
+  };
 }
 
 export default SfccClient;

@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
-import { useQueries } from '@tanstack/react-query';
 
 import { FieldAppSDK } from '@contentful/app-sdk';
-import { useSDK, useCMA } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 import { Flex, Button } from '@contentful/f36-components';
 import { ShoppingCartIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 
-import { AppInstanceParameters } from '../../locations/Field';
 import logo from '../../Salesforce_Corporate_Logo_RGB.png';
-import SfccClient from '../../utils/Sfcc';
 import { DialogInvocationParameters } from '../../locations/Dialog';
+import { SfccItem, makeSelectText } from '../../utils/resources';
+import { useFieldItems } from '../../utils/useFieldItems';
 
 const logoStyle = css`
   display: block;
@@ -23,10 +22,8 @@ const logoStyle = css`
 
 const SelectItemAction = (props: { fieldValue?: string | string[] }) => {
   const sdk = useSDK<FieldAppSDK>();
-  const cma = useCMA();
   const selectMultiple = sdk.field.type === 'Array';
-  const { fieldType } = sdk.parameters.instance as AppInstanceParameters;
-  const [currentData, setCurrentData] = useState<any[]>([]);
+  const [currentData, setCurrentData] = useState<SfccItem[]>([]);
 
   const queryArray: string[] = [];
   if (props.fieldValue) {
@@ -35,25 +32,13 @@ const SelectItemAction = (props: { fieldValue?: string | string[] }) => {
       : queryArray.push(props.fieldValue);
   }
 
-  const client = new SfccClient(cma, sdk.ids);
-  const currentItemQueries = useQueries({
-    queries: queryArray.map((id: string) => {
-      const [itemId, catalogId] = id.split(':');
-      return {
-        queryKey: ['itemInfo', itemId],
-        queryFn:
-          fieldType === 'product'
-            ? () => client.fetchProduct(itemId)
-            : () => client.fetchCategory(itemId, catalogId),
-      };
-    }),
-  });
+  const { fieldType, options, locale, queries: currentItemQueries } = useFieldItems(queryArray);
 
   const queriesComplete = currentItemQueries.every((query) => query.isSuccess || query.isError);
 
   useEffect(() => {
     if (queriesComplete) {
-      const updatedData: any[] = [];
+      const updatedData: SfccItem[] = [];
       for (const query of currentItemQueries) {
         if (query.isSuccess) {
           updatedData.push(query.data);
@@ -66,23 +51,14 @@ const SelectItemAction = (props: { fieldValue?: string | string[] }) => {
     }
   }, [queriesComplete]);
 
-  const makeCTAText = (selectMultiple: boolean, fieldType: string) => {
-    let ctaText = 'Select ';
-    if (selectMultiple) {
-      ctaText += fieldType === 'product' ? 'products' : 'categories';
-    } else {
-      ctaText += `a ${fieldType}`;
-    }
-
-    return ctaText;
-  };
-
   const onButtonClick = async () => {
     const parameters: DialogInvocationParameters = {
       selectMultiple: selectMultiple,
       fieldType: fieldType,
       currentData: currentData,
       fieldValue: props.fieldValue,
+      locale,
+      ...options,
     };
 
     if (!queryArray.length || queriesComplete) {
@@ -105,7 +81,7 @@ const SelectItemAction = (props: { fieldValue?: string | string[] }) => {
         variant="secondary"
         size="small"
         onClick={onButtonClick}>
-        {makeCTAText(selectMultiple, fieldType)}
+        {makeSelectText(selectMultiple, fieldType)}
       </Button>
     </Flex>
   );

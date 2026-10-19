@@ -16,6 +16,7 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { DialogAppSDK } from '@contentful/app-sdk';
 
 import { DialogInvocationParameters } from '../../locations/Dialog';
+import { FieldType, SfccItem, itemKey, labelFor } from '../../utils/resources';
 
 interface SearchBarProps {
   query: string;
@@ -23,14 +24,15 @@ interface SearchBarProps {
   stickyHeaderBreakpoint: number;
   saveIsDisabled: boolean;
   selectedItems?: string | string[];
-  selectedData: any[];
+  selectedData: SfccItem[];
+  locale?: string;
   onQueryChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onSave: () => void;
   removeSelected: (id: string) => void;
 }
 
 interface SearchControlProps extends SearchBarProps {
-  fieldType: 'product' | 'category';
+  fieldType: FieldType;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -87,7 +89,7 @@ const LeftSideControls = (props: SearchControlProps) => {
     <Box css={wrapperStyles}>
       <Flex flexDirection="row" alignItems="center">
         <TextInput
-          placeholder={`Search for a ${props.fieldType}...`}
+          placeholder={`Search for a ${labelFor(props.fieldType).singular}...`}
           type="search"
           name="item-search"
           id="item-search"
@@ -125,24 +127,17 @@ const RightSideControls = (props: SearchControlProps) => {
 
 interface SelectionListProps {
   items?: string | string[];
-  itemsInfo: any[];
+  itemsInfo: SfccItem[];
   removeSelected: (item: string) => void;
-  fieldType: 'product' | 'category';
+  fieldType: FieldType;
 }
 
 const SelectionList = (props: SelectionListProps) => {
   const items: string[] | undefined = typeof props.items === 'string' ? [props.items] : props.items;
 
   // console.log(props)
-  const findItemData = (itemId: string, fieldType: 'product' | 'category', itemsInfo?: any[]) => {
-    if (itemsInfo?.length) {
-      return itemsInfo.find((item) => {
-        return fieldType === 'product'
-          ? item.id === itemId
-          : `${item.catalogId}:${item.id}` === itemId;
-      });
-    }
-  };
+  const findItemData = (itemId: string, fieldType: FieldType, itemsInfo?: SfccItem[]) =>
+    itemsInfo?.find((item) => item && itemKey(fieldType, item) === itemId);
 
   return (
     <Flex gap="spacingXs" flexWrap="wrap" alignItems="center">
@@ -162,8 +157,8 @@ const SelectionList = (props: SelectionListProps) => {
 
 interface SelectionListItemProps {
   itemId: string;
-  itemData: any;
-  fieldType: 'product' | 'category';
+  itemData?: SfccItem;
+  fieldType: FieldType;
   removeSelected: (id: string) => void;
 }
 
@@ -177,7 +172,7 @@ const SelectionListItem = (props: SelectionListItemProps) => {
     return props.fieldType === 'product' ? <AssetIcon /> : <TagsIcon />;
   };
 
-  const getProductPreviewImageUrl = (productInfo?: any) => {
+  const getProductPreviewImageUrl = (productInfo?: SfccItem) => {
     return productInfo?.image?.absUrl || '';
   };
 
@@ -257,7 +252,7 @@ const SelectionListItem = (props: SelectionListItemProps) => {
           <CloseIcon variant="white" />
         </Box>
 
-        {fieldType === 'category' && (
+        {fieldType !== 'product' && (
           <Box css={selectedItemIconStyles}>{itemData ? <TagsIcon /> : <ErrorCircleIcon />}</Box>
         )}
         {fieldType === 'product' && (

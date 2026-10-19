@@ -1,17 +1,12 @@
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
 
-import { Box, Flex, SkeletonContainer, SkeletonImage } from '@contentful/f36-components';
+import { Badge, Box, Flex, SkeletonContainer, SkeletonImage } from '@contentful/f36-components';
 import { AssetIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 
-import {
-  SearchResultsProps,
-  SearchResultProps,
-  height,
-  headerHeight,
-  stickyHeaderBreakpoint,
-} from './SearchPicker';
+import { SearchResultsProps, SearchResultProps, height } from './SearchPicker';
+import { describeItem, getItemStatus } from '../../utils/resources';
 
 const ProductSearchResults = (props: SearchResultsProps) => {
   const resultsStyles = css`
@@ -31,8 +26,9 @@ const ProductSearchResults = (props: SearchResultsProps) => {
         `}>
         {props.searchResults.map((result) => (
           <ProductSearchResult
-            key={props.fieldType === 'product' ? result.id : `${result.catalogId}:${result.id}`}
+            key={result.id}
             fieldType={props.fieldType}
+            locale={props.locale}
             onItemSelect={props.onItemSelect}
             selected={props.selectedItems}
             result={result}
@@ -44,8 +40,10 @@ const ProductSearchResults = (props: SearchResultsProps) => {
 };
 
 const ProductSearchResult = (props: SearchResultProps) => {
-  const { result, fieldType, onItemSelect, selected } = props;
-  const resultId = fieldType === 'product' ? result.id : `${result.catalogId}:${result.id}`;
+  const { result, fieldType, onItemSelect, selected, locale } = props;
+  const resultId = result.id;
+  const { title, detail } = describeItem(fieldType, result, locale);
+  const statuses = getItemStatus(fieldType, result);
   const isSelected =
     typeof selected === 'string' ? result.id === selected : selected?.includes(resultId);
 
@@ -150,9 +148,18 @@ const ProductSearchResult = (props: SearchResultProps) => {
             />
           </div>
         )}
-        <p css={resultNameStyles}>{result.name?.default || 'Untitled Product'}</p>
+        <p css={resultNameStyles}>{title}</p>
         <p css={resultIdStyles}>ID: {result.id}</p>
-        {fieldType === 'category' && <p css={resultIdStyles}>Catalog ID: {result.catalogId}</p>}
+        {detail && <p css={resultIdStyles}>{detail}</p>}
+        {statuses.length > 0 && (
+          <Flex gap="spacingXs" marginTop="spacingXs">
+            {statuses.map((status) => (
+              <Badge key={status.label} variant={status.variant}>
+                {status.label}
+              </Badge>
+            ))}
+          </Flex>
+        )}
       </div>
     </Flex>
   );
