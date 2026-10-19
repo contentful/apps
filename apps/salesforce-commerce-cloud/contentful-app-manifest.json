@@ -3,7 +3,7 @@
     {
       "id": "sfccApi",
       "name": "Salesforce Commerce Cloud API",
-      "description": "Proxies SFCC product and category API calls server-side to avoid CORS restrictions.",
+      "description": "Proxies SFCC product, category, customer group, promotion, campaign, coupon and store API calls server-side to avoid CORS restrictions.",
       "path": "functions/index.js",
       "entryFile": "functions/index.ts",
       "allowNetworks": [
@@ -19,7 +19,7 @@
     {
       "id": "sfccApi",
       "name": "SFCC API",
-      "description": "Invokes the sfccApi function to proxy SFCC product and category API calls.",
+      "description": "Invokes the sfccApi function to proxy SFCC commerce API calls.",
       "type": "function-invocation",
       "functionId": "sfccApi",
       "category": "Custom",
@@ -52,6 +52,30 @@
           "id": "categoryId",
           "name": "Category ID",
           "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "resource",
+          "name": "Resource",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "resourceId",
+          "name": "Resource ID",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "siteId",
+          "name": "Site ID",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "includeVariants",
+          "name": "Include Variants",
+          "type": "Boolean",
           "required": false
         }
       ]
