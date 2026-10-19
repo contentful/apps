@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { fieldFilterValuesToQuery } from '../../../src/locations/Page/utils/contentfulQueryUtils';
+import {
+  buildQuery,
+  fieldFilterValuesToQuery,
+} from '../../../src/locations/Page/utils/contentfulQueryUtils';
 import type { ContentTypeField, FieldFilterValue } from '../../../src/locations/Page/types';
 
 describe('contentfulQueryUtils', () => {
@@ -290,6 +293,50 @@ describe('contentfulQueryUtils', () => {
       expect(fieldFilterValuesToQuery([buildFilter(field, 'not exists', null)]).query).toEqual({
         'fields.authors.es-US.sys.id[exists]': 'false',
       });
+    });
+  });
+
+  describe('buildQuery order', () => {
+    const buildOrder = (sortOption: string, displayField: { id: string; type: string } | null) =>
+      buildQuery(sortOption, displayField, [], 'blogPost', 0, 25, [], '').order;
+
+    it('falls back to updated date descending for a Text display field on either name sort', () => {
+      const displayField = { id: 'title', type: 'Text' };
+
+      expect(buildOrder('displayName_asc', displayField)).toBe('-sys.updatedAt');
+      expect(buildOrder('displayName_desc', displayField)).toBe('-sys.updatedAt');
+    });
+
+    it.each(['Symbol', 'Integer', 'Number', 'Boolean', 'Date'])(
+      'sorts by the %s display field for the name sorts',
+      (type) => {
+        const displayField = { id: 'title', type };
+
+        expect(buildOrder('displayName_asc', displayField)).toBe('fields.title');
+        expect(buildOrder('displayName_desc', displayField)).toBe('-fields.title');
+      }
+    );
+
+    it.each(['RichText', 'Location', 'Link'])(
+      'falls back to updated date descending for a %s display field',
+      (type) => {
+        const displayField = { id: 'title', type };
+
+        expect(buildOrder('displayName_asc', displayField)).toBe('-sys.updatedAt');
+        expect(buildOrder('displayName_desc', displayField)).toBe('-sys.updatedAt');
+      }
+    );
+
+    it('returns no order for the name sorts when there is no display field', () => {
+      expect(buildOrder('displayName_asc', null)).toBeUndefined();
+      expect(buildOrder('displayName_desc', null)).toBeUndefined();
+    });
+
+    it('keeps the explicit updated date sorts unchanged for a Text display field', () => {
+      const displayField = { id: 'title', type: 'Text' };
+
+      expect(buildOrder('updatedAt_asc', displayField)).toBe('sys.updatedAt');
+      expect(buildOrder('updatedAt_desc', displayField)).toBe('-sys.updatedAt');
     });
   });
 });

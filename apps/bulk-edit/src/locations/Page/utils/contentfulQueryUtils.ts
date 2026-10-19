@@ -1,14 +1,24 @@
 import { QueryOptions } from 'contentful-management';
 import { ContentTypeField, FieldFilterValue } from '../types';
 import { isNumericSearch } from './entryUtils';
-import { ARCHIVED_STATUS, CHANGED_STATUS, DRAFT_STATUS, PUBLISHED_STATUS } from './constants';
+import {
+  ARCHIVED_STATUS,
+  CHANGED_STATUS,
+  DRAFT_STATUS,
+  ORDERABLE_FIELD_TYPES,
+  PUBLISHED_STATUS,
+} from './constants';
 
-const getOrder = (sortOption: string, displayField: string | null) => {
+type DisplayField = { id: string; type: string };
+
+const getOrder = (sortOption: string, displayField: DisplayField | null) => {
   if (sortOption === 'updatedAt_desc') return '-sys.updatedAt';
   else if (sortOption === 'updatedAt_asc') return 'sys.updatedAt';
   else if (displayField === null) return undefined;
-  else if (sortOption === 'displayName_asc') return `fields.${displayField}`;
-  else if (sortOption === 'displayName_desc') return `-fields.${displayField}`;
+  // The CMA rejects ordering by fields such as Text, so fall back to newest updated first
+  else if (!ORDERABLE_FIELD_TYPES.includes(displayField.type)) return '-sys.updatedAt';
+  else if (sortOption === 'displayName_asc') return `fields.${displayField.id}`;
+  else if (sortOption === 'displayName_desc') return `-fields.${displayField.id}`;
 };
 
 // The CMA addresses a localized field as `fields.<id>.<locale>`, not by the app's `uniqueId`.
@@ -40,7 +50,7 @@ const getStatusFilter = (statusLabels: string[]) => {
 
 export const buildQuery = (
   sortOption: string,
-  displayField: string | null,
+  displayField: DisplayField | null,
   statusLabels: string[],
   selectedContentTypeId: string | undefined,
   activePage: number,

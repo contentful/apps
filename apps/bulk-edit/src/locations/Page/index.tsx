@@ -307,7 +307,9 @@ const Page = () => {
       }
       setEntriesLoading(true);
       try {
-        const displayField = currentContentType.displayField || null;
+        const displayField =
+          currentContentType.fields.find((field) => field.id === currentContentType.displayField) ??
+          null;
         const statusLabels = selectedStatuses.map((status) => status.label);
         const shouldClientFilter = needsClientFiltering();
 
