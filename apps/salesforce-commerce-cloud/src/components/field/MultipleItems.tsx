@@ -3,7 +3,7 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { Flex } from '@contentful/f36-components';
 import { FieldAppSDK } from '@contentful/app-sdk';
 
-import { AppInstanceParameters } from '../../locations/Field';
+import { AppInstanceParameters } from '../../utils/resources';
 
 import { DndContext, closestCenter, PointerSensor, useSensor } from '@dnd-kit/core';
 import {
