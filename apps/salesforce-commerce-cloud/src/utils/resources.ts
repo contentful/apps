@@ -45,6 +45,11 @@ export interface ScopeOptions {
   includeVariants?: boolean;
 }
 
+export interface SearchPage {
+  items: SfccItem[];
+  nextOffset?: number;
+}
+
 const LABELS: Record<FieldType, { singular: string; plural: string }> = {
   product: { singular: 'product', plural: 'products' },
   category: { singular: 'category', plural: 'categories' },

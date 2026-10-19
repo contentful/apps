@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 // Contentful Imports
-import { Modal } from '@contentful/f36-components';
+import { Button, Flex, Modal } from '@contentful/f36-components';
 import { useSDK, useCMA } from '@contentful/react-apps-toolkit';
 import { DialogAppSDK } from '@contentful/app-sdk';
 
@@ -11,7 +11,7 @@ import SearchBar from './SearchBar';
 import ProductSearchResults from './ProductSearchResults';
 import ListSearchResults from './ListSearchResults';
 import { DialogInvocationParameters } from '../../locations/Dialog';
-import { FieldType, SfccItem, itemKey } from '../../utils/resources';
+import { FieldType, SfccItem, isResourceType, itemKey } from '../../utils/resources';
 
 export const headerHeight = 114;
 export const stickyHeaderBreakpoint = 900;
@@ -36,9 +36,14 @@ const SearchPicker = () => {
   const [selected, setSelected] = useState<string | string[] | undefined>(fieldValue);
   const [selectedData, setSelectedItemsInfo] = useState<SfccItem[]>(currentData || []);
   const [searchResults, setSearchResults] = useState<SfccItem[]>([]);
+  const [pageRequest, setPageRequest] = useState({ offset: 0 });
+  const [nextOffset, setNextOffset] = useState<number>();
 
   const onQueryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(event.target.value);
+    setPageRequest({ offset: 0 });
+    setSearchResults([]);
+    setNextOffset(undefined);
   };
 
   const onSave = () => {
@@ -89,20 +94,42 @@ const SearchPicker = () => {
   };
 
   useEffect(() => {
-    const timeOutId = setTimeout(() => {
-      const client = new SfccClient(cma, sdk.ids, { siteId, catalogId, includeVariants });
-      setQueryIsFetching(true);
-      client
-        .search(fieldType, query.length >= 3 ? query : undefined)
-        .then((results) => setSearchResults(results))
-        .catch((error: Error) => {
-          setSearchResults([]);
-          sdk.notifier.error(error.message);
-        })
-        .finally(() => setQueryIsFetching(false));
-    }, 500);
-    return () => clearTimeout(timeOutId);
-  }, [fieldType, query]);
+    let cancelled = false;
+    setQueryIsFetching(true);
+    const timeOutId = setTimeout(
+      () => {
+        const client = new SfccClient(cma, sdk.ids, { siteId, catalogId, includeVariants });
+        const searchQuery = isResourceType(fieldType) || query.length >= 3 ? query : undefined;
+        client
+          .search(fieldType, searchQuery, pageRequest.offset)
+          .then((page) => {
+            if (cancelled) return;
+            setSearchResults((previous) => {
+              if (pageRequest.offset === 0) return page.items;
+              const seen = new Set(previous.map((item) => itemKey(fieldType, item)));
+              return [
+                ...previous,
+                ...page.items.filter((item) => !seen.has(itemKey(fieldType, item))),
+              ];
+            });
+            setNextOffset(page.nextOffset);
+          })
+          .catch((error: Error) => {
+            if (cancelled) return;
+            if (pageRequest.offset === 0) setSearchResults([]);
+            sdk.notifier.error(error.message);
+          })
+          .finally(() => {
+            if (!cancelled) setQueryIsFetching(false);
+          });
+      },
+      pageRequest.offset === 0 ? 500 : 0
+    );
+    return () => {
+      cancelled = true;
+      clearTimeout(timeOutId);
+    };
+  }, [fieldType, query, pageRequest, cma, sdk, siteId, catalogId, includeVariants]);
 
   const searchBarProps = {
     isLoading: queryIsFetching,
@@ -130,6 +157,17 @@ const SearchPicker = () => {
           selectedItems={selected}
           locale={locale}
         />
+      )}
+      {nextOffset !== undefined && (
+        <Flex justifyContent="center" padding="spacingM">
+          <Button
+            variant="secondary"
+            isDisabled={queryIsFetching}
+            isLoading={queryIsFetching}
+            onClick={() => setPageRequest({ offset: nextOffset })}>
+            Load more
+          </Button>
+        </Flex>
       )}
     </Modal.Content>
   );

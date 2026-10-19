@@ -242,9 +242,110 @@ describe('sfccApi function handler', () => {
       mockContext()
     );
 
-    expect(result).toEqual({ ok: true, data: [] });
+    expect(result).toEqual({ ok: true, data: { items: [] } });
     expect(body.query).toEqual({ matchAllQuery: {} });
   });
+
+  it('returns continuation offsets and retrieves resources beyond the first 50 hits', async () => {
+    const groups = Array.from({ length: 51 }, (_, index) => ({ id: `group-${index}` }));
+    const offsets: number[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (url.includes('dwsso/oauth2/access_token')) return mockTokenResponse();
+        const body = JSON.parse(String(init?.body)) as { offset: number; limit: number };
+        offsets.push(body.offset);
+        return {
+          ok: true,
+          json: async () => ({
+            hits: groups.slice(body.offset, body.offset + body.limit),
+            total: groups.length,
+          }),
+        } as Response;
+      })
+    );
+
+    const first = await handler(
+      { body: { type: 'searchResource', resource: 'customerGroup' } } as Parameters<
+        typeof handler
+      >[0],
+      mockContext()
+    );
+    const last = await handler(
+      { body: { type: 'searchResource', resource: 'customerGroup', offset: 50 } } as Parameters<
+        typeof handler
+      >[0],
+      mockContext()
+    );
+
+    expect(first).toMatchObject({ ok: true, data: { nextOffset: 50 } });
+    expect(last).toEqual({ ok: true, data: { items: [{ id: 'group-50' }] } });
+    expect(offsets).toEqual([0, 50]);
+  });
+
+  it('does not offer another page when exactly 50 results exhaust the search', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (url.includes('dwsso/oauth2/access_token')) return mockTokenResponse();
+        return {
+          ok: true,
+          json: async () => ({
+            hits: Array.from({ length: 50 }, (_, index) => ({ id: `store-${index}` })),
+            total: 50,
+          }),
+        } as Response;
+      })
+    );
+
+    const result = await handler(
+      { body: { type: 'searchResource', resource: 'store' } } as Parameters<typeof handler>[0],
+      mockContext()
+    );
+    expect(result).toMatchObject({ ok: true });
+    expect(result).not.toHaveProperty('data.nextOffset');
+  });
+
+  it('searches campaigns by ID without a disjunction across ID and description', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (url.includes('dwsso/oauth2/access_token')) return mockTokenResponse();
+        const body = JSON.parse(String(init?.body)) as { query: unknown };
+        expect(body.query).toEqual({
+          textQuery: { fields: ['campaignId'], searchPhrase: 'summer' },
+        });
+        return {
+          ok: true,
+          json: async () => ({ hits: [{ campaignId: 'summer-sale' }], total: 1 }),
+        } as Response;
+      })
+    );
+
+    const result = await handler(
+      { body: { type: 'searchResource', resource: 'campaign', query: 'summer' } } as Parameters<
+        typeof handler
+      >[0],
+      mockContext()
+    );
+    expect(result).toMatchObject({ ok: true, data: { items: [{ id: 'summer-sale' }] } });
+  });
+
+  it.each([-1, 1.5, Number.MAX_SAFE_INTEGER + 1])(
+    'rejects invalid search offset %s',
+    async (offset) => {
+      const fetchMock = vi.fn();
+      vi.stubGlobal('fetch', fetchMock);
+      const result = await handler(
+        { body: { type: 'searchResource', resource: 'store', offset } } as Parameters<
+          typeof handler
+        >[0],
+        mockContext()
+      );
+      expect(result).toMatchObject({ ok: false, error: { type: 'ValidationError' } });
+      expect(fetchMock).not.toHaveBeenCalled();
+    }
+  );
 
   it('summarises campaigns and coupons with their status fields', async () => {
     const fetchMock = vi.fn(async (url: string) => {

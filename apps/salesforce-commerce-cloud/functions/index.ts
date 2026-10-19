@@ -20,7 +20,7 @@ type Action =
   | ({ type: 'searchCategories'; query?: string } & ScopeOptions)
   | ({ type: 'fetchProduct'; productId: string } & ScopeOptions)
   | ({ type: 'fetchCategory'; catalogId: string; categoryId: string } & ScopeOptions)
-  | ({ type: 'searchResource'; resource: Resource; query?: string } & ScopeOptions)
+  | ({ type: 'searchResource'; resource: Resource; query?: string; offset?: number } & ScopeOptions)
   | ({ type: 'fetchResource'; resource: Resource; resourceId: string } & ScopeOptions);
 
 interface InstallationParameters {
@@ -152,7 +152,8 @@ const RESOURCES: Record<Resource, ResourceConfig> = {
     searchPath: 'pricing/campaigns/v1/organizations/{org}/campaigns',
     getPath: (id) => `pricing/campaigns/v1/organizations/{org}/campaigns/${id}`,
     idField: 'campaignId',
-    textFields: ['campaignId', 'description'],
+    // Campaign search rejects disjunctions, including a multi-field textQuery.
+    textFields: ['campaignId'],
     summarize: (c) => ({
       id: c.campaignId as string,
       description: c.description as string | undefined,
@@ -276,12 +277,14 @@ function buildSearchBody(query?: string, forCategories = false, options: ScopeOp
   };
 }
 
-function buildResourceSearchBody(config: ResourceConfig, query?: string) {
+function buildResourceSearchBody(config: ResourceConfig, query?: string, offset = 0) {
   return {
     query: query?.length
       ? { textQuery: { fields: config.textFields, searchPhrase: query } }
       : { matchAllQuery: {} },
     limit: 50,
+    offset,
+    sorts: [{ field: config.idField, sortOrder: 'asc' }],
   };
 }
 
@@ -299,6 +302,17 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   }
 
   const action = event.body;
+
+  if (
+    action.type === 'searchResource' &&
+    action.offset !== undefined &&
+    (!Number.isSafeInteger(action.offset) || action.offset < 0)
+  ) {
+    return {
+      ok: false,
+      error: { type: 'ValidationError', message: 'Offset must be a non-negative integer' },
+    };
+  }
 
   if (
     (action.type === 'searchResource' || action.type === 'fetchResource') &&
@@ -359,11 +373,23 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
 
       case 'searchResource': {
         const config = RESOURCES[action.resource];
+        const offset = action.offset ?? 0;
         const data = (await sfccFetch(resourceUrl(config.searchPath), token, {
           method: 'POST',
-          body: JSON.stringify(buildResourceSearchBody(config, action.query)),
-        })) as { hits?: SfccRecord[] };
-        return { ok: true, data: (data.hits ?? []).map(config.summarize) };
+          body: JSON.stringify(buildResourceSearchBody(config, action.query, offset)),
+        })) as { hits?: SfccRecord[]; total?: number };
+        const hits = data.hits ?? [];
+        const nextOffset = offset + hits.length;
+        const hasMore =
+          hits.length > 0 &&
+          (data.total === undefined ? hits.length === 50 : nextOffset < data.total);
+        return {
+          ok: true,
+          data: {
+            items: hits.map(config.summarize),
+            ...(hasMore ? { nextOffset } : {}),
+          },
+        };
       }
 
       case 'fetchResource': {

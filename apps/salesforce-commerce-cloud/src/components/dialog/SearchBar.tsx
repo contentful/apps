@@ -89,7 +89,11 @@ const LeftSideControls = (props: SearchControlProps) => {
     <Box css={wrapperStyles}>
       <Flex flexDirection="row" alignItems="center">
         <TextInput
-          placeholder={`Search for a ${labelFor(props.fieldType).singular}...`}
+          placeholder={
+            props.fieldType === 'campaign'
+              ? 'Search by campaign ID...'
+              : `Search for a ${labelFor(props.fieldType).singular}...`
+          }
           type="search"
           name="item-search"
           id="item-search"

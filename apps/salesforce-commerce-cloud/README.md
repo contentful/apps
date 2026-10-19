@@ -5,6 +5,11 @@ This project was bootstrapped with [Create Contentful App](https://github.com/co
 Each field using the app sets the `fieldType` instance parameter. Every type stores plain SFCC
 IDs (a Symbol, or a list of Symbols for array fields); fetch the full record at render time.
 
+Customer group, promotion, campaign, coupon and store pickers load results in pages of 50.
+Use **Load more** to browse subsequent pages; selections are kept while searching or loading
+more results. Campaigns are searched by campaign ID because the campaign API does not support
+OR queries across ID and description.
+
 | `fieldType` | Stored value | Account Manager scope |
 |---|---|---|
 | `product` | Product ID | `sfcc.products` |

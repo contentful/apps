@@ -1,5 +1,12 @@
 import { BaseAppSDK, CMAClient } from '@contentful/app-sdk';
-import { FieldType, ResourceType, ScopeOptions, SfccItem, isResourceType } from './resources';
+import {
+  FieldType,
+  ResourceType,
+  ScopeOptions,
+  SearchPage,
+  SfccItem,
+  isResourceType,
+} from './resources';
 
 const APP_ACTION_ID = 'sfccApi';
 
@@ -78,11 +85,12 @@ class SfccClient {
   fetchCategory = (catalogId: string, categoryId: string) =>
     callFunction<SfccItem>(this.cma, this.ids, { type: 'fetchCategory', catalogId, categoryId });
 
-  searchResource = (resource: ResourceType, query?: string) =>
-    callFunction<SfccItem[]>(this.cma, this.ids, {
+  searchResource = (resource: ResourceType, query?: string, offset = 0) =>
+    callFunction<SearchPage>(this.cma, this.ids, {
       type: 'searchResource',
       resource,
       query,
+      offset,
       ...compact({ siteId: this.options.siteId }),
     });
 
@@ -94,10 +102,10 @@ class SfccClient {
       ...compact({ siteId: this.options.siteId }),
     });
 
-  search = (fieldType: FieldType, query?: string) => {
-    if (fieldType === 'product') return this.searchProducts(query);
-    if (fieldType === 'category') return this.searchCategories(query);
-    return this.searchResource(fieldType as ResourceType, query);
+  search = async (fieldType: FieldType, query?: string, offset = 0): Promise<SearchPage> => {
+    if (fieldType === 'product') return { items: await this.searchProducts(query) };
+    if (fieldType === 'category') return { items: await this.searchCategories(query) };
+    return this.searchResource(fieldType as ResourceType, query, offset);
   };
 
   /** Fetches a stored field value (categories are stored as `catalogId:categoryId`). */

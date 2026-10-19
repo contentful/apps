@@ -37,6 +37,12 @@
           "required": false
         },
         {
+          "id": "offset",
+          "name": "Search Offset",
+          "type": "Number",
+          "required": false
+        },
+        {
           "id": "productId",
           "name": "Product ID",
           "type": "Symbol",
