@@ -94,6 +94,14 @@ describe('contentfulQueryUtils', () => {
       });
     });
 
+    it('serializes a Text match filter', () => {
+      const field = buildField('body', 'Text');
+
+      expect(fieldFilterValuesToQuery([buildFilter(field, 'match', 'hello')]).query).toEqual({
+        'fields.body[match]': 'hello',
+      });
+    });
+
     it('serializes an Integer gt filter', () => {
       const field = buildField('views', 'Integer');
 
@@ -202,6 +210,25 @@ describe('contentfulQueryUtils', () => {
 
       expect(fieldFilterValuesToQuery([buildFilter(field, 'match', 'hello')]).query).toEqual({
         'fields.articleTitle.en-US[match]': 'hello',
+      });
+    });
+
+    it('serializes a localized Text is filter with the locale as a path segment', () => {
+      const field = buildLocalizedField('body', 'Text', 'en-US');
+
+      expect(fieldFilterValuesToQuery([buildFilter(field, 'in', 'long text')]).query).toEqual({
+        'fields.body.en-US[in]': 'long text',
+      });
+    });
+
+    it('serializes localized Text empty and not empty filters', () => {
+      const field = buildLocalizedField('body', 'Text', 'en-US');
+
+      expect(fieldFilterValuesToQuery([buildFilter(field, 'exists', null)]).query).toEqual({
+        'fields.body.en-US[exists]': 'true',
+      });
+      expect(fieldFilterValuesToQuery([buildFilter(field, 'not exists', null)]).query).toEqual({
+        'fields.body.en-US[exists]': 'false',
       });
     });
 

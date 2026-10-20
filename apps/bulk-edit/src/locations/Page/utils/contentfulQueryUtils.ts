@@ -99,6 +99,7 @@ export const fieldFilterValuesToQuery = (
 
     if (
       fieldFilterValue.contentTypeField.type === 'Symbol' ||
+      fieldFilterValue.contentTypeField.type === 'Text' ||
       fieldFilterValue.contentTypeField.type === 'Integer' ||
       fieldFilterValue.contentTypeField.type === 'Number' ||
       fieldFilterValue.contentTypeField.type === 'RichText'
