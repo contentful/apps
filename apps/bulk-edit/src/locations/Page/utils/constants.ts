@@ -33,6 +33,9 @@ export const API_LIMITS = {
 
 export const PAGE_SIZE_OPTIONS = [25, 50, 100, 200, 500];
 
+// Field types the CMA accepts in `order`. Mirrors SORTABLE_TYPES in the entity-search package.
+export const ORDERABLE_FIELD_TYPES = ['Boolean', 'Date', 'Integer', 'Number', 'Symbol'];
+
 export const SIDEBAR_WIDTH = 260;
 export const SPACER_SPACING = 24;
 export const CELL_WIDTH = 200;
