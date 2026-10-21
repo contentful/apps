@@ -1,4 +1,5 @@
 import type { Document, Block, Inline, Text } from '@contentful/rich-text-types';
+import { getEntryStatusLabel } from './queryBuilder';
 
 export interface Entry {
   sys: {
@@ -99,7 +100,7 @@ export function flattenEntry(entry: Entry, options: FlattenOptions): FlatRow {
     Created: formatDate(entry.sys.createdAt),
     Updated: formatDate(entry.sys.updatedAt),
     'Last Updated By': updatedByName,
-    Status: entry.sys.publishedVersion ? 'Published' : 'Draft',
+    Status: getEntryStatusLabel(entry),
   };
 
   if (includeContentTypeName) {

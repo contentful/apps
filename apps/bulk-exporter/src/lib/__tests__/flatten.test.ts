@@ -238,6 +238,59 @@ describe('flatten', () => {
       expect(result['Status']).toBe('Draft');
       expect(result['Last Updated By']).toBe('Unknown');
     });
+
+    it('should report Changed for entries edited since their last publish', () => {
+      const changedEntry: Entry = {
+        ...mockEntry,
+        sys: {
+          ...mockEntry.sys,
+          version: 8,
+          publishedVersion: 5,
+        },
+      };
+
+      const result = flattenEntry(changedEntry, {
+        contentType: mockContentType,
+        locales: ['en-US'],
+      });
+
+      expect(result['Status']).toBe('Changed');
+    });
+
+    it('should report Published for entries exactly one version ahead of their publish', () => {
+      const publishedEntry: Entry = {
+        ...mockEntry,
+        sys: {
+          ...mockEntry.sys,
+          version: 6,
+          publishedVersion: 5,
+        },
+      };
+
+      const result = flattenEntry(publishedEntry, {
+        contentType: mockContentType,
+        locales: ['en-US'],
+      });
+
+      expect(result['Status']).toBe('Published');
+    });
+
+    it('should report Archived for archived entries', () => {
+      const archivedEntry: Entry = {
+        ...mockEntry,
+        sys: {
+          ...mockEntry.sys,
+          archivedAt: '2024-02-01T00:00:00Z',
+        },
+      };
+
+      const result = flattenEntry(archivedEntry, {
+        contentType: mockContentType,
+        locales: ['en-US'],
+      });
+
+      expect(result['Status']).toBe('Archived');
+    });
   });
 
   describe('flattenEntries', () => {
