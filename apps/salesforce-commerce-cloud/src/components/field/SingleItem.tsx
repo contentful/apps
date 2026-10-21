@@ -2,7 +2,7 @@ import React from 'react';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { FieldAppSDK } from '@contentful/app-sdk';
 
-import { AppInstanceParameters } from '../../locations/Field';
+import { AppInstanceParameters } from '../../utils/resources';
 import ItemCard from './ItemCard';
 
 interface SingleItemProps {

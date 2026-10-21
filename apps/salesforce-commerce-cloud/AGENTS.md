@@ -1,7 +1,7 @@
 # Agent Guide — salesforce-commerce-cloud
 
 ## What This App Does
-Integrates Salesforce Commerce Cloud (SFCC) with Contentful as a product picker. Lets editors select SFCC products/categories for use in Contentful fields. Published as `contentful-sfcc-vite`.
+Integrates Salesforce Commerce Cloud (SFCC) with Contentful as a product picker. Lets editors select SFCC products, categories, customer groups, promotions, campaigns, coupons and stores for use in Contentful fields. Field types are defined in `src/utils/resources.ts`; the server-side `sfccApi` App Function in `functions/index.ts` proxies all SCAPI Admin calls. Published as `contentful-sfcc-vite`.
 
 ## Archetype
 Standard Vite app.
@@ -37,10 +37,11 @@ src/
 ## Sharp Edges & Invariants
 
 - **SFCC OAuth**: SFCC uses OAuth 2.0 (client credentials grant). Credentials (client ID + secret + site ID) are in installation parameters — never log them.
-- **SFCC API is CORS-restricted**: SFCC's OCAPI may not permit browser-side requests depending on configuration. If direct browser calls fail, a backend proxy (Lambda or App Action) may be needed. Check the current implementation in `src/utils/` to understand whether requests go through a proxy.
+- **All SFCC calls go through the `sfccApi` App Function**: the browser never calls SFCC directly (SCAPI Admin APIs are not CORS-enabled and need the client secret). `src/utils/Sfcc.tsx` invokes the function via an App Action; `functions/index.ts` gets the Account Manager token and calls SCAPI. Add new SFCC calls there, not in the frontend.
 - **Product ID format**: SFCC product IDs follow a specific format per catalog configuration. The stored field value format is defined by the integration — verify in `src/utils/` before changing.
 
 ## Never / Always
 
 - **Never** log SFCC OAuth credentials or tokens.
+- **Always** request only the OAuth scope a resource needs (see `docs/ADRs/0001-per-action-oauth-scopes.md`).
 - **Always** handle SFCC API pagination — product catalogs can be very large.

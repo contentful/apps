@@ -6,12 +6,7 @@ import { useSDK, useAutoResizer } from '@contentful/react-apps-toolkit';
 import SelectItemAction from '../components/field/SelectItemAction';
 import SingleItem from '../components/field/SingleItem';
 import MultipleItems from '../components/field/MultipleItems';
-
-import { KeyValueMap } from 'contentful-management';
-
-export interface AppInstanceParameters extends KeyValueMap {
-  fieldType: 'product' | 'category';
-}
+import ReferenceHealthNote from '../components/field/ReferenceHealthNote';
 
 const Field = () => {
   useAutoResizer();
@@ -30,15 +25,16 @@ const Field = () => {
 
   return (
     <>
-      {value?.length && (
+      {value?.length ? (
         <>
+          <ReferenceHealthNote value={value} />
           {selectMultiple ? (
             <MultipleItems value={value as string[]} />
           ) : (
             <SingleItem value={value as string} />
           )}
         </>
-      )}
+      ) : null}
       {(!value?.length || selectMultiple) && <SelectItemAction fieldValue={value} />}
     </>
   );

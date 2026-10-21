@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import { Heading, Form, TextInput, FormControl } from '@contentful/f36-components';
+import { Heading, Form, TextInput, FormControl, Note, Paragraph } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { Layout } from '@contentful/f36-layout';
 import tokens from '@contentful/f36-tokens';
@@ -174,6 +174,14 @@ const ConfigScreen = () => {
               onInputBlur={onInputBlur}
             />
           ))}
+          <Note title="API client scopes">
+            <Paragraph marginBottom="none">
+              Products and categories require the <code>sfcc.products</code> and{' '}
+              <code>sfcc.catalogs</code> scopes. To use the other field types, also grant{' '}
+              <code>sfcc.customergroups</code> (customer groups), <code>sfcc.promotions</code>{' '}
+              (promotions, campaigns and coupons) and <code>sfcc.stores</code> (stores).
+            </Paragraph>
+          </Note>
         </Form>
       </Layout.Body>
     </Layout>

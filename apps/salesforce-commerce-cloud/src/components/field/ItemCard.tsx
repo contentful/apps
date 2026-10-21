@@ -1,20 +1,18 @@
 import React from 'react';
 import { css } from '@emotion/react';
-import { useQuery } from '@tanstack/react-query';
 
 // Contentful Imports
-import { Card, Flex, Text, IconButton, Box } from '@contentful/f36-components';
+import { Badge, Card, Flex, Text, IconButton } from '@contentful/f36-components';
 import { WarningIcon, ExternalLinkIcon, CloseIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
-import { useSDK, useCMA } from '@contentful/react-apps-toolkit';
-import { FieldAppSDK } from '@contentful/app-sdk';
 
 // Local Imports
-import SfccClient from '../../utils/Sfcc';
+import { FieldType, SfccItem, describeItem, getItemStatus, labelFor } from '../../utils/resources';
+import { useFieldItem } from '../../utils/useFieldItems';
 
 interface ItemProps {
   id: string;
-  type: 'product' | 'category';
+  type: FieldType;
   onRemove: (id: string) => void;
 }
 
@@ -27,18 +25,10 @@ interface ItemCardProps extends ItemProps {
 }
 
 const ItemCard = (props: ItemCardProps) => {
-  const sdk = useSDK<FieldAppSDK>();
-  const cma = useCMA();
-  const client = new SfccClient(cma, sdk.ids);
-
-  const [itemId, catalogId] = props.id.split(':');
-  const { isLoading, data: itemData } = useQuery({
-    queryKey: ['itemInfo', props.id],
-    queryFn:
-      props.type === 'product'
-        ? () => client.fetchProduct(itemId)
-        : () => client.fetchCategory(itemId, catalogId),
-  });
+  const {
+    locale,
+    query: { isLoading, data: itemData },
+  } = useFieldItem(props.id);
 
   return (
     <Card
@@ -53,6 +43,7 @@ const ItemCard = (props: ItemCardProps) => {
               id={props.id}
               type={props.type}
               itemData={itemData}
+              locale={locale}
               onRemove={props.onRemove}
             />
           ) : (
@@ -65,18 +56,16 @@ const ItemCard = (props: ItemCardProps) => {
 };
 
 interface ItemPreviewProps extends ItemProps {
-  itemData: any;
+  itemData: SfccItem;
+  locale?: string;
 }
 
 const ItemPreview = (props: ItemPreviewProps) => {
   const { itemData } = props;
   const useImage = props.type === 'product';
+  const { title, detail } = describeItem(props.type, itemData, props.locale);
+  const statuses = getItemStatus(props.type, itemData);
 
-  const categoryStyle = css`
-    margin-left: ${tokens.spacingXs};
-  `;
-
-  // const externalLink = props.type === 'product' ? 'https://example.com' : 'https://google.com'
   const actionsProps: ItemActionsProps = {
     id: props.id,
     type: props.type,
@@ -97,25 +86,21 @@ const ItemPreview = (props: ItemPreviewProps) => {
       )}
       <Flex flexDirection="column" marginLeft="spacingS">
         <Text as="div" fontWeight="fontWeightDemiBold" fontSize="fontSizeM">
-          {itemData.name?.default || 'Untitled Item'}
+          {title}
         </Text>
         <Text as="div" fontWeight="fontWeightMedium" fontSize="fontSizeS" fontColor="gray600">
           ID: {itemData.id}
-          {props.type === 'category' && (
-            <>
-              <Box
-                as="span"
-                css={css`
-                  margin-left: ${tokens.spacingXs};
-                `}>
-                |
-              </Box>
-              <Box as="span" css={categoryStyle}>
-                Catalog: {itemData.name?.default || itemData.catalogId}
-              </Box>
-            </>
-          )}
+          {detail && ` | ${detail}`}
         </Text>
+        {statuses.length > 0 && (
+          <Flex gap="spacingXs" marginTop="spacing2Xs">
+            {statuses.map((status) => (
+              <Badge key={status.label} variant={status.variant}>
+                {status.label}
+              </Badge>
+            ))}
+          </Flex>
+        )}
         <ItemActions {...actionsProps} />
       </Flex>
     </>
@@ -165,11 +150,12 @@ const ItemActions = (props: ItemActionsProps) => {
 };
 
 const MissingItem = (props: ItemProps) => {
+  const label = labelFor(props.type).singular;
   return (
     <>
       <WarningIcon variant="warning" />
       <Text marginLeft="spacingS">
-        {props.type.charAt(0).toUpperCase() + props.type.slice(1)} not found: {props.id}
+        {label.charAt(0).toUpperCase() + label.slice(1)} not found: {props.id}
       </Text>
       <ItemActions id={props.id} type={props.type} onRemove={props.onRemove} />
     </>
