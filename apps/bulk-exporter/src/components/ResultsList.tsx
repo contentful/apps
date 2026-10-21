@@ -27,6 +27,7 @@ import {
 } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import type { ContentType } from '../lib/flatten';
+import { getEntryDisplayStatus } from '../lib/queryBuilder';
 
 type SortColumn = 'name' | 'contentType' | 'updated' | 'updatedBy' | 'status';
 type SortDirection = 'asc' | 'desc';
@@ -450,19 +451,6 @@ export function ResultsList({
       return id ? userMap[id] || id : 'Unknown';
     };
 
-    const statusOf = (entry: SearchResult): string => {
-      if (entry.sys.archivedAt) return 'archived';
-      const hasPublished = entry.sys.publishedVersion !== undefined;
-      const isChanged =
-        hasPublished &&
-        entry.sys.version !== undefined &&
-        entry.sys.publishedVersion !== undefined &&
-        entry.sys.version > entry.sys.publishedVersion + 1;
-      if (!hasPublished) return 'draft';
-      if (isChanged) return 'changed';
-      return 'published';
-    };
-
     const accessor = (entry: SearchResult): string => {
       switch (sortColumn) {
         case 'name':
@@ -474,7 +462,7 @@ export function ResultsList({
         case 'updatedBy':
           return updatedByOf(entry).toLowerCase();
         case 'status':
-          return statusOf(entry);
+          return getEntryDisplayStatus(entry);
       }
     };
 
@@ -591,19 +579,6 @@ export function ResultsList({
       }
     }
     return entry.sys.id;
-  };
-
-  const getStatus = (entry: SearchResult): string => {
-    if (entry.sys.archivedAt) return 'archived';
-    const hasPublished = entry.sys.publishedVersion !== undefined;
-    const isChanged =
-      hasPublished &&
-      entry.sys.version !== undefined &&
-      entry.sys.publishedVersion !== undefined &&
-      entry.sys.version > entry.sys.publishedVersion + 1;
-    if (!hasPublished) return 'draft';
-    if (isChanged) return 'changed';
-    return 'published';
   };
 
   const getFieldValue = (entry: SearchResult, field: SchemaField, locale: string): string => {
@@ -861,7 +836,7 @@ export function ResultsList({
 
                 <Table.Body>
                   {sortedResults.map((entry) => {
-                    const status = getStatus(entry);
+                    const status = getEntryDisplayStatus(entry);
                     const entryUrl = `https://${webappHostname}/spaces/${spaceId}/environments/${environmentId}/entries/${entry.sys.id}`;
                     return (
                       <Table.Row key={entry.sys.id}>

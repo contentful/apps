@@ -1,5 +1,46 @@
 import { describe, it, expect } from 'vitest';
-import { buildQuery, getStatusPostFilter, type QueryFormData } from '../queryBuilder';
+import {
+  buildQuery,
+  getEntryDisplayStatus,
+  getEntryStatusLabel,
+  getStatusPostFilter,
+  type QueryFormData,
+} from '../queryBuilder';
+
+describe('getEntryDisplayStatus', () => {
+  it('should return published for an entry exactly one version ahead of its last publish', () => {
+    expect(getEntryDisplayStatus({ sys: { version: 5, publishedVersion: 4 } })).toBe('published');
+  });
+
+  it('should return draft for an entry with no publishedVersion', () => {
+    expect(getEntryDisplayStatus({ sys: { version: 1 } })).toBe('draft');
+  });
+
+  it('should return changed for an entry more than one version ahead of its last publish', () => {
+    expect(getEntryDisplayStatus({ sys: { version: 9, publishedVersion: 4 } })).toBe('changed');
+  });
+
+  it('should return archived when archivedAt is set, even for a published entry', () => {
+    expect(
+      getEntryDisplayStatus({
+        sys: { version: 5, publishedVersion: 4, archivedAt: '2024-01-01T00:00:00Z' },
+      })
+    ).toBe('archived');
+  });
+
+  it('should return published for a published entry with no version field', () => {
+    expect(getEntryDisplayStatus({ sys: { publishedVersion: 4 } })).toBe('published');
+  });
+});
+
+describe('getEntryStatusLabel', () => {
+  it('should return the capitalized label for each status', () => {
+    expect(getEntryStatusLabel({ sys: { version: 5, publishedVersion: 4 } })).toBe('Published');
+    expect(getEntryStatusLabel({ sys: { version: 1 } })).toBe('Draft');
+    expect(getEntryStatusLabel({ sys: { version: 9, publishedVersion: 4 } })).toBe('Changed');
+    expect(getEntryStatusLabel({ sys: { archivedAt: '2024-01-01T00:00:00Z' } })).toBe('Archived');
+  });
+});
 
 describe('getStatusPostFilter', () => {
   const published = { sys: { version: 5, publishedVersion: 4 } };
