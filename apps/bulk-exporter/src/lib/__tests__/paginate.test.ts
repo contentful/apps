@@ -1,5 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
-import { paginateEntries, getEntryCount, scanMatchingEntries } from '../paginate';
+import {
+  paginateEntries,
+  getEntryCount,
+  scanMatchingEntries,
+  choosePagingMode,
+  sliceMatchingPage,
+  orderEntriesByIds,
+} from '../paginate';
 
 describe('paginate', () => {
   describe('paginateEntries', () => {
@@ -379,6 +386,58 @@ describe('paginate', () => {
 
       expect(result.exact).toBe(true);
       expect(result.matchingIds).toHaveLength(500);
+    });
+  });
+
+  describe('choosePagingMode', () => {
+    it('uses the matching list when the scan finished', () => {
+      expect(choosePagingMode({ matchingIds: ['a'], exact: true, rawTotal: 1 })).toBe(
+        'matching-list'
+      );
+    });
+
+    it('falls back to skip paging when the cap was hit', () => {
+      expect(choosePagingMode({ matchingIds: ['a'], exact: false, rawTotal: 20000 })).toBe(
+        'skip-paging'
+      );
+    });
+  });
+
+  describe('sliceMatchingPage', () => {
+    const ids = Array.from({ length: 120 }, (_, i) => `e${i}`);
+
+    it('returns a full page of ids from the requested page', () => {
+      const page = sliceMatchingPage(ids, 1, 50);
+      expect(page).toHaveLength(50);
+      expect(page[0]).toBe('e50');
+      expect(page[49]).toBe('e99');
+    });
+
+    it('returns the remainder on the last page', () => {
+      expect(sliceMatchingPage(ids, 2, 50)).toEqual(ids.slice(100));
+    });
+
+    it('returns nothing past the last page', () => {
+      expect(sliceMatchingPage(ids, 3, 50)).toEqual([]);
+    });
+  });
+
+  describe('orderEntriesByIds', () => {
+    it('reorders a fetched batch into the id order', () => {
+      const fetched = [{ sys: { id: 'b' } }, { sys: { id: 'c' } }, { sys: { id: 'a' } }];
+      expect(orderEntriesByIds(fetched, ['a', 'b', 'c']).map((e) => e.sys.id)).toEqual([
+        'a',
+        'b',
+        'c',
+      ]);
+    });
+
+    it('drops ids that were not found in the fetched batch', () => {
+      const fetched = [{ sys: { id: 'b' } }, { sys: { id: 'a' } }];
+      expect(orderEntriesByIds(fetched, ['a', 'missing', 'b']).map((e) => e.sys.id)).toEqual([
+        'a',
+        'b',
+      ]);
     });
   });
 

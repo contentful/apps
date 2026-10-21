@@ -5,7 +5,15 @@ import type { PageAppSDK } from '@contentful/app-sdk';
 import { ExportForm, type ExportFormData } from '../components/ExportForm';
 import { ResultsList } from '../components/ResultsList';
 import { Exporter, type ExportProgress } from '../lib/exporter';
-import { getEntryCount, scanMatchingEntries, SCAN_CAP } from '../lib/paginate';
+import {
+  choosePagingMode,
+  getEntryCount,
+  orderEntriesByIds,
+  scanMatchingEntries,
+  SCAN_CAP,
+  sliceMatchingPage,
+  type ScanResult,
+} from '../lib/paginate';
 import { createThrottler } from '../lib/throttle';
 import { buildQuery, getStatusPostFilter, type EntryStatus } from '../lib/queryBuilder';
 import type { ContentType, Entry } from '../lib/flatten';
@@ -71,6 +79,7 @@ const Page = () => {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [lastSearchQuery, setLastSearchQuery] = useState<Record<string, unknown> | null>(null);
+  const [lastScan, setLastScan] = useState<ScanResult | null>(null);
   const [activePage, setActivePage] = useState(0);
   const ITEMS_PER_PAGE = 50;
   const [lastFormData, setLastFormData] = useState<ExportFormData | null>(null);
@@ -277,6 +286,42 @@ const Page = () => {
     }
   };
 
+  /**
+   * Loads one page of results. When the scan finished (every matching id is known),
+   * the page is built from the matching ids so it holds a full set of matching
+   * entries. Otherwise it fetches a raw CMA page and post-filters it in memory, so
+   * the page can hold fewer than ITEMS_PER_PAGE entries.
+   */
+  const fetchResultsPage = async (
+    query: Record<string, unknown>,
+    postFilter: ReturnType<typeof getStatusPostFilter>,
+    scan: ScanResult | null,
+    page: number
+  ): Promise<{ items: SearchResult[]; total: number }> => {
+    if (scan && choosePagingMode(scan) === 'matching-list') {
+      const pageIds = sliceMatchingPage(scan.matchingIds, page, ITEMS_PER_PAGE);
+      if (pageIds.length === 0) return { items: [], total: scan.matchingIds.length };
+
+      const response = await sdk.cma.entry.getMany({
+        query: { ...query, 'sys.id[in]': pageIds.join(','), limit: pageIds.length, skip: 0 },
+      });
+      return {
+        items: orderEntriesByIds(response.items as unknown as SearchResult[], pageIds),
+        total: scan.matchingIds.length,
+      };
+    }
+
+    const response = await sdk.cma.entry.getMany({
+      query: { ...query, limit: ITEMS_PER_PAGE, skip: page * ITEMS_PER_PAGE },
+    });
+    const items = postFilter
+      ? (response.items as unknown as SearchResult[]).filter(
+          postFilter as (e: SearchResult) => boolean
+        )
+      : (response.items as unknown as SearchResult[]);
+    return { items, total: response.total };
+  };
+
   const handleSearch = async (data: ExportFormData) => {
     try {
       setIsSearching(true);
@@ -314,31 +359,23 @@ const Page = () => {
       // will actually contain; a status with no post-filter needs no scan.
       const { content_type, ...filters } = query;
       const throttler = createThrottler({ requestsPerSecond: 8, maxConcurrent: 4, maxRetries: 3 });
-      const [response, scan] = await Promise.all([
-        sdk.cma.entry.getMany({
-          query: { ...query, limit: ITEMS_PER_PAGE, skip: 0 },
-        }),
-        postFilter
-          ? scanMatchingEntries(
-              sdk.cma,
-              { contentType: content_type as string | undefined, filters },
-              postFilter,
-              <T,>(fn: () => Promise<T>) => throttler.execute(fn),
-              SCAN_CAP
-            )
-          : Promise.resolve(null),
-      ]);
-
-      const items = postFilter
-        ? (response.items as unknown as SearchResult[]).filter(
-            postFilter as (e: SearchResult) => boolean
+      const scan = postFilter
+        ? await scanMatchingEntries(
+            sdk.cma,
+            { contentType: content_type as string | undefined, filters },
+            postFilter,
+            <T,>(fn: () => Promise<T>) => throttler.execute(fn),
+            SCAN_CAP
           )
-        : (response.items as unknown as SearchResult[]);
+        : null;
 
+      const { items, total } = await fetchResultsPage(query, postFilter, scan, 0);
+
+      setLastScan(scan);
       setSearchResults(items);
       mergeConceptsFromResults(items);
       setCountIsApproximate(scan !== null && !scan.exact);
-      setEstimatedCount(scan ? (scan.exact ? scan.matchingIds.length : scan.rawTotal) : response.total);
+      setEstimatedCount(scan ? (scan.exact ? scan.matchingIds.length : scan.rawTotal) : total);
 
       setTimeout(() => {
         const resultsElement = document.querySelector('[data-results-list]');
@@ -432,16 +469,8 @@ const Page = () => {
       setSelectedEntryIds([]);
       setSelectAllMatching(false);
 
-      const response = await sdk.cma.entry.getMany({
-        query: { ...lastSearchQuery, limit: ITEMS_PER_PAGE, skip: page * ITEMS_PER_PAGE },
-      });
-
       const postFilter = getStatusPostFilter(lastFormData?.status as EntryStatus);
-      const items = postFilter
-        ? (response.items as unknown as SearchResult[]).filter(
-            postFilter as (e: SearchResult) => boolean
-          )
-        : (response.items as unknown as SearchResult[]);
+      const { items } = await fetchResultsPage(lastSearchQuery, postFilter, lastScan, page);
 
       setSearchResults(items);
       mergeConceptsFromResults(items);

@@ -237,6 +237,38 @@ export async function scanMatchingEntries(
   return { matchingIds, exact: true, rawTotal };
 }
 
+/**
+ * 'matching-list' builds each page from the scan's complete list of matching ids, so
+ * every page is full. 'skip-paging' is the plain skip/limit fetch with the post-filter
+ * applied afterward, used when the scan hit its cap and the id list is incomplete.
+ */
+export function choosePagingMode(scan: ScanResult): 'matching-list' | 'skip-paging' {
+  return scan.exact ? 'matching-list' : 'skip-paging';
+}
+
+export function sliceMatchingPage(
+  matchingIds: string[],
+  page: number,
+  itemsPerPage: number
+): string[] {
+  return matchingIds.slice(page * itemsPerPage, (page + 1) * itemsPerPage);
+}
+
+/**
+ * The CMA's `sys.id[in]` filter does not return entries in the order of the id list,
+ * so put a fetched batch back into `orderedIds` order, dropping ids it did not return.
+ */
+export function orderEntriesByIds<T extends { sys: { id: string } }>(
+  entries: T[],
+  orderedIds: string[]
+): T[] {
+  const byId = new Map(entries.map((entry) => [entry.sys.id, entry]));
+  return orderedIds.flatMap((id) => {
+    const entry = byId.get(id);
+    return entry ? [entry] : [];
+  });
+}
+
 export async function getEntryCount(
   cma: CMAClient,
   contentType: string | undefined,
