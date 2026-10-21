@@ -125,6 +125,58 @@ describe('getStatusPostFilter', () => {
   });
 });
 
+describe('mixed published and changed fixture', () => {
+  // version 5 / publishedVersion 4 is published; version 9 / publishedVersion 4 has an
+  // unpublished edit; version 1 with no publishedVersion is a draft.
+  const mixed = [
+    { id: 'p1', sys: { version: 5, publishedVersion: 4 } },
+    { id: 'c1', sys: { version: 9, publishedVersion: 4 } },
+    { id: 'p2', sys: { version: 2, publishedVersion: 1 } },
+    { id: 'c2', sys: { version: 6, publishedVersion: 4 } },
+    { id: 'd1', sys: { version: 1 } },
+  ];
+
+  it('should have the Published post-filter accept exactly the entries displayed as published', () => {
+    const filter = getStatusPostFilter('published')!;
+    const accepted = mixed.filter(filter).map((e) => e.id);
+    const displayedPublished = mixed
+      .filter((e) => getEntryDisplayStatus(e) === 'published')
+      .map((e) => e.id);
+
+    expect(accepted).toEqual(['p1', 'p2']);
+    expect(accepted).toEqual(displayedPublished);
+  });
+
+  it('should have the Changed post-filter accept exactly the entries displayed as changed', () => {
+    const filter = getStatusPostFilter('changed')!;
+    const accepted = mixed.filter(filter).map((e) => e.id);
+    const displayedChanged = mixed
+      .filter((e) => getEntryDisplayStatus(e) === 'changed')
+      .map((e) => e.id);
+
+    expect(accepted).toEqual(['c1', 'c2']);
+    expect(accepted).toEqual(displayedChanged);
+  });
+
+  it('should label every entry with an unpublished edit as Changed', () => {
+    expect(mixed.map((e) => getEntryStatusLabel(e))).toEqual([
+      'Published',
+      'Changed',
+      'Published',
+      'Changed',
+      'Draft',
+    ]);
+  });
+
+  it('should send identical server-side params for Published and Changed searches', () => {
+    // The CMA cannot tell the two apart, which is why the client-side post-filter exists.
+    const published = buildQuery({ contentTypeId: 'caseStudy', status: 'published' });
+    const changed = buildQuery({ contentTypeId: 'caseStudy', status: 'changed' });
+
+    expect(published).toEqual(changed);
+  });
+});
+
 describe('queryBuilder', () => {
   describe('basic content type', () => {
     it('should include content_type', () => {

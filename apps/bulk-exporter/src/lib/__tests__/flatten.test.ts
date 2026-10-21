@@ -6,6 +6,7 @@ import {
   type Entry,
   type ContentType,
 } from '../flatten';
+import { getStatusPostFilter } from '../queryBuilder';
 
 describe('flatten', () => {
   const mockContentType: ContentType = {
@@ -290,6 +291,44 @@ describe('flatten', () => {
       });
 
       expect(result['Status']).toBe('Archived');
+    });
+  });
+
+  describe('flattenEntries with a mixed published and changed fixture', () => {
+    const makeEntry = (id: string, version: number, publishedVersion?: number): Entry => ({
+      ...mockEntry,
+      sys: { ...mockEntry.sys, id, version, publishedVersion },
+    });
+
+    const mixed = [
+      makeEntry('p1', 5, 4),
+      makeEntry('c1', 9, 4),
+      makeEntry('p2', 2, 1),
+      makeEntry('c2', 6, 4),
+      makeEntry('d1', 1),
+    ];
+
+    it('should write Changed in the Status column only for entries with an unpublished edit', () => {
+      const rows = flattenEntries(mixed, { contentType: mockContentType, locales: ['en-US'] });
+
+      expect(rows.map((r) => [r['Entry ID'], r['Status']])).toEqual([
+        ['p1', 'Published'],
+        ['c1', 'Changed'],
+        ['p2', 'Published'],
+        ['c2', 'Changed'],
+        ['d1', 'Draft'],
+      ]);
+    });
+
+    it('should write only Published in the Status column once the Published post-filter is applied', () => {
+      const publishedOnly = mixed.filter(getStatusPostFilter('published')!);
+      const rows = flattenEntries(publishedOnly, {
+        contentType: mockContentType,
+        locales: ['en-US'],
+      });
+
+      expect(rows.map((r) => r['Entry ID'])).toEqual(['p1', 'p2']);
+      expect(rows.every((r) => r['Status'] === 'Published')).toBe(true);
     });
   });
 
