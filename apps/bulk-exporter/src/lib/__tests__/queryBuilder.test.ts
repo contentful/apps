@@ -1,5 +1,88 @@
 import { describe, it, expect } from 'vitest';
-import { buildQuery, type QueryFormData } from '../queryBuilder';
+import { buildQuery, getStatusPostFilter, type QueryFormData } from '../queryBuilder';
+
+describe('getStatusPostFilter', () => {
+  const published = { sys: { version: 5, publishedVersion: 4 } };
+  const changed = { sys: { version: 9, publishedVersion: 4 } };
+  const draft = { sys: { version: 1 } };
+  const equalVersions = { sys: { version: 4, publishedVersion: 4 } };
+
+  describe('published', () => {
+    const filter = getStatusPostFilter('published')!;
+
+    it('should return a predicate', () => {
+      expect(filter).toBeTypeOf('function');
+    });
+
+    it('should accept an entry exactly one version ahead of its last publish', () => {
+      expect(filter(published)).toBe(true);
+    });
+
+    it('should reject an entry more than one version ahead of its last publish', () => {
+      expect(filter(changed)).toBe(false);
+    });
+
+    it('should reject an entry two versions ahead (boundary)', () => {
+      expect(filter({ sys: { version: 6, publishedVersion: 4 } })).toBe(false);
+    });
+
+    it('should reject a draft entry with no publishedVersion', () => {
+      expect(filter(draft)).toBe(false);
+    });
+
+    it('should reject an entry whose version equals its publishedVersion', () => {
+      expect(filter(equalVersions)).toBe(false);
+    });
+
+    it('should reject an entry with no version', () => {
+      expect(filter({ sys: { publishedVersion: 4 } })).toBe(false);
+    });
+  });
+
+  describe('changed', () => {
+    const filter = getStatusPostFilter('changed')!;
+
+    it('should return a predicate', () => {
+      expect(filter).toBeTypeOf('function');
+    });
+
+    it('should accept an entry more than one version ahead of its last publish', () => {
+      expect(filter(changed)).toBe(true);
+    });
+
+    it('should accept an entry two versions ahead (boundary)', () => {
+      expect(filter({ sys: { version: 6, publishedVersion: 4 } })).toBe(true);
+    });
+
+    it('should reject an entry exactly one version ahead of its last publish', () => {
+      expect(filter(published)).toBe(false);
+    });
+
+    it('should reject a draft entry with no publishedVersion', () => {
+      expect(filter(draft)).toBe(false);
+    });
+
+    it('should reject an entry with no version', () => {
+      expect(filter({ sys: { publishedVersion: 4 } })).toBe(false);
+    });
+  });
+
+  describe('published and changed are mutually exclusive', () => {
+    it('should never accept the same entry in both filters', () => {
+      const publishedFilter = getStatusPostFilter('published')!;
+      const changedFilter = getStatusPostFilter('changed')!;
+      for (const entry of [published, changed, draft, equalVersions]) {
+        expect(publishedFilter(entry) && changedFilter(entry)).toBe(false);
+      }
+    });
+  });
+
+  describe('statuses handled fully by query params', () => {
+    it.each(['any', 'draft', 'archived'] as const)('should return null for %s', (status) => {
+      expect(getStatusPostFilter(status)).toBeNull();
+    });
+  });
+});
 
 describe('queryBuilder', () => {
   describe('basic content type', () => {
