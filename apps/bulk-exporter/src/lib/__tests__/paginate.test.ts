@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { paginateEntries, getEntryCount } from '../paginate';
+import { paginateEntries, getEntryCount, scanMatchingEntries } from '../paginate';
 
 describe('paginate', () => {
   describe('paginateEntries', () => {
@@ -285,6 +285,100 @@ describe('paginate', () => {
 
       await expect(run()).rejects.toBe(otherError);
       expect(getMany).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('scanMatchingEntries', () => {
+    const isPublished = (entry: { sys: { version?: number; publishedVersion?: number } }) =>
+      entry.sys.publishedVersion !== undefined &&
+      entry.sys.version === entry.sys.publishedVersion + 1;
+
+    // Entries alternate published (version 2, publishedVersion 1) and changed (version 5).
+    const makeEntries = (count: number, offset: number) =>
+      Array.from({ length: count }, (_, i) => {
+        const n = offset + i;
+        return {
+          sys: { id: `e${n}`, version: n % 2 === 0 ? 2 : 5, publishedVersion: 1 },
+        };
+      });
+
+    it('returns only post-filter passes and exact true when the scan finishes', async () => {
+      const getMany = vi.fn().mockImplementation(({ query }) => {
+        if (query.limit === 0) return Promise.resolve({ items: [], total: 10 });
+        return Promise.resolve({ items: makeEntries(10, 0), total: 10 });
+      });
+      const throttledFetch = vi.fn((fn) => fn());
+
+      const result = await scanMatchingEntries(
+        { entry: { getMany } } as any,
+        { contentType: 'test', filters: { 'sys.archivedAt[exists]': false } },
+        isPublished,
+        throttledFetch,
+        9000
+      );
+
+      expect(result.exact).toBe(true);
+      expect(result.rawTotal).toBe(10);
+      expect(result.matchingIds).toEqual(['e0', 'e2', 'e4', 'e6', 'e8']);
+
+      const scanCall = getMany.mock.calls.find((call) => call[0].query.limit !== 0);
+      expect(scanCall?.[0].query.select).toBe(
+        'sys.id,sys.version,sys.publishedVersion,sys.archivedAt'
+      );
+      expect(scanCall?.[0].query['sys.archivedAt[exists]']).toBe(false);
+    });
+
+    it('returns exact true with no matches without scanning when the total is zero', async () => {
+      const getMany = vi.fn().mockResolvedValue({ items: [], total: 0 });
+
+      const result = await scanMatchingEntries(
+        { entry: { getMany } } as any,
+        { contentType: 'test' },
+        isPublished,
+        vi.fn((fn) => fn()),
+        9000
+      );
+
+      expect(result).toEqual({ matchingIds: [], exact: true, rawTotal: 0 });
+      expect(getMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns exact false and the raw total when the cap is hit before the scan ends', async () => {
+      const getMany = vi.fn().mockImplementation(({ query }) => {
+        if (query.limit === 0) return Promise.resolve({ items: [], total: 5000 });
+        return Promise.resolve({ items: makeEntries(query.limit, query.skip), total: 5000 });
+      });
+
+      const result = await scanMatchingEntries(
+        { entry: { getMany } } as any,
+        { contentType: 'test' },
+        isPublished,
+        vi.fn((fn) => fn()),
+        2000
+      );
+
+      expect(result.exact).toBe(false);
+      expect(result.rawTotal).toBe(5000);
+      // 1 count call + 2 scan pages of 1000, then it stops.
+      expect(getMany).toHaveBeenCalledTimes(3);
+    });
+
+    it('stays exact when the cap equals the number of entries scanned to the end', async () => {
+      const getMany = vi.fn().mockImplementation(({ query }) => {
+        if (query.limit === 0) return Promise.resolve({ items: [], total: 1000 });
+        return Promise.resolve({ items: makeEntries(1000, 0), total: 1000 });
+      });
+
+      const result = await scanMatchingEntries(
+        { entry: { getMany } } as any,
+        { contentType: 'test' },
+        isPublished,
+        vi.fn((fn) => fn()),
+        1000
+      );
+
+      expect(result.exact).toBe(true);
+      expect(result.matchingIds).toHaveLength(500);
     });
   });
 

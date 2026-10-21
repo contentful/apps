@@ -30,6 +30,46 @@ const mockResults = [
   },
 ];
 
+describe('ResultsList result count', () => {
+  it('shows the exact count in the header and select-all banner', async () => {
+    render(
+      <ResultsList
+        results={mockResults}
+        loading={false}
+        totalCount={1234}
+        itemsPerPage={1}
+        selectedIds={['entry1']}
+        onSelectionChange={vi.fn()}
+        onSelectAllMatchingChange={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText('1,234 results')).toBeInTheDocument();
+    expect(screen.getByText(/Select all 1,234 entries matching this search/)).toBeInTheDocument();
+    expect(screen.queryByText(/Approximate/)).not.toBeInTheDocument();
+  });
+
+  it('labels the header and select-all banner Approximate when the scan cap was hit', async () => {
+    render(
+      <ResultsList
+        results={mockResults}
+        loading={false}
+        totalCount={12000}
+        isCountApproximate
+        itemsPerPage={1}
+        selectedIds={['entry1']}
+        onSelectionChange={vi.fn()}
+        onSelectAllMatchingChange={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText('Approximate 12,000 results')).toBeInTheDocument();
+    expect(
+      screen.getByText(/Select all Approximate 12,000 entries matching this search/)
+    ).toBeInTheDocument();
+  });
+});
+
 describe('ResultsList field selection', () => {
   it('renders one checked checkbox per field column when excludedFieldIds is empty', () => {
     render(

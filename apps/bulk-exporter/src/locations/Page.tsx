@@ -5,7 +5,8 @@ import type { PageAppSDK } from '@contentful/app-sdk';
 import { ExportForm, type ExportFormData } from '../components/ExportForm';
 import { ResultsList } from '../components/ResultsList';
 import { Exporter, type ExportProgress } from '../lib/exporter';
-import { getEntryCount } from '../lib/paginate';
+import { getEntryCount, scanMatchingEntries, SCAN_CAP } from '../lib/paginate';
+import { createThrottler } from '../lib/throttle';
 import { buildQuery, getStatusPostFilter, type EntryStatus } from '../lib/queryBuilder';
 import type { ContentType, Entry } from '../lib/flatten';
 
@@ -64,6 +65,7 @@ const Page = () => {
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [loading, setLoading] = useState(true);
   const [estimatedCount, setEstimatedCount] = useState<number | null>(null);
+  const [countIsApproximate, setCountIsApproximate] = useState(false);
   const [progress, setProgress] = useState<ExportProgress | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
@@ -305,11 +307,28 @@ const Page = () => {
 
       setLastSearchQuery(query);
 
-      const response = await sdk.cma.entry.getMany({
-        query: { ...query, limit: ITEMS_PER_PAGE, skip: 0 },
-      });
-
       const postFilter = getStatusPostFilter(data.status as EntryStatus);
+
+      // The CMA cannot tell Published from Changed, so its total over-counts a
+      // post-filtered search. Scan the matching entries to count what the export
+      // will actually contain; a status with no post-filter needs no scan.
+      const { content_type, ...filters } = query;
+      const throttler = createThrottler({ requestsPerSecond: 8, maxConcurrent: 4, maxRetries: 3 });
+      const [response, scan] = await Promise.all([
+        sdk.cma.entry.getMany({
+          query: { ...query, limit: ITEMS_PER_PAGE, skip: 0 },
+        }),
+        postFilter
+          ? scanMatchingEntries(
+              sdk.cma,
+              { contentType: content_type as string | undefined, filters },
+              postFilter,
+              <T,>(fn: () => Promise<T>) => throttler.execute(fn),
+              SCAN_CAP
+            )
+          : Promise.resolve(null),
+      ]);
+
       const items = postFilter
         ? (response.items as unknown as SearchResult[]).filter(
             postFilter as (e: SearchResult) => boolean
@@ -318,7 +337,8 @@ const Page = () => {
 
       setSearchResults(items);
       mergeConceptsFromResults(items);
-      setEstimatedCount(response.items.length >= response.total ? items.length : response.total);
+      setCountIsApproximate(scan !== null && !scan.exact);
+      setEstimatedCount(scan ? (scan.exact ? scan.matchingIds.length : scan.rawTotal) : response.total);
 
       setTimeout(() => {
         const resultsElement = document.querySelector('[data-results-list]');
@@ -598,6 +618,7 @@ const Page = () => {
           activePage={activePage}
           itemsPerPage={ITEMS_PER_PAGE}
           totalCount={estimatedCount ?? undefined}
+          isCountApproximate={countIsApproximate}
           selectedIds={selectedEntryIds}
           onSelectionChange={setSelectedEntryIds}
           onExportSelected={handleExportSelected}

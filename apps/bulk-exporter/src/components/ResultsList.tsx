@@ -143,6 +143,8 @@ export interface ResultsListProps {
   activePage?: number;
   itemsPerPage?: number;
   totalCount?: number;
+  /** True when totalCount is the CMA's unfiltered total because the search exceeded the scan cap */
+  isCountApproximate?: boolean;
   selectedIds?: string[];
   onSelectionChange?: (selectedIds: string[]) => void;
   onExportSelected?: (
@@ -358,6 +360,7 @@ export function ResultsList({
   activePage = 0,
   itemsPerPage = 50,
   totalCount,
+  isCountApproximate = false,
   selectedIds = [],
   onSelectionChange,
   onExportSelected,
@@ -618,7 +621,9 @@ export function ResultsList({
             <Flex gap="spacingS" alignItems="center">
               <Text fontSize="fontSizeS" fontColor="gray600">
                 {totalCount !== undefined
-                  ? `${totalCount.toLocaleString()} results`
+                  ? `${
+                      isCountApproximate ? 'Approximate ' : ''
+                    }${totalCount.toLocaleString()} results`
                   : `${results.length} results`}
               </Text>
               {sortColumn && (
@@ -650,7 +655,8 @@ export function ResultsList({
               <Text fontSize="fontSizeM" fontColor="gray700">
                 {selectAllMatching ? (
                   <>
-                    All {(totalCount ?? selectedIds.length).toLocaleString()}{' '}
+                    All {isCountApproximate ? 'Approximate ' : ''}
+                    {(totalCount ?? selectedIds.length).toLocaleString()}{' '}
                     {(totalCount ?? selectedIds.length) === 1 ? 'entry' : 'entries'} matching this
                     search are selected.{' '}
                     <TextLink as="button" onClick={handleClearSelection}>
@@ -662,7 +668,8 @@ export function ResultsList({
                     All {allCurrentIds.length} {allCurrentIds.length === 1 ? 'entry' : 'entries'} on
                     this page are selected.{' '}
                     <TextLink as="button" onClick={() => onSelectAllMatchingChange?.(true)}>
-                      Select all {totalCount?.toLocaleString()} entries matching this search
+                      Select all {isCountApproximate ? 'Approximate ' : ''}
+                      {totalCount?.toLocaleString()} entries matching this search
                     </TextLink>
                   </>
                 ) : (

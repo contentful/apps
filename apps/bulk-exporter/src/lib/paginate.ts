@@ -18,6 +18,12 @@ const MIN_PAGE_SIZE = 1;
 const MAX_SKIP = 9000;
 
 /**
+ * Most entries a search scans to build an exact matching count. Kept at MAX_SKIP so
+ * the scan stays inside the plain skip/limit loop and never reaches the cursor path.
+ */
+export const SCAN_CAP = MAX_SKIP;
+
+/**
  * Fetches a page, halving `limit` and retrying if the CMA rejects it as too
  * large. Returns the limit that actually worked so the caller can carry it
  * forward as the starting point for the next page instead of re-discovering it
@@ -170,6 +176,65 @@ async function* paginateByCursor(
     };
     fetched += result.items.length;
   }
+}
+
+export interface ScanResult {
+  /** sys.id of entries passing the post-filter, in scan order */
+  matchingIds: string[];
+  /** false if the cap was hit before the scan finished; matchingIds is then incomplete */
+  exact: boolean;
+  /** The CMA's own unfiltered total, used for the "Approximate" count */
+  rawTotal: number;
+}
+
+interface ScannedEntry {
+  sys: { id: string; version?: number; publishedVersion?: number; archivedAt?: string };
+}
+
+const SCAN_SELECT = 'sys.id,sys.version,sys.publishedVersion,sys.archivedAt';
+
+/**
+ * Walks the search's entries (ids and status fields only) and collects the ids that
+ * pass `postFilter`, so the displayed count can match what the export will contain.
+ * Stops once `cap` entries have been scanned without reaching the end, returning
+ * `exact: false` and the CMA's raw total instead of an incomplete match list.
+ */
+export async function scanMatchingEntries(
+  cma: CMAClient,
+  options: PaginateOptions,
+  postFilter: (entry: ScannedEntry) => boolean,
+  throttledFetch: <T>(fn: () => Promise<T>) => Promise<T>,
+  cap: number
+): Promise<ScanResult> {
+  const rawTotal = await throttledFetch(() =>
+    getEntryCount(cma, options.contentType, options.filters)
+  );
+
+  const matchingIds: string[] = [];
+  if (rawTotal === 0) {
+    return { matchingIds, exact: true, rawTotal };
+  }
+
+  const scanOptions: PaginateOptions = {
+    ...options,
+    filters: { ...options.filters, select: SCAN_SELECT },
+  };
+
+  let scanned = 0;
+  for await (const batch of paginateEntries(cma, scanOptions, throttledFetch)) {
+    for (const entry of batch as ScannedEntry[]) {
+      if (postFilter(entry)) {
+        matchingIds.push(entry.sys.id);
+      }
+    }
+    scanned += batch.length;
+
+    if (scanned >= cap && scanned < rawTotal) {
+      return { matchingIds, exact: false, rawTotal };
+    }
+  }
+
+  return { matchingIds, exact: true, rawTotal };
 }
 
 export async function getEntryCount(
