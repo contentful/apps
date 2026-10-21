@@ -88,6 +88,8 @@ export default class App extends React.Component {
       accessToken: token,
       expires,
     };
+    this.popup = null;
+    this.oauthConsumed = false;
 
     window.addEventListener('storage', (e) => {
       if (e.key === OPTI_CREDENTIALS) {
@@ -101,28 +103,45 @@ export default class App extends React.Component {
         }
       }
     });
-
-    this.listener = window.addEventListener(
-      'message',
-      (event) => {
-        const { data, origin } = event;
-        const { token, expires } = data;
-
-        if (origin !== new URL(redirectUrl).origin || !token) {
-          return;
-        }
-
-        const credential = {
-          [TOKEN_KEY]: token,
-          [TOKEN_EXPIRATION]: expires,
-        };
-
-        window.localStorage.setItem(OPTI_CREDENTIALS, JSON.stringify(credential));
-        this.setState({ client: this.makeClient(token), accessToken: token, expires });
-      },
-      false
-    );
   }
+
+  componentWillUnmount() {
+    this.clearOAuthAttempt();
+  }
+
+  clearOAuthAttempt = () => {
+    if (this.popup) {
+      window.removeEventListener('message', this.handleOAuthMessage, false);
+      this.popup = null;
+    }
+  };
+
+  handleOAuthMessage = (event) => {
+    if (
+      this.oauthConsumed ||
+      !this.popup ||
+      event.source !== this.popup ||
+      event.origin !== new URL(redirectUrl).origin
+    ) {
+      return;
+    }
+
+    const { token, expires } = event.data || {};
+    if (!token) {
+      return;
+    }
+
+    this.oauthConsumed = true;
+    this.clearOAuthAttempt();
+
+    const credential = {
+      [TOKEN_KEY]: token,
+      [TOKEN_EXPIRATION]: expires,
+    };
+
+    window.localStorage.setItem(OPTI_CREDENTIALS, JSON.stringify(credential));
+    this.setState({ client: this.makeClient(token), accessToken: token, expires });
+  };
 
   makeClient = (token) => {
     return new OptimizelyClient({
@@ -136,7 +155,12 @@ export default class App extends React.Component {
 
   openAuth = () => {
     const WINDOW_OPTS = 'left=150,top=150,width=700,height=700';
-    window.open(url, '', WINDOW_OPTS);
+    this.clearOAuthAttempt();
+    this.oauthConsumed = false;
+    this.popup = window.open(url, '', WINDOW_OPTS);
+    if (this.popup) {
+      window.addEventListener('message', this.handleOAuthMessage, false);
+    }
   };
 
   render() {

@@ -1,12 +1,11 @@
 /* global global */
 import React from 'react';
-import { cleanup, render, configure } from '@testing-library/react';
+import { act, cleanup, render, configure } from '@testing-library/react';
 
 import App from '../src';
 import { expect, vi } from 'vitest';
 global.window.close = () => {};
 global.window.encodeURIComponent = (x) => x;
-global.window.addEventListener = vi.fn();
 
 const LOCATION_ENTRY_SIDEBAR = 'entry-sidebar';
 const LOCATION_ENTRY_EDITOR = 'entry-editor';
@@ -160,9 +159,35 @@ function mockSdk() {
 
 configure({ testIdAttribute: 'data-test-id' });
 
+const expectedOrigin = new URL(
+  import.meta.env.VITE_APP_OPTIMIZELY_OAUTH_REDIRECT_URL || window.location.href
+).origin;
+
+function dispatchOAuthMessage(source, data = { token: 'token-1', expires: 123 }) {
+  act(() => {
+    window.dispatchEvent(new MessageEvent('message', { source, origin: expectedOrigin, data }));
+  });
+}
+
+function messageHandlers(spy) {
+  return spy.mock.calls.filter(([type]) => type === 'message').map(([, handler]) => handler);
+}
+
+function renderAuthApp() {
+  LOCATION = LOCATION_ENTRY_SIDEBAR;
+  const ref = React.createRef();
+  const view = render(<App ref={ref} sdk={mockSdk()} />);
+  return { ...view, app: ref.current };
+}
+
 describe('Optimizely App', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
   afterEach(() => {
     cleanup();
+    vi.restoreAllMocks();
 
     LOCATION = '';
     PROJECT_ID = '';
@@ -200,15 +225,125 @@ describe('Optimizely App', () => {
     PROJECT_ID = '123';
     VALID_FIELDS = true;
     const sdk = mockSdk();
-    Storage.prototype.setItem = vi.fn();
-    Storage.prototype.getItem = () => {
+    vi.spyOn(window.localStorage, 'getItem').mockImplementation(() => {
       return JSON.stringify({
         optToken: 'token',
         optExpire: Date.now() + 24 * 3600 * 1000,
       });
-    };
+    });
 
     const { getByTestId } = render(<App sdk={sdk} />);
     expect(getByTestId('editor-page')).toBeDefined();
+  });
+
+  it('does not accept OAuth messages without an open popup, including a blocked attempt', () => {
+    const addListener = vi.spyOn(window, 'addEventListener');
+    const setItem = vi.spyOn(window.localStorage, 'setItem');
+    const popup = {};
+    const open = vi.spyOn(window, 'open').mockReturnValue(null);
+    const { app } = renderAuthApp();
+
+    expect(messageHandlers(addListener)).toHaveLength(0);
+    dispatchOAuthMessage(popup);
+    act(() => app.openAuth());
+    expect(open).toHaveBeenCalledOnce();
+    expect(messageHandlers(addListener)).toHaveLength(0);
+    dispatchOAuthMessage(popup);
+
+    expect(setItem).not.toHaveBeenCalled();
+    expect(app.state.accessToken).toBeNull();
+    expect(app.state.client).toBeNull();
+  });
+
+  it('accepts only the active popup and expected origin, then consumes its token once', () => {
+    const addListener = vi.spyOn(window, 'addEventListener');
+    const removeListener = vi.spyOn(window, 'removeEventListener');
+    const setItem = vi.spyOn(window.localStorage, 'setItem');
+    const popup = {};
+    vi.spyOn(window, 'open').mockReturnValue(popup);
+    const { app } = renderAuthApp();
+
+    act(() => app.openAuth());
+    const [handler] = messageHandlers(addListener);
+    expect(handler).toEqual(expect.any(Function));
+
+    dispatchOAuthMessage({});
+    act(() => {
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          source: popup,
+          origin: 'https://wrong.example',
+          data: { token: 'wrong-origin', expires: 123 },
+        })
+      );
+    });
+    expect(setItem).not.toHaveBeenCalled();
+    expect(app.state.client).toBeNull();
+    expect(messageHandlers(removeListener)).toHaveLength(0);
+
+    dispatchOAuthMessage(popup);
+    const client = app.state.client;
+    dispatchOAuthMessage(popup, { token: 'duplicate', expires: 456 });
+
+    expect(setItem).toHaveBeenCalledOnce();
+    expect(setItem).toHaveBeenCalledWith(
+      'optCred',
+      JSON.stringify({ optToken: 'token-1', optExpire: 123 })
+    );
+    expect(app.state.accessToken).toBe('token-1');
+    expect(app.state.expires).toBe(123);
+    expect(client.accessToken).toBe('token-1');
+    expect(app.state.client).toBe(client);
+    expect(messageHandlers(removeListener)).toEqual([handler]);
+  });
+
+  it('replaces the old popup attempt and lets a later attempt complete independently', () => {
+    const addListener = vi.spyOn(window, 'addEventListener');
+    const removeListener = vi.spyOn(window, 'removeEventListener');
+    const setItem = vi.spyOn(window.localStorage, 'setItem');
+    const oldPopup = {};
+    const currentPopup = {};
+    const laterPopup = {};
+    vi.spyOn(window, 'open')
+      .mockReturnValueOnce(oldPopup)
+      .mockReturnValueOnce(currentPopup)
+      .mockReturnValueOnce(laterPopup);
+    const { app } = renderAuthApp();
+    act(() => app.openAuth());
+    const [oldHandler] = messageHandlers(addListener);
+    act(() => app.openAuth());
+    expect(messageHandlers(addListener)).toHaveLength(2);
+    expect(messageHandlers(removeListener)).toEqual([oldHandler]);
+    dispatchOAuthMessage(oldPopup);
+    expect(setItem).not.toHaveBeenCalled();
+
+    dispatchOAuthMessage(currentPopup);
+    expect(setItem).toHaveBeenCalledTimes(1);
+    expect(app.state.accessToken).toBe('token-1');
+
+    act(() => app.openAuth());
+    dispatchOAuthMessage(currentPopup, { token: 'stale', expires: 456 });
+    expect(setItem).toHaveBeenCalledTimes(1);
+    dispatchOAuthMessage(laterPopup, { token: 'token-2', expires: 789 });
+    expect(setItem).toHaveBeenCalledTimes(2);
+    expect(app.state.accessToken).toBe('token-2');
+    expect(app.state.client.accessToken).toBe('token-2');
+  });
+
+  it('removes the active OAuth listener on unmount', () => {
+    const addListener = vi.spyOn(window, 'addEventListener');
+    const removeListener = vi.spyOn(window, 'removeEventListener');
+    const setItem = vi.spyOn(window.localStorage, 'setItem');
+    const popup = {};
+    vi.spyOn(window, 'open').mockReturnValue(popup);
+    const { app, unmount } = renderAuthApp();
+
+    act(() => app.openAuth());
+    const [handler] = messageHandlers(addListener);
+    unmount();
+    dispatchOAuthMessage(popup);
+
+    expect(messageHandlers(removeListener)).toEqual([handler]);
+    expect(setItem).not.toHaveBeenCalled();
   });
 });
