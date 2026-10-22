@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect } from 'react';
+import { useCallback, useContext, useEffect, useRef } from 'react';
 import { ConnectedWorkspace, useWorkspaceStore, WorkspaceState } from './workspace.store';
 import { apiClient, slackClient } from './requests';
 import { openPopup } from './helpers';
@@ -61,53 +61,73 @@ export const useConnect = () => {
     }));
 
   const [setTemporaryRefreshToken] = useAuthStore((state) => [state.setTemporaryRefreshToken]);
+  const activeListener = useRef<(() => void) | null>(null);
 
-  const onMessage = async (message: MessageEvent) => {
-    if (message.origin !== window.location.origin) {
-      return;
-    }
-    if (message.data.result === 'error') {
-      sdk.notifier.error('Something went wrong while authenticating with Slack. Please try again.');
-    }
-    if (message.data.errorMessage) {
-      console.error(message.data.errorMessage);
-    }
-    if (message.data.state && message.data.accessToken) {
-      setWorkspaceState(WorkspaceState.LOADING);
-      setNotificationsLoading(true);
-      try {
-        const token = message.data.accessToken;
-        setTemporaryRefreshToken(message.data.refreshToken);
-        const workspace = await slackClient.getWorkspace(token);
-        const channels = await slackClient.getChannels(token, workspace.id);
-        setChannels(channels);
-        await saveWorkspace(workspace, message.data.refreshToken);
-        addConnectedWorkspace({ ...(workspace as ConnectedWorkspace) });
-        sdk.notifier.success('Connected to the Slack workspace successfully.');
-      } catch (e) {
-        sdk.notifier.error(
-          'Something went wrong while authenticating with Slack. Please try again.'
-        );
-      } finally {
-        setNotificationsLoading(false);
-      }
-      if (message.data) {
-        window.removeEventListener('message', onMessage);
-      }
-
-      setWorkspaceState(WorkspaceState.SUCCESS);
-    }
-  };
-
-  useEffect(() => {
-    return () => window.removeEventListener('message', onMessage);
-    // added during migration to new linting rules, ideally we can remove it
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  const clearActiveListener = useCallback(() => {
+    activeListener.current?.();
+    activeListener.current = null;
   }, []);
 
+  useEffect(() => {
+    return clearActiveListener;
+  }, [clearActiveListener]);
+
   const startOAuth = () => {
+    clearActiveListener();
+    const popup = openPopup(makeOAuthURL(sdk.ids.space, getEnvironmentName(sdk.ids)), 700, 900);
+    if (!popup) {
+      return;
+    }
+
+    let consumed = false;
+    const onMessage = async (message: MessageEvent) => {
+      if (consumed || message.origin !== window.location.origin || message.source !== popup) {
+        return;
+      }
+      if (message.data.result === 'cancel' || message.data.result === 'error') {
+        consumed = true;
+        clearActiveListener();
+        if (message.data.result === 'error') {
+          sdk.notifier.error(
+            'Something went wrong while authenticating with Slack. Please try again.'
+          );
+          if (message.data.errorMessage) {
+            console.error(message.data.errorMessage);
+          }
+        }
+        return;
+      }
+      if (message.data.errorMessage) {
+        console.error(message.data.errorMessage);
+      }
+      if (message.data.state && message.data.accessToken) {
+        consumed = true;
+        clearActiveListener();
+        setWorkspaceState(WorkspaceState.LOADING);
+        setNotificationsLoading(true);
+        try {
+          const token = message.data.accessToken;
+          setTemporaryRefreshToken(message.data.refreshToken);
+          const workspace = await slackClient.getWorkspace(token);
+          const channels = await slackClient.getChannels(token, workspace.id);
+          setChannels(channels);
+          await saveWorkspace(workspace, message.data.refreshToken);
+          addConnectedWorkspace({ ...(workspace as ConnectedWorkspace) });
+          sdk.notifier.success('Connected to the Slack workspace successfully.');
+        } catch (e) {
+          sdk.notifier.error(
+            'Something went wrong while authenticating with Slack. Please try again.'
+          );
+        } finally {
+          setNotificationsLoading(false);
+        }
+
+        setWorkspaceState(WorkspaceState.SUCCESS);
+      }
+    };
+
     window.addEventListener('message', onMessage);
-    openPopup(makeOAuthURL(sdk.ids.space, getEnvironmentName(sdk.ids)), 700, 900);
+    activeListener.current = () => window.removeEventListener('message', onMessage);
   };
 
   return { startOAuth };
