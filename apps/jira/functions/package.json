@@ -1,6 +1,9 @@
 {
   "name": "@contentful/jira-functions",
   "version": "1.4.107",
+  "engines": {
+    "node": ">=24"
+  },
   "main": "index.js",
   "private": true,
   "scripts": {
@@ -34,7 +37,7 @@
     "rimraf": "^3.0.2",
     "serverless": "^3.31.0",
     "serverless-domain-manager": "3.3.2",
-    "serverless-offline": "^13.3.0",
+    "serverless-offline": "^13.10.2",
     "sinon": "^7.5.0",
     "sinon-chai": "^3.3.0",
     "ts-mocha": "^10.0.0",
