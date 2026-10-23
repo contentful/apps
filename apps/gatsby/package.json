@@ -1,6 +1,9 @@
 {
   "name": "@contentful/gatsby-preview",
   "version": "1.13.5",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "^1.30.0",

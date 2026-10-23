@@ -1,6 +1,9 @@
 {
   "name": "@contentful/commercetools-without-search",
   "version": "0.1.0",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "devDependencies": {
     "@types/react": "16.8.23",
