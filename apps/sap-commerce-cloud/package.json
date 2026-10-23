@@ -1,6 +1,9 @@
 {
   "name": "@contentful/sap-commerce-cloud",
   "version": "1.1.1",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "scripts": {
     "create-app-definition": "contentful-app-scripts create-app-definition",
