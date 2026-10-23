@@ -1,6 +1,9 @@
 {
   "name": "operating-hours",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "description": "Contentful app for managing business hours of operation",
   "scripts": {

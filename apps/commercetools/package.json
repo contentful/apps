@@ -1,6 +1,9 @@
 {
   "name": "@contentful/commercetools",
   "version": "1.10.5",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "devDependencies": {
     "@types/react": "17.0.65",

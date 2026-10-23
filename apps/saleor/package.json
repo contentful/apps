@@ -1,6 +1,9 @@
 {
   "name": "@contentful/saleor",
   "version": "1.6.116",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "1.33.2",
