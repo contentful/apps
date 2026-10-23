@@ -1,6 +1,9 @@
 {
   "name": "@contentful/ai-image-generator-frontend",
   "version": "0.1.0",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "dependencies": {
     "@contentful/app-sdk": "^4.29.1",
@@ -66,6 +69,8 @@
     "babel-plugin-named-exports-order": "^0.0.2",
     "cross-env": "7.0.3",
     "esbuild": "^0.25.0",
+    "eslint": "^8.57.1",
+    "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-storybook": "^0.8.0",
     "jsdom": "^25.0.1",
     "prop-types": "^15.8.1",

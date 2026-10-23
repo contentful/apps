@@ -1,6 +1,9 @@
 {
   "name": "@contentful/ai-image-generator-backend",
   "version": "0.1.0",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "description": "",
   "main": "index.js",

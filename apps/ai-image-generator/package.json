@@ -1,6 +1,9 @@
 {
   "name": "@contentful/ai-image-generator",
   "version": "0.1.0",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "scripts": {
     "create-app-definition": "contentful-app-scripts create-app-definition",
