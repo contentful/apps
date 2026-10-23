@@ -5,3 +5,5 @@ require:
   - './test/hooks.ts'
 spec:
   - 'src/**/*.spec.ts' # the positional arguments!
+node-option:
+  - 'no-experimental-strip-types'
