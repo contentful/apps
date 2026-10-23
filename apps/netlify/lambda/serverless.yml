@@ -28,7 +28,7 @@ custom:
 
 provider:
   name: aws
-  runtime: nodejs22.x
+  runtime: nodejs24.x
   stage: ${env:STAGE, 'test'}
   region: 'us-east-1'
   lambdaHashingVersion: 20201221

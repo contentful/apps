@@ -1,6 +1,9 @@
 {
   "name": "@contentful/netlify-build-and-preview",
   "version": "1.9.71",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "1.33.2",    
