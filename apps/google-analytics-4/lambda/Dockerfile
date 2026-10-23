@@ -1,5 +1,5 @@
 # pull official base image
-FROM node:20-buster-slim
+FROM node:24.22.1-bookworm-slim
 
 # set working directory
 WORKDIR /usr/src/app
