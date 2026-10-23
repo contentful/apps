@@ -13,7 +13,7 @@ REST calls out of the browser (`functions/src/muxProxy.ts`).
 
 ## Functions
 
-`functions/` is a standalone package with its own dependencies, build and tests:
+`functions/` is a standalone package with its own dependencies and tests (the app build bundles it):
 
 ```bash
 cd functions && npm ci && npm test
