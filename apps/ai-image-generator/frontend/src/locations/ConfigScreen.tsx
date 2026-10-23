@@ -14,7 +14,7 @@ const ConfigScreen = () => {
     const getAppActions = async () => {
       const appActions = await sdk.cma.appAction.getMany({
         appDefinitionId: sdk.ids.app,
-        limit: 100,
+        query: { limit: 100 },
       });
       console.log('appActions', appActions);
     };
