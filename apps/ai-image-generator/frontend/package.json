@@ -69,6 +69,7 @@
     "babel-plugin-named-exports-order": "^0.0.2",
     "cross-env": "7.0.3",
     "esbuild": "^0.25.0",
+    "eslint": "^8.57.1",
     "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-storybook": "^0.8.0",
     "jsdom": "^25.0.1",
