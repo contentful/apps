@@ -6,7 +6,9 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = fs.realpathSync(path.resolve(__dirname, '..'));
+const DIGEST_PATTERN = /^sha256:[a-f0-9]{64}$/;
+const MAX_RESPONSE_BYTES = 1024 * 1024;
 const args = process.argv.slice(2);
 const checkOnly = args.includes('--check');
 const onlyIndex = args.indexOf('--only');
@@ -16,7 +18,24 @@ if (only && !only.startsWith(path.join(ROOT, 'apps') + path.sep)) {
   process.exit(2);
 }
 
-const version = fs.readFileSync(path.join(ROOT, '.nvmrc'), 'utf8').trim();
+function assertInsideRoot(file) {
+  const real = fs.realpathSync(fs.existsSync(file) ? file : path.dirname(file));
+  if (real !== ROOT && !real.startsWith(ROOT + path.sep)) {
+    throw new Error(`Refusing to touch ${file}: it resolves outside the repository`);
+  }
+}
+
+function readText(file) {
+  assertInsideRoot(file);
+  return fs.readFileSync(file, 'utf8');
+}
+
+function writeText(file, content) {
+  assertInsideRoot(file);
+  fs.writeFileSync(file, content);
+}
+
+const version = readText(path.join(ROOT, '.nvmrc')).trim();
 if (!/^\d+\.\d+\.\d+$/.test(version)) {
   console.error(`Root .nvmrc must contain a full version such as 24.22.1 (found "${version}")`);
   process.exit(2);
@@ -31,14 +50,14 @@ function record(file, description, next, current) {
   const relative = path.relative(ROOT, file);
   drift.push(`${relative}: ${description}`);
   if (!checkOnly) {
-    fs.writeFileSync(file, next);
+    writeText(file, next);
     written.push(relative);
   }
 }
 
 function walk(dir, visit) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (entry.name === 'node_modules' || entry.name === '.git') continue;
+    if (entry.name === 'node_modules' || entry.name === '.git' || entry.isSymbolicLink()) continue;
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) walk(full, visit);
     else visit(full);
@@ -47,7 +66,7 @@ function walk(dir, visit) {
 
 function syncNvmrc(dir) {
   const file = path.join(dir, '.nvmrc');
-  const current = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
+  const current = fs.existsSync(file) ? readText(file) : '';
   record(file, `.nvmrc should be ${version}`, `${version}\n`, current);
 }
 
@@ -58,48 +77,70 @@ function setEngines(source) {
   const match = source.match(engines);
   if (match) {
     if (/"node"\s*:/.test(match[2])) {
-      return source.replace(/("engines"\s*:\s*\{[^}]*"node"\s*:\s*)"[^"]*"/, `$1"${range}"`);
+      return source.replace(
+        /("engines"\s*:\s*\{[^}]*"node"\s*:\s*)"[^"]*"/,
+        (_, head) => `${head}"${range}"`
+      );
     }
     const body = match[2].trimEnd();
     const separator = body.trim() === '' ? '' : ',';
-    return source.replace(engines, `$1${body}${separator}\n    "node": "${range}"\n  $3`);
+    return source.replace(
+      engines,
+      (_, open, __, close) => `${open}${body}${separator}\n    "node": "${range}"\n  ${close}`
+    );
   }
   const anchor =
     source.match(/^ {2}"version": "[^"]*",\n/m) || source.match(/^ {2}"name": "[^"]*",\n/m);
   const block = `  "engines": {\n    "node": "${range}"\n  },\n`;
-  if (anchor) return source.replace(anchor[0], `${anchor[0]}${block}`);
-  return source.replace(/^\{\n/, `{\n${block}`);
+  if (anchor) return source.replace(anchor[0], () => `${anchor[0]}${block}`);
+  return source.replace(/^\{\n/, () => `{\n${block}`);
 }
 
 function syncPackageJson(file) {
-  const current = fs.readFileSync(file, 'utf8');
+  const current = readText(file);
   record(file, `engines.node should be >=${major}`, setEngines(current), current);
 }
 
 function resolveDigest(tag) {
   return new Promise((resolve) => {
     if (!/^[a-z0-9][a-z0-9._-]*$/i.test(tag)) return resolve(null);
-    https
-      .get(
-        `https://hub.docker.com/v2/repositories/library/node/tags/${encodeURIComponent(tag)}`,
-        (res) => {
-          let body = '';
-          res.on('data', (chunk) => (body += chunk));
-          res.on('end', () => {
-            try {
-              resolve(JSON.parse(body).digest || null);
-            } catch (e) {
-              resolve(null);
-            }
-          });
+    const request = https.get(
+      {
+        host: 'hub.docker.com',
+        path: `/v2/repositories/library/node/tags/${encodeURIComponent(tag)}`,
+        timeout: 10000,
+      },
+      (res) => {
+        if (res.statusCode !== 200) {
+          res.resume();
+          return resolve(null);
         }
-      )
-      .on('error', () => resolve(null));
+        let body = '';
+        res.setEncoding('utf8');
+        res.on('data', (chunk) => {
+          body += chunk;
+          if (body.length > MAX_RESPONSE_BYTES) {
+            request.destroy();
+            resolve(null);
+          }
+        });
+        res.on('end', () => {
+          try {
+            const digest = JSON.parse(body).digest;
+            resolve(DIGEST_PATTERN.test(digest) ? digest : null);
+          } catch (e) {
+            resolve(null);
+          }
+        });
+      }
+    );
+    request.on('timeout', () => request.destroy());
+    request.on('error', () => resolve(null));
   });
 }
 
 async function syncDockerfile(file) {
-  const current = fs.readFileSync(file, 'utf8');
+  const current = readText(file);
   const from = /^FROM node:(\d+(?:\.\d+){0,2})(-[a-z0-9.-]+)?(@sha256:[a-f0-9]{64})?/gm;
   let next = current;
   for (const match of current.matchAll(from)) {
@@ -109,20 +150,20 @@ async function syncDockerfile(file) {
     const tag = `${version}${suffix}`;
     // An unresolvable digest is dropped so Renovate re-pins it.
     const newDigest = digest && !checkOnly ? await resolveDigest(tag) : null;
-    next = next.replace(line, `FROM node:${tag}${newDigest ? `@${newDigest}` : ''}`);
+    next = next.replace(line, () => `FROM node:${tag}${newDigest ? `@${newDigest}` : ''}`);
   }
   record(file, `FROM node should be ${version}`, next, current);
 }
 
 function syncServerless(file) {
-  const current = fs.readFileSync(file, 'utf8');
+  const current = readText(file);
   const next = current.replace(/^(\s*runtime:\s*)nodejs\d+\.x/gm, `$1nodejs${major}.x`);
   record(file, `runtime should be nodejs${major}.x`, next, current);
 }
 
 function syncCircleci() {
   const file = path.join(ROOT, '.circleci', 'config.yml');
-  const current = fs.readFileSync(file, 'utf8');
+  const current = readText(file);
   const next = current.replace(/(cimg\/node:)\d+\.\d+\.\d+/g, `$1${version}`);
   record(file, `cimg/node should be ${version}`, next, current);
 }
@@ -151,7 +192,7 @@ async function main() {
   if (!only) {
     syncCircleci();
     const rootPackage = path.join(ROOT, 'package.json');
-    const current = fs.readFileSync(rootPackage, 'utf8');
+    const current = readText(rootPackage);
     record(rootPackage, `engines.node should be >=${major}`, setEngines(current), current);
   }
 
