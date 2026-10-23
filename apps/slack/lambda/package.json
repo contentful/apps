@@ -2,6 +2,9 @@
   "name": "slack-lambda",
   "private": true,
   "version": "1.1.10",
+  "engines": {
+    "node": ">=24"
+  },
   "main": "index.js",
   "scripts": {
     "build": "rimraf build && tsc",
