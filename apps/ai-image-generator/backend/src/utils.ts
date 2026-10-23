@@ -2,6 +2,13 @@ import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import { default as sharp } from 'sharp';
 import { Dimensions } from './types';
 
+export interface RGBA {
+  r?: number;
+  g?: number;
+  b?: number;
+  alpha?: number;
+}
+
 export interface AreEqualColorOpts {
   tolerance?: number;
   compareAlpha?: boolean;
@@ -31,8 +38,8 @@ export const difference = (a: number, b: number): number => {
 
 // note: we don't care about alpha channel here, only the RGB color
 export const areEqualColors = (
-  colorA: sharp.RGBA,
-  colorB: sharp.RGBA,
+  colorA: RGBA,
+  colorB: RGBA,
   opts: AreEqualColorOpts = {}
 ): boolean => {
   const { tolerance, compareAlpha } = { tolerance: 0, compareAlpha: false, ...opts };
@@ -53,7 +60,7 @@ export const areEqualColors = (
   return true;
 };
 
-export const toRGBA = (rawPixels: Buffer): sharp.RGBA => {
+export const toRGBA = (rawPixels: Buffer): RGBA => {
   return {
     r: rawPixels[0],
     g: rawPixels[1],
