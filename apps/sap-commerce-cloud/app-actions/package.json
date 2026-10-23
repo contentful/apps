@@ -2,6 +2,9 @@
   "name": "@contentful/sap-commerce-cloud-app-actions",
   "private": true,
   "version": "1.0.2",
+  "engines": {
+    "node": ">=24"
+  },
   "main": "index.js",
   "scripts": {
     "build": "NODE_ENV=production tsc",
