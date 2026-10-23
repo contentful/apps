@@ -1,6 +1,9 @@
 {
   "name": "@contentful/frontify-assets",
   "version": "1.5.75",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "devDependencies": {
     "cross-env": "7.0.3"
