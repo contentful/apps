@@ -30,6 +30,61 @@ const mockResults = [
   },
 ];
 
+describe('ResultsList result count', () => {
+  it('shows the exact count in the header and select-all banner', async () => {
+    render(
+      <ResultsList
+        results={mockResults}
+        loading={false}
+        totalCount={1234}
+        itemsPerPage={1}
+        selectedIds={['entry1']}
+        onSelectionChange={vi.fn()}
+        onSelectAllMatchingChange={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText('1,234 results')).toBeInTheDocument();
+    expect(screen.getByText(/Select all 1,234 entries matching this search/)).toBeInTheDocument();
+    expect(screen.queryByText(/Up to/)).not.toBeInTheDocument();
+  });
+
+  it('labels the header and select-all action as upper bounds when the scan cap was hit', async () => {
+    render(
+      <ResultsList
+        results={mockResults}
+        loading={false}
+        totalCount={12000}
+        isCountUpperBound
+        itemsPerPage={1}
+        selectedIds={['entry1']}
+        onSelectionChange={vi.fn()}
+        onSelectAllMatchingChange={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText('Up to 12,000 results')).toBeInTheDocument();
+    expect(
+      screen.getByText('Select all entries matching this search (up to 12,000)')
+    ).toBeInTheDocument();
+  });
+
+  it('does not claim an exact selected count when the scan cap was hit', () => {
+    render(
+      <ResultsList
+        results={mockResults}
+        loading={false}
+        totalCount={12000}
+        isCountUpperBound
+        selectAllMatching
+      />
+    );
+
+    expect(screen.getByText(/All entries matching this search are selected/)).toBeInTheDocument();
+    expect(screen.queryByText(/All 12,000 entries matching this search/)).not.toBeInTheDocument();
+  });
+});
+
 describe('ResultsList field selection', () => {
   it('renders one checked checkbox per field column when excludedFieldIds is empty', () => {
     render(

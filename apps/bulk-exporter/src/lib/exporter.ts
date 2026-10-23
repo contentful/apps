@@ -2,6 +2,7 @@ import type { CMAClient } from '@contentful/app-sdk';
 import { createThrottler } from './throttle';
 import { paginateEntries, getEntryCount } from './paginate';
 import { flattenEntries, flattenEntry, type ContentType, type Entry } from './flatten';
+import { getEntryStatusLabel } from './queryBuilder';
 import { exportData, getFileExtension, type ExportFormat } from './exportFormats';
 import { extractErrorMessage } from './cmaError';
 
@@ -178,7 +179,7 @@ export class Exporter {
                 Created: new Date(entry.sys.createdAt).toISOString().split('T')[0],
                 Updated: new Date(entry.sys.updatedAt).toISOString().split('T')[0],
                 'Last Updated By': updatedByName,
-                Status: entry.sys.publishedVersion ? 'Published' : 'Draft',
+                Status: getEntryStatusLabel(entry),
                 'Content Type': contentTypeId,
               };
 
@@ -216,7 +217,7 @@ export class Exporter {
               Created: new Date(entry.sys.createdAt).toISOString().split('T')[0],
               Updated: new Date(entry.sys.updatedAt).toISOString().split('T')[0],
               'Last Updated By': updatedByName,
-              Status: entry.sys.publishedVersion ? 'Published' : 'Draft',
+              Status: getEntryStatusLabel(entry),
               'Content Type': entry.sys.contentType.sys.id,
             };
 

@@ -165,6 +165,28 @@ interface SysVersioned {
   };
 }
 
+export type EntryDisplayStatus = 'published' | 'draft' | 'changed' | 'archived';
+export type EntryStatusLabel = 'Published' | 'Draft' | 'Changed' | 'Archived';
+
+/**
+ * The single source of truth for an entry's status as shown to the user.
+ * Archived wins over everything; an entry with no publishedVersion is a draft;
+ * an entry more than one version ahead of its last publish is changed.
+ */
+export function getEntryDisplayStatus(entry: SysVersioned): EntryDisplayStatus {
+  const { version, publishedVersion, archivedAt } = entry.sys;
+  if (archivedAt) return 'archived';
+  if (publishedVersion === undefined) return 'draft';
+  if (version !== undefined && version > publishedVersion + 1) return 'changed';
+  return 'published';
+}
+
+/** Capitalized form of {@link getEntryDisplayStatus}, for export file Status columns. */
+export function getEntryStatusLabel(entry: SysVersioned): EntryStatusLabel {
+  const status = getEntryDisplayStatus(entry);
+  return (status.charAt(0).toUpperCase() + status.slice(1)) as EntryStatusLabel;
+}
+
 /**
  * Returns a client-side predicate for statuses that the CMA cannot distinguish
  * server-side (published vs changed). Returns null for statuses that are fully

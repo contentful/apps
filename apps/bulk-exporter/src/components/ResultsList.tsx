@@ -27,6 +27,7 @@ import {
 } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import type { ContentType } from '../lib/flatten';
+import { getEntryDisplayStatus } from '../lib/queryBuilder';
 
 type SortColumn = 'name' | 'contentType' | 'updated' | 'updatedBy' | 'status';
 type SortDirection = 'asc' | 'desc';
@@ -142,6 +143,8 @@ export interface ResultsListProps {
   activePage?: number;
   itemsPerPage?: number;
   totalCount?: number;
+  /** True when totalCount is the CMA's unfiltered total because the scan reached its cap */
+  isCountUpperBound?: boolean;
   selectedIds?: string[];
   onSelectionChange?: (selectedIds: string[]) => void;
   onExportSelected?: (
@@ -150,7 +153,7 @@ export interface ResultsListProps {
     filename: string,
     options: { includeTags: boolean; includeConcepts: boolean }
   ) => void;
-  /** True once the user has clicked "Select all N entries matching this search" */
+  /** True once the user has selected every entry matching the current search */
   selectAllMatching?: boolean;
   onSelectAllMatchingChange?: (value: boolean) => void;
   /** Exports every entry matching the current search filters, not just the fetched page(s) */
@@ -357,6 +360,7 @@ export function ResultsList({
   activePage = 0,
   itemsPerPage = 50,
   totalCount,
+  isCountUpperBound = false,
   selectedIds = [],
   onSelectionChange,
   onExportSelected,
@@ -450,19 +454,6 @@ export function ResultsList({
       return id ? userMap[id] || id : 'Unknown';
     };
 
-    const statusOf = (entry: SearchResult): string => {
-      if (entry.sys.archivedAt) return 'archived';
-      const hasPublished = entry.sys.publishedVersion !== undefined;
-      const isChanged =
-        hasPublished &&
-        entry.sys.version !== undefined &&
-        entry.sys.publishedVersion !== undefined &&
-        entry.sys.version > entry.sys.publishedVersion + 1;
-      if (!hasPublished) return 'draft';
-      if (isChanged) return 'changed';
-      return 'published';
-    };
-
     const accessor = (entry: SearchResult): string => {
       switch (sortColumn) {
         case 'name':
@@ -474,7 +465,7 @@ export function ResultsList({
         case 'updatedBy':
           return updatedByOf(entry).toLowerCase();
         case 'status':
-          return statusOf(entry);
+          return getEntryDisplayStatus(entry);
       }
     };
 
@@ -593,19 +584,6 @@ export function ResultsList({
     return entry.sys.id;
   };
 
-  const getStatus = (entry: SearchResult): string => {
-    if (entry.sys.archivedAt) return 'archived';
-    const hasPublished = entry.sys.publishedVersion !== undefined;
-    const isChanged =
-      hasPublished &&
-      entry.sys.version !== undefined &&
-      entry.sys.publishedVersion !== undefined &&
-      entry.sys.version > entry.sys.publishedVersion + 1;
-    if (!hasPublished) return 'draft';
-    if (isChanged) return 'changed';
-    return 'published';
-  };
-
   const getFieldValue = (entry: SearchResult, field: SchemaField, locale: string): string => {
     if (!entry.fields?.[field.id]) return '—';
     const localeMap = entry.fields[field.id];
@@ -643,7 +621,7 @@ export function ResultsList({
             <Flex gap="spacingS" alignItems="center">
               <Text fontSize="fontSizeS" fontColor="gray600">
                 {totalCount !== undefined
-                  ? `${totalCount.toLocaleString()} results`
+                  ? `${isCountUpperBound ? 'Up to ' : ''}${totalCount.toLocaleString()} results`
                   : `${results.length} results`}
               </Text>
               {sortColumn && (
@@ -675,9 +653,13 @@ export function ResultsList({
               <Text fontSize="fontSizeM" fontColor="gray700">
                 {selectAllMatching ? (
                   <>
-                    All {(totalCount ?? selectedIds.length).toLocaleString()}{' '}
-                    {(totalCount ?? selectedIds.length) === 1 ? 'entry' : 'entries'} matching this
-                    search are selected.{' '}
+                    All{' '}
+                    {isCountUpperBound
+                      ? 'entries'
+                      : `${(totalCount ?? selectedIds.length).toLocaleString()} ${
+                          (totalCount ?? selectedIds.length) === 1 ? 'entry' : 'entries'
+                        }`}{' '}
+                    matching this search are selected.{' '}
                     <TextLink as="button" onClick={handleClearSelection}>
                       Clear selection
                     </TextLink>
@@ -687,7 +669,9 @@ export function ResultsList({
                     All {allCurrentIds.length} {allCurrentIds.length === 1 ? 'entry' : 'entries'} on
                     this page are selected.{' '}
                     <TextLink as="button" onClick={() => onSelectAllMatchingChange?.(true)}>
-                      Select all {totalCount?.toLocaleString()} entries matching this search
+                      {isCountUpperBound
+                        ? `Select all entries matching this search (up to ${totalCount?.toLocaleString()})`
+                        : `Select all ${totalCount?.toLocaleString()} entries matching this search`}
                     </TextLink>
                   </>
                 ) : (
@@ -861,7 +845,7 @@ export function ResultsList({
 
                 <Table.Body>
                   {sortedResults.map((entry) => {
-                    const status = getStatus(entry);
+                    const status = getEntryDisplayStatus(entry);
                     const entryUrl = `https://${webappHostname}/spaces/${spaceId}/environments/${environmentId}/entries/${entry.sys.id}`;
                     return (
                       <Table.Row key={entry.sys.id}>

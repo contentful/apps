@@ -18,6 +18,12 @@ const MIN_PAGE_SIZE = 1;
 const MAX_SKIP = 9000;
 
 /**
+ * Most entries a search scans to build an exact matching count. Kept at MAX_SKIP so
+ * the scan stays inside the plain skip/limit loop and never reaches the cursor path.
+ */
+export const SCAN_CAP = MAX_SKIP;
+
+/**
  * Fetches a page, halving `limit` and retrying if the CMA rejects it as too
  * large. Returns the limit that actually worked so the caller can carry it
  * forward as the starting point for the next page instead of re-discovering it
@@ -170,6 +176,97 @@ async function* paginateByCursor(
     };
     fetched += result.items.length;
   }
+}
+
+export interface ScanResult {
+  /** sys.id of entries passing the post-filter, in scan order */
+  matchingIds: string[];
+  /** false when the cap is reached; the scan cannot prove matchingIds is complete */
+  exact: boolean;
+  /** The CMA's initial unfiltered total, an upper bound for a stable search */
+  rawTotal: number;
+}
+
+interface ScannedEntry {
+  sys: { id: string; version?: number; publishedVersion?: number; archivedAt?: string };
+}
+
+const SCAN_SELECT = 'sys.id,sys.version,sys.publishedVersion,sys.archivedAt';
+
+/**
+ * Walks the search's entries (ids and status fields only) and collects the ids that
+ * pass `postFilter`, so the displayed count can match what the export will contain.
+ * Stops once `cap` entries have been scanned, returning `exact: false` because
+ * entries created during the scan could make the matching list incomplete.
+ */
+export async function scanMatchingEntries(
+  cma: CMAClient,
+  options: PaginateOptions,
+  postFilter: (entry: ScannedEntry) => boolean,
+  throttledFetch: <T>(fn: () => Promise<T>) => Promise<T>,
+  cap: number
+): Promise<ScanResult> {
+  const rawTotal = await throttledFetch(() =>
+    getEntryCount(cma, options.contentType, options.filters)
+  );
+
+  const matchingIds: string[] = [];
+  if (rawTotal === 0) {
+    return { matchingIds, exact: true, rawTotal };
+  }
+
+  const scanOptions: PaginateOptions = {
+    ...options,
+    filters: { ...options.filters, select: SCAN_SELECT },
+  };
+
+  let scanned = 0;
+  for await (const batch of paginateEntries(cma, scanOptions, throttledFetch)) {
+    for (const entry of batch as ScannedEntry[]) {
+      if (postFilter(entry)) {
+        matchingIds.push(entry.sys.id);
+      }
+    }
+    scanned += batch.length;
+
+    if (scanned >= cap) {
+      return { matchingIds, exact: false, rawTotal };
+    }
+  }
+
+  return { matchingIds, exact: true, rawTotal };
+}
+
+/**
+ * 'matching-list' builds each page from the scan's complete list of matching ids, so
+ * every page is full. 'skip-paging' is the plain skip/limit fetch with the post-filter
+ * applied afterward, used when the scan hit its cap and id-list completeness is unproven.
+ */
+export function choosePagingMode(scan: ScanResult): 'matching-list' | 'skip-paging' {
+  return scan.exact ? 'matching-list' : 'skip-paging';
+}
+
+export function sliceMatchingPage(
+  matchingIds: string[],
+  page: number,
+  itemsPerPage: number
+): string[] {
+  return matchingIds.slice(page * itemsPerPage, (page + 1) * itemsPerPage);
+}
+
+/**
+ * The CMA's `sys.id[in]` filter does not return entries in the order of the id list,
+ * so put a fetched batch back into `orderedIds` order, dropping ids it did not return.
+ */
+export function orderEntriesByIds<T extends { sys: { id: string } }>(
+  entries: T[],
+  orderedIds: string[]
+): T[] {
+  const byId = new Map(entries.map((entry) => [entry.sys.id, entry]));
+  return orderedIds.flatMap((id) => {
+    const entry = byId.get(id);
+    return entry ? [entry] : [];
+  });
 }
 
 export async function getEntryCount(

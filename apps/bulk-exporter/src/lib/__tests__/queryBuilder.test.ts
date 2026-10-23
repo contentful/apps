@@ -1,5 +1,181 @@
 import { describe, it, expect } from 'vitest';
-import { buildQuery, type QueryFormData } from '../queryBuilder';
+import {
+  buildQuery,
+  getEntryDisplayStatus,
+  getEntryStatusLabel,
+  getStatusPostFilter,
+  type QueryFormData,
+} from '../queryBuilder';
+
+describe('getEntryDisplayStatus', () => {
+  it('should return published for an entry exactly one version ahead of its last publish', () => {
+    expect(getEntryDisplayStatus({ sys: { version: 5, publishedVersion: 4 } })).toBe('published');
+  });
+
+  it('should return draft for an entry with no publishedVersion', () => {
+    expect(getEntryDisplayStatus({ sys: { version: 1 } })).toBe('draft');
+  });
+
+  it('should return changed for an entry more than one version ahead of its last publish', () => {
+    expect(getEntryDisplayStatus({ sys: { version: 9, publishedVersion: 4 } })).toBe('changed');
+  });
+
+  it('should return archived when archivedAt is set, even for a published entry', () => {
+    expect(
+      getEntryDisplayStatus({
+        sys: { version: 5, publishedVersion: 4, archivedAt: '2024-01-01T00:00:00Z' },
+      })
+    ).toBe('archived');
+  });
+
+  it('should return published for a published entry with no version field', () => {
+    expect(getEntryDisplayStatus({ sys: { publishedVersion: 4 } })).toBe('published');
+  });
+});
+
+describe('getEntryStatusLabel', () => {
+  it('should return the capitalized label for each status', () => {
+    expect(getEntryStatusLabel({ sys: { version: 5, publishedVersion: 4 } })).toBe('Published');
+    expect(getEntryStatusLabel({ sys: { version: 1 } })).toBe('Draft');
+    expect(getEntryStatusLabel({ sys: { version: 9, publishedVersion: 4 } })).toBe('Changed');
+    expect(getEntryStatusLabel({ sys: { archivedAt: '2024-01-01T00:00:00Z' } })).toBe('Archived');
+  });
+});
+
+describe('getStatusPostFilter', () => {
+  const published = { sys: { version: 5, publishedVersion: 4 } };
+  const changed = { sys: { version: 9, publishedVersion: 4 } };
+  const draft = { sys: { version: 1 } };
+  const equalVersions = { sys: { version: 4, publishedVersion: 4 } };
+
+  describe('published', () => {
+    const filter = getStatusPostFilter('published')!;
+
+    it('should return a predicate', () => {
+      expect(filter).toBeTypeOf('function');
+    });
+
+    it('should accept an entry exactly one version ahead of its last publish', () => {
+      expect(filter(published)).toBe(true);
+    });
+
+    it('should reject an entry more than one version ahead of its last publish', () => {
+      expect(filter(changed)).toBe(false);
+    });
+
+    it('should reject an entry two versions ahead (boundary)', () => {
+      expect(filter({ sys: { version: 6, publishedVersion: 4 } })).toBe(false);
+    });
+
+    it('should reject a draft entry with no publishedVersion', () => {
+      expect(filter(draft)).toBe(false);
+    });
+
+    it('should reject an entry whose version equals its publishedVersion', () => {
+      expect(filter(equalVersions)).toBe(false);
+    });
+
+    it('should reject an entry with no version', () => {
+      expect(filter({ sys: { publishedVersion: 4 } })).toBe(false);
+    });
+  });
+
+  describe('changed', () => {
+    const filter = getStatusPostFilter('changed')!;
+
+    it('should return a predicate', () => {
+      expect(filter).toBeTypeOf('function');
+    });
+
+    it('should accept an entry more than one version ahead of its last publish', () => {
+      expect(filter(changed)).toBe(true);
+    });
+
+    it('should accept an entry two versions ahead (boundary)', () => {
+      expect(filter({ sys: { version: 6, publishedVersion: 4 } })).toBe(true);
+    });
+
+    it('should reject an entry exactly one version ahead of its last publish', () => {
+      expect(filter(published)).toBe(false);
+    });
+
+    it('should reject a draft entry with no publishedVersion', () => {
+      expect(filter(draft)).toBe(false);
+    });
+
+    it('should reject an entry with no version', () => {
+      expect(filter({ sys: { publishedVersion: 4 } })).toBe(false);
+    });
+  });
+
+  describe('published and changed are mutually exclusive', () => {
+    it('should never accept the same entry in both filters', () => {
+      const publishedFilter = getStatusPostFilter('published')!;
+      const changedFilter = getStatusPostFilter('changed')!;
+      for (const entry of [published, changed, draft, equalVersions]) {
+        expect(publishedFilter(entry) && changedFilter(entry)).toBe(false);
+      }
+    });
+  });
+
+  describe('statuses handled fully by query params', () => {
+    it.each(['any', 'draft', 'archived'] as const)('should return null for %s', (status) => {
+      expect(getStatusPostFilter(status)).toBeNull();
+    });
+  });
+});
+
+describe('mixed published and changed fixture', () => {
+  // version 5 / publishedVersion 4 is published; version 9 / publishedVersion 4 has an
+  // unpublished edit; version 1 with no publishedVersion is a draft.
+  const mixed = [
+    { id: 'p1', sys: { version: 5, publishedVersion: 4 } },
+    { id: 'c1', sys: { version: 9, publishedVersion: 4 } },
+    { id: 'p2', sys: { version: 2, publishedVersion: 1 } },
+    { id: 'c2', sys: { version: 6, publishedVersion: 4 } },
+    { id: 'd1', sys: { version: 1 } },
+  ];
+
+  it('should have the Published post-filter accept exactly the entries displayed as published', () => {
+    const filter = getStatusPostFilter('published')!;
+    const accepted = mixed.filter(filter).map((e) => e.id);
+    const displayedPublished = mixed
+      .filter((e) => getEntryDisplayStatus(e) === 'published')
+      .map((e) => e.id);
+
+    expect(accepted).toEqual(['p1', 'p2']);
+    expect(accepted).toEqual(displayedPublished);
+  });
+
+  it('should have the Changed post-filter accept exactly the entries displayed as changed', () => {
+    const filter = getStatusPostFilter('changed')!;
+    const accepted = mixed.filter(filter).map((e) => e.id);
+    const displayedChanged = mixed
+      .filter((e) => getEntryDisplayStatus(e) === 'changed')
+      .map((e) => e.id);
+
+    expect(accepted).toEqual(['c1', 'c2']);
+    expect(accepted).toEqual(displayedChanged);
+  });
+
+  it('should label every entry with an unpublished edit as Changed', () => {
+    expect(mixed.map((e) => getEntryStatusLabel(e))).toEqual([
+      'Published',
+      'Changed',
+      'Published',
+      'Changed',
+      'Draft',
+    ]);
+  });
+
+  it('should send identical server-side params for Published and Changed searches', () => {
+    // The CMA cannot tell the two apart, which is why the client-side post-filter exists.
+    const published = buildQuery({ contentTypeId: 'caseStudy', status: 'published' });
+    const changed = buildQuery({ contentTypeId: 'caseStudy', status: 'changed' });
+
+    expect(published).toEqual(changed);
+  });
+});
 
 describe('queryBuilder', () => {
   describe('basic content type', () => {

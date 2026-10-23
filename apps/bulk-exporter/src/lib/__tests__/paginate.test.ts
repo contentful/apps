@@ -1,5 +1,13 @@
 import { describe, it, expect, vi } from 'vitest';
-import { paginateEntries, getEntryCount } from '../paginate';
+import {
+  paginateEntries,
+  getEntryCount,
+  scanMatchingEntries,
+  choosePagingMode,
+  sliceMatchingPage,
+  orderEntriesByIds,
+} from '../paginate';
+import { getStatusPostFilter } from '../queryBuilder';
 
 describe('paginate', () => {
   describe('paginateEntries', () => {
@@ -285,6 +293,304 @@ describe('paginate', () => {
 
       await expect(run()).rejects.toBe(otherError);
       expect(getMany).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('scanMatchingEntries', () => {
+    const isPublished = (entry: { sys: { version?: number; publishedVersion?: number } }) =>
+      entry.sys.publishedVersion !== undefined &&
+      entry.sys.version === entry.sys.publishedVersion + 1;
+
+    // Entries alternate published (version 2, publishedVersion 1) and changed (version 5).
+    const makeEntries = (count: number, offset: number) =>
+      Array.from({ length: count }, (_, i) => {
+        const n = offset + i;
+        return {
+          sys: { id: `e${n}`, version: n % 2 === 0 ? 2 : 5, publishedVersion: 1 },
+        };
+      });
+
+    it('returns only post-filter passes and exact true when the scan finishes', async () => {
+      const getMany = vi.fn().mockImplementation(({ query }) => {
+        if (query.limit === 0) return Promise.resolve({ items: [], total: 10 });
+        return Promise.resolve({ items: makeEntries(10, 0), total: 10 });
+      });
+      const throttledFetch = vi.fn((fn) => fn());
+
+      const result = await scanMatchingEntries(
+        { entry: { getMany } } as any,
+        { contentType: 'test', filters: { 'sys.archivedAt[exists]': false } },
+        isPublished,
+        throttledFetch,
+        9000
+      );
+
+      expect(result.exact).toBe(true);
+      expect(result.rawTotal).toBe(10);
+      expect(result.matchingIds).toEqual(['e0', 'e2', 'e4', 'e6', 'e8']);
+
+      const scanCall = getMany.mock.calls.find((call) => call[0].query.limit !== 0);
+      expect(scanCall?.[0].query.select).toBe(
+        'sys.id,sys.version,sys.publishedVersion,sys.archivedAt'
+      );
+      expect(scanCall?.[0].query['sys.archivedAt[exists]']).toBe(false);
+    });
+
+    it('returns exact true with no matches without scanning when the total is zero', async () => {
+      const getMany = vi.fn().mockResolvedValue({ items: [], total: 0 });
+
+      const result = await scanMatchingEntries(
+        { entry: { getMany } } as any,
+        { contentType: 'test' },
+        isPublished,
+        vi.fn((fn) => fn()),
+        9000
+      );
+
+      expect(result).toEqual({ matchingIds: [], exact: true, rawTotal: 0 });
+      expect(getMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns exact false and the raw total when the cap is hit before the scan ends', async () => {
+      const getMany = vi.fn().mockImplementation(({ query }) => {
+        if (query.limit === 0) return Promise.resolve({ items: [], total: 5000 });
+        return Promise.resolve({ items: makeEntries(query.limit, query.skip), total: 5000 });
+      });
+
+      const result = await scanMatchingEntries(
+        { entry: { getMany } } as any,
+        { contentType: 'test' },
+        isPublished,
+        vi.fn((fn) => fn()),
+        2000
+      );
+
+      expect(result.exact).toBe(false);
+      expect(result.rawTotal).toBe(5000);
+      // 1 count call + 2 scan pages of 1000, then it stops.
+      expect(getMany).toHaveBeenCalledTimes(3);
+    });
+
+    it('treats a scan that ends at the cap as incomplete', async () => {
+      const getMany = vi.fn().mockImplementation(({ query }) => {
+        if (query.limit === 0) return Promise.resolve({ items: [], total: 1000 });
+        return Promise.resolve({ items: makeEntries(1000, 0), total: 1000 });
+      });
+
+      const result = await scanMatchingEntries(
+        { entry: { getMany } } as any,
+        { contentType: 'test' },
+        isPublished,
+        vi.fn((fn) => fn()),
+        1000
+      );
+
+      expect(result.exact).toBe(false);
+      expect(result.matchingIds).toHaveLength(500);
+    });
+
+    it('stops at the cap when the total grows after the initial count', async () => {
+      const getMany = vi.fn().mockImplementation(({ query }) => {
+        if (query.limit === 0) return Promise.resolve({ items: [], total: 9000 });
+        const count = Math.min(query.limit, 9001 - query.skip);
+        return Promise.resolve({ items: makeEntries(count, query.skip), total: 9001 });
+      });
+
+      const result = await scanMatchingEntries(
+        { entry: { getMany } } as any,
+        { contentType: 'test' },
+        isPublished,
+        vi.fn((fn) => fn()),
+        9000
+      );
+
+      expect(result.exact).toBe(false);
+      expect(result.matchingIds).toHaveLength(4500);
+      expect(getMany).toHaveBeenCalledTimes(10);
+    });
+  });
+
+  describe('choosePagingMode', () => {
+    it('uses the matching list when the scan finished', () => {
+      expect(choosePagingMode({ matchingIds: ['a'], exact: true, rawTotal: 1 })).toBe(
+        'matching-list'
+      );
+    });
+
+    it('falls back to skip paging when the cap was hit', () => {
+      expect(choosePagingMode({ matchingIds: ['a'], exact: false, rawTotal: 20000 })).toBe(
+        'skip-paging'
+      );
+    });
+  });
+
+  describe('sliceMatchingPage', () => {
+    const ids = Array.from({ length: 120 }, (_, i) => `e${i}`);
+
+    it('returns a full page of ids from the requested page', () => {
+      const page = sliceMatchingPage(ids, 1, 50);
+      expect(page).toHaveLength(50);
+      expect(page[0]).toBe('e50');
+      expect(page[49]).toBe('e99');
+    });
+
+    it('returns the remainder on the last page', () => {
+      expect(sliceMatchingPage(ids, 2, 50)).toEqual(ids.slice(100));
+    });
+
+    it('returns nothing past the last page', () => {
+      expect(sliceMatchingPage(ids, 3, 50)).toEqual([]);
+    });
+  });
+
+  describe('orderEntriesByIds', () => {
+    it('reorders a fetched batch into the id order', () => {
+      const fetched = [{ sys: { id: 'b' } }, { sys: { id: 'c' } }, { sys: { id: 'a' } }];
+      expect(orderEntriesByIds(fetched, ['a', 'b', 'c']).map((e) => e.sys.id)).toEqual([
+        'a',
+        'b',
+        'c',
+      ]);
+    });
+
+    it('drops ids that were not found in the fetched batch', () => {
+      const fetched = [{ sys: { id: 'b' } }, { sys: { id: 'a' } }];
+      expect(orderEntriesByIds(fetched, ['a', 'missing', 'b']).map((e) => e.sys.id)).toEqual([
+        'a',
+        'b',
+      ]);
+    });
+  });
+
+  describe('mixed published and changed fixture across count, pages, and export', () => {
+    const ITEMS_PER_PAGE = 50;
+    const TOTAL = 2500;
+    const postFilter = getStatusPostFilter('published')!;
+
+    // Every fourth entry has an unpublished edit (version 9, publishedVersion 4); the rest are
+    // published (version 5, publishedVersion 4). 2500 entries -> 1875 published, 625 changed.
+    const fixture = Array.from({ length: TOTAL }, (_, i) => ({
+      sys: {
+        id: `e${i}`,
+        version: i % 4 === 3 ? 9 : 5,
+        publishedVersion: 4,
+      },
+    }));
+    const expectedPublished = fixture.filter(postFilter);
+
+    // A CMA stand-in that honors limit, skip, `select`, and `sys.id[in]` (returned in reverse
+    // order, because the real filter does not return entries in the order of the id list).
+    const makeCma = () => ({
+      entry: {
+        getMany: vi.fn().mockImplementation(({ query }) => {
+          if (query['sys.id[in]']) {
+            const ids = String(query['sys.id[in]']).split(',');
+            const items = fixture.filter((e) => ids.includes(e.sys.id)).reverse();
+            return Promise.resolve({ items, total: items.length });
+          }
+          if (query.limit === 0) return Promise.resolve({ items: [], total: TOTAL });
+          const skip = query.skip ?? 0;
+          return Promise.resolve({ items: fixture.slice(skip, skip + query.limit), total: TOTAL });
+        }),
+      },
+    });
+
+    const throttledFetch = <T>(fn: () => Promise<T>) => fn();
+
+    // What Exporter.start does with the same filter: walk every entry, keep post-filter passes.
+    const exportedRowCount = async (cma: ReturnType<typeof makeCma>) => {
+      let rows = 0;
+      for await (const batch of paginateEntries(
+        cma as any,
+        { contentType: 'caseStudy' },
+        throttledFetch
+      )) {
+        rows += (batch as typeof fixture).filter(postFilter).length;
+      }
+      return rows;
+    };
+
+    it('within the cap, the count, the rows summed across every page, and the exported rows are the same number', async () => {
+      const cma = makeCma();
+      const scan = await scanMatchingEntries(
+        cma as any,
+        { contentType: 'caseStudy' },
+        postFilter,
+        throttledFetch,
+        9000
+      );
+
+      expect(scan.exact).toBe(true);
+      expect(choosePagingMode(scan)).toBe('matching-list');
+
+      const pageRowCounts: number[] = [];
+      const pageIds: string[] = [];
+      for (let page = 0; page * ITEMS_PER_PAGE < scan.matchingIds.length; page++) {
+        const ids = sliceMatchingPage(scan.matchingIds, page, ITEMS_PER_PAGE);
+        const response = await cma.entry.getMany({ query: { 'sys.id[in]': ids.join(',') } });
+        const rows = orderEntriesByIds(response.items as typeof fixture, ids);
+        pageRowCounts.push(rows.length);
+        pageIds.push(...rows.map((r) => r.sys.id));
+      }
+
+      const count = scan.matchingIds.length;
+      const rowsAcrossPages = pageRowCounts.reduce((sum, n) => sum + n, 0);
+      const exported = await exportedRowCount(cma);
+
+      expect(count).toBe(expectedPublished.length);
+      expect(rowsAcrossPages).toBe(count);
+      expect(exported).toBe(count);
+      // Pages come back in the scan's order despite the CMA reversing each batch.
+      expect(pageIds).toEqual(expectedPublished.map((e) => e.sys.id));
+    });
+
+    it('within the cap, every page except the last holds a full 50 matching entries', async () => {
+      const scan = await scanMatchingEntries(
+        makeCma() as any,
+        { contentType: 'caseStudy' },
+        postFilter,
+        throttledFetch,
+        9000
+      );
+
+      const pageSizes: number[] = [];
+      for (let page = 0; page * ITEMS_PER_PAGE < scan.matchingIds.length; page++) {
+        pageSizes.push(sliceMatchingPage(scan.matchingIds, page, ITEMS_PER_PAGE).length);
+      }
+
+      expect(pageSizes.slice(0, -1).every((n) => n === ITEMS_PER_PAGE)).toBe(true);
+      expect(pageSizes[pageSizes.length - 1]).toBe(expectedPublished.length % ITEMS_PER_PAGE);
+    });
+
+    it('above the cap, skip-paging is chosen, the count is the raw total, and the export is still post-filtered', async () => {
+      const cma = makeCma();
+      const scan = await scanMatchingEntries(
+        cma as any,
+        { contentType: 'caseStudy' },
+        postFilter,
+        throttledFetch,
+        2000
+      );
+
+      expect(scan.exact).toBe(false);
+      expect(choosePagingMode(scan)).toBe('skip-paging');
+      // The shown count is the raw, un-post-filtered total, not the matching count.
+      expect(scan.rawTotal).toBe(TOTAL);
+      expect(scan.rawTotal).not.toBe(expectedPublished.length);
+
+      // The export is unaffected by the cap: only post-filter passes, so the two numbers differ.
+      const exported = await exportedRowCount(cma);
+      expect(exported).toBe(expectedPublished.length);
+      expect(exported).toBeLessThan(scan.rawTotal);
+    });
+
+    it('above the cap, a skip-paged result page can show fewer than 50 matching entries (accepted limitation)', async () => {
+      const cma = makeCma();
+      const response = await cma.entry.getMany({ query: { skip: 0, limit: ITEMS_PER_PAGE } });
+      const page = (response.items as typeof fixture).filter(postFilter);
+
+      expect(page.length).toBeLessThan(ITEMS_PER_PAGE);
+      expect(page.every((e) => e.sys.version === e.sys.publishedVersion + 1)).toBe(true);
     });
   });
 
