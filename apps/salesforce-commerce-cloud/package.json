@@ -1,6 +1,9 @@
 {
   "name": "contentful-sfcc-vite",
   "version": "0.1.0",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "dependencies": {
     "@contentful/app-scripts": "^2.5.11",
