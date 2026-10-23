@@ -1,6 +1,9 @@
 {
   "name": "bulk-exporter",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=24"
+  },
   "description": "Search, filter, and export Contentful entries to CSV, JSON, XLSX, XML, or YAML",
   "author": "Contentful",
   "license": "MIT",

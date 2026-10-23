@@ -1,6 +1,9 @@
 {
   "name": "deep-clone",
   "version": "1.2.1",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "type": "module",
   "dependencies": {
