@@ -1,6 +1,9 @@
 {
   "name": "ai-content-generator",
   "version": "0.1.0",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "dependencies": {
     "@contentful/app-scripts": "^2.3.0",
