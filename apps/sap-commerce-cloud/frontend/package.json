@@ -1,6 +1,9 @@
 {
   "name": "@contentful/sap-commerce-cloud-frontend",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "homepage": "./",
   "dependencies": {
