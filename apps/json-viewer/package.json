@@ -1,6 +1,9 @@
 {
   "name": "json-viewer",
   "version": "0.1.0",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "dependencies": {
     "@contentful/app-scripts": "^1.30.1",
