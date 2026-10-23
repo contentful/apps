@@ -64,6 +64,7 @@ jobs:
           template-preset: 'aws-push-artifacts'
       - run:
           name: Install dependencies
+          no_output_timeout: 30m
           command: |
             npm ci
             npm run bootstrap:ci
@@ -95,6 +96,7 @@ jobs:
       - set_since
       - run:
           name: Install dependencies
+          no_output_timeout: 30m
           command: |
             npm ci
             npm run bootstrap:ci
