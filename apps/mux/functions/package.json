@@ -1,6 +1,9 @@
 {
   "name": "mux-functions",
   "version": "0.1.0",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "dependencies": {
     "@mux/mux-node": "^12.2.0",
