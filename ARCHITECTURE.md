@@ -198,7 +198,7 @@ Frontend (React) → fetch() to Lambda URL
 
 ## Invariants & Sharp Edges
 
-- **Node ≥ 16, npm ≥ 8** required. CI runs on Node 22.
+- **Node ≥ 24, npm ≥ 8** required. CI runs on Node 24.
 - **`--since` flag is critical** — never run `lerna run build` without it locally unless you intend to build all 56 apps.
 - **`lerna bootstrap` must run before building** — installs and links cross-package deps.
 - **`bedrock-content-generator` uses LavaMoat** (`allow-scripts`) — extra step required after bootstrap in CI.

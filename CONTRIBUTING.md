@@ -4,10 +4,19 @@
 
 | Tool | Version |
 |------|---------|
-| Node.js | ≥ 16.0.0 (CI runs on **22**) |
+| Node.js | ≥ 24 (CI runs on **24**) |
 | npm | ≥ 8.0.0 |
 
-Use [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) to manage Node versions. The CI image is `cimg/node:22.15`.
+Use [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) to manage Node versions; `nvm use` reads the root `.nvmrc`.
+
+### Node.js version
+
+The root `.nvmrc` is the source of truth. Every package under `apps/` has its own `.nvmrc` and `engines.node`, and Dockerfiles, Lambda runtimes (`serverless.yml`) and the CircleCI image follow it. After changing the root `.nvmrc`, run:
+
+```bash
+npm run node:sync   # rewrite every declaration from the root .nvmrc
+npm run node:check  # fail if any declaration has drifted (also runs in CI)
+```
 
 ---
 

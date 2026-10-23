@@ -42,11 +42,21 @@ commands:
               fi
             done
 
+executors:
+  node:
+    parameters:
+      resource_class:
+        type: string
+        default: medium
+    docker:
+      - image: cimg/node:24.22.1
+    resource_class: << parameters.resource_class >>
+
 jobs:
   apps-test:
-    docker:
-      - image: cimg/node:24.22.0
-    resource_class: medium+
+    executor:
+      name: node
+      resource_class: medium+
     steps:
       - checkout
       - set_since
@@ -76,9 +86,9 @@ jobs:
           path: /tmp/artifacts
 
   build:
-    docker:
-      - image: cimg/node:24.22.0
-    resource_class: medium+
+    executor:
+      name: node
+      resource_class: medium+
     working_directory: ~/apps
     steps:
       - checkout
@@ -96,9 +106,9 @@ jobs:
             npm run build
 
   build-deploy-staging:
-    docker:
-      - image: cimg/node:24.22.0
-    resource_class: medium+
+    executor:
+      name: node
+      resource_class: medium+
     steps:
       - vault/get-secrets:
           template-preset: 'aws-push-artifacts'
@@ -139,9 +149,9 @@ jobs:
           command: aws cloudfront create-invalidation --distribution-id $SLACK_TEST_CLOUDFRONT_DIST_ID --paths "/*"
 
   build-deploy-prod:
-    docker:
-      - image: cimg/node:24.22.0
-    resource_class: medium+
+    executor:
+      name: node
+      resource_class: medium+
     steps:
       - vault/get-secrets:
           template-preset: 'aws-push-artifacts'
@@ -187,8 +197,7 @@ jobs:
           command: aws cloudfront create-invalidation --distribution-id $SLACK_PRD_CLOUDFRONT_DIST_ID --paths "/*"
 
   test-ts-example:
-    docker:
-      - image: cimg/node:24.22.0
+    executor: node
     steps:
       - checkout
       - run:
@@ -202,8 +211,7 @@ jobs:
           command: cd examples/typescript && npm run test
 
   test-js-example:
-    docker:
-      - image: cimg/node:24.22.0
+    executor: node
     steps:
       - checkout
       - run:
