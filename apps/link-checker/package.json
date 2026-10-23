@@ -1,6 +1,9 @@
 {
   "name": "contentful-link-checker",
   "version": "0.1.0",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "overrides": {
     "@tootallnate/once": ">=3.0.1",
