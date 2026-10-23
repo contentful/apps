@@ -371,7 +371,7 @@ describe('paginate', () => {
       expect(getMany).toHaveBeenCalledTimes(3);
     });
 
-    it('stays exact when the cap equals the number of entries scanned to the end', async () => {
+    it('treats a scan that ends at the cap as incomplete', async () => {
       const getMany = vi.fn().mockImplementation(({ query }) => {
         if (query.limit === 0) return Promise.resolve({ items: [], total: 1000 });
         return Promise.resolve({ items: makeEntries(1000, 0), total: 1000 });
@@ -385,8 +385,28 @@ describe('paginate', () => {
         1000
       );
 
-      expect(result.exact).toBe(true);
+      expect(result.exact).toBe(false);
       expect(result.matchingIds).toHaveLength(500);
+    });
+
+    it('stops at the cap when the total grows after the initial count', async () => {
+      const getMany = vi.fn().mockImplementation(({ query }) => {
+        if (query.limit === 0) return Promise.resolve({ items: [], total: 9000 });
+        const count = Math.min(query.limit, 9001 - query.skip);
+        return Promise.resolve({ items: makeEntries(count, query.skip), total: 9001 });
+      });
+
+      const result = await scanMatchingEntries(
+        { entry: { getMany } } as any,
+        { contentType: 'test' },
+        isPublished,
+        vi.fn((fn) => fn()),
+        9000
+      );
+
+      expect(result.exact).toBe(false);
+      expect(result.matchingIds).toHaveLength(4500);
+      expect(getMany).toHaveBeenCalledTimes(10);
     });
   });
 

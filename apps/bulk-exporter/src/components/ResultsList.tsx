@@ -143,8 +143,8 @@ export interface ResultsListProps {
   activePage?: number;
   itemsPerPage?: number;
   totalCount?: number;
-  /** True when totalCount is the CMA's unfiltered total because the search exceeded the scan cap */
-  isCountApproximate?: boolean;
+  /** True when totalCount is the CMA's unfiltered total because the scan reached its cap */
+  isCountUpperBound?: boolean;
   selectedIds?: string[];
   onSelectionChange?: (selectedIds: string[]) => void;
   onExportSelected?: (
@@ -153,7 +153,7 @@ export interface ResultsListProps {
     filename: string,
     options: { includeTags: boolean; includeConcepts: boolean }
   ) => void;
-  /** True once the user has clicked "Select all N entries matching this search" */
+  /** True once the user has selected every entry matching the current search */
   selectAllMatching?: boolean;
   onSelectAllMatchingChange?: (value: boolean) => void;
   /** Exports every entry matching the current search filters, not just the fetched page(s) */
@@ -360,7 +360,7 @@ export function ResultsList({
   activePage = 0,
   itemsPerPage = 50,
   totalCount,
-  isCountApproximate = false,
+  isCountUpperBound = false,
   selectedIds = [],
   onSelectionChange,
   onExportSelected,
@@ -622,7 +622,7 @@ export function ResultsList({
               <Text fontSize="fontSizeS" fontColor="gray600">
                 {totalCount !== undefined
                   ? `${
-                      isCountApproximate ? 'Approximate ' : ''
+                      isCountUpperBound ? 'Up to ' : ''
                     }${totalCount.toLocaleString()} results`
                   : `${results.length} results`}
               </Text>
@@ -655,10 +655,13 @@ export function ResultsList({
               <Text fontSize="fontSizeM" fontColor="gray700">
                 {selectAllMatching ? (
                   <>
-                    All {isCountApproximate ? 'Approximate ' : ''}
-                    {(totalCount ?? selectedIds.length).toLocaleString()}{' '}
-                    {(totalCount ?? selectedIds.length) === 1 ? 'entry' : 'entries'} matching this
-                    search are selected.{' '}
+                    All{' '}
+                    {isCountUpperBound
+                      ? 'entries'
+                      : `${(totalCount ?? selectedIds.length).toLocaleString()} ${
+                          (totalCount ?? selectedIds.length) === 1 ? 'entry' : 'entries'
+                        }`}{' '}
+                    matching this search are selected.{' '}
                     <TextLink as="button" onClick={handleClearSelection}>
                       Clear selection
                     </TextLink>
@@ -668,8 +671,9 @@ export function ResultsList({
                     All {allCurrentIds.length} {allCurrentIds.length === 1 ? 'entry' : 'entries'} on
                     this page are selected.{' '}
                     <TextLink as="button" onClick={() => onSelectAllMatchingChange?.(true)}>
-                      Select all {isCountApproximate ? 'Approximate ' : ''}
-                      {totalCount?.toLocaleString()} entries matching this search
+                      {isCountUpperBound
+                        ? `Select all entries matching this search (up to ${totalCount?.toLocaleString()})`
+                        : `Select all ${totalCount?.toLocaleString()} entries matching this search`}
                     </TextLink>
                   </>
                 ) : (

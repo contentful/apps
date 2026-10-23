@@ -73,7 +73,7 @@ const Page = () => {
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [loading, setLoading] = useState(true);
   const [estimatedCount, setEstimatedCount] = useState<number | null>(null);
-  const [countIsApproximate, setCountIsApproximate] = useState(false);
+  const [countIsUpperBound, setCountIsUpperBound] = useState(false);
   const [progress, setProgress] = useState<ExportProgress | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
@@ -374,7 +374,7 @@ const Page = () => {
       setLastScan(scan);
       setSearchResults(items);
       mergeConceptsFromResults(items);
-      setCountIsApproximate(scan !== null && !scan.exact);
+      setCountIsUpperBound(scan !== null && !scan.exact);
       setEstimatedCount(scan ? (scan.exact ? scan.matchingIds.length : scan.rawTotal) : total);
 
       setTimeout(() => {
@@ -647,7 +647,7 @@ const Page = () => {
           activePage={activePage}
           itemsPerPage={ITEMS_PER_PAGE}
           totalCount={estimatedCount ?? undefined}
-          isCountApproximate={countIsApproximate}
+          isCountUpperBound={countIsUpperBound}
           selectedIds={selectedEntryIds}
           onSelectionChange={setSelectedEntryIds}
           onExportSelected={handleExportSelected}

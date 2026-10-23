@@ -181,9 +181,9 @@ async function* paginateByCursor(
 export interface ScanResult {
   /** sys.id of entries passing the post-filter, in scan order */
   matchingIds: string[];
-  /** false if the cap was hit before the scan finished; matchingIds is then incomplete */
+  /** false when the cap is reached; the scan cannot prove matchingIds is complete */
   exact: boolean;
-  /** The CMA's own unfiltered total, used for the "Approximate" count */
+  /** The CMA's initial unfiltered total, an upper bound for a stable search */
   rawTotal: number;
 }
 
@@ -196,8 +196,8 @@ const SCAN_SELECT = 'sys.id,sys.version,sys.publishedVersion,sys.archivedAt';
 /**
  * Walks the search's entries (ids and status fields only) and collects the ids that
  * pass `postFilter`, so the displayed count can match what the export will contain.
- * Stops once `cap` entries have been scanned without reaching the end, returning
- * `exact: false` and the CMA's raw total instead of an incomplete match list.
+ * Stops once `cap` entries have been scanned, returning `exact: false` because
+ * entries created during the scan could make the matching list incomplete.
  */
 export async function scanMatchingEntries(
   cma: CMAClient,
@@ -229,7 +229,7 @@ export async function scanMatchingEntries(
     }
     scanned += batch.length;
 
-    if (scanned >= cap && scanned < rawTotal) {
+    if (scanned >= cap) {
       return { matchingIds, exact: false, rawTotal };
     }
   }
@@ -240,7 +240,7 @@ export async function scanMatchingEntries(
 /**
  * 'matching-list' builds each page from the scan's complete list of matching ids, so
  * every page is full. 'skip-paging' is the plain skip/limit fetch with the post-filter
- * applied afterward, used when the scan hit its cap and the id list is incomplete.
+ * applied afterward, used when the scan hit its cap and id-list completeness is unproven.
  */
 export function choosePagingMode(scan: ScanResult): 'matching-list' | 'skip-paging' {
   return scan.exact ? 'matching-list' : 'skip-paging';
