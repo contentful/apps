@@ -114,6 +114,46 @@ describe('getMarketoForms handler', () => {
     expect(result.forms).not.toContainEqual(expect.objectContaining({ id: 'form-archived' }));
   });
 
+  it('should exclude forms in an unarchived subfolder of an archived parent folder', async () => {
+    // Reproduces the customer's retest of ES-642: Marketo's isArchive flag
+    // doesn't cascade from a parent folder down onto its subfolders, so a
+    // form sitting in a subfolder must have its whole ancestor chain
+    // checked, not just its own folder.
+    const liveForm = buildMarketoForm({ id: 'form-live', name: 'Current Contact Form' });
+    const nestedArchivedForm = buildMarketoForm({
+      id: 'form-nested-archived',
+      name: '00976653 II',
+      url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/nested.json',
+      folder: { type: 'Folder', value: 26, folderName: '2023 Campaigns' },
+    });
+
+    mockFetchRoutes({
+      [AUTH_URL]: mockAuthResponse,
+      [FORMS_URL]: buildFormsApiResponse([liveForm, nestedArchivedForm]),
+      [folderUrl(100)]: buildFolderApiResponse(buildMarketoFolder()),
+      [folderUrl(26)]: buildFolderApiResponse(
+        buildMarketoFolder({
+          id: 26,
+          name: '2023 Campaigns',
+          isArchive: false,
+          parent: { id: 25, type: 'Folder' },
+        })
+      ),
+      [folderUrl(25)]: buildFolderApiResponse(
+        buildMarketoFolder({ id: 25, name: '_Archive', isArchive: true })
+      ),
+    });
+
+    const result = await handler(mockEvent, mockContext);
+
+    expect(result.forms).toEqual([
+      { id: 'form-live', name: 'Current Contact Form', url: liveForm.url },
+    ]);
+    expect(result.forms).not.toContainEqual(
+      expect.objectContaining({ id: 'form-nested-archived' })
+    );
+  });
+
   it('should not issue duplicate folder lookups when multiple forms share a folder', async () => {
     const formA = buildMarketoForm({
       id: 'form-a',
