@@ -1,0 +1,18 @@
+{
+  "functions": [
+    {
+      "id": "auditLogBroker",
+      "name": "Audit Log Broker",
+      "description": "Lists audit log files in the customer S3 bucket for a date range and returns short-lived pre-signed GET URLs. Never returns credentials.",
+      "path": "functions/auditLogBroker.js",
+      "entryFile": "functions/auditLogBroker.ts",
+      "allowNetworks": [
+        "*.amazonaws.com",
+        "*.windows.net",
+        "storage.googleapis.com",
+        "oauth2.googleapis.com"
+      ],
+      "accepts": ["appaction.call"]
+    }
+  ]
+}
