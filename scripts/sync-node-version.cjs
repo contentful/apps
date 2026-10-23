@@ -11,6 +11,10 @@ const args = process.argv.slice(2);
 const checkOnly = args.includes('--check');
 const onlyIndex = args.indexOf('--only');
 const only = onlyIndex === -1 ? null : path.resolve(ROOT, args[onlyIndex + 1] || '');
+if (only && !only.startsWith(path.join(ROOT, 'apps') + path.sep)) {
+  console.error('--only must point to a directory inside apps/');
+  process.exit(2);
+}
 
 const version = fs.readFileSync(path.join(ROOT, '.nvmrc'), 'utf8').trim();
 if (!/^\d+\.\d+\.\d+$/.test(version)) {
@@ -74,18 +78,22 @@ function syncPackageJson(file) {
 
 function resolveDigest(tag) {
   return new Promise((resolve) => {
+    if (!/^[a-z0-9][a-z0-9._-]*$/i.test(tag)) return resolve(null);
     https
-      .get(`https://hub.docker.com/v2/repositories/library/node/tags/${tag}`, (res) => {
-        let body = '';
-        res.on('data', (chunk) => (body += chunk));
-        res.on('end', () => {
-          try {
-            resolve(JSON.parse(body).digest || null);
-          } catch (e) {
-            resolve(null);
-          }
-        });
-      })
+      .get(
+        `https://hub.docker.com/v2/repositories/library/node/tags/${encodeURIComponent(tag)}`,
+        (res) => {
+          let body = '';
+          res.on('data', (chunk) => (body += chunk));
+          res.on('end', () => {
+            try {
+              resolve(JSON.parse(body).digest || null);
+            } catch (e) {
+              resolve(null);
+            }
+          });
+        }
+      )
       .on('error', () => resolve(null));
   });
 }
