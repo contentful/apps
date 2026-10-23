@@ -621,9 +621,7 @@ export function ResultsList({
             <Flex gap="spacingS" alignItems="center">
               <Text fontSize="fontSizeS" fontColor="gray600">
                 {totalCount !== undefined
-                  ? `${
-                      isCountUpperBound ? 'Up to ' : ''
-                    }${totalCount.toLocaleString()} results`
+                  ? `${isCountUpperBound ? 'Up to ' : ''}${totalCount.toLocaleString()} results`
                   : `${results.length} results`}
               </Text>
               {sortColumn && (
