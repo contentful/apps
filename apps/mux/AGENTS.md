@@ -15,7 +15,7 @@ apps/mux/
 │       ├── locations/         # config, Sidebar
 │       ├── components/        # Robots/, AssetConfiguration/, TrackForm/, ...
 │       └── util/              # muxApi, robots*, types
-├── functions/                 # Contentful App Functions (its own package + build)
+├── functions/                 # Contentful App Functions (its own package; bundled by the root build)
 │   └── src/
 │       ├── muxProxy.ts        # appaction.call — Mux REST proxy for /video/v1/ and /robots/v0/
 │       ├── getSignedUrlTokens.ts  # appaction.call — signs playback JWTs
@@ -37,7 +37,7 @@ apps/mux/
 - **Who can run Robots is a UI guardrail, not a permission.** `canRunRobots` in `frontend/src/util/robotsAccess.ts`: space admins (`sdk.user.spaceMembership.admin`, never role names), or everyone while `muxRobotsAllowEveryone` is `true` — unset means admins only. Any new control that starts, cancels or chooses a run reads it; nothing server-side enforces it (ADR-0016).
 - **Robots needs the `robots:*` scope**, which cannot be added to an existing Mux token. `muxProxy` forwards Mux's `error.type` so the Robots tab can tell Mux refusing one run (`robots_*`: a workflow not on the plan, units) from Robots being off for the account (`forbidden`). Only the job list read decides capability; a refused run is a failed run (ADR-0006).
 - **The config screen calls `api.mux.com` from the browser** (`util/apiClient.tsx`) under a CORS exception Mux granted Contentful. That is not an oversight: the screen has to work *before* the app is installed, and it validates credentials as *typed* rather than as saved. Everything else goes through `muxProxy`. Its errors still go through the tab's classifier — `muxApiErrorFromResponse` then `capabilityFromError` — never a status check of its own.
-- **`functions/`** is a standalone package with its own `package.json`, `vite.config.mts` and `vitest.config.mts`. Bootstrap, test and build it independently.
+- **`functions/`** is a standalone package with its own `package.json`, `vite.config.mts` and `vitest.config.mts`. Bootstrap and test it independently; the root `npm run build` bundles it.
 - `contentful-app-manifest.json` (both the root one and `functions/`) defines the function signatures — update it when adding a function.
 - **Asset stored as JSON**: Mux asset data lives in a Contentful JSON object field. The schema and its version history are documented in `frontend/README.md`.
 

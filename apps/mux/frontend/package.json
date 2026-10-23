@@ -21,7 +21,7 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@contentful/app-scripts": "^1.29.0",
+    "@contentful/app-scripts": "^2.5.5",
     "@contentful/app-sdk": "4.12.0",
     "@contentful/dam-app-base": "2.0.46",
     "@contentful/f36-components": "4.67.0",
