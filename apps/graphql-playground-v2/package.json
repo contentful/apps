@@ -1,6 +1,9 @@
 {
   "name": "graphql-playground-v2",
   "version": "0.1.0",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "dependencies": {
     "@contentful/app-sdk": "^4.23.1",
