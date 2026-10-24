@@ -60,6 +60,9 @@ jobs:
     steps:
       - checkout
       - set_since
+      - run:
+          name: Check Node.js versions
+          command: npm run node:check
       - vault/get-secrets:
           template-preset: 'aws-push-artifacts'
       - run:
