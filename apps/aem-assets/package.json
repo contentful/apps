@@ -21,8 +21,8 @@
     "react-dom": "19.2.5"
   },
   "devDependencies": {
-    "@contentful/app-scripts": "^2.5.11",
-    "@vitejs/plugin-react": "^6.0.1",
+    "@contentful/app-scripts": "^2.5.12",
+    "@vitejs/plugin-react": "^6.1.2",
     "vite": "^8.0.10"
   },
   "browserslist": {
