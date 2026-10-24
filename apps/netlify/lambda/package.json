@@ -23,9 +23,9 @@
     "serverless-domain-manager": "3.3.2"
   },
   "dependencies": {
-    "@contentful/node-apps-toolkit": "^4.0.1",
+    "@contentful/node-apps-toolkit": "^4.1.0",
     "aws-serverless-express": "3.4.0",
-    "express": "4.22.1",
+    "express": "4.22.3",
     "lodash.get": "^4.4.2",
     "node-fetch": "2.7.0"
   },
