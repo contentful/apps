@@ -1,6 +1,9 @@
 {
   "name": "bulk-edit",
   "version": "0.1.0",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "dependencies": {
     "@contentful/app-sdk": "^4.29.1",

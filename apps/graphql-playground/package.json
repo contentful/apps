@@ -1,6 +1,9 @@
 {
   "name": "@contentful/graphql-playground",
   "version": "0.2.11",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "lavamoat": {
     "allowScripts": {

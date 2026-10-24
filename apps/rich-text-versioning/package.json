@@ -1,6 +1,9 @@
 {
   "name": "rich-text-versioning",
   "version": "0.1.0",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "dependencies": {
     "@ali-tas/htmldiff-js": "^2.0.1",
