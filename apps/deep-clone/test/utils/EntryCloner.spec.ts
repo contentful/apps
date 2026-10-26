@@ -275,6 +275,40 @@ describe('EntryCloner', () => {
         })
       );
     });
+
+    it('should not clone referenced entry if its content type is blacklisted', async () => {
+      const blacklistedReferencedEntry = getMockEntry('blacklisted-entry-id', {
+        title: { 'en-US': 'Global Header Title' },
+      });
+      blacklistedReferencedEntry.sys.contentType.sys.id = 'globalHeader';
+      const mainEntryWithBlacklist = getMockEntry('main-entry-id', {
+        title: { 'en-US': 'Main Entry Title' },
+        reference: {
+          'en-US': {
+            sys: { type: 'Link', linkType: 'Entry', id: 'blacklisted-entry-id' },
+          },
+        },
+      });
+      const clonedMainEntryWithBlacklist = getMockEntry('cloned-main-entry-id', {
+        title: { 'en-US': '[CLONE] Main Entry Title' },
+        reference: {
+          'en-US': {
+            sys: { type: 'Link', linkType: 'Entry', id: 'blacklisted-entry-id' },
+          },
+        },
+      });
+      mockCma.contentType.get.mockResolvedValue(contentType);
+      mockCma.entry.get
+        .mockResolvedValueOnce(mainEntryWithBlacklist)
+        .mockResolvedValueOnce(blacklistedReferencedEntry);
+      mockCma.entry.create.mockResolvedValueOnce(clonedMainEntryWithBlacklist);
+      const result = await entryCloner.cloneEntry();
+      expect(setReferencesCount).toHaveBeenCalledWith(1);
+      expect(setClonesCount).toHaveBeenCalledWith(1);
+      expect(mockCma.entry.create).toHaveBeenCalledTimes(1);
+      expect(mockCma.entry.update).not.toHaveBeenCalled();
+      expect(result.fields.reference['en-US'].sys.id).toEqual('blacklisted-entry-id');
+    });
   });
 
   describe('Creation failure handling', () => {

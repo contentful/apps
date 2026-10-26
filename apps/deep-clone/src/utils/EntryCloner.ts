@@ -1,6 +1,7 @@
 import { ContentTypeProps, CreateEntryProps, EntryProps } from 'contentful-management';
 import { CMAClient } from '@contentful/app-sdk';
 import { AppParameters } from '@/vite-env';
+import { CONTENT_TYPE_CLONE_BLACKLIST } from '../constants/contentTypeCloneBlacklist';
 
 type ReferenceMap = Record<string, EntryProps>;
 type ReferenceChildrenMap = Record<string, string[]>;
@@ -142,9 +143,8 @@ class EntryCloner {
     signal?: AbortSignal
   ): Promise<void> {
     this.throwIfDiscoveryAborted(signal);
-    this.addChildReference(parentEntryId, entryId);
-
     if (this.references[entryId]) {
+      this.addChildReference(parentEntryId, entryId);
       return;
     }
 
@@ -157,6 +157,12 @@ class EntryCloner {
     }
 
     if (entry !== undefined) {
+      const contentTypeId = entry.sys.contentType.sys.id;
+      if (parentEntryId !== undefined && CONTENT_TYPE_CLONE_BLACKLIST.has(contentTypeId)) {
+        return;
+      }
+
+      this.addChildReference(parentEntryId, entryId);
       this.references[entryId] = entry;
       this.discoveryOrder.push(entryId);
       this.discoveryParents[entryId] = parentEntryId ?? null;
