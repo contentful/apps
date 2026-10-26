@@ -32,7 +32,7 @@
     "prettier:write": "npx prettier@2.8.8 --write",
     "prettier:check": "npx prettier@2.8.8 --check '**/*.{js,jsx,ts,tsx}'",
     "prepare": "husky install",
-    "sentry-release": "SENTRY_RELEASE=$(git rev-parse --short HEAD); sentry-cli releases --log-level=debug new -p marketplace-apps $SENTRY_RELEASE && sentry-cli releases --log-level=debug set-commits --auto --ignore-missing $SENTRY_RELEASE && sentry-cli releases --log-level=debug finalize $SENTRY_RELEASE && sentry-cli releases --log-level=debug deploys $SENTRY_RELEASE new -e production"
+    "sentry-release": "SENTRY_RELEASE=$(git rev-parse --short HEAD); sentry-cli releases new -p marketplace-apps $SENTRY_RELEASE && sentry-cli releases set-commits --auto --ignore-missing $SENTRY_RELEASE && sentry-cli releases finalize $SENTRY_RELEASE && sentry-cli releases deploys $SENTRY_RELEASE new -e production"
   },
   "dependencies": {
     "lerna": "6.6.2"
