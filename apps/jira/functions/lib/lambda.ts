@@ -1,9 +1,4 @@
-import {
-  APIGatewayEventRequestContext,
-  APIGatewayProxyCallback,
-  APIGatewayProxyEvent,
-  APIGatewayProxyResult,
-} from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 export interface HTTPHeaders {
   [key: string]: string;
@@ -29,17 +24,13 @@ export const generateAPIGatewayResponse = (response: HTTPResponse): APIGatewayPr
 
 export const handleLambdaHTTPEvent =
   (handler: (arg: APIGatewayProxyEvent) => Promise<HTTPResponse>) =>
-  async (
-    event: APIGatewayProxyEvent,
-    _: APIGatewayEventRequestContext,
-    callback: APIGatewayProxyCallback
-  ) => {
+  async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
       const response = await handler(event);
-      callback(null, generateAPIGatewayResponse(response));
+      return generateAPIGatewayResponse(response);
     } catch (err) {
       console.error('Failed to handle request', event, err);
 
-      callback(null, generateAPIGatewayResponse({ statusCode: 500 }));
+      return generateAPIGatewayResponse({ statusCode: 500 });
     }
   };

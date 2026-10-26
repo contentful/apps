@@ -16,8 +16,9 @@
     "deploy:test": "DEPLOY_TIME_UNIX=$(date \"+%s\") sls deploy --stage test"
   },
   "dependencies": {
-    "@contentful/smartling-frontend": "^1.7.71",
     "@contentful/app-sdk": "^4.29.3",
+    "@contentful/smartling-frontend": "^1.7.71",
+    "aws-serverless-express": "3.4.0",
     "braces": "^3.0.3",
     "jest": "^29.7.0",
     "micromatch": "^4.0.8",
