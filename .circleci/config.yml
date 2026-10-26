@@ -15,8 +15,11 @@ commands:
           command: |
             echo "//npm.pkg.github.com/:_authToken=${GITHUB_PACKAGES_WRITE_TOKEN}" >> ~/.npmrc
       - run:
+          name: Build packages
+          command: npx lerna run build --stream --scope=@contentful/dam-app-base --scope=@contentful/ecommerce-app-base --scope=@contentful/eslint-plugin-contentful-apps
+      - run:
           name: Publish packages
-          command: NPM_CONFIG_IGNORE_SCRIPTS=false npm run publish-packages
+          command: npm run publish-packages
 
   set_since:
     steps:
