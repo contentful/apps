@@ -126,8 +126,10 @@ jobs:
           name: Install awscli
           command: |
             sudo apt-get update
-            sudo apt-get install python3-pip python3-dev
-            sudo pip3 install --break-system-packages awscli
+            sudo apt-get install -y python3-venv
+            python3 -m venv "$HOME/awscli"
+            "$HOME/awscli/bin/pip" install awscli==1.46.1
+            echo 'export PATH="$HOME/awscli/bin:$PATH"' >> $BASH_ENV
       - run:
           name: Build
           command: |
@@ -169,8 +171,10 @@ jobs:
           name: Install awscli
           command: |
             sudo apt-get update
-            sudo apt-get install python3-pip python3-dev
-            sudo pip3 install --break-system-packages awscli
+            sudo apt-get install -y python3-venv
+            python3 -m venv "$HOME/awscli"
+            "$HOME/awscli/bin/pip" install awscli==1.46.1
+            echo 'export PATH="$HOME/awscli/bin:$PATH"' >> $BASH_ENV
       - run:
           name: Build
           command: |
