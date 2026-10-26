@@ -1,0 +1,62 @@
+name: Deploy Deep Clone App
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'apps/deep-clone/**'
+      - '.github/workflows/deploy-deep-clone.yml'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'apps/deep-clone/**'
+      - '.github/workflows/deploy-deep-clone.yml'
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Deploy to Contentful'
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/deep-clone
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: apps/deep-clone/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run tests
+        run: npm run test:ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Deploy to Contentful
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/master') || (github.event_name == 'workflow_dispatch' && inputs.deploy == true)
+        env:
+          DEFINITIONS_ORG_ID: ${{ secrets.DEFINITIONS_ORG_ID }}
+          CONTENTFUL_CMA_TOKEN: ${{ secrets.CONTENTFUL_CMA_TOKEN }}
+        run: npm run deploy
