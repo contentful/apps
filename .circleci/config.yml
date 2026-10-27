@@ -84,6 +84,9 @@ jobs:
           name: Lint
           command: npm run lint
       - run:
+          name: Verify project configurations
+          command: npm run verify-config
+      - run:
           name: Test
           command: npm run test
       - store_artifacts:
