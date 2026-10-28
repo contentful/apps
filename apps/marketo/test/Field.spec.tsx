@@ -11,6 +11,8 @@ const mockForms: FormObject[] = [
   { id: 'form-3', url: 'https://marketo.example.com/form-3', name: 'Demo Request' },
 ];
 
+const FORM_ERROR_TEXT = 'Could not load Marketo forms. Please try again or contact a space admin.';
+
 let mockSdk: ReturnType<typeof createMockSdk>;
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
@@ -192,6 +194,219 @@ describe('Field component', () => {
 
       expect(screen.queryByText('Newsletter Signup')).not.toBeInTheDocument();
       expect(screen.queryByText('Contact Us')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Paginated loading', () => {
+    type Page = { forms: FormObject[]; nextOffset?: number };
+
+    const form = (id: string, name: string): FormObject => ({
+      id,
+      name,
+      url: `https://marketo.example.com/${id}`,
+    });
+
+    const page1: Page = { forms: [form('form-1', 'Newsletter Signup')], nextOffset: 200 };
+    const page2: Page = { forms: [form('form-4800', 'EN Product Marketing')], nextOffset: 400 };
+    const page3: Page = { forms: [form('form-5115', 'EN Brand Invite')] };
+
+    const requestedOffsets = () =>
+      mockSdk.cma.appActionCall.createWithResponse.mock.calls.map(
+        (call: unknown[]) => (call[1] as { parameters: { offset?: number } }).parameters.offset
+      );
+
+    // Serves pages by offset. Offsets listed in `held` stay pending until
+    // released, so tests can observe the UI between pages.
+    const mockPages = (pages: Record<number, Page | Error>, held: number[] = []) => {
+      const releases = new Map<number, () => void>();
+      mockSdk.cma.appActionCall.createWithResponse.mockImplementation(
+        async (_ids: unknown, { parameters }: { parameters: { offset?: number } }) => {
+          const offset = parameters.offset ?? 0;
+          if (held.includes(offset)) {
+            await new Promise<void>((resolve) => releases.set(offset, resolve));
+          }
+          const page = pages[offset];
+          if (page instanceof Error) throw page;
+          return { response: { body: JSON.stringify(page) } };
+        }
+      );
+      return {
+        release: async (offset: number) => {
+          await waitFor(() => expect(releases.has(offset)).toBe(true));
+          releases.get(offset)!();
+        },
+      };
+    };
+
+    const openDropdown = async (user: ReturnType<typeof userEvent.setup>) => {
+      const input = await waitForAutocomplete();
+      await user.click(input);
+      return input;
+    };
+
+    it('should request the first page without an offset and follow nextOffset until the last page', async () => {
+      const user = userEvent.setup();
+      mockPages({ 0: page1, 200: page2, 400: page3 });
+
+      render(<Field />);
+      await openDropdown(user);
+
+      await waitFor(() => {
+        expect(screen.getByText('Newsletter Signup')).toBeInTheDocument();
+        expect(screen.getByText('EN Product Marketing')).toBeInTheDocument();
+        expect(screen.getByText('EN Brand Invite')).toBeInTheDocument();
+      });
+      expect(requestedOffsets()).toEqual([undefined, 200, 400]);
+    });
+
+    it('should show the first page while later pages are still loading', async () => {
+      const user = userEvent.setup();
+      const pages = mockPages({ 0: page1, 200: page2, 400: page3 }, [200]);
+
+      render(<Field />);
+      await openDropdown(user);
+
+      expect(screen.getByText('Newsletter Signup')).toBeInTheDocument();
+      expect(screen.getByText(/Loading more Marketo forms/i)).toBeInTheDocument();
+
+      await pages.release(200);
+
+      await waitFor(() => {
+        expect(screen.queryByText(/Loading more Marketo forms/i)).not.toBeInTheDocument();
+      });
+    });
+
+    it('should apply the current search to forms that arrive later', async () => {
+      const user = userEvent.setup();
+      const pages = mockPages({ 0: page1, 200: page2, 400: page3 }, [200]);
+
+      render(<Field />);
+      const input = await openDropdown(user);
+      await user.type(input, 'product');
+
+      expect(screen.queryByText('Newsletter Signup')).not.toBeInTheDocument();
+
+      await pages.release(200);
+
+      await waitFor(() => {
+        expect(screen.getByText('EN Product Marketing')).toBeInTheDocument();
+      });
+      expect(screen.queryByText('Newsletter Signup')).not.toBeInTheDocument();
+      expect(screen.queryByText('EN Brand Invite')).not.toBeInTheDocument();
+    });
+
+    it('should display a saved form that is on a later page once it loads', async () => {
+      mockSdk.field.getValue.mockReturnValue({
+        id: 'form-4800',
+        url: 'https://marketo.example.com/form-4800',
+      });
+      mockPages({ 0: page1, 200: page2, 400: page3 });
+
+      render(<Field />);
+
+      const input = await waitForAutocomplete();
+      await waitFor(() => expect(input).toHaveValue('EN Product Marketing'));
+    });
+
+    it('should not re-select the saved form after the user cleared the field', async () => {
+      const user = userEvent.setup();
+      mockSdk.field.getValue.mockReturnValue({
+        id: 'form-4800',
+        url: 'https://marketo.example.com/form-4800',
+      });
+      const pages = mockPages({ 0: page1, 200: page2, 400: page3 }, [200]);
+
+      render(<Field />);
+      const input = await waitForAutocomplete();
+      await user.type(input, 'x');
+      await user.clear(input);
+
+      await pages.release(200);
+
+      await waitFor(() => {
+        expect(screen.queryByText(/Loading more Marketo forms/i)).not.toBeInTheDocument();
+      });
+      expect(input).toHaveValue('');
+    });
+
+    it('should keep loaded forms and warn when a later page fails', async () => {
+      const user = userEvent.setup();
+      mockPages({ 0: page1, 200: new Error('Rate limited') });
+
+      render(<Field />);
+      await openDropdown(user);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Some Marketo forms could not be loaded/i)).toBeInTheDocument();
+      });
+      expect(screen.getByText('Newsletter Signup')).toBeInTheDocument();
+    });
+
+    it('should keep loading instead of showing "no forms" when the first page is empty but more exist', async () => {
+      const user = userEvent.setup();
+      const pages = mockPages({ 0: { forms: [], nextOffset: 200 }, 200: page3 }, [200]);
+
+      render(<Field />);
+
+      await waitFor(() => expect(requestedOffsets()).toContain(200));
+      expect(screen.queryByText(/No Marketo forms found/i)).not.toBeInTheDocument();
+
+      await pages.release(200);
+
+      await openDropdown(user);
+      expect(screen.getByText('EN Brand Invite')).toBeInTheDocument();
+    });
+
+    it('should drop forms already loaded from an earlier page', async () => {
+      const user = userEvent.setup();
+      mockPages({
+        0: page1,
+        200: {
+          forms: [form('form-1', 'Newsletter Signup'), form('form-4800', 'EN Product Marketing')],
+        },
+      });
+
+      render(<Field />);
+      await openDropdown(user);
+
+      await waitFor(() => {
+        expect(screen.getByText('EN Product Marketing')).toBeInTheDocument();
+      });
+      expect(screen.getAllByText('Newsletter Signup')).toHaveLength(1);
+    });
+
+    it('should show the load error when a later page fails before any forms loaded', async () => {
+      mockPages({ 0: { forms: [], nextOffset: 200 }, 200: new Error('Rate limited') });
+
+      render(<Field />);
+
+      await waitFor(() => {
+        expect(screen.getByText(FORM_ERROR_TEXT)).toBeInTheDocument();
+      });
+      expect(screen.queryByText(/No Marketo forms found/i)).not.toBeInTheDocument();
+    });
+
+    it('should stop paging when a page only repeats forms already loaded', async () => {
+      mockPages({ 0: page1, 200: { ...page1, nextOffset: 400 }, 400: page3 });
+
+      render(<Field />);
+      await waitForAutocomplete();
+
+      await waitFor(() => expect(requestedOffsets()).toEqual([undefined, 200]));
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      expect(requestedOffsets()).toEqual([undefined, 200]);
+    });
+
+    it('should stop requesting pages after unmount', async () => {
+      const pages = mockPages({ 0: page1, 200: page2, 400: page3 }, [200]);
+
+      const { unmount } = render(<Field />);
+      await waitForAutocomplete();
+      unmount();
+      await pages.release(200);
+
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      expect(requestedOffsets()).toEqual([undefined, 200]);
     });
   });
 

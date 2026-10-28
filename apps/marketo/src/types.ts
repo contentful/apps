@@ -6,6 +6,8 @@ export type FormObject = {
 
 export type MarketoFormsResponse = {
   forms?: FormObject[];
+  // Offset of the next forms.json page; absent when this was the last page.
+  nextOffset?: number;
 };
 
 // Shapes returned by Marketo's Asset API (forms.json / folder/{id}.json).
