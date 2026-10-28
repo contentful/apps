@@ -43,7 +43,7 @@
   ],
   "homepage": ".",
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "4.65.0"
+    "@rollup/rollup-linux-x64-gnu": "4.65.1"
   },
   "overrides": {
     "form-data": "^4.0.6"
