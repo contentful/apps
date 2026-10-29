@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Paragraph,
   Flex,
@@ -31,17 +31,25 @@ const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
   useAutoResizer();
   const [forms, setForms] = useState<FormObject[] | null>(null);
-  const [filteredForms, setFilteredForms] = useState<FormObject[]>([]);
-  const [selectedForm, setSelectedForm] = useState<FormObject>(EMPTY_FORM);
+  const [searchTerm, setSearchTerm] = useState('');
+  // null until the editor interacts; until then the saved form is selected
+  // as soon as the page containing it arrives.
+  const [selection, setSelection] = useState<FormObject | null>(null);
+  const [savedFormId] = useState<string | undefined>(() => sdk.field.getValue()?.id || undefined);
   const [loadingData, setLoadingStatus] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [partialLoadError, setPartialLoadError] = useState(false);
   const [error, updateError] = useState<ErrorState>({ error: false, message: '' });
-  // Forms keep arriving page by page after the first render, so the latest
-  // search, selection, and saved-but-not-yet-loaded form are read from refs.
-  const searchTermRef = useRef('');
-  const selectedIdRef = useRef('');
-  const pendingSelectionIdRef = useRef<string | undefined>(undefined);
+
+  const savedForm = useMemo(
+    () => (savedFormId && forms?.find((form) => form.id === savedFormId)) || EMPTY_FORM,
+    [forms, savedFormId]
+  );
+  const selectedForm = selection ?? savedForm;
+  const filteredForms = useMemo(
+    () => (forms ?? []).filter((form) => matchesSearch(form, searchTerm, selectedForm.id)),
+    [forms, searchTerm, selectedForm.id]
+  );
 
   const handleDropdownOpen = () => {
     sdk.window.stopAutoResizer();
@@ -57,42 +65,25 @@ const Field = () => {
       return;
     }
     sdk.field.setValue({ id: form.id, url: form.url });
-    setSelectedForm(form);
-    selectedIdRef.current = form.id;
-    pendingSelectionIdRef.current = undefined;
-    searchTermRef.current = '';
-    if (forms) {
-      setFilteredForms(forms.filter((item) => item.id !== form.id));
-    }
+    setSelection(form);
+    setSearchTerm('');
   };
 
   const handleFormInputChange = (value: string) => {
-    if (value) {
-      pendingSelectionIdRef.current = undefined;
+    if (value && selection === null) {
+      setSelection(selectedForm);
     }
-    if (!value && selectedForm?.id) {
+    if (!value && selectedForm.id) {
       removeFieldValue();
       return;
     }
-
-    const normalizedValue = value.trim().toLowerCase();
-    searchTermRef.current = normalizedValue;
-    if (!forms) {
-      setFilteredForms([]);
-      return;
-    }
-    setFilteredForms(
-      forms.filter((form) => matchesSearch(form, normalizedValue, selectedForm?.id ?? ''))
-    );
+    setSearchTerm(value.trim().toLowerCase());
   };
 
   const removeFieldValue = () => {
     sdk.field.setValue(EMPTY_FORM);
-    setSelectedForm(EMPTY_FORM);
-    selectedIdRef.current = '';
-    pendingSelectionIdRef.current = undefined;
-    searchTermRef.current = '';
-    setFilteredForms(forms || []);
+    setSelection(EMPTY_FORM);
+    setSearchTerm('');
   };
 
   useEffect(() => {
@@ -114,7 +105,6 @@ const Field = () => {
     // Shows the first page as soon as it arrives, then keeps loading the
     // remaining pages in the background so search covers every form.
     const loadForms = async () => {
-      pendingSelectionIdRef.current = sdk.field.getValue()?.id || undefined;
       let loaded: FormObject[] = [];
       let offset: number | undefined;
 
@@ -130,20 +120,7 @@ const Field = () => {
           const newForms = result.forms.filter((form) => !loadedIds.has(form.id));
           loaded = [...loaded, ...newForms];
 
-          const pendingId = pendingSelectionIdRef.current;
-          const preselectedForm = pendingId && loaded.find((form) => form.id === pendingId);
-          if (preselectedForm) {
-            setSelectedForm(preselectedForm);
-            selectedIdRef.current = preselectedForm.id;
-            pendingSelectionIdRef.current = undefined;
-          }
-
           setForms(loaded);
-          setFilteredForms(
-            loaded.filter((form) =>
-              matchesSearch(form, searchTermRef.current, selectedIdRef.current)
-            )
-          );
           setLoadingStatus(false);
 
           // A non-empty page with nothing new means paging isn't advancing.
@@ -196,7 +173,7 @@ const Field = () => {
         <>
           <FormControl>
             <Autocomplete<FormObject>
-              items={filteredForms.filter((item) => item.id !== selectedForm?.id)}
+              items={filteredForms}
               selectedItem={selectedForm}
               onInputValueChange={handleFormInputChange}
               onSelectItem={updateFieldValue}
