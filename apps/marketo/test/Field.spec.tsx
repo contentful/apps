@@ -131,7 +131,7 @@ describe('Field component', () => {
       render(<Field />);
 
       const input = await waitForAutocomplete();
-      expect(input).toHaveValue('Contact Us');
+      await waitFor(() => expect(input).toHaveValue('Contact Us'));
     });
   });
 
