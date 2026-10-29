@@ -198,16 +198,73 @@ describe('getMarketoForms handler', () => {
         .mock.calls.map(([url]) => String(url))
         .filter((url) => url.includes('forms.json'));
 
-    it('should return nextOffset when the page is full', async () => {
+    const authRequests = () =>
+      vi.mocked(fetch).mock.calls.filter(([url]) => String(url) === AUTH_URL);
+
+    it('should fetch up to 5 pages with one auth and return nextOffset when the last is full', async () => {
       mockRoutes({
         [AUTH_URL]: authResponse,
-        [formsUrl(0)]: pageResponse(PAGE_SIZE),
+        ...Object.fromEntries(
+          [0, 200, 400, 600, 800].map((offset) => [
+            formsUrl(offset),
+            pageResponse(PAGE_SIZE, offset),
+          ])
+        ),
       });
 
       const result = (await handler(mockEvent, mockContext)) as MarketoFormsResponse;
 
-      expect(result.forms).toHaveLength(PAGE_SIZE);
-      expect(result.nextOffset).toBe(PAGE_SIZE);
+      expect(result.forms).toHaveLength(5 * PAGE_SIZE);
+      expect(result.forms?.[PAGE_SIZE].id).toBe('form-200');
+      expect(result.nextOffset).toBe(1000);
+      expect(authRequests()).toHaveLength(1);
+    });
+
+    it('should stop at the first short page and drop pages after it', async () => {
+      mockRoutes({
+        [AUTH_URL]: authResponse,
+        [formsUrl(0)]: pageResponse(PAGE_SIZE),
+        [formsUrl(200)]: pageResponse(PAGE_SIZE, 200),
+        [formsUrl(400)]: pageResponse(5, 400),
+        // Forms created mid-call can make a later page non-empty.
+        [formsUrl(600)]: pageResponse(PAGE_SIZE, 600),
+        [formsUrl(800)]: pageResponse(PAGE_SIZE, 800),
+      });
+
+      const result = (await handler(mockEvent, mockContext)) as MarketoFormsResponse;
+
+      expect(result.forms).toHaveLength(2 * PAGE_SIZE + 5);
+      expect(result.nextOffset).toBeUndefined();
+    });
+
+    it('should start from the given offset', async () => {
+      mockRoutes({
+        [AUTH_URL]: authResponse,
+        [formsUrl(1000)]: pageResponse(PAGE_SIZE, 1000),
+        [formsUrl(1200)]: pageResponse(1, 1200),
+        [formsUrl(1400)]: { success: true },
+        [formsUrl(1600)]: { success: true },
+        [formsUrl(1800)]: { success: true },
+      });
+
+      const result = (await handler(withOffset(1000), mockContext)) as MarketoFormsResponse;
+
+      expect(result.forms?.[0].id).toBe('form-1000');
+      expect(result.forms).toHaveLength(PAGE_SIZE + 1);
+      expect(formsRequests()).toEqual([1000, 1200, 1400, 1600, 1800].map(formsUrl));
+    });
+
+    it('should throw MarketoApiError when a later page fails', async () => {
+      mockRoutes({
+        [AUTH_URL]: authResponse,
+        [formsUrl(0)]: pageResponse(PAGE_SIZE),
+        [formsUrl(200)]: pageResponse(PAGE_SIZE, 200),
+        [formsUrl(400)]: { success: false, errors: [{ code: '606' }] },
+        [formsUrl(600)]: { success: true },
+        [formsUrl(800)]: { success: true },
+      });
+
+      await expect(handler(mockEvent, mockContext)).rejects.toThrow(MarketoApiError);
     });
 
     it('should request the page at the given offset and omit nextOffset on a short page', async () => {
