@@ -11,12 +11,9 @@ import {
   AUTH_URL,
   FORMS_URL,
   formsUrl,
-  folderUrl,
   mockAuthResponse,
   buildMarketoForm,
-  buildMarketoFolder,
   buildFormsApiResponse,
-  buildFolderApiResponse,
   jsonResponse,
 } from '../mocks';
 
@@ -58,95 +55,38 @@ describe('getMarketoForms handler', () => {
     });
   };
 
-  it('should successfully fetch and return Marketo forms', async () => {
+  it('should return each form with its folder reference', async () => {
     const form1 = buildMarketoForm({ id: 'form-1', name: 'Contact Form' });
     const form2 = buildMarketoForm({
       id: 'form-2',
       name: 'Newsletter Signup',
       url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/2.json',
-      folder: { type: 'Folder', value: 101, folderName: 'Emails' },
+      folder: { type: 'Program', value: 101, folderName: 'Webinar' },
     });
 
     mockFetchRoutes({
       [AUTH_URL]: mockAuthResponse,
       [FORMS_URL]: buildFormsApiResponse([form1, form2]),
-      [folderUrl(100)]: buildFolderApiResponse(buildMarketoFolder()),
-      [folderUrl(101)]: buildFolderApiResponse(buildMarketoFolder({ id: 101, name: 'Emails' })),
     });
 
     const result = await handler(mockEvent, mockContext);
 
     expect(result).toEqual({
       forms: [
-        { id: 'form-1', name: 'Contact Form', url: form1.url },
-        { id: 'form-2', name: 'Newsletter Signup', url: form2.url },
+        {
+          id: 'form-1',
+          name: 'Contact Form',
+          url: form1.url,
+          folder: { id: 100, type: 'Folder' },
+        },
+        {
+          id: 'form-2',
+          name: 'Newsletter Signup',
+          url: form2.url,
+          folder: { id: 101, type: 'Program' },
+        },
       ],
     });
-  });
-
-  it('should exclude forms whose folder is archived (isArchive=true)', async () => {
-    // Reproduces the ES-642 customer scenario: a form carrying a normal
-    // "approved" status while sitting in a folder Marketo's UI has archived.
-    // Archival is a folder-level property in Marketo, never a form-level
-    // one, so the fix must cross-reference each form's folder before
-    // returning it.
-    const liveForm = buildMarketoForm({ id: 'form-live', name: 'Current Contact Form' });
-    const archivedForm = buildMarketoForm({
-      id: 'form-archived',
-      name: 'z_archived_Old Contact Form',
-      url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/archived.json',
-      folder: { type: 'Folder', value: 25, folderName: '_Archive' },
-    });
-
-    mockFetchRoutes({
-      [AUTH_URL]: mockAuthResponse,
-      [FORMS_URL]: buildFormsApiResponse([liveForm, archivedForm]),
-      [folderUrl(100)]: buildFolderApiResponse(buildMarketoFolder()),
-      [folderUrl(25)]: buildFolderApiResponse(
-        buildMarketoFolder({ id: 25, name: '_Archive', isArchive: true })
-      ),
-    });
-
-    const result = await handler(mockEvent, mockContext);
-
-    expect(result.forms).toEqual([
-      { id: 'form-live', name: 'Current Contact Form', url: liveForm.url },
-    ]);
-    expect(result.forms).not.toContainEqual(expect.objectContaining({ id: 'form-archived' }));
-  });
-
-  it('should not issue duplicate folder lookups when multiple forms share a folder', async () => {
-    const formA = buildMarketoForm({
-      id: 'form-a',
-      name: 'Archived A',
-      url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/a.json',
-      folder: { type: 'Folder', value: 25, folderName: '_Archive' },
-    });
-    const formB = buildMarketoForm({
-      id: 'form-b',
-      name: 'Archived B',
-      url: 'https://test-munchkin.mktorest.com/rest/asset/v1/form/b.json',
-      folder: { type: 'Folder', value: 25, folderName: '_Archive' },
-    });
-
-    let folderLookupCount = 0;
-    vi.mocked(fetch).mockImplementation(async (input) => {
-      const url = String(input);
-      if (url === AUTH_URL) return jsonResponse(mockAuthResponse);
-      if (url === FORMS_URL) return jsonResponse(buildFormsApiResponse([formA, formB]));
-      if (url === folderUrl(25)) {
-        folderLookupCount += 1;
-        return jsonResponse(
-          buildFolderApiResponse(buildMarketoFolder({ id: 25, name: '_Archive', isArchive: true }))
-        );
-      }
-      throw new Error(`Unexpected fetch: ${url}`);
-    });
-
-    const result = await handler(mockEvent, mockContext);
-
-    expect(result.forms).toEqual([]);
-    expect(folderLookupCount).toBe(1);
   });
 
   it('should keep a form when it has no folder information (defensive fallback)', async () => {
@@ -210,6 +150,20 @@ describe('getMarketoForms handler', () => {
     await expect(handler(mockEvent, mockContext)).rejects.toThrow(MarketoApiError);
   });
 
+  it.each(['606', '615'])(
+    'should report rateLimited instead of throwing when Marketo returns %s',
+    async (code) => {
+      mockFetchRoutes({
+        [AUTH_URL]: mockAuthResponse,
+        [FORMS_URL]: { success: false, errors: [{ code, message: 'Limit exceeded' }] },
+      });
+
+      const result = await handler(mockEvent, mockContext);
+
+      expect(result).toEqual({ rateLimited: true });
+    }
+  );
+
   describe('pagination', () => {
     const PAGE_SIZE = 200;
 
@@ -231,7 +185,6 @@ describe('getMarketoForms handler', () => {
       mockFetchRoutes({
         [AUTH_URL]: mockAuthResponse,
         [formsUrl(400)]: buildFormsApiResponse(buildFormPage(3, 400)),
-        [folderUrl(100)]: buildFolderApiResponse(buildMarketoFolder()),
       });
 
       const result = await handler(eventWithOffset(400), mockContext);
@@ -255,17 +208,15 @@ describe('getMarketoForms handler', () => {
       expect(result).toEqual({ forms: [] });
     });
 
-    it('should base nextOffset on the raw page size, not the count left after archive filtering', async () => {
-      const archivedPage = buildFormPage(PAGE_SIZE, 0, 25);
+    it('should return nextOffset when the page is full', async () => {
       mockFetchRoutes({
         [AUTH_URL]: mockAuthResponse,
-        [formsUrl(0)]: buildFormsApiResponse(archivedPage),
-        [folderUrl(25)]: buildFolderApiResponse(buildMarketoFolder({ id: 25, isArchive: true })),
+        [formsUrl(0)]: buildFormsApiResponse(buildFormPage(PAGE_SIZE)),
       });
 
       const result = await handler(mockEvent, mockContext);
 
-      expect(result.forms).toEqual([]);
+      expect(result.forms).toHaveLength(PAGE_SIZE);
       expect(result.nextOffset).toBe(PAGE_SIZE);
     });
 
@@ -275,7 +226,6 @@ describe('getMarketoForms handler', () => {
         mockFetchRoutes({
           [AUTH_URL]: mockAuthResponse,
           [formsUrl(0)]: buildFormsApiResponse(buildFormPage(1)),
-          [folderUrl(100)]: buildFolderApiResponse(buildMarketoFolder()),
         });
 
         const result = await handler(eventWithOffset(offset), mockContext);
@@ -283,62 +233,5 @@ describe('getMarketoForms handler', () => {
         expect(result.forms).toHaveLength(1);
       }
     );
-  });
-
-  describe('folder lookups', () => {
-    it('should run at most 5 folder lookups concurrently', async () => {
-      const forms = Array.from({ length: 12 }, (_, i) =>
-        buildMarketoForm({
-          id: `form-${i}`,
-          folder: { type: 'Folder', value: 1000 + i, folderName: `Folder ${i}` },
-        })
-      );
-
-      let inFlight = 0;
-      let maxInFlight = 0;
-      vi.mocked(fetch).mockImplementation(async (input) => {
-        const url = String(input);
-        if (url === AUTH_URL) return jsonResponse(mockAuthResponse);
-        if (url === FORMS_URL) return jsonResponse(buildFormsApiResponse(forms));
-        const folderMatch = url.match(/folder\/(\d+)\.json/);
-        if (folderMatch) {
-          inFlight += 1;
-          maxInFlight = Math.max(maxInFlight, inFlight);
-          await new Promise((resolve) => setTimeout(resolve, 5));
-          inFlight -= 1;
-          return jsonResponse(
-            buildFolderApiResponse(buildMarketoFolder({ id: Number(folderMatch[1]) }))
-          );
-        }
-        throw new Error(`Unexpected fetch: ${url}`);
-      });
-
-      const result = await handler(mockEvent, mockContext);
-
-      expect(result.forms).toHaveLength(12);
-      expect(maxInFlight).toBeLessThanOrEqual(5);
-      expect(maxInFlight).toBeGreaterThan(1);
-    });
-
-    it('should log a failed folder lookup and keep its forms', async () => {
-      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-      const form = buildMarketoForm({ id: 'form-1' });
-
-      mockFetchRoutes({
-        [AUTH_URL]: mockAuthResponse,
-        [FORMS_URL]: buildFormsApiResponse([form]),
-        [folderUrl(100)]: {
-          success: false,
-          errors: [{ code: '615', message: 'Concurrent access limit reached' }],
-        },
-      });
-
-      const result = await handler(mockEvent, mockContext);
-
-      expect(result.forms).toEqual([{ id: 'form-1', name: form.name, url: form.url }]);
-      expect(consoleError).toHaveBeenCalledWith(expect.stringContaining('folder 100'));
-      expect(consoleError).toHaveBeenCalledWith(expect.stringContaining('615'));
-      consoleError.mockRestore();
-    });
   });
 });

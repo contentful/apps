@@ -17,6 +17,15 @@
       "entryFile": "functions/getMarketoForms.ts",
       "allowNetworks": ["https://*.mktorest.com"],
       "accepts": ["appaction.call"]
+    },
+    {
+      "id": "getMarketoFolderStatusFunction",
+      "name": "Get Marketo folder status",
+      "description": "Function to get the archive status of Marketo folders from an App Action",
+      "path": "functions/getMarketoFolderStatus.js",
+      "entryFile": "functions/getMarketoFolderStatus.ts",
+      "allowNetworks": ["https://*.mktorest.com"],
+      "accepts": ["appaction.call"]
     }
   ],
   "actions": [
@@ -80,6 +89,18 @@
                 "name": {
                   "type": "string",
                   "description": "The name of the form"
+                },
+                "folder": {
+                  "type": "object",
+                  "description": "The folder or program the form lives in",
+                  "properties": {
+                    "id": {
+                      "type": "number"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
@@ -87,6 +108,51 @@
           "nextOffset": {
             "type": "number",
             "description": "Offset of the next page of forms; absent on the last page"
+          },
+          "rateLimited": {
+            "type": "boolean",
+            "description": "Marketo rate limited the call; retry after a wait"
+          }
+        }
+      }
+    },
+    {
+      "id": "getMarketoFolderStatusAction",
+      "name": "Get Marketo folder status",
+      "type": "function-invocation",
+      "functionId": "getMarketoFolderStatusFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "folders",
+          "name": "Folders",
+          "type": "Symbol",
+          "required": true
+        }
+      ],
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "folders": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "isArchive": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "rateLimited": {
+            "type": "boolean",
+            "description": "Some folders were rate limited; retry them after a wait"
           }
         }
       }

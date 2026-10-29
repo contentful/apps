@@ -5,6 +5,7 @@ export const CREDENTIAL_VALIDATION: { id: string; message: string }[] = [
 ];
 
 export const GET_FORMS_APP_ACTION_ID = 'getMarketoFormsAction';
+export const GET_FOLDER_STATUS_APP_ACTION_ID = 'getMarketoFolderStatusAction';
 
 export const INVALID_CREDENTIALS_RESPONSE =
   'Marketo authentication failed, check your credentials and try again.';

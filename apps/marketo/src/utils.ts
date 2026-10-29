@@ -44,3 +44,5 @@ export const loadSavedSelections = (
     return config?.controls?.some((control) => control.fieldId === field.fieldId);
   });
 };
+
+export const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));

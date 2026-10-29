@@ -9,8 +9,15 @@ import {
 } from '@contentful/f36-components';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import type { FormObject, MarketoFormsResponse } from '../types';
-import { GET_FORMS_APP_ACTION_ID } from '../const';
+import type {
+  FormObject,
+  MarketoFolderRef,
+  MarketoFolderStatusResponse,
+  MarketoFormsResponse,
+  MarketoFormWithFolder,
+} from '../types';
+import { GET_FOLDER_STATUS_APP_ACTION_ID, GET_FORMS_APP_ACTION_ID } from '../const';
+import { delay } from '../utils';
 
 type ErrorState = {
   error: boolean;
@@ -23,6 +30,39 @@ const FORM_ERROR_MESSAGE =
   'Could not load Marketo forms. Please try again or contact a space admin.';
 const PARTIAL_LOAD_MESSAGE =
   'Some Marketo forms could not be loaded. Reload the entry to try again.';
+
+const FOLDERS_PER_CALL = 10;
+// Keeps the field at about 40 Marketo requests per 20 seconds, well under
+// Marketo's per-instance limit of 100 that every integration shares.
+const MS_PER_MARKETO_REQUEST = 500;
+const RATE_LIMIT_WAIT_MS = 20_000;
+const MAX_RATE_LIMIT_RETRIES = 3;
+const FOLDER_STATUS_TTL_MS = 24 * 60 * 60 * 1000;
+
+type FolderStatuses = Record<string, { isArchive: boolean; checkedAt: number }>;
+
+const folderKey = ({ id, type }: MarketoFolderRef) => `${type}:${id}`;
+
+// Folder archive status is saved per browser so later loads skip lookups.
+const readFolderStatuses = (storageKey: string): FolderStatuses => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey) ?? '{}') as FolderStatuses;
+    const now = Date.now();
+    return Object.fromEntries(
+      Object.entries(saved).filter(([, status]) => now - status.checkedAt < FOLDER_STATUS_TTL_MS)
+    );
+  } catch {
+    return {};
+  }
+};
+
+const saveFolderStatuses = (storageKey: string, statuses: FolderStatuses) => {
+  try {
+    localStorage.setItem(storageKey, JSON.stringify(statuses));
+  } catch {
+    // Storage can be unavailable; the next load checks folders again.
+  }
+};
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
@@ -90,25 +130,82 @@ const Field = () => {
   useEffect(() => {
     let cancelled = false;
 
-    const fetchPage = async (offset?: number) => {
+    const storageKey = `marketo-folder-status:${sdk.ids.space}:${sdk.ids.environment}:${
+      sdk.parameters.installation?.munchkinId ?? ''
+    }`;
+    const statuses = readFolderStatuses(storageKey);
+
+    // Each call is followed by a pause sized to the Marketo requests it made.
+    const callAction = async <T,>(
+      appActionId: string,
+      parameters: Record<string, string | number>,
+      marketoRequests: number
+    ) => {
       const { response } = await sdk.cma.appActionCall.createWithResponse(
-        {
-          appDefinitionId: sdk.ids.app!,
-          appActionId: GET_FORMS_APP_ACTION_ID,
-        },
-        {
-          parameters: offset === undefined ? {} : { offset },
-        }
+        { appDefinitionId: sdk.ids.app!, appActionId },
+        { parameters }
       );
-      return JSON.parse(response.body) as MarketoFormsResponse;
+      await delay(marketoRequests * MS_PER_MARKETO_REQUEST);
+      return JSON.parse(response.body) as T;
     };
 
-    // Shows the first page as soon as it arrives, then keeps loading the
-    // remaining pages in the background so search covers every form.
+    // A page costs Marketo two requests: auth and forms.json.
+    const fetchPage = async (offset?: number) => {
+      for (let attempt = 0; attempt <= MAX_RATE_LIMIT_RETRIES; attempt++) {
+        if (attempt > 0) await delay(RATE_LIMIT_WAIT_MS);
+        const result = await callAction<MarketoFormsResponse>(
+          GET_FORMS_APP_ACTION_ID,
+          offset === undefined ? {} : { offset },
+          2
+        );
+        if (!result.rateLimited) return result;
+      }
+      throw new Error('Marketo kept rate limiting the forms request');
+    };
+
+    // A folder batch costs Marketo auth plus one request per folder. Only the
+    // folders that were rate limited are sent again.
+    const checkFolders = async (folders: MarketoFolderRef[]) => {
+      let pending = folders;
+      for (let attempt = 0; pending.length > 0; attempt++) {
+        if (attempt > MAX_RATE_LIMIT_RETRIES) {
+          throw new Error('Marketo kept rate limiting folder requests');
+        }
+        if (attempt > 0) await delay(RATE_LIMIT_WAIT_MS);
+        const result = await callAction<MarketoFolderStatusResponse>(
+          GET_FOLDER_STATUS_APP_ACTION_ID,
+          { folders: pending.map(folderKey).join(',') },
+          1 + pending.length
+        );
+        for (const folder of result.folders) {
+          statuses[folderKey(folder)] = { isArchive: folder.isArchive, checkedAt: Date.now() };
+        }
+        if (!result.rateLimited) return;
+        pending = pending.filter((folder) => !(folderKey(folder) in statuses));
+      }
+    };
+
+    // Shows forms as soon as their folder is known not to be archived, and
+    // keeps loading the remaining pages in the background so search covers
+    // every form.
     const loadForms = async () => {
       const fieldValue = sdk.field.getValue();
-      let loaded: FormObject[] = [];
+      let loaded: MarketoFormWithFolder[] = [];
+      let visible: FormObject[] = [];
       let offset: number | undefined;
+
+      const showVisibleForms = () => {
+        visible = loaded.filter(
+          (form) => !form.folder || statuses[folderKey(form.folder)]?.isArchive === false
+        );
+        setForms(visible);
+        if (fieldValue?.id && !selectionTouchedRef.current) {
+          const preselectedForm = visible.find((form) => form.id === fieldValue.id);
+          if (preselectedForm) {
+            setSelectedForm(preselectedForm);
+          }
+        }
+      };
 
       try {
         do {
@@ -122,14 +219,23 @@ const Field = () => {
           const newForms = result.forms.filter((form) => !loadedIds.has(form.id));
           loaded = [...loaded, ...newForms];
 
-          setForms(loaded);
-          if (fieldValue?.id && !selectionTouchedRef.current) {
-            const preselectedForm = loaded.find((form) => form.id === fieldValue.id);
-            if (preselectedForm) {
-              setSelectedForm(preselectedForm);
+          showVisibleForms();
+          setLoadingStatus(false);
+          setLoadingMore(true);
+
+          const unknownFolders = new Map<string, MarketoFolderRef>();
+          for (const { folder } of newForms) {
+            if (folder && !(folderKey(folder) in statuses)) {
+              unknownFolders.set(folderKey(folder), folder);
             }
           }
-          setLoadingStatus(false);
+          const folders = [...unknownFolders.values()];
+          for (let i = 0; i < folders.length; i += FOLDERS_PER_CALL) {
+            await checkFolders(folders.slice(i, i + FOLDERS_PER_CALL));
+            if (cancelled) return;
+            saveFolderStatuses(storageKey, statuses);
+            showVisibleForms();
+          }
 
           // A non-empty page with nothing new means paging isn't advancing.
           const stalled = result.forms.length > 0 && newForms.length === 0;
@@ -138,7 +244,7 @@ const Field = () => {
         } while (offset !== undefined);
       } catch {
         if (cancelled) return;
-        if (loaded.length > 0) {
+        if (visible.length > 0) {
           setPartialLoadError(true);
         } else {
           updateError({

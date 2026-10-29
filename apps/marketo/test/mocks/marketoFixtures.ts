@@ -6,8 +6,8 @@ export const AUTH_URL = `https://${MUNCHKIN_ID}.mktorest.com/identity/oauth/toke
 export const formsUrl = (offset = 0) =>
   `https://${MUNCHKIN_ID}.mktorest.com/rest/asset/v1/forms.json?maxReturn=200&offset=${offset}`;
 export const FORMS_URL = formsUrl(0);
-export const folderUrl = (folderId: number) =>
-  `https://${MUNCHKIN_ID}.mktorest.com/rest/asset/v1/folder/${folderId}.json?type=Folder`;
+export const folderUrl = (folderId: number, type = 'Folder') =>
+  `https://${MUNCHKIN_ID}.mktorest.com/rest/asset/v1/folder/${folderId}.json?type=${type}`;
 
 export const mockAuthResponse = {
   access_token: 'test-access-token',

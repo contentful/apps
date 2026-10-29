@@ -4,10 +4,22 @@ export type FormObject = {
   name: string;
 };
 
+export type MarketoFolderRef = { id: number; type: 'Folder' | 'Program' };
+
+export type MarketoFormWithFolder = FormObject & { folder?: MarketoFolderRef };
+
+// rateLimited means Marketo rejected the call for its rate or concurrency
+// limit, so the caller should wait and retry the same request.
 export type MarketoFormsResponse = {
-  forms?: FormObject[];
+  forms?: MarketoFormWithFolder[];
   // Offset of the next forms.json page; absent when this was the last page.
   nextOffset?: number;
+  rateLimited?: boolean;
+};
+
+export type MarketoFolderStatusResponse = {
+  folders: Array<MarketoFolderRef & { isArchive: boolean }>;
+  rateLimited?: boolean;
 };
 
 // Shapes returned by Marketo's Asset API (forms.json / folder/{id}.json).
@@ -15,7 +27,7 @@ export type MarketoFormsResponse = {
 // status (e.g. "approved") regardless of whether its folder is archived.
 export type MarketoFormRecord = FormObject & {
   status: string;
-  folder?: { type: 'Folder'; value: number; folderName: string };
+  folder?: { type: MarketoFolderRef['type']; value: number; folderName: string };
 };
 
 export type MarketoFolderRecord = {
