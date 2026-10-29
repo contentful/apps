@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Paragraph,
   Flex,
@@ -24,31 +24,29 @@ const FORM_ERROR_MESSAGE =
 const PARTIAL_LOAD_MESSAGE =
   'Some Marketo forms could not be loaded. Reload the entry to try again.';
 
-const matchesSearch = (form: FormObject, searchTerm: string, selectedId: string) =>
-  form.id !== selectedId && form.name.toLowerCase().includes(searchTerm);
-
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
   useAutoResizer();
   const [forms, setForms] = useState<FormObject[] | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  // null until the editor interacts; until then the saved form is selected
-  // as soon as the page containing it arrives.
-  const [selection, setSelection] = useState<FormObject | null>(null);
-  const [savedFormId] = useState<string | undefined>(() => sdk.field.getValue()?.id || undefined);
+  const [selectedForm, setSelectedForm] = useState<FormObject>(EMPTY_FORM);
   const [loadingData, setLoadingStatus] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [partialLoadError, setPartialLoadError] = useState(false);
   const [error, updateError] = useState<ErrorState>({ error: false, message: '' });
+  // Forms keep arriving after the first render; once the editor interacts
+  // with the field, later pages must not override their selection.
+  const selectionTouchedRef = useRef(false);
 
-  const savedForm = useMemo(
-    () => (savedFormId && forms?.find((form) => form.id === savedFormId)) || EMPTY_FORM,
-    [forms, savedFormId]
-  );
-  const selectedForm = selection ?? savedForm;
   const filteredForms = useMemo(
-    () => (forms ?? []).filter((form) => matchesSearch(form, searchTerm, selectedForm.id)),
-    [forms, searchTerm, selectedForm.id]
+    () =>
+      (forms ?? []).filter((form) => {
+        if (selectedForm && selectedForm.id === form.id) {
+          return false;
+        }
+        return form.name.toLowerCase().includes(searchTerm);
+      }),
+    [forms, searchTerm, selectedForm]
   );
 
   const handleDropdownOpen = () => {
@@ -65,24 +63,27 @@ const Field = () => {
       return;
     }
     sdk.field.setValue({ id: form.id, url: form.url });
-    setSelection(form);
+    selectionTouchedRef.current = true;
+    setSelectedForm(form);
     setSearchTerm('');
   };
 
   const handleFormInputChange = (value: string) => {
-    if (value && selection === null) {
-      setSelection(selectedForm);
+    if (value) {
+      selectionTouchedRef.current = true;
     }
-    if (!value && selectedForm.id) {
+    if (!value && selectedForm?.id) {
       removeFieldValue();
       return;
     }
+
     setSearchTerm(value.trim().toLowerCase());
   };
 
   const removeFieldValue = () => {
     sdk.field.setValue(EMPTY_FORM);
-    setSelection(EMPTY_FORM);
+    selectionTouchedRef.current = true;
+    setSelectedForm(EMPTY_FORM);
     setSearchTerm('');
   };
 
@@ -105,6 +106,7 @@ const Field = () => {
     // Shows the first page as soon as it arrives, then keeps loading the
     // remaining pages in the background so search covers every form.
     const loadForms = async () => {
+      const fieldValue = sdk.field.getValue();
       let loaded: FormObject[] = [];
       let offset: number | undefined;
 
@@ -121,6 +123,12 @@ const Field = () => {
           loaded = [...loaded, ...newForms];
 
           setForms(loaded);
+          if (fieldValue?.id && !selectionTouchedRef.current) {
+            const preselectedForm = loaded.find((form) => form.id === fieldValue.id);
+            if (preselectedForm) {
+              setSelectedForm(preselectedForm);
+            }
+          }
           setLoadingStatus(false);
 
           // A non-empty page with nothing new means paging isn't advancing.
@@ -173,7 +181,7 @@ const Field = () => {
         <>
           <FormControl>
             <Autocomplete<FormObject>
-              items={filteredForms}
+              items={filteredForms.filter((item) => item.id !== selectedForm?.id)}
               selectedItem={selectedForm}
               onInputValueChange={handleFormInputChange}
               onSelectItem={updateFieldValue}
