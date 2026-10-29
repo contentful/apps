@@ -53,7 +53,14 @@
       "type": "function-invocation",
       "functionId": "getMarketoFormsFunction",
       "category": "Custom",
-      "parameters": [],
+      "parameters": [
+        {
+          "id": "offset",
+          "name": "Offset",
+          "type": "Number",
+          "required": false
+        }
+      ],
       "resultSchema": {
         "type": "object",
         "properties": {
@@ -76,6 +83,10 @@
                 }
               }
             }
+          },
+          "nextOffset": {
+            "type": "number",
+            "description": "Offset of the next page of forms; absent on the last page"
           }
         }
       }
