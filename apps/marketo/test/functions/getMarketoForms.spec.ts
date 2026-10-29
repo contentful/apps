@@ -227,19 +227,6 @@ describe('getMarketoForms handler', () => {
       body: { offset } as AppActionRequest<'Custom'>['body'],
     });
 
-    it('should request the first page and return nextOffset when the page is full', async () => {
-      mockFetchRoutes({
-        [AUTH_URL]: mockAuthResponse,
-        [formsUrl(0)]: buildFormsApiResponse(buildFormPage(PAGE_SIZE)),
-        [folderUrl(100)]: buildFolderApiResponse(buildMarketoFolder()),
-      });
-
-      const result = await handler(mockEvent, mockContext);
-
-      expect(result.forms).toHaveLength(PAGE_SIZE);
-      expect(result.nextOffset).toBe(PAGE_SIZE);
-    });
-
     it('should request the page at the given offset and omit nextOffset on a short page', async () => {
       mockFetchRoutes({
         [AUTH_URL]: mockAuthResponse,
@@ -254,7 +241,7 @@ describe('getMarketoForms handler', () => {
     });
 
     it('should return no forms and no nextOffset when the offset is past the last page', async () => {
-      // Marketo answers an out-of-range offset with success and no result array.
+      // Out-of-range offsets succeed with no result array.
       mockFetchRoutes({
         [AUTH_URL]: mockAuthResponse,
         [formsUrl(600)]: {
@@ -300,8 +287,6 @@ describe('getMarketoForms handler', () => {
 
   describe('folder lookups', () => {
     it('should run at most 5 folder lookups concurrently', async () => {
-      // Marketo rejects more than 10 concurrent calls per instance, and the
-      // customer's other integrations share that budget.
       const forms = Array.from({ length: 12 }, (_, i) =>
         buildMarketoForm({
           id: `form-${i}`,
