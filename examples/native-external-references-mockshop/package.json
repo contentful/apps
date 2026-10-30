@@ -14,15 +14,18 @@
     "show-resource-entities": "tsx -r dotenv/config ./src/tools/show-resource-entities.ts",
     "delete-resource-entities": "tsx -r dotenv/config ./src/tools/delete-resource-entities.ts",
     "install-app": "contentful-app-scripts install",
-    "prettier": "prettier --write functions, src"
+    "prettier": "prettier --write functions, src",
+    "test": "vitest",
+    "test:ci": "vitest run"
   },
   "devDependencies": {
     "@contentful/app-scripts": "^2.3.0",
     "@tsconfig/recommended": "^1.0.8",
-    "@types/node": "^16.18.126",
+    "@types/node": "^24.0.13",
     "contentful-management": "^11.48.0",
     "tsx": "^4.19.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^3.2.4"
   },
   "homepage": ".",
   "dependencies": {
