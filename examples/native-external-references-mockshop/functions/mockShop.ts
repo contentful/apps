@@ -48,36 +48,55 @@ const queryHandler: QueryHandler = async (event, context) => {
 
 const searchHandler: ResourcesSearchHandler = async (event, context) => {
   const { query } = event;
+  const hasQuery = Boolean(query?.trim());
   const mockShopUrl = getMockShopUrl(context);
 
   const response = await fetch(mockShopUrl, {
     body: JSON.stringify({
-      query: /* GraphQL */ `
-        query searchProducts($query: String!) {
-          search(query: $query, first: 3, types: PRODUCT) {
-            edges {
-              node {
-                ... on Product {
-                  id
-                  title
-                  featuredImage {
-                    url
-                    altText
+      query: hasQuery
+        ? /* GraphQL */ `
+            query searchProducts($query: String!) {
+              search(query: $query, first: 3, types: PRODUCT) {
+                edges {
+                  node {
+                    ... on Product {
+                      id
+                      title
+                      featuredImage {
+                        url
+                        altText
+                      }
+                    }
                   }
                 }
               }
             }
-          }
-        }
-      `,
-      variables: { query },
+          `
+        : /* GraphQL */ `
+            query browseProducts {
+              products(first: 3) {
+                edges {
+                  node {
+                    id
+                    title
+                    featuredImage {
+                      url
+                      altText
+                    }
+                  }
+                }
+              }
+            }
+          `,
+      variables: hasQuery ? { query } : {},
     }),
     method: 'POST',
     headers: { Accept: 'application/json', 'content-type': 'application/json' },
   });
   const result = (await response.json()) as SearchResultData;
 
-  const items = result.data.search.edges.map((edge) => ({
+  const products = 'search' in result.data ? result.data.search : result.data.products;
+  const items = products.edges.map((edge) => ({
     ...withBadge(edge.node),
     ...withUrn(edge.node),
   }));
@@ -90,64 +109,66 @@ const searchHandler: ResourcesSearchHandler = async (event, context) => {
 const lookupHandler: ResourcesLookupHandler = async (event, context) => {
   const { urns } = event.lookupBy;
 
+  if (urns.length === 0) {
+    return { items: [], pages: {} };
+  }
+
   const mockShopUrl = getMockShopUrl(context);
 
   const isContentDeliveryApi = ['cda', 'cpa'].includes(
     context.originalRequest?.headers['contentful-api']
   );
 
-  const query = isContentDeliveryApi
+  const productFields = isContentDeliveryApi
     ? /* GraphQL */ `
-        query lookupProducts($ids: [ID!]!) {
-          nodes(ids: $ids) {
-            ... on Product {
-              id
-              title
-              description
-              compareAtPriceRange {
-                maxVariantPrice {
-                  amount
-                  currencyCode
-                }
-              }
-              adjacentVariants {
-                availableForSale
-                barcode
-                currentlyNotInStock
-                image {
-                  url
-                }
-              }
-              featuredImage {
-                id
-                url
-                altText
-                width
-                height
-              }
-            }
+        id
+        title
+        description
+        compareAtPriceRange {
+          maxVariantPrice {
+            amount
+            currencyCode
           }
+        }
+        adjacentVariants {
+          availableForSale
+          barcode
+          currentlyNotInStock
+          image {
+            url
+          }
+        }
+        featuredImage {
+          id
+          url
+          altText
+          width
+          height
         }
       `
     : /* GraphQL */ `
-        query lookupProducts($ids: [ID!]!) {
-          nodes(ids: $ids) {
-            ... on Product {
-              id
-              title
-              featuredImage {
-                url
-                altText
-              }
-            }
-          }
+        id
+        title
+        featuredImage {
+          url
+          altText
         }
       `;
+
+  // Mock Shop resolves product(id:) but currently returns no nodes for product IDs.
+  // Aliases keep all lookups in one request, with URNs passed safely as variables.
+  const query = /* GraphQL */ `
+    query lookupProducts(${urns.map((_, index) => `$id${index}: ID!`).join(', ')}) {
+      ${urns
+        .map((_, index) => `product${index}: product(id: $id${index}) { ${productFields} }`)
+        .join('\n')}
+    }
+  `;
 
   const response = await fetch(mockShopUrl, {
     body: JSON.stringify({
       query,
-      variables: { ids: urns },
+      variables: Object.fromEntries(urns.map((urn, index) => [`id${index}`, urn])),
     }),
     method: 'POST',
     headers: { Accept: 'application/json', 'content-type': 'application/json' },
@@ -155,8 +176,9 @@ const lookupHandler: ResourcesLookupHandler = async (event, context) => {
 
   const result = (await response.json()) as ProductLookupData;
 
-  const items = result.data.nodes
-    .map((node) => {
+  const items = urns
+    .map((_, index) => {
+      const node = result.data[`product${index}`];
       if (node === null) {
         console.error('Null node encountered');
         return null;
