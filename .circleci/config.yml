@@ -15,8 +15,11 @@ commands:
           command: |
             echo "//npm.pkg.github.com/:_authToken=${GITHUB_PACKAGES_WRITE_TOKEN}" >> ~/.npmrc
       - run:
+          name: Build packages
+          command: npx lerna run build --stream --scope=@contentful/dam-app-base --scope=@contentful/ecommerce-app-base --scope=@contentful/eslint-plugin-contentful-apps
+      - run:
           name: Publish packages
-          command: NPM_CONFIG_IGNORE_SCRIPTS=false npm run publish-packages
+          command: npm run publish-packages
 
   set_since:
     steps:
@@ -51,6 +54,8 @@ executors:
     docker:
       - image: cimg/node:24.22.1
     resource_class: << parameters.resource_class >>
+    environment:
+      NPM_CONFIG_IGNORE_SCRIPTS: 'true'
 
 jobs:
   apps-test:
@@ -63,8 +68,6 @@ jobs:
       - run:
           name: Check Node.js versions
           command: npm run node:check
-      - vault/get-secrets:
-          template-preset: 'aws-push-artifacts'
       - run:
           name: Install dependencies
           no_output_timeout: 30m
@@ -129,8 +132,10 @@ jobs:
           name: Install awscli
           command: |
             sudo apt-get update
-            sudo apt-get install python3-pip python3-dev
-            sudo pip3 install --break-system-packages awscli
+            sudo apt-get install -y python3-venv
+            python3 -m venv "$HOME/awscli"
+            "$HOME/awscli/bin/pip" install awscli==1.46.1
+            echo 'export PATH="$HOME/awscli/bin:$PATH"' >> $BASH_ENV
       - run:
           name: Build
           command: |
@@ -172,8 +177,10 @@ jobs:
           name: Install awscli
           command: |
             sudo apt-get update
-            sudo apt-get install python3-pip python3-dev
-            sudo pip3 install --break-system-packages awscli
+            sudo apt-get install -y python3-venv
+            python3 -m venv "$HOME/awscli"
+            "$HOME/awscli/bin/pip" install awscli==1.46.1
+            echo 'export PATH="$HOME/awscli/bin:$PATH"' >> $BASH_ENV
       - run:
           name: Build
           command: |
@@ -233,36 +240,37 @@ workflows:
   version: 2
   test-deploy:
     jobs:
-      - apps-test:
-          context:
-            - vault
-            - apps-staging
+      - apps-test
       - build:
-          context:
-            - vault
-            - apps-staging
           filters:
             branches:
               ignore:
                 - master
                 - staging
-      - build-deploy-staging:
-          context:
-            - vault
-            - apps-staging
+      - breakglass:
+          type: approval
           requires:
             - apps-test
           filters:
             branches:
               only:
                 - master
-                - staging
+      - build-deploy-staging:
+          context:
+            - vault
+            - apps-staging
+          requires:
+            - breakglass
+          filters:
+            branches:
+              only:
+                - master
       - build-deploy-prod:
           context:
             - vault
             - apps-production
           requires:
-            - apps-test
+            - breakglass
           filters:
             branches:
               only:
