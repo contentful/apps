@@ -29,15 +29,15 @@
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEV_TESTING_ORG_ID} --definition-id A8dr1iHtz78TyWqrUFb72 --token ${TEST_CMA_TOKEN}"
   },
   "devDependencies": {
-    "@contentful/app-scripts": "^1.29.0",
-    "@testing-library/jest-dom": "^5.11.5",
-    "@testing-library/react": "^11.1.2",
-    "@types/jest": "^26.0.15",
-    "@types/react": "^17.0.69",
-    "@types/react-dom": "^17.0.22",
-    "@vitejs/plugin-react": "^4.1.1",
+    "@contentful/app-scripts": "^1.33.2",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^11.2.7",
+    "@types/jest": "^26.0.24",
+    "@types/react": "^17.0.93",
+    "@types/react-dom": "^17.0.26",
+    "@vitejs/plugin-react": "^4.7.0",
     "happy-dom": "9.20.3",
-    "typescript": "^5.2.2",
+    "typescript": "^5.9.3",
     "vitest": "^0.34.6"
   },
   "overrides": {

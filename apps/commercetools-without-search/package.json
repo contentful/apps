@@ -6,10 +6,10 @@
   },
   "private": true,
   "devDependencies": {
-    "@types/react": "16.8.23",
-    "@types/react-dom": "16.8.5",
+    "@types/react": "16.14.70",
+    "@types/react-dom": "16.9.25",
     "cross-env": "7.0.3",
-    "typescript": "4.3.2"
+    "typescript": "4.9.5"
   },
   "dependencies": {
     "@commercetools/platform-sdk": "2.8.0",

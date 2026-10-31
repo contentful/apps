@@ -7,12 +7,12 @@
   "private": true,
   "main": "build/index.html",
   "devDependencies": {
-    "@types/react": "^16.9.23",
-    "@types/react-dom": "^16.9.5",
+    "@types/react": "^16.14.70",
+    "@types/react-dom": "^16.9.25",
     "cross-env": "^7.0.3",
     "react-test-renderer": "^17.0.2",
-    "sass": "^1.26.2",
-    "typescript": "^3.8.3"
+    "sass": "^1.107.0",
+    "typescript": "^3.9.10"
   },
   "dependencies": {
     "@contentful/app-scripts": "^1.29.0",
