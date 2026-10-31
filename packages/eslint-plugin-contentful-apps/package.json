@@ -39,7 +39,7 @@
     "dts": true
   },
   "dependencies": {
-    "eslint-plugin-jsx-a11y": "^6.10.0"
+    "eslint-plugin-jsx-a11y": "^6.10.2"
   },
   "peerDependencies": {
     "eslint-plugin-jsx-a11y": "^6.10.0"
