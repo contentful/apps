@@ -26,7 +26,7 @@
     "esbuild": "^0.25.0"
   },
   "devDependencies": {
-    "contentful-management": "^11.3.0",
-    "ts-node": "^10.9.1"
+    "contentful-management": "^11.76.0",
+    "ts-node": "^10.9.2"
   }
 }
