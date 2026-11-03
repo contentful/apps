@@ -155,14 +155,16 @@ the app config):
 
 Required because editors' browsers download the log files.
    Contentful serves hosted app bundles from a sandboxed per-app origin on
-   `ctfcloud.net` (not `app.contentful.com`), so both origins are needed:
+   `ctfcloud.net` (not `app.contentful.com`), so both origins are needed.
+   Use your app's exact origin (see [Finding your app's origin](#finding-your-apps-origin)),
+   not `*.ctfcloud.net`, which matches every Contentful-hosted app:
 
 ```json
 [
   {
     "AllowedHeaders": ["*"],
     "AllowedMethods": ["GET", "HEAD"],
-    "AllowedOrigins": ["https://app.contentful.com", "https://*.ctfcloud.net"],
+    "AllowedOrigins": ["https://app.contentful.com", "https://<app-uuid>.ctfcloud.net"],
     "ExposeHeaders": [],
     "MaxAgeSeconds": 3000
   }
@@ -199,7 +201,7 @@ The Function's outbound calls always come from
 
    | Allowed origins | Allowed methods | Allowed headers | Exposed headers | Max age |
    |---|---|---|---|---|
-   | `https://app.contentful.com,https://*.ctfcloud.net` | `GET,HEAD` | `*` | `*` | `3000` |
+   | `https://app.contentful.com,https://<app-uuid>.ctfcloud.net` | `GET,HEAD` | `*` | `*` | `3000` |
 
 5. **App config screen:** provider "Azure Blob Storage" → account name,
    container name, account key → Save.
@@ -223,7 +225,7 @@ The Function's outbound calls always come from
    toolbar) or a local `gcloud`:
 
 ```bash
-echo '[{"origin": ["*"], "method": ["GET", "HEAD"], "maxAgeSeconds": 3000}]' > cors.json
+echo '[{"origin": ["https://app.contentful.com", "https://<app-uuid>.ctfcloud.net"], "method": ["GET", "HEAD"], "maxAgeSeconds": 3000}]' > cors.json
 gcloud storage buckets update gs://<bucket> --cors-file=cors.json
 ```
 
@@ -234,14 +236,32 @@ gcloud storage buckets update gs://<bucket> --cors-file=cors.json
 ```json
 [
   {
-    "origin": ["*"],
+    "origin": ["https://app.contentful.com", "https://<app-uuid>.ctfcloud.net"],
     "method": ["GET", "HEAD"],
     "maxAgeSeconds": 3000
   }
 ]
 ```
 
-GCS CORS does not support wildcard subdomains, and the Contentful app iframe runs on a per-app ctfcloud.net origin, so "*" is required. This is safe: the URLs themselves are auth'd by their V4 signature and expire after 15 minutes — CORS adds no access control here.
+GCS CORS does not support wildcard subdomains, so list the app's exact origin (see [Finding your app's origin](#finding-your-apps-origin)). `"*"` also works, because the URLs are authenticated by their V4 signature and expire after 15 minutes, but the exact origin is tighter.
+
+### Finding your app's origin
+
+The origin is fixed per app definition: the same across bundle uploads,
+environments and spaces. Recreating the app definition gives it a new origin.
+To get it, run `window.location.origin` in the browser console with the app's
+iframe selected, or derive it from the app definition ID (base62, decoded to a
+UUID):
+
+```js
+const origin = (id) => {
+  const a = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let n = 0n;
+  for (const c of id) n = n * 62n + BigInt(a.indexOf(c));
+  const h = n.toString(16).padStart(32, '0');
+  return `https://${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}.ctfcloud.net`;
+};
+```
 
 ## Create the app definition & deploy
 
