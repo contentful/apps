@@ -112,11 +112,11 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
 
   // Resolved only for a real upload — editing an existing asset creates nothing, so it has no
   // Automation section to label. Not awaited anywhere: the ids render until the names arrive.
-  const { names: directiveNames, missingIds: missingDirectiveIds } = useRobotsDirectiveNames(
-    muxApi,
-    defaultDirectiveIds,
-    !isEditMode
-  );
+  const {
+    names: directiveNames,
+    missingIds: missingDirectiveIds,
+    v0Ids: v0DirectiveIds,
+  } = useRobotsDirectiveNames(muxApi, defaultDirectiveIds, !isEditMode);
 
   // DRM is disabled for audio files
   const effectiveDRMEnabled = muxEnableDRM && !isAudioOnly;
@@ -328,6 +328,7 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
                   availableDirectiveIds={defaultDirectiveIds}
                   selectedDirectiveIds={modalData.directiveIds}
                   missingDirectiveIds={missingDirectiveIds}
+                  v0DirectiveIds={v0DirectiveIds}
                   directiveNames={directiveNames}
                   isReadOnly={!canChooseDirectives}
                   onChange={(directiveIds) => setModalData((prev) => ({ ...prev, directiveIds }))}

@@ -11,6 +11,7 @@ import Config from '../locations/config';
  * working token. It now asks the Robots tab's classifier and shows the tab's notes.
  */
 
+const COST_WARNING = 'Directives selected here spend Mux AI units on every upload';
 const TERMS_PAGE = 'https://dashboard.mux.com/organizations/org-1/environments/env-1/robots/jobs';
 
 /** What `fetch` resolves with, reduced to what the screen reads. */
@@ -116,8 +117,80 @@ describe('RobotsConfiguration — what a refused listing says', () => {
 
     expect(await screen.findByLabelText('Ingest')).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
-      'https://api.mux.com/robots/v0/directives?limit=100&page=1',
+      'https://api.mux.com/robots/v1/directives?limit=100&page=1',
       expect.objectContaining({ method: 'GET' })
+    );
+  });
+});
+
+/**
+ * The v1 list returns v0 directives too. One stays on v0 on every upload it is attached to until
+ * someone replaces it with a v1 copy, so the screen that attaches it says so (ADR-0017).
+ */
+describe('RobotsConfiguration — directives still on Robots v0', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  const v0 = {
+    id: 'drv_old',
+    name: 'Summ and Moderate',
+    _links: { self: { href: '/robots/v0/directives/drv_old' } },
+  };
+  const v1 = {
+    id: 'drv_new',
+    name: 'Summ and Moderate v1',
+    _links: { self: { href: '/robots/v1/directives/drv_new' } },
+  };
+
+  const renderSelected = (directiveIds: string[]) => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => answer(200, { data: [v0, v1] }))
+    );
+    render(
+      <RobotsConfiguration
+        tokenId="token-id"
+        tokenSecret="token-secret"
+        directiveIds={directiveIds}
+        onChange={vi.fn()}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'List directives' }));
+  };
+
+  it('marks each v0 directive in the list, selected or not', async () => {
+    renderSelected([]);
+
+    const badge = await screen.findByText('v0');
+    expect(screen.getAllByText('v0')).toHaveLength(1);
+    expect(badge.closest('label')).toHaveTextContent(/^Summ and Moderate\s*v0$/);
+    // Nothing selected runs on v0, so there is nothing to ask for yet. The cost warning stays.
+    expect(screen.queryByTestId('robots-v0-directives')).not.toBeInTheDocument();
+    expect(screen.getByText(COST_WARNING)).toBeInTheDocument();
+  });
+
+  it('puts the v0 note right under the cost warning, above the list', async () => {
+    renderSelected(['drv_old']);
+
+    const note = await screen.findByTestId('robots-v0-directives');
+    const follows = (a: Node, b: Node) =>
+      !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(follows(screen.getByText(COST_WARNING), note)).toBe(true);
+    expect(follows(note, screen.getByRole('checkbox', { name: /^Summ and Moderate\s*v0$/ }))).toBe(
+      true
+    );
+  });
+
+  it('asks for a v1 copy of a selected v0 directive, and links the migration guide', async () => {
+    renderSelected(['drv_old', 'drv_new']);
+
+    const note = await screen.findByTestId('robots-v0-directives');
+    expect(note).toHaveTextContent('“Summ and Moderate” runs on Robots v0');
+    expect(note).not.toHaveTextContent('Summ and Moderate v1');
+    expect(within(note).getByRole('link', { name: /How to migrate directives/ })).toHaveAttribute(
+      'href',
+      'https://www.mux.com/docs/guides/robots-migrate-directives-to-v1'
     );
   });
 });

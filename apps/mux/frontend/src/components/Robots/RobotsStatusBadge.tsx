@@ -40,6 +40,7 @@ const NODE_VARIANT: Record<RobotsNodeStatus, Variant> = {
   failed: 'negative',
   waiting_for_resources: 'secondary',
   waiting_for_source_workflow: 'secondary',
+  waiting_for_source_bindings: 'secondary',
 };
 
 const CREATE_VARIANT: Record<PendingCreateRowPhase, Variant> = {

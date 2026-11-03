@@ -26,6 +26,28 @@ export const formatMs = (ms?: number): string => {
 export const formatSeconds = (seconds?: number): string =>
   typeof seconds === 'number' ? formatMs(seconds * 1000) : EM_DASH;
 
+/**
+ * A media time from a Robots output, in seconds. v1 sends seconds (`start_time`, `time`) and v0
+ * sent milliseconds (`start_ms`, `timestamp_ms`); a job keeps the version it ran on, so the key
+ * says which, and nothing is converted twice.
+ */
+export const outputSeconds = (
+  row: Record<string, unknown>,
+  secondsKey: string,
+  msKey: string
+): number | undefined => {
+  const seconds = row[secondsKey];
+  if (typeof seconds === 'number') return seconds;
+  const ms = row[msKey];
+  return typeof ms === 'number' ? ms / 1000 : undefined;
+};
+
+/** A start–end span from a Robots output, whichever version wrote it. */
+export const formatOutputRange = (row: Record<string, unknown>): string =>
+  `${formatSeconds(outputSeconds(row, 'start_time', 'start_ms'))} – ${formatSeconds(
+    outputSeconds(row, 'end_time', 'end_ms')
+  )}`;
+
 /** A model's 0–1 score. Two decimals, because that is the precision Mux reports. */
 export const formatScore = (score: unknown): string =>
   typeof score === 'number' ? score.toFixed(2) : EM_DASH;

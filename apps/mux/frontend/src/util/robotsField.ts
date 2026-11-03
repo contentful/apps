@@ -1,5 +1,6 @@
 import {
   PERSISTED_OUTPUT_WORKFLOWS,
+  RobotsAnalyzeStructureOutput,
   RobotsDirectiveRun,
   RobotsDirectiveRunRecord,
   RobotsJob,
@@ -96,22 +97,44 @@ function compact<T extends object>(value: T): Partial<T> {
   return result as Partial<T>;
 }
 
+const textOutput = (value: unknown): string | undefined =>
+  typeof value === 'string' ? value : undefined;
+
+function tagsOutput(value: unknown): string[] | undefined {
+  const tags = Array.isArray(value)
+    ? (value as unknown[]).filter((tag): tag is string => typeof tag === 'string')
+    : undefined;
+  return tags?.length ? tags : undefined;
+}
+
 function extractSummarizeOutput(job: RobotsJob): RobotsSummarizeOutput | undefined {
   const outputs = job.outputs;
   if (!outputs) return undefined;
-  const tags = Array.isArray(outputs.tags)
-    ? (outputs.tags as unknown[]).filter((tag): tag is string => typeof tag === 'string')
-    : undefined;
 
   const output = compact({
     jobId: job.id,
     completedAt: job.updated_at,
-    title: typeof outputs.title === 'string' ? outputs.title : undefined,
-    description: typeof outputs.description === 'string' ? outputs.description : undefined,
-    tags: tags?.length ? tags : undefined,
+    title: textOutput(outputs.title),
+    description: textOutput(outputs.description),
+    tags: tagsOutput(outputs.tags),
   }) as RobotsSummarizeOutput;
 
   return output.title || output.description || output.tags ? output : undefined;
+}
+
+function extractAnalyzeStructureOutput(job: RobotsJob): RobotsAnalyzeStructureOutput | undefined {
+  const outputs = job.outputs;
+  if (!outputs) return undefined;
+
+  const output = compact({
+    jobId: job.id,
+    completedAt: job.updated_at,
+    title: textOutput(outputs.title),
+    summary: textOutput(outputs.summary),
+    tags: tagsOutput(outputs.tags),
+  }) as RobotsAnalyzeStructureOutput;
+
+  return output.title || output.summary || output.tags ? output : undefined;
 }
 
 function extractModerateOutput(job: RobotsJob): RobotsModerateOutput | undefined {
@@ -141,9 +164,10 @@ function extractModerateOutput(job: RobotsJob): RobotsModerateOutput | undefined
 /**
  * Folds the outputs of completed jobs into the persisted `robotsOutputs`.
  *
- * Only summarize and moderation: the rest either already land on the Mux asset (captions, dubs,
- * thumbnails) or are too large for a JSON field (scenes, key moments). Keyed by workflow, so
- * re-running supersedes rather than accumulating. See ADR-0008.
+ * Only summarize, moderation and Analyze Structure's title, summary and tags: the rest either
+ * already land on the Mux asset (captions, dubs, thumbnails) or are too large for a JSON field
+ * (scenes, key moments). Keyed by workflow, so re-running supersedes rather than accumulating.
+ * See ADR-0008.
  *
  * Whoever started the job: an output describes the video, not this entry's activity. What it must
  * be is *this* video's, so each job is checked against `assetId` by its own record — not by the
@@ -166,22 +190,18 @@ export function mergeRobotsOutputs(
   const next: RobotsOutputs = { ...(existing ?? {}) };
   let changed = false;
 
-  for (const job of relevant) {
-    if (job.workflow === 'summarize') {
-      const output = extractSummarizeOutput(job);
-      if (!output) continue;
-      if (isNewerOutput(next.summarize, output)) {
-        next.summarize = output;
-        changed = true;
-      }
+  const offer = <K extends keyof RobotsOutputs>(key: K, output: RobotsOutputs[K]) => {
+    if (output && isNewerOutput(next[key], output)) {
+      next[key] = output;
+      changed = true;
     }
-    if (job.workflow === 'moderate') {
-      const output = extractModerateOutput(job);
-      if (!output) continue;
-      if (isNewerOutput(next.moderate, output)) {
-        next.moderate = output;
-        changed = true;
-      }
+  };
+
+  for (const job of relevant) {
+    if (job.workflow === 'summarize') offer('summarize', extractSummarizeOutput(job));
+    if (job.workflow === 'moderate') offer('moderate', extractModerateOutput(job));
+    if (job.workflow === 'analyze-structure') {
+      offer('analyzeStructure', extractAnalyzeStructureOutput(job));
     }
   }
 
@@ -198,7 +218,7 @@ function ranOnAsset(job: RobotsJob, assetId: string | undefined): boolean {
  * timestamps are whole seconds, so ties are real; the job id breaks them. See ADR-0008's
  * 2026-09-25 amendment.
  */
-function isNewerOutput(
+export function isNewerOutput(
   current: { jobId: string; completedAt?: number } | undefined,
   candidate: { jobId: string; completedAt?: number }
 ): boolean {
@@ -359,7 +379,7 @@ export function applyRobotsJobsToValue(
 }
 
 /**
- * Jobs that still need `GET /robots/v0/jobs/{workflow}/{id}`, where `outputs`, `units_consumed`,
+ * Jobs that still need the job detail GET, where `outputs`, `units_consumed`,
  * `errors` and `parameters` live. Reading one is a GET that charges nobody, and it is where every
  * summarize and moderate output comes from.
  *
@@ -909,4 +929,68 @@ export function runTableRows(
     (run) => run.run_id,
     (run) => run.started_at
   );
+}
+
+// --- Jobs Mux deleted ---
+
+/** How long Mux keeps a Robots job, outputs included. */
+export const ROBOTS_JOB_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
+
+/** The stored output a deleted job produced, under the names its workflow's view reads. */
+function keptOutputs(
+  outputs: RobotsOutputs | undefined,
+  record: RobotsJobRecord
+): Record<string, unknown> | undefined {
+  const { summarize, moderate, analyzeStructure } = outputs ?? {};
+  if (record.workflow === 'summarize' && summarize?.jobId === record.id) {
+    const { title, description, tags } = summarize;
+    return compact({ title, description, tags });
+  }
+  if (record.workflow === 'moderate' && moderate?.jobId === record.id) {
+    return compact({
+      exceeds_threshold: moderate.exceedsThreshold,
+      max_scores: moderate.maxScores,
+    });
+  }
+  if (record.workflow === 'analyze-structure' && analyzeStructure?.jobId === record.id) {
+    const { title, summary, tags } = analyzeStructure;
+    return compact({ title, summary, tags });
+  }
+  return undefined;
+}
+
+/**
+ * The entry's records of jobs Mux no longer has, as jobs the table can show (ADR-0005).
+ *
+ * A record counts as deleted only where the list could have named it: a list that was not cut
+ * short, or a job older than Mux keeps one. Each carries what the entry kept of it: its error, and
+ * the stored output when this job is the one that produced it.
+ */
+export function deletedJobs(
+  value: MuxContentfulObject | undefined,
+  listed: RobotsJob[],
+  isListComplete: boolean,
+  now = Date.now()
+): RobotsJob[] {
+  const listedIds = new Set(listed.map((job) => job.id));
+  return (value?.robotsJobs ?? [])
+    .filter(
+      (record) =>
+        !listedIds.has(record.id) &&
+        (isListComplete ||
+          (!!record.created_at && now - record.created_at * 1000 > ROBOTS_JOB_RETENTION_MS))
+    )
+    .map(
+      (record) =>
+        compact({
+          id: record.id,
+          workflow: record.workflow,
+          status: record.status,
+          created_at: record.created_at,
+          updated_at: record.updated_at,
+          units_consumed: record.units_consumed,
+          outputs: keptOutputs(value?.robotsOutputs, record),
+          errors: record.error ? [{ message: record.error }] : undefined,
+        }) as RobotsJob
+    );
 }

@@ -39,6 +39,7 @@ const show = (jobs: RobotsJob[], overrides: Record<string, unknown> = {}) => {
   render(
     <RobotsJobTable
       jobs={jobs}
+      deletedJobs={overrides.deletedJobs as RobotsJob[] | undefined}
       pendingRows={(overrides.pendingRows as PendingCreateRow[]) ?? []}
       onDontStart={overrides.onDontStart as ((requestId: string) => void) | undefined}
       pointsToNote={(overrides.pointsToNote as boolean) ?? true}
@@ -344,5 +345,35 @@ describe('a pending row', () => {
     const rows = screen.getByTestId('robots_job_table').querySelectorAll('tbody tr');
     expect(rows).toHaveLength(3);
     expect(rows[1]).toHaveTextContent('pending');
+  });
+});
+
+describe('RobotsJobTable — jobs Mux deleted', () => {
+  it('shows each as a read-only row that says so', () => {
+    const onViewOutput = vi.fn();
+    const kept = job({ id: 'rjob_kept', outputs: { title: 'Kept' }, units_consumed: 584 });
+    show([], {
+      onViewOutput,
+      deletedJobs: [
+        kept,
+        job({ id: 'rjob_lost', workflow: 'moderate', created_at: 1_600_000_000 }),
+        job({ id: 'rjob_stuck', status: 'processing', created_at: 1_500_000_000 }),
+      ],
+    });
+
+    expect(screen.queryByText(/No Robots jobs have run/)).not.toBeInTheDocument();
+    expect(screen.getAllByText('Deleted by Mux')).toHaveLength(3);
+    expect(screen.getByText(/Mux deletes Robots jobs after 30 days/)).toBeInTheDocument();
+    expect(screen.getByTestId('robots-units-rjob_kept')).toHaveTextContent('584');
+    expect(screen.getByTestId('robots-units-rjob_lost')).toHaveTextContent('Unavailable');
+    expect(screen.getByTestId('robots-not-kept-rjob_lost')).toBeInTheDocument();
+
+    // A record left processing has no final status, and nothing to cancel.
+    const stuck = screen.getByTestId('robots-not-kept-rjob_stuck').closest('tr') as HTMLElement;
+    expect(within(stuck).getByText('unknown')).toBeInTheDocument();
+    expect(within(stuck).queryByRole('button', { name: 'Cancel' })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'View output' }));
+    expect(onViewOutput).toHaveBeenCalledWith(kept);
   });
 });

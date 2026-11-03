@@ -20,12 +20,16 @@ interface ProxyCall {
 
 const proxyCalls: ProxyCall[] = [];
 
+/** `muxProxy`'s answer for a path, when a test needs other than success. */
+const proxyAnswers = new Map<string, Record<string, unknown>>();
+
 /** What Mux answers each call with — only the shape the method under test reads back. */
 const muxResponseFor = (call: ProxyCall): unknown => {
   if (call.path === '/video/v1/assets') return { data: { id: 'asset-1', status: 'preparing' } };
   if (call.path === '/video/v1/uploads') {
     return { data: { id: 'upload-1', url: 'https://storage.example/upload-1' } };
   }
+  if (call.method === 'GET' && call.path.includes('/runs?')) return { data: [] };
   return { data: {} };
 };
 
@@ -39,9 +43,11 @@ const cmaClient = {
     createWithResponse: vi.fn(
       async (_target: unknown, { parameters }: { parameters: ProxyCall }) => {
         proxyCalls.push(parameters);
-        return {
-          response: { body: JSON.stringify({ ok: true, data: muxResponseFor(parameters) }) },
+        const answer = proxyAnswers.get(parameters.path) ?? {
+          ok: true,
+          data: muxResponseFor(parameters),
         };
+        return { response: { body: JSON.stringify(answer) } };
       }
     ),
   },
@@ -100,6 +106,7 @@ describe('what the plugin sends Mux', () => {
 
   beforeEach(async () => {
     proxyCalls.length = 0;
+    proxyAnswers.clear();
     muxApi = await MuxApiService.getInstance(cmaClient, sdk);
   });
 
@@ -107,7 +114,7 @@ describe('what the plugin sends Mux', () => {
     await muxApi.createRobotsJob('summarize', { asset_id: 'asset-1' });
 
     expect(proxyCalls).toHaveLength(1);
-    expect(proxyCalls[0]).toMatchObject({ method: 'POST', path: '/robots/v0/jobs/summarize' });
+    expect(proxyCalls[0]).toMatchObject({ method: 'POST', path: '/robots/v1/jobs/summarize' });
     // Mux reads it from the top level; inside `parameters` it is an unknown workflow parameter.
     expect(bodyOf(proxyCalls[0])).toEqual({
       parameters: { asset_id: 'asset-1' },
@@ -120,7 +127,7 @@ describe('what the plugin sends Mux', () => {
 
     expect(proxyCalls[0]).toMatchObject({
       method: 'POST',
-      path: '/robots/v0/directives/drv_1/runs',
+      path: '/robots/v1/directives/drv_1/runs',
     });
     expect(bodyOf(proxyCalls[0])).toEqual({ asset_id: 'asset-1' });
   });
@@ -184,5 +191,134 @@ describe('what the plugin sends Mux', () => {
     for (const call of proxyCalls) {
       expect(passthroughPaths(bodyOf(call))).toEqual([]);
     }
+  });
+});
+
+describe('which Robots version each call goes to', () => {
+  let muxApi: MuxApiService;
+
+  beforeEach(async () => {
+    proxyCalls.length = 0;
+    proxyAnswers.clear();
+    muxApi = await MuxApiService.getInstance(cmaClient, sdk);
+  });
+
+  const v0Links = (path: string) => ({ self: { href: `/robots/v0/${path}` } });
+  const v1Links = (path: string) => ({ self: { href: `/robots/v1/${path}` } });
+  const notFound = { ok: false, status: 404, error: 'Directive not found', errorType: 'not_found' };
+
+  it('creates a job on v1, and hands it back with the route it was created on', async () => {
+    proxyAnswers.set('/robots/v1/jobs/summarize', {
+      ok: true,
+      data: { data: { id: 'rjob_new', workflow: 'summarize', status: 'pending' } },
+    });
+
+    const response = await muxApi.createRobotsJob('summarize', { asset_id: 'asset-1' });
+
+    // Without it the job would read as v0, and its detail read would be a 404.
+    expect(response.data._links).toEqual(v1Links('jobs/summarize/rjob_new'));
+  });
+
+  it('lists jobs through v1, which returns both versions', async () => {
+    await muxApi.listRobotsJobs({ asset_id: 'asset-1', limit: 100 });
+
+    expect(proxyCalls.map((call) => call.path)).toEqual([
+      '/robots/v1/jobs?asset_id=asset-1&limit=100',
+    ]);
+  });
+
+  it('reads and cancels a job on the version its links name', async () => {
+    await muxApi.getRobotsJob({
+      id: 'rjob_0',
+      workflow: 'find-scenes',
+      _links: v0Links('jobs/find-scenes/rjob_0'),
+    });
+    await muxApi.getRobotsJob({
+      id: 'rjob_1',
+      workflow: 'analyze-structure',
+      _links: v1Links('jobs/analyze-structure/rjob_1'),
+    });
+    // Nothing without links was created on v1: only v1 creates are stamped.
+    await muxApi.getRobotsJob({ id: 'rjob_2', workflow: 'summarize' });
+    await muxApi.cancelRobotsJob({ id: 'rjob_0', _links: v0Links('jobs/find-scenes/rjob_0') });
+    await muxApi.cancelRobotsJob({ id: 'rjob_1', _links: v1Links('jobs/summarize/rjob_1') });
+
+    expect(proxyCalls.map((call) => `${call.method} ${call.path}`)).toEqual([
+      'GET /robots/v0/jobs/find-scenes/rjob_0',
+      'GET /robots/v1/jobs/analyze-structure/rjob_1',
+      'GET /robots/v0/jobs/summarize/rjob_2',
+      'POST /robots/v0/jobs/rjob_0/cancel',
+      'POST /robots/v1/jobs/rjob_1/cancel',
+    ]);
+  });
+
+  it('runs a listed directive on the version the listing names', async () => {
+    proxyAnswers.set('/robots/v1/directives?limit=100', {
+      ok: true,
+      data: {
+        data: [
+          { id: 'drv_listed_v0', _links: v0Links('directives/drv_listed_v0') },
+          { id: 'drv_listed_v1', _links: v1Links('directives/drv_listed_v1') },
+        ],
+      },
+    });
+
+    await muxApi.listRobotsDirectives({ limit: 100 });
+    await muxApi.createRobotsDirectiveRun('drv_listed_v0', 'asset-1');
+    await muxApi.listRobotsDirectiveRuns('drv_listed_v1', { limit: 25 });
+
+    expect(proxyCalls.map((call) => `${call.method} ${call.path}`)).toEqual([
+      'GET /robots/v1/directives?limit=100',
+      'POST /robots/v0/directives/drv_listed_v0/runs',
+      'GET /robots/v1/directives/drv_listed_v1/runs?limit=25',
+    ]);
+  });
+
+  it('tries an id no listing named on v1, then on v0 after a 404, and remembers the answer', async () => {
+    proxyAnswers.set('/robots/v1/directives/drv_configured/runs?limit=25', notFound);
+
+    await muxApi.listRobotsDirectiveRuns('drv_configured', { limit: 25 });
+    await muxApi.getRobotsDirectiveRun('drv_configured', 'drvrun_1');
+
+    expect(proxyCalls.map((call) => call.path)).toEqual([
+      '/robots/v1/directives/drv_configured/runs?limit=25',
+      '/robots/v0/directives/drv_configured/runs?limit=25',
+      '/robots/v0/directives/drv_configured/runs/drvrun_1',
+    ]);
+  });
+
+  it('falls back to v0 on a 404 only, never on a refusal that says something else', async () => {
+    proxyAnswers.set('/robots/v1/directives/drv_refused/runs', {
+      ok: false,
+      status: 401,
+      error: 'Unauthorized',
+    });
+
+    await expect(muxApi.createRobotsDirectiveRun('drv_refused', 'asset-1')).rejects.toMatchObject({
+      status: 401,
+    });
+    expect(proxyCalls.map((call) => call.path)).toEqual(['/robots/v1/directives/drv_refused/runs']);
+  });
+
+  it('reads a v1 run, which names itself `id`, as the `run_id` the app keys runs by', async () => {
+    const v1Run = {
+      id: 'drvrun_v1',
+      directive_id: 'drv_new',
+      subject_id: 'asset-1',
+      status: 'running',
+      node_states: [{ workflow: 'summarize', status: 'dispatched', job_id: 'rjob_1' }],
+    };
+    proxyAnswers.set('/robots/v1/directives/drv_new/runs', { ok: true, data: { data: v1Run } });
+    proxyAnswers.set('/robots/v1/directives/drv_new/runs?limit=25', {
+      ok: true,
+      data: { data: [v1Run] },
+    });
+
+    const created = await muxApi.createRobotsDirectiveRun('drv_new', 'asset-1');
+    const listed = await muxApi.listRobotsDirectiveRuns('drv_new', { limit: 25 });
+
+    const { id, ...rest } = v1Run;
+    expect(created.data).toEqual({ ...rest, run_id: id });
+    expect(listed.data).toEqual([{ ...rest, run_id: id }]);
   });
 });

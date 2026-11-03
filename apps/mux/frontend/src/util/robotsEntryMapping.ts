@@ -1,5 +1,6 @@
 import { FieldExtensionSDK } from '@contentful/app-sdk';
-import { RobotsOutputs } from './robotsTypes';
+import { RobotsOutputs, RobotsWorkflow } from './robotsTypes';
+import { isNewerOutput } from './robotsField';
 
 /**
  * Mapping generated Robots output onto the editor's own entry fields.
@@ -189,10 +190,7 @@ export function entryFieldOptions(sdk: FieldExtensionSDK): EntryFieldOption[] {
     }));
 }
 
-function suggestFieldId(
-  key: RobotsOutputKey,
-  compatible: EntryFieldOption[]
-): string | undefined {
+function suggestFieldId(key: RobotsOutputKey, compatible: EntryFieldOption[]): string | undefined {
   for (const pattern of CONVENTION[key]) {
     const match = compatible.find((field) => pattern.test(field.id));
     if (match) return match.id;
@@ -200,10 +198,34 @@ function suggestFieldId(
   return undefined;
 }
 
+/** The title, description and tags "Apply summary" offers, and the workflow they came from. */
+export interface SummaryToApply {
+  workflow: Extract<RobotsWorkflow, 'summarize' | 'analyze-structure'>;
+  title?: string;
+  description?: string;
+  tags?: string[];
+}
+
 /**
- * Turns stored summarize output into the rows the apply dialog renders.
+ * The newest of the stored Summarize and Analyze Structure outputs, by the same order that picks
+ * each one (ADR-0008). Analyze Structure's `summary` is the description.
+ */
+export function summaryToApply(outputs: RobotsOutputs | undefined): SummaryToApply | undefined {
+  const summarize = outputs?.summarize;
+  const analyzed = outputs?.analyzeStructure;
+  if (analyzed && (!summarize || isNewerOutput(summarize, analyzed))) {
+    const { title, summary, tags } = analyzed;
+    return { workflow: 'analyze-structure', title, description: summary, tags };
+  }
+  if (!summarize) return undefined;
+  const { title, description, tags } = summarize;
+  return { workflow: 'summarize', title, description, tags };
+}
+
+/**
+ * Turns the stored summary into the rows the apply dialog renders.
  *
- * Only summarize is mappable: moderation scores are numbers an editor would not paste into a text
+ * Only a summary is mappable: moderation scores are numbers an editor would not paste into a text
  * field, captions and dubs are already Mux tracks, and chapters/scenes/key moments are structured
  * arrays with no natural single-field home.
  */
@@ -211,7 +233,7 @@ export function buildOutputCandidates(
   sdk: FieldExtensionSDK,
   outputs: RobotsOutputs | undefined
 ): RobotsOutputCandidate[] {
-  const summary = outputs?.summarize;
+  const summary = summaryToApply(outputs);
   if (!summary) return [];
 
   const options = entryFieldOptions(sdk);

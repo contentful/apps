@@ -95,3 +95,11 @@ when, Mux for what a specific job produced.
 - `robotsJobs` and `robotsOutputs` differ in cardinality by design: many jobs, at most one output
   per workflow. Anyone reading the field needs to know that the two answer different questions.
 - Nothing migrates. The map has always had this shape.
+
+## Amendment — 2026-11-02
+
+Robots v1's Analyze Structure returns a title, summary and tags as well as chapters, scenes and key
+moments. Its title, summary and tags are stored as `robotsOutputs.analyzeStructure`
+(`{ jobId, completedAt, title, summary, tags }`, Mux's names), picked by the same order as every
+other slot; its arrays are not stored. "Apply summary" reads the newer of `summarize` and
+`analyzeStructure` by that order, so the two never need reconciling on the entry. See ADR-0017.

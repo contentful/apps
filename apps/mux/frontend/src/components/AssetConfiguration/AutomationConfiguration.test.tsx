@@ -55,6 +55,22 @@ describe('AutomationConfiguration', () => {
 
     expect(screen.getByText('drv_1')).toBeInTheDocument();
   });
+
+  it('marks a directive still on Robots v0 and keeps it selected, because it still runs', () => {
+    render(
+      <AutomationConfiguration
+        availableDirectiveIds={['drv_old', 'drv_new']}
+        selectedDirectiveIds={['drv_old', 'drv_new']}
+        v0DirectiveIds={['drv_old']}
+        directiveNames={{ drv_old: 'Old pipeline', drv_new: 'New pipeline' }}
+        onChange={vi.fn()}
+      />
+    );
+
+    expect(screen.getByRole('checkbox', { name: 'Old pipeline v0' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'New pipeline' })).toBeChecked();
+    expect(screen.getAllByText(/Runs on Robots v0/)).toHaveLength(1);
+  });
 });
 
 /**
@@ -157,6 +173,23 @@ describe('useRobotsDirectiveNames', () => {
     render(<Probe muxApi={{ listRobotsDirectives } as never} ids={[]} />);
 
     expect(listRobotsDirectives).not.toHaveBeenCalled();
+  });
+
+  it('names the requested ids the listing places on v0', async () => {
+    const V0Probe = ({ muxApi }: { muxApi: MuxApiService }) => {
+      const { v0Ids } = useRobotsDirectiveNames(muxApi, ['drv_old', 'drv_new'], true);
+      return <span data-testid="v0">{v0Ids.join(',')}</span>;
+    };
+    const listRobotsDirectives = vi.fn(async () => ({
+      data: [
+        { id: 'drv_old', _links: { self: { href: '/robots/v0/directives/drv_old' } } },
+        { id: 'drv_new', _links: { self: { href: '/robots/v1/directives/drv_new' } } },
+        { id: 'drv_other', _links: { self: { href: '/robots/v0/directives/drv_other' } } },
+      ],
+    }));
+    render(<V0Probe muxApi={{ listRobotsDirectives } as never} />);
+
+    await waitFor(() => expect(screen.getByTestId('v0')).toHaveTextContent(/^drv_old$/));
   });
 
   it('calls nothing while disabled, so editing an asset costs no round trip', () => {
@@ -288,6 +321,21 @@ describe('directives Mux does not have', () => {
         })
       ).toEqual(['drv_live', 'drv_gone']);
       consoleError.mockRestore();
+    });
+
+    it('marks a v0 directive and still attaches it', async () => {
+      const directiveIds = await upload(async () => ({
+        data: [
+          {
+            id: 'drv_live',
+            name: 'Live',
+            _links: { self: { href: '/robots/v0/directives/drv_live' } },
+          },
+        ],
+      }));
+
+      expect(directiveIds).toEqual(['drv_live']);
+      expect(screen.getByText(/Runs on Robots v0/)).toBeInTheDocument();
     });
 
     it('attaches the defaults for someone who cannot choose them', async () => {

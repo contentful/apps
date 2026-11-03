@@ -5,10 +5,11 @@ import {
   EM_DASH,
   asRows,
   asStrings,
-  formatMs,
+  formatOutputRange,
   formatScore,
   formatSeconds,
   formatText,
+  outputSeconds,
 } from '../../util/robotsFormat';
 import RobotsJsonBlock from './RobotsJsonBlock';
 
@@ -106,39 +107,107 @@ interface OutputView {
   render: (outputs: RobotsOutputPayload) => ReactElement;
 }
 
+/**
+ * What Mux reports about a best-effort write to the asset, under `asset_updates` (v0's chapters
+ * write was `asset_update`). Absent when the job was not asked to write, or ran before Mux
+ * recorded outcomes; a job can complete with the write `failed`.
+ */
+type AssetUpdateKind = 'title' | 'chapters' | 'thumbnail';
+type AssetUpdateOutcome = { variant: 'positive' | 'warning' | 'neutral'; text: string };
+
+const ASSET_UPDATE_OUTCOMES: Record<AssetUpdateKind, Record<string, AssetUpdateOutcome>> = {
+  title: {
+    updated: { variant: 'positive', text: 'The generated title is now the Mux asset’s title.' },
+    failed: { variant: 'warning', text: 'Mux could not set the generated title on the asset.' },
+  },
+  chapters: {
+    created: {
+      variant: 'positive',
+      text: 'The chapters were added to the Mux video as its chapters track.',
+    },
+    failed: {
+      variant: 'warning',
+      text: 'Mux could not add these chapters to the video. They are still listed below.',
+    },
+  },
+  thumbnail: {
+    updated: { variant: 'positive', text: 'The best thumbnail is now the Mux video’s thumbnail.' },
+    failed: { variant: 'warning', text: 'Mux could not set the video’s thumbnail.' },
+  },
+};
+
+function assetUpdateOutcome(
+  outputs: RobotsOutputPayload,
+  kind: AssetUpdateKind
+): AssetUpdateOutcome | undefined {
+  const update =
+    (outputs.asset_updates as Record<string, unknown> | undefined)?.[kind] ??
+    (kind === 'chapters' ? outputs.asset_update : undefined);
+  const status = (update as { status?: unknown } | undefined)?.status;
+  return typeof status === 'string' &&
+    Object.prototype.hasOwnProperty.call(ASSET_UPDATE_OUTCOMES[kind], status)
+    ? ASSET_UPDATE_OUTCOMES[kind][status]
+    : undefined;
+}
+
+const OutcomeNote: FC<{ outcome?: AssetUpdateOutcome }> = ({ outcome }) =>
+  outcome ? (
+    <Box marginBottom="spacingM">
+      <Note variant={outcome.variant}>{outcome.text}</Note>
+    </Box>
+  ) : null;
+
+/** Summarize's title, description and tags, which Analyze Structure also returns. */
+const SummaryFields: FC<{
+  title: unknown;
+  description: unknown;
+  descriptionLabel: string;
+  tags: unknown;
+}> = ({ title, description, descriptionLabel, tags }) => {
+  const tagList = asStrings(tags);
+  return (
+    <>
+      {typeof title === 'string' && (
+        <Labelled label="Title">
+          <Paragraph marginBottom="none">{title}</Paragraph>
+        </Labelled>
+      )}
+      {typeof description === 'string' && (
+        <Labelled label={descriptionLabel}>
+          <Paragraph marginBottom="none">{description}</Paragraph>
+        </Labelled>
+      )}
+      {tagList.length > 0 && (
+        <Labelled label="Tags">
+          <Flex gap="spacingXs" flexWrap="wrap" marginTop="spacingXs">
+            {tagList.map((tag) => (
+              <Badge key={tag} variant="secondary">
+                {tag}
+              </Badge>
+            ))}
+          </Flex>
+        </Labelled>
+      )}
+    </>
+  );
+};
+
 const SUMMARIZE: OutputView = {
   hasContent: (outputs) =>
     typeof outputs.title === 'string' ||
     typeof outputs.description === 'string' ||
     asStrings(outputs.tags).length > 0,
-  render: (outputs) => {
-    const tags = asStrings(outputs.tags);
-    return (
-      <>
-        {typeof outputs.title === 'string' && (
-          <Labelled label="Title">
-            <Paragraph marginBottom="none">{outputs.title}</Paragraph>
-          </Labelled>
-        )}
-        {typeof outputs.description === 'string' && (
-          <Labelled label="Description">
-            <Paragraph marginBottom="none">{outputs.description}</Paragraph>
-          </Labelled>
-        )}
-        {tags.length > 0 && (
-          <Labelled label="Tags">
-            <Flex gap="spacingXs" flexWrap="wrap" marginTop="spacingXs">
-              {tags.map((tag) => (
-                <Badge key={tag} variant="secondary">
-                  {tag}
-                </Badge>
-              ))}
-            </Flex>
-          </Labelled>
-        )}
-      </>
-    );
-  },
+  render: (outputs) => (
+    <>
+      <OutcomeNote outcome={assetUpdateOutcome(outputs, 'title')} />
+      <SummaryFields
+        title={outputs.title}
+        description={outputs.description}
+        descriptionLabel="Description"
+        tags={outputs.tags}
+      />
+    </>
+  ),
 };
 
 const MODERATE: OutputView = {
@@ -189,119 +258,151 @@ const ASK_QUESTIONS: OutputView = {
   ),
 };
 
-/**
- * What Mux reports about writing the chapters onto the video. `asset_update` is present only
- * when the job ran with `update_asset_chapters`; the write is best-effort, so a job can complete
- * with it `failed`.
- */
-const ChaptersAssetUpdateNote: FC<{ assetUpdate: unknown }> = ({ assetUpdate }) => {
-  const status = (assetUpdate as { status?: unknown } | undefined)?.status;
-  if (status === 'created') {
-    return (
-      <Note variant="positive">
-        The chapters were added to the Mux video as its chapters track.
-      </Note>
-    );
-  }
-  if (status === 'failed') {
-    return (
-      <Note variant="warning">
-        Mux could not add these chapters to the video. They are still listed below.
-      </Note>
-    );
-  }
-  return (
-    <Note variant="neutral">
-      These chapters were not added to the Mux video; they are listed below.
-    </Note>
-  );
+const ChaptersTable: FC<{ chapters: Array<Record<string, unknown>> }> = ({ chapters }) => (
+  <SimpleTable columns={['Start', 'Title']}>
+    {chapters.map((chapter, index) => (
+      <Table.Row key={index}>
+        <Table.Cell>{formatSeconds(chapter.start_time as number)}</Table.Cell>
+        <Table.Cell>{formatText(chapter.title)}</Table.Cell>
+      </Table.Row>
+    ))}
+  </SimpleTable>
+);
+
+/** On by default here, so its absence is worth saying. */
+const CHAPTERS_NOT_ADDED: AssetUpdateOutcome = {
+  variant: 'neutral',
+  text: 'These chapters were not added to the Mux video; they are listed below.',
 };
 
 const GENERATE_CHAPTERS: OutputView = {
   hasContent: (outputs) => asRows(outputs.chapters).length > 0,
   render: (outputs) => (
     <>
-      <ChaptersAssetUpdateNote assetUpdate={outputs.asset_update} />
-      <Box marginTop="spacingM">
-        <SimpleTable columns={['Start', 'Title']}>
-          {asRows(outputs.chapters).map((chapter, index) => (
-            <Table.Row key={index}>
-              <Table.Cell>{formatSeconds(chapter.start_time as number)}</Table.Cell>
-              <Table.Cell>{formatText(chapter.title)}</Table.Cell>
-            </Table.Row>
-          ))}
-        </SimpleTable>
-      </Box>
+      <OutcomeNote outcome={assetUpdateOutcome(outputs, 'chapters') ?? CHAPTERS_NOT_ADDED} />
+      <ChaptersTable chapters={asRows(outputs.chapters)} />
     </>
   ),
 };
 
+/** Find Key Moments' `moments` and Analyze Structure's `key_moments` are the same objects. */
+const KeyMomentsTable: FC<{ moments: Array<Record<string, unknown>> }> = ({ moments }) => (
+  <SimpleTable columns={['Range', 'Title', 'Score', 'Narrative', 'Concepts']}>
+    {moments.map((moment, index) => {
+      const quotable = moment.quotable_segment as { text?: unknown } | undefined;
+      return (
+        <Table.Row key={index}>
+          <Table.Cell>{formatOutputRange(moment)}</Table.Cell>
+          <Table.Cell>{formatText(moment.title)}</Table.Cell>
+          <Table.Cell>{formatScore(moment.overall_score)}</Table.Cell>
+          <Table.Cell>
+            <NarrativeCell
+              audible={moment.audible_narrative}
+              visual={moment.visual_narrative}
+              quotable={typeof quotable?.text === 'string' ? quotable.text : undefined}
+            />
+          </Table.Cell>
+          <Table.Cell>
+            <ConceptBadges
+              audible={moment.notable_audible_concepts}
+              visual={moment.notable_visual_concepts}
+            />
+          </Table.Cell>
+        </Table.Row>
+      );
+    })}
+  </SimpleTable>
+);
+
 const FIND_KEY_MOMENTS: OutputView = {
   hasContent: (outputs) => asRows(outputs.moments).length > 0,
-  render: (outputs) => (
-    <SimpleTable columns={['Range', 'Title', 'Score', 'Narrative', 'Concepts']}>
-      {asRows(outputs.moments).map((moment, index) => {
-        const quotable = moment.quotable_segment as { text?: unknown } | undefined;
-        return (
-          <Table.Row key={index}>
-            <Table.Cell>
-              {formatMs(moment.start_ms as number)} – {formatMs(moment.end_ms as number)}
-            </Table.Cell>
-            <Table.Cell>{formatText(moment.title)}</Table.Cell>
-            <Table.Cell>{formatScore(moment.overall_score)}</Table.Cell>
-            <Table.Cell>
-              <NarrativeCell
-                audible={moment.audible_narrative}
-                visual={moment.visual_narrative}
-                quotable={typeof quotable?.text === 'string' ? quotable.text : undefined}
-              />
-            </Table.Cell>
-            <Table.Cell>
-              <ConceptBadges
-                audible={moment.notable_audible_concepts}
-                visual={moment.notable_visual_concepts}
-              />
-            </Table.Cell>
-          </Table.Row>
-        );
-      })}
-    </SimpleTable>
-  ),
+  render: (outputs) => <KeyMomentsTable moments={asRows(outputs.moments)} />,
 };
+
+/** v0's Find Scenes and v1's Analyze Structure describe a scene the same way, in their own unit. */
+const ScenesTable: FC<{ scenes: Array<Record<string, unknown>> }> = ({ scenes }) => (
+  <SimpleTable columns={['Range', 'Title', 'Summary']}>
+    {scenes.map((scene, index) => (
+      <Table.Row key={index}>
+        <Table.Cell>{formatOutputRange(scene)}</Table.Cell>
+        <Table.Cell>{formatText(scene.title)}</Table.Cell>
+        <Table.Cell>
+          {String(
+            scene.blended_narrative ?? scene.audible_narrative ?? scene.visual_narrative ?? ''
+          )}
+        </Table.Cell>
+      </Table.Row>
+    ))}
+  </SimpleTable>
+);
 
 const FIND_SCENES: OutputView = {
   hasContent: (outputs) => asRows(outputs.scenes).length > 0,
+  render: (outputs) => <ScenesTable scenes={asRows(outputs.scenes)} />,
+};
+
+/** One of Analyze Structure's lists, which Mux always sends and leaves empty when none qualify. */
+const ListSection: FC<{ label: string; rows: unknown; empty: string; children: ReactElement }> = ({
+  label,
+  rows,
+  empty,
+  children,
+}) => (
+  <Labelled label={label}>
+    <Box marginTop="spacingXs">
+      {asRows(rows).length > 0 ? children : <Paragraph marginBottom="none">{empty}</Paragraph>}
+    </Box>
+  </Labelled>
+);
+
+const ANALYZE_STRUCTURE: OutputView = {
+  hasContent: (outputs) =>
+    typeof outputs.title === 'string' ||
+    typeof outputs.summary === 'string' ||
+    [outputs.chapters, outputs.scenes, outputs.key_moments].some(Array.isArray),
   render: (outputs) => (
-    <SimpleTable columns={['Range', 'Title', 'Summary']}>
-      {asRows(outputs.scenes).map((scene, index) => (
-        <Table.Row key={index}>
-          <Table.Cell>
-            {formatMs(scene.start_ms as number)} – {formatMs(scene.end_ms as number)}
-          </Table.Cell>
-          <Table.Cell>{formatText(scene.title)}</Table.Cell>
-          <Table.Cell>
-            {String(
-              scene.blended_narrative ?? scene.audible_narrative ?? scene.visual_narrative ?? ''
-            )}
-          </Table.Cell>
-        </Table.Row>
-      ))}
-    </SimpleTable>
+    <>
+      <OutcomeNote outcome={assetUpdateOutcome(outputs, 'title')} />
+      <OutcomeNote outcome={assetUpdateOutcome(outputs, 'chapters')} />
+      <SummaryFields
+        title={outputs.title}
+        description={outputs.summary}
+        descriptionLabel="Summary"
+        tags={outputs.tags}
+      />
+      <ListSection label="Chapters" rows={outputs.chapters} empty="Mux found no chapters.">
+        <ChaptersTable chapters={asRows(outputs.chapters)} />
+      </ListSection>
+      <ListSection
+        label="Scenes"
+        rows={outputs.scenes}
+        empty="Mux found no scenes. An audio-only video has none.">
+        <ScenesTable scenes={asRows(outputs.scenes)} />
+      </ListSection>
+      <ListSection label="Key moments" rows={outputs.key_moments} empty="Mux found no key moments.">
+        <KeyMomentsTable moments={asRows(outputs.key_moments)} />
+      </ListSection>
+    </>
   ),
 };
 
 const FIND_BEST_THUMBNAILS: OutputView = {
   hasContent: (outputs) => asRows(outputs.best_thumbnails).length > 0,
   render: (outputs) => (
-    <SimpleTable columns={['Timestamp', 'Score', 'Description']}>
-      {asRows(outputs.best_thumbnails).map((thumbnail, index) => (
-        <Table.Row key={index}>
-          <Table.Cell>{formatMs(thumbnail.timestamp_ms as number)}</Table.Cell>
-          <Table.Cell>{formatScore(thumbnail.overall)}</Table.Cell>
-          <Table.Cell>{String(thumbnail.description ?? '')}</Table.Cell>
-        </Table.Row>
-      ))}
-    </SimpleTable>
+    <>
+      <OutcomeNote outcome={assetUpdateOutcome(outputs, 'thumbnail')} />
+      <SimpleTable columns={['Timestamp', 'Score', 'Description']}>
+        {asRows(outputs.best_thumbnails).map((thumbnail, index) => (
+          <Table.Row key={index}>
+            <Table.Cell>
+              {formatSeconds(outputSeconds(thumbnail, 'time', 'timestamp_ms'))}
+            </Table.Cell>
+            <Table.Cell>{formatScore(thumbnail.overall)}</Table.Cell>
+            <Table.Cell>{String(thumbnail.description ?? '')}</Table.Cell>
+          </Table.Row>
+        ))}
+      </SimpleTable>
+    </>
   ),
 };
 
@@ -363,6 +464,7 @@ export const OUTPUT_VIEWS: Partial<Record<RobotsWorkflow, OutputView>> = {
   'ask-questions': ASK_QUESTIONS,
   'generate-chapters': GENERATE_CHAPTERS,
   'find-key-moments': FIND_KEY_MOMENTS,
+  'analyze-structure': ANALYZE_STRUCTURE,
   'find-scenes': FIND_SCENES,
   'find-best-thumbnails': FIND_BEST_THUMBNAILS,
   'generate-engagement-insights': ENGAGEMENT_INSIGHTS,
@@ -370,4 +472,24 @@ export const OUTPUT_VIEWS: Partial<Record<RobotsWorkflow, OutputView>> = {
   'edit-captions': TRACK_PRODUCING,
   'translate-captions': TRACK_PRODUCING,
   'translate-audio': TRACK_PRODUCING,
+};
+
+/**
+ * What the entry keeps of a job Mux deleted: the stored outputs. Analyze Structure keeps only its
+ * title, summary and tags, so its view leaves out the lists it would otherwise call empty.
+ */
+export const KEPT_OUTPUT_VIEWS: Partial<Record<RobotsWorkflow, OutputView>> = {
+  summarize: SUMMARIZE,
+  moderate: MODERATE,
+  'analyze-structure': {
+    hasContent: ANALYZE_STRUCTURE.hasContent,
+    render: (outputs) => (
+      <SummaryFields
+        title={outputs.title}
+        description={outputs.summary}
+        descriptionLabel="Summary"
+        tags={outputs.tags}
+      />
+    ),
+  },
 };

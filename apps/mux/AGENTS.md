@@ -17,7 +17,7 @@ apps/mux/
 │       └── util/              # muxApi, robots*, types
 ├── functions/                 # Contentful App Functions (its own package; bundled by the root build)
 │   └── src/
-│       ├── muxProxy.ts        # appaction.call — Mux REST proxy for /video/v1/ and /robots/v0/
+│       ├── muxProxy.ts        # appaction.call — Mux REST proxy for /video/v1/, /robots/v0/ and /robots/v1/
 │       ├── getSignedUrlTokens.ts  # appaction.call — signs playback JWTs
 │       └── onPublish.ts       # appevent.handler — runs queued pendingActions
 ├── docs/ADRs/
@@ -35,6 +35,7 @@ apps/mux/
 - **Video upload flow**: `muxProxy` creates a Mux direct-upload URL, the browser uploads straight to Mux (not through Contentful), and `pollForUploadDetails` waits for the asset id.
 - **Mux API credentials** (token ID + secret) live in installation parameters — never log them.
 - **Who can run Robots is a UI guardrail, not a permission.** `canRunRobots` in `frontend/src/util/robotsAccess.ts`: space admins (`sdk.user.spaceMembership.admin`, never role names), or everyone while `muxRobotsAllowEveryone` is `true` — unset means admins only. Any new control that starts, cancels or chooses a run reads it; nothing server-side enforces it (ADR-0016).
+- **Robots v0 and v1 run side by side.** New jobs and directive runs go to v1. A job or directive keeps the version that created it and the other answers 404: jobs route by `_links` (`robotsApiVersionOf`; creates are stamped), directives through `MuxApiService.onDirectiveVersion`. Outputs are read by key (`start_time` seconds, `start_ms` milliseconds), never converted by version, and nothing on the entry records a version (ADR-0017).
 - **Robots needs the `robots:*` scope**, which cannot be added to an existing Mux token. `muxProxy` forwards Mux's `error.type` so the Robots tab can tell Mux refusing one run (`robots_*`: a workflow not on the plan, units) from Robots being off for the account (`forbidden`). Only the job list read decides capability; a refused run is a failed run (ADR-0006).
 - **The config screen calls `api.mux.com` from the browser** (`util/apiClient.tsx`) under a CORS exception Mux granted Contentful. That is not an oversight: the screen has to work *before* the app is installed, and it validates credentials as *typed* rather than as saved. Everything else goes through `muxProxy`. Its errors still go through the tab's classifier — `muxApiErrorFromResponse` then `capabilityFromError` — never a status check of its own.
 - **`functions/`** is a standalone package with its own `package.json`, `vite.config.mts` and `vitest.config.mts`. Bootstrap and test it independently; the root `npm run build` bundles it.

@@ -10,6 +10,7 @@ import {
   formatFieldValue,
   preferredTargetFieldId,
   richTextDocument,
+  summaryToApply,
   valueForField,
   wouldOverwrite,
 } from './robotsEntryMapping';
@@ -71,6 +72,38 @@ describe('entryFieldOptions', () => {
       { id: 'title', name: 'title label', type: 'Symbol', itemsType: undefined },
       { id: 'tags', name: 'tags label', type: 'Array', itemsType: 'Symbol' },
     ]);
+  });
+});
+
+describe('summaryToApply', () => {
+  const summarize = { jobId: 'rjob_s', completedAt: 100, title: 'S', description: 'S desc' };
+  const analyzeStructure = { jobId: 'rjob_a', completedAt: 200, title: 'A', summary: 'A sum' };
+
+  it('takes the newer of Summarize and Analyze Structure, reading summary as the description', () => {
+    expect(summaryToApply({ summarize, analyzeStructure })).toEqual({
+      workflow: 'analyze-structure',
+      title: 'A',
+      description: 'A sum',
+      tags: undefined,
+    });
+    expect(
+      summaryToApply({ summarize: { ...summarize, completedAt: 300 }, analyzeStructure })
+    ).toMatchObject({ workflow: 'summarize', description: 'S desc' });
+  });
+
+  it('takes whichever one exists, and nothing when neither does', () => {
+    expect(summaryToApply({ summarize })?.workflow).toBe('summarize');
+    expect(summaryToApply({ analyzeStructure })?.workflow).toBe('analyze-structure');
+    expect(summaryToApply({ moderate: { jobId: 'rjob_m' } })).toBeUndefined();
+    expect(summaryToApply(undefined)).toBeUndefined();
+  });
+
+  it('builds the apply rows from the newer one', () => {
+    const sdk = buildSdk([{ id: 'description', type: 'Text' }]);
+    const description = buildOutputCandidates(sdk, { summarize, analyzeStructure }).find(
+      (candidate) => candidate.key === 'description'
+    );
+    expect(description?.value).toBe('A sum');
   });
 });
 
@@ -266,9 +299,7 @@ describe('richTextDocument', () => {
         {
           nodeType: 'paragraph',
           data: {},
-          content: [
-            { nodeType: 'text', value: 'A generated description', marks: [], data: {} },
-          ],
+          content: [{ nodeType: 'text', value: 'A generated description', marks: [], data: {} }],
         },
       ],
     });
@@ -290,9 +321,7 @@ describe('valueForField', () => {
 
 describe('currentFieldValue', () => {
   it('falls back to the field’s own locale when it is not localized', () => {
-    const sdk = buildSdk([
-      { id: 'title', type: 'Symbol', locales: ['de-DE'], value: 'Ein Titel' },
-    ]);
+    const sdk = buildSdk([{ id: 'title', type: 'Symbol', locales: ['de-DE'], value: 'Ein Titel' }]);
     expect(currentFieldValue(sdk, 'title', 'en-US')).toBe('Ein Titel');
   });
 

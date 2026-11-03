@@ -67,7 +67,7 @@ function readMuxErrorMessage(body: unknown, status: number): string {
 }
 
 /** The Mux APIs this app calls. Anything else is refused before it reaches Mux. */
-const ALLOWED_PATH_PREFIXES = ['/video/v1/', '/robots/v0/'];
+const ALLOWED_PATH_PREFIXES = ['/video/v1/', '/robots/v0/', '/robots/v1/'];
 
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
   event: AppActionRequest<'Custom', Parameters>,
