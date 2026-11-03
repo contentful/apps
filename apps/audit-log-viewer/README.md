@@ -247,10 +247,14 @@ GCS CORS does not support wildcard subdomains, so list the app's exact origin (s
 
 ### Finding your app's origin
 
+If you installed the Audit Log Viewer published by Contentful, the origin is
+`https://f7ae447f-7ad6-4cbe-8c16-f1b7857cd855.ctfcloud.net`.
+
 The origin is fixed per app definition: the same across bundle uploads,
 environments and spaces. Recreating the app definition gives it a new origin.
-To get it, run `window.location.origin` in the browser console with the app's
-iframe selected, or derive it from the app definition ID (base62, decoded to a
+If you deployed your own app definition,
+run `window.location.origin` in the browser console with the app's iframe
+selected, or derive the origin from the app definition ID (base62, decoded to a
 UUID):
 
 ```js
