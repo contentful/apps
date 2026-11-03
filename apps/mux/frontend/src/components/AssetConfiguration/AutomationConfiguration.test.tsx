@@ -323,6 +323,30 @@ describe('directives Mux does not have', () => {
       consoleError.mockRestore();
     });
 
+    it('starts the upload once when Upload is clicked twice', async () => {
+      let finish: () => void = () => undefined;
+      const onConfirm = vi.fn(() => new Promise<void>((resolve) => (finish = resolve)));
+      render(
+        <MuxAssetConfigurationModal
+          isShown
+          onClose={vi.fn()}
+          onConfirm={onConfirm}
+          installationParams={{ muxEnableSignedUrls: false }}
+          sdk={sdk}
+          canChooseDirectives
+        />
+      );
+      const button = await screen.findByRole('button', { name: 'Upload' });
+      await waitFor(() => expect(button).toBeEnabled());
+
+      fireEvent.click(button);
+      fireEvent.click(button);
+
+      expect(onConfirm).toHaveBeenCalledTimes(1);
+      await waitFor(() => expect(button).toBeDisabled());
+      finish();
+    });
+
     it('marks a v0 directive and still attaches it', async () => {
       const directiveIds = await upload(async () => ({
         data: [
