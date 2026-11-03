@@ -44,6 +44,7 @@ import {
   RobotsJob,
   RobotsPendingDirectiveRunCreate,
   RobotsPendingJobCreate,
+  robotsApiVersionOf,
 } from './robotsTypes';
 import { MuxContentfulObject } from './types';
 
@@ -1658,29 +1659,50 @@ describe('deletedJobs', () => {
   } as unknown as MuxContentfulObject;
   const listed = [{ id: 'rjob_listed', workflow: 'summarize', status: 'completed' }] as RobotsJob[];
 
-  it('takes every unlisted record from a complete list, with what the entry kept', () => {
-    const jobs = deletedJobs(stored, listed, true, now);
+  it('takes the unlisted records past Mux’s retention, with what the entry kept', () => {
+    const jobs = deletedJobs(stored, listed, now);
 
-    expect(jobs.map((job) => job.id)).toEqual(['rjob_sum', 'rjob_err', 'rjob_recent']);
+    expect(jobs.map((job) => job.id)).toEqual(['rjob_sum', 'rjob_err']);
     expect(jobs[0].outputs).toEqual({ title: 'Kept title', description: 'Kept', tags: ['a'] });
     expect(jobs[1].errors).toEqual([{ message: 'Boom' }]);
-    // Its summary was replaced by a newer one, so nothing of its output is left.
-    expect(jobs[2].outputs).toBeUndefined();
   });
 
-  it('takes only records past Mux’s retention from a list cut short', () => {
-    expect(deletedJobs(stored, listed, false, now).map((job) => job.id)).toEqual([
-      'rjob_sum',
-      'rjob_err',
-    ]);
+  it('leaves out a recent record the list does not name yet', () => {
+    // Another editor's job, recorded on the entry before this session's list caught up with it.
+    expect(deletedJobs(stored, [], now).map((job) => job.id)).not.toContain('rjob_recent');
+  });
+
+  it('shows no output for a job whose stored summary a newer one replaced', () => {
+    const value = {
+      robotsJobs: [
+        { id: 'rjob_older', workflow: 'summarize', status: 'completed', created_at: old },
+      ],
+      robotsOutputs: { summarize: { jobId: 'rjob_newer', title: 'Newer' } },
+    } as unknown as MuxContentfulObject;
+
+    expect(deletedJobs(value, [], now)[0].outputs).toBeUndefined();
   });
 
   it('keeps Analyze Structure’s output under Mux’s names', () => {
     const value = {
-      robotsJobs: [{ id: 'rjob_as', workflow: 'analyze-structure', status: 'completed' }],
+      robotsJobs: [
+        { id: 'rjob_as', workflow: 'analyze-structure', status: 'completed', created_at: old },
+      ],
       robotsOutputs: { analyzeStructure: { jobId: 'rjob_as', title: 'T', summary: 'S' } },
     } as unknown as MuxContentfulObject;
 
-    expect(deletedJobs(value, [], true, now)[0].outputs).toEqual({ title: 'T', summary: 'S' });
+    expect(deletedJobs(value, [], now)[0].outputs).toEqual({ title: 'T', summary: 'S' });
+  });
+});
+
+describe('robotsApiVersionOf', () => {
+  it('reads the version from a relative route or a full URL', () => {
+    const at = (href: string) => robotsApiVersionOf({ _links: { self: { href } } });
+
+    expect(at('/robots/v1/jobs/summarize/rjob_1')).toBe('v1');
+    expect(at('https://api.mux.com/robots/v1/jobs/summarize/rjob_1')).toBe('v1');
+    expect(at('https://api.mux.com/robots/v0/directives/drv_1')).toBe('v0');
+    expect(at('/video/v1/assets/a')).toBeUndefined();
+    expect(robotsApiVersionOf({})).toBeUndefined();
   });
 });

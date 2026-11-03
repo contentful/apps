@@ -296,7 +296,6 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
     setIsLoading,
     loadError,
     hasLoadedOnce,
-    isComplete: isJobListComplete,
     pollNonce,
     refresh,
     addCreatedJob,
@@ -316,8 +315,8 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
   const runsNamedByJobs = useMemo(() => directiveRunRefsFromJobs(enrichedJobs), [enrichedJobs]);
   /** Shown, never written back: nothing here changes what the entry records. */
   const jobsMuxDeleted = useMemo(
-    () => deletedJobs(value, enrichedJobs, isJobListComplete),
-    [value?.robotsJobs, value?.robotsOutputs, enrichedJobs, isJobListComplete]
+    () => deletedJobs(value, enrichedJobs),
+    [value?.robotsJobs, value?.robotsOutputs, enrichedJobs]
   );
 
   const {

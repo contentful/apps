@@ -962,14 +962,13 @@ function keptOutputs(
 /**
  * The entry's records of jobs Mux no longer has, as jobs the table can show (ADR-0005).
  *
- * A record counts as deleted only where the list could have named it: a list that was not cut
- * short, or a job older than Mux keeps one. Each carries what the entry kept of it: its error, and
- * the stored output when this job is the one that produced it.
+ * Only a record older than Mux keeps a job counts. A younger one missing from the list is still in
+ * Mux: past a list cut short, or written by another editor after this list loaded. Each carries
+ * what the entry kept of it: its error, and the stored output when this job produced it.
  */
 export function deletedJobs(
   value: MuxContentfulObject | undefined,
   listed: RobotsJob[],
-  isListComplete: boolean,
   now = Date.now()
 ): RobotsJob[] {
   const listedIds = new Set(listed.map((job) => job.id));
@@ -977,8 +976,8 @@ export function deletedJobs(
     .filter(
       (record) =>
         !listedIds.has(record.id) &&
-        (isListComplete ||
-          (!!record.created_at && now - record.created_at * 1000 > ROBOTS_JOB_RETENTION_MS))
+        !!record.created_at &&
+        now - record.created_at * 1000 > ROBOTS_JOB_RETENTION_MS
     )
     .map(
       (record) =>

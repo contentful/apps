@@ -7,9 +7,6 @@ import {
 } from '../../util/robots';
 import { RobotsCapability, RobotsJob } from '../../util/robotsTypes';
 
-/** One page. A full page may not be every job on the asset. */
-const JOB_LIST_LIMIT = 100;
-
 /**
  * The job list, and the capability the list read doubles as.
  *
@@ -28,8 +25,6 @@ export interface RobotsJobListState {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   loadError?: string;
   hasLoadedOnce: boolean;
-  /** The last list that loaded returned every job on the asset, not one full page of them. */
-  isComplete: boolean;
   /**
    * Bumped after every refresh attempt, successful or not. The poll effect keys off this rather
    * than off `jobs`: a refresh that throws leaves `jobs` untouched, so keying off the data alone
@@ -64,7 +59,6 @@ export function useRobotsJobList({
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | undefined>();
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
-  const [isComplete, setIsComplete] = useState(false);
   const [pollNonce, setPollNonce] = useState(0);
 
   /** Guards the fetch against overlapping itself when a tick is slower than the interval. */
@@ -94,7 +88,7 @@ export function useRobotsJobList({
       if (!options.silent) setIsLoading(true);
 
       try {
-        const response = await muxApi.listRobotsJobs({ asset_id: assetId, limit: JOB_LIST_LIMIT });
+        const response = await muxApi.listRobotsJobs({ asset_id: assetId, limit: 100 });
         const fetched = response.data ?? [];
         if (!isMountedRef.current) return;
 
@@ -105,7 +99,6 @@ export function useRobotsJobList({
         }
         const pendingLocal = Array.from(locallyCreatedRef.current.values());
         setJobs(pendingLocal.length > 0 ? [...pendingLocal, ...fetched] : fetched);
-        setIsComplete(fetched.length < JOB_LIST_LIMIT);
         setLoadError(undefined);
         // A successful list *is* the capability check. Keep the identity stable when it has not
         // changed, so this does not re-render on every tick.
@@ -166,7 +159,6 @@ export function useRobotsJobList({
     setIsLoading,
     loadError,
     hasLoadedOnce,
-    isComplete,
     pollNonce,
     refresh,
     addCreatedJob,

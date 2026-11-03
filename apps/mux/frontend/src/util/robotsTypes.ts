@@ -53,13 +53,14 @@ export interface RobotsLinks {
 }
 
 /**
- * The version that owns a listed job or directive, read from its `_links.self` route. `undefined`
- * without one: create and detail responses carry no `_links`.
+ * The version that owns a listed job or directive, read from its `_links.self` route, relative as
+ * Mux sends it today or as a full URL. `undefined` without one: create and detail responses carry
+ * no `_links`.
  */
 export function robotsApiVersionOf(
   resource: { _links?: RobotsLinks } | undefined
 ): RobotsApiVersion | undefined {
-  const match = /^\/robots\/(v0|v1)\//.exec(resource?._links?.self?.href ?? '');
+  const match = /\/robots\/(v0|v1)\//.exec(resource?._links?.self?.href ?? '');
   return match ? (match[1] as RobotsApiVersion) : undefined;
 }
 
