@@ -108,7 +108,7 @@ const Field = () => {
   const name = useMemo<string>(() => {
     switch (typeof value) {
       case 'string':
-        const color = theme.colors.find((c) => outputColor(c.value) === value);
+        const color = theme.colors.find((c) => outputColor(c.value) === outputColor(value));
         if (color) {
           return color.name;
         }
