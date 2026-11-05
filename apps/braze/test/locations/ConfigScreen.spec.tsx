@@ -170,8 +170,9 @@ describe('Config Screen component', () => {
         return { ok: false, status: 401 };
       });
 
-      await saveAppInstallation();
+      const result = await saveAppInstallation();
 
+      expect(result).toBe(false);
       expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
     });
 
@@ -187,8 +188,9 @@ describe('Config Screen component', () => {
         return { ok: true, status: 200 };
       });
 
-      await saveAppInstallation();
+      const result = await saveAppInstallation();
 
+      expect(result).toBe(false);
       expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
     });
 
@@ -204,8 +206,9 @@ describe('Config Screen component', () => {
         return { ok: true, status: 200 };
       });
 
-      await saveAppInstallation();
+      const result = await saveAppInstallation();
 
+      expect(result).toBe(false);
       expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
     });
   });

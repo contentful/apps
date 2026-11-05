@@ -95,7 +95,8 @@ describe('useSaveConfigHandler', () => {
 
     await waitFor(() => expect(sdk.app.onConfigure).toHaveBeenCalledOnce());
 
-    const configureCallback = sdk.app.onConfigure.mock.calls[0][0]();
-    expect(configureCallback.parameters).toEqual(undefined);
+    const configureCallback = sdk.app.onConfigure.mock.calls[0][0];
+    await expect(configureCallback()).resolves.toBe(false);
+    expect(sdk.notifier.error).toHaveBeenCalledWith('invalid');
   });
 });
