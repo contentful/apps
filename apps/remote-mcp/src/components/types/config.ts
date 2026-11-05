@@ -86,7 +86,8 @@ export const ENTITY_AVAILABLE_ACTIONS: Record<
   entries: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish', 'archive', 'unarchive'],
   assets: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish', 'archive', 'unarchive'],
   contentTypes: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish'],
-  aiActions: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish', 'invoke'],
+  // Write actions are not offered: APS denies them to every delegated app token.
+  aiActions: ['read', 'invoke'],
   locales: ['read', 'edit', 'create', 'delete'],
   concepts: ['read', 'edit', 'create', 'delete'],
   conceptSchemes: ['read', 'edit', 'create', 'delete'],

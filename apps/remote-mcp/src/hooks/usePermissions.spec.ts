@@ -112,4 +112,22 @@ describe('usePermissions', () => {
       }
     });
   });
+
+  describe('AI actions', () => {
+    it('only offers read and invoke, so select-all never enables AI action writes', () => {
+      const { result } = renderHook(() => usePermissions());
+
+      act(() => {
+        result.current.handleRowToggle('aiActions');
+      });
+
+      const { aiActions } = result.current.contentLifecyclePermissions;
+      expect(aiActions.read).toBe(true);
+      expect(aiActions.invoke).toBe(true);
+      for (const action of ['edit', 'create', 'delete', 'publish', 'unpublish'] as const) {
+        expect(isActionAvailable('aiActions', action)).toBe(false);
+        expect(aiActions[action]).toBe(false);
+      }
+    });
+  });
 });
