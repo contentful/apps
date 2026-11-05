@@ -1,10 +1,7 @@
 /* eslint-disable  @typescript-eslint/no-non-null-assertion */
 
-// Must be imported before MuxPlayer to prevent Chromecast errors in Contentful's sandboxed iframe
-import './util/disableChromecast';
-
 import React, { ChangeEvent, createRef } from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import {
   init,
@@ -16,7 +13,8 @@ import {
 import { Button, Note, Spinner, TextLink, Tabs, Box, Flex } from '@contentful/f36-components';
 import { Form, FormControl, TextInput } from '@contentful/f36-forms';
 
-import MuxPlayer from '@mux/mux-player-react';
+import PreviewPlayer from './components/PreviewPlayer';
+import { buildPlayerSnippet } from './util/playerSnippet';
 
 import Config from './locations/config';
 
@@ -218,7 +216,6 @@ export class App extends React.Component<AppProps, AppState> {
   resolveRef = createRef<(value: string | null) => void>();
   muxUploaderRef = createRef<any>(); // eslint-disable-line @typescript-eslint/no-explicit-any
   fileInputRef = React.createRef<HTMLInputElement>();
-  muxPlayerRef = React.createRef<any>(); // eslint-disable-line @typescript-eslint/no-explicit-any
   private pollPending = false;
 
   /**
@@ -296,6 +293,7 @@ export class App extends React.Component<AppProps, AppState> {
       storyboardToken: undefined,
       drmLicenseToken: undefined,
       raw: undefined,
+      playerReloadCount: 0,
     };
   }
 
@@ -1299,7 +1297,7 @@ export class App extends React.Component<AppProps, AppState> {
 
   reloadPlayer = async () => {
     if (!this.state || !this.state.value) return;
-    this.muxPlayerRef.current?.load();
+    this.setState((previous) => ({ playerReloadCount: previous.playerReloadCount + 1 }));
   };
 
   generateExternalPlayerURL = (): string | null => {
@@ -1312,33 +1310,28 @@ export class App extends React.Component<AppProps, AppState> {
       return null;
     }
 
-    const playbackId = this.state.value.drmPlaybackId;
-    const streamType = this.getPlayerType();
-    const customDomain = this.props.sdk.parameters.installation.muxDomain;
     const videoTitle = this.state.value.meta?.title || 'DRM Protected Video';
-
-    // Use JSON.stringify for safe string escaping
-    const tokens = {
-      playback: this.state.playbackToken,
-      ...(this.state.posterToken && { thumbnail: this.state.posterToken }),
-      ...(this.state.storyboardToken && { storyboard: this.state.storyboardToken }),
-      drm: this.state.drmLicenseToken,
-    };
-
-    // Build player attributes
-    const attrs: string[] = [
-      `playback-id="${playbackId}"`,
-      streamType ? `stream-type="${streamType}"` : '',
-      customDomain && customDomain !== 'mux.com' ? `custom-domain="${customDomain}"` : '',
-      this.state.value.audioOnly ? 'audio="true"' : '',
-    ].filter(Boolean);
+    const snippet = buildPlayerSnippet({
+      playbackId: this.state.value.drmPlaybackId!,
+      streamType: this.getPlayerType(),
+      customDomain: this.props.sdk.parameters.installation.muxDomain,
+      audio: this.state.value.audioOnly,
+      aspectRatio: this.getPlayerAspectRatio()?.aspectRatio,
+      tokens: {
+        playback: this.state.playbackToken,
+        thumbnail: this.state.posterToken,
+        storyboard: this.state.storyboardToken,
+        drm: this.state.drmLicenseToken,
+      },
+      videoTitle,
+    });
 
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mux DRM Player - ${videoTitle.replace(/"/g, '&quot;')}</title>
+  <title>Mux DRM Player - ${videoTitle.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</title>
   <style>
     body {
       margin: 0;
@@ -1351,6 +1344,7 @@ export class App extends React.Component<AppProps, AppState> {
       align-items: center;
       justify-content: center;
       min-height: 100vh;
+      box-sizing: border-box;
     }
     .container {
       max-width: 1200px;
@@ -1360,23 +1354,12 @@ export class App extends React.Component<AppProps, AppState> {
       margin-bottom: 20px;
       font-size: 24px;
     }
-    mux-player {
-      width: 100%;
-      max-width: 100%;
-    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>${videoTitle.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h1>
-    <script src="https://unpkg.com/@mux/mux-player"></script>
-    <mux-player ${attrs.join(' ')} style="width:100%"></mux-player>
-    <script>
-      const player = document.querySelector('mux-player');
-      if (player) {
-        player.tokens = ${JSON.stringify(tokens)};
-      }
-    </script>
+    ${snippet.replace(/\n/g, '\n    ')}
   </div>
 </body>
 </html>`;
@@ -1403,6 +1386,10 @@ export class App extends React.Component<AppProps, AppState> {
       {
         name: 'video-title',
         value: this.state.value.meta?.title,
+      },
+      {
+        name: 'aspect-ratio',
+        value: this.getPlayerAspectRatio()?.aspectRatio,
       },
     ];
     if (this.state.value.signedPlaybackId) {
@@ -1891,14 +1878,13 @@ export class App extends React.Component<AppProps, AppState> {
 
             {showPlayer && (
               <section className="player" style={this.getPlayerAspectRatio()}>
-                <MuxPlayer
-                  ref={this.muxPlayerRef}
-                  data-testid="muxplayer"
-                  style={{ height: '100%', width: '100%' }}
-                  playbackId={this.state.playerPlaybackId}
+                <PreviewPlayer
+                  key={`${this.state.playerPlaybackId}-${this.state.playerReloadCount}`}
+                  playbackId={this.state.playerPlaybackId!}
                   streamType={this.getPlayerType()}
-                  customDomain={muxDomain && muxDomain !== 'mux.com' ? muxDomain : undefined}
+                  customDomain={muxDomain}
                   audio={this.state.value.audioOnly}
+                  aspectRatio={this.getPlayerAspectRatio()?.aspectRatio}
                   metadata={{
                     player_name: 'Contentful Admin Dashboard',
                     viewer_user_id:
@@ -2180,12 +2166,13 @@ export class App extends React.Component<AppProps, AppState> {
 }
 
 init((sdk) => {
+  const root = createRoot(document.getElementById('root')!);
   if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
-    render(<Config sdk={sdk as AppExtensionSDK} />, document.getElementById('root'));
+    root.render(<Config sdk={sdk as AppExtensionSDK} />);
   } else if (sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR)) {
-    render(<Sidebar sdk={sdk as SidebarExtensionSDK} />, document.getElementById('root'));
+    root.render(<Sidebar sdk={sdk as SidebarExtensionSDK} />);
   } else {
-    render(<App sdk={sdk as FieldExtensionSDK} />, document.getElementById('root'));
+    root.render(<App sdk={sdk as FieldExtensionSDK} />);
   }
 });
 
