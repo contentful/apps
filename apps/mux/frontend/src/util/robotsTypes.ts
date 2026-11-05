@@ -7,7 +7,19 @@
  * `RobotsOutputs`), which are ours and use the app's camelCase.
  */
 
-/** The twelve public workflows, exactly as they appear in `POST /robots/v0/jobs/{workflow}`. */
+/**
+ * The Robots API versions this app speaks. A job or directive keeps the version that created it
+ * and is read, cancelled and run on that version only: the other one answers 404. See ADR-0017.
+ */
+export type RobotsApiVersion = 'v0' | 'v1';
+
+/** The version new jobs and directive runs are created on. */
+export const ROBOTS_API_VERSION: RobotsApiVersion = 'v1';
+
+/**
+ * Every workflow a listed job can name, as it appears in `POST /robots/{version}/jobs/{workflow}`.
+ * `find-scenes` exists on v0 only; its jobs are still listed and read until Mux purges them.
+ */
 export const ROBOTS_WORKFLOWS = [
   'generate-premium-captions',
   'edit-captions',
@@ -19,11 +31,38 @@ export const ROBOTS_WORKFLOWS = [
   'find-best-thumbnails',
   'generate-engagement-insights',
   'generate-chapters',
+  'analyze-structure',
   'find-scenes',
   'moderate',
 ] as const;
 
 export type RobotsWorkflow = (typeof ROBOTS_WORKFLOWS)[number];
+
+/** Workflows v1 dropped. Their old jobs are shown, never started. */
+export const ROBOTS_RETIRED_WORKFLOWS = ['find-scenes'] as const;
+
+/** What the run form offers and `POST /robots/v1/jobs/{workflow}` accepts. */
+export type RobotsRunnableWorkflow = Exclude<
+  RobotsWorkflow,
+  (typeof ROBOTS_RETIRED_WORKFLOWS)[number]
+>;
+
+/** `_links` as the list endpoints return it, naming the route of the version that owns the item. */
+export interface RobotsLinks {
+  self?: { href?: string };
+}
+
+/**
+ * The version that owns a listed job or directive, read from its `_links.self` route, relative as
+ * Mux sends it today or as a full URL. `undefined` without one: create and detail responses carry
+ * no `_links`.
+ */
+export function robotsApiVersionOf(
+  resource: { _links?: RobotsLinks } | undefined
+): RobotsApiVersion | undefined {
+  const match = /\/robots\/(v0|v1)\//.exec(resource?._links?.self?.href ?? '');
+  return match ? (match[1] as RobotsApiVersion) : undefined;
+}
 
 export type RobotsJobStatus = 'pending' | 'processing' | 'completed' | 'errored' | 'cancelled';
 
@@ -54,33 +93,26 @@ export interface RobotsJob {
   resources?: unknown;
   /** Single-job GET only, like `parameters`. Absent for a job created by a direct POST. */
   directive?: RobotsJobDirective;
+  /** On list summaries, and stamped on created jobs. Read it through `robotsApiVersionOf`. */
+  _links?: RobotsLinks;
 }
 
 /**
- * The directive run that dispatched a job, as `GET /robots/v0/jobs/{workflow}/{id}` names it: the
- * two ids `GET /robots/v0/directives/{id}/runs/{run_id}` takes. Documented in the API reference
- * and in `@mux/mux-node`'s `JobDirectiveContext`.
+ * The directive run that dispatched a job, as the single-job GET names it: the two ids the
+ * directive's run GET takes. A dispatched job has its directive's version.
  */
 export interface RobotsJobDirective {
   id: string;
   run_id: string;
 }
 
-export interface RobotsDirectiveWorkflowBinding {
-  reference_id?: string;
-  workflow?: RobotsWorkflow;
-  inputs?: string[];
-  params?: Record<string, unknown>;
-}
-
+/** A directive as the v1 list summarises it, for both versions. The configuration is not in it. */
 export interface RobotsDirective {
   id: string;
   name?: string;
-  subject?: { type?: string };
-  resources?: unknown[];
-  workflows?: RobotsDirectiveWorkflowBinding[];
   created_at?: number;
   updated_at?: number;
+  _links?: RobotsLinks;
 }
 
 export type RobotsDirectiveRunStatus =
@@ -103,28 +135,34 @@ export type RobotsNodeStatus =
   | 'dispatched'
   | 'failed'
   | 'waiting_for_resources'
-  | 'waiting_for_source_workflow';
+  | 'waiting_for_source_workflow'
+  | 'waiting_for_source_bindings';
 
+/** One step of a run. The names a node uses depend on its directive's version, so both are here. */
 export interface RobotsNodeState {
   reference_id?: string;
   status?: RobotsNodeStatus;
+  /** v0. */
   workflow_name?: RobotsWorkflow | string;
+  /** v1. */
+  workflow?: RobotsWorkflow | string;
   job_id?: string;
   /** Present when `status` is `failed`. */
   reason?: string;
-  /** Present when `status` is `waiting_for_source_workflow`. */
+  /** v0, while `waiting_for_source_workflow`: workflow names. */
   source_workflows?: string[];
+  /** v1, while `waiting_for_source_bindings`: binding reference ids. */
+  source_bindings?: string[];
 }
 
 /**
  * A directive run as the REST API returns it, from both `GET .../runs` and `GET .../runs/{id}`.
  *
  * The field names are the ones to be careful about, because Mux serialises a run two different
- * ways. The **webhook** payload nests `{ id, directive_id, asset_id, … }`; the **REST** responses
- * use `run_id` and `subject_id` and carry no directive id at all. Modelling the webhook shape here
- * is what made the runs table permanently empty: filtering on `asset_id` matched nothing, ever.
- * Confirmed against `@mux/mux-node`'s generated `DirectiveRunDetail`, since the API reference
- * documents these three endpoints with no response schema at all.
+ * ways. The v0 **webhook** payload nests `{ id, directive_id, asset_id, … }`; the v0 **REST**
+ * responses use `run_id` and `subject_id`. Modelling the webhook shape here is what made the runs
+ * table permanently empty: filtering on `asset_id` matched nothing, ever. v1 uses `id` everywhere,
+ * and `readDirectiveRun` renames it so the rest of the app keys runs one way.
  *
  * `subject_id` rather than `asset_id` because a directive's subject is what it runs against, and
  * today that is always an asset.
@@ -133,15 +171,26 @@ export interface RobotsDirectiveRun {
   run_id: string;
   subject_id?: string;
   status?: RobotsDirectiveRunStatus;
-  /** Returned in the order the bindings appear in the directive's `workflows`. */
+  /** Returned in the order of the directive's bindings. */
   node_states?: RobotsNodeState[];
   started_at?: number;
   completed_at?: number | null;
   /**
-   * Not on the wire. Attached by the caller from the directive whose runs it asked for — which is
-   * the only place the association exists, since the response never names its own directive.
+   * v1 sends it. For a v0 run the caller attaches it from the directive whose runs it asked for,
+   * the only place that association exists.
    */
   directive_id?: string;
+}
+
+/** A run as either version sends it: v1 names it `id`. */
+export type RobotsDirectiveRunResponse = Omit<RobotsDirectiveRun, 'run_id'> & {
+  run_id?: string;
+  id?: string;
+};
+
+export function readDirectiveRun(run: RobotsDirectiveRunResponse): RobotsDirectiveRun {
+  const { id, run_id: runId, ...rest } = run;
+  return { ...rest, run_id: runId ?? id ?? '' };
 }
 
 /**
@@ -245,23 +294,37 @@ export interface RobotsModerateOutput {
   maxScores?: { sexual?: number; violence?: number };
 }
 
+/** Analyze Structure's title, summary and tags, under Mux's names. */
+export interface RobotsAnalyzeStructureOutput {
+  jobId: string;
+  completedAt?: number;
+  title?: string;
+  summary?: string;
+  tags?: string[];
+}
+
 /**
  * Outputs written onto the field JSON so the Delivery API returns them with the entry: the newest
  * completed run of each workflow on this asset, whoever started it (ADR-0005, ADR-0008).
  *
- * Only summarize and moderation live here. The other workflows' results live on the Mux asset:
- * captions and dubs as tracks, chapters as its chapters track (`update_asset_chapters`), and the
- * best thumbnail as `thumbnail_time`. That also keeps this object small — scenes and key
- * moments, the two outputs that could realistically approach Contentful's JSON-field size limit,
- * are never persisted.
+ * Only summarize, moderation and Analyze Structure's text live here. The other workflows' results
+ * live on the Mux asset: captions and dubs as tracks, chapters as its chapters track
+ * (`update_asset_chapters`), and the best thumbnail as `thumbnail_time`. That also keeps this
+ * object small — scenes and key moments, the two outputs that could realistically approach
+ * Contentful's JSON-field size limit, are never persisted, Analyze Structure's included.
  */
 export interface RobotsOutputs {
   summarize?: RobotsSummarizeOutput;
   moderate?: RobotsModerateOutput;
+  analyzeStructure?: RobotsAnalyzeStructureOutput;
 }
 
 /** Workflows whose outputs are persisted onto the field JSON. */
-export const PERSISTED_OUTPUT_WORKFLOWS: RobotsWorkflow[] = ['summarize', 'moderate'];
+export const PERSISTED_OUTPUT_WORKFLOWS: RobotsWorkflow[] = [
+  'summarize',
+  'moderate',
+  'analyze-structure',
+];
 
 // There used to be a `TRACK_PRODUCING_WORKFLOWS` list here, gating the post-completion asset
 // resync on the four workflows that attach a track. It was deleted rather than left in place,

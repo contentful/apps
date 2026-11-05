@@ -113,3 +113,16 @@ frequency, not size: each status change of a running job is one full-field write
   a read records something.
 - A cancelled job still takes a slot in the detail window even though `Not charged` makes its read
   redundant for the Units column.
+
+## Amendment — 2026-11-02
+
+The tab showed only the jobs Mux listed, so an entry whose jobs Mux had deleted showed an empty
+table that said no job had ever run, while `robotsJobs` held them. The table now adds a read-only
+row, marked "Deleted by Mux", for each record the list leaves out (`deletedJobs`). Only a record
+older than Mux's 30 days counts. A younger one the list leaves out is still in Mux: past a list cut
+short at its page size, or written by another editor after this session's list loaded. Such a row shows the recorded status (a record left
+unfinished shows `unknown`), units or `Unavailable`, and no Cancel. Its output is the one the
+entry kept: the stored Summarize, Moderate or Analyze Structure output when this job produced it,
+or the recorded error. It opens without a request and without a Raw JSON tab, since it is the
+entry's record and not something Mux returned. Nothing about these rows is written back, so an
+entry is never marked *Changed* for showing them.

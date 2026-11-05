@@ -109,6 +109,7 @@ describe('the other shaped outputs', () => {
     ['ask-questions', { unexpected: 1 }],
     ['generate-chapters', { unexpected: 1 }],
     ['find-scenes', { unexpected: 1 }],
+    ['analyze-structure', { unexpected: 1 }],
     ['find-best-thumbnails', { unexpected: 1 }],
     ['generate-engagement-insights', { unexpected: 1 }],
     ['moderate', { unexpected: 1 }],
@@ -384,7 +385,23 @@ describe('the raw JSON view', () => {
     );
 
     await waitFor(() => expect(screen.getByText('Fetched title')).toBeInTheDocument());
-    expect(getRobotsJob).toHaveBeenCalledWith('summarize', 'rjob_fetch');
+    expect(getRobotsJob).toHaveBeenCalledWith({ id: 'rjob_fetch', workflow: 'summarize' });
+  });
+
+  it('fetches it on the version its links name, which is the only one that has it', async () => {
+    const _links = { self: { href: '/robots/v1/jobs/summarize/rjob_v1' } };
+    const getRobotsJob = vi.fn(async () => ({ data: undefined }));
+    render(
+      <RobotsOutputViewer
+        job={job({ id: 'rjob_v1', workflow: 'summarize', outputs: undefined, _links })}
+        muxApi={{ getRobotsJob } as never}
+        onClose={vi.fn()}
+      />
+    );
+
+    await waitFor(() =>
+      expect(getRobotsJob).toHaveBeenCalledWith({ id: 'rjob_v1', workflow: 'summarize', _links })
+    );
   });
 
   /**
@@ -407,7 +424,7 @@ describe('the raw JSON view', () => {
   /** A result belongs to the job it was fetched for, and to no other. */
   it("never shows one job's output under another job's header", async () => {
     const muxApi = {
-      getRobotsJob: vi.fn((_workflow: string, id: string) =>
+      getRobotsJob: vi.fn(({ id }: { id: string }) =>
         id === 'rjob_a'
           ? Promise.resolve({
               data: job({
@@ -680,6 +697,7 @@ describe('the job facts', () => {
 });
 
 describe('generate-chapters output', () => {
+  // v0's name for the outcome. v1 sends only `asset_updates.chapters`.
   const chaptersJob = (assetUpdate?: unknown) =>
     job({
       workflow: 'generate-chapters',
@@ -688,6 +706,19 @@ describe('generate-chapters output', () => {
         ...(assetUpdate !== undefined && { asset_update: assetUpdate }),
       },
     });
+
+  it('reads the outcome where v1 reports it', () => {
+    show(
+      job({
+        workflow: 'generate-chapters',
+        outputs: {
+          chapters: [{ start_time: 0, end_time: 34.6, title: 'Intro' }],
+          asset_updates: { chapters: { status: 'created', track_id: 'track_chapters_1' } },
+        },
+      })
+    );
+    expect(screen.getByText(/added to the Mux video as its chapters track/)).toBeInTheDocument();
+  });
 
   it('says the chapters are on the video when Mux wrote them', () => {
     show(chaptersJob({ status: 'created', track_id: 'track_chapters_1' }));
@@ -705,5 +736,125 @@ describe('generate-chapters output', () => {
     show(chaptersJob());
     expect(screen.getByText(/were not added to the Mux video/)).toBeInTheDocument();
     expect(screen.getByText('Intro')).toBeInTheDocument();
+  });
+});
+
+/**
+ * A job keeps the version it ran on, so a v0 job's milliseconds and a v1 job's seconds are both on
+ * screen for as long as Mux keeps the v0 one. The key says which unit it is.
+ */
+describe('media times, in either version’s unit', () => {
+  it('reads key moments in seconds from v1 and in milliseconds from v0, to the same range', () => {
+    const moment = { title: 'The reveal', overall_score: 0.9 };
+    const { unmount } = show(
+      job({ outputs: { moments: [{ ...moment, start_time: 62.5, end_time: 75 }] } })
+    );
+    expect(screen.getByText('1:02 – 1:15')).toBeInTheDocument();
+    unmount();
+
+    show(job({ outputs: { moments: [{ ...moment, start_ms: 62500, end_ms: 75000 }] } }));
+    expect(screen.getByText('1:02 – 1:15')).toBeInTheDocument();
+  });
+
+  it('reads a thumbnail’s time from v1 and its timestamp from v0', () => {
+    const { unmount } = show(
+      job({ workflow: 'find-best-thumbnails', outputs: { best_thumbnails: [{ time: 95.2 }] } })
+    );
+    expect(screen.getByText('1:35')).toBeInTheDocument();
+    unmount();
+
+    show(
+      job({
+        workflow: 'find-best-thumbnails',
+        outputs: { best_thumbnails: [{ timestamp_ms: 95200 }] },
+      })
+    );
+    expect(screen.getByText('1:35')).toBeInTheDocument();
+  });
+});
+
+describe('analyze-structure output', () => {
+  const analyzed = (outputs: Record<string, unknown> = {}) =>
+    job({
+      workflow: 'analyze-structure',
+      outputs: {
+        title: 'A title',
+        summary: 'A summary',
+        tags: ['heist'],
+        chapters: [{ start_time: 0, end_time: 34.6, title: 'Opening' }],
+        scenes: [
+          {
+            start_time: 34.633,
+            end_time: 83.133,
+            title: 'Prison release',
+            visual_narrative: 'A gate opens.',
+          },
+        ],
+        key_moments: [
+          { start_time: 62.5, end_time: 75, title: 'The reveal', overall_score: 0.9, cues: [] },
+        ],
+        ...outputs,
+      },
+    });
+
+  it('shows everything it returns, with times in seconds', () => {
+    show(analyzed());
+
+    expect(screen.getByText('A title')).toBeInTheDocument();
+    expect(screen.getByText('A summary')).toBeInTheDocument();
+    expect(screen.getByText('heist')).toBeInTheDocument();
+    expect(screen.getByText('Opening')).toBeInTheDocument();
+    expect(screen.getByText('0:34 – 1:23')).toBeInTheDocument();
+    expect(screen.getByText('Prison release')).toBeInTheDocument();
+    expect(screen.getByText('A gate opens.')).toBeInTheDocument();
+    expect(screen.getByText('1:02 – 1:15')).toBeInTheDocument();
+    expect(screen.getByText('The reveal')).toBeInTheDocument();
+    // No update was asked for, so there is no outcome to report.
+    expect(screen.queryByText(/Mux asset’s title|chapters track/)).toBeNull();
+  });
+
+  it('says an audio-only video has no scenes, and still shows the rest', () => {
+    show(analyzed({ scenes: [] }));
+    expect(
+      screen.getByText('Mux found no scenes. An audio-only video has none.')
+    ).toBeInTheDocument();
+    expect(screen.getByText('A summary')).toBeInTheDocument();
+    expect(screen.getByText('Opening')).toBeInTheDocument();
+    expect(screen.queryByText(/not in the shape this view knows how to draw/)).toBeNull();
+  });
+
+  it('says how each asset update it was asked for went', () => {
+    show(
+      analyzed({
+        asset_updates: { title: { status: 'updated' }, chapters: { status: 'failed' } },
+      })
+    );
+    expect(screen.getByText(/generated title is now the Mux asset’s title/)).toBeInTheDocument();
+    expect(screen.getByText(/could not add these chapters/)).toBeInTheDocument();
+  });
+});
+
+describe('asset update outcomes on other workflows', () => {
+  it('says whether Summarize set the asset’s title', () => {
+    show(
+      job({
+        workflow: 'summarize',
+        outputs: { title: 'A title', asset_updates: { title: { status: 'failed' } } },
+      })
+    );
+    expect(screen.getByText(/could not set the generated title/)).toBeInTheDocument();
+  });
+
+  it('says whether Find best thumbnails set the video’s thumbnail', () => {
+    show(
+      job({
+        workflow: 'find-best-thumbnails',
+        outputs: {
+          best_thumbnails: [{ time: 95.2 }],
+          asset_updates: { thumbnail: { status: 'updated' } },
+        },
+      })
+    );
+    expect(screen.getByText(/now the Mux video’s thumbnail/)).toBeInTheDocument();
   });
 });

@@ -4,14 +4,16 @@ import {
   RobotsCapability,
   RobotsDirectiveRun,
   RobotsJob,
+  RobotsRunnableWorkflow,
   RobotsUnavailableState,
-  RobotsWorkflow,
 } from './robotsTypes';
 
 /** What the Robots tab sends Mux, and how it reads the answers. See ADR-0003 and ADR-0006. */
 
 export const ROBOTS_PRICING_URL = 'https://www.mux.com/docs/pricing/overview#mux-robots-pricing';
 export const ROBOTS_DOCS_URL = 'https://www.mux.com/docs/guides/robots';
+export const ROBOTS_DIRECTIVES_MIGRATION_URL =
+  'https://www.mux.com/docs/guides/robots-migrate-directives-to-v1';
 export const ROBOTS_TOKEN_DOCS_URL = 'https://dashboard.mux.com/settings/access-tokens';
 /** No organization or environment in it, so it is right for every account. */
 export const ROBOTS_DASHBOARD_URL = 'https://dashboard.mux.com';
@@ -49,7 +51,7 @@ export const ROBOTS_UNCONFIRMED_RECHECK_TICKS = 10;
  */
 export async function startRobotsJob(
   muxApi: MuxApiService,
-  workflow: RobotsWorkflow,
+  workflow: RobotsRunnableWorkflow,
   parameters: Record<string, unknown>
 ): Promise<RobotsJob> {
   const response = await muxApi.createRobotsJob(workflow, parameters);
@@ -70,7 +72,7 @@ export async function startRobotsJob(
 
 /**
  * Starts a directive run, once, on the same terms as `startRobotsJob`. A 2xx that names no run is
- * an unknown outcome. The response never names its directive, so the run is tagged with it here.
+ * an unknown outcome. A v0 response never names its directive, so the run is tagged with it here.
  */
 export async function startRobotsDirectiveRun(
   muxApi: MuxApiService,
@@ -81,6 +83,17 @@ export async function startRobotsDirectiveRun(
   const created = response?.data;
   if (!created?.run_id) throw new Error('Mux answered without naming the run it started.');
   return { ...created, directive_id: directiveId };
+}
+
+/**
+ * A v1 409 that means "not yet": the asset or a caption track is still being prepared. Every other
+ * 409 means the same work is already running, as it always has. See ADR-0017.
+ */
+export function isNotReadyYet(error: MuxApiError): boolean {
+  return (
+    error.status === 409 &&
+    (error.errorType === 'asset_not_ready' || error.errorType === 'track_not_ready')
+  );
 }
 
 /**

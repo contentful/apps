@@ -6,9 +6,9 @@ import { RobotsJob } from '../../util/robotsTypes';
 /**
  * The job detail cache.
  *
- * `GET /robots/v0/jobs` returns a six-field summary; `outputs`, `units_consumed`, `errors` and
- * `parameters` only exist on `GET /robots/v0/jobs/{workflow}/{id}`. Terminal detail never
- * changes, so it is fetched once and cached for the life of the component.
+ * The job list returns a summary; `outputs`, `units_consumed`, `errors` and `parameters` only
+ * exist on `GET /robots/{version}/jobs/{workflow}/{id}`, on the version that created the job.
+ * Terminal detail never changes, so it is fetched once and cached for the life of the component.
  *
  * Three ways in, all bounded:
  *
@@ -80,7 +80,7 @@ export function useRobotsJobDetails(
       const fetched = await Promise.all(
         pending.map(async (job) => {
           try {
-            const response = await muxApi.getRobotsJob(job.workflow, job.id);
+            const response = await muxApi.getRobotsJob(job);
             return response.data ? ([job.id, response.data] as const) : ([job.id, null] as const);
           } catch (error) {
             console.error(`[robots] Could not load job ${job.id}`, error);
@@ -126,7 +126,7 @@ export function useRobotsJobDetails(
       loadingDetailIdsRef.current.add(job.id);
       setLoadingDetailIds((previous) => [...previous, job.id]);
       try {
-        const response = await muxApi.getRobotsJob(job.workflow, job.id);
+        const response = await muxApi.getRobotsJob(job);
         if (!isMountedRef.current) return;
         if (response.data) {
           setJobDetails((previous) => ({ ...previous, [job.id]: response.data }));

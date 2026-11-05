@@ -29,8 +29,10 @@ import {
   applyRobotsJobsToValue,
   cachedRobotsCapability,
   capabilityFromError,
+  deletedJobs,
   directiveRunRefsFromJobs,
   freshPendingCreates,
+  isNotReadyYet,
   newPendingDirectiveRunCreate,
   newPendingJobCreate,
   pendingCreateRows,
@@ -44,13 +46,15 @@ import {
   unfinishedJobRecords,
 } from '../../util/robots';
 import { workflowLabel } from '../../util/robotsCatalog';
+import { summaryToApply } from '../../util/robotsEntryMapping';
 import {
   RobotsAdvisory,
   RobotsDirective,
   RobotsDirectiveRun,
   RobotsJob,
   RobotsPendingCreate,
-  RobotsWorkflow,
+  RobotsRunnableWorkflow,
+  robotsApiVersionOf,
 } from '../../util/robotsTypes';
 import { MuxContentfulObject, Track } from '../../util/types';
 import ExternalLink from '../ExternalLink';
@@ -61,6 +65,7 @@ import RobotsRunModal from './RobotsRunModal';
 import RobotsOutputViewer from './RobotsOutputViewer';
 import RobotsDirectiveRunTable from './RobotsDirectiveRunTable';
 import RobotsUnconfirmedNote from './RobotsUnconfirmedNote';
+import RobotsV0DirectivesNote from './RobotsV0DirectivesNote';
 import ApplyToEntryModal from './ApplyToEntryModal';
 import { useRobotsDirectiveRuns } from './useRobotsDirectiveRuns';
 import { directiveNamesById } from './useRobotsDirectiveNames';
@@ -308,6 +313,11 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
 
   /** The runs this asset's jobs name, which is how a run started outside Contentful is found. */
   const runsNamedByJobs = useMemo(() => directiveRunRefsFromJobs(enrichedJobs), [enrichedJobs]);
+  /** Shown, never written back: nothing here changes what the entry records. */
+  const jobsMuxDeleted = useMemo(
+    () => deletedJobs(value, enrichedJobs),
+    [value?.robotsJobs, value?.robotsOutputs, enrichedJobs]
+  );
 
   const {
     directiveRuns,
@@ -460,6 +470,10 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
   }, [enrichedJobs, directiveRuns, updateField, assetId]);
 
   const inFlight = useMemo(() => activeJobs(enrichedJobs), [enrichedJobs]);
+  const runningOnV0 = useMemo(
+    () => inFlight.filter((job) => robotsApiVersionOf(job) === 'v0').map((job) => job.workflow),
+    [inFlight]
+  );
   /**
    * Directive runs that may still dispatch more work.
    *
@@ -642,7 +656,9 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
     settle([pending.requestId]);
     void removePlaceholders([pending.requestId]);
     if (!isMountedRef.current) return;
-    if (error.status === 409) {
+    if (isNotReadyYet(error)) {
+      sdk.notifier.warning(error.message);
+    } else if (error.status === 409) {
       sdk.notifier.warning(alreadyRunning);
       reread();
     } else {
@@ -678,7 +694,10 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
    * Starts a workflow. The modal has already closed; the job table shows the run from here on.
    * See ADR-0003.
    */
-  const handleRun = async (workflow: RobotsWorkflow, parameters: Record<string, unknown>) => {
+  const handleRun = async (
+    workflow: RobotsRunnableWorkflow,
+    parameters: Record<string, unknown>
+  ) => {
     if (!muxApi || startingJobRef.current) return;
     const pending = newPendingJobCreate(workflow);
     startingJobRef.current = pending.requestId;
@@ -734,7 +753,7 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
     if (!muxApi) return;
     setCancellingIds((previous) => [...previous, job.id]);
     try {
-      await muxApi.cancelRobotsJob(job.id);
+      await muxApi.cancelRobotsJob(job);
       await refresh({ silent: true });
     } catch (error) {
       sdk.notifier.error(
@@ -885,9 +904,9 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
 
   // Not a spend guard like the two above — there is simply nothing to apply yet. It reads as a
   // reason rather than a boolean because it is what the tooltip says.
-  const applyDisabledReason = value?.robotsOutputs?.summarize
+  const applyDisabledReason = summaryToApply(value?.robotsOutputs)
     ? undefined
-    : 'Run a Summarize workflow to apply its title, description and tags to this entry’s own fields.';
+    : 'Run Summarize or Analyze structure to apply a title, description and tags to this entry’s own fields.';
 
   const availableDirectives =
     directiveListing.status === 'loaded'
@@ -914,6 +933,10 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
     directiveListing.status === 'loaded' ? directiveListing.directives : [],
     defaultDirectiveIds
   );
+  const v0Directives =
+    directiveListing.status === 'loaded'
+      ? directiveListing.directives.filter((directive) => robotsApiVersionOf(directive) === 'v0')
+      : [];
 
   return (
     <Box marginTop="spacingS">
@@ -986,9 +1009,15 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
 
       {/* A list that failed is not a list with nothing in it: the note above says what happened,
           and "No Robots jobs have run on this video yet" would be a claim nobody checked. */}
-      {!(loadError && enrichedJobs.length === 0 && jobRows.length === 0) && (
+      {!(
+        loadError &&
+        enrichedJobs.length === 0 &&
+        jobsMuxDeleted.length === 0 &&
+        jobRows.length === 0
+      ) && (
         <RobotsJobTable
           jobs={enrichedJobs}
+          deletedJobs={jobsMuxDeleted}
           pendingRows={jobRows}
           onDontStart={canRunRobots ? handleDontStart : undefined}
           pointsToNote={canRunRobots}
@@ -1012,6 +1041,14 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
         </Text>
         {canRunRobots && (
           <>
+            {v0Directives.length > 0 && (
+              <Box marginBottom="spacingM">
+                <RobotsV0DirectivesNote
+                  directives={v0Directives}
+                  nextStep="use the copy instead, here and in this app’s configuration."
+                />
+              </Box>
+            )}
             <Flex gap="spacingS" alignItems="flex-end" marginBottom="spacingM">
               <Box style={{ minWidth: '18rem' }}>
                 <Select
@@ -1025,7 +1062,9 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
                   <Select.Option value="">{directivePrompt}</Select.Option>
                   {availableDirectives.map((directive) => (
                     <Select.Option key={directive.id} value={directive.id}>
-                      {directive.name || directive.id}
+                      {`${directive.name || directive.id}${
+                        v0Directives.includes(directive) ? ' (v0)' : ''
+                      }`}
                     </Select.Option>
                   ))}
                 </Select>
@@ -1068,6 +1107,7 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
           audioTracks={audioTracks}
           isAudioOnly={value?.audioOnly}
           duration={value?.is_live ? undefined : value?.duration}
+          runningOnV0={runningOnV0}
           isRunDisabled={!!runDisabledReason}
           runDisabledReason={runDisabledReason}
         />
@@ -1077,6 +1117,7 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
         job={viewedJob && (enrichedJobs.find((job) => job.id === viewedJob.id) ?? viewedJob)}
         muxApi={muxApi}
         onLoaded={rememberJobDetail}
+        isDeleted={!!viewedJob && jobsMuxDeleted.some((job) => job.id === viewedJob.id)}
         onClose={() => setViewedJob(undefined)}
       />
 

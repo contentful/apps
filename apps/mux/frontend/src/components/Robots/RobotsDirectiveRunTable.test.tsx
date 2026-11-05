@@ -51,6 +51,28 @@ describe('RobotsDirectiveRunTable', () => {
     expect(stepCell).toHaveStyle({ verticalAlign: 'middle' });
   });
 
+  it('names a v1 run’s steps, which v1 calls workflow and source_bindings', () => {
+    showRuns([
+      run({
+        node_states: [
+          { reference_id: 'summary', workflow: 'summarize', status: 'dispatched' },
+          {
+            reference_id: 'scenes',
+            workflow: 'analyze-structure',
+            status: 'waiting_for_source_bindings',
+            source_bindings: ['summary'],
+          },
+        ],
+      }),
+    ]);
+    fireEvent.click(screen.getByRole('button', { name: 'Show steps' }));
+
+    expect(screen.getByText('Summarize')).toBeInTheDocument();
+    expect(screen.getByText('Analyze structure')).toBeInTheDocument();
+    expect(screen.getByText('waiting for source bindings')).toBeInTheDocument();
+    expect(screen.getByText('Waiting on summary')).toBeInTheDocument();
+  });
+
   it('wraps a directive shown by its id, which has no spaces to break at', () => {
     const id = `drv_${'x'.repeat(80)}`;
     showRuns([run({ directive_id: id })], { directiveNames: {} });

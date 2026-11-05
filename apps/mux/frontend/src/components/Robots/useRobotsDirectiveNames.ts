@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { MuxApiService } from '../../util/muxApi';
-import { RobotsDirective } from '../../util/robotsTypes';
+import { RobotsDirective, robotsApiVersionOf } from '../../util/robotsTypes';
 
 /**
  * Turning directive ids into the names a person chose in Mux.
@@ -10,7 +10,7 @@ import { RobotsDirective } from '../../util/robotsTypes';
  * and ours to keep. A name is a label someone can rename at any time, so it is resolved on
  * demand and never persisted.
  *
- * `GET /robots/v0/directives` is the only way to resolve one, which is an app-action round trip,
+ * `GET /robots/v1/directives` is the only way to resolve one, which is an app-action round trip,
  * so the rule everywhere this is used is the same: the names are a convenience and the id is the
  * truth. Nothing waits on the listing, and every caller renders the id when the listing fails or
  * when a directive has been deleted in Mux since it was configured.
@@ -40,6 +40,8 @@ export interface RobotsDirectiveNames {
    * because neither is evidence of absence.
    */
   missingIds: string[];
+  /** Requested ids the listing places on Robots v0. They still run, on v0 (ADR-0017). */
+  v0Ids: string[];
 }
 
 /**
@@ -81,10 +83,14 @@ export function useRobotsDirectiveNames(
   // Keyed on `idKey` rather than `directiveIds`, whose identity can change on every render.
   return useMemo(() => {
     const ids = idKey ? idKey.split(',') : [];
-    const listed = new Set((listing?.directives ?? []).map((directive) => directive.id));
+    const directives = listing?.directives ?? [];
+    const listed = new Set(directives.map((directive) => directive.id));
     return {
-      names: directiveNamesById(listing?.directives ?? [], ids),
+      names: directiveNamesById(directives, ids),
       missingIds: listing?.isComplete ? ids.filter((id) => !listed.has(id)) : [],
+      v0Ids: directives
+        .filter((directive) => ids.includes(directive.id) && robotsApiVersionOf(directive) === 'v0')
+        .map((directive) => directive.id),
     };
   }, [listing, idKey]);
 }

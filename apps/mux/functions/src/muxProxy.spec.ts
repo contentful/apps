@@ -71,6 +71,30 @@ describe('muxProxy handler', () => {
     expect(fetch).toHaveBeenCalledTimes(1);
   });
 
+  it('forwards both Robots versions: a resource is only reachable on the one that created it', async () => {
+    vi.mocked(fetch).mockImplementation(
+      async () => new Response(JSON.stringify({ data: [] }), { status: 200 }) as Response
+    );
+
+    for (const path of ['/robots/v1/jobs?asset_id=abc123', '/robots/v0/jobs/summarize/rjob_1']) {
+      expect(await handler(makeEvent({ method: 'GET', path }), validContext())).toEqual({
+        ok: true,
+        data: { data: [] },
+      });
+    }
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('rejects a path that traverses out of /robots/v1/ after normalization', async () => {
+    const result = await handler(
+      makeEvent({ method: 'GET', path: '/robots/v1/../../system/v1/signing-keys' }),
+      validContext()
+    );
+
+    expect(result).toEqual({ ok: false, error: 'Path not permitted', status: 403 });
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
   it('rejects a path that traverses out of /robots/v0/ after normalization', async () => {
     const result = await handler(
       makeEvent({ method: 'GET', path: '/robots/v0/../../system/v1/signing-keys' }),

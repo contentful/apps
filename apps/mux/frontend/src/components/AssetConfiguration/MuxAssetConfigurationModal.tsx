@@ -1,4 +1,4 @@
-import { FC, useState, useEffect, useMemo } from 'react';
+import { FC, useState, useEffect, useMemo, useRef } from 'react';
 import { Modal, Button, Accordion, Note } from '@contentful/f36-components';
 import { VideoQualitySelector } from './VideoQualitySelector';
 import { PlaybackPolicySelector } from './PlaybackPolicySelector';
@@ -64,7 +64,7 @@ export interface ModalData {
 interface MuxAssetConfigurationModalProps {
   isShown: boolean;
   onClose: () => void;
-  onConfirm: (data: ModalData) => void;
+  onConfirm: (data: ModalData) => void | Promise<void>;
   installationParams: {
     muxEnableSignedUrls: boolean;
     muxEnableDRM?: boolean;
@@ -112,11 +112,11 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
 
   // Resolved only for a real upload — editing an existing asset creates nothing, so it has no
   // Automation section to label. Not awaited anywhere: the ids render until the names arrive.
-  const { names: directiveNames, missingIds: missingDirectiveIds } = useRobotsDirectiveNames(
-    muxApi,
-    defaultDirectiveIds,
-    !isEditMode
-  );
+  const {
+    names: directiveNames,
+    missingIds: missingDirectiveIds,
+    v0Ids: v0DirectiveIds,
+  } = useRobotsDirectiveNames(muxApi, defaultDirectiveIds, !isEditMode);
 
   // DRM is disabled for audio files
   const effectiveDRMEnabled = muxEnableDRM && !isAudioOnly;
@@ -237,6 +237,24 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
 
   const isFormValid = Object.values(validationState).every((isValid) => isValid);
 
+  // Starting an upload takes a request or two before the modal closes, and a second click in that
+  // time uploaded the video twice. The ref blocks a click the re-render has not disabled yet.
+  const [isConfirming, setIsConfirming] = useState(false);
+  const isConfirmingRef = useRef(false);
+  const confirm = async () => {
+    if (isConfirmingRef.current) return;
+    isConfirmingRef.current = true;
+    setIsConfirming(true);
+    try {
+      await onConfirm(modalData);
+    } catch (error) {
+      // The modal stays open when the upload could not start, so let it be tried again.
+      isConfirmingRef.current = false;
+      setIsConfirming(false);
+      throw error;
+    }
+  };
+
   return (
     <FieldModal isShown={isShown} onClose={onClose}>
       <Modal.Header
@@ -328,6 +346,7 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
                   availableDirectiveIds={defaultDirectiveIds}
                   selectedDirectiveIds={modalData.directiveIds}
                   missingDirectiveIds={missingDirectiveIds}
+                  v0DirectiveIds={v0DirectiveIds}
                   directiveNames={directiveNames}
                   isReadOnly={!canChooseDirectives}
                   onChange={(directiveIds) => setModalData((prev) => ({ ...prev, directiveIds }))}
@@ -345,8 +364,9 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
         <Button
           size="small"
           variant="positive"
-          onClick={() => onConfirm(modalData)}
-          isDisabled={!isFormValid}>
+          onClick={confirm}
+          isLoading={isConfirming}
+          isDisabled={!isFormValid || isConfirming}>
           {isEditMode ? 'Update' : 'Upload'}
         </Button>
       </Modal.Controls>

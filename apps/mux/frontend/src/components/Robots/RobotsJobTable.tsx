@@ -13,7 +13,7 @@ import RobotsStatusBadge from './RobotsStatusBadge';
 /**
  * What is known about a job's *full* record, as opposed to the six-field list summary.
  *
- * `units_consumed` only exists on `GET /robots/v0/jobs/{workflow}/{id}`, and that read is bounded
+ * `units_consumed` only exists on the job detail GET, and that read is bounded
  * (see `jobsNeedingDetail`), so a blank cell has three causes the editor cannot tell apart unless
  * the column says which one it is.
  */
@@ -23,7 +23,9 @@ export type RobotsJobDetailState =
   /** The read was attempted and failed — a purged job, a proxy error. Asking again is pointless. */
   | 'unreadable'
   /** Never asked. Past the background window, or not its turn yet. */
-  | 'unread';
+  | 'unread'
+  /** Mux deleted the job. What the entry recorded is all there is. */
+  | 'deleted';
 
 interface RobotsUnitsCell {
   label: string;
@@ -46,6 +48,7 @@ export function unitsCell(job: RobotsJob, detail: RobotsJobDetailState): RobotsU
   if (typeof job.units_consumed === 'number') {
     return { label: String(job.units_consumed), isLoadable: false };
   }
+  if (detail === 'deleted') return { label: 'Unavailable', isLoadable: false };
   if (!isTerminalStatus(job.status)) return { label: 'Not counted yet', isLoadable: false };
   if (detail === 'unreadable') return { label: 'Unavailable', isLoadable: false };
   // We read the whole job and it carried no count. Not the same as never having looked.
@@ -55,6 +58,8 @@ export function unitsCell(job: RobotsJob, detail: RobotsJobDetailState): RobotsU
 
 interface RobotsJobTableProps {
   jobs: RobotsJob[];
+  /** Jobs Mux deleted, from the entry's records. Read-only rows. See `deletedJobs`. */
+  deletedJobs?: RobotsJob[];
   /** Job creates still pending, shown as rows until each becomes its job. See `pendingCreateRows`. */
   pendingRows: PendingCreateRow[];
   /** Withdraws a create still waiting behind a publish. Absent for someone who cannot run Robots. */
@@ -94,6 +99,7 @@ const detailState = (
 
 interface JobActionsProps {
   job: RobotsJob;
+  isDeleted: boolean;
   isCancelling: boolean;
   onCancel?: (job: RobotsJob) => void;
   onViewOutput: (job: RobotsJob) => void;
@@ -103,8 +109,22 @@ interface JobActionsProps {
  * A missing button reads as a rendering bug, so a row with no action to offer says what it would
  * have shown instead.
  */
-const JobActions: FC<JobActionsProps> = ({ job, isCancelling, onCancel, onViewOutput }) => {
-  if (job.status === 'pending' || job.status === 'processing') {
+const JobActions: FC<JobActionsProps> = ({
+  job,
+  isDeleted,
+  isCancelling,
+  onCancel,
+  onViewOutput,
+}) => {
+  if (isDeleted && !job.outputs && job.errors === undefined && job.status !== 'cancelled') {
+    return (
+      <Text fontColor="gray600" fontSize="fontSizeS" data-testid={`robots-not-kept-${job.id}`}>
+        Output not kept on this entry
+      </Text>
+    );
+  }
+
+  if (!isDeleted && (job.status === 'pending' || job.status === 'processing')) {
     if (!onCancel) {
       return (
         <Text fontColor="gray600" fontSize="fontSizeS" data-testid={`robots-running-${job.id}`}>
@@ -143,6 +163,7 @@ const JobActions: FC<JobActionsProps> = ({ job, isCancelling, onCancel, onViewOu
 
 const RobotsJobTable: FC<RobotsJobTableProps> = ({
   jobs,
+  deletedJobs = [],
   pendingRows,
   onDontStart,
   pointsToNote,
@@ -179,7 +200,8 @@ const RobotsJobTable: FC<RobotsJobTableProps> = ({
     );
   }
 
-  const rows = jobTableRows(pendingRows, jobs);
+  const deletedIds = new Set(deletedJobs.map((job) => job.id));
+  const rows = jobTableRows(pendingRows, [...jobs, ...deletedJobs]);
   if (rows.length === 0) {
     return <EmptyTableNote>No Robots jobs have run on this video yet.</EmptyTableNote>;
   }
@@ -218,7 +240,11 @@ const RobotsJobTable: FC<RobotsJobTableProps> = ({
               );
             }
 
-            const units = unitsCell(job, detailState(job, detailedJobIds, unreadableJobIds));
+            const isDeleted = deletedIds.has(job.id);
+            const units = unitsCell(
+              job,
+              isDeleted ? 'deleted' : detailState(job, detailedJobIds, unreadableJobIds)
+            );
             // The background read is coming, so this is loading, not "Not loaded".
             const isLoadingDetail =
               loadingDetailIds.includes(job.id) ||
@@ -229,9 +255,18 @@ const RobotsJobTable: FC<RobotsJobTableProps> = ({
                 <Table.Cell>
                   <Text>{workflowLabel(job.workflow)}</Text>
                   {/* No failure reason here: the status says it errored, View output says why. */}
+                  {isDeleted && (
+                    <Text as="p" fontColor="gray500" fontSize="fontSizeS">
+                      Deleted by Mux
+                    </Text>
+                  )}
                 </Table.Cell>
                 <Table.Cell>
-                  <RobotsStatusBadge kind="job" status={job.status} />
+                  {/* A record left unfinished has no final status to show. */}
+                  <RobotsStatusBadge
+                    kind="job"
+                    status={!isDeleted || isTerminalStatus(job.status) ? job.status : undefined}
+                  />
                 </Table.Cell>
                 <Table.Cell>{formatTimestamp(job.created_at)}</Table.Cell>
                 <Table.Cell>
@@ -254,6 +289,7 @@ const RobotsJobTable: FC<RobotsJobTableProps> = ({
                 <Table.Cell>
                   <JobActions
                     job={job}
+                    isDeleted={isDeleted}
                     isCancelling={cancellingIds.includes(job.id)}
                     onCancel={onCancel}
                     onViewOutput={onViewOutput}
@@ -264,6 +300,12 @@ const RobotsJobTable: FC<RobotsJobTableProps> = ({
           })}
         </Table.Body>
       </Table>
+      {deletedJobs.length > 0 && (
+        <Text as="p" fontColor="gray600" fontSize="fontSizeS" marginTop="spacingXs">
+          Mux deletes Robots jobs after 30 days. Rows marked “Deleted by Mux” come from this entry’s
+          history, which keeps the latest Summarize, Moderate and Analyze structure results.
+        </Text>
+      )}
     </Box>
   );
 };
