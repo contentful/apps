@@ -1,5 +1,5 @@
-import pick from 'lodash/pick';
 import { setup } from '@contentful/dam-app-base';
+import pick from 'lodash/pick';
 
 const CTF_APP_URL = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
 const BF_EMBED_URL = `https://integration-panel-ui.brandfolder-svc.com?channel=message&appName=Contentful&origin=${CTF_APP_URL}&attachment_fields=mux_hls_url`;
@@ -45,7 +45,9 @@ function renderDialog(sdk) {
   iframe.id = 'brandfolder-embed';
   iframe.className = 'iframe-container';
   iframe.src = bf_embed_url;
-  iframe.width = 400;
+  iframe.title = 'Brandfolder asset picker';
+  iframe.style.width = '100%';
+  iframe.style.display = 'block';
   iframe.height = 650;
   iframe.style.border = 'none';
   container.appendChild(iframe);
@@ -79,8 +81,8 @@ async function openDialog(sdk, _currentValue, config) {
     shouldCloseOnOverlayClick: true,
     shouldCloseOnEscapePress: true,
     parameters: { ...config },
-    width: 400,
-    allowHeightOverflow: true,
+    width: 'fullWidth',
+    allowHeightOverflow: false,
   });
 
   if (!Array.isArray(result)) {
