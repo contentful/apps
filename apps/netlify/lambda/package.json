@@ -31,7 +31,7 @@
   },
   "overrides": {
     "axios": ">=1.16.0",
-    "fast-xml-parser": ">=5.11.2",
+    "fast-xml-parser": ">=5.12.0",
     "lodash": ">=4.18.0",
     "minimatch": ">=10.2.6",
     "simple-git": ">=3.36.0",
