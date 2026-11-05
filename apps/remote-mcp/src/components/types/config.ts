@@ -99,11 +99,11 @@ export const ENTITY_AVAILABLE_ACTIONS: Record<
   tags: ['read', 'create'],
   orgs: ['read'],
   spaces: ['read'],
-  componentTypes: ['read'],
+  componentTypes: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish'],
   experiences: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish'],
-  templates: ['read'],
-  dataAssemblies: ['read'],
-  fragments: ['read', 'edit', 'create', 'delete'],
+  templates: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish'],
+  dataAssemblies: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish'],
+  fragments: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish'],
 } as const;
 
 /** All entity keys derived from ENTITY_AVAILABLE_ACTIONS */
