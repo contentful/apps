@@ -1,7 +1,7 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any */
 
 import React from 'react';
-import { fireEvent, render, queryByAttribute } from '@testing-library/react';
+import { act, fireEvent, render, queryByAttribute } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { App } from '.';
 import { vi } from 'vitest';
@@ -22,8 +22,8 @@ vi.mock('contentful-management', () => ({
   })),
 }));
 
-// Mock MuxPlayer to avoid Web Component errors in jsdom
-vi.mock('@mux/mux-player-react', () => ({
+// jsdom has no media playback for the Video.js player to drive.
+vi.mock('./components/PreviewPlayer', () => ({
   default: vi.fn(() => null),
 }));
 
@@ -142,6 +142,14 @@ const SDK_MOCK = {
   },
 };
 
+const wait = (ms: number) => act(() => new Promise<void>((resolve) => setTimeout(resolve, ms)));
+
+const renderSettled = async (ui: React.ReactElement) => {
+  const dom = render(ui);
+  await wait(0);
+  return dom;
+};
+
 const getById = queryByAttribute.bind(null, 'id');
 const getByName = queryByAttribute.bind(null, 'name');
 
@@ -192,7 +200,7 @@ describe('Mux frontend app', () => {
     const dom = render(<App sdk={mockedSdk as any} />);
 
     // Wait for the component to finish its async operations and state updates
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await wait(100);
 
     const error = await dom.findByTestId('terminalerror');
     expect(error).toBeVisible();
@@ -287,6 +295,7 @@ describe('Mux frontend app', () => {
     const menuHeader = dom.getByTestId('menu_header');
     expect(menuHeader.innerHTML).toContain('Remove');
     expect(menuHeader.innerHTML).toContain('Delete');
+    await wait(0);
   });
 
   it('Show captions in a table.', async () => {
@@ -330,6 +339,7 @@ describe('Mux frontend app', () => {
     expect(captionTable.innerHTML).toContain(
       'https://stream.mux.com/playback-test-123/text/text-track-123.vtt'
     );
+    await wait(0);
   });
 
   it('Show a pending caption in a table.', async () => {
@@ -369,6 +379,7 @@ describe('Mux frontend app', () => {
     const dom = render(<App sdk={mockedSdk as any} />);
     const captionTable = dom.getByTestId('caption_table');
     expect(captionTable.innerHTML).toContain('preparing');
+    await wait(0);
   });
 
   it('Caption Error, will show in table, but be removed after delete.', async () => {
@@ -412,9 +423,10 @@ describe('Mux frontend app', () => {
     const dom = render(<App sdk={mockedSdk as any} />);
     const captionTable = dom.getByTestId('caption_table');
     expect(captionTable.innerHTML).toContain('An Errored Language');
+    await wait(0);
   });
 
-  it('adds a Robots tab alongside the existing ones', () => {
+  it('adds a Robots tab alongside the existing ones', async () => {
     const mockedSdk = {
       ...SDK_MOCK,
       field: {
@@ -432,6 +444,7 @@ describe('Mux frontend app', () => {
     expect(dom.getByText('Robots')).toBeVisible();
     // The Robots panel must not fetch while another tab is selected.
     expect(dom.getByText('Captions')).toBeVisible();
+    await wait(0);
   });
 
   it('does not touch a v3 field value that has no Robots data', async () => {
@@ -455,7 +468,7 @@ describe('Mux frontend app', () => {
     };
 
     render(<App sdk={mockedSdk as any} />);
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    await wait(150);
 
     // A mount that learns nothing new must not write, because every write bumps the entry version
     // and flips a published entry to "Changed". This is the regression that the Robots field
@@ -688,7 +701,7 @@ describe('switching playback policy on an asset with no playback IDs', () => {
     // The Playback tab is only reachable in this state because the editor branch now keys off
     // `assetId`. A delete action with no `id` would make the publish function issue
     // `DELETE /assets/{id}/playback-ids` with no ID, on four consecutive publishes.
-    await (ref.current as App).swapPlaybackIDs('signed');
+    await act(() => (ref.current as App).swapPlaybackIDs('signed'));
 
     expect(stored.pendingActions.delete).toEqual([]);
     expect(stored.pendingActions.create).toEqual([
@@ -721,7 +734,7 @@ describe('switching playback policy on an asset with no playback IDs', () => {
       />
     );
 
-    await (ref.current as App).swapPlaybackIDs('public');
+    await act(() => (ref.current as App).swapPlaybackIDs('public'));
 
     expect(stored.pendingActions.delete).toEqual([]);
     expect(stored.pendingActions.create).toEqual([
@@ -754,7 +767,7 @@ describe('switching playback policy on an asset with no playback IDs', () => {
     );
 
     for (const policy of ['public', 'signed', 'drm'] as const) {
-      await (ref.current as App).swapPlaybackIDs(policy);
+      await act(() => (ref.current as App).swapPlaybackIDs(policy));
       for (const action of stored.pendingActions.create) {
         expect(action.data?.policy).toBeTruthy();
       }
@@ -794,7 +807,7 @@ describe('switching playback policy on an asset with no playback IDs', () => {
     );
     setValue.mockClear();
 
-    await (ref.current as App).swapPlaybackIDs('public');
+    await act(() => (ref.current as App).swapPlaybackIDs('public'));
 
     expect(setValue).not.toHaveBeenCalled();
     expect(stored.pendingActions.create).toHaveLength(1);
@@ -835,7 +848,7 @@ describe('pasting a Mux asset ID over a field that already holds one', () => {
       robotsJobs: [{ id: 'rjob_1', workflow: 'summarize', status: 'completed' }],
     } as Partial<MuxContentfulObject>);
 
-    await app.addVideoByInput(submitEvent('asset-new'));
+    await act(() => app.addVideoByInput(submitEvent('asset-new')));
 
     expect(openConfirm).toHaveBeenCalled();
     // Declined, so nothing is replaced. This write discards the whole value by design; the point
@@ -846,7 +859,7 @@ describe('pasting a Mux asset ID over a field that already holds one', () => {
   it('replaces a genuinely empty field with no prompt at all', async () => {
     const { app, setValue, openConfirm } = mountWith({});
 
-    await app.addVideoByInput(submitEvent('asset-new'));
+    await act(() => app.addVideoByInput(submitEvent('asset-new')));
 
     expect(openConfirm).not.toHaveBeenCalled();
     expect(setValue).toHaveBeenCalledWith({ assetId: 'asset-new' });
@@ -894,9 +907,9 @@ describe('polling while a track is preparing', () => {
       />
     );
     const app = ref.current as App;
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
     // The mount resync has already run; this test is about the poll loop that follows it.
-    app.setState({ initialResyncDone: true });
+    act(() => app.setState({ initialResyncDone: true }));
 
     const getAsset = vi.fn();
     getAsset.mockResolvedValueOnce({
@@ -911,7 +924,7 @@ describe('polling while a track is preparing', () => {
     });
     (app as any).muxApi = { getAsset, deleteTrack: vi.fn() };
 
-    await app.pollForAssetDetails();
+    await act(() => app.pollForAssetDetails());
     return { getAsset, read: () => stored as MuxContentfulObject };
   };
 
@@ -982,7 +995,7 @@ describe('the Robots panel across tab switches', () => {
   };
 
   const mountIt = () =>
-    render(
+    renderSettled(
       <App
         sdk={
           {
@@ -993,8 +1006,8 @@ describe('the Robots panel across tab switches', () => {
       />
     );
 
-  it('stays mounted, but hidden, while another tab is selected', () => {
-    const dom = mountIt();
+  it('stays mounted, but hidden, while another tab is selected', async () => {
+    const dom = await mountIt();
 
     // Captions is the default tab, so the Robots panel is inactive from the start. It has to be
     // both things at once: present, so its state survives, and hidden, so it does not draw its
@@ -1006,19 +1019,20 @@ describe('the Robots panel across tab switches', () => {
     expect(panel?.textContent).not.toBe('');
   });
 
-  it('shows the panel once its tab is selected', () => {
+  it('shows the panel once its tab is selected', async () => {
     // The other direction, because a panel that is always hidden would pass the test above.
-    const dom = mountIt();
+    const dom = await mountIt();
 
     fireEvent.mouseDown(dom.getByText('Robots'));
+    await wait(0);
 
     const panel = dom.container.querySelector('[data-test-id="robots_tab_panel"]');
     expect(panel).toBeVisible();
   });
 
-  it('does not fetch anything while its tab is not selected', () => {
+  it('does not fetch anything while its tab is not selected', async () => {
     // The other half of the trade: force-mounting must not turn into work on every entry open.
-    const dom = mountIt();
+    const dom = await mountIt();
 
     const panel = dom.container.querySelector('[data-test-id="robots_tab_panel"]');
     expect(panel).not.toBeNull();
@@ -1067,7 +1081,7 @@ describe('a video that loses its playback IDs mid-session', () => {
     const app = ref.current as App;
     // `this.muxApi` is assigned when `MuxApiService.getInstance()` resolves, so anything set
     // before that is overwritten. Wait for the mount resync to finish, then take the client over.
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
     const getAsset = vi.fn().mockResolvedValue({
       data: {
         id: 'asset-test-123',
@@ -1077,11 +1091,11 @@ describe('a video that loses its playback IDs mid-session', () => {
       },
     });
     (app as any).muxApi = { getAsset, deleteTrack: vi.fn() };
-    app.setState({ initialResyncDone: true, isPolling: false });
+    act(() => app.setState({ initialResyncDone: true, isPolling: false }));
 
     // One poll to establish the asset as playable.
-    await app.pollForAssetDetails();
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await act(() => app.pollForAssetDetails());
+    await wait(20);
     warning.mockClear();
 
     // Then the playback IDs change under the open session. `isPolling` is cleared in a `setState`
@@ -1089,10 +1103,10 @@ describe('a video that loses its playback IDs mid-session', () => {
     getAsset.mockResolvedValue({
       data: { id: 'asset-test-123', status: 'ready', playback_ids: playbackIds, tracks: [] },
     });
-    app.setState({ isPolling: false });
-    await new Promise((resolve) => setTimeout(resolve, 20));
-    await app.pollForAssetDetails();
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    act(() => app.setState({ isPolling: false }));
+    await wait(20);
+    await act(() => app.pollForAssetDetails());
+    await wait(20);
     return { app, warning, read: () => stored as MuxContentfulObject };
   };
 
@@ -1132,7 +1146,7 @@ describe('a video with a Robots job still running', () => {
   const nowSeconds = () => Math.floor(Date.now() / 1000);
 
   const mountWith = (robotsJobs: unknown[]) =>
-    render(
+    renderSettled(
       <App
         sdk={
           {
@@ -1152,8 +1166,8 @@ describe('a video with a Robots job still running', () => {
       />
     );
 
-  it('says a publish now will publish the job unfinished', () => {
-    const dom = mountWith([
+  it('says a publish now will publish the job unfinished', async () => {
+    const dom = await mountWith([
       { id: 'rjob_1', workflow: 'summarize', status: 'processing', created_at: nowSeconds() },
     ]);
 
@@ -1163,8 +1177,8 @@ describe('a video with a Robots job still running', () => {
     expect(note.textContent).toContain('publish again once it completes');
   });
 
-  it('counts them, because a directive dispatches several', () => {
-    const dom = mountWith([
+  it('counts them, because a directive dispatches several', async () => {
+    const dom = await mountWith([
       { id: 'rjob_1', workflow: 'summarize', status: 'processing', created_at: nowSeconds() },
       { id: 'rjob_2', workflow: 'moderate', status: 'pending', created_at: nowSeconds() },
     ]);
@@ -1172,8 +1186,8 @@ describe('a video with a Robots job still running', () => {
     expect(dom.getByTestId('robots-jobs-in-flight').textContent).toContain('2 Robots jobs');
   });
 
-  it('says nothing once every recorded job has finished', () => {
-    const dom = mountWith([
+  it('says nothing once every recorded job has finished', async () => {
+    const dom = await mountWith([
       { id: 'rjob_1', workflow: 'summarize', status: 'completed', created_at: nowSeconds() },
       { id: 'rjob_2', workflow: 'moderate', status: 'errored', created_at: nowSeconds() },
     ]);
@@ -1181,8 +1195,8 @@ describe('a video with a Robots job still running', () => {
     expect(dom.queryByTestId('robots-jobs-in-flight')).toBeNull();
   });
 
-  it('stops nagging about a record that has been stuck for hours', () => {
-    const dom = mountWith([
+  it('stops nagging about a record that has been stuck for hours', async () => {
+    const dom = await mountWith([
       {
         id: 'rjob_1',
         workflow: 'summarize',
@@ -1231,9 +1245,9 @@ describe('telling the editor that an upload already has Robots working on it', (
 
   const runPollWith = async (robots: Record<string, any>, directiveIds: string[] | undefined) => {
     const { app, notifier } = buildApp();
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
     const instance = app();
-    instance.setState({ initialResyncDone: true });
+    act(() => instance.setState({ initialResyncDone: true }));
     (instance as any).muxApi = {
       getAsset: vi.fn().mockResolvedValue({ data: readyAsset }),
       deleteTrack: vi.fn(),
@@ -1242,11 +1256,11 @@ describe('telling the editor that an upload already has Robots working on it', (
       ...robots,
     };
     if (directiveIds) {
-      await instance.onConfirmModal({ directiveIds } as any);
+      await act(() => instance.onConfirmModal({ directiveIds } as any));
     }
-    await instance.pollForAssetDetails();
+    await act(() => instance.pollForAssetDetails());
     // The announcement is deliberately not awaited by the poll.
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
     return { instance, notifier, muxApi: (instance as any).muxApi };
   };
 
@@ -1338,9 +1352,9 @@ describe('telling the editor that an upload already has Robots working on it', (
       ['drv_1']
     );
 
-    await instance.pollForAssetDetails();
-    await instance.pollForAssetDetails();
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await act(() => instance.pollForAssetDetails());
+    await act(() => instance.pollForAssetDetails());
+    await wait(50);
 
     expect(notifier.success).toHaveBeenCalledTimes(1);
   });

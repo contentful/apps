@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import AutomationConfiguration from './AutomationConfiguration';
 import MuxAssetConfigurationModal from './MuxAssetConfigurationModal';
@@ -226,7 +226,7 @@ describe('directives Mux does not have', () => {
     render(<Probe muxApi={{ listRobotsDirectives } as never} ids={['drv_gone']} />);
 
     await waitFor(() => expect(listRobotsDirectives).toHaveBeenCalled());
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await act(() => new Promise<void>((resolve) => setTimeout(resolve, 10)));
     expect(screen.getByTestId('missing')).toHaveTextContent('');
   });
 
@@ -302,7 +302,7 @@ describe('directives Mux does not have', () => {
         />
       );
       await waitFor(() => expect(screen.getByRole('button', { name: 'Upload' })).toBeEnabled());
-      await new Promise((resolve) => setTimeout(resolve, 20));
+      await act(() => new Promise<void>((resolve) => setTimeout(resolve, 20)));
       fireEvent.click(screen.getByRole('button', { name: 'Upload' }));
       return onConfirm.mock.calls[0]?.[0]?.directiveIds;
     };

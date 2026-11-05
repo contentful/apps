@@ -255,7 +255,7 @@ describe('the raw JSON view', () => {
     await openRaw();
     const shown = rawText();
     // The block's own button, not the one beside the job id.
-    await userEvent.click(screen.getByRole('button', { name: 'Copy to clipboard' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Copy this job' }));
 
     await waitFor(() => expect(writeText).toHaveBeenCalledWith(shown));
   });
@@ -297,7 +297,9 @@ describe('the raw JSON view', () => {
     expect(block.tagName).toBe('TEXTAREA');
     expect(block).toHaveClass('copycodearea');
     expect(block.value).toContain('payload text');
-    expect(screen.getByRole('button', { name: 'Copy to clipboard' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /^Copy th(is output|ese moment insights)$/ })
+    ).toBeInTheDocument();
   });
 
   /**

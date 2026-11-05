@@ -2,7 +2,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App, DiscardedFieldWriteError } from '.';
 import { MuxContentfulObject } from './util/types';
 
@@ -25,7 +25,7 @@ vi.mock('contentful-management', () => ({
   })),
 }));
 
-vi.mock('@mux/mux-player-react', () => ({ default: vi.fn(() => null) }));
+vi.mock('./components/PreviewPlayer', () => ({ default: vi.fn(() => null) }));
 
 vi.mock('./util/muxApi', () => ({
   MuxApiService: {
@@ -48,6 +48,12 @@ vi.mock('./util/muxApi', () => ({
   getUploadUrl: vi.fn(),
   buildAssetSettings: vi.fn(),
 }));
+
+// These tests drive the write chain on the App instance and assert on how its promises interleave,
+// which act would change by flushing work early. RTL still turns act on inside its own calls.
+beforeAll(() => {
+  (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = false;
+});
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 

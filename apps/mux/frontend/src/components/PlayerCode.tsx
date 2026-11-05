@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { Box, Switch, Tabs, TextLink, Flex } from '@contentful/f36-components';
+import { Box, Switch, Tabs, TextLink, Flex, Note } from '@contentful/f36-components';
 import CodeBlock from './CodeBlock';
+import { buildPlayerSnippet, isDvrStreamType, VIDEOJS_MUX_DOCS_URL } from '../util/playerSnippet';
 
 interface PlayerCodeProps {
   params: { name: string; value: string | undefined }[];
 }
 
 const PlayerCode: React.FC<PlayerCodeProps> = ({ params }) => {
-  const [codeType, setCodeType] = useState<'mux-player' | 'iframe'>('mux-player');
+  const [codeType, setCodeType] = useState<'videojs' | 'iframe'>('videojs');
   const [autoplay, setAutoplay] = useState(false);
   const [mute, setMute] = useState(false);
   const [loop, setLoop] = useState(false);
@@ -24,26 +25,25 @@ const PlayerCode: React.FC<PlayerCodeProps> = ({ params }) => {
   const audio = getParam('audio');
   const customDomain = getParam('custom-domain');
   const streamType = getParam('stream-type');
+  const aspectRatio = getParam('aspect-ratio');
 
-  // Compose attributes for both code types
-  const muxPlayerAttrs = [
-    `playback-id="${playbackId}"`,
-    streamType ? `stream-type="${streamType}"` : '',
-    playbackToken ? `playback-token="${playbackToken}"` : '',
-    thumbnailToken ? `thumbnail-token="${thumbnailToken}"` : '',
-    storyboardToken ? `storyboard-token="${storyboardToken}"` : '',
-    drmToken ? `drm-token="${drmToken}"` : '',
-    audio ? `audio="${audio}"` : '',
-    customDomain ? `custom-domain="${customDomain}"` : '',
-    autoplay ? 'autoplay' : '',
-    mute ? 'muted' : '',
-    loop ? 'loop' : '',
-    videoTitle ? `metadata-video-title="${videoTitle}"` : '',
-  ]
-    .filter(Boolean)
-    .join(' ');
-
-  const muxPlayerCode = `<script src="https://unpkg.com/@mux/mux-player"></script>\n\n<mux-player ${muxPlayerAttrs} style="width:100%" />`;
+  const videojsCode = buildPlayerSnippet({
+    playbackId,
+    streamType,
+    customDomain,
+    audio: audio === 'true',
+    aspectRatio,
+    tokens: {
+      playback: playbackToken,
+      thumbnail: thumbnailToken,
+      storyboard: storyboardToken,
+      drm: drmToken,
+    },
+    videoTitle,
+    autoplay,
+    muted: mute,
+    loop,
+  });
 
   let iframeSrcBase =
     customDomain && customDomain !== 'mux.com'
@@ -79,18 +79,30 @@ const PlayerCode: React.FC<PlayerCodeProps> = ({ params }) => {
 
   const iframeCode = `<iframe ${iframeAttrs} style="aspect-ratio: 16/9; width: 100%; border: 0;"></iframe>`;
 
-  const codeSnippet = codeType === 'mux-player' ? muxPlayerCode : iframeCode;
+  const codeSnippet = codeType === 'videojs' ? videojsCode : iframeCode;
 
   return (
     <section>
-      <Tabs
-        defaultTab="mux-player"
-        onTabChange={(id) => setCodeType(id as 'mux-player' | 'iframe')}>
+      <Tabs defaultTab="videojs" onTabChange={(id) => setCodeType(id as 'videojs' | 'iframe')}>
         <Tabs.List>
-          <Tabs.Tab panelId="mux-player">Mux Player</Tabs.Tab>
+          <Tabs.Tab panelId="videojs">Video.js</Tabs.Tab>
           <Tabs.Tab panelId="iframe">iframe</Tabs.Tab>
         </Tabs.List>
       </Tabs>
+      {codeType === 'videojs' && isDvrStreamType(streamType) && (
+        <Box marginTop="spacingS">
+          <Note variant="neutral">
+            The Video.js live skin has no DVR time slider yet, so viewers can return to the live
+            edge but cannot scrub back.{' '}
+            <TextLink
+              href="https://github.com/videojs/video.js/issues/9621"
+              target="_blank"
+              rel="noopener noreferrer">
+              Track DVR support
+            </TextLink>
+          </Note>
+        </Box>
+      )}
       <CodeBlock
         value={codeSnippet}
         tooltipCopiedText="Snippet Copied"
@@ -110,11 +122,8 @@ const PlayerCode: React.FC<PlayerCodeProps> = ({ params }) => {
         </Flex>
       </Box>
       <p>
-        <TextLink
-          href="https://docs.mux.com/guides/video/mux-player"
-          target="_blank"
-          rel="noopener noreferrer">
-          Read more about Mux Player
+        <TextLink href={VIDEOJS_MUX_DOCS_URL} target="_blank" rel="noopener noreferrer">
+          Read more about Video.js with Mux
         </TextLink>
       </p>
     </section>

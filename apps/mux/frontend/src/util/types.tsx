@@ -30,6 +30,8 @@ export interface InstallationParams {
 
 export interface AppState {
   value?: MuxContentfulObject;
+  /** Bumped to remount the preview player, which reloads the manifest and its text tracks. */
+  playerReloadCount: number;
   error: string | false;
   errorShowResetAction: boolean | false;
   isDeleting: boolean | false;
