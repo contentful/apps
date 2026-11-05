@@ -88,7 +88,8 @@ export const ENTITY_AVAILABLE_ACTIONS: Record<
   contentTypes: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish'],
   // Write actions are not offered: APS denies them to every delegated app token.
   aiActions: ['read', 'invoke'],
-  locales: ['read', 'edit', 'create', 'delete'],
+  // Write actions are not offered: APS denies them to every delegated app token.
+  locales: ['read'],
   concepts: ['read', 'edit', 'create', 'delete'],
   conceptSchemes: ['read', 'edit', 'create', 'delete'],
   // 'delete' is excluded: delete_release is never registered on the remote server
