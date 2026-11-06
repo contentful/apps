@@ -12,4 +12,5 @@ export interface Theme {
 
 export interface AppInstallationParameters {
   themes: Theme[];
+  enableOpacity?: boolean;
 }

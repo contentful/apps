@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## Unreleased
+
+### Features
+
+- **color-picker:** Add opt-in opacity configuration, eight-digit hex output, and popup opacity slider/numeric controls for custom colors and theme swatches.
+
+
 # [0.3.0](https://github.com/contentful/apps/compare/contentful-color-picker@0.2.6...contentful-color-picker@0.3.0) (2023-01-31)
 
 ### Features

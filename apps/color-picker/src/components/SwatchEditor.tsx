@@ -1,10 +1,11 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { DragHandle, Flex, FormControl, IconButton, TextInput } from '@contentful/f36-components';
+import { Button, DragHandle, Flex, FormControl, IconButton, TextInput } from '@contentful/f36-components';
 import { DeleteIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
-import { Color } from '../types';
+import ColorPicker from './ColorPicker';
+import type { Color } from '../types';
 
 const styles = {
   displayNone: css({
@@ -19,9 +20,15 @@ interface SwatchEditorProps {
   swatch: Color;
   onChange: (swatch: Color) => void;
   onRemove: (swatch: Color) => void;
+  enableOpacity: boolean;
 }
 
-export default function SwatchEditor({ swatch, onChange, onRemove }: SwatchEditorProps) {
+export default function SwatchEditor({
+  swatch,
+  onChange,
+  onRemove,
+  enableOpacity,
+}: SwatchEditorProps) {
   const {
     attributes,
     listeners,
@@ -56,12 +63,26 @@ export default function SwatchEditor({ swatch, onChange, onRemove }: SwatchEdito
             className={styles.displayNone}>
             Color
           </FormControl.Label>
-          <input
-            value={swatch.value}
-            onChange={(e) => onChange({ ...swatch, value: e.target.value })}
-            id={`SwatchEditorColor-${swatch.id}`}
-            type="color"
-          />
+          {enableOpacity ? (
+            <ColorPicker
+              value={swatch.value}
+              onChange={(value) => onChange({ ...swatch, value })}>
+              <Button
+                id={`SwatchEditorColor-${swatch.id}`}
+                aria-label={`Edit ${swatch.name || 'swatch'} color`}
+                size="small"
+                variant="secondary">
+                {swatch.value.toUpperCase()}
+              </Button>
+            </ColorPicker>
+          ) : (
+            <input
+              value={swatch.value}
+              onChange={(e) => onChange({ ...swatch, value: e.target.value })}
+              id={`SwatchEditorColor-${swatch.id}`}
+              type="color"
+            />
+          )}
           <TextInput
             name={`SwatchEditorName-${swatch.id}`}
             placeholder="Color name"
