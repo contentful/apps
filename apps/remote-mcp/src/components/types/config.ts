@@ -88,7 +88,8 @@ export const ENTITY_AVAILABLE_ACTIONS: Record<
   contentTypes: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish'],
   // Write actions are not offered: APS denies them to every delegated app token.
   aiActions: ['read', 'invoke'],
-  locales: ['read', 'edit', 'create', 'delete'],
+  // Write actions are not offered: APS denies them to every delegated app token.
+  locales: ['read'],
   concepts: ['read', 'edit', 'create', 'delete'],
   conceptSchemes: ['read', 'edit', 'create', 'delete'],
   // 'delete' is excluded: delete_release is never registered on the remote server
@@ -99,11 +100,11 @@ export const ENTITY_AVAILABLE_ACTIONS: Record<
   tags: ['read', 'create'],
   orgs: ['read'],
   spaces: ['read'],
-  componentTypes: ['read'],
+  componentTypes: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish'],
   experiences: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish'],
-  templates: ['read'],
-  dataAssemblies: ['read'],
-  fragments: ['read', 'edit', 'create', 'delete'],
+  templates: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish'],
+  dataAssemblies: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish'],
+  fragments: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish'],
 } as const;
 
 /** All entity keys derived from ENTITY_AVAILABLE_ACTIONS */
