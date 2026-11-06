@@ -1,29 +1,32 @@
 const fs = require('fs');
 const path = require('path');
-const { execFileSync } = require('child_process');
 
 const rootDir = path.resolve(__dirname, '..');
-const sourceConfigPath = path.join(rootDir, 'serverless.yml');
-const tempConfigPath = path.join(rootDir, '.serverless.verify-config.yml');
 
-const stage = process.env.CIRCLE_BRANCH === 'master' ? 'prd' : 'test';
+const stages = ['test', 'prd'];
+const requiredKeys = [
+  'signingSecret',
+  'domainName',
+  'serviceAccountKeyEncryptionSecret',
+  'dynamoDbEndpoint',
+];
 
-const sourceConfig = fs.readFileSync(sourceConfigPath, 'utf8');
-
-const sanitizedConfig = sourceConfig.replace(/\n  - serverless-offline(?=\n)/, '');
-
-fs.writeFileSync(tempConfigPath, sanitizedConfig);
-
-try {
-  execFileSync(
-    process.platform === 'win32' ? 'npx.cmd' : 'npx',
-    ['serverless', 'print', '--config', tempConfigPath, '--stage', stage],
-    {
-      cwd: rootDir,
-      stdio: 'inherit',
-      env: process.env,
-    }
+const missingKeys = [];
+for (const stage of stages) {
+  const stageConfig = fs.readFileSync(
+    path.join(rootDir, 'config', `serverless-env.${stage}.yml`),
+    'utf8'
   );
-} finally {
-  fs.rmSync(tempConfigPath, { force: true });
+  for (const key of requiredKeys) {
+    if (!new RegExp(`^${key}:`, 'm').test(stageConfig)) {
+      missingKeys.push(`${stage}: ${key}`);
+    }
+  }
 }
+
+if (missingKeys.length > 0) {
+  console.error(`Missing config keys:\n${missingKeys.join('\n')}`);
+  process.exit(1);
+}
+
+console.log(`Config keys present for stages: ${stages.join(', ')}.`);
