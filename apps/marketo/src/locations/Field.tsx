@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Paragraph,
   Flex,
@@ -21,15 +21,33 @@ const EMPTY_FORM: FormObject = { id: '', name: '', url: '' };
 const DROPDOWN_EXPANDED_HEIGHT = 240;
 const FORM_ERROR_MESSAGE =
   'Could not load Marketo forms. Please try again or contact a space admin.';
+const PARTIAL_LOAD_MESSAGE =
+  'Some Marketo forms could not be loaded. Reload the entry to try again.';
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
   useAutoResizer();
   const [forms, setForms] = useState<FormObject[] | null>(null);
-  const [filteredForms, setFilteredForms] = useState<FormObject[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedForm, setSelectedForm] = useState<FormObject>(EMPTY_FORM);
   const [loadingData, setLoadingStatus] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [partialLoadError, setPartialLoadError] = useState(false);
   const [error, updateError] = useState<ErrorState>({ error: false, message: '' });
+  // Forms keep arriving after the first render; once the editor interacts
+  // with the field, later pages must not override their selection.
+  const selectionTouchedRef = useRef(false);
+
+  const filteredForms = useMemo(
+    () =>
+      (forms ?? []).filter((form) => {
+        if (selectedForm && selectedForm.id === form.id) {
+          return false;
+        }
+        return form.name.toLowerCase().includes(searchTerm);
+      }),
+    [forms, searchTerm, selectedForm]
+  );
 
   const handleDropdownOpen = () => {
     sdk.window.stopAutoResizer();
@@ -45,86 +63,102 @@ const Field = () => {
       return;
     }
     sdk.field.setValue({ id: form.id, url: form.url });
+    selectionTouchedRef.current = true;
     setSelectedForm(form);
-    if (forms) {
-      setFilteredForms(forms.filter((item) => item.id !== form.id));
-    }
+    setSearchTerm('');
   };
 
   const handleFormInputChange = (value: string) => {
+    if (value) {
+      selectionTouchedRef.current = true;
+    }
     if (!value && selectedForm?.id) {
       removeFieldValue();
       return;
     }
 
-    const normalizedValue = value.trim().toLowerCase();
-    if (!forms) {
-      setFilteredForms([]);
-      return;
-    }
-    setFilteredForms(
-      forms.filter((form) => {
-        if (selectedForm && selectedForm.id === form.id) {
-          return false;
-        }
-        return form.name.toLowerCase().includes(normalizedValue);
-      })
-    );
+    setSearchTerm(value.trim().toLowerCase());
   };
 
   const removeFieldValue = () => {
     sdk.field.setValue(EMPTY_FORM);
+    selectionTouchedRef.current = true;
     setSelectedForm(EMPTY_FORM);
-    setFilteredForms(forms || []);
+    setSearchTerm('');
   };
 
   useEffect(() => {
+    let cancelled = false;
+
+    const fetchPage = async (offset?: number) => {
+      const { response } = await sdk.cma.appActionCall.createWithResponse(
+        {
+          appDefinitionId: sdk.ids.app!,
+          appActionId: GET_FORMS_APP_ACTION_ID,
+        },
+        {
+          parameters: offset === undefined ? {} : { offset },
+        }
+      );
+      return JSON.parse(response.body) as MarketoFormsResponse;
+    };
+
+    // Shows the first page as soon as it arrives, then keeps loading the
+    // remaining pages in the background so search covers every form.
     const loadForms = async () => {
+      const fieldValue = sdk.field.getValue();
+      let loaded: FormObject[] = [];
+      let offset: number | undefined;
+
       try {
-        const { response } = await sdk.cma.appActionCall.createWithResponse(
-          {
-            appDefinitionId: sdk.ids.app!,
-            appActionId: GET_FORMS_APP_ACTION_ID,
-          },
-          {
-            parameters: {},
+        do {
+          const result = await fetchPage(offset);
+          if (cancelled) return;
+          if (!result.forms) {
+            throw new Error('Marketo forms response has no forms');
           }
-        );
 
-        const result = JSON.parse(response.body) as MarketoFormsResponse;
+          const loadedIds = new Set(loaded.map((form) => form.id));
+          const newForms = result.forms.filter((form) => !loadedIds.has(form.id));
+          loaded = [...loaded, ...newForms];
 
-        if (!result.forms) {
+          setForms(loaded);
+          if (fieldValue?.id && !selectionTouchedRef.current) {
+            const preselectedForm = loaded.find((form) => form.id === fieldValue.id);
+            if (preselectedForm) {
+              setSelectedForm(preselectedForm);
+            }
+          }
+          setLoadingStatus(false);
+
+          // A non-empty page with nothing new means paging isn't advancing.
+          const stalled = result.forms.length > 0 && newForms.length === 0;
+          offset = stalled ? undefined : result.nextOffset;
+          setLoadingMore(offset !== undefined);
+        } while (offset !== undefined);
+      } catch {
+        if (cancelled) return;
+        if (loaded.length > 0) {
+          setPartialLoadError(true);
+        } else {
           updateError({
             error: true,
             message: FORM_ERROR_MESSAGE,
           });
-          setLoadingStatus(false);
-          return;
         }
-
-        setForms(result.forms);
-        setFilteredForms(result.forms);
-
-        const fieldValue = sdk.field.getValue();
-        if (fieldValue?.id) {
-          const preselectedForm = result.forms.find((form) => form.id === fieldValue.id);
-          setSelectedForm(preselectedForm || EMPTY_FORM);
-        }
-
         setLoadingStatus(false);
-      } catch {
-        updateError({
-          error: true,
-          message: FORM_ERROR_MESSAGE,
-        });
-        setLoadingStatus(false);
+        setLoadingMore(false);
       }
     };
 
     loadForms();
+
+    return () => {
+      cancelled = true;
+    };
   }, [sdk.field]);
 
-  if (loadingData) {
+  if (loadingData || (forms?.length === 0 && loadingMore)) {
     return (
       <Flex alignItems="center" gap="spacingXs">
         <Paragraph marginBottom="none">Loading Marketo forms</Paragraph>
@@ -159,8 +193,15 @@ const Field = () => {
               listWidth="full"
             />
           </FormControl>
+          {loadingMore && (
+            <Flex alignItems="center" gap="spacingXs">
+              <Paragraph marginBottom="none">Loading more Marketo forms</Paragraph>
+              <Spinner size="small" color="primary" />
+            </Flex>
+          )}
         </>
       )}
+      {partialLoadError && <Note variant="warning">{PARTIAL_LOAD_MESSAGE}</Note>}
     </Flex>
   );
 };

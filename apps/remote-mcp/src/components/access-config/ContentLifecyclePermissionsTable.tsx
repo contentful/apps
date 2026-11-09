@@ -45,7 +45,7 @@ export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTab
       </Box>
 
       <div style={{ width: '100%', overflowX: 'auto' }}>
-        <Table style={{ minWidth: '800px' }}>
+        <Table>
           <Table.Head>
             <Table.Row>
               <Table.Cell></Table.Cell>

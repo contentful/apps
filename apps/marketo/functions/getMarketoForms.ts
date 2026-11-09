@@ -6,85 +6,83 @@ import type {
 } from '@contentful/node-apps-toolkit';
 import { MarketoApiError } from './exceptions';
 import { getMarketoToken } from './getMarketoToken';
-import type {
-  AppInstallationParameters,
-  MarketoApiResponse,
-  MarketoFolderRecord,
-  MarketoFormRecord,
-  MarketoFormsResponse,
-} from '../src/types';
+import type { AppInstallationParameters, FormObject, MarketoFormsResponse } from '../src/types';
 
-const marketoGet = async <T>(
-  baseUrl: string,
-  path: string,
-  accessToken: string
-): Promise<{ response: Response; body: MarketoApiResponse<T> }> => {
-  const response = await fetch(`${baseUrl}${path}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-  return { response, body: await response.json() };
+// Marketo's maximum page size for asset browse endpoints.
+const FORMS_PAGE_SIZE = 200;
+// Pages fetched per call. One auth covers all of them, and fewer calls load
+// a large form list faster. The pages after the first run in parallel, well
+// under Marketo's limit of 10 concurrent calls per instance.
+const PAGES_PER_CALL = 5;
+
+const parseOffset = (value: unknown) => {
+  const offset = Number(value ?? 0);
+  return Number.isInteger(offset) && offset >= 0 ? offset : 0;
 };
 
-// Marketo archives at the folder level (folder.isArchive), never on the form
-// itself, so a form's own status can still read "approved" while its folder
-// is archived. Cross-referencing each form's folder is the only way to keep
-// archived forms out of the picker.
-const isFolderArchived = async (baseUrl: string, accessToken: string, folderId: number) => {
-  const { body } = await marketoGet<MarketoFolderRecord>(
-    baseUrl,
-    `/rest/asset/v1/folder/${folderId}.json?type=Folder`,
-    accessToken
+const fetchFormsPage = async (
+  baseUrl: string,
+  accessToken: string,
+  offset: number
+): Promise<FormObject[]> => {
+  const response = await fetch(
+    `${baseUrl}/rest/asset/v1/forms.json?maxReturn=${FORMS_PAGE_SIZE}&offset=${offset}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
   );
-  return Boolean(body.success && body.result?.[0]?.isArchive);
+
+  const formsResponse = await response.json();
+
+  if (!response.ok || !formsResponse.success) {
+    const errorMessage = formsResponse.message || 'Marketo getForms request failed';
+
+    throw new MarketoApiError(errorMessage, {
+      statusCode: response.status,
+      errors: formsResponse.errors,
+    });
+  }
+
+  // Marketo answers an offset past the last form with success and no result.
+  const forms: FormObject[] = formsResponse.result ?? [];
+  return forms.map(({ id, url, name }) => ({ id, url, name }));
 };
 
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
-  _event: AppActionRequest<'Custom'>,
+  event: AppActionRequest<'Custom'>,
   context: FunctionEventContext
 ): Promise<MarketoFormsResponse> => {
   const { clientId, clientSecret, munchkinId } =
     context.appInstallationParameters as AppInstallationParameters;
+  const offset = parseOffset((event.body as { offset?: unknown } | undefined)?.offset);
 
   const auth = await getMarketoToken(clientId, clientSecret, munchkinId);
   const baseUrl = `https://${munchkinId}.mktorest.com`;
 
-  const { response, body: formsResponse } = await marketoGet<MarketoFormRecord>(
-    baseUrl,
-    '/rest/asset/v1/forms.json?maxReturn=200',
-    auth.access_token
-  );
-
-  if (!response.ok || !formsResponse.success) {
-    throw new MarketoApiError(formsResponse.message || 'Marketo getForms request failed', {
-      statusCode: response.status,
-      errors: formsResponse.errors ?? [],
-    });
+  // The first page is fetched alone so instances with one page of forms
+  // make a single forms.json request.
+  const pages = [await fetchFormsPage(baseUrl, auth.access_token, offset)];
+  if (pages[0].length === FORMS_PAGE_SIZE) {
+    const nextOffsets = Array.from(
+      { length: PAGES_PER_CALL - 1 },
+      (_, i) => offset + (i + 1) * FORMS_PAGE_SIZE
+    );
+    const nextPages = await Promise.all(
+      nextOffsets.map((pageOffset) => fetchFormsPage(baseUrl, auth.access_token, pageOffset))
+    );
+    for (const page of nextPages) {
+      pages.push(page);
+      if (page.length < FORMS_PAGE_SIZE) break;
+    }
   }
 
-  const forms = formsResponse.result ?? [];
-  const folderIds = [
-    ...new Set(forms.map((form) => form.folder?.value).filter((id): id is number => id != null)),
-  ];
-
-  const folderArchiveChecks = await Promise.all(
-    folderIds.map(
-      async (folderId) =>
-        [folderId, await isFolderArchived(baseUrl, auth.access_token, folderId)] as const
-    )
-  );
-  const archivedFolderIds = new Set(
-    folderArchiveChecks.filter(([, isArchived]) => isArchived).map(([folderId]) => folderId)
-  );
-
-  const mappedResponse = forms
-    .filter((form) => !form.folder || !archivedFolderIds.has(form.folder.value))
-    .map(({ id, url, name }) => ({ id, url, name }));
-
+  const lastPageFull = pages[pages.length - 1].length === FORMS_PAGE_SIZE;
   return {
-    forms: mappedResponse,
+    forms: pages.flat(),
+    ...(lastPageFull && { nextOffset: offset + pages.length * FORMS_PAGE_SIZE }),
   };
 };

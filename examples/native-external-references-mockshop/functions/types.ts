@@ -26,18 +26,16 @@ export type Product = {
   };
 };
 
+type ProductConnection = {
+  edges: {
+    node: Product;
+  }[];
+};
+
 export type SearchResultData = {
-  data: {
-    search: {
-      edges: {
-        node: Product;
-      }[];
-    };
-  };
+  data: { search: ProductConnection } | { products: ProductConnection };
 };
 
 export type ProductLookupData = {
-  data: {
-    nodes: (Product | null)[];
-  };
+  data: Record<string, Product | null>;
 };
