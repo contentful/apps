@@ -69,9 +69,9 @@ writes nothing.
 
 ### v4 — `robotsOutputs`
 
-The newest completed summarize and moderation output on the video, whoever started the job. A job
-supplies an output only when its own record names this asset (`parameters.asset_id` on the
-single-job GET). See ADR-0005 and ADR-0008.
+The newest completed summarize, moderation and Analyze Structure output on the video, whoever
+started the job. A job supplies an output only when its own record names this asset
+(`parameters.asset_id` on the single-job GET). See ADR-0005 and ADR-0008.
 
 All four Robots keys — `robotsJobs`, `robotsOutputs`, `robotsDirectiveRuns` and
 `robotsPendingCreates` — sit at **v4**, not at successive versions. They ship in one release, so
@@ -94,16 +94,26 @@ place the browser's copy of the rule and the function's can drift.
       "completedAt": number,
       "exceedsThreshold": boolean,
       "maxScores": { "sexual": number, "violence": number }
+    },
+    "analyzeStructure": {
+      "jobId": string,
+      "completedAt": number,
+      "title": string,
+      "summary": string,
+      "tags": [string]
     }
   }
 }
 ```
 
-Keyed by **workflow, not by job**, so there is at most one summary and one moderation result per
+`analyzeStructure` holds only Analyze Structure's title, summary and tags; its chapters, scenes and
+key moments are not stored. "Apply summary" uses the newer of `summarize` and `analyzeStructure`.
+
+Keyed by **workflow, not by job**, so there is at most one result per workflow and
 locale and the newest completed run wins, wherever it ran. Running summarize again to get a better
 title overwrites the previous one on the entry, which is not reversible from Contentful. The
 history is not lost: the job stays in `robotsJobs`, and the superseded output itself is readable
-from `GET /robots/v0/jobs/{workflow}/{id}` for the 30 days Mux keeps the job. The surviving output
+from the job's detail GET, on the version that ran it, for the 30 days Mux keeps the job. The surviving output
 carries its own `jobId` and `completedAt`, so it is always traceable to the run that produced it.
 See `docs/ADRs/0008`.
 
@@ -315,7 +325,8 @@ The **Robots** tab runs Mux AI workflows on the current video and reads the resu
   a real boundary needs the secret moved server-side first. See ADR-0016.
 - **Every job on the video is recorded.** The tab records every job it reads for the asset,
   whoever started it, and keeps a record once stored: Robots purges jobs after 30 days, and the
-  record simply stops updating. So the first time someone opens the Robots tab on an entry whose
+  record simply stops updating. The table keeps showing it, marked "Deleted by Mux", with the
+  output the entry kept. So the first time someone opens the Robots tab on an entry whose
   video has any Robots job, the entry gains `robotsJobs` (and v4) and shows *Changed*, with nothing
   run from Contentful. Installs without Robots list no jobs and stay untouched. See ADR-0005.
 - **A run is guarded by a placeholder on the entry, and shown as a row until it becomes the job.**
@@ -340,9 +351,10 @@ The **Robots** tab runs Mux AI workflows on the current video and reads the resu
   is shared. The job
   list itself is always read per asset, so the tab shows every job regardless of which locale
   started it.
-- **The job list is a summary.** `GET /robots/v0/jobs` gives status and timing but no `outputs`,
+- **The job list is a summary.** `GET /robots/v1/jobs` gives status and timing but no `outputs`,
   `parameters`, `units_consumed` or `errors`, so the tab fills those in from the single job
-  (`GET /robots/v0/jobs/{workflow}/{id}`). Reading a job costs nothing and charges nobody, and a
+  (`GET /robots/{version}/jobs/{workflow}/{id}`, on the version its `_links` name — v0 and v1 jobs
+  are listed together, see ADR-0017). Reading a job costs nothing and charges nobody, and a
   row with a permanently blank Units column reads as a bug. The read is bounded — terminal jobs
   only, the newest 20 on the asset, a handful per pass — and a
   detail read that fails is remembered as failed, so a 404 on a purged job does not get

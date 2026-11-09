@@ -3,11 +3,17 @@ import { PlainClientAPI } from 'contentful-management';
 import { ModalData } from '../components/AssetConfiguration/MuxAssetConfigurationModal';
 import { InstallationParams, ResolutionType, StaticRendition, Track } from './types';
 import {
+  ROBOTS_API_VERSION,
+  RobotsApiVersion,
   RobotsDirective,
   RobotsDirectiveRun,
+  RobotsDirectiveRunResponse,
   RobotsJob,
   RobotsJobStatus,
+  RobotsRunnableWorkflow,
   RobotsWorkflow,
+  readDirectiveRun,
+  robotsApiVersionOf,
 } from './robotsTypes';
 
 export interface AssetSettings {
@@ -165,6 +171,8 @@ export class MuxApiService {
   private cmaClient: PlainClientAPI;
   private sdk: FieldExtensionSDK | AppExtensionSDK;
   private actionIds: Record<string, string> = {};
+  /** The version each directive was created on, as a listing or an earlier call showed it. */
+  private directiveVersions = new Map<string, RobotsApiVersion>();
 
   private constructor(cmaClient: PlainClientAPI, sdk: FieldExtensionSDK | AppExtensionSDK) {
     this.cmaClient = cmaClient;
@@ -317,6 +325,10 @@ export class MuxApiService {
   // rather than unwrapping the way `createUpload` does. `muxProxy` hands back Mux's whole
   // response body, so the envelope is what actually arrives; unwrapping some methods and not
   // others is how the existing inconsistency got there.
+  //
+  // Jobs and directive runs are created on `ROBOTS_API_VERSION`. Everything else goes to the
+  // version that created the resource — a job by its `_links`, a directive by
+  // `onDirectiveVersion` — because the other version answers 404 (ADR-0017).
 
   /**
    * Starts a job. Nothing in the app reads a job's `passthrough`, which is the customer's field:
@@ -324,26 +336,30 @@ export class MuxApiService {
    * below is an interim marker until Mux confirms it counts by that header (ADR-0003).
    */
   async createRobotsJob(
-    workflow: RobotsWorkflow,
+    workflow: RobotsRunnableWorkflow,
     parameters: Record<string, unknown>
   ): Promise<MuxDataResponse<RobotsJob>> {
-    return this.callProxy(
+    const response = await this.callProxy<MuxDataResponse<RobotsJob>>(
       'POST',
-      `/robots/v0/jobs/${workflow}`,
+      `/robots/${ROBOTS_API_VERSION}/jobs/${workflow}`,
       JSON.stringify({
         parameters,
         passthrough: 'mux:cms:contentful:', // interim marker, see ADR-0003; nothing reads it
       })
     );
+    // The create response has no `_links`, and without them the job would read as v0.
+    if (!response?.data?.id) return response;
+    const href = `/robots/${ROBOTS_API_VERSION}/jobs/${workflow}/${response.data.id}`;
+    return { ...response, data: { ...response.data, _links: { self: { href } } } };
   }
 
   async getRobotsJob(
-    workflow: RobotsWorkflow,
-    jobId: string
+    job: Pick<RobotsJob, 'id' | 'workflow' | '_links'>
   ): Promise<MuxDataResponse<RobotsJob>> {
-    return this.callProxy('GET', `/robots/v0/jobs/${workflow}/${jobId}`);
+    return this.callProxy('GET', `/robots/${jobVersion(job)}/jobs/${job.workflow}/${job.id}`);
   }
 
+  /** Lists the jobs of both versions, each with the `_links` of the version that owns it. */
   async listRobotsJobs(query: {
     asset_id?: string;
     workflow?: RobotsWorkflow;
@@ -351,47 +367,93 @@ export class MuxApiService {
     limit?: number;
     page?: number;
   }): Promise<MuxDataResponse<RobotsJob[]>> {
-    return this.callProxy('GET', `/robots/v0/jobs${buildQueryString(query)}`);
+    return this.callProxy('GET', `/robots/v1/jobs${buildQueryString(query)}`);
   }
 
   /** Note the path asymmetry with `getRobotsJob`: cancel takes no workflow segment. */
-  async cancelRobotsJob(jobId: string): Promise<MuxDataResponse<RobotsJob>> {
-    return this.callProxy('POST', `/robots/v0/jobs/${jobId}/cancel`);
+  async cancelRobotsJob(
+    job: Pick<RobotsJob, 'id' | '_links'>
+  ): Promise<MuxDataResponse<RobotsJob>> {
+    return this.callProxy('POST', `/robots/${jobVersion(job)}/jobs/${job.id}/cancel`);
   }
 
+  /** Lists the directives of both versions, as summaries. */
   async listRobotsDirectives(
     query: { limit?: number; page?: number } = {}
   ): Promise<MuxDataResponse<RobotsDirective[]>> {
-    return this.callProxy('GET', `/robots/v0/directives${buildQueryString(query)}`);
+    const response = await this.callProxy<MuxDataResponse<RobotsDirective[]>>(
+      'GET',
+      `/robots/v1/directives${buildQueryString(query)}`
+    );
+    for (const directive of response?.data ?? []) {
+      const version = robotsApiVersionOf(directive);
+      if (version) this.directiveVersions.set(directive.id, version);
+    }
+    return response;
   }
 
   /** 409 when a run for this directive/asset pair is already in progress. */
   async createRobotsDirectiveRun(
     directiveId: string,
     assetId: string
-  ): Promise<MuxDataResponse<RobotsDirectiveRun>> {
-    return this.callProxy(
-      'POST',
-      `/robots/v0/directives/${directiveId}/runs`,
-      JSON.stringify({ asset_id: assetId })
+  ): Promise<Partial<MuxDataResponse<RobotsDirectiveRun>>> {
+    const response = await this.onDirectiveVersion(directiveId, (version) =>
+      this.callProxy<Partial<MuxDataResponse<RobotsDirectiveRunResponse>>>(
+        'POST',
+        `/robots/${version}/directives/${directiveId}/runs`,
+        JSON.stringify({ asset_id: assetId })
+      )
     );
+    return readRunResponse(response);
   }
 
   async listRobotsDirectiveRuns(
     directiveId: string,
     query: { limit?: number; page?: number } = {}
   ): Promise<MuxDataResponse<RobotsDirectiveRun[]>> {
-    return this.callProxy(
-      'GET',
-      `/robots/v0/directives/${directiveId}/runs${buildQueryString(query)}`
+    const response = await this.onDirectiveVersion(directiveId, (version) =>
+      this.callProxy<MuxDataResponse<RobotsDirectiveRunResponse[]>>(
+        'GET',
+        `/robots/${version}/directives/${directiveId}/runs${buildQueryString(query)}`
+      )
     );
+    return { ...response, data: (response?.data ?? []).map(readDirectiveRun) };
   }
 
   async getRobotsDirectiveRun(
     directiveId: string,
     runId: string
-  ): Promise<MuxDataResponse<RobotsDirectiveRun>> {
-    return this.callProxy('GET', `/robots/v0/directives/${directiveId}/runs/${runId}`);
+  ): Promise<Partial<MuxDataResponse<RobotsDirectiveRun>>> {
+    const response = await this.onDirectiveVersion(directiveId, (version) =>
+      this.callProxy<Partial<MuxDataResponse<RobotsDirectiveRunResponse>>>(
+        'GET',
+        `/robots/${version}/directives/${directiveId}/runs/${runId}`
+      )
+    );
+    return readRunResponse(response);
+  }
+
+  /**
+   * Calls a directive's routes on the version that created it. An id no listing has shown yet —
+   * one from the configuration, or from a run recorded on the entry — is tried on v1, and on v0
+   * only after a 404, which is how Mux says to resolve an id stored without its version.
+   */
+  private async onDirectiveVersion<T>(
+    directiveId: string,
+    call: (version: RobotsApiVersion) => Promise<T>
+  ): Promise<T> {
+    const known = this.directiveVersions.get(directiveId);
+    if (known) return call(known);
+    try {
+      const result = await call('v1');
+      this.directiveVersions.set(directiveId, 'v1');
+      return result;
+    } catch (error) {
+      if (!(error instanceof MuxApiError && error.status === 404)) throw error;
+      const result = await call('v0');
+      this.directiveVersions.set(directiveId, 'v0');
+      return result;
+    }
   }
 
   // --- Signed URL tokens ---
@@ -399,6 +461,17 @@ export class MuxApiService {
   async getSignedUrlTokens(playbackId: string, isDRM = false): Promise<SignedTokens> {
     return this.callAction<SignedTokens>('getSignedUrlTokens', { playbackId, isDRM });
   }
+}
+
+/** Jobs created here are stamped with their links, so one without any was created on v0. */
+function jobVersion(job: Pick<RobotsJob, '_links'>): RobotsApiVersion {
+  return robotsApiVersionOf(job) ?? 'v0';
+}
+
+function readRunResponse(
+  response: Partial<MuxDataResponse<RobotsDirectiveRunResponse>> | undefined
+): Partial<MuxDataResponse<RobotsDirectiveRun>> {
+  return { ...response, data: response?.data && readDirectiveRun(response.data) };
 }
 
 function buildQueryString(query: Record<string, string | number | undefined>): string {

@@ -1,8 +1,10 @@
-import { RobotsWorkflow } from './robotsTypes';
+import { RobotsRunnableWorkflow, RobotsWorkflow } from './robotsTypes';
+import { Track } from './types';
 
 /**
- * The Robots workflow catalog: the twelve public workflows as data, with a parameter descriptor
- * per workflow so the run modal renders itself.
+ * The Robots workflow catalog: the workflows the run form offers, as data, with a parameter
+ * descriptor per workflow so the run modal renders itself. Jobs are created on v1, so every name
+ * here is v1's (ADR-0017).
  *
  * Only parameters documented in the Robots API reference or guides are listed, and every name,
  * nesting level and enum member here has been checked against them — a wrong parameter name is a
@@ -36,7 +38,7 @@ import { RobotsWorkflow } from './robotsTypes';
  * is created — rather than by leaving the editor without the control. Contentful can now put a
  * playback ID back (ADR-0015), which is what made arming this a complete feature. See ADR-0014.
  *
- * The controlled vocabularies — `find-scenes`' and `find-key-moments`'
+ * The controlled vocabularies — `analyze-structure`'s and `find-key-moments`'
  * `output_steering.topic_taxonomy`, `summarize`'s `output_steering.tag_taxonomy` — used to be on
  * that list, on the grounds that they need a bespoke row editor. They are exposed now, through the
  * `taxonomy` kind: the editor names a vocabulary, lists its values and decides whether anything
@@ -63,12 +65,16 @@ export type RobotsParamKind =
   | 'boolean'
   | 'select'
   | 'language'
+  /** Which of the asset's ready caption tracks a workflow reads, by language. */
+  | 'captionLanguage'
   | 'track'
   | 'stringList'
   /** Multi-select over a fixed enum. Never free text — see the header note. */
   | 'enumList'
   | 'questions'
   | 'replacements'
+  /** `edit-captions`' speaker label renames: the replacements editor without case sensitivity. */
+  | 'speakerReplacements'
   /** A controlled vocabulary: `topic_taxonomy` / `tag_taxonomy`. */
   | 'taxonomy';
 
@@ -89,6 +95,10 @@ export interface RobotsAssetContext {
   isAudioOnly?: boolean;
   /** Seconds. Absent for a live stream, whose recorded duration is still growing. */
   duration?: number;
+  /** The asset's caption tracks, for rules about one of them. */
+  captions?: Array<Pick<Track, 'id' | 'name'>>;
+  /** Workflows with a job still running on Robots v0 on this asset. */
+  runningOnV0?: RobotsWorkflow[];
 }
 
 /**
@@ -107,7 +117,7 @@ export type RobotsFieldCondition =
  * The documented caps on one controlled vocabulary, as data.
  *
  * Declared per field rather than per kind because the reference pages genuinely disagree:
- * `summarize`'s `tag_taxonomy` documents six separate limits, while `find-scenes`' and
+ * `summarize`'s `tag_taxonomy` documents six separate limits, while `analyze-structure`'s and
  * `find-key-moments`' `topic_taxonomy` document none at all. Inventing the missing ones would
  * block runs Mux accepts, so an absent limit here means "the reference states none".
  */
@@ -200,7 +210,7 @@ export interface RobotsParamField {
 export type RobotsCategory = 'Accessibility' | 'Insights' | 'Structure' | 'Trust & Safety';
 
 export interface RobotsWorkflowDefinition {
-  key: RobotsWorkflow;
+  key: RobotsRunnableWorkflow;
   label: string;
   category: RobotsCategory;
   description: string;
@@ -218,10 +228,8 @@ export interface RobotsWorkflowDefinition {
    * `workflowUnavailableReason`. Only a known audio-only asset disables it; an unknown kind
    * offers everything.
    *
-   * `find-scenes` is documented: "Audio-only assets are not supported." `find-best-thumbnails`
-   * is **a product decision, not a documented restriction**: the reference says nothing about
-   * audio-only assets, but the workflow ranks frames and such an asset has none. It is not
-   * missing a citation; do not remove it for want of one.
+   * A **product decision, not a documented restriction**: `find-best-thumbnails` ranks frames,
+   * and such an asset has none. It is not missing a citation; do not remove it for want of one.
    */
   requiresVideoTrack?: boolean;
 }
@@ -231,8 +239,11 @@ const LANGUAGE_HELP = 'BCP 47 language code, e.g. en, es, ja.';
 /**
  * The label for every workflow's `language_code` that selects which of the asset's caption tracks
  * the workflow reads. It used to be "Caption track language" or "Transcript language", which
- * editors read as the language of the result. Each field's help text says, per the reference,
- * what Mux picks when it is left empty — the rule differs by workflow.
+ * editors read as the language of the result.
+ *
+ * Offered as the asset's own ready caption languages: v1 takes the first ready track when it is
+ * left out, with no preference for English, and an explicit one must match a track exactly — `en`
+ * does not read an `en-US` track.
  */
 const CAPTIONS_TO_READ_LABEL = 'Captions to read';
 
@@ -289,11 +300,11 @@ const SCOPE_FIELDS: RobotsParamField[] = [
 
 const TAGS_SECTION: RobotsParamSection = { id: 'tags', title: 'Tags' };
 
-/** `find-key-moments`' `target_duration_ms`: the API takes both bounds together or neither. */
+/** `find-key-moments`' `target_duration`: the API takes both bounds together or neither. */
 const HIGHLIGHT_LENGTH_SECTION: RobotsParamSection = {
   id: 'highlight-length',
   title: 'Highlight length',
-  description: 'Set both bounds, or neither.',
+  description: 'Seconds. Set both bounds, or neither.',
 };
 
 const UPLOAD_TO_MUX: RobotsParamField = {
@@ -304,15 +315,58 @@ const UPLOAD_TO_MUX: RobotsParamField = {
   defaultValue: true,
 };
 
+type ReplaceExistingTracks = 'fail' | 'replace_all' | 'replace_generated';
+
+const REPLACE_EXISTING_OPTIONS: Record<ReplaceExistingTracks, RobotsParamOption> = {
+  fail: { value: 'fail', label: 'Reject the run' },
+  replace_all: { value: 'replace_all', label: 'Delete them, then add the new track' },
+  replace_generated: {
+    value: 'replace_generated',
+    label: 'Delete only Mux’s auto-generated ones, then add the new track',
+  },
+};
+
 /**
- * `output_steering.topic_taxonomy`, shared by `find-scenes` and `find-key-moments`.
+ * v1's `replace_existing_tracks` on the workflows that add a track: what happens to tracks already
+ * on the video in the same language or under the same name. Mux defaults to `fail`, which rejects
+ * the run before billing it, and takes any other value only with an upload, so the select sits
+ * below `upload_to_mux` and goes with it.
+ */
+function replaceExistingTracksField(
+  tracks: string,
+  choices: ReplaceExistingTracks[],
+  note = ''
+): RobotsParamField {
+  return {
+    kind: 'select',
+    name: 'replace_existing_tracks',
+    label: `If the video already has ${tracks} in this language`,
+    helpText: `A track with the same name counts too. A rejected run is not charged.${note}`,
+    options: choices.map((choice) => REPLACE_EXISTING_OPTIONS[choice]),
+    defaultValue: 'fail',
+    showWhen: { field: 'upload_to_mux', equals: true },
+  };
+}
+
+const REPLACE_GENERATED_NOTE =
+  ' Deleting only auto-generated ones still rejects the run if a track you uploaded is in the way.';
+
+/** `track_name` on the translation workflows, whose default name Mux builds from the language. */
+const translatedTrackName = (example: string): RobotsParamField => ({
+  kind: 'text',
+  name: 'track_name',
+  label: 'Track name',
+  helpText: `Leave empty and Mux names it after the language — "${example}".`,
+  showWhen: { field: 'upload_to_mux', equals: true },
+});
+
+/**
+ * `output_steering.topic_taxonomy`, shared by `analyze-structure` and `find-key-moments`.
  *
- * One descriptor for both because the parameter is one parameter: `find-scenes` documents the
- * sub-schema in full — `name`, `values[].label` / `.description` / `.aliases`, `allow_other` — and
- * `find-key-moments` lists `topic_taxonomy` under the same `output_steering` object with no
- * sub-schema at all, only its parent's summary ("…audience, taxonomy, and rubric tie-breakers").
- * Neither page documents a single cap, so `taxonomyLimits` is absent rather than borrowed from
- * `summarize`, whose limits belong to a different workflow.
+ * One descriptor for both because the parameter is one parameter, with the same sub-schema on both
+ * pages: `name`, `values[].label` / `.description` / `.aliases`, `allow_other`. Neither documents a
+ * single cap, so `taxonomyLimits` is absent rather than borrowed from `summarize`, whose limits
+ * belong to a different workflow.
  */
 const TOPIC_TAXONOMY: RobotsParamField = {
   kind: 'taxonomy',
@@ -371,22 +425,11 @@ export const ROBOTS_CATALOG: RobotsWorkflowDefinition[] = [
         maxItemLength: 49,
       },
       UPLOAD_TO_MUX,
-      {
-        // Sits below `upload_to_mux`, and only exists while it is on. The reference: "When false,
-        // no track is created and `replace_existing` must also be false; the generated SRT remains
-        // available via `temporary_srt_url`." That was checked as an error after the fact, which
-        // let the editor tick two independently reasonable boxes and then refused the run. A
-        // documented combination that cannot exist is better expressed as one that cannot be
-        // built — and a hidden field is never sent, so the request is right either way.
-        kind: 'boolean',
-        name: 'replace_existing',
-        label: 'Replace the existing caption track',
-        helpText:
-          'Off, a run is rejected when the asset already has a track in this language. On, that ' +
-          'track is deleted first.',
-        defaultValue: false,
-        showWhen: { field: 'upload_to_mux', equals: true },
-      },
+      replaceExistingTracksField(
+        'captions',
+        ['fail', 'replace_all', 'replace_generated'],
+        REPLACE_GENERATED_NOTE
+      ),
     ],
   },
   {
@@ -411,6 +454,14 @@ export const ROBOTS_CATALOG: RobotsWorkflowDefinition[] = [
         name: 'replacements',
         label: 'Replacements',
         helpText: 'Static find/replace rules applied to the cue text.',
+      },
+      {
+        kind: 'speakerReplacements',
+        name: 'speaker_replacements',
+        label: 'Speaker labels',
+        helpText:
+          'Rename the bracketed speaker labels at the start of cues, such as the ones Generate ' +
+          'premium captions adds with Label speakers. Write them without the square brackets.',
       },
       {
         // Form-only, and the reason the mode select below can finally default to the documented
@@ -456,25 +507,27 @@ export const ROBOTS_CATALOG: RobotsWorkflowDefinition[] = [
         helpText: 'Words or phrases left alone. One per line; spaces are fine.',
         showWhen: { field: 'censor_profanity', equals: true },
       },
-      {
-        kind: 'text',
-        name: 'track_name_suffix',
-        label: 'Suffix for the new track name',
-        helpText: 'Added to the original track’s name. Leave empty for Mux’s default, "edited".',
-      },
       UPLOAD_TO_MUX,
       {
-        // The same relationship as `generate-premium-captions`' `replace_existing`, one notch
-        // weaker: "Has effect only when upload_to_mux is true." Mux ignores it rather than
-        // rejecting the run, so nothing was broken — but a checkbox that provably does nothing is
-        // still a checkbox that lies, and the `showWhen` mechanism already existed. Its documented
-        // default is `true`, which is what applies when it is hidden and therefore unsent; that is
-        // also moot, since with no upload there is no replacement track to delete for.
-        kind: 'boolean',
-        name: 'delete_original_track',
-        label: 'Delete the original track',
-        helpText: 'The edited track replaces it rather than sitting alongside it.',
-        defaultValue: true,
+        // v0's `delete_original_track` and `track_name_suffix`, as v1 has them. Both only mean
+        // something while the result is uploaded: with `upload_to_mux` off, Mux runs the job with
+        // neither sent, and `validateParams` holds the `fail` rules.
+        kind: 'select',
+        name: 'replace_existing_tracks',
+        label: 'The original track',
+        options: [
+          { value: 'replace', label: 'Replace it with the edited track' },
+          { value: 'fail', label: 'Keep it, and add the edited track beside it' },
+        ],
+        defaultValue: 'replace',
+        showWhen: { field: 'upload_to_mux', equals: true },
+      },
+      {
+        kind: 'text',
+        name: 'track_name',
+        label: 'Name for the edited track',
+        helpText:
+          'Leave empty to keep the original’s name. Keeping the original needs a different one.',
         showWhen: { field: 'upload_to_mux', equals: true },
       },
     ],
@@ -495,7 +548,7 @@ export const ROBOTS_CATALOG: RobotsWorkflowDefinition[] = [
       },
       {
         kind: 'language',
-        name: 'to_language_code',
+        name: 'output_language_code',
         label: 'Target language',
         helpText: LANGUAGE_HELP,
         isRequired: true,
@@ -511,6 +564,12 @@ export const ROBOTS_CATALOG: RobotsWorkflowDefinition[] = [
           'Cannot contain < or >.',
       },
       UPLOAD_TO_MUX,
+      replaceExistingTracksField(
+        'captions',
+        ['fail', 'replace_all', 'replace_generated'],
+        REPLACE_GENERATED_NOTE
+      ),
+      translatedTrackName('Spanish (Auto-translated)'),
     ],
   },
   {
@@ -526,19 +585,26 @@ export const ROBOTS_CATALOG: RobotsWorkflowDefinition[] = [
     // note lost its tail ("there is no way to check beforehand") for the same reason: knowing that
     // nobody can check changes no decision the editor is making.
     notes: [
-      'The run is rejected if the video has no audio track, or already has an audio track in ' +
-        'the target language.',
+      'The run is rejected if the video has no audio track.',
       'Dubbing may not be enabled on every account.',
     ],
     params: [
       {
         kind: 'language',
-        name: 'to_language_code',
+        name: 'output_language_code',
         label: 'Target language',
         helpText: LANGUAGE_HELP,
         isRequired: true,
       },
       UPLOAD_TO_MUX,
+      // No `replace_generated`: Mux Video never auto-generates audio tracks, so the reference says
+      // it behaves as `fail` here.
+      replaceExistingTracksField(
+        'an audio track',
+        ['fail', 'replace_all'],
+        ' The video’s primary audio track is never deleted.'
+      ),
+      translatedTrackName('Spanish (Auto-dubbed)'),
     ],
   },
   {
@@ -574,14 +640,11 @@ export const ROBOTS_CATALOG: RobotsWorkflowDefinition[] = [
         step: 1,
       },
       {
-        // "BCP 47 language code of the caption track to analyze … When omitted, the SDK uses the
-        // default track."
-        kind: 'language',
+        kind: 'captionLanguage',
         name: 'language_code',
         label: CAPTIONS_TO_READ_LABEL,
         helpText:
-          'Summarize reads one of this video’s caption tracks. Choose the language of the one ' +
-          'to use, or leave empty and Mux picks. The summary’s own language is Output language.',
+          'Summarize reads one caption track. The summary’s own language is Output language.',
       },
       {
         kind: 'language',
@@ -686,14 +749,10 @@ export const ROBOTS_CATALOG: RobotsWorkflowDefinition[] = [
         step: 1,
       },
       {
-        // Same wording on the reference as `summarize`'s: "When omitted, the SDK uses the default
-        // track."
-        kind: 'language',
+        kind: 'captionLanguage',
         name: 'language_code',
         label: CAPTIONS_TO_READ_LABEL,
-        helpText:
-          'The answers come from one of this video’s caption tracks. Choose the language of ' +
-          'the one to use, or leave empty and Mux picks.',
+        helpText: 'The answers come from one caption track.',
       },
       ...SCOPE_FIELDS,
     ],
@@ -734,18 +793,18 @@ export const ROBOTS_CATALOG: RobotsWorkflowDefinition[] = [
       },
       {
         kind: 'number',
-        name: 'target_duration_ms.min',
-        label: 'Minimum highlight length (ms)',
+        name: 'target_duration.min',
+        label: 'Minimum highlight length (seconds)',
         min: 0,
-        step: 1000,
+        step: 1,
         section: HIGHLIGHT_LENGTH_SECTION,
       },
       {
         kind: 'number',
-        name: 'target_duration_ms.max',
-        label: 'Maximum highlight length (ms)',
+        name: 'target_duration.max',
+        label: 'Maximum highlight length (seconds)',
         min: 0,
-        step: 1000,
+        step: 1,
         section: HIGHLIGHT_LENGTH_SECTION,
       },
       {
@@ -885,14 +944,12 @@ export const ROBOTS_CATALOG: RobotsWorkflowDefinition[] = [
     description: 'Create timestamped chapters from the video content.',
     params: [
       {
-        // "When omitted, the SDK prefers English if available."
-        kind: 'language',
+        kind: 'captionLanguage',
         name: 'language_code',
         label: CAPTIONS_TO_READ_LABEL,
         helpText:
-          'Chapters are made from one of this video’s caption tracks. Choose the language of ' +
-          'the one to use, or leave empty and Mux prefers English when there is an English ' +
-          'track. The chapter titles’ language is Output language.',
+          'Chapters are made from one caption track. The chapter titles’ language is Output ' +
+          'language.',
       },
       {
         kind: 'language',
@@ -935,8 +992,8 @@ export const ROBOTS_CATALOG: RobotsWorkflowDefinition[] = [
       {
         // On by default: putting the chapters on the video is why this workflow is run from a
         // CMS. The reference is explicit that an asset holds a single chapters track, so any
-        // existing one is replaced, and that the write is best-effort (`asset_update` in the
-        // job's outputs says how it went) — hence the help text.
+        // existing one is replaced, and that the write is best-effort (`asset_updates.chapters`
+        // in the job's outputs says how it went) — hence the help text.
         kind: 'boolean',
         name: 'update_asset_chapters',
         label: 'Add the chapters to the Mux video',
@@ -948,58 +1005,44 @@ export const ROBOTS_CATALOG: RobotsWorkflowDefinition[] = [
     ],
   },
   {
-    key: 'find-scenes',
-    label: 'Find scenes',
+    // v0's Find Scenes is gone; this replaces it and is a workflow of its own too. On an
+    // audio-only asset it runs from the captions alone and its scenes are always empty.
+    key: 'analyze-structure',
+    label: 'Analyze structure',
     category: 'Structure',
-    description: 'Segment the video into ordered, timestamped scenes.',
-    requiresVideoTrack: true,
+    description:
+      'A title, summary, tags, chapters, scenes and key moments in one run. Replaces Find scenes.',
+    notes: [
+      'It costs more units than Find scenes did, and on a video it can generate Mux Shots, billed ' +
+        'separately from Robots units.',
+    ],
     params: [
       {
-        // "Preferred transcript language code to analyze when a matching transcript track is
-        // available. Defaults to the first ready transcript track on the asset."
-        kind: 'language',
+        kind: 'captionLanguage',
         name: 'language_code',
         label: CAPTIONS_TO_READ_LABEL,
         helpText:
-          'Scenes are found from this video’s caption track in that language, if it has one. ' +
-          'Leave empty to use the first caption track that is ready.',
+          'Analyze structure reads one caption track. On an audio-only asset the captions are ' +
+          'all it reads.',
       },
-      { kind: 'number', name: 'min_scenes', label: 'Minimum scenes (hint)', min: 1, step: 1 },
       {
-        kind: 'select',
-        name: 'output_steering.segmentation_strategy',
-        label: 'How to split the video',
-        options: [
-          { value: '', label: NO_PREFERENCE_LABEL },
-          { value: 'editorial_beats', label: 'Editorial beats' },
-          { value: 'topic_changes', label: 'Topic changes' },
-          { value: 'visual_transitions', label: 'Visual transitions' },
-          { value: 'action_progression', label: 'Action progression' },
-          { value: 'instructional_steps', label: 'Instructional steps' },
-        ],
+        kind: 'language',
+        name: 'output_language_code',
+        label: 'Output language',
+        helpText: `Leave empty to write in the captions’ language. ${LANGUAGE_HELP}`,
       },
       {
         kind: 'select',
-        name: 'output_steering.title_style',
-        label: 'Title style',
+        name: 'output_steering.granularity',
+        label: 'Granularity',
+        helpText: 'How finely the video is split into scenes and chapters.',
         options: [
           { value: '', label: NO_PREFERENCE_LABEL },
-          { value: 'descriptive', label: 'Descriptive' },
-          { value: 'editorial', label: 'Editorial' },
-          { value: 'search_optimized', label: 'Search optimized' },
-          { value: 'accessibility', label: 'Accessibility' },
-        ],
-      },
-      {
-        kind: 'select',
-        name: 'output_steering.narration_detail',
-        label: 'Narration detail',
-        options: [
-          { value: '', label: NO_PREFERENCE_LABEL },
-          { value: 'concise', label: 'Concise' },
+          { value: 'coarse', label: 'Coarse' },
           { value: 'balanced', label: 'Balanced' },
-          { value: 'detailed', label: 'Detailed' },
+          { value: 'fine', label: 'Fine' },
         ],
+        defaultValue: '',
       },
       { kind: 'text', name: 'output_steering.audience', label: 'Audience' },
       {
@@ -1011,12 +1054,22 @@ export const ROBOTS_CATALOG: RobotsWorkflowDefinition[] = [
       TOPIC_TAXONOMY,
       ...SCOPE_FIELDS,
       {
-        kind: 'number',
-        name: 'min_scene_duration_ms',
-        label: 'Minimum scene length (ms)',
-        helpText: 'At least 1000. Defaults to 15000.',
-        min: 1000,
-        step: 1000,
+        // Off by default, unlike Generate chapters': editors run this one for what it reads off
+        // the video, so it changes the asset only when asked.
+        kind: 'boolean',
+        name: 'update_asset_meta',
+        label: "Set the asset's title to the generated one",
+        helpText: 'Writes `meta.title` on the Mux asset.',
+        defaultValue: false,
+      },
+      {
+        kind: 'boolean',
+        name: 'update_asset_chapters',
+        label: 'Add the chapters to the Mux video',
+        helpText:
+          'Writes them as the video’s chapters track when the job finishes. Replaces any ' +
+          'chapters track the video already has, including one added by hand.',
+        defaultValue: false,
       },
     ],
   },
@@ -1032,12 +1085,10 @@ export const ROBOTS_CATALOG: RobotsWorkflowDefinition[] = [
         // hidden once we know this asset has pictures — but only then. `notEquals: false` means an
         // unknown `isAudioOnly` still renders it: hiding a usable control on missing information
         // is the worse failure of the two.
-        kind: 'language',
+        kind: 'captionLanguage',
         name: 'language_code',
         label: CAPTIONS_TO_READ_LABEL,
-        helpText:
-          'Only for an audio-only video, which is moderated from its captions. Choose the ' +
-          'language of the caption track to use, or leave empty for the first one that is ready.',
+        helpText: 'Only for an audio-only video, which is moderated from its captions.',
         showWhen: { context: 'isAudioOnly', notEquals: false },
       },
       {
@@ -1111,11 +1162,20 @@ export const ROBOTS_CATALOG: RobotsWorkflowDefinition[] = [
   },
 ];
 
-export const ROBOTS_CATALOG_BY_KEY: Record<RobotsWorkflow, RobotsWorkflowDefinition> =
+export const ROBOTS_CATALOG_BY_KEY: Record<RobotsRunnableWorkflow, RobotsWorkflowDefinition> =
   ROBOTS_CATALOG.reduce((acc, definition) => {
     acc[definition.key] = definition;
     return acc;
-  }, {} as Record<RobotsWorkflow, RobotsWorkflowDefinition>);
+  }, {} as Record<RobotsRunnableWorkflow, RobotsWorkflowDefinition>);
+
+/**
+ * Labels for workflows a listed job can name and the catalog does not offer: retired on v1, or
+ * not adopted here but dispatched by a v1 directive.
+ */
+const UNOFFERED_WORKFLOW_LABELS: Record<string, string> = {
+  'find-scenes': 'Find scenes',
+  'generate-contextual-text': 'Generate contextual text',
+};
 
 export const ROBOTS_CATEGORIES: RobotsCategory[] = [
   'Accessibility',
@@ -1125,11 +1185,15 @@ export const ROBOTS_CATEGORIES: RobotsCategory[] = [
 ];
 
 export function workflowLabel(workflow: string): string {
-  return ROBOTS_CATALOG_BY_KEY[workflow as RobotsWorkflow]?.label ?? workflow;
+  return (
+    ROBOTS_CATALOG_BY_KEY[workflow as RobotsRunnableWorkflow]?.label ??
+    UNOFFERED_WORKFLOW_LABELS[workflow] ??
+    workflow
+  );
 }
 
 /** What the run form opens on. */
-export const DEFAULT_ROBOTS_WORKFLOW: RobotsWorkflow = 'summarize';
+export const DEFAULT_ROBOTS_WORKFLOW: RobotsRunnableWorkflow = 'summarize';
 
 /** Why this asset cannot run a workflow, as the picker's suffix — or `undefined` when it can. */
 export function workflowUnavailableReason(
@@ -1147,9 +1211,9 @@ export function workflowUnavailableReason(
  * turned out to be audio-only. The default runs on any asset; a catalog test holds it to that.
  */
 export function availableWorkflow(
-  preferred: RobotsWorkflow,
+  preferred: RobotsRunnableWorkflow,
   context: RobotsAssetContext = {}
-): RobotsWorkflow {
+): RobotsRunnableWorkflow {
   return workflowUnavailableReason(ROBOTS_CATALOG_BY_KEY[preferred], context)
     ? DEFAULT_ROBOTS_WORKFLOW
     : preferred;
@@ -1339,6 +1403,27 @@ export function groupFieldsBySection(fields: RobotsParamField[]): RobotsFieldGro
   return groups;
 }
 
+export interface RobotsCaptionLanguage {
+  languageCode: string;
+  /** The names of the ready tracks in that language, in the asset's track order. */
+  names: string[];
+}
+
+/**
+ * The languages a `captionLanguage` field offers: the asset's ready caption tracks, in track
+ * order, one entry per language. Mux reads the first ready track in the chosen language.
+ */
+export function readyCaptionLanguages(captions: Track[]): RobotsCaptionLanguage[] {
+  const byLanguage = new Map<string, string[]>();
+  for (const track of captions) {
+    if (track.status !== 'ready' || !track.language_code) continue;
+    const names = byLanguage.get(track.language_code) ?? [];
+    if (track.name) names.push(track.name);
+    byLanguage.set(track.language_code, names);
+  }
+  return Array.from(byLanguage, ([languageCode, names]) => ({ languageCode, names }));
+}
+
 /** Splits an `ask-questions` row's comma-separated options box into trimmed, non-empty options. */
 function questionAnswerOptions(row: QuestionRow): string[] {
   return (row.answerOptions ?? '')
@@ -1375,6 +1460,15 @@ export function toApiParamValue(field: RobotsParamField, value: unknown): unknow
         ...(row.caseSensitive && { case_sensitive: true }),
       }));
     return replacements.length > 0 ? replacements : undefined;
+  }
+
+  // Labels, not cue text: the spaces around one are never part of it.
+  if (field.kind === 'speakerReplacements') {
+    const rows = Array.isArray(value) ? (value as ReplacementRow[]) : [];
+    const renames = rows
+      .filter((row) => row.find.trim() !== '')
+      .map((row) => ({ find: row.find.trim(), replace: row.replace.trim() }));
+    return renames.length > 0 ? renames : undefined;
   }
 
   if (field.kind === 'taxonomy') {
@@ -1443,8 +1537,8 @@ export function confirmWarnings(
   definition: RobotsWorkflowDefinition,
   values: Record<string, unknown>,
   context: RobotsAssetContext = {}
-): RobotsConfirmWarning[] {
-  const warnings: RobotsConfirmWarning[] = [];
+): Array<Pick<RobotsConfirmWarning, 'title' | 'body'>> {
+  const warnings: Array<Pick<RobotsConfirmWarning, 'title' | 'body'>> = [];
   for (const field of definition.params) {
     if (!field.confirmWarnings) continue;
     if (!isFieldVisible(field, values, context)) continue;
@@ -1453,14 +1547,24 @@ export function confirmWarnings(
     const value = values[field.name] ?? field.defaultValue;
     warnings.push(...field.confirmWarnings.filter((warning) => warning.whenValue === value));
   }
+  // Mux refuses a duplicate run with 409 only within one version, so a v1 run next to a v0 job of
+  // the same workflow starts a second job, billed as well.
+  if (context.runningOnV0?.includes(definition.key)) {
+    warnings.push({
+      title: `${definition.label} is still running on Robots v0`,
+      body:
+        'Mux does not treat this run as a duplicate of that job, so both run and both are ' +
+        'billed. Wait for the v0 job to finish to avoid it.',
+    });
+  }
   return warnings;
 }
 
 /**
  * The documented caps on one controlled vocabulary, checked against what would actually be sent.
  *
- * Only limits the field declares are enforced. `find-scenes` and `find-key-moments` document none
- * for `topic_taxonomy`, and a cap invented for them would block a run Mux accepts.
+ * Only limits the field declares are enforced. `analyze-structure` and `find-key-moments` document
+ * none for `topic_taxonomy`, and a cap invented for them would block a run Mux accepts.
  */
 function taxonomyErrors(field: RobotsParamField, formValue: unknown, apiValue: unknown): string[] {
   const errors: string[] = [];
@@ -1694,12 +1798,24 @@ export function validateParams(
     );
   }
 
+  // Mux's guide: "Audio-only assets require a ready caption track." With pictures it reads the
+  // video too, so only a known audio-only asset needs one.
+  if (
+    definition.key === 'analyze-structure' &&
+    context.isAudioOnly === true &&
+    context.hasCaptions === false
+  ) {
+    errors.push(
+      'This audio-only video has no caption track, and Analyze structure reads it from the captions. Generate captions first.'
+    );
+  }
+
   errors.push(...scopeErrors(definition, values, context));
 
   // `find-key-moments` requires both bounds together or neither.
   if (definition.key === 'find-key-moments') {
-    const min = values['target_duration_ms.min'];
-    const max = values['target_duration_ms.max'];
+    const min = values['target_duration.min'];
+    const max = values['target_duration.max'];
     const hasMin = min !== undefined && min !== '';
     const hasMax = max !== undefined && max !== '';
     if (hasMin !== hasMax) {
@@ -1709,15 +1825,46 @@ export function validateParams(
     }
   }
 
-  // `edit-captions` needs something to do: the API requires at least one of `replacements` and
-  // `auto_censor_profanity`. Since the profanity object is now gated behind one explicit toggle,
-  // that toggle *is* the second half of the condition.
+  // `edit-captions` needs something to do: the API requires at least one of `replacements`,
+  // `speaker_replacements` and `auto_censor_profanity`. Since the profanity object is gated
+  // behind one explicit toggle, that toggle *is* the last part of the condition.
   if (definition.key === 'edit-captions') {
-    const replacementsField = definition.params.find((field) => field.kind === 'replacements');
-    const hasReplacements =
-      replacementsField && toApiParamValue(replacementsField, values[replacementsField.name]);
-    if (!hasReplacements && values.censor_profanity !== true) {
-      errors.push('Add at least one replacement rule, or turn on "Censor profanity".');
+    const sent = (kind: RobotsParamKind) => {
+      const field = definition.params.find((candidate) => candidate.kind === kind);
+      return field ? toApiParamValue(field, values[field.name]) : undefined;
+    };
+    const renames = sent('speakerReplacements') as
+      | Array<{ find: string; replace: string }>
+      | undefined;
+    if (!sent('replacements') && !renames && values.censor_profanity !== true) {
+      errors.push(
+        'Add at least one replacement rule or speaker label, or turn on "Censor profanity".'
+      );
+    }
+    if (renames?.some((rename) => rename.replace === '')) {
+      errors.push('Give each speaker label a new name.');
+    }
+    if (renames?.some((rename) => /[[\]]/.test(rename.find + rename.replace))) {
+      errors.push('Write speaker labels without the square brackets.');
+    }
+
+    // Mux requires track names to be unique on the asset. Replacing the original frees its name;
+    // keeping it adds a second track, which needs a name of its own.
+    if (values.upload_to_mux === true) {
+      const trackName = typeof values.track_name === 'string' ? values.track_name.trim() : '';
+      const keepsOriginal = values.replace_existing_tracks === 'fail';
+      const taken = context.captions?.find(
+        (track) => track.name === trackName && (keepsOriginal || track.id !== values.track_id)
+      );
+      if (keepsOriginal && !trackName) {
+        errors.push(
+          'Name the edited track: keeping the original means the two need different names.'
+        );
+      } else if (trackName && taken?.id === values.track_id) {
+        errors.push('Give the edited track a different name from the original’s.');
+      } else if (trackName && taken) {
+        errors.push(`Another caption track on this video is already named “${trackName}”.`);
+      }
     }
   }
 
@@ -1741,12 +1888,9 @@ export function validateParams(
 
   // `generate-premium-captions`' phrase hints carry two constraints the widget cannot express.
   //
-  // The documented `upload_to_mux` / `replace_existing` rule used to be checked here too:
-  // "When false, no track is created and `replace_existing` must also be false." It is a real
-  // constraint, but an error after the fact was the wrong shape for it — the form let the editor
-  // tick two independently reasonable boxes and then refused. `replace_existing` is now hidden
-  // behind `showWhen: upload_to_mux === true`, so the combination cannot be built or sent, and the
-  // check that remained would have been unreachable.
+  // The documented `upload_to_mux` / `replace_existing_tracks` rule is not checked here: the
+  // select is hidden behind `showWhen: upload_to_mux === true`, so the combination cannot be built
+  // or sent.
   if (definition.key === 'generate-premium-captions') {
     // Length and count are checked generically above, from `maxItemLength` / `maxItems`. Word
     // count and the forbidden characters are specific to this parameter.

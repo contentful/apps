@@ -16,7 +16,7 @@ import { workflowLabel } from '../../util/robotsCatalog';
 import { formatTimestamp } from '../../util/robotsFormat';
 import { MuxApiService } from '../../util/muxApi';
 import RobotsJsonBlock, { prettyJson } from './RobotsJsonBlock';
-import { OUTPUT_VIEWS } from './RobotsOutputViews';
+import { KEPT_OUTPUT_VIEWS, OUTPUT_VIEWS } from './RobotsOutputViews';
 import { RobotsJobDetailState, unitsCell } from './RobotsJobTable';
 import RobotsStatusBadge from './RobotsStatusBadge';
 
@@ -42,6 +42,8 @@ interface RobotsOutputViewerProps {
    * capped — so for a row past that cap this fetch is the only detail that will ever exist.
    */
   onLoaded?: (job: RobotsJob) => void;
+  /** Mux deleted the job, so `job` is what the entry kept of it and nothing is fetched. */
+  isDeleted?: boolean;
   onClose: () => void;
 }
 
@@ -59,7 +61,7 @@ const shapedOrRaw = (hasContent: boolean, shaped: ReactElement, outputs: unknown
     </>
   );
 
-const OutputBody: FC<{ job: RobotsJob }> = ({ job }) => {
+const OutputBody: FC<{ job: RobotsJob; isDeleted?: boolean }> = ({ job, isDeleted = false }) => {
   if (job.status === 'errored') {
     return (
       <Note variant="negative">
@@ -81,7 +83,7 @@ const OutputBody: FC<{ job: RobotsJob }> = ({ job }) => {
     );
   }
 
-  const view = OUTPUT_VIEWS[job.workflow];
+  const view = (isDeleted ? KEPT_OUTPUT_VIEWS : OUTPUT_VIEWS)[job.workflow];
   if (!view) {
     // Unreachable for the twelve workflows in `ROBOTS_WORKFLOWS`. It catches one Mux adds that
     // this build has never heard of, which is exactly when saying so out loud beats an
@@ -184,11 +186,18 @@ interface ViewerResult {
   message?: string;
 }
 
-const RobotsOutputViewer: FC<RobotsOutputViewerProps> = ({ job, muxApi, onLoaded, onClose }) => {
+const RobotsOutputViewer: FC<RobotsOutputViewerProps> = ({
+  job,
+  muxApi,
+  onLoaded,
+  isDeleted = false,
+  onClose,
+}) => {
   const [result, setResult] = useState<ViewerResult | undefined>();
 
   const jobId = job?.id;
   const workflow = job?.workflow;
+  const href = job?._links?.self?.href;
   /**
    * Whether the caller already holds what this modal would fetch: `outputs` and `errors` exist
    * only on the single-job GET, so either one means the full record is in hand — a create
@@ -196,15 +205,15 @@ const RobotsOutputViewer: FC<RobotsOutputViewerProps> = ({ job, muxApi, onLoaded
    * re-reading it is a risk as well as a cost: this is the only place its reason is shown, and a
    * failed re-read would put its own error there instead.
    */
-  const isHeldInFull = !!job?.outputs || job?.errors !== undefined;
+  const isHeldInFull = isDeleted || !!job?.outputs || job?.errors !== undefined;
 
   /**
    * Fetch the job in full when the modal opens. The single-job GET is the only place `outputs`
    * lives, and fetching it here means we only pay for the jobs someone opens.
    *
-   * Keyed on what the fetch depends on — id, workflow, whether the record is already in hand —
-   * rather than on the identity of `job`, which the panel rebuilds on every poll tick. Keying on
-   * identity would cancel and restart this fetch on a six-second cadence.
+   * Keyed on what the fetch depends on — id, workflow, the version's route, whether the record is
+   * already in hand — rather than on the identity of `job`, which the panel rebuilds on every poll
+   * tick. Keying on identity would cancel and restart this fetch on a six-second cadence.
    */
   useEffect(() => {
     if (!jobId || !workflow || isHeldInFull) return;
@@ -218,7 +227,11 @@ const RobotsOutputViewer: FC<RobotsOutputViewerProps> = ({ job, muxApi, onLoaded
 
     (async () => {
       try {
-        const response = await muxApi.getRobotsJob(workflow, jobId);
+        const response = await muxApi.getRobotsJob({
+          id: jobId,
+          workflow,
+          _links: href ? { self: { href } } : undefined,
+        });
         // A later run owns the state now; there is no flag left behind by saying nothing here.
         if (cancelled) return;
         setResult({ jobId, job: response.data });
@@ -237,7 +250,7 @@ const RobotsOutputViewer: FC<RobotsOutputViewerProps> = ({ job, muxApi, onLoaded
     return () => {
       cancelled = true;
     };
-  }, [jobId, workflow, isHeldInFull, muxApi, onLoaded]);
+  }, [jobId, workflow, href, isHeldInFull, muxApi, onLoaded]);
 
   /** A result carrying another id belongs to the job the modal showed before this one. */
   const settled = result?.jobId === jobId ? result : undefined;
@@ -247,8 +260,13 @@ const RobotsOutputViewer: FC<RobotsOutputViewerProps> = ({ job, muxApi, onLoaded
   /** Derived, never latched, so a cancelled request leaves nothing to get stuck on. */
   const isLoading = !!jobId && !isHeldInFull && !settled;
   /** The job table's vocabulary for the same cell, so the two never disagree about a job. */
-  const detail: RobotsJobDetailState =
-    isHeldInFull || settled?.job ? 'loaded' : error ? 'unreadable' : 'unread';
+  const detail: RobotsJobDetailState = isDeleted
+    ? 'deleted'
+    : isHeldInFull || settled?.job
+    ? 'loaded'
+    : error
+    ? 'unreadable'
+    : 'unread';
 
   return (
     <FieldModal isShown={!!job} onClose={onClose} size="large">
@@ -274,6 +292,17 @@ const RobotsOutputViewer: FC<RobotsOutputViewerProps> = ({ job, muxApi, onLoaded
                 </Flex>
               ) : error ? (
                 <Note variant="negative">{error}</Note>
+              ) : isDeleted ? (
+                // No Raw JSON tab: this is the entry's record, not anything Mux returned.
+                <>
+                  <Box marginBottom="spacingM">
+                    <Note variant="neutral">
+                      Mux deletes Robots jobs after 30 days and no longer has this one. This is what
+                      the entry kept.
+                    </Note>
+                  </Box>
+                  <OutputBody job={shown} isDeleted />
+                </>
               ) : (
                 <Tabs defaultTab="result">
                   <Tabs.List>

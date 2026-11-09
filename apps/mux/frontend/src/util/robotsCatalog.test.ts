@@ -15,18 +15,48 @@ import {
   groupFieldsBySection,
   isFieldVisible,
   paramsFromFormValues,
+  readyCaptionLanguages,
   toApiParamValue,
   validateParams,
+  workflowLabel,
   workflowUnavailableReason,
 } from './robotsCatalog';
-import { ROBOTS_WORKFLOWS, RobotsWorkflow } from './robotsTypes';
+import { ROBOTS_RETIRED_WORKFLOWS, ROBOTS_WORKFLOWS, RobotsRunnableWorkflow } from './robotsTypes';
+import { Track } from './types';
 
 describe('the catalog itself', () => {
-  it('covers exactly the twelve public workflows', () => {
-    expect(ROBOTS_CATALOG).toHaveLength(12);
+  it('covers every workflow v1 runs, and none it retired', () => {
+    const retired: readonly string[] = ROBOTS_RETIRED_WORKFLOWS;
     expect(ROBOTS_CATALOG.map((definition) => definition.key).sort()).toEqual(
-      [...ROBOTS_WORKFLOWS].sort()
+      ROBOTS_WORKFLOWS.filter((workflow) => !retired.includes(workflow)).sort()
     );
+    expect(ROBOTS_CATALOG.map((definition) => definition.key)).not.toContain('find-scenes');
+  });
+
+  it('still names a retired workflow, whose old jobs stay listed', () => {
+    expect(workflowLabel('find-scenes')).toBe('Find scenes');
+    expect(workflowLabel('generate-contextual-text')).toBe('Generate contextual text');
+    expect(workflowLabel('analyze-structure')).toBe('Analyze structure');
+  });
+
+  it('sends no parameter under the name v0 gave it', () => {
+    const v0Names = [
+      'to_language_code',
+      'target_duration_ms.min',
+      'target_duration_ms.max',
+      'replace_existing',
+      'delete_original_track',
+      'track_name_suffix',
+    ];
+    const names = ROBOTS_CATALOG.flatMap((definition) =>
+      definition.params.map((field) => field.name)
+    );
+    expect(names.filter((name) => v0Names.includes(name))).toEqual([]);
+    for (const key of ['translate-captions', 'translate-audio'] as RobotsRunnableWorkflow[]) {
+      expect(
+        paramsFromFormValues(ROBOTS_CATALOG_BY_KEY[key], 'asset-1', { output_language_code: 'es' })
+      ).toMatchObject({ output_language_code: 'es' });
+    }
   });
 
   it('gives every workflow a label, description and category', () => {
@@ -51,7 +81,11 @@ describe('the catalog itself', () => {
   });
 
   it('gives the three workflows the spec calls out a real form', () => {
-    for (const key of ['ask-questions', 'moderate', 'find-key-moments'] as RobotsWorkflow[]) {
+    for (const key of [
+      'ask-questions',
+      'moderate',
+      'find-key-moments',
+    ] as RobotsRunnableWorkflow[]) {
       expect(ROBOTS_CATALOG_BY_KEY[key].params.length).toBeGreaterThan(1);
     }
   });
@@ -111,8 +145,8 @@ describe('the catalog itself', () => {
     expect(sentinelOptions()).toContain(
       'moderate.on_flagged.action → Do nothing — just record the scores'
     );
-    // The ten known ones, so deleting the option rather than relabelling it does not pass silently.
-    expect(steering).toHaveLength(10);
+    // The eight known ones, so deleting the option rather than relabelling it does not pass silently.
+    expect(steering).toHaveLength(8);
   });
 
   it('still sends nothing for the sentinel, so the relabel changed only the words', () => {
@@ -325,13 +359,13 @@ describe('validateParams', () => {
 
   it('requires both highlight length bounds together', () => {
     const definition = ROBOTS_CATALOG_BY_KEY['find-key-moments'];
-    expect(validateParams(definition, { 'target_duration_ms.min': 5000 })).toContain(
+    expect(validateParams(definition, { 'target_duration.min': 5 })).toContain(
       'Set both highlight length bounds, or neither.'
     );
     expect(
       validateParams(definition, {
-        'target_duration_ms.min': 5000,
-        'target_duration_ms.max': 15000,
+        'target_duration.min': 5,
+        'target_duration.max': 15,
       })
     ).toEqual([]);
   });
@@ -340,16 +374,27 @@ describe('validateParams', () => {
     const definition = ROBOTS_CATALOG_BY_KEY['find-key-moments'];
     expect(
       validateParams(definition, {
-        'target_duration_ms.min': 20000,
-        'target_duration_ms.max': 5000,
+        'target_duration.min': 20,
+        'target_duration.max': 5,
       })
     ).toContain('The minimum highlight length cannot exceed the maximum.');
+  });
+
+  it('sends the highlight length in seconds, which is what v1 reads', () => {
+    expect(
+      paramsFromFormValues(ROBOTS_CATALOG_BY_KEY['find-key-moments'], 'asset-1', {
+        'target_duration.min': 5,
+        'target_duration.max': 20.5,
+      })
+    ).toEqual({ asset_id: 'asset-1', target_duration: { min: 5, max: 20.5 } });
   });
 
   it('requires edit-captions to actually do something', () => {
     const definition = ROBOTS_CATALOG_BY_KEY['edit-captions'];
     const errors = validateParams(definition, { track_id: 'track-1' });
-    expect(errors).toContain('Add at least one replacement rule, or turn on "Censor profanity".');
+    expect(errors).toContain(
+      'Add at least one replacement rule or speaker label, or turn on "Censor profanity".'
+    );
 
     expect(
       validateParams(definition, {
@@ -392,7 +437,9 @@ describe('validateParams', () => {
         censor_profanity: false,
         'auto_censor_profanity.always_censor': ['damn'],
       })
-    ).toContain('Add at least one replacement rule, or turn on "Censor profanity".');
+    ).toContain(
+      'Add at least one replacement rule or speaker label, or turn on "Censor profanity".'
+    );
   });
 
   it('no longer refuses the premium-captions combination — it cannot be built', () => {
@@ -417,42 +464,81 @@ describe('validateParams', () => {
     expect(validateParams(definition, { phrases: ['Acme Pro', 'Contentful'] })).toEqual([]);
   });
 
-  it('offers the documented find-scenes steering, nested correctly', () => {
-    // These eight were documented all along and we exposed none of them, on a stale assumption
-    // that find-scenes had no documented `output_steering` sub-fields.
-    const definition = ROBOTS_CATALOG_BY_KEY['find-scenes'];
+  it('offers analyze-structure as a workflow of its own, nested correctly', () => {
+    const definition = ROBOTS_CATALOG_BY_KEY['analyze-structure'];
     const names = definition.params.map((field) => field.name);
-    expect(names).toContain('output_steering.segmentation_strategy');
-    expect(names).toContain('output_steering.title_style');
-    expect(names).toContain('output_steering.narration_detail');
-    expect(names).toContain('output_steering.audience');
-    expect(names).toContain('output_steering.brand_terms');
-    expect(names).toContain('output_steering.scope.start_time');
+    expect(names).toEqual([
+      'language_code',
+      'output_language_code',
+      'output_steering.granularity',
+      'output_steering.audience',
+      'output_steering.brand_terms',
+      'output_steering.topic_taxonomy',
+      'output_steering.scope.start_time',
+      'output_steering.scope.end_time',
+      'update_asset_meta',
+      'update_asset_chapters',
+    ]);
 
-    const strategy = definition.params.find(
-      (field) => field.name === 'output_steering.segmentation_strategy'
+    const granularity = definition.params.find(
+      (field) => field.name === 'output_steering.granularity'
     );
-    expect(strategy?.options?.map((option) => option.value)).toEqual([
+    expect(granularity?.options?.map((option) => option.value)).toEqual([
       '',
-      'editorial_beats',
-      'topic_changes',
-      'visual_transitions',
-      'action_progression',
-      'instructional_steps',
+      'coarse',
+      'balanced',
+      'fine',
     ]);
 
     // Three levels of nesting is the deepest shape in the catalog.
     const built = paramsFromFormValues(definition, 'asset-1', {
-      'output_steering.segmentation_strategy': 'topic_changes',
+      'output_steering.granularity': 'fine',
       'output_steering.scope.start_time': 30,
     });
     expect(built).toEqual({
       asset_id: 'asset-1',
       output_steering: {
-        segmentation_strategy: 'topic_changes',
+        granularity: 'fine',
         scope: { start_time: 30 },
       },
     });
+  });
+
+  it('needs captions for analyze-structure only on a video known to be audio-only', () => {
+    const definition = ROBOTS_CATALOG_BY_KEY['analyze-structure'];
+    const values = defaultParamValues(definition.params);
+    expect(validateParams(definition, values, { isAudioOnly: true, hasCaptions: false })).toEqual([
+      expect.stringMatching(/audio-only video has no caption track/),
+    ]);
+    expect(validateParams(definition, values, { isAudioOnly: true, hasCaptions: true })).toEqual(
+      []
+    );
+    expect(validateParams(definition, values, { isAudioOnly: false, hasCaptions: false })).toEqual(
+      []
+    );
+    expect(validateParams(definition, values, { hasCaptions: false })).toEqual([]);
+  });
+
+  it('writes to the asset from analyze-structure only when asked, and says it costs more', () => {
+    const definition = ROBOTS_CATALOG_BY_KEY['analyze-structure'];
+    const defaults = defaultParamValues(definition.params);
+    expect(paramsFromFormValues(definition, 'asset-1', defaults)).toEqual({
+      asset_id: 'asset-1',
+      update_asset_meta: false,
+      update_asset_chapters: false,
+    });
+    expect(
+      paramsFromFormValues(definition, 'asset-1', {
+        ...defaults,
+        update_asset_meta: true,
+        update_asset_chapters: true,
+      })
+    ).toMatchObject({ update_asset_meta: true, update_asset_chapters: true });
+
+    const notes = definition.notes?.join(' ');
+    expect(notes).toMatch(/costs more units than Find scenes/);
+    expect(notes).toMatch(/Mux Shots/);
+    expect(notes).not.toMatch(/\d/);
   });
 
   it('offers never_translate on translate-captions', () => {
@@ -536,6 +622,14 @@ describe('paramsFromFormValues', () => {
       expect(armed[0].body).toContain('Playback tab');
     });
 
+    it('warns when the same workflow is still running on v0, which Mux does not dedupe', () => {
+      const definition = ROBOTS_CATALOG_BY_KEY.moderate;
+      expect(confirmWarnings(definition, {}, { runningOnV0: ['summarize'] })).toEqual([]);
+      expect(confirmWarnings(definition, {}, { runningOnV0: ['moderate'] })).toEqual([
+        expect.objectContaining({ title: 'Moderate is still running on Robots v0' }),
+      ]);
+    });
+
     it('no longer claims the app does not offer this', () => {
       // The note said "Automatic playback-ID deletion on a flagged result is not offered here."
       // A reversed decision has to stop asserting the old one.
@@ -578,15 +672,17 @@ describe('paramsFromFormValues', () => {
 // positives: gating a workflow the docs never restrict costs the editor a run they are entitled
 // to, and this app has no way to check entitlement server-side.
 describe('audio-only assets', () => {
-  it('marks find-scenes and find-best-thumbnails unavailable on audio-only, and only them', () => {
-    // find-scenes: "Audio-only assets are not supported." find-best-thumbnails: our decision —
-    // it ranks frames, and an audio-only asset has none. See `requiresVideoTrack`.
+  it('marks only find-best-thumbnails unavailable on audio-only', () => {
+    // Our decision: it ranks frames. Analyze structure runs there from the captions, with no
+    // scenes. See `requiresVideoTrack`.
     const unavailable = ROBOTS_CATALOG.filter((definition) =>
       workflowUnavailableReason(definition, { isAudioOnly: true })
     ).map((definition) => definition.key);
-    expect(unavailable.sort()).toEqual(['find-best-thumbnails', 'find-scenes']);
+    expect(unavailable).toEqual(['find-best-thumbnails']);
     expect(
-      workflowUnavailableReason(ROBOTS_CATALOG_BY_KEY['find-scenes'], { isAudioOnly: true })
+      workflowUnavailableReason(ROBOTS_CATALOG_BY_KEY['find-best-thumbnails'], {
+        isAudioOnly: true,
+      })
     ).toBe('not available for audio-only');
   });
 
@@ -599,9 +695,11 @@ describe('audio-only assets', () => {
   });
 
   it('keeps a workflow the asset can run, and swaps one it cannot for the default', () => {
-    expect(availableWorkflow('find-scenes', { isAudioOnly: false })).toBe('find-scenes');
-    expect(availableWorkflow('find-scenes', {})).toBe('find-scenes');
-    expect(availableWorkflow('find-scenes', { isAudioOnly: true })).toBe(DEFAULT_ROBOTS_WORKFLOW);
+    expect(availableWorkflow('analyze-structure', { isAudioOnly: false })).toBe(
+      'analyze-structure'
+    );
+    expect(availableWorkflow('analyze-structure', {})).toBe('analyze-structure');
+    expect(availableWorkflow('analyze-structure', { isAudioOnly: true })).toBe('analyze-structure');
     expect(availableWorkflow('find-best-thumbnails', { isAudioOnly: true })).toBe(
       DEFAULT_ROBOTS_WORKFLOW
     );
@@ -668,8 +766,8 @@ describe('audio-only assets', () => {
   });
 
   it('never refuses a whole workflow for the asset kind — that is the picker’s job', () => {
-    // Re-swept across all twelve reference pages. Only three mention audio-only assets at all:
-    // `find-scenes` ("Audio-only assets are not supported."), `find-key-moments` (`use_shots`
+    // Re-swept across the reference pages. Three mention audio-only assets in a way that bears on
+    // a run: `analyze-structure` (no scenes, captions required), `find-key-moments` (`use_shots`
     // "Not supported for audio-only assets", plus "Audio-only assets always use transcript
     // evidence and require a caption track"), and `moderate` — whose mention is about one
     // parameter being ignored, not about the run, so it hides a field rather than refusing a job.
@@ -681,7 +779,7 @@ describe('audio-only assets', () => {
     // `hasCaptions: true` because chapters is gated on captions, not on the asset kind, and this
     // test has to keep asking only about the kind.
     const unrestricted = ROBOTS_CATALOG.map((definition) => definition.key).filter(
-      (key): key is RobotsWorkflow => key !== 'find-key-moments'
+      (key): key is RobotsRunnableWorkflow => key !== 'find-key-moments'
     );
     expect(unrestricted).toHaveLength(11);
     for (const key of unrestricted) {
@@ -1014,7 +1112,7 @@ describe('enum multi-selects', () => {
 
 // --- the `''` select sentinel (D1, E3) ---
 describe('selects with no documented API default', () => {
-  const sentinelSelects: Array<[RobotsWorkflow, string]> = [
+  const sentinelSelects: Array<[RobotsRunnableWorkflow, string]> = [
     ['find-best-thumbnails', 'output_steering.selection_strategy'],
     ['find-key-moments', 'output_steering.selection_strategy'],
     ['find-key-moments', 'output_steering.title_style'],
@@ -1052,7 +1150,7 @@ describe('workflow notes', () => {
 
   it('states the length-bounds rule once, on the section both bounds sit in', () => {
     const bounds = ROBOTS_CATALOG_BY_KEY['find-key-moments'].params.filter((field) =>
-      field.name.startsWith('target_duration_ms.')
+      field.name.startsWith('target_duration.')
     );
     expect(bounds).toHaveLength(2);
     for (const field of bounds) {
@@ -1078,7 +1176,9 @@ describe('workflow notes', () => {
     expect(ROBOTS_CATALOG_BY_KEY['edit-captions'].notes).toBeUndefined();
     expect(
       validateParams(ROBOTS_CATALOG_BY_KEY['edit-captions'], { track_id: 'track-1' })
-    ).toContain('Add at least one replacement rule, or turn on "Censor profanity".');
+    ).toContain(
+      'Add at least one replacement rule or speaker label, or turn on "Censor profanity".'
+    );
   });
 
   it('leaves translate-audio only the notes an editor can act on', () => {
@@ -1121,71 +1221,217 @@ describe('the legacy prompt_overrides object', () => {
 
 // --- documented cross-field rules, expressed structurally (item 4) ---
 describe('parameters that only exist while their precondition holds', () => {
-  it('offers generate-premium-captions replace_existing only while the result is uploaded', () => {
-    // Reference, verbatim: "When false, no track is created and `replace_existing` must also be
-    // false; the generated SRT remains available via `temporary_srt_url`."
+  it('offers generate-premium-captions replace_existing_tracks only while the result is uploaded', () => {
+    // Reference: "When false, no track is created and `replace_existing_tracks` must be `fail`",
+    // its default — so hiding it, and so not sending it, is always right.
     const definition = ROBOTS_CATALOG_BY_KEY['generate-premium-captions'];
     const field = definition.params.find(
-      (candidate) => candidate.name === 'replace_existing'
+      (candidate) => candidate.name === 'replace_existing_tracks'
     ) as RobotsParamField;
 
     expect(isFieldVisible(field, { upload_to_mux: true })).toBe(true);
     expect(isFieldVisible(field, { upload_to_mux: false })).toBe(false);
+    expect(field.options?.map((option) => option.value)).toEqual([
+      'fail',
+      'replace_all',
+      'replace_generated',
+    ]);
+    expect(field.defaultValue).toBe('fail');
   });
 
-  it('never sends replace_existing alongside upload_to_mux: false', () => {
-    // The whole point of moving the rule: the invalid pair cannot leave the form, so there is
-    // nothing left for Mux to reject.
+  it('offers the translations a track name and what to do with a clashing track, with an upload', () => {
+    for (const [key, choices] of [
+      ['translate-captions', ['fail', 'replace_all', 'replace_generated']],
+      // Mux never auto-generates audio tracks, so `replace_generated` would mean `fail`.
+      ['translate-audio', ['fail', 'replace_all']],
+    ] as const) {
+      const definition = ROBOTS_CATALOG_BY_KEY[key];
+      const field = (name: string) =>
+        definition.params.find((candidate) => candidate.name === name) as RobotsParamField;
+
+      expect(field('replace_existing_tracks').options?.map((option) => option.value)).toEqual(
+        choices
+      );
+      expect(field('replace_existing_tracks').defaultValue).toBe('fail');
+      for (const name of ['replace_existing_tracks', 'track_name']) {
+        expect(isFieldVisible(field(name), { upload_to_mux: true })).toBe(true);
+        expect(isFieldVisible(field(name), { upload_to_mux: false })).toBe(false);
+      }
+
+      const values = {
+        track_id: 'track-1',
+        output_language_code: 'es',
+        replace_existing_tracks: 'replace_all',
+        track_name: 'Español',
+      };
+      expect(
+        paramsFromFormValues(definition, 'asset-1', { ...values, upload_to_mux: true })
+      ).toMatchObject({ replace_existing_tracks: 'replace_all', track_name: 'Español' });
+      const notUploaded = paramsFromFormValues(definition, 'asset-1', {
+        ...values,
+        upload_to_mux: false,
+      });
+      expect(notUploaded).not.toHaveProperty('replace_existing_tracks');
+      expect(notUploaded).not.toHaveProperty('track_name');
+    }
+  });
+
+  it('never sends replace_existing_tracks alongside upload_to_mux: false', () => {
     const definition = ROBOTS_CATALOG_BY_KEY['generate-premium-captions'];
     expect(
       paramsFromFormValues(definition, 'asset-1', {
         upload_to_mux: false,
-        replace_existing: true,
+        replace_existing_tracks: 'replace_all',
       })
     ).toEqual({ asset_id: 'asset-1', upload_to_mux: false });
     expect(
       paramsFromFormValues(definition, 'asset-1', {
         upload_to_mux: true,
-        replace_existing: true,
+        replace_existing_tracks: 'replace_all',
       })
-    ).toEqual({ asset_id: 'asset-1', upload_to_mux: true, replace_existing: true });
+    ).toEqual({ asset_id: 'asset-1', upload_to_mux: true, replace_existing_tracks: 'replace_all' });
   });
 
-  it('gives edit-captions delete_original_track the same treatment', () => {
-    // Weaker wording — "Has effect only when upload_to_mux is true" — so this was never a
-    // rejection, just a checkbox that did nothing. Same fix regardless.
+  it('gives edit-captions replace_existing_tracks and track_name the same treatment', () => {
+    // Neither means anything without an upload, and Mux runs the job with neither sent.
     const definition = ROBOTS_CATALOG_BY_KEY['edit-captions'];
-    const field = definition.params.find(
-      (candidate) => candidate.name === 'delete_original_track'
-    ) as RobotsParamField;
-
-    expect(isFieldVisible(field, { upload_to_mux: true })).toBe(true);
-    expect(isFieldVisible(field, { upload_to_mux: false })).toBe(false);
+    for (const name of ['replace_existing_tracks', 'track_name']) {
+      const field = definition.params.find((candidate) => candidate.name === name);
+      expect(isFieldVisible(field as RobotsParamField, { upload_to_mux: true })).toBe(true);
+      expect(isFieldVisible(field as RobotsParamField, { upload_to_mux: false })).toBe(false);
+    }
     expect(
       paramsFromFormValues(definition, 'asset-1', {
         track_id: 'track-1',
         upload_to_mux: false,
-        delete_original_track: true,
+        replace_existing_tracks: 'fail',
+        track_name: 'English (clean)',
       })
     ).toEqual({ asset_id: 'asset-1', track_id: 'track-1', upload_to_mux: false });
   });
 
+  it('replaces the edited track by default, which is what v1 does with nothing sent', () => {
+    const definition = ROBOTS_CATALOG_BY_KEY['edit-captions'];
+    expect(
+      paramsFromFormValues(definition, 'asset-1', {
+        ...defaultParamValues(definition.params),
+        track_id: 'track-1',
+      })
+    ).toMatchObject({ upload_to_mux: true, replace_existing_tracks: 'replace' });
+  });
+
+  it('needs a new name to keep the original track, as Mux does', () => {
+    const definition = ROBOTS_CATALOG_BY_KEY['edit-captions'];
+    const context = { captions: [{ id: 'track-1', name: 'English' }] };
+    const keeping = {
+      track_id: 'track-1',
+      censor_profanity: true,
+      upload_to_mux: true,
+      replace_existing_tracks: 'fail',
+    };
+
+    expect(validateParams(definition, keeping, context)).toEqual([
+      'Name the edited track: keeping the original means the two need different names.',
+    ]);
+    expect(validateParams(definition, { ...keeping, track_name: ' English ' }, context)).toEqual([
+      'Give the edited track a different name from the original’s.',
+    ]);
+    expect(
+      validateParams(definition, { ...keeping, track_name: 'English (clean)' }, context)
+    ).toEqual([]);
+    expect(
+      validateParams(definition, { ...keeping, replace_existing_tracks: 'replace' }, context)
+    ).toEqual([]);
+    expect(validateParams(definition, { ...keeping, upload_to_mux: false }, context)).toEqual([]);
+  });
+
+  it('sends speaker label renames, trimmed, as something for edit-captions to do', () => {
+    const definition = ROBOTS_CATALOG_BY_KEY['edit-captions'];
+    const values = {
+      track_id: 'track-1',
+      upload_to_mux: false,
+      speaker_replacements: [
+        { find: ' Speaker 1 ', replace: ' Ana ', caseSensitive: false },
+        { find: '', replace: 'ignored', caseSensitive: false },
+      ],
+    };
+
+    expect(validateParams(definition, values)).toEqual([]);
+    expect(paramsFromFormValues(definition, 'asset-1', values)).toEqual({
+      asset_id: 'asset-1',
+      track_id: 'track-1',
+      upload_to_mux: false,
+      speaker_replacements: [{ find: 'Speaker 1', replace: 'Ana' }],
+    });
+  });
+
+  it('needs a new name for each speaker label, written without brackets', () => {
+    const definition = ROBOTS_CATALOG_BY_KEY['edit-captions'];
+    const renaming = (find: string, replace: string) => ({
+      track_id: 'track-1',
+      upload_to_mux: false,
+      speaker_replacements: [{ find, replace, caseSensitive: false }],
+    });
+
+    expect(validateParams(definition, renaming('Speaker 1', ' '))).toEqual([
+      'Give each speaker label a new name.',
+    ]);
+    expect(validateParams(definition, renaming('[Speaker 1]', 'Ana'))).toEqual([
+      'Write speaker labels without the square brackets.',
+    ]);
+  });
+
+  it('refuses a name another caption track already has, whatever happens to the original', () => {
+    const definition = ROBOTS_CATALOG_BY_KEY['edit-captions'];
+    const context = {
+      captions: [
+        { id: 'track-1', name: 'English' },
+        { id: 'track-2', name: 'Spanish' },
+      ],
+    };
+    const editing = { track_id: 'track-1', censor_profanity: true, upload_to_mux: true };
+    const taken = ['Another caption track on this video is already named “Spanish”.'];
+
+    for (const choice of ['replace', 'fail']) {
+      const values = { ...editing, replace_existing_tracks: choice };
+      expect(validateParams(definition, { ...values, track_name: 'Spanish' }, context)).toEqual(
+        taken
+      );
+    }
+    // Replacing frees the original's own name.
+    expect(
+      validateParams(
+        definition,
+        { ...editing, replace_existing_tracks: 'replace', track_name: 'English' },
+        context
+      )
+    ).toEqual([]);
+    // Nothing reaches the asset without an upload, so no name can clash.
+    expect(
+      validateParams(
+        definition,
+        { ...editing, upload_to_mux: false, track_name: 'Spanish' },
+        context
+      )
+    ).toEqual([]);
+  });
+
   it('puts each gated field after the checkbox that gates it', () => {
     // A control that appears above the box controlling it reads as a glitch.
-    const order = (key: RobotsWorkflow, name: string) =>
+    const order = (key: RobotsRunnableWorkflow, name: string) =>
       ROBOTS_CATALOG_BY_KEY[key].params.findIndex((field) => field.name === name);
-    expect(order('generate-premium-captions', 'replace_existing')).toBeGreaterThan(
+    expect(order('generate-premium-captions', 'replace_existing_tracks')).toBeGreaterThan(
       order('generate-premium-captions', 'upload_to_mux')
     );
-    expect(order('edit-captions', 'delete_original_track')).toBeGreaterThan(
-      order('edit-captions', 'upload_to_mux')
-    );
+    for (const name of ['replace_existing_tracks', 'track_name']) {
+      expect(order('edit-captions', name)).toBeGreaterThan(order('edit-captions', 'upload_to_mux'));
+    }
   });
 });
 
 // --- controlled vocabularies (items 1 and 2) ---
 describe('controlled vocabularies', () => {
-  const taxonomyField = (key: RobotsWorkflow, name: string) =>
+  const taxonomyField = (key: RobotsRunnableWorkflow, name: string) =>
     ROBOTS_CATALOG_BY_KEY[key].params.find((field) => field.name === name) as RobotsParamField;
 
   const value = (overrides: Partial<TaxonomyValue> = {}): TaxonomyValue => ({
@@ -1194,7 +1440,7 @@ describe('controlled vocabularies', () => {
   });
 
   it('exposes topic_taxonomy on both workflows that document it, at the documented path', () => {
-    for (const key of ['find-scenes', 'find-key-moments'] as RobotsWorkflow[]) {
+    for (const key of ['analyze-structure', 'find-key-moments'] as RobotsRunnableWorkflow[]) {
       const field = taxonomyField(key, 'output_steering.topic_taxonomy');
       expect(field.kind).toBe('taxonomy');
       // Neither page documents a single cap, so none is invented for them.
@@ -1256,9 +1502,9 @@ describe('controlled vocabularies', () => {
    */
   it.each([
     ['summarize', 'output_steering.tag_taxonomy'],
-    ['find-scenes', 'output_steering.topic_taxonomy'],
+    ['analyze-structure', 'output_steering.topic_taxonomy'],
     ['find-key-moments', 'output_steering.topic_taxonomy'],
-  ] as Array<[RobotsWorkflow, string]>)(
+  ] as Array<[RobotsRunnableWorkflow, string]>)(
     'always sends allow_other with %s %s, because the API rejects the object without it',
     (key, name) => {
       const field = taxonomyField(key, name);
@@ -1382,8 +1628,8 @@ describe('controlled vocabularies', () => {
   });
 
   it('applies no cap at all to topic_taxonomy, which documents none', () => {
-    // Borrowing summarize's numbers would block a run find-scenes accepts.
-    for (const key of ['find-scenes', 'find-key-moments'] as RobotsWorkflow[]) {
+    // Borrowing summarize's numbers would block a run analyze-structure accepts.
+    for (const key of ['analyze-structure', 'find-key-moments'] as RobotsRunnableWorkflow[]) {
       const rows = Array.from({ length: 80 }, (_, i) => ({
         label: `topic-${i}`,
         description: 'd'.repeat(500),
@@ -1409,10 +1655,10 @@ describe('the scope window', () => {
 
   it('is on the six workflows that document it, with both bounds', () => {
     expect(SCOPED.map((definition) => definition.key).sort()).toEqual([
+      'analyze-structure',
       'ask-questions',
       'find-best-thumbnails',
       'find-key-moments',
-      'find-scenes',
       'moderate',
       'summarize',
     ]);
@@ -1539,14 +1785,14 @@ describe('what an empty field is said to do', () => {
     expect(trackName?.helpText).toContain('"English (Generated)"');
   });
 
-  it('labels every caption-track picker by what it picks, and says what empty means', () => {
+  it('offers every caption-track picker as the asset’s own ready caption languages', () => {
     // `language_code` on these five selects one of the asset's caption tracks — it is not the
-    // language of the result, which is what "Caption track language" was read as.
-    const keys: RobotsWorkflow[] = [
+    // language of the result. v1 matches it exactly, so it is picked from the tracks, not typed.
+    const keys: RobotsRunnableWorkflow[] = [
       'summarize',
       'ask-questions',
       'generate-chapters',
-      'find-scenes',
+      'analyze-structure',
       'moderate',
     ];
     const pickers = keys.map(
@@ -1557,18 +1803,35 @@ describe('what an empty field is said to do', () => {
     );
     for (const field of pickers) {
       expect(field.label).toBe('Captions to read');
-      expect(field.helpText).toMatch(/caption track/);
-      expect(field.helpText).toMatch(/leave empty/i);
+      expect(field.kind).toBe('captionLanguage');
+      expect(field.helpText).toMatch(/caption/i);
+      // v1 takes the first ready track when it is left out, with no English preference.
+      expect(field.helpText).not.toMatch(/English/);
     }
     // Where the workflow also takes an output language, the help says which is which.
-    for (const key of ['summarize', 'generate-chapters'] as RobotsWorkflow[]) {
+    for (const key of ['summarize', 'generate-chapters'] as RobotsRunnableWorkflow[]) {
       const help = ROBOTS_CATALOG_BY_KEY[key].params.find(
         (field) => field.name === 'language_code'
       )?.helpText;
       expect(help).toMatch(/Output language/);
     }
-    // And chapters says what the reference says it prefers.
-    expect(pickers[2].helpText).toMatch(/English/);
+  });
+
+  it('lists each ready caption language once, in track order, with its tracks’ names', () => {
+    const track = (id: string, language_code: string, name: string, status = 'ready') =>
+      ({ id, type: 'text', text_type: 'subtitles', language_code, name, status } as Track);
+
+    expect(
+      readyCaptionLanguages([
+        track('t1', 'en-US', 'English'),
+        track('t2', 'es', 'Spanish', 'preparing'),
+        track('t3', 'fr', 'French'),
+        track('t4', 'en-US', 'English (edited)'),
+      ])
+    ).toEqual([
+      { languageCode: 'en-US', names: ['English', 'English (edited)'] },
+      { languageCode: 'fr', names: ['French'] },
+    ]);
   });
 
   it('no longer calls any field "Caption track language" or "Transcript language"', () => {

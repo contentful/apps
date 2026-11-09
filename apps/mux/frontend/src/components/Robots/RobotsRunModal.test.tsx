@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import RobotsRunModal from './RobotsRunModal';
 import { Track } from '../../util/types';
-import { ROBOTS_WORKFLOWS } from '../../util/robotsTypes';
+import { ROBOTS_RETIRED_WORKFLOWS, ROBOTS_WORKFLOWS } from '../../util/robotsTypes';
 
 const captionTrack: Track = {
   type: 'text',
@@ -13,6 +13,7 @@ const captionTrack: Track = {
   language_code: 'en-US',
   text_type: 'subtitles',
   closed_captions: true,
+  status: 'ready',
 } as Track;
 
 const renderModal = (overrides: Record<string, unknown> = {}) => {
@@ -38,11 +39,14 @@ const renderModal = (overrides: Record<string, unknown> = {}) => {
 // the harness. The behaviour they would cover (per-workflow validation, and which parameters
 // actually get sent) is covered directly in `util/robotsCatalog.test.ts`.
 describe('RobotsRunModal', () => {
-  it('offers every workflow in the catalog', () => {
+  it('offers every workflow in the catalog, and none v1 retired', () => {
     renderModal();
     const select = screen.getByLabelText('Workflow') as HTMLSelectElement;
     const values = Array.from(select.querySelectorAll('option')).map((option) => option.value);
-    expect(values.sort()).toEqual([...ROBOTS_WORKFLOWS].sort());
+    const retired: readonly string[] = ROBOTS_RETIRED_WORKFLOWS;
+    expect(values.sort()).toEqual(
+      ROBOTS_WORKFLOWS.filter((workflow) => !retired.includes(workflow)).sort()
+    );
   });
 
   it('groups them by category', () => {
@@ -285,14 +289,13 @@ describe('RobotsRunModal form widgets', () => {
         .getByLabelText('Workflow')
         .querySelector(`option[value="${value}"]`) as HTMLOptionElement;
 
-    for (const value of ['find-scenes', 'find-best-thumbnails']) {
-      expect(option(value)).toBeDisabled();
-      expect(option(value).textContent).toMatch(/\(not available for audio-only\)$/);
-    }
-    // Every other workflow is still on offer.
+    expect(option('find-best-thumbnails')).toBeDisabled();
+    expect(option('find-best-thumbnails').textContent).toMatch(/\(not available for audio-only\)$/);
+    // Every other workflow is still on offer, Analyze structure included.
+    expect(option('analyze-structure')).toBeEnabled();
     expect(option('find-key-moments')).toBeEnabled();
     expect(option('moderate')).toBeEnabled();
-    expect(screen.getByLabelText('Workflow').querySelectorAll('option:disabled')).toHaveLength(2);
+    expect(screen.getByLabelText('Workflow').querySelectorAll('option:disabled')).toHaveLength(1);
   });
 
   it('disables nothing when the asset kind is unknown or has pictures', () => {
@@ -315,14 +318,14 @@ describe('RobotsRunModal form widgets', () => {
   });
 
   it('opens on the default rather than on a workflow this video cannot run', () => {
-    renderModal({ isAudioOnly: true, initialWorkflow: 'find-scenes' });
+    renderModal({ isAudioOnly: true, initialWorkflow: 'find-best-thumbnails' });
     expect((screen.getByLabelText('Workflow') as HTMLSelectElement).value).toBe('summarize');
     expect(screen.getByLabelText('Tone')).toBeInTheDocument();
   });
 
   it('moves off a workflow that turns out to be unavailable while the form is open', async () => {
     // An entry whose value predates `audioOnly` learns it on the next asset read, which can land
-    // after the editor picked find-scenes.
+    // after the editor picked find-best-thumbnails.
     const props = {
       isShown: true,
       onClose: vi.fn(),
@@ -333,44 +336,108 @@ describe('RobotsRunModal form widgets', () => {
       isRunDisabled: false,
     };
     const { rerender } = render(<RobotsRunModal {...props} />);
-    await userEvent.selectOptions(screen.getByLabelText('Workflow'), 'find-scenes');
+    await userEvent.selectOptions(screen.getByLabelText('Workflow'), 'find-best-thumbnails');
     await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
-    expect(screen.getByRole('button', { name: 'Run Find scenes' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Run Find best thumbnails' })).toBeInTheDocument();
 
     rerender(<RobotsRunModal {...props} isAudioOnly />);
 
-    // Off the confirm step it was on, and onto a workflow it can run — never "Run Find scenes".
-    expect(screen.queryByRole('button', { name: /Run Find scenes/ })).not.toBeInTheDocument();
+    // Off the confirm step it was on, and onto a workflow it can run.
+    expect(
+      screen.queryByRole('button', { name: /Run Find best thumbnails/ })
+    ).not.toBeInTheDocument();
     expect((screen.getByLabelText('Workflow') as HTMLSelectElement).value).toBe('summarize');
 
-    // And it stays there if the kind goes unknown again, rather than bringing find-scenes back.
+    // And it stays there if the kind goes unknown again, rather than bringing the old one back.
     rerender(<RobotsRunModal {...props} />);
     expect((screen.getByLabelText('Workflow') as HTMLSelectElement).value).toBe('summarize');
   });
 
-  it('does not block find-scenes when the caller does not know the asset kind', async () => {
-    renderModal({ initialWorkflow: 'find-scenes' });
-    expect(screen.queryByText(/audio-only/)).not.toBeInTheDocument();
+  it('does not block find-best-thumbnails when the caller does not know the asset kind', () => {
+    renderModal({ initialWorkflow: 'find-best-thumbnails' });
+    expect(screen.queryByText(/not available for audio-only/)).not.toBeInTheDocument();
+    expect((screen.getByLabelText('Workflow') as HTMLSelectElement).value).toBe(
+      'find-best-thumbnails'
+    );
   });
 
-  it('takes the replace-existing checkbox away with the upload it depends on', async () => {
-    // The documented pair — "When false, no track is created and `replace_existing` must also be
-    // false" — used to be two boxes the editor could tick before being refused.
+  it('runs analyze-structure on an audio-only video', () => {
+    renderModal({ isAudioOnly: true, initialWorkflow: 'analyze-structure' });
+    expect((screen.getByLabelText('Workflow') as HTMLSelectElement).value).toBe(
+      'analyze-structure'
+    );
+  });
+
+  it('takes the existing-captions choice away with the upload it depends on', async () => {
+    // The documented pair — "When false, no track is created and `replace_existing_tracks` must
+    // be `fail`" — cannot be built wrong if the choice goes with the upload.
+    const label = 'If the video already has captions in this language';
     renderModal({ initialWorkflow: 'generate-premium-captions' });
 
-    expect(screen.getByLabelText('Replace the existing caption track')).toBeInTheDocument();
+    expect(screen.getByLabelText(label)).toBeInTheDocument();
     await userEvent.click(screen.getByLabelText('Attach the result to the Mux asset'));
-    expect(screen.queryByLabelText('Replace the existing caption track')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(label)).not.toBeInTheDocument();
     // And no error where the impossible combination used to produce one.
     expect(screen.queryByText(/Fix these before running/)).not.toBeInTheDocument();
   });
 
-  it('takes the delete-original checkbox away for the same reason', async () => {
+  it('takes what happens to the original track away for the same reason', async () => {
     renderModal({ initialWorkflow: 'edit-captions' });
 
-    expect(screen.getByLabelText('Delete the original track')).toBeInTheDocument();
+    expect(screen.getByLabelText('The original track')).toBeInTheDocument();
+    expect(screen.getByLabelText('Name for the edited track')).toBeInTheDocument();
     await userEvent.click(screen.getByLabelText('Attach the result to the Mux asset'));
-    expect(screen.queryByLabelText('Delete the original track')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('The original track')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Name for the edited track')).not.toBeInTheDocument();
+  });
+
+  it('asks for a new name when the original track is kept, before Continue', async () => {
+    renderModal({ initialWorkflow: 'edit-captions' });
+    await userEvent.selectOptions(screen.getByLabelText(/Caption track to edit/), 'track-1');
+    await userEvent.click(screen.getByLabelText('Censor profanity'));
+    await userEvent.selectOptions(screen.getByLabelText('The original track'), 'fail');
+
+    expect(screen.getByText(/Name the edited track/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Continue' })).toBeDisabled();
+
+    await userEvent.type(screen.getByLabelText('Name for the edited track'), 'US English');
+    expect(screen.getByText(/different name from the original/)).toBeInTheDocument();
+  });
+
+  it('renames speaker labels, with no case-sensitivity column, and runs on them alone', async () => {
+    const { onRun } = renderModal({ initialWorkflow: 'edit-captions' });
+    await userEvent.selectOptions(screen.getByLabelText(/Caption track to edit/), 'track-1');
+    await userEvent.click(screen.getByRole('button', { name: 'Add speaker label' }));
+    await userEvent.type(screen.getByLabelText('Speaker label 1'), 'Speaker 1');
+    await userEvent.type(screen.getByLabelText('New speaker label 1'), 'Ana');
+    expect(screen.queryByLabelText('Case sensitive 1')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Run Edit captions' }));
+    expect(onRun).toHaveBeenCalledWith(
+      'edit-captions',
+      expect.objectContaining({ speaker_replacements: [{ find: 'Speaker 1', replace: 'Ana' }] })
+    );
+  });
+
+  it('offers the captions to read from the asset’s own ready tracks', async () => {
+    const preparing = { ...captionTrack, id: 'track-2', language_code: 'fr', status: 'preparing' };
+    const { onRun } = renderModal({
+      initialWorkflow: 'summarize',
+      captions: [captionTrack, preparing as Track],
+    });
+    const picker = screen.getByLabelText('Captions to read') as HTMLSelectElement;
+
+    expect(Array.from(picker.options).map((option) => option.value)).toEqual(['', 'en-US']);
+    expect(picker.options[1].textContent).toBe('US English · en-US');
+
+    await userEvent.selectOptions(picker, 'en-US');
+    await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Run Summarize' }));
+    expect(onRun).toHaveBeenCalledWith(
+      'summarize',
+      expect.objectContaining({ language_code: 'en-US' })
+    );
   });
 
   it("hides moderate's language picker once the asset is known to have pictures", () => {
@@ -482,7 +549,7 @@ describe('RobotsRunModal form widgets', () => {
       isRunDisabled: false,
     };
     const { rerender } = render(<RobotsRunModal {...props} />);
-    await userEvent.selectOptions(screen.getByLabelText('Workflow'), 'find-scenes');
+    await userEvent.selectOptions(screen.getByLabelText('Workflow'), 'analyze-structure');
     await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
 
     // Everything that reached the DOM, including what was taken out of it again: a step drawn
@@ -551,10 +618,10 @@ describe('RobotsRunModal taxonomy editor', () => {
     expect(screen.queryByLabelText('Taxonomy value 2')).not.toBeInTheDocument();
   });
 
-  it('offers a topic taxonomy on find-scenes with no count to spend', () => {
-    // `summarize` documents "Supports 1-50 values" and shows the counter; `find-scenes` documents
-    // no cap at all, so there is nothing honest to count against.
-    renderModal({ initialWorkflow: 'find-scenes' });
+  it('offers a topic taxonomy on analyze-structure with no count to spend', () => {
+    // `summarize` documents "Supports 1-50 values" and shows the counter; `analyze-structure`
+    // documents no cap at all, so there is nothing honest to count against.
+    renderModal({ initialWorkflow: 'analyze-structure' });
     expect(screen.getByText('Topic taxonomy')).toBeInTheDocument();
     expect(screen.queryByText(/of 50 used\./)).not.toBeInTheDocument();
   });

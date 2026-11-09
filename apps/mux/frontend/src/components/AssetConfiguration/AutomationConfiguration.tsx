@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Box, Checkbox, FormControl, List, Note, Text } from '@contentful/f36-components';
+import { Badge, Box, Checkbox, FormControl, List, Note, Text } from '@contentful/f36-components';
 import ExternalLink from '../ExternalLink';
 import DirectiveId from '../DirectiveId';
 import { ROBOTS_DOCS_URL } from '../../util/robots';
@@ -33,6 +33,8 @@ interface AutomationConfigurationProps {
   selectedDirectiveIds: string[];
   /** Configured ids Mux says it does not have. Shown, and not selectable. */
   missingDirectiveIds?: string[];
+  /** Configured ids still on Robots v0. Marked, and attached like any other: they run on v0. */
+  v0DirectiveIds?: string[];
   /** id → name, already falling back to the id. See `useRobotsDirectiveNames`. */
   directiveNames?: Record<string, string>;
   /** Lists the directives without checkboxes, for someone who cannot run Robots. */
@@ -44,10 +46,19 @@ interface DirectiveRow {
   id: string;
   name: string;
   isMissing: boolean;
+  isV0: boolean;
 }
 
-const DirectiveLabel: FC<{ directive: DirectiveRow }> = ({ directive }) =>
-  directive.name === directive.id ? <DirectiveId id={directive.id} /> : <>{directive.name}</>;
+const DirectiveLabel: FC<{ directive: DirectiveRow }> = ({ directive }) => (
+  <>
+    {directive.name === directive.id ? <DirectiveId id={directive.id} /> : directive.name}
+    {directive.isV0 && (
+      <Box as="span" marginLeft="spacingXs">
+        <Badge variant="warning">v0</Badge>
+      </Box>
+    )}
+  </>
+);
 
 /**
  * What goes under a directive's label, with or without a checkbox beside it. `isIndented` lines it
@@ -74,6 +85,12 @@ const DirectiveDetails: FC<{ directive: DirectiveRow; isIndented?: boolean }> = 
           configuration changed after this page loaded — reloading picks that up.
         </Text>
       )}
+      {directive.isV0 && (
+        <Text as="p" fontColor="gray500" marginLeft={marginLeft}>
+          Runs on Robots v0, which Mux is retiring. An admin can replace it with a v1 copy in this
+          app&apos;s configuration.
+        </Text>
+      )}
     </>
   );
 };
@@ -82,6 +99,7 @@ const AutomationConfiguration: FC<AutomationConfigurationProps> = ({
   availableDirectiveIds,
   selectedDirectiveIds,
   missingDirectiveIds = [],
+  v0DirectiveIds = [],
   directiveNames,
   isReadOnly = false,
   onChange,
@@ -100,6 +118,7 @@ const AutomationConfiguration: FC<AutomationConfigurationProps> = ({
     id,
     name: directiveNames?.[id] || id,
     isMissing: missingDirectiveIds.includes(id),
+    isV0: v0DirectiveIds.includes(id),
   }));
 
   if (isReadOnly) {

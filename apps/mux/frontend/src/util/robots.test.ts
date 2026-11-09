@@ -7,8 +7,10 @@ import {
   applyRobotsDirectiveRunsToValue,
   applyRobotsJobsToValue,
   capabilityFromError,
+  deletedJobs,
   directiveRunRefsFromJobs,
   jobsNeedingDetail,
+  ROBOTS_JOB_RETENTION_MS,
   mergeDirectiveRunRecords,
   mergeJobRecords,
   mergeRobotsOutputs,
@@ -42,6 +44,7 @@ import {
   RobotsJob,
   RobotsPendingDirectiveRunCreate,
   RobotsPendingJobCreate,
+  robotsApiVersionOf,
 } from './robotsTypes';
 import { MuxContentfulObject } from './types';
 
@@ -379,6 +382,39 @@ describe('mergeRobotsOutputs', () => {
       title: 'A title',
       description: 'A description',
       tags: ['x', 'y'],
+    });
+  });
+
+  it('persists Analyze Structure’s title, summary and tags under its own key, and nothing else', () => {
+    const existing = { summarize: { jobId: 'rjob_sum', completedAt: 1, title: 'Kept' } };
+    const merged = mergeRobotsOutputs(
+      existing,
+      [
+        job({
+          id: 'rjob_as',
+          workflow: 'analyze-structure',
+          outputs: {
+            title: 'A title',
+            summary: 'A summary',
+            tags: ['x'],
+            chapters: [{ start_time: 0, end_time: 1, title: 'Intro' }],
+            scenes: [],
+            key_moments: [],
+          },
+        }),
+      ],
+      'asset-1'
+    );
+
+    expect(merged).toEqual({
+      ...existing,
+      analyzeStructure: {
+        jobId: 'rjob_as',
+        completedAt: 1_700_000_100,
+        title: 'A title',
+        summary: 'A summary',
+        tags: ['x'],
+      },
     });
   });
 
@@ -1598,5 +1634,75 @@ describe('pending creates on screen', () => {
       ];
       for (const state of states) expectOneAtIndex(tableAt(state));
     });
+  });
+});
+
+/**
+ * Mux deletes a job after 30 days, and the entry's record of it is all that is left. The tab shows
+ * those records instead of saying no job ever ran (ADR-0005).
+ */
+describe('deletedJobs', () => {
+  const now = 1_800_000_000_000;
+  const old = Math.floor((now - ROBOTS_JOB_RETENTION_MS) / 1000) - 60;
+  const recent = Math.floor(now / 1000) - 60;
+  const stored = {
+    assetId: 'asset-1',
+    robotsJobs: [
+      { id: 'rjob_sum', workflow: 'summarize', status: 'completed', created_at: old },
+      { id: 'rjob_err', workflow: 'moderate', status: 'errored', created_at: old, error: 'Boom' },
+      { id: 'rjob_recent', workflow: 'summarize', status: 'completed', created_at: recent },
+      { id: 'rjob_listed', workflow: 'summarize', status: 'completed', created_at: recent },
+    ],
+    robotsOutputs: {
+      summarize: { jobId: 'rjob_sum', title: 'Kept title', description: 'Kept', tags: ['a'] },
+    },
+  } as unknown as MuxContentfulObject;
+  const listed = [{ id: 'rjob_listed', workflow: 'summarize', status: 'completed' }] as RobotsJob[];
+
+  it('takes the unlisted records past Mux’s retention, with what the entry kept', () => {
+    const jobs = deletedJobs(stored, listed, now);
+
+    expect(jobs.map((job) => job.id)).toEqual(['rjob_sum', 'rjob_err']);
+    expect(jobs[0].outputs).toEqual({ title: 'Kept title', description: 'Kept', tags: ['a'] });
+    expect(jobs[1].errors).toEqual([{ message: 'Boom' }]);
+  });
+
+  it('leaves out a recent record the list does not name yet', () => {
+    // Another editor's job, recorded on the entry before this session's list caught up with it.
+    expect(deletedJobs(stored, [], now).map((job) => job.id)).not.toContain('rjob_recent');
+  });
+
+  it('shows no output for a job whose stored summary a newer one replaced', () => {
+    const value = {
+      robotsJobs: [
+        { id: 'rjob_older', workflow: 'summarize', status: 'completed', created_at: old },
+      ],
+      robotsOutputs: { summarize: { jobId: 'rjob_newer', title: 'Newer' } },
+    } as unknown as MuxContentfulObject;
+
+    expect(deletedJobs(value, [], now)[0].outputs).toBeUndefined();
+  });
+
+  it('keeps Analyze Structure’s output under Mux’s names', () => {
+    const value = {
+      robotsJobs: [
+        { id: 'rjob_as', workflow: 'analyze-structure', status: 'completed', created_at: old },
+      ],
+      robotsOutputs: { analyzeStructure: { jobId: 'rjob_as', title: 'T', summary: 'S' } },
+    } as unknown as MuxContentfulObject;
+
+    expect(deletedJobs(value, [], now)[0].outputs).toEqual({ title: 'T', summary: 'S' });
+  });
+});
+
+describe('robotsApiVersionOf', () => {
+  it('reads the version from a relative route or a full URL', () => {
+    const at = (href: string) => robotsApiVersionOf({ _links: { self: { href } } });
+
+    expect(at('/robots/v1/jobs/summarize/rjob_1')).toBe('v1');
+    expect(at('https://api.mux.com/robots/v1/jobs/summarize/rjob_1')).toBe('v1');
+    expect(at('https://api.mux.com/robots/v0/directives/drv_1')).toBe('v0');
+    expect(at('/video/v1/assets/a')).toBeUndefined();
+    expect(robotsApiVersionOf({})).toBeUndefined();
   });
 });

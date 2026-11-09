@@ -1,5 +1,6 @@
 import { FC, useCallback, useState } from 'react';
 import {
+  Badge,
   Box,
   Button,
   Checkbox,
@@ -15,9 +16,10 @@ import { CycleIcon, PlusIcon } from '@contentful/f36-icons';
 import ExternalLink from './ExternalLink';
 import DirectiveId from './DirectiveId';
 import RobotsCapabilityNote from './Robots/RobotsCapabilityNote';
+import RobotsV0DirectivesNote from './Robots/RobotsV0DirectivesNote';
 import ApiClient from '../util/apiClient';
 import { muxApiErrorFromResponse } from '../util/muxApi';
-import { RobotsDirective } from '../util/robotsTypes';
+import { RobotsDirective, robotsApiVersionOf } from '../util/robotsTypes';
 import { ROBOTS_DOCS_URL, capabilityFromError } from '../util/robots';
 
 /**
@@ -31,9 +33,12 @@ import { ROBOTS_DOCS_URL, capabilityFromError } from '../util/robots';
  * but not yet saved would list the wrong account's directives, or none.
  *
  * **What happens if that direct call is blocked.** Mux granted Contentful a browser-CORS
- * exception, and whether it covers `/robots/v0/*` as well as the Video API paths is not settled.
- * So the picker degrades rather than breaking: if the fetch fails, directive ids can be pasted by
- * hand and everything downstream works identically. The list is a convenience, not the mechanism.
+ * exception, which answers `/robots/v1/*` as it does the Video API paths. The picker still degrades
+ * rather than breaking: if the fetch fails, directive ids can be pasted by hand and everything
+ * downstream works identically. The list is a convenience, not the mechanism.
+ *
+ * The v1 list returns the directives of both versions. A v0 one is marked, because it stays on v0
+ * on every upload it is attached to until it is replaced by a v1 copy (ADR-0017).
  *
  * **A listing is evidence about the credentials it was read with, and no others.** A selected
  * id the account does not have — deleted in Mux, or chosen under a different token — cannot run,
@@ -51,7 +56,7 @@ interface RobotsConfigurationProps {
   onChange: (directiveIds: string[]) => void;
 }
 
-/** `GET /robots/v0/directives` is paginated, so an account with many would silently truncate. */
+/** `GET /robots/v1/directives` is paginated, so an account with many would silently truncate. */
 const PAGE_SIZE = 100;
 const MAX_PAGES = 10;
 
@@ -90,7 +95,7 @@ const RobotsConfiguration: FC<RobotsConfigurationProps> = ({
     try {
       for (let page = 1; page <= MAX_PAGES; page += 1) {
         const response = await apiClient.get(
-          `/robots/v0/directives?limit=${PAGE_SIZE}&page=${page}`
+          `/robots/v1/directives?limit=${PAGE_SIZE}&page=${page}`
         );
 
         if (!response.ok) {
@@ -127,7 +132,7 @@ const RobotsConfiguration: FC<RobotsConfigurationProps> = ({
   //
   // This section is on a screen every existing customer opens, and most of them do not have
   // Robots. Listing directives automatically would fire a cross-origin request to
-  // `api.mux.com/robots/v0/directives` for all of them and, on a 403, put an error notice on a
+  // `api.mux.com/robots/v1/directives` for all of them and, on a 403, put an error notice on a
   // configuration screen they came to for something else. Nothing happens until someone asks.
 
   /** The listing, only while it is about the token in the form. */
@@ -153,6 +158,10 @@ const RobotsConfiguration: FC<RobotsConfigurationProps> = ({
   };
 
   const knownIds = new Set(directives.map((directive) => directive.id));
+  const isV0 = (directive: RobotsDirective) => robotsApiVersionOf(directive) === 'v0';
+  const selectedV0Directives = directives.filter(
+    (directive) => isV0(directive) && directiveIds.includes(directive.id)
+  );
   const unlistedIds = directiveIds.filter((id) => !knownIds.has(id));
   const missingIds = current?.isComplete ? unlistedIds : [];
   const uncheckedIds = current?.isComplete ? [] : unlistedIds;
@@ -171,18 +180,16 @@ const RobotsConfiguration: FC<RobotsConfigurationProps> = ({
         <ExternalLink href={`${ROBOTS_DOCS_URL}-directives`}>Author directives in Mux</ExternalLink>
       </Paragraph>
 
-      {directiveIds.length > 0 ? (
-        <Note variant="warning" title="This spends money on every upload">
-          The {directiveIds.length === 1 ? 'directive' : 'directives'} selected below run on every
-          video uploaded through this app and consume Mux AI units, with no per-video confirm step.
-          Only people who can run Robots can deselect them per upload.
+      <Flex flexDirection="column" gap="spacingS">
+        <Note variant="warning" title="Directives selected here spend Mux AI units on every upload">
+          Each one runs on every video uploaded through this app, with no per-video confirm step.
+          Only people who can run Robots can deselect it per upload.
         </Note>
-      ) : (
-        <Note variant="neutral">
-          Nothing runs automatically. Selecting a directive here means it runs on every new upload
-          and consumes Mux AI units — leave this empty unless you want that.
-        </Note>
-      )}
+        <RobotsV0DirectivesNote
+          directives={selectedV0Directives}
+          nextStep="select the copy here and deselect the original."
+        />
+      </Flex>
 
       {!hasCredentials && (
         <Box marginTop="spacingM">
@@ -238,6 +245,11 @@ const RobotsConfiguration: FC<RobotsConfigurationProps> = ({
                   toggle(directive.id, (event.target as HTMLInputElement).checked)
                 }>
                 {directive.name || <DirectiveId id={directive.id} />}
+                {isV0(directive) && (
+                  <Box as="span" marginLeft="spacingXs">
+                    <Badge variant="warning">v0</Badge>
+                  </Box>
+                )}
               </Checkbox>
               {/* In place of the Checkbox's own `helpText`, which is a string and so cannot be told
                   to wrap an id that has no spaces in it. The same text tokens and indent. */}

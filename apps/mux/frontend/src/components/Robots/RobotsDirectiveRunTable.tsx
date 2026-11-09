@@ -12,8 +12,8 @@ import RobotsStatusBadge from './RobotsStatusBadge';
 /**
  * Directive runs, one row each, expanding to the per-workflow `node_states`.
  *
- * `node_states` come back "in the order the bindings appear in the Directive's workflows", so a
- * step maps to its workflow by position and needs no lookup against the directive.
+ * `node_states` come back in the order of the directive's bindings, so a step maps to its workflow
+ * by position and needs no lookup against the directive.
  */
 
 interface RobotsDirectiveRunTableProps {
@@ -31,7 +31,8 @@ const COLUMNS = ['Directive', 'Status', 'Started', 'Steps'];
 
 const nodeDetail = (node: RobotsNodeState): string => {
   if (node.reason) return node.reason;
-  if (node.source_workflows?.length) return `Waiting on ${node.source_workflows.join(', ')}`;
+  const sources = node.source_bindings ?? node.source_workflows;
+  if (sources?.length) return `Waiting on ${sources.join(', ')}`;
   return EM_DASH;
 };
 
@@ -45,19 +46,20 @@ const NodeStateRows: FC<{ nodeStates: RobotsNodeState[] }> = ({ nodeStates }) =>
       </Table.Row>
     </Table.Head>
     <Table.Body>
-      {nodeStates.map((node, index) => (
-        <Table.Row key={node.job_id ?? node.reference_id ?? index}>
-          <Table.Cell>
-            {node.workflow_name
-              ? workflowLabel(node.workflow_name)
-              : node.reference_id ?? `Step ${index + 1}`}
-          </Table.Cell>
-          <Table.Cell>
-            <RobotsStatusBadge kind="node" status={node.status} />
-          </Table.Cell>
-          <Table.Cell>{nodeDetail(node)}</Table.Cell>
-        </Table.Row>
-      ))}
+      {nodeStates.map((node, index) => {
+        const workflow = node.workflow ?? node.workflow_name;
+        return (
+          <Table.Row key={node.job_id ?? node.reference_id ?? index}>
+            <Table.Cell>
+              {workflow ? workflowLabel(workflow) : node.reference_id ?? `Step ${index + 1}`}
+            </Table.Cell>
+            <Table.Cell>
+              <RobotsStatusBadge kind="node" status={node.status} />
+            </Table.Cell>
+            <Table.Cell>{nodeDetail(node)}</Table.Cell>
+          </Table.Row>
+        );
+      })}
     </Table.Body>
   </Table>
 );

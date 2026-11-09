@@ -27,7 +27,7 @@ import {
   validateParams,
   workflowUnavailableReason,
 } from '../../util/robotsCatalog';
-import { RobotsWorkflow } from '../../util/robotsTypes';
+import { RobotsRunnableWorkflow, RobotsWorkflow } from '../../util/robotsTypes';
 import { ROBOTS_PRICING_URL } from '../../util/robots';
 import { Track } from '../../util/types';
 import RobotsParamFields from './RobotsParamFields';
@@ -36,7 +36,10 @@ interface RobotsRunModalProps {
   isShown: boolean;
   onClose: () => void;
   /** Not awaited: the modal closes on confirm, and the job table shows the run starting. */
-  onRun: (workflow: RobotsWorkflow, parameters: Record<string, unknown>) => Promise<void> | void;
+  onRun: (
+    workflow: RobotsRunnableWorkflow,
+    parameters: Record<string, unknown>
+  ) => Promise<void> | void;
   assetId: string;
   captions: Track[];
   audioTracks: Track[];
@@ -47,11 +50,13 @@ interface RobotsRunModalProps {
   isAudioOnly?: boolean;
   /** Seconds, when known. Unknown blocks nothing, the same as `isAudioOnly`. */
   duration?: number;
+  /** Workflows with a v0 job still running on this video, which the confirm step warns about. */
+  runningOnV0?: RobotsWorkflow[];
   /** True while a create is pending on this video — Run stays disabled until it resolves. */
   isRunDisabled: boolean;
   /** Why Run is unavailable, when it is for a reason worth explaining. */
   runDisabledReason?: string;
-  initialWorkflow?: RobotsWorkflow;
+  initialWorkflow?: RobotsRunnableWorkflow;
 }
 
 const RobotsRunModal: FC<RobotsRunModalProps> = ({
@@ -63,23 +68,24 @@ const RobotsRunModal: FC<RobotsRunModalProps> = ({
   audioTracks,
   isAudioOnly,
   duration,
+  runningOnV0,
   isRunDisabled,
   runDisabledReason,
   initialWorkflow,
 }) => {
-  const [selectedWorkflow, setSelectedWorkflow] = useState<RobotsWorkflow>(
+  const [selectedWorkflow, setSelectedWorkflow] = useState<RobotsRunnableWorkflow>(
     initialWorkflow ?? DEFAULT_ROBOTS_WORKFLOW
   );
   const [values, setValues] = useState<Record<string, unknown>>({});
   /** The workflow the confirm step is for, so a workflow that changes under it leaves the step. */
-  const [confirmedWorkflow, setConfirmedWorkflow] = useState<RobotsWorkflow | undefined>();
+  const [confirmedWorkflow, setConfirmedWorkflow] = useState<RobotsRunnableWorkflow | undefined>();
 
   // One context object for all three consumers — which fields render, which are validated, and
   // which are sent. Sharing it is the point: a field hidden because of what the asset is must not
   // then be validated or sent, exactly as with the `showWhen`s that key off another field.
   const context = useMemo<RobotsAssetContext>(
-    () => ({ hasCaptions: captions.length > 0, isAudioOnly, duration }),
-    [captions.length, isAudioOnly, duration]
+    () => ({ hasCaptions: captions.length > 0, isAudioOnly, duration, captions, runningOnV0 }),
+    [captions, isAudioOnly, duration, runningOnV0]
   );
 
   // Derived rather than trusted, because the asset kind can arrive after the choice was made.
@@ -189,7 +195,7 @@ const RobotsRunModal: FC<RobotsRunModalProps> = ({
                     value={workflow}
                     onChange={(event) =>
                       setSelectedWorkflow(
-                        (event.target as HTMLSelectElement).value as RobotsWorkflow
+                        (event.target as HTMLSelectElement).value as RobotsRunnableWorkflow
                       )
                     }>
                     {ROBOTS_CATEGORIES.map((category) => (

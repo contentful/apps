@@ -70,7 +70,7 @@ const apiThatFailsWith = (error: unknown) => ({
  */
 const apiThatReturns = (jobs: unknown[], details: Record<string, unknown> = {}) => ({
   listRobotsJobs: vi.fn(async () => ({ data: jobs })),
-  getRobotsJob: vi.fn(async (_workflow: string, jobId: string) => ({
+  getRobotsJob: vi.fn(async ({ id: jobId }: { id: string }) => ({
     data: details[jobId] ?? (jobs as any[]).find((job) => job.id === jobId),
   })),
   listRobotsDirectives: vi.fn(async () => ({ data: [] })),
@@ -361,7 +361,7 @@ describe('RobotsPanel spend guards', () => {
 
     await waitFor(() =>
       expect(screen.getByRole('tooltip')).toHaveTextContent(
-        /Run a Summarize workflow to apply its title, description and tags/
+        /Run Summarize or Analyze structure to apply a title, description and tags/
       )
     );
   });
@@ -370,6 +370,18 @@ describe('RobotsPanel spend guards', () => {
     renderPanel({
       muxApi: apiThatReturns([]),
       value: value({ robotsOutputs: { summarize: { jobId: 'rjob_1', title: 'A title' } } }),
+    });
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Apply summary' })).toBeEnabled()
+    );
+  });
+
+  it('enables apply once only an Analyze structure summary has been stored', async () => {
+    renderPanel({
+      muxApi: apiThatReturns([]),
+      value: value({
+        robotsOutputs: { analyzeStructure: { jobId: 'rjob_1', summary: 'A summary' } },
+      }),
     });
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'Apply summary' })).toBeEnabled()
@@ -467,7 +479,7 @@ describe('RobotsPanel field writes', () => {
     const resync = vi.fn(async () => undefined);
     const muxApi = {
       listRobotsJobs: vi.fn(async () => ({ data: [{ ...done }, { ...running }] })),
-      getRobotsJob: vi.fn(async (_workflow: string, id: string) => ({ data: { ...done, id } })),
+      getRobotsJob: vi.fn(async ({ id }: { id: string }) => ({ data: { ...done, id } })),
       listRobotsDirectives: vi.fn(async () => ({ data: [] })),
       listRobotsDirectiveRuns: vi.fn(async () => ({ data: [] })),
     };
@@ -1453,7 +1465,9 @@ describe('RobotsPanel — the fields the list leaves out', () => {
     renderPanel({ muxApi, updateField });
 
     await waitFor(() =>
-      expect(muxApi.getRobotsJob).toHaveBeenCalledWith('summarize', 'rjob_theirs')
+      expect(muxApi.getRobotsJob).toHaveBeenCalledWith(
+        expect.objectContaining({ workflow: 'summarize', id: 'rjob_theirs' })
+      )
     );
     expect(await screen.findByText('7')).toBeInTheDocument();
     await waitFor(() => expect(read()?.robotsJobs?.[0]).toMatchObject({ units_consumed: 7 }));
@@ -1600,7 +1614,9 @@ describe('RobotsPanel — Units past the detail window', () => {
     await settled(muxApi);
     // The ceiling held: 25 terminal jobs on the asset, 20 detail reads, never the oldest.
     expect(muxApi.getRobotsJob).toHaveBeenCalledTimes(20);
-    expect(muxApi.getRobotsJob).not.toHaveBeenCalledWith('summarize', 'rjob_old');
+    expect(muxApi.getRobotsJob).not.toHaveBeenCalledWith(
+      expect.objectContaining({ workflow: 'summarize', id: 'rjob_old' })
+    );
 
     // And the row it never reached says which kind of blank it is.
     expect(screen.getByTestId('robots-load-units-rjob_old')).toHaveTextContent('Not loaded');
@@ -1628,7 +1644,9 @@ describe('RobotsPanel — Units past the detail window', () => {
     await waitFor(() => expect(screen.getByTestId('robots-units-rjob_old')).toHaveTextContent('9'));
     // Exactly one more request than the bounded pass made: volume tracks interest, not history.
     expect(muxApi.getRobotsJob).toHaveBeenCalledTimes(21);
-    expect(muxApi.getRobotsJob).toHaveBeenCalledWith('summarize', 'rjob_old');
+    expect(muxApi.getRobotsJob).toHaveBeenCalledWith(
+      expect.objectContaining({ workflow: 'summarize', id: 'rjob_old' })
+    );
   });
 
   it('keeps what the output modal already paid for', async () => {
@@ -1925,7 +1943,7 @@ describe("RobotsPanel — polling between a directive's workflows", () => {
     let jobs: unknown[] = [finishedJob];
     const muxApi = {
       listRobotsJobs: vi.fn(async () => ({ data: jobs.map((job) => ({ ...(job as object) })) })),
-      getRobotsJob: vi.fn(async (_workflow: string, id: string) => ({
+      getRobotsJob: vi.fn(async ({ id }: { id: string }) => ({
         data: jobs.find((job: any) => job.id === id),
       })),
       listRobotsDirectives: vi.fn(async () => ({ data: [] })),
@@ -2451,7 +2469,7 @@ describe('RobotsPanel — a finished job reaching the rest of the editor', () =>
       listRobotsJobs: vi.fn(async () => ({
         data: [{ id: 'rjob_edit', workflow: 'edit-captions', status, created_at: nowSeconds }],
       })),
-      getRobotsJob: vi.fn(async (_workflow: string, id: string) => ({
+      getRobotsJob: vi.fn(async ({ id }: { id: string }) => ({
         data: { id, workflow: 'edit-captions', status },
       })),
       listRobotsDirectives: vi.fn(async () => ({ data: [] })),
@@ -2514,8 +2532,8 @@ describe('RobotsPanel — what the run form knows about the asset', () => {
     await waitFor(() => expect(screen.getByText('Run a workflow')).toBeInTheDocument());
     await userEvent.click(screen.getByRole('button', { name: 'Run a workflow' }));
 
-    expect(await workflowOption('find-scenes')).toBeDisabled();
     expect(await workflowOption('find-best-thumbnails')).toBeDisabled();
+    expect(await workflowOption('analyze-structure')).toBeEnabled();
   });
 
   it('does not invent a restriction for a video whose kind is not recorded', async () => {
@@ -2524,9 +2542,11 @@ describe('RobotsPanel — what the run form knows about the asset', () => {
     await waitFor(() => expect(screen.getByText('Run a workflow')).toBeInTheDocument());
     await userEvent.click(screen.getByRole('button', { name: 'Run a workflow' }));
 
-    expect(await workflowOption('find-scenes')).toBeEnabled();
-    await userEvent.selectOptions(await screen.findByLabelText('Workflow'), 'find-scenes');
-    expect((screen.getByLabelText('Workflow') as HTMLSelectElement).value).toBe('find-scenes');
+    expect(await workflowOption('analyze-structure')).toBeEnabled();
+    await userEvent.selectOptions(await screen.findByLabelText('Workflow'), 'analyze-structure');
+    expect((screen.getByLabelText('Workflow') as HTMLSelectElement).value).toBe(
+      'analyze-structure'
+    );
   });
 
   it('tells the run form how long the video is, so a scope past its end is refused', async () => {
@@ -4145,7 +4165,7 @@ describe('RobotsPanel — a directive run started outside Contentful', () => {
   ) => ({
     listRobotsJobs: vi.fn(async () => ({ data: importedJobs() })),
     // The list is a summary; the single-job GET is the only place a job names its run.
-    getRobotsJob: vi.fn(async (_workflow: string, id: string) => ({
+    getRobotsJob: vi.fn(async ({ id }: { id: string }) => ({
       data: { ...importedJobs().find((job) => job.id === id), directive: named },
     })),
     listRobotsDirectives: vi.fn(async () => ({
@@ -4674,5 +4694,204 @@ describe('RobotsPanel — outputs of jobs started elsewhere', () => {
     renderPanel({ muxApi, updateField: stored.updateField, value: stored.value, isActive: false });
 
     await waitFor(() => expect(stored.read()?.robotsOutputs?.summarize?.jobId).toBe('rjob_theirs'));
+  });
+});
+
+/**
+ * v0 and v1 side by side (ADR-0017). New runs go to v1; a job or directive keeps the version that
+ * created it, and the other version answers 404 about it.
+ */
+describe('RobotsPanel — Robots v0 and v1 side by side', () => {
+  beforeEach(() => {
+    resetRobotsCapabilityCache();
+    vi.clearAllMocks();
+  });
+
+  const v0Directive = {
+    id: 'drv_old',
+    name: 'Summ and Moderate',
+    _links: { self: { href: '/robots/v0/directives/drv_old' } },
+  };
+  const v1Directive = {
+    id: 'drv_new',
+    name: 'Summ and Moderate v1',
+    _links: { self: { href: '/robots/v1/directives/drv_new' } },
+  };
+
+  it('tells a 409 that means "not ready yet" apart from a run already going', async () => {
+    const muxApi = {
+      ...apiThatReturns([]),
+      createRobotsJob: vi.fn(async () => {
+        throw new MuxApiError(
+          'No ready subtitle track available for this asset',
+          409,
+          'track_not_ready'
+        );
+      }),
+    };
+    const store = renderWithStore(value(), { muxApi });
+
+    await runSummarize();
+    await waitFor(() =>
+      expect(sdk.notifier.warning).toHaveBeenCalledWith(
+        'No ready subtitle track available for this asset'
+      )
+    );
+    expect(sdk.notifier.warning).not.toHaveBeenCalledWith(
+      'This workflow is already running on this video with the same settings.'
+    );
+    await waitFor(() => expect(store.read()?.robotsPendingCreates).toBeUndefined());
+  });
+
+  it('still reads a v1 `conflict` as the same run already going', async () => {
+    const muxApi = {
+      ...apiThatReturns([]),
+      createRobotsJob: vi.fn(async () => {
+        throw new MuxApiError(
+          'A job with the same workflow is already in progress',
+          409,
+          'conflict'
+        );
+      }),
+    };
+    renderWithStore(value(), { muxApi });
+
+    await runSummarize();
+    await waitFor(() =>
+      expect(sdk.notifier.warning).toHaveBeenCalledWith(
+        'This workflow is already running on this video with the same settings.'
+      )
+    );
+  });
+
+  it('cancels a job through the version its links name', async () => {
+    const running = {
+      id: 'rjob_v0',
+      workflow: 'summarize',
+      status: 'processing',
+      created_at: Math.floor(Date.now() / 1000),
+      _links: { self: { href: '/robots/v0/jobs/summarize/rjob_v0' } },
+    };
+    const muxApi = {
+      ...apiThatReturns([running]),
+      cancelRobotsJob: vi.fn(async () => ({ data: running })),
+    };
+    renderPanel({ muxApi });
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Cancel' }));
+    await waitFor(() =>
+      expect(muxApi.cancelRobotsJob).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'rjob_v0', _links: running._links })
+      )
+    );
+  });
+
+  it('warns before a v1 run next to a v0 job of the same workflow, which Mux does not refuse', async () => {
+    const runningJob = (version: 'v0' | 'v1') => ({
+      id: `rjob_${version}`,
+      workflow: 'summarize',
+      status: 'processing',
+      created_at: Math.floor(Date.now() / 1000),
+      _links: { self: { href: `/robots/${version}/jobs/summarize/rjob_${version}` } },
+    });
+    const confirmSummarize = async () => {
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: 'Run a workflow' })).toBeEnabled()
+      );
+      fireEvent.click(screen.getByRole('button', { name: 'Run a workflow' }));
+      fireEvent.click(await screen.findByRole('button', { name: 'Continue' }));
+      await screen.findByRole('button', { name: 'Run Summarize' });
+    };
+
+    const { unmount } = renderPanel({ muxApi: apiThatReturns([runningJob('v0')]) });
+    await screen.findByRole('button', { name: 'Cancel' });
+    await confirmSummarize();
+    expect(screen.getByTestId('robots-confirm-warning')).toHaveTextContent(
+      'Summarize is still running on Robots v0'
+    );
+    unmount();
+
+    // A v1 duplicate is Mux's to refuse, with a 409.
+    renderPanel({ muxApi: apiThatReturns([runningJob('v1')]) });
+    await screen.findByRole('button', { name: 'Cancel' });
+    await confirmSummarize();
+    expect(screen.queryByTestId('robots-confirm-warning')).toBeNull();
+  });
+
+  it('marks the directives still on v0, and asks for a v1 copy', async () => {
+    renderPanel({
+      muxApi: {
+        ...apiThatReturns([]),
+        listRobotsDirectives: vi.fn(async () => ({ data: [v0Directive, v1Directive] })),
+      },
+    });
+
+    const note = await screen.findByTestId('robots-v0-directives');
+    expect(note).toHaveTextContent('“Summ and Moderate” runs on Robots v0');
+    expect(note).not.toHaveTextContent('Summ and Moderate v1');
+    const options = Array.from(
+      (screen.getByLabelText('Directive') as HTMLSelectElement).options
+    ).map((option) => option.textContent);
+    expect(options).toEqual([
+      'Select a directive',
+      'Summ and Moderate (v0)',
+      'Summ and Moderate v1',
+    ]);
+  });
+
+  it('marks nothing when the listing failed and only configured ids are known', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    renderPanel({
+      muxApi: {
+        ...apiThatReturns([]),
+        listRobotsDirectives: vi.fn(async () => {
+          throw new MuxApiError('Down', 500);
+        }),
+      },
+      defaultDirectiveIds: ['drv_configured'],
+    });
+
+    await waitFor(() =>
+      expect(
+        Array.from((screen.getByLabelText('Directive') as HTMLSelectElement).options).map(
+          (option) => option.textContent
+        )
+      ).toEqual(['Select a directive', 'drv_configured'])
+    );
+    expect(screen.queryByTestId('robots-v0-directives')).not.toBeInTheDocument();
+    consoleError.mockRestore();
+  });
+});
+
+describe('RobotsPanel — jobs Mux deleted', () => {
+  beforeEach(() => {
+    resetRobotsCapabilityCache();
+    vi.clearAllMocks();
+  });
+
+  it('shows the entry’s records and its kept summary, and writes nothing', async () => {
+    const updateField = vi.fn(async () => undefined);
+    renderPanel({
+      muxApi: apiThatReturns([]),
+      updateField,
+      value: value({
+        version: 4,
+        robotsJobs: [
+          { id: 'rjob_old', workflow: 'summarize', status: 'completed', created_at: 1_700_000_000 },
+        ],
+        robotsOutputs: {
+          summarize: { jobId: 'rjob_old', title: 'Kept title', description: 'Kept description' },
+        },
+      }),
+    });
+
+    expect(await screen.findByText('Deleted by Mux')).toBeInTheDocument();
+    expect(screen.queryByText(/No Robots jobs have run/)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'View output' }));
+    expect(await screen.findByText('Kept title')).toBeInTheDocument();
+    expect(screen.getByText(/no longer has this one/)).toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: 'Raw JSON' })).not.toBeInTheDocument();
+    expect(updateField).not.toHaveBeenCalled();
   });
 });

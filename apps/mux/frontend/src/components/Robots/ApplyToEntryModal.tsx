@@ -22,13 +22,16 @@ import {
   formatFieldValue,
   matchesGeneratedValue,
   preferredTargetFieldId,
+  summaryToApply,
   wouldOverwrite,
 } from '../../util/robotsEntryMapping';
+import { workflowLabel } from '../../util/robotsCatalog';
 import { RobotsOutputs } from '../../util/robotsTypes';
 import FieldModal from '../FieldModal';
 
 /**
- * "Apply summary" — and the mapping UI, in one dialog.
+ * "Apply summary" — and the mapping UI, in one dialog. The summary is the newest of Summarize's
+ * and Analyze Structure's, and the dialog names which.
  *
  * The mapping is not configured anywhere: the target dropdown is pre-filled by convention and
  * filtered to type-compatible fields, and the generated value sits beside the current one so the
@@ -68,6 +71,7 @@ const ApplyToEntryModal: FC<ApplyToEntryModalProps> = ({ isShown, onClose, sdk, 
     () => (isShown ? buildOutputCandidates(sdk, outputs) : []),
     [isShown, sdk, outputs]
   );
+  const source = summaryToApply(outputs)?.workflow;
   const fieldOptions = useMemo(() => (isShown ? entryFieldOptions(sdk) : []), [isShown, sdk]);
   const fieldNames = useMemo(
     () => Object.fromEntries(fieldOptions.map((field) => [field.id, field.name])),
@@ -128,11 +132,13 @@ const ApplyToEntryModal: FC<ApplyToEntryModalProps> = ({ isShown, onClose, sdk, 
           <Modal.Content>
             {candidates.length === 0 ? (
               <Note variant="neutral">
-                There is no generated summary to apply yet. Run the Summarize workflow first.
+                There is no generated summary to apply yet. Run Summarize or Analyze structure
+                first.
               </Note>
             ) : (
               <>
                 <Paragraph>
+                  {source && <>From the latest {workflowLabel(source)} run. </>}
                   Pick a target field for each output — leave it on <strong>Do not apply</strong> to
                   skip one. Writing to the <strong>{locale}</strong> locale. Nothing is saved to Mux
                   — these are your own entry fields, and the change stays a draft until you publish.

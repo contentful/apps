@@ -71,7 +71,7 @@ export function useRobotsJobList({
   /**
    * Jobs this session created that the list has not caught up with yet.
    *
-   * `POST` answers before `GET /robots/v0/jobs` lists the job, so a refresh already in flight when
+   * `POST` answers before the job list includes the job, so a refresh already in flight when
    * Run was clicked resolves afterwards and its wholesale replace would drop the optimistic row —
    * leaving nothing non-terminal for the poll effect to arm on.
    */
