@@ -4,7 +4,7 @@
   "type": "module",
   "engines": {
     "node": ">=24",
-    "npm": ">=8.19.4"
+    "npm": ">=11.10.0"
   },
   "devDependencies": {
     "@sentry/cli": "^2.14.4",
