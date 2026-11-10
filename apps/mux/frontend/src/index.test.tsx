@@ -8,6 +8,8 @@ import { vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { MuxContentfulObject } from './util/types';
+import PreviewPlayer, { type PreviewPlayerProps } from './components/PreviewPlayer';
+import { MuxApiService } from './util/muxApi';
 
 vi.mock('contentful-management', () => ({
   createClient: vi.fn(() => ({
@@ -1122,7 +1124,8 @@ describe('a video that loses its playback IDs mid-session', () => {
 
     // Left behind, the stale id sits beside equally stale tokens. Nothing renders it today
     // because `isPlayerReady` re-checks the value, but the two must not be allowed to disagree.
-    expect(app.state.playerPlaybackId).toBeUndefined();
+    expect(app.getPreviewPlaybackId()).toBeUndefined();
+    expect(app.state.tokenPlaybackId).toBeUndefined();
     expect(app.state.playbackToken).toBeUndefined();
     expect(app.state.drmLicenseToken).toBeUndefined();
   });
@@ -1131,7 +1134,7 @@ describe('a video that loses its playback IDs mid-session', () => {
     const { warning, app } = await mountWithAsset([{ id: 'public-playback-id', policy: 'public' }]);
 
     expect(warning).not.toHaveBeenCalled();
-    expect(app.state.playerPlaybackId).toBe('public-playback-id');
+    expect(app.getPreviewPlaybackId()).toBe('public-playback-id');
   });
 });
 
@@ -1402,5 +1405,133 @@ describe('the tab strip', () => {
     // lines of CSS no element carried, which is how the mask went unexamined for so long.
     expect(declarations).not.toMatch(/tabs-scroll-button/);
     expect(declarations).not.toMatch(/tabs-container/);
+  });
+});
+
+/**
+ * The publish function swaps playback IDs server-side and rewrites the field before the browser
+ * resyncs, so the field editor sees the new value before it has new tokens.
+ */
+describe('the preview player while a publish swaps the playback policy', () => {
+  const SIGNING_INSTALLATION = {
+    ...SDK_MOCK.parameters.installation,
+    muxEnableSignedUrls: true,
+    muxSigningKeyId: 'signing-key-id',
+    muxSigningKeyPrivate: 'signing-key-private',
+  };
+
+  const tokensFor = (playbackId: string) => ({
+    playbackToken: `playback-token-for-${playbackId}`,
+    posterToken: `poster-token-for-${playbackId}`,
+    storyboardToken: `storyboard-token-for-${playbackId}`,
+  });
+
+  const mount = async (initial: Partial<MuxContentfulObject>) => {
+    let stored: any = { version: 5, assetId: 'asset-test-123', ready: true, ...initial };
+    let changeField: (value: any) => void = () => undefined;
+    const getSignedUrlTokens = vi.fn(async (playbackId: string) => tokensFor(playbackId));
+    const getAsset = vi.fn(async () => ({
+      data: {
+        id: 'asset-test-123',
+        status: 'ready',
+        playback_ids: [
+          stored.playbackId && { id: stored.playbackId, policy: 'public' },
+          stored.signedPlaybackId && { id: stored.signedPlaybackId, policy: 'signed' },
+        ].filter(Boolean),
+        tracks: [],
+      },
+    }));
+    const defaults = await MuxApiService.getInstance(undefined as any, undefined as any);
+    vi.mocked(MuxApiService.getInstance).mockResolvedValueOnce({
+      ...defaults,
+      getAsset,
+      getSignedUrlTokens,
+    } as any);
+    const ref = React.createRef<App>();
+    render(
+      <App
+        ref={ref}
+        sdk={
+          {
+            ...SDK_MOCK,
+            parameters: { ...SDK_MOCK.parameters, installation: SIGNING_INSTALLATION },
+            field: {
+              ...SDK_MOCK.field,
+              getValue: () => stored,
+              setValue: (next: any) => {
+                stored = next;
+                return Promise.resolve();
+              },
+              onValueChanged: (listener: (value: any) => void) => {
+                changeField = listener;
+                return () => undefined;
+              },
+            },
+          } as any
+        }
+      />
+    );
+    const app = ref.current as App;
+    await wait(50);
+
+    const rendered = () =>
+      vi.mocked(PreviewPlayer).mock.calls.map(([props]) => props as PreviewPlayerProps);
+    const publishRewritesField = async (next: Partial<MuxContentfulObject>) => {
+      stored = { ...stored, playbackId: undefined, signedPlaybackId: undefined, ...next };
+      vi.mocked(PreviewPlayer).mockClear();
+      act(() => changeField(stored));
+      await wait(20);
+    };
+    return { app, getSignedUrlTokens, rendered, publishRewritesField };
+  };
+
+  it('never loads the deleted signed ID once the field holds the new public one', async () => {
+    const { rendered, publishRewritesField } = await mount({ signedPlaybackId: 'signed-id' });
+    expect(rendered().at(-1)?.tokens?.playback).toBe('playback-token-for-signed-id');
+
+    await publishRewritesField({ playbackId: 'public-id' });
+
+    expect(rendered().length).toBeGreaterThan(0);
+    for (const props of rendered()) {
+      expect(props.playbackId).toBe('public-id');
+      expect(props.tokens).toBeUndefined();
+    }
+  });
+
+  it('plays the new signed ID with its own tokens, without waiting for a resync', async () => {
+    const { rendered, publishRewritesField } = await mount({ playbackId: 'public-id' });
+
+    await publishRewritesField({ signedPlaybackId: 'signed-id' });
+
+    expect(rendered().length).toBeGreaterThan(0);
+    for (const props of rendered()) {
+      expect(props.playbackId).toBe('signed-id');
+      expect(props.tokens?.playback).toBe('playback-token-for-signed-id');
+    }
+  });
+
+  it('drops tokens that arrive for a signed ID the field no longer holds', async () => {
+    const { getSignedUrlTokens, rendered, publishRewritesField } = await mount({
+      playbackId: 'public-id',
+    });
+    let releaseStale: () => void = () => undefined;
+    getSignedUrlTokens.mockImplementationOnce(
+      (playbackId: string) =>
+        new Promise((resolve) => {
+          releaseStale = () => resolve(tokensFor(playbackId));
+        })
+    );
+
+    await publishRewritesField({ signedPlaybackId: 'stale-signed-id' });
+    await publishRewritesField({ signedPlaybackId: 'signed-id' });
+    releaseStale();
+    await wait(20);
+
+    const last = rendered().at(-1);
+    expect(last?.playbackId).toBe('signed-id');
+    expect(last?.tokens?.playback).toBe('playback-token-for-signed-id');
+    for (const props of rendered()) {
+      expect(props.tokens?.playback).not.toBe('playback-token-for-stale-signed-id');
+    }
   });
 });
