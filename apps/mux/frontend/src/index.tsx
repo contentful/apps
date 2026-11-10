@@ -229,6 +229,8 @@ export class App extends React.Component<AppProps, AppState> {
   private publishGateTimer?: ReturnType<typeof setTimeout>;
   /** Tracks the last publish we reacted to, so one publish is handled once. */
   private lastHandledPublishedAt?: string;
+  /** The latest signed ID tokens were requested for; a slower response for an older one loses. */
+  private requestedTokenPlaybackId?: string;
   private isUnmounted = false;
   /**
    * Directives attached to an upload started in this session, and whether we have spoken about
@@ -275,10 +277,6 @@ export class App extends React.Component<AppProps, AppState> {
         (!muxAccessTokenId || !muxAccessTokenSecret) &&
         "It doesn't look like you've specified your Mux Access Token ID or Secret in the extension configuration.",
       errorShowResetAction: false,
-      playerPlaybackId:
-        field && ('playbackId' in field || 'signedPlaybackId' in field || 'drmPlaybackId' in field)
-          ? field.playbackId || field.signedPlaybackId || field.drmPlaybackId
-          : undefined,
       modalAssetConfigurationVisible: false,
       file: null,
       showMuxUploaderUI: false,
@@ -592,12 +590,8 @@ export class App extends React.Component<AppProps, AppState> {
         if (this.isUsingDRM() && this.state.value.drmPlaybackId) {
           // Load DRM tokens for external player link
           await this.setSignedPlayback(this.state.value.drmPlaybackId, true);
-          this.setState({ playerPlaybackId: this.state.value.drmPlaybackId });
         } else if (this.isUsingSigned() && this.state.value.signedPlaybackId) {
           await this.setSignedPlayback(this.state.value.signedPlaybackId);
-          this.setState({ playerPlaybackId: this.state.value.signedPlaybackId });
-        } else if (this.state.value.playbackId) {
-          this.setState({ playerPlaybackId: this.state.value.playbackId });
         }
         return;
       }
@@ -623,6 +617,19 @@ export class App extends React.Component<AppProps, AppState> {
     if (this.muxApi && this.state.value?.assetId && !this.state.initialResyncDone) {
       this.resync({ silent: true });
       this.setState({ initialResyncDone: true });
+    }
+
+    // The publish function rewrites the field with a new signed ID before the browser resyncs,
+    // and a resync is not guaranteed to follow every external change.
+    const previewPlaybackId = this.getPreviewPlaybackId();
+    if (
+      this.muxApi &&
+      this.isUsingSigned() &&
+      !this.isUsingDRM() &&
+      previewPlaybackId &&
+      previewPlaybackId !== this.requestedTokenPlaybackId
+    ) {
+      void this.setSignedPlayback(previewPlaybackId);
     }
   }
 
@@ -660,14 +667,19 @@ export class App extends React.Component<AppProps, AppState> {
     return this.state.value && this.state.value.drmPlaybackId ? true : false;
   };
 
+  getPreviewPlaybackId = (): string | undefined =>
+    this.state.value?.playbackId || this.state.value?.signedPlaybackId || undefined;
+
+  hasTokensFor = (playbackId: string): boolean =>
+    !this.state.isTokenLoading &&
+    this.state.tokenPlaybackId === playbackId &&
+    !!this.state.playbackToken;
+
   isPlayerReady = (): boolean => {
-    if (!this.state.playerPlaybackId) return false;
-
-    const isPublicReady = !!this.state.value?.ready && !!this.state.value?.playbackId;
-    const isSignedReady =
-      this.isUsingSigned() && !this.state.isTokenLoading && !!this.state.playbackToken;
-
-    return isPublicReady || isSignedReady;
+    const playbackId = this.getPreviewPlaybackId();
+    if (!playbackId) return false;
+    if (playbackId === this.state.value?.playbackId) return !!this.state.value?.ready;
+    return this.hasTokensFor(playbackId);
   };
 
   getSwitchCheckedState = (): boolean => {
@@ -921,6 +933,7 @@ export class App extends React.Component<AppProps, AppState> {
   };
 
   setSignedPlayback = async (signedPlaybackId: string, isDRM = false) => {
+    this.requestedTokenPlaybackId = signedPlaybackId;
     const { muxSigningKeyId, muxSigningKeyPrivate } = this.props.sdk.parameters
       .installation as InstallationParams;
     if (!(muxSigningKeyId && muxSigningKeyPrivate)) {
@@ -934,8 +947,10 @@ export class App extends React.Component<AppProps, AppState> {
     }
     const { playbackToken, posterToken, storyboardToken, licenseToken } =
       await this.fetchSignedTokens(signedPlaybackId, isDRM);
+    if (this.requestedTokenPlaybackId !== signedPlaybackId) return;
 
     this.setState({
+      tokenPlaybackId: signedPlaybackId,
       playbackToken,
       posterToken,
       storyboardToken,
@@ -1102,25 +1117,22 @@ export class App extends React.Component<AppProps, AppState> {
         };
       });
 
-      // The `else` matters: playback IDs can be deleted at Mux — by hand, or by a `moderate`
-      // workflow configured with `on_flagged: delete_playback_ids` — and leaving the last known
-      // id behind keeps a stale token beside it.
-      const nextPlayerPlaybackId =
-        drmPlayback?.id || publicPlayback?.id || signedPlayback?.id || undefined;
+      const hasPlaybackIdNow = !!(drmPlayback || publicPlayback || signedPlayback);
 
       // The player vanishing mid-session needs saying out loud. A `moderate` run started from the
       // Robots tab can delete every playback ID, and the poll picks that up silently — the notice
       // in the editor explains the end state, but only a toast connects it to what just happened.
       const hadPlaybackId = hasAnyPlaybackId(currentValue);
-      if (hadPlaybackId && !nextPlayerPlaybackId) {
+      if (hadPlaybackId && !hasPlaybackIdNow) {
         this.props.sdk.notifier.warning(
           'This video no longer has any playback IDs, so it cannot be played. Request a new one in the Playback tab, or add one in Mux and resync.'
         );
       }
 
-      this.setState({ playerPlaybackId: nextPlayerPlaybackId });
-      if (!nextPlayerPlaybackId) {
+      if (!hasPlaybackIdNow) {
+        this.requestedTokenPlaybackId = undefined;
         this.setState({
+          tokenPlaybackId: undefined,
           playbackToken: undefined,
           posterToken: undefined,
           storyboardToken: undefined,
@@ -1746,6 +1758,7 @@ export class App extends React.Component<AppProps, AppState> {
       const hasPlaybackId = hasAnyPlaybackId(this.state.value);
 
       const showPlayer = this.isPlayerReady();
+      const previewPlaybackId = this.getPreviewPlaybackId();
 
       // Read from the stored value, so this costs no request and is known before the Robots tab
       // has fetched anything.
@@ -1879,8 +1892,8 @@ export class App extends React.Component<AppProps, AppState> {
             {showPlayer && (
               <section className="player" style={this.getPlayerAspectRatio()}>
                 <PreviewPlayer
-                  key={`${this.state.playerPlaybackId}-${this.state.playerReloadCount}`}
-                  playbackId={this.state.playerPlaybackId!}
+                  key={`${previewPlaybackId}-${this.state.playerReloadCount}`}
+                  playbackId={previewPlaybackId!}
                   streamType={this.getPlayerType()}
                   customDomain={muxDomain}
                   audio={this.state.value.audioOnly}
