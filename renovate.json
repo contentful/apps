@@ -1,6 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["local>contentful/renovate-config:defaultNxMonorepo"],
+  "minimumReleaseAge": "7 days",
   "packageRules": [
     {
       "matchManagers": ["npm"],
@@ -31,13 +32,15 @@
       "matchManagers": ["npm"],
       "matchDepTypes": ["dependencies"],
       "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "production dependencies"
+      "groupName": "production dependencies",
+      "automerge": false
     },
     {
       "matchManagers": ["npm"],
       "matchDepTypes": ["devDependencies"],
       "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "dev dependencies"
+      "groupName": "dev dependencies",
+      "automerge": false
     }
   ]
 }

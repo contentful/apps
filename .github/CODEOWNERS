@@ -2,6 +2,13 @@
 
 * @contentful/group-applied-ai-solutions @contentful/team-10-pines
 
+# package manifests and CI config are owned by the default owners
+
+**/package.json @contentful/group-applied-ai-solutions @contentful/team-10-pines
+**/package-lock.json @contentful/group-applied-ai-solutions @contentful/team-10-pines
+**/.npmrc @contentful/group-applied-ai-solutions @contentful/team-10-pines
+/.circleci/ @contentful/group-applied-ai-solutions @contentful/team-10-pines
+
 # team tundra co-owns examples and function examples
 
 examples @contentful/group-applied-ai-solutions @contentful/team-10-pines
@@ -15,8 +22,3 @@ examples/function-potterdb-rest-api @contentful/team-entity-architecture
 examples/native-external-references-mockshop @contentful/team-entity-architecture
 examples/native-external-references-tmdb @contentful/team-entity-architecture
 function-examples/external-references @contentful/team-entity-architecture
-
-# package.json and package-lock.json should be unowned so that Renovate can automatically update dependencies
-
-**/package.json
-**/package-lock.json
