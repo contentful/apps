@@ -316,8 +316,8 @@ class EntryCloner {
 
     const titleField = contentType.fields.find((field) => field.id === contentType.displayField);
 
-    // Update title field for the clone
-    if (titleField && entryFields[titleField.id]) {
+    // Update title field for the clone. An empty clone text keeps names unchanged.
+    if (this.parameters.cloneText?.trim() && titleField && entryFields[titleField.id]) {
       const titleFieldValues = entryFields[titleField.id];
       for (const locale in titleFieldValues) {
         const title = titleFieldValues[locale];

@@ -71,19 +71,24 @@ describe('Config Screen component', () => {
     });
   });
 
-  it('shows a toast error if the clone text is not set', async () => {
+  it('saves with an empty clone text and disables the position options', async () => {
     const user = userEvent.setup();
     render(<ConfigScreen />);
     expect(await screen.findByLabelText(/Clone text/i)).toBeTruthy();
 
     const input = screen.getByLabelText(/Clone text/i);
-    user.clear(input);
-    await act(async () => {
-      await saveAppInstallation();
-    });
+    await user.clear(input);
 
-    expect(mockSdk.notifier.error).toHaveBeenCalledWith(
-      'The app configuration was not saved. Please try again.'
-    );
+    expect(screen.getByRole('radio', { name: 'Before' })).toHaveProperty('disabled', true);
+    expect(screen.getByRole('radio', { name: 'After' })).toHaveProperty('disabled', true);
+
+    await act(async () => {
+      const result = await saveAppInstallation();
+      expect(result).toEqual({
+        parameters: { cloneText: '', cloneTextBefore: true, automaticRedirect: true },
+        targetState: { EditorInterface: {} },
+      });
+    });
+    expect(mockSdk.notifier.error).not.toHaveBeenCalled();
   });
 });
