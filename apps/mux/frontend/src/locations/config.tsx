@@ -10,7 +10,7 @@ import {
   ContentType,
   CompatibleFields,
   SelectedFields,
-} from '@contentful/dam-app-base';
+} from '../util/contentTypeFields';
 import MuxLogoSvg from '../images/mux-logo.svg';
 import './config.css';
 import ApiClient from '../util/apiClient';

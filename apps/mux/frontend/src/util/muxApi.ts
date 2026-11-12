@@ -215,7 +215,6 @@ export class MuxApiService {
       response: { body },
     } = await this.cmaClient.appActionCall.createWithResponse(
       {
-        organizationId: this.sdk.ids.organization,
         appDefinitionId,
         appActionId: actionId,
       },
