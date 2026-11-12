@@ -28,9 +28,13 @@ const contentTypes = [
 ];
 
 const makeSdkMock = () => ({
-  space: {
-    getContentTypes: jest.fn().mockResolvedValue({ items: contentTypes }),
-    getEditorInterfaces: jest.fn().mockResolvedValue({ items: [] }),
+  cma: {
+    contentType: {
+      getMany: jest.fn().mockResolvedValue({ items: contentTypes }),
+    },
+    editorInterface: {
+      getMany: jest.fn().mockResolvedValue({ items: [] }),
+    },
   },
   app: {
     setReady: jest.fn(),
@@ -93,7 +97,7 @@ describe('AppConfig', () => {
       apiKey: 'test-api-key',
       maxFiles: 12,
     });
-    sdk.space.getEditorInterfaces.mockResolvedValueOnce({
+    sdk.cma.editorInterface.getMany.mockResolvedValueOnce({
       items: [
         {
           sys: { contentType: { sys: { id: 'ct3' } } },
@@ -126,6 +130,70 @@ describe('AppConfig', () => {
     ].forEach(([labelRe, expected]) => {
       const fieldCheckbox = getByLabelText(labelRe as RegExp) as HTMLInputElement;
       expect(fieldCheckbox.checked).toBe(expected);
+    });
+  });
+
+  describe('with more content types than a single CMA page', () => {
+    // PAGE_SIZE is 1000, so the first page must be full for a second request to happen.
+    const PAGE_SIZE = 1000;
+    const plainContentTypes = Array.from({ length: PAGE_SIZE }, (_, i) => ({
+      sys: { id: `plain-${i}` },
+      name: `Plain ${i}`,
+      fields: [{ id: 'txt', name: 'Text', type: 'Text' }],
+    }));
+    const lateJsonContentType = {
+      sys: { id: 'late-json' },
+      name: 'Late JSON',
+      fields: [{ id: 'payload', name: 'Late payload', type: 'Object' }],
+    };
+    const total = PAGE_SIZE + 1;
+
+    it('lists JSON fields from content types beyond the first page (ES-917)', async () => {
+      const sdk = makeSdkMock();
+      sdk.cma.contentType.getMany
+        .mockResolvedValueOnce({ items: plainContentTypes, total })
+        .mockResolvedValueOnce({ items: [lateJsonContentType], total });
+
+      const { getByLabelText } = renderComponent(sdk);
+
+      await waitFor(() => getByLabelText(/Late payload/));
+      expect(sdk.cma.contentType.getMany).toHaveBeenCalledTimes(2);
+      expect(sdk.cma.contentType.getMany).toHaveBeenNthCalledWith(1, {
+        query: { limit: PAGE_SIZE, skip: 0 },
+      });
+      expect(sdk.cma.contentType.getMany).toHaveBeenNthCalledWith(2, {
+        query: { limit: PAGE_SIZE, skip: PAGE_SIZE },
+      });
+    });
+
+    it('restores selected fields from editor interfaces beyond the first page', async () => {
+      const sdk = makeSdkMock();
+      sdk.cma.contentType.getMany.mockResolvedValueOnce({ items: [lateJsonContentType] });
+
+      const fillerEditorInterfaces = Array.from({ length: PAGE_SIZE }, (_, i) => ({
+        sys: { contentType: { sys: { id: `plain-${i}` } } },
+        controls: [],
+      }));
+      sdk.cma.editorInterface.getMany
+        .mockResolvedValueOnce({ items: fillerEditorInterfaces, total })
+        .mockResolvedValueOnce({
+          items: [
+            {
+              sys: { contentType: { sys: { id: 'late-json' } } },
+              controls: [{ fieldId: 'payload', widgetNamespace: 'app', widgetId: 'some-app' }],
+            },
+          ],
+          total,
+        });
+
+      const { getByLabelText } = renderComponent(sdk);
+
+      await waitFor(() => {
+        expect((getByLabelText(/Late payload/) as HTMLInputElement).checked).toBe(true);
+      });
+      expect(sdk.cma.editorInterface.getMany).toHaveBeenNthCalledWith(2, {
+        query: { limit: PAGE_SIZE, skip: PAGE_SIZE },
+      });
     });
   });
 

@@ -25,6 +25,7 @@ import {
   selectedFieldsToTargetState,
 } from './fields';
 import FieldSelector from './FieldSelector';
+import { fetchAllPages } from './pagination';
 import { toExtensionParameters, toInputParameters } from './parameters';
 
 interface Props {
@@ -101,18 +102,21 @@ export default class AppConfig extends React.Component<Props, State> {
   }
 
   init = async () => {
-    const { space, app, ids } = this.props.sdk;
+    const { app, ids, cma } = this.props.sdk;
 
     app.onConfigure(this.onAppConfigure);
 
-    const [contentTypesResponse, eisResponse, parameters] = await Promise.all([
-      space.getContentTypes() as Promise<CollectionResponse<ContentType>>,
-      space.getEditorInterfaces(),
+    // Both collection endpoints truncate at 100 items by default, so page explicitly.
+    const [contentTypes, editorInterfaces, parameters] = await Promise.all([
+      fetchAllPages<ContentType>(
+        (query) => cma.contentType.getMany({ query }) as Promise<CollectionResponse<ContentType>>
+      ),
+      fetchAllPages<EditorInterface>(
+        (query) =>
+          cma.editorInterface.getMany({ query }) as Promise<CollectionResponse<EditorInterface>>
+      ),
       app.getParameters(),
     ]);
-
-    const contentTypes = (contentTypesResponse as CollectionResponse<ContentType>).items;
-    const editorInterfaces = (eisResponse as CollectionResponse<EditorInterface>).items;
 
     const compatibleFields = getCompatibleFields(contentTypes);
     const filteredContentTypes = contentTypes.filter((ct) => {
