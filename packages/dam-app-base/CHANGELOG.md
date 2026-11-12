@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.6](https://github.com/contentful/apps/compare/@contentful/dam-app-base@4.0.5...@contentful/dam-app-base@4.0.6) (2026-11-12)
+
+### Bug Fixes
+
+- **dam-app-base:** paginate content types and editor interfaces app config [AIS-1248] ([#11433](https://github.com/contentful/apps/issues/11433)) ([417a09e](https://github.com/contentful/apps/commit/417a09eb7bd297fde507ffbb83d772260734878d))
+
 ## [4.0.5](https://github.com/contentful/apps/compare/@contentful/dam-app-base@4.0.4...@contentful/dam-app-base@4.0.5) (2026-04-22)
 
 ### Bug Fixes
