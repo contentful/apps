@@ -43,12 +43,14 @@ describe('fetchAppInstallationParameters', () => {
     });
 
     it('throws a TypeError', async () => {
+      let threw = false;
       try {
-        async () => await fetchAppInstallationParameters(context, cmaClient);
+        await fetchAppInstallationParameters(context, cmaClient);
       } catch (error) {
-        const e = error as Error;
-        expect(e).to.be.a('TypeError');
+        threw = true;
+        expect(error).to.be.instanceOf(TypeError);
       }
+      expect(threw, 'expected fetchAppInstallationParameters to throw TypeError').to.be.true;
     });
   });
 });
