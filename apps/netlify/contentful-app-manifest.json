@@ -6,8 +6,12 @@
       "description": "Fires the configured Netlify build hooks when entries or assets are published or unpublished.",
       "path": "functions/appEventHandler.js",
       "entryFile": "functions/appEventHandler.js",
-      "allowNetworks": ["api.netlify.com"],
-      "accepts": ["appevent.handler"]
+      "allowNetworks": [
+        "api.netlify.com"
+      ],
+      "accepts": [
+        "appevent.handler"
+      ]
     }
   ],
   "actions": []
