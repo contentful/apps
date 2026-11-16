@@ -31,11 +31,10 @@ apps/netlify/
 
 ## Sharp Edges & Invariants
 
-- **Functions replace the old AWS Lambda.** Installation parameters arrive in `context.appInstallationParameters`; there is no signature verification, token exchange or CMA call to maintain.
-- **Functions may only reach `api.netlify.com`** — it is the only entry in `allowNetworks` in `contentful-app-manifest.json`. Add hosts there before calling anything else.
+- **Contentful Functions.** Installation parameters arrive in `context.appInstallationParameters`; there is no signature verification, token exchange or CMA call to maintain.
+- **Functions only reach `api.netlify.com`** — it is the only entry in `allowNetworks` in `contentful-app-manifest.json`. Add hosts there before calling anything else.
 - **Build hook IDs** live in installation parameters (`buildHookIds`, `siteNames`, `events`). `siteNames` and `buildHookIds` are comma-separated and ordered the same way.
 - **`npm run build` builds both** the frontend (`vite build`) and the functions (`build-functions --ci`). `--ci` is required, otherwise the CLI prompts interactively.
-- The `netlifyBuild` action id and its `siteName` parameter, and the `appEventHandler` event subscription, must match the app definition in Contentful.
 
 ## Never / Always
 
