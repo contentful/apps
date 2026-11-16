@@ -18,8 +18,10 @@
       "name": "App Action Function Template",
       "description": "Template for creating custom app actions. Add your own code to define how your app should respond when an action is triggered.",
       "path": "functions/handleBuildHook.js",
-      "entryFile": "functions/handleBuildHook.ts",
-      "allowNetworks": ["api.netlify.com"],
+      "entryFile": "functions/handleBuildHook.js",
+      "allowNetworks": [
+        "api.netlify.com"
+      ],
       "accepts": [
         "appaction.call"
       ]

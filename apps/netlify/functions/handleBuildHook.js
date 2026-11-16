@@ -1,4 +1,4 @@
-import { getBuildHookIds } from "./lib/build-hook";
+import { fireBuildHook, getBuildHookIds } from "./lib/build-hook";
 
 /**
  * This handler is invoked when your App Action is called
