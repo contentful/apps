@@ -2,11 +2,10 @@ import { getBuildHookIds, fireBuildHook, validateAppEvent, getEventDetails } fro
 
 /**
  * Fires the Netlify build hooks configured for an Entry/Asset event
- * (replaces the lambda's POST /app-events).
  *
  * @param {Object} event - The app event to be handled
  * @param {Object} context - Provides the app installation parameters
- * @returns None - App event handlers don't return a response
+ * @returns None
  */
 export const handler = async (event, context) => {
   validateAppEvent(event.body);

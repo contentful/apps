@@ -1,15 +1,6 @@
 {
   "functions": [
     {
-      "id": "appactionCall",
-      "name": "Netlify build action",
-      "description": "Fires the Netlify build hook of the given site.",
-      "path": "functions/appactionCall.js",
-      "entryFile": "functions/appactionCall.js",
-      "allowNetworks": ["api.netlify.com"],
-      "accepts": ["appaction.call"]
-    },
-    {
       "id": "appEventHandler",
       "name": "Netlify build on content events",
       "description": "Fires the configured Netlify build hooks when entries or assets are published or unpublished.",
@@ -19,21 +10,5 @@
       "accepts": ["appevent.handler"]
     }
   ],
-  "actions": [
-    {
-      "id": "netlifyBuild",
-      "name": "Netlify build",
-      "type": "function-invocation",
-      "functionId": "appactionCall",
-      "category": "Custom",
-      "parameters": [
-        {
-          "id": "siteName",
-          "name": "Site name",
-          "type": "Symbol",
-          "required": true
-        }
-      ]
-    }
-  ]
+  "actions": []
 }
