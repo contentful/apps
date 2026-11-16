@@ -6,10 +6,12 @@
   },
   "private": true,
   "devDependencies": {
-    "@contentful/app-scripts": "1.33.2",    
+    "@contentful/app-scripts": "^2.3.0",
     "@testing-library/react": "8.0.4",
     "cross-env": "7.0.3",
-    "identity-obj-proxy": "3.0.0"
+    "identity-obj-proxy": "3.0.0",
+    "@contentful/node-apps-toolkit": "^3.11.1",
+    "@tsconfig/recommended": "1.0.8"
   },
   "dependencies": {
     "@contentful/app-sdk": "4.23.0",
@@ -23,7 +25,7 @@
     "lodash.get": "4.4.2",
     "lodash.uniqby": "4.7.0",
     "prop-types": "15.8.1",
-    "pubnub": "7.6.3",    
+    "pubnub": "7.6.3",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "setimmediate": "^1.0.5",
@@ -41,7 +43,9 @@
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 1VchawWvbIClHuMIyxwR5m --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 537Gb0QlvPjLKQYgLEY2jr --token ${TEST_CMA_TOKEN}",
     "test": "TZ=UTC vitest",
-    "test:ci": "TZ=UTC CI=true vitest"
+    "test:ci": "TZ=UTC CI=true vitest",
+    "create-app-definition": "contentful-app-scripts create-app-definition",
+    "upsert-actions": "contentful-app-scripts upsert-actions --ci --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
   },
   "eslintConfig": {
     "extends": "react-app"
