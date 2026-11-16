@@ -12,7 +12,6 @@ Connects Contentful spaces to Netlify sites. Shows build status in the Entry Sid
 apps/netlify/
 ├── src/                          # React app (standard Vite app with locations/)
 ├── functions/                    # Contentful Functions, bundled into build/functions
-│   ├── appactionCall.js          # App action: fires the build hook of one site
 │   ├── appEventHandler.js        # App event handler: fires build hooks on Entry/Asset publish/unpublish
 │   └── lib/build-hook.js         # Shared logic (hook lookup and filtering, Netlify call)
 ├── contentful-app-manifest.json  # Declares the functions and the `netlifyBuild` action
