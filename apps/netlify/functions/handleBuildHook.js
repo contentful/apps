@@ -1,4 +1,4 @@
-import { fireBuildHook, getBuildHookIds } from "./lib/build-hook";
+import { fireBuildHook, getBuildHookIdFromSiteName, validateParams } from './lib/build-hook';
 
 /**
  * This handler is invoked when your App Action is called
@@ -8,18 +8,17 @@ import { fireBuildHook, getBuildHookIds } from "./lib/build-hook";
  * @returns {Object} The response from your App Action
  */
 export const handler = async (event, context) => {
-  {
-    // actions are for building only one site
-    const [buildHookId] = getBuildHookIds(
-      { siteName: event.body?.siteName },
-      context.appInstallationParameters
-    );
+  validateParams(context.appInstallationParameters);
 
-    if (!buildHookId) {
-      throw new Error('Cannot find build hook');
-    }
+  const [buildHookId] = getBuildHookIdFromSiteName(
+    event.body?.siteName,
+    context.appInstallationParameters
+  );
 
-    await fireBuildHook(buildHookId);
-    return { success: true };
+  if (!buildHookId) {
+    throw new Error('Cannot find build hook');
   }
+
+  await fireBuildHook(buildHookId);
+  return { success: true };
 };

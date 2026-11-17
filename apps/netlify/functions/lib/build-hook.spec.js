@@ -1,7 +1,25 @@
 import { describe, expect, it } from 'vitest';
-import { getBuildHookIds, validateAppEvent, getEventDetails } from './build-hook';
+import {
+  validateAppEvent,
+  getEventDetails,
+  validateParams,
+  getBuildHookIdFromSiteName,
+  filterHookIdsFromCT,
+} from './build-hook';
 
 const hookId = 'my-build-hook';
+
+const getBuildHookIds = ({ siteName, contentTypeId, isAsset }, parameters) => {
+  if (!siteName && !contentTypeId && !isAsset) {
+    throw new Error('Invalid request, requires action call or publish/unpublish event');
+  }
+
+  validateParams(parameters);
+
+  return siteName
+    ? getBuildHookIdFromSiteName(siteName, parameters)
+    : filterHookIdsFromCT({ contentTypeId, isAsset }, parameters);
+};
 
 describe('getBuildHookIds', () => {
   describe('for an app action', () => {

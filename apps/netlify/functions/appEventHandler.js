@@ -1,4 +1,11 @@
-import { getBuildHookIds, fireBuildHook, validateAppEvent, getEventDetails } from './lib/build-hook';
+import {
+  fireBuildHook,
+  validateAppEvent,
+  getEventDetails,
+  validateParams,
+  getBuildHookIdFromSiteName,
+  filterHookIdsFromCT,
+} from './lib/build-hook';
 
 /**
  * Fires the Netlify build hooks configured for an Entry/Asset event
@@ -10,8 +17,16 @@ import { getBuildHookIds, fireBuildHook, validateAppEvent, getEventDetails } fro
 export const handler = async (event, context) => {
   validateAppEvent(event.body);
 
-  const buildHookIds = getBuildHookIds(
-    getEventDetails(event.body),
+  const { contentTypeId, isAsset } = getEventDetails(event.body);
+
+  if (!contentTypeId && !isAsset) {
+    throw new Error('Invalid request, requires action call or publish/unpublish event');
+  }
+
+  validateParams(context.appInstallationParameters);
+
+  const buildHookIds = filterHookIdsFromCT(
+    { contentTypeId, isAsset },
     context.appInstallationParameters
   );
 

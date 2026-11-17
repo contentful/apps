@@ -33,18 +33,6 @@ const getBuildHookIdFromSiteName = (siteName, parameters) => {
   return buildHookIndex > -1 ? [parameters.buildHookIds.split(',')[buildHookIndex]] : [];
 };
 
-const getBuildHookIds = ({ siteName, contentTypeId, isAsset }, parameters) => {
-  if (!siteName && !contentTypeId && !isAsset) {
-    throw new Error('Invalid request, requires action call or publish/unpublish event');
-  }
-
-  validateParams(parameters);
-
-  return siteName
-    ? getBuildHookIdFromSiteName(siteName, parameters)
-    : filterHookIdsFromCT({ contentTypeId, isAsset }, parameters);
-};
-
 const fireBuildHook = async (buildHookId) => {
   const res = await fetch(`${BUILD_HOOKS_BASE_URL}/${buildHookId}`, { method: 'POST' });
   if (!res.ok) {
@@ -63,4 +51,11 @@ const getEventDetails = (body) => ({
   isAsset: ASSET_TYPES.includes(body?.sys?.type),
 });
 
-export { getBuildHookIds, fireBuildHook, validateAppEvent, getEventDetails };
+export {
+  getBuildHookIdFromSiteName,
+  validateParams,
+  filterHookIdsFromCT,
+  fireBuildHook,
+  validateAppEvent,
+  getEventDetails,
+};
