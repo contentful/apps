@@ -9,9 +9,7 @@
     "@contentful/app-scripts": "^2.3.0",
     "@testing-library/react": "8.0.4",
     "cross-env": "7.0.3",
-    "identity-obj-proxy": "3.0.0",
-    "@contentful/node-apps-toolkit": "^3.11.1",
-    "@tsconfig/recommended": "1.0.8"
+    "identity-obj-proxy": "3.0.0"
   },
   "dependencies": {
     "@contentful/app-sdk": "4.23.0",

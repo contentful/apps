@@ -3,14 +3,6 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-### Features
-
-* Migrate serverless functions to contentful functions.([#11436](https://github.com/contentful/apps/pull/11436)) (2026-11-16)
-
-
-
-
-
 # 1.8.0 (2026-11-16)
 
 

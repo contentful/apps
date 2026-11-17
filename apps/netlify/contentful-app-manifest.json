@@ -16,7 +16,7 @@
     {
       "id": "handleBuildHook",
       "name": "App Action Function Template",
-      "description": "Template for creating custom app actions. Add your own code to define how your app should respond when an action is triggered.",
+      "description": "Fires the configured Netlify build hooks when the action is triggered.",
       "path": "functions/handleBuildHook.js",
       "entryFile": "functions/handleBuildHook.js",
       "allowNetworks": [
@@ -29,7 +29,7 @@
   ],
   "actions": [
     {
-      "id": "netlifyBuild",
+      "id": "2fQy1xVEYyAL2uHkKRAKD",
       "name": "Netlify build",
       "type": "function-invocation",
       "functionId": "handleBuildHook",
