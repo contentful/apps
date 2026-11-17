@@ -16,9 +16,13 @@ const getBuildHookIds = ({ siteName, contentTypeId, isAsset }, parameters) => {
 
   validateParams(parameters);
 
-  return siteName
-    ? getBuildHookIdFromSiteName(siteName, parameters)
-    : filterHookIdsFromCT({ contentTypeId, isAsset }, parameters);
+  if (siteName) {
+    const buildHookId = getBuildHookIdFromSiteName(siteName, parameters);
+
+    return buildHookId ? [buildHookId] : [];
+  } else {
+    return filterHookIdsFromCT({ contentTypeId, isAsset }, parameters);
+  }
 };
 
 describe('getBuildHookIds', () => {

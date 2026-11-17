@@ -10,7 +10,7 @@ import { fireBuildHook, getBuildHookIdFromSiteName, validateParams } from './lib
 export const handler = async (event, context) => {
   validateParams(context.appInstallationParameters);
 
-  const [buildHookId] = getBuildHookIdFromSiteName(
+  const buildHookId = getBuildHookIdFromSiteName(
     event.body?.siteName,
     context.appInstallationParameters
   );

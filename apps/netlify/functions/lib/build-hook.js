@@ -30,7 +30,7 @@ const filterHookIdsFromCT = ({ contentTypeId, isAsset }, parameters) => {
 const getBuildHookIdFromSiteName = (siteName, parameters) => {
   const buildHookIndex = parameters.siteNames.split(',').indexOf(siteName);
   // build hooks are ordered in the same way as siteName
-  return buildHookIndex > -1 ? [parameters.buildHookIds.split(',')[buildHookIndex]] : [];
+  return buildHookIndex > -1 ? parameters.buildHookIds.split(',')[buildHookIndex] : null;
 };
 
 const fireBuildHook = async (buildHookId) => {
