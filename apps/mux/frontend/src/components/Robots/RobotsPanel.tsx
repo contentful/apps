@@ -353,6 +353,8 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
     }
   }, [muxApi]);
 
+  const firstLoadReadRunsRef = useRef(false);
+
   /**
    * First activation.
    *
@@ -386,13 +388,13 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
     // cache exists to prevent. This is the one place that reads it, because it is the only place
     // that would otherwise spend a request on a question with a known answer.
     //
-    // From a ref captured at mount, not from the `capability` state. React 17 does not batch the
-    // two `setState`s the fetch makes across its `await`, so `setCapability('enabled')` renders
-    // before `setHasLoadedOnce(true)` does — and a `capability` dependency here would re-enter
-    // this effect in that gap, with `hasLoadedOnce` still false, and fetch everything twice.
+    // From a ref captured at mount, not from the `capability` state: a `capability` dependency
+    // here could re-enter this effect after `setCapability('enabled')` and before
+    // `setHasLoadedOnce(true)`, with `hasLoadedOnce` still false, and fetch everything twice.
     if (cachedCapabilityRef.current && cachedCapabilityRef.current.state !== 'enabled') return;
 
     setIsLoading(true);
+    firstLoadReadRunsRef.current = isActive;
     void Promise.all([refresh({ silent: true }), loadDirectiveRuns()]);
   }, [
     isActive,
@@ -408,6 +410,13 @@ const RobotsPanelForAsset: FC<RobotsPanelProps & { assetId: string }> = ({
   useEffect(() => {
     // Only after the first load — otherwise this races it and both fetch the same runs.
     if (!isActive || capability?.state !== 'enabled' || !hasLoadedOnce) return;
+    // The first load has just read the runs for this activation. Whether that read is still in
+    // flight when the load finishes depends on how React batches its renders, so do not rely on
+    // `loadDirectiveRuns` dropping the duplicate.
+    if (firstLoadReadRunsRef.current) {
+      firstLoadReadRunsRef.current = false;
+      return;
+    }
     loadDirectiveRuns();
   }, [isActive, capability?.state, hasLoadedOnce, loadDirectiveRuns]);
 

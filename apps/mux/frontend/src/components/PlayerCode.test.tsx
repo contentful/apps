@@ -32,11 +32,11 @@ const params = [
 const snippet = () => (screen.getByRole('textbox') as HTMLTextAreaElement).value;
 
 describe('PlayerCode', () => {
-  it('renders the mux-player snippet in a read-only block', () => {
+  it('renders the Video.js snippet in a read-only block', () => {
     render(<PlayerCode params={params} />);
 
-    expect(snippet()).toContain('<mux-player playback-id="pb_123"');
-    expect(snippet()).toContain('metadata-video-title="A Title"');
+    expect(snippet()).toContain('<mux-video src="https://stream.mux.com/pb_123.m3u8"');
+    expect(snippet()).toContain('"video_title": "A Title"');
     expect(screen.getByRole('textbox')).toHaveAttribute('readonly');
     expect(screen.getByRole('textbox')).toHaveClass('copycodearea');
   });
@@ -55,6 +55,22 @@ describe('PlayerCode', () => {
     await userEvent.click(screen.getByText('iframe'));
     expect(snippet()).toContain('<iframe src="https://player.mux.com/pb_123');
     expect(snippet()).toContain('autoplay=true');
+  });
+
+  it('says the live skin has no DVR slider only for a DVR stream', () => {
+    const { rerender } = render(<PlayerCode params={params} />);
+    expect(screen.queryByText(/no DVR time slider/)).toBeNull();
+
+    rerender(
+      <PlayerCode
+        params={[
+          ...params.filter((p) => p.name !== 'stream-type'),
+          { name: 'stream-type', value: 'live:dvr' },
+        ]}
+      />
+    );
+    expect(screen.getByText(/no DVR time slider/)).toBeInTheDocument();
+    expect(snippet()).toContain('<live-video-player>');
   });
 
   it('copies the snippet that is on screen', async () => {
