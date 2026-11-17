@@ -21,7 +21,7 @@ const DeleteUndoButton: React.FC<DeleteUndoButtonProps> = ({
       variant="secondary"
       size={size}
       onClick={onUndo}
-      disabled={disabled}
+      isDisabled={disabled}
       style={{ minWidth: 64 }}>
       Undo
     </Button>
@@ -30,7 +30,7 @@ const DeleteUndoButton: React.FC<DeleteUndoButtonProps> = ({
       variant="negative"
       size={size}
       onClick={onDelete}
-      disabled={disabled}
+      isDisabled={disabled}
       style={{ minWidth: 64 }}>
       Delete
     </Button>

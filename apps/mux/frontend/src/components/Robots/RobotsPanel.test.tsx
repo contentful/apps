@@ -29,6 +29,8 @@ import { MuxContentfulObject } from '../../util/types';
 /** The entry these tests run in. */
 const ids = { space: 'space-1', environment: 'master', entry: 'entry-1' };
 
+const wait = (ms: number) => act(() => new Promise<void>((resolve) => setTimeout(resolve, ms)));
+
 const sdk = {
   ids,
   field: { id: 'muxVideo' },
@@ -561,7 +563,7 @@ describe('RobotsPanel — a job create is guarded by a placeholder on the entry'
       expect.objectContaining({ kind: 'job', workflow: 'summarize' }),
     ]);
     // Held: nothing has been sent.
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
     expect(createRobotsJob).not.toHaveBeenCalled();
 
     await act(async () => release());
@@ -647,8 +649,8 @@ describe('RobotsPanel — a job create is guarded by a placeholder on the entry'
     };
     const store = renderWithStore(value(), { muxApi });
 
-    await runSummarize();
     const readsBefore = muxApi.listRobotsJobs.mock.calls.length;
+    await runSummarize();
     await waitFor(() =>
       expect(sdk.notifier.warning).toHaveBeenCalledWith(
         'This workflow is already running on this video with the same settings.'
@@ -703,17 +705,18 @@ describe('RobotsPanel — a job create is guarded by a placeholder on the entry'
 
     await runSummarize();
     await waitFor(() => expect(pendingCreatesIn(store.read())).toHaveLength(1));
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
     expect(screen.queryByTestId('robots-job-unconfirmed')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Run a workflow' })).toBeDisabled();
   });
 
-  it('blocks Run on first paint for an entry that already holds a placeholder', () => {
+  it('blocks Run on first paint for an entry that already holds a placeholder', async () => {
     recordRobotsCapability({ state: 'enabled' });
     renderWithStore(value({ version: 4, robotsPendingCreates: [pendingJob()] }), {
       muxApi: apiThatReturns([]),
     });
     expect(screen.getByRole('button', { name: 'Run a workflow' })).toBeDisabled();
+    await wait(0);
   });
 
   it('reads the list for a fresh placeholder without the tab being open', async () => {
@@ -737,7 +740,7 @@ describe('RobotsPanel — a job create is guarded by a placeholder on the entry'
       { muxApi, isActive: false }
     );
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
     expect(muxApi.listRobotsJobs).not.toHaveBeenCalled();
 
     store.activate();
@@ -896,7 +899,7 @@ describe('RobotsPanel — what the editor sees while a run starts', () => {
     const before = store.read();
     expect(held.write?.mutate(before)).toBe(before);
     await act(async () => held.release());
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
     expect(createRobotsJob).not.toHaveBeenCalled();
     expect(store.read()?.robotsPendingCreates).toBeUndefined();
     expect(sdk.notifier.error).not.toHaveBeenCalled();
@@ -1157,7 +1160,9 @@ describe('RobotsPanel — what the editor sees while a run starts', () => {
     const runDirective = async () => {
       await waitFor(() => expect(screen.getByRole('combobox')).toBeInTheDocument());
       fireEvent.change(screen.getByRole('combobox'), { target: { value: 'drv_1' } });
-      fireEvent.click(screen.getByRole('button', { name: 'Run directive' }));
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'Run directive' }));
+      });
     };
 
     it('shows the row while parked, and a withdrawn run is never asked for', async () => {
@@ -1172,7 +1177,7 @@ describe('RobotsPanel — what the editor sees while a run starts', () => {
       expect(pendingCells()).toHaveLength(0);
 
       await act(async () => held.release());
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await wait(50);
       expect(muxApi.createRobotsDirectiveRun).not.toHaveBeenCalled();
     });
 
@@ -1554,7 +1559,7 @@ describe('RobotsPanel — the fields the list leaves out', () => {
 
     await waitFor(() => expect(muxApi.getRobotsJob).toHaveBeenCalledTimes(1));
     // Give the effects a few more cycles to prove it does not loop.
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
     expect(muxApi.getRobotsJob).toHaveBeenCalledTimes(1);
   });
 });
@@ -1604,7 +1609,7 @@ describe('RobotsPanel — Units past the detail window', () => {
   /** The background pass has drained as far as the window lets it. */
   const settled = async (muxApi: ReturnType<typeof apiWithLongHistory>) => {
     await waitFor(() => expect(muxApi.getRobotsJob).toHaveBeenCalledTimes(20));
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
   };
 
   it('stops at the window, and says so rather than showing an em dash', async () => {
@@ -2115,7 +2120,9 @@ describe('RobotsPanel — starting a directive run', () => {
     renderPanel({ muxApi, defaultDirectiveIds: ['drv_1'], ...extra });
     await waitFor(() => expect(screen.getByRole('combobox')).toBeInTheDocument());
     fireEvent.change(screen.getByRole('combobox'), { target: { value: 'drv_1' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Run directive' }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Run directive' }));
+    });
   };
 
   it('records the run on the entry at creation, in place of its placeholder', async () => {
@@ -2185,7 +2192,7 @@ describe('RobotsPanel — starting a directive run', () => {
     expect(store.savedWrites()[0].mutate(value())?.robotsPendingCreates).toEqual([
       expect.objectContaining({ kind: 'directive-run', directiveId: 'drv_1' }),
     ]);
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
     expect(muxApi.createRobotsDirectiveRun).not.toHaveBeenCalled();
 
     await act(async () => release());
@@ -2321,7 +2328,7 @@ describe('RobotsPanel — starting a directive run', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Run directive' }));
 
     await waitFor(() => expect(pendingCreatesIn(store.read())).toHaveLength(1));
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
     expect(screen.queryByTestId('robots-directive-run-unconfirmed')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Run directive' })).toBeDisabled();
   });
@@ -2996,7 +3003,7 @@ describe('RobotsPanel — resuming a job without opening the tab', () => {
       isActive: false,
       value: value({ robotsJobs: [recordedJob('completed')] } as any),
     });
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
 
     // The whole point of the `isActive` gate: an editor who never opens this tab pays nothing.
     expect(muxApi.listRobotsJobs).not.toHaveBeenCalled();
@@ -3007,7 +3014,7 @@ describe('RobotsPanel — resuming a job without opening the tab', () => {
     const muxApi = apiThatReturns([stale]);
 
     renderPanel({ muxApi, isActive: false, value: value({ robotsJobs: [stale] } as any) });
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
 
     // A job Mux purged, or a session that died mid-run, must not make every open of this entry
     // fetch forever.
@@ -3178,7 +3185,7 @@ describe('RobotsPanel — what the first open costs', () => {
     // The names are cosmetic, so a slow — or cold-starting — directive list must not be in front
     // of the table the editor opened the tab for.
     await waitFor(() => expect(screen.getByTestId('robots_job_table')).toBeInTheDocument());
-    releaseDirectives({ data: [] });
+    await act(async () => releaseDirectives({ data: [] }));
   });
 
   it('reads runs for the configured directives only, not for every directive in the account', async () => {
@@ -3239,7 +3246,7 @@ describe('RobotsPanel — what the first open costs', () => {
     renderPanel({ muxApi, defaultDirectiveIds: ['drv_configured'] });
 
     await waitFor(() => expect(screen.getByTestId('robots_job_table')).toBeInTheDocument());
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await wait(100);
     expect(muxApi.listRobotsDirectiveRuns).toHaveBeenCalledTimes(1);
   });
   it('still polls a directive the entry records but the config has since dropped', async () => {
@@ -3301,7 +3308,7 @@ describe('RobotsPanel — what the tab shows before everything is read', () => {
     renderPanel({ muxApi: apiThatReturns([completed('rjob_1')]), resync });
 
     await waitFor(() => expect(screen.getByTestId('robots_job_table')).toBeInTheDocument());
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await wait(20);
     expect(screen.queryByTestId('robots-scope-missing')).not.toBeInTheDocument();
     expect(cachedRobotsCapability()).toEqual({ state: 'enabled' });
     consoleError.mockRestore();
@@ -3320,6 +3327,7 @@ describe('RobotsPanel — what the tab shows before everything is read', () => {
     expect(screen.getByText('Directives')).toBeInTheDocument();
     expect(screen.getByTestId('robots_job_table_loading')).toBeInTheDocument();
     expect(screen.queryByText(/No Robots jobs have run/)).not.toBeInTheDocument();
+    await wait(0);
   });
 
   it('shows only a placeholder while it does not know whether Robots is on', () => {
@@ -3820,7 +3828,10 @@ const runSummarize = async () => {
   await waitFor(() => expect(screen.getByRole('button', { name: 'Run a workflow' })).toBeEnabled());
   fireEvent.click(screen.getByRole('button', { name: 'Run a workflow' }));
   fireEvent.click(await screen.findByRole('button', { name: 'Continue' }));
-  fireEvent.click(await screen.findByRole('button', { name: 'Run Summarize' }));
+  const run = await screen.findByRole('button', { name: 'Run Summarize' });
+  await act(async () => {
+    fireEvent.click(run);
+  });
 };
 
 const finishedJob = () => ({
@@ -3884,7 +3895,7 @@ describe('RobotsPanel — a refused run is a failed run, not a lost account', ()
 
     await runSummarize();
     await waitFor(() => expect(sdk.notifier.error).toHaveBeenCalled());
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
 
     expect(muxApi.listRobotsJobs.mock.calls.length).toBe(before);
   });
@@ -4202,9 +4213,9 @@ describe('RobotsPanel — a directive run started outside Contentful', () => {
 
     // More passes, which is what Refresh and activation cost: a finished run is not read again.
     fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
     fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
 
     expect(muxApi.getRobotsDirectiveRun).toHaveBeenCalledTimes(1);
     expect(muxApi.getRobotsDirectiveRun).toHaveBeenCalledWith('drv_mux', 'drvrun_mux');
@@ -4225,7 +4236,7 @@ describe('RobotsPanel — a directive run started outside Contentful', () => {
 
     await screen.findByTestId('robots_directive_run_table');
     await waitFor(() => expect(muxApi.getRobotsJob).toHaveBeenCalledTimes(2));
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
     expect(muxApi.getRobotsDirectiveRun).not.toHaveBeenCalled();
   });
 
@@ -4243,7 +4254,7 @@ describe('RobotsPanel — a directive run started outside Contentful', () => {
     });
 
     await waitFor(() => expect(muxApi.getRobotsDirectiveRun).toHaveBeenCalled());
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
     expect(screen.getByText('No directive runs for this video yet.')).toBeInTheDocument();
     expect(stored.read()?.robotsDirectiveRuns).toBeUndefined();
   });
@@ -4259,7 +4270,7 @@ describe('RobotsPanel — a directive run started outside Contentful', () => {
     renderPanel({ muxApi });
 
     await waitFor(() => expect(muxApi.getRobotsDirectiveRun).toHaveBeenCalled());
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
     expect(screen.getByText('No directive runs for this video yet.')).toBeInTheDocument();
     expect(screen.getByTestId('robots_job_table')).toBeInTheDocument();
     consoleError.mockRestore();
@@ -4379,7 +4390,7 @@ describe('RobotsPanel — a directive run started outside Contentful', () => {
     renderPanel({ muxApi, defaultDirectiveIds: ['drv_cfg'] });
 
     await waitFor(() => expect(muxApi.getRobotsJob).toHaveBeenCalledTimes(2));
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
     expect(muxApi.getRobotsDirectiveRun).not.toHaveBeenCalled();
 
     releaseListing();
@@ -4561,7 +4572,7 @@ describe('RobotsPanel — outputs of jobs started elsewhere', () => {
 
     await waitFor(() => expect(muxApi.getRobotsJob).toHaveBeenCalledTimes(2));
     await waitFor(() => expect(stored.read()?.robotsJobs).toHaveLength(2));
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
     expect(stored.read()?.robotsOutputs).toBeUndefined();
   });
 
@@ -4602,7 +4613,7 @@ describe('RobotsPanel — outputs of jobs started elsewhere', () => {
     await waitFor(() =>
       expect(stored.read()?.robotsOutputs?.summarize?.title).toBe('Theirs, later')
     );
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
     expect(stored.read()?.robotsOutputs?.summarize?.jobId).toBe('rjob_later');
     expect(stored.read()?.robotsJobs?.map((record) => record.id)).toEqual([
       'rjob_later',
@@ -4672,7 +4683,7 @@ describe('RobotsPanel — outputs of jobs started elsewhere', () => {
     const updateField = vi.fn(async () => undefined);
     renderPanel({ muxApi, updateField, isActive: false });
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await wait(50);
     expect(muxApi.listRobotsJobs).not.toHaveBeenCalled();
     expect(updateField).not.toHaveBeenCalled();
   });

@@ -30,17 +30,19 @@ export interface InstallationParams {
 
 export interface AppState {
   value?: MuxContentfulObject;
+  /** Bumped to remount the preview player, which reloads the manifest and its text tracks. */
+  playerReloadCount: number;
   error: string | false;
   errorShowResetAction: boolean | false;
   isDeleting: boolean | false;
   isTokenLoading: boolean | false;
+  tokenPlaybackId?: string;
   playbackToken?: string;
   posterToken?: string;
   storyboardToken?: string;
   drmLicenseToken?: string;
   captionname?: string;
   audioName?: string;
-  playerPlaybackId?: string;
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   raw?: any;
   modalAssetConfigurationVisible: boolean;
