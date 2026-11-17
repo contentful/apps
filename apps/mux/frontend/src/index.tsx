@@ -1,10 +1,7 @@
 /* eslint-disable  @typescript-eslint/no-non-null-assertion */
 
-// Must be imported before MuxPlayer to prevent Chromecast errors in Contentful's sandboxed iframe
-import './util/disableChromecast';
-
 import React, { ChangeEvent, createRef } from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import {
   init,
@@ -16,7 +13,8 @@ import {
 import { Button, Note, Spinner, TextLink, Tabs, Box, Flex } from '@contentful/f36-components';
 import { Form, FormControl, TextInput } from '@contentful/f36-forms';
 
-import MuxPlayer from '@mux/mux-player-react';
+import PreviewPlayer from './components/PreviewPlayer';
+import { buildPlayerSnippet } from './util/playerSnippet';
 
 import Config from './locations/config';
 
@@ -218,7 +216,6 @@ export class App extends React.Component<AppProps, AppState> {
   resolveRef = createRef<(value: string | null) => void>();
   muxUploaderRef = createRef<any>(); // eslint-disable-line @typescript-eslint/no-explicit-any
   fileInputRef = React.createRef<HTMLInputElement>();
-  muxPlayerRef = React.createRef<any>(); // eslint-disable-line @typescript-eslint/no-explicit-any
   private pollPending = false;
 
   /**
@@ -232,6 +229,8 @@ export class App extends React.Component<AppProps, AppState> {
   private publishGateTimer?: ReturnType<typeof setTimeout>;
   /** Tracks the last publish we reacted to, so one publish is handled once. */
   private lastHandledPublishedAt?: string;
+  /** The latest signed ID tokens were requested for; a slower response for an older one loses. */
+  private requestedTokenPlaybackId?: string;
   private isUnmounted = false;
   /**
    * Directives attached to an upload started in this session, and whether we have spoken about
@@ -278,10 +277,6 @@ export class App extends React.Component<AppProps, AppState> {
         (!muxAccessTokenId || !muxAccessTokenSecret) &&
         "It doesn't look like you've specified your Mux Access Token ID or Secret in the extension configuration.",
       errorShowResetAction: false,
-      playerPlaybackId:
-        field && ('playbackId' in field || 'signedPlaybackId' in field || 'drmPlaybackId' in field)
-          ? field.playbackId || field.signedPlaybackId || field.drmPlaybackId
-          : undefined,
       modalAssetConfigurationVisible: false,
       file: null,
       showMuxUploaderUI: false,
@@ -296,6 +291,7 @@ export class App extends React.Component<AppProps, AppState> {
       storyboardToken: undefined,
       drmLicenseToken: undefined,
       raw: undefined,
+      playerReloadCount: 0,
     };
   }
 
@@ -594,12 +590,8 @@ export class App extends React.Component<AppProps, AppState> {
         if (this.isUsingDRM() && this.state.value.drmPlaybackId) {
           // Load DRM tokens for external player link
           await this.setSignedPlayback(this.state.value.drmPlaybackId, true);
-          this.setState({ playerPlaybackId: this.state.value.drmPlaybackId });
         } else if (this.isUsingSigned() && this.state.value.signedPlaybackId) {
           await this.setSignedPlayback(this.state.value.signedPlaybackId);
-          this.setState({ playerPlaybackId: this.state.value.signedPlaybackId });
-        } else if (this.state.value.playbackId) {
-          this.setState({ playerPlaybackId: this.state.value.playbackId });
         }
         return;
       }
@@ -625,6 +617,19 @@ export class App extends React.Component<AppProps, AppState> {
     if (this.muxApi && this.state.value?.assetId && !this.state.initialResyncDone) {
       this.resync({ silent: true });
       this.setState({ initialResyncDone: true });
+    }
+
+    // The publish function rewrites the field with a new signed ID before the browser resyncs,
+    // and a resync is not guaranteed to follow every external change.
+    const previewPlaybackId = this.getPreviewPlaybackId();
+    if (
+      this.muxApi &&
+      this.isUsingSigned() &&
+      !this.isUsingDRM() &&
+      previewPlaybackId &&
+      previewPlaybackId !== this.requestedTokenPlaybackId
+    ) {
+      void this.setSignedPlayback(previewPlaybackId);
     }
   }
 
@@ -662,14 +667,19 @@ export class App extends React.Component<AppProps, AppState> {
     return this.state.value && this.state.value.drmPlaybackId ? true : false;
   };
 
+  getPreviewPlaybackId = (): string | undefined =>
+    this.state.value?.playbackId || this.state.value?.signedPlaybackId || undefined;
+
+  hasTokensFor = (playbackId: string): boolean =>
+    !this.state.isTokenLoading &&
+    this.state.tokenPlaybackId === playbackId &&
+    !!this.state.playbackToken;
+
   isPlayerReady = (): boolean => {
-    if (!this.state.playerPlaybackId) return false;
-
-    const isPublicReady = !!this.state.value?.ready && !!this.state.value?.playbackId;
-    const isSignedReady =
-      this.isUsingSigned() && !this.state.isTokenLoading && !!this.state.playbackToken;
-
-    return isPublicReady || isSignedReady;
+    const playbackId = this.getPreviewPlaybackId();
+    if (!playbackId) return false;
+    if (playbackId === this.state.value?.playbackId) return !!this.state.value?.ready;
+    return this.hasTokensFor(playbackId);
   };
 
   getSwitchCheckedState = (): boolean => {
@@ -923,6 +933,7 @@ export class App extends React.Component<AppProps, AppState> {
   };
 
   setSignedPlayback = async (signedPlaybackId: string, isDRM = false) => {
+    this.requestedTokenPlaybackId = signedPlaybackId;
     const { muxSigningKeyId, muxSigningKeyPrivate } = this.props.sdk.parameters
       .installation as InstallationParams;
     if (!(muxSigningKeyId && muxSigningKeyPrivate)) {
@@ -936,8 +947,10 @@ export class App extends React.Component<AppProps, AppState> {
     }
     const { playbackToken, posterToken, storyboardToken, licenseToken } =
       await this.fetchSignedTokens(signedPlaybackId, isDRM);
+    if (this.requestedTokenPlaybackId !== signedPlaybackId) return;
 
     this.setState({
+      tokenPlaybackId: signedPlaybackId,
       playbackToken,
       posterToken,
       storyboardToken,
@@ -1104,25 +1117,22 @@ export class App extends React.Component<AppProps, AppState> {
         };
       });
 
-      // The `else` matters: playback IDs can be deleted at Mux — by hand, or by a `moderate`
-      // workflow configured with `on_flagged: delete_playback_ids` — and leaving the last known
-      // id behind keeps a stale token beside it.
-      const nextPlayerPlaybackId =
-        drmPlayback?.id || publicPlayback?.id || signedPlayback?.id || undefined;
+      const hasPlaybackIdNow = !!(drmPlayback || publicPlayback || signedPlayback);
 
       // The player vanishing mid-session needs saying out loud. A `moderate` run started from the
       // Robots tab can delete every playback ID, and the poll picks that up silently — the notice
       // in the editor explains the end state, but only a toast connects it to what just happened.
       const hadPlaybackId = hasAnyPlaybackId(currentValue);
-      if (hadPlaybackId && !nextPlayerPlaybackId) {
+      if (hadPlaybackId && !hasPlaybackIdNow) {
         this.props.sdk.notifier.warning(
           'This video no longer has any playback IDs, so it cannot be played. Request a new one in the Playback tab, or add one in Mux and resync.'
         );
       }
 
-      this.setState({ playerPlaybackId: nextPlayerPlaybackId });
-      if (!nextPlayerPlaybackId) {
+      if (!hasPlaybackIdNow) {
+        this.requestedTokenPlaybackId = undefined;
         this.setState({
+          tokenPlaybackId: undefined,
           playbackToken: undefined,
           posterToken: undefined,
           storyboardToken: undefined,
@@ -1299,7 +1309,7 @@ export class App extends React.Component<AppProps, AppState> {
 
   reloadPlayer = async () => {
     if (!this.state || !this.state.value) return;
-    this.muxPlayerRef.current?.load();
+    this.setState((previous) => ({ playerReloadCount: previous.playerReloadCount + 1 }));
   };
 
   generateExternalPlayerURL = (): string | null => {
@@ -1312,33 +1322,28 @@ export class App extends React.Component<AppProps, AppState> {
       return null;
     }
 
-    const playbackId = this.state.value.drmPlaybackId;
-    const streamType = this.getPlayerType();
-    const customDomain = this.props.sdk.parameters.installation.muxDomain;
     const videoTitle = this.state.value.meta?.title || 'DRM Protected Video';
-
-    // Use JSON.stringify for safe string escaping
-    const tokens = {
-      playback: this.state.playbackToken,
-      ...(this.state.posterToken && { thumbnail: this.state.posterToken }),
-      ...(this.state.storyboardToken && { storyboard: this.state.storyboardToken }),
-      drm: this.state.drmLicenseToken,
-    };
-
-    // Build player attributes
-    const attrs: string[] = [
-      `playback-id="${playbackId}"`,
-      streamType ? `stream-type="${streamType}"` : '',
-      customDomain && customDomain !== 'mux.com' ? `custom-domain="${customDomain}"` : '',
-      this.state.value.audioOnly ? 'audio="true"' : '',
-    ].filter(Boolean);
+    const snippet = buildPlayerSnippet({
+      playbackId: this.state.value.drmPlaybackId!,
+      streamType: this.getPlayerType(),
+      customDomain: this.props.sdk.parameters.installation.muxDomain,
+      audio: this.state.value.audioOnly,
+      aspectRatio: this.getPlayerAspectRatio()?.aspectRatio,
+      tokens: {
+        playback: this.state.playbackToken,
+        thumbnail: this.state.posterToken,
+        storyboard: this.state.storyboardToken,
+        drm: this.state.drmLicenseToken,
+      },
+      videoTitle,
+    });
 
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mux DRM Player - ${videoTitle.replace(/"/g, '&quot;')}</title>
+  <title>Mux DRM Player - ${videoTitle.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</title>
   <style>
     body {
       margin: 0;
@@ -1351,6 +1356,7 @@ export class App extends React.Component<AppProps, AppState> {
       align-items: center;
       justify-content: center;
       min-height: 100vh;
+      box-sizing: border-box;
     }
     .container {
       max-width: 1200px;
@@ -1360,23 +1366,12 @@ export class App extends React.Component<AppProps, AppState> {
       margin-bottom: 20px;
       font-size: 24px;
     }
-    mux-player {
-      width: 100%;
-      max-width: 100%;
-    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>${videoTitle.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h1>
-    <script src="https://unpkg.com/@mux/mux-player"></script>
-    <mux-player ${attrs.join(' ')} style="width:100%"></mux-player>
-    <script>
-      const player = document.querySelector('mux-player');
-      if (player) {
-        player.tokens = ${JSON.stringify(tokens)};
-      }
-    </script>
+    ${snippet.replace(/\n/g, '\n    ')}
   </div>
 </body>
 </html>`;
@@ -1403,6 +1398,10 @@ export class App extends React.Component<AppProps, AppState> {
       {
         name: 'video-title',
         value: this.state.value.meta?.title,
+      },
+      {
+        name: 'aspect-ratio',
+        value: this.getPlayerAspectRatio()?.aspectRatio,
       },
     ];
     if (this.state.value.signedPlaybackId) {
@@ -1759,6 +1758,7 @@ export class App extends React.Component<AppProps, AppState> {
       const hasPlaybackId = hasAnyPlaybackId(this.state.value);
 
       const showPlayer = this.isPlayerReady();
+      const previewPlaybackId = this.getPreviewPlaybackId();
 
       // Read from the stored value, so this costs no request and is known before the Robots tab
       // has fetched anything.
@@ -1891,14 +1891,13 @@ export class App extends React.Component<AppProps, AppState> {
 
             {showPlayer && (
               <section className="player" style={this.getPlayerAspectRatio()}>
-                <MuxPlayer
-                  ref={this.muxPlayerRef}
-                  data-testid="muxplayer"
-                  style={{ height: '100%', width: '100%' }}
-                  playbackId={this.state.playerPlaybackId}
+                <PreviewPlayer
+                  key={`${previewPlaybackId}-${this.state.playerReloadCount}`}
+                  playbackId={previewPlaybackId!}
                   streamType={this.getPlayerType()}
-                  customDomain={muxDomain && muxDomain !== 'mux.com' ? muxDomain : undefined}
+                  customDomain={muxDomain}
                   audio={this.state.value.audioOnly}
+                  aspectRatio={this.getPlayerAspectRatio()?.aspectRatio}
                   metadata={{
                     player_name: 'Contentful Admin Dashboard',
                     viewer_user_id:
@@ -2180,12 +2179,13 @@ export class App extends React.Component<AppProps, AppState> {
 }
 
 init((sdk) => {
+  const root = createRoot(document.getElementById('root')!);
   if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
-    render(<Config sdk={sdk as AppExtensionSDK} />, document.getElementById('root'));
+    root.render(<Config sdk={sdk as AppExtensionSDK} />);
   } else if (sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR)) {
-    render(<Sidebar sdk={sdk as SidebarExtensionSDK} />, document.getElementById('root'));
+    root.render(<Sidebar sdk={sdk as SidebarExtensionSDK} />);
   } else {
-    render(<App sdk={sdk as FieldExtensionSDK} />, document.getElementById('root'));
+    root.render(<App sdk={sdk as FieldExtensionSDK} />);
   }
 });
 

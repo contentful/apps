@@ -7,8 +7,6 @@
 1. Go to this project: `cd apps/mux` (no need to npm install again, because bootstrap already did that via lerna)
 1. `npm start` - now the mux app is running on http://localhost:3000
 
-**Notes**: `@contentful/dam-app-base` gets installed by lerna when running `npm run bootstrap` from the root directory. If you're getting errors related to this you should probably `rm -rf node_modules` from this project, cd back into the root and run `npm i && npm run bootstrap` again.
-
 ## Contentful app setup
 
 - Use the Mux (dev) contentful app and make sure it is pointed to http://localhost:3000 for development
