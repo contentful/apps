@@ -3,7 +3,6 @@ import {
   validateAppEvent,
   getEventDetails,
   validateParams,
-  getBuildHookIdFromSiteName,
   filterHookIdsFromCT,
 } from './lib/build-hook';
 
