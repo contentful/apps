@@ -15,7 +15,7 @@
     },
     {
       "id": "handleBuildHook",
-      "name": "App Action Function Template",
+      "name": "Netlify build on action trigger",
       "description": "Fires the configured Netlify build hooks when the action is triggered.",
       "path": "functions/handleBuildHook.js",
       "entryFile": "functions/handleBuildHook.js",
