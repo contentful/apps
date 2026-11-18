@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+### Features
+
+- Migrate serverless functions to contentful functions.[#11436](https://github.com/contentful/apps/pull/11436) (2026-11-18)
+
+# 1.10.0 (2026-11-18)
+
 ## [1.9.71](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.9.70...@contentful/netlify-build-and-preview@1.9.71) (2023-01-30)
 
 ### Bug Fixes
