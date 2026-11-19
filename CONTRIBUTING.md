@@ -58,7 +58,7 @@ npm run dev
 
 This runs Vite in watch mode and opens the app at `http://localhost:3000`. The app must be configured in a Contentful organization — use a personal dev space.
 
-For apps with App Actions (`mux`, `vercel`, `microsoft-teams`, `sap-commerce-cloud`):
+For apps with App Actions (`netlify`, `mux`, `vercel`, `microsoft-teams`, `sap-commerce-cloud`):
 ```bash
 # Terminal 1 — frontend
 cd apps/<app-name>/frontend && npm start
@@ -67,7 +67,7 @@ cd apps/<app-name>/frontend && npm start
 cd apps/<app-name> && npm run start:functions
 ```
 
-For legacy lambda apps (`netlify`, `typeform`, `slack`, etc.):
+For legacy lambda apps (`typeform`, `slack`, etc.):
 ```bash
 cd apps/<app-name>/frontend && npm start
 # Lambda runs in AWS — local dev typically uses the deployed staging lambda

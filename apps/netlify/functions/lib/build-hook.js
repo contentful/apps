@@ -23,12 +23,12 @@ const filterHookIdsFromCT = ({ contentTypeId, isAsset }, parameters) => {
     // either we have an asset which we always publish or check if CT is supported
     return isAsset
       ? hookEvents.assets
-      : hookEvents.cts === '*' || hookEvents.cts.includes(contentTypeId);
+      : hookEvents.cts === '*' || hookEvents.cts.split(',').includes(contentTypeId);
   });
 };
 
 const getBuildHookIdFromSiteName = (siteName, parameters) => {
-  const buildHookIndex = parameters.siteNames.split(',').indexOf(siteName);
+  const buildHookIndex = (parameters.siteNames || '').split(',').indexOf(siteName);
   // build hooks are ordered in the same way as siteName
   return buildHookIndex > -1 ? parameters.buildHookIds.split(',')[buildHookIndex] : null;
 };

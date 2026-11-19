@@ -6,7 +6,7 @@ Netlify App
 The Netlify App is a React app (in `src`) plus two Contentful Functions (in `functions`) which handle
 Netlify build hooks:
 
-* `appactionCall`: the `netlifyBuild` app action, fires the build hook of one site.
+* `handleNetlifyBuild`: triggered by the `Netlify Build` app action, fires the build hook of one site.
 * `appEventHandler`: fires the configured build hooks when Entries or Assets are published/unpublished.
 
 ### Launching the app

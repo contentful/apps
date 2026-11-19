@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { handler as appEventHandler } from './appEventHandler';
-import { handler as buildHookHandler } from './handleBuildHook';
+import { handler as buildHookHandler } from './handleNetlifyBuild';
 
 const hookId = 'my-build-hook';
 const netlifyUrl = (id) => `https://api.netlify.com/build_hooks/${id}`;

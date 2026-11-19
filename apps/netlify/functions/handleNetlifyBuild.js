@@ -1,7 +1,7 @@
 import { fireBuildHook, getBuildHookIdFromSiteName, validateParams } from './lib/build-hook';
 
 /**
- * This handler is invoked when your App Action is called
+ * Fires the Netlify build hooks App Action is called
  *
  * @param {Object} event - Contains the name of the site hosted in netlify.
  * @param {Object} context - Provides access to the CMA client and other context information

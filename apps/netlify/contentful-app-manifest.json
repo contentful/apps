@@ -14,11 +14,11 @@
       ]
     },
     {
-      "id": "handleBuildHook",
+      "id": "handleNetlifyBuild",
       "name": "Netlify build on action trigger",
       "description": "Fires the configured Netlify build hooks when the action is triggered.",
-      "path": "functions/handleBuildHook.js",
-      "entryFile": "functions/handleBuildHook.js",
+      "path": "functions/handleNetlifyBuild.js",
+      "entryFile": "functions/handleNetlifyBuild.js",
       "allowNetworks": [
         "api.netlify.com"
       ],
@@ -32,7 +32,7 @@
       "id": "2fQy1xVEYyAL2uHkKRAKD",
       "name": "Netlify build",
       "type": "function-invocation",
-      "functionId": "handleBuildHook",
+      "functionId": "handleNetlifyBuild",
       "category": "Custom",
       "parameters": [
         {

@@ -89,7 +89,7 @@ apps/<name>/
 └── package.json
 ```
 
-Examples: `mux`, `vercel`, `microsoft-teams`, `sap-commerce-cloud`
+Examples: `netlify`,`mux`, `vercel`, `microsoft-teams`, `sap-commerce-cloud`
 
 ### 3. Lambda + Frontend App (legacy)
 Older apps use AWS Lambda for backend logic instead of App Actions.
@@ -101,7 +101,7 @@ apps/<name>/
 └── package.json
 ```
 
-Examples: `netlify`, `typeform`, `slack`, `sap-commerce-cloud-with-air`, `google-analytics-4`, `ai-image-tagging`, `smartling`
+Examples: `typeform`, `slack`, `sap-commerce-cloud-with-air`, `google-analytics-4`, `ai-image-tagging`, `smartling`
 
 ### 4. DAM / Ecommerce Base Apps
 Thin wrappers around shared base packages. Almost no custom logic — configuration-only.
