@@ -332,8 +332,8 @@ export const EditSiteModal = ({
                         availableContentTypes.length === 0
                           ? 'All content types already selected'
                           : selectedContentTypes.length >= 1
-                          ? 'Add more content types...'
-                          : 'Select content types...'
+                            ? 'Add more content types...'
+                            : 'Select content types...'
                       }
                       width="full"
                       itemToString={(item) => item.label}
