@@ -41,8 +41,8 @@ describe('getBuildHookIdFromSiteName', () => {
       buildHookIds: hookId,
     });
 
-    expect(id).toBeNull()
-  })
+    expect(id).toBeNull();
+  });
 
   it('returns no hook for a missing siteName', () => {
     const id = getBuildHookIdFromSiteName(null, {
@@ -50,8 +50,8 @@ describe('getBuildHookIdFromSiteName', () => {
       buildHookIds: hookId,
     });
 
-    expect(id).toBeNull()
-  })
+    expect(id).toBeNull();
+  });
 });
 
 describe('filterHookIdsFromCT', () => {
