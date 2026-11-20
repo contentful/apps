@@ -44,8 +44,8 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for full details. Quick reference:
 | Archetype | Marker | Examples |
 |-----------|--------|---------|
 | Standard Vite | `src/locations/` dir | Most apps |
-| App Actions + Frontend | `app-actions/` + `contentful-app-manifest.json` | `mux`, `vercel`, `microsoft-teams`, `sap-commerce-cloud` |
-| Legacy Lambda + Frontend | `lambda/` dir | `netlify`, `typeform`, `slack`, `google-analytics-4`, `ai-image-tagging`, `smartling` |
+| App Actions + Frontend | `app-actions/` + `contentful-app-manifest.json` | `netlify`, `mux`, `vercel`, `microsoft-teams`, `sap-commerce-cloud` |
+| Legacy Lambda + Frontend | `lambda/` dir | `typeform`, `slack`, `google-analytics-4`, `ai-image-tagging`, `smartling` |
 | DAM base | depends on `@contentful/dam-app-base` | `brandfolder`, `dropbox`, `frontify`, `wistia-videos` |
 | Ecommerce base | depends on `@contentful/ecommerce-app-base` | `commercetools`, `commercetools-without-search`, `saleor` |
 

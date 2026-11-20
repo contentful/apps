@@ -16,11 +16,8 @@ yarn-error.log*
 **/node_modules/
 
 # Build
-frontend/build/*
-!frontend/build/index.html
+build/*
+!build/index.html
 
 # VS Code
 .vscode
-
-# serverless stuff
-.serverless

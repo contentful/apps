@@ -4,22 +4,21 @@
 Connects Contentful spaces to Netlify sites. Shows build status in the Entry Sidebar and lets editors trigger Netlify builds directly from Contentful. Published as `@contentful/netlify-build-and-preview`.
 
 ## Archetype
-**Legacy Lambda + Frontend** app.
+**Frontend + Contentful Functions** app.
 
 ## Structure
 
 ```
 apps/netlify/
-├── frontend/          # React app
-│   └── src/           # Standard Vite app with locations/
-├── lambda/            # AWS Lambda — Netlify webhook and build API proxy
-│   ├── app.js
-│   ├── handlers/      # Route handlers
-│   └── helpers/
-└── images/            # Logo assets
+├── src/                          # React app (standard Vite app with locations/)
+├── functions/                    # Contentful Functions, bundled into build/functions
+│   ├── appEventHandler.js        # App event handler: fires build hooks on Entry/Asset publish/unpublish
+│   └── lib/build-hook.js         # Shared logic (hook lookup and filtering, Netlify call)
+├── contentful-app-manifest.json  # Declares the functions and the `netlifyBuild` action
+└── images/                       # Logo assets
 ```
 
-## Key Dependencies (frontend)
+## Key Dependencies
 
 | Package | Role |
 |---------|------|
@@ -28,17 +27,17 @@ apps/netlify/
 | `@contentful/f36-icons` | Icons |
 | `@contentful/f36-tokens` | Design tokens |
 | `date-fns` | Date formatting for build timestamps |
+| `@contentful/app-scripts` | Builds the functions (`build-functions`) and uploads the bundle |
 
 ## Sharp Edges & Invariants
 
-- **Lambda proxies Netlify API** — the frontend does not call the Netlify API directly. All Netlify build hooks and status checks go through the Lambda. Netlify build hook URLs are sensitive (they trigger builds without authentication).
-- **Lambda URL** is in installation parameters.
-- **Build hook URL** is a secret — it is stored in installation parameters and only ever sent to the Lambda, not exposed in the frontend.
-- The Lambda uses Node.js — check `lambda/package.json` for its runtime version and dependencies separately from the frontend.
-- Netlify build status is polled — the Sidebar polls the Lambda for build status updates. Respect the polling interval.
+- **Contentful Functions.** Installation parameters arrive in `context.appInstallationParameters`; there is no signature verification, token exchange or CMA call to maintain.
+- **Functions only reach `api.netlify.com`** — it is the only entry in `allowNetworks` in `contentful-app-manifest.json`. Add hosts there before calling anything else.
+- **Build hook IDs** live in installation parameters (`buildHookIds`, `siteNames`, `events`). `siteNames` and `buildHookIds` are comma-separated and ordered the same way.
+- **`npm run build` builds both** the frontend (`vite build`) and the functions (`build-functions --ci`). `--ci` is required, otherwise the CLI prompts interactively.
 
 ## Never / Always
 
-- **Never** expose Netlify build hook URLs in the frontend bundle or logs.
-- **Never** call the Netlify API directly from the frontend.
-- **Always** handle the case where the Lambda is unreachable (network error, cold start timeout).
+- **Never** log build hook IDs or URLs.
+- **Always** throw an `Error` from a function when it cannot do its job; the platform reports it as a failed invocation.
+- **Always** keep `functions/lib/build-hook.spec.js` and `functions/handlers.spec.js` in sync with behavior changes.

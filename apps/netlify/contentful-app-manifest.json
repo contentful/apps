@@ -1,0 +1,47 @@
+{
+  "functions": [
+    {
+      "id": "appEventHandler",
+      "name": "Netlify build on content events",
+      "description": "Fires the configured Netlify build hooks when entries or assets are published or unpublished.",
+      "path": "functions/appEventHandler.js",
+      "entryFile": "functions/appEventHandler.js",
+      "allowNetworks": [
+        "api.netlify.com"
+      ],
+      "accepts": [
+        "appevent.handler"
+      ]
+    },
+    {
+      "id": "handleNetlifyBuild",
+      "name": "Netlify build on action trigger",
+      "description": "Fires the configured Netlify build hooks when the action is triggered.",
+      "path": "functions/handleNetlifyBuild.js",
+      "entryFile": "functions/handleNetlifyBuild.js",
+      "allowNetworks": [
+        "api.netlify.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "2fQy1xVEYyAL2uHkKRAKD",
+      "name": "Netlify build",
+      "type": "function-invocation",
+      "functionId": "handleNetlifyBuild",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "siteName",
+          "name": "Site name",
+          "type": "Symbol",
+          "required": true
+        }
+      ]
+    }
+  ]
+}
