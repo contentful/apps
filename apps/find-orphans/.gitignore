@@ -1,0 +1,3 @@
+# Seed-script config holds a CMA token and a test space id; keep it local.
+# (.env is already ignored by the repo-root .gitignore.)
+.env.seed
