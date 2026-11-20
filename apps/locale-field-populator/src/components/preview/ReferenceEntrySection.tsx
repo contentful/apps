@@ -2,7 +2,6 @@ import { ContentTypeField } from '@contentful/app-sdk';
 import { Accordion, Box, Checkbox, Flex, Note, Text, TextLink } from '@contentful/f36-components';
 import { ContentTypeProps, EntryProps } from 'contentful-management';
 import { useMemo } from 'react';
-import { isEntryArrayField, isEntryField } from '../../utils/fieldTypes';
 import PreviewFieldRow from './PreviewFieldRow';
 import { depthIndent, styles } from './ReferenceEntrySection.styles';
 import { ArrowSquareOutIcon } from '@contentful/f36-icons';
@@ -54,10 +53,10 @@ const ReferenceEntrySection = ({
   isDisabled = false,
   depth = 1,
 }: ReferenceEntrySectionProps) => {
+  // Reference fields (single and array) are localizable like any other field --
+  // populating the link itself across locales is exactly what this app is for.
   const localizedFields = useMemo(() => {
-    return (contentType.fields as ContentTypeField[]).filter(
-      (field) => field.localized && !isEntryField(field) && !isEntryArrayField(field)
-    );
+    return (contentType.fields as ContentTypeField[]).filter((field) => field.localized);
   }, [contentType.fields]);
 
   const fieldCount = localizedFields.length;
@@ -184,6 +183,7 @@ const ReferenceEntrySection = ({
                   isAdopted={adoptedFields[field.id] ?? true}
                   onAdoptedChange={(adopted) => onAdoptedFieldChange(field.id, adopted)}
                   isDisabled={isDisabled}
+                  baseUrl={baseUrl}
                 />
               ))}
             </Flex>

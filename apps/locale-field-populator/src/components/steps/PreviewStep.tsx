@@ -22,7 +22,6 @@ import {
   setAllEntryFieldsAdopted,
   setFieldAdopted,
 } from '../../utils/adoptedFields';
-import { isEntryArrayField, isEntryField } from '../../utils/fieldTypes';
 import { SimplifiedLocale } from '../../utils/locales';
 import PreviewBox from '../preview/PreviewBox';
 import PreviewFieldRow from '../preview/PreviewFieldRow';
@@ -110,10 +109,10 @@ const PreviewStepComponent = ({
     return locale?.name || sourceLocale;
   }, [availableLocales, sourceLocale]);
 
+  // Reference fields (single and array) are localizable like any other field --
+  // populating the link itself across locales is exactly what this app is for.
   const localizedFields = useMemo(() => {
-    return contentType.fields.filter(
-      (field) => field.localized && !isEntryField(field) && !isEntryArrayField(field)
-    );
+    return contentType.fields.filter((field) => field.localized);
   }, [contentType.fields]);
 
   const allFieldsAdopted = useMemo(() => {
@@ -123,9 +122,7 @@ const PreviewStepComponent = ({
   const totalReferencedFields = useMemo(() => {
     return referencedEntries.reduce((count, ref) => {
       if (ref.isSelfReference || ref.isAlreadyIncluded) return count;
-      const fields = ref.contentType.fields.filter(
-        (f) => f.localized && !isEntryField(f) && !isEntryArrayField(f)
-      );
+      const fields = ref.contentType.fields.filter((f) => f.localized);
       return count + fields.length;
     }, 0);
   }, [referencedEntries]);
@@ -139,9 +136,7 @@ const PreviewStepComponent = ({
   const hasMore = visibleCount < referencedEntries.length;
 
   const handleAdoptAll = (entryId: string, contentType: ContentTypeProps, adopted: boolean) => {
-    const fieldIds = contentType.fields
-      .filter((f) => f.localized && !isEntryField(f) && !isEntryArrayField(f))
-      .map((f) => f.id);
+    const fieldIds = contentType.fields.filter((f) => f.localized).map((f) => f.id);
     onAdoptedFieldsChange(setAllEntryFieldsAdopted(adoptedFields, entryId, fieldIds, adopted));
   };
 
@@ -234,10 +229,6 @@ const PreviewStepComponent = ({
         {/* Main entry field rows */}
         <Flex flexDirection="column" gap="spacingS">
           {contentType.fields.map((field) => {
-            if (isEntryField(field) || isEntryArrayField(field)) {
-              return null;
-            }
-
             if (field.localized) {
               return (
                 <PreviewFieldRow
@@ -250,6 +241,7 @@ const PreviewStepComponent = ({
                   isAdopted={adoptedFields[entry.sys.id]?.[field.id] ?? true}
                   onAdoptedChange={(adopted) => handleFieldAdopted(entry.sys.id, field.id, adopted)}
                   isDisabled={isDisabled}
+                  baseUrl={baseUrl}
                 />
               );
             }
