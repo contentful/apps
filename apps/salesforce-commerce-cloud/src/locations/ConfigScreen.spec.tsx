@@ -9,12 +9,12 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 describe('Config Screen component', () => {
-  it('Component text exists', async () => {
+  it('renders the config UI and blocks install when required fields are empty', async () => {
     const { findByText } = render(<ConfigScreen />);
 
-    // simulate the user clicking the install button
-    await mockSdk.app.onConfigure.mock.calls[0][0]();
+    const configureResult = await mockSdk.app.onConfigure.mock.calls[0][0]();
+    expect(configureResult).toBe(false);
 
-    expect(findByText(/Welcome to your contentful app. This is your config page./)).toBeTruthy();
+    expect(await findByText('App Config')).toBeTruthy();
   });
 });
