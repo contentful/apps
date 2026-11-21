@@ -1,11 +1,13 @@
-import { FieldAppSDK } from '@contentful/app-sdk';
+import type { FieldAppSDK } from '@contentful/app-sdk';
 import { Flex, Form, Menu } from '@contentful/f36-components';
 import { useFieldValue, useSDK } from '@contentful/react-apps-toolkit';
 import { css } from 'emotion';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ColorBox } from '../components/ColorBox';
 import { SelectColorButton } from '../components/SelectColorButton';
-import { Color, Theme } from '../types';
+import type { Color, Theme } from '../types';
+import ColorPicker from '../components/ColorPicker.js';
+import { formatHexColor } from '../utils/color.js';
 import tokens from '@contentful/f36-tokens';
 
 const styles = {
@@ -34,12 +36,37 @@ type FieldValue = Color | string | undefined;
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
+  const enableOpacity = sdk.parameters.installation.enableOpacity === true;
   const locale = sdk.field.locale;
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [value, setValue] = useFieldValue<FieldValue>(sdk.field.id, locale);
   const customColorPicker = useRef<HTMLInputElement>(null);
 
   const storeHexValue = sdk.field.type === 'Symbol';
+  const outputColor = (color: string): string =>
+    enableOpacity ? formatHexColor(color, true) : color;
+
+  const writeValue = (nextValue: FieldValue): void => {
+    void setValue(nextValue).catch(() => sdk.notifier.error('Unable to save the color.'));
+  };
+
+  const writeCustomColor = (color: string): void => {
+    writeValue(
+      storeHexValue
+        ? outputColor(color)
+        : { id: window.crypto.randomUUID(), name: 'Custom', value: outputColor(color) }
+    );
+  };
+
+  const openCustomPicker = (): void => {
+    if (enableOpacity) {
+      setIsOpen(false);
+      setIsPickerOpen(true);
+    } else {
+      customColorPicker.current?.click();
+    }
+  };
 
   const allowCustomValue = useMemo(() => {
     const { validations } = sdk.field;
@@ -59,11 +86,11 @@ const Field = () => {
     const acceptedValues = validations.find((validation) => validation.in)?.in;
 
     if (acceptedValues?.at(0) && theme.colors?.at(0)) {
-      return theme.colors.filter((color) => acceptedValues?.includes(color.value));
+      return theme.colors.filter((color) => acceptedValues?.includes(outputColor(color.value)));
     }
 
     return theme.colors;
-  }, [sdk.field, theme.colors]);
+  }, [sdk.field, theme.colors, enableOpacity]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -81,7 +108,7 @@ const Field = () => {
   const name = useMemo<string>(() => {
     switch (typeof value) {
       case 'string':
-        const color = theme.colors.find((c) => c.value === value);
+        const color = theme.colors.find((c) => outputColor(c.value) === outputColor(value));
         if (color) {
           return color.name;
         }
@@ -105,7 +132,25 @@ const Field = () => {
       default:
         return 'Invalid';
     }
-  }, [allowCustomValue, sdk.field.required, theme.colors, value]);
+  }, [allowCustomValue, sdk.field.required, theme.colors, value, enableOpacity]);
+
+  if (enableOpacity && (theme.colors.length === 0 || isPickerOpen)) {
+    return (
+      <Form>
+        <ColorPicker
+          defaultOpen={isPickerOpen}
+          onClose={() => setIsPickerOpen(false)}
+          value={(typeof value === 'string' ? value : value?.value) ?? '#000000ff'}
+          onChange={writeCustomColor}>
+          <SelectColorButton
+            name={name}
+            value={value}
+            onClearClick={() => writeValue(undefined)}
+          />
+        </ColorPicker>
+      </Form>
+    );
+  }
 
   return (
     <Form>
@@ -113,8 +158,8 @@ const Field = () => {
         <SelectColorButton
           name={name}
           value={value}
-          onClick={() => customColorPicker?.current?.click()}
-          onClearClick={() => setValue(undefined)}
+          onClick={openCustomPicker}
+          onClearClick={() => writeValue(undefined)}
         />
       ) : (
         <Menu isOpen={isOpen} onOpen={() => setIsOpen(true)} onClose={() => setIsOpen(false)}>
@@ -123,41 +168,31 @@ const Field = () => {
               showChevron
               name={name}
               value={value}
-              onClearClick={() => setValue(undefined)}
+              onClearClick={() => writeValue(undefined)}
             />
           </Menu.Trigger>
           <Menu.List className={styles.menuList}>
             {validatedColors.map((color: Color) => (
               <Menu.Item
                 key={color.id}
-                onClick={() => setValue(storeHexValue ? color.value : color)}>
+                onClick={() => writeValue(storeHexValue ? outputColor(color.value) : { ...color, value: outputColor(color.value) })}>
                 <Flex alignItems="center" gap="spacingXs">
                   <ColorBox color={color} />
                   <Flex gap="spacing2Xs">
                     {color.name}
-                    <span className={styles.hexValue}>{color.value}</span>
+                    <span className={styles.hexValue}>{outputColor(color.value)}</span>
                   </Flex>
                 </Flex>
               </Menu.Item>
             ))}
             {allowCustomValue && (
-              <Menu.Item onClick={() => customColorPicker?.current?.click()}>Custom...</Menu.Item>
+              <Menu.Item onClick={openCustomPicker}>Custom...</Menu.Item>
             )}
           </Menu.List>
         </Menu>
       )}
       <input
-        onChange={(e) => {
-          if (storeHexValue) {
-            setValue(e.target.value);
-          } else {
-            setValue({
-              id: window.crypto.randomUUID(),
-              name: 'Custom',
-              value: e.target.value,
-            });
-          }
-        }}
+        onChange={(e) => writeCustomColor(e.target.value)}
         type="color"
         id="customColor"
         className={styles.displayNone}
