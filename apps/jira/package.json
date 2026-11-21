@@ -8,8 +8,8 @@
   "devDependencies": {
     "concurrently": "5.3.0",
     "js-yaml": "3.15.2",
-    "@ngrok/ngrok": "^1.7.0",
-    "dotenv": "^16.4.5"
+    "@ngrok/ngrok": "^1.8.0",
+    "dotenv": "^16.6.1"
   },
   "scripts": {
     "start:lambda": "npm run --prefix functions start",
