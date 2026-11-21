@@ -147,6 +147,49 @@ describe('EntryCloner', () => {
       );
     });
 
+    it('keeps entry names unchanged when the clone text is empty', async () => {
+      entryCloner = new EntryCloner(
+        mockCma as any,
+        { ...mockParameters, cloneText: '' },
+        'main-entry-id',
+        setReferencesCount,
+        setClonesCount,
+        setUpdatesCount
+      );
+      mockCma.contentType.get.mockResolvedValue(contentType);
+      mockCma.entry.get.mockResolvedValueOnce(mainEntry).mockResolvedValueOnce(referencedEntry);
+      mockCma.entry.create
+        .mockResolvedValueOnce(clonedMainEntry)
+        .mockResolvedValueOnce(clonedReferencedEntry);
+      mockCma.entry.update.mockResolvedValueOnce(updatedMainEntry);
+
+      await entryCloner.cloneEntry();
+
+      expect(mockCma.entry.create).toHaveBeenNthCalledWith(
+        1,
+        { contentTypeId: 'testContentType' },
+        {
+          fields: {
+            title: { 'en-US': 'Main Entry Title' },
+            reference: {
+              'en-US': {
+                sys: { type: 'Link', linkType: 'Entry', id: 'referenced-entry-id' },
+              },
+            },
+          },
+        }
+      );
+      expect(mockCma.entry.create).toHaveBeenNthCalledWith(
+        2,
+        { contentTypeId: 'testContentType' },
+        {
+          fields: {
+            title: { 'en-US': 'Referenced Entry Title' },
+          },
+        }
+      );
+    });
+
     it('should retry if there is a version mismatch error', async () => {
       mockCma.contentType.get.mockResolvedValue(contentType);
       mockCma.entry.get
