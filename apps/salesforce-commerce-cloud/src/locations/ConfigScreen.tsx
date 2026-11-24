@@ -91,6 +91,7 @@ const ConfigScreen = () => {
     {
       id: 'clientSecret',
       label: 'Client Secret',
+      type: 'password' as const,
       helpText:
         'The Client Secret (labeled Password) to use when connecting with the above API client.',
     },
@@ -193,6 +194,7 @@ const FormInput = (props: {
     id: string;
     label: string;
     helpText: string;
+    type?: 'text' | 'password';
   };
   value: string;
   isInvalid: boolean;
@@ -208,6 +210,8 @@ const FormInput = (props: {
         id={input.id}
         name={input.id}
         size="small"
+        type={input.type ?? 'text'}
+        autoComplete={input.type === 'password' ? 'off' : undefined}
         value={props.value}
         onChange={props.onInputChange}
         onFocus={props.onInputFocus}
