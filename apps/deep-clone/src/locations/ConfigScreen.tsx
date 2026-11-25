@@ -36,11 +36,9 @@ function ConfigScreen() {
     })();
   }, [sdk]);
 
+  const hasCloneText = Boolean(parameters.cloneText?.trim());
+
   const onConfigure = useCallback(async () => {
-    if (!parameters.cloneText?.trim()) {
-      sdk.notifier.error('The app configuration was not saved. Please try again.');
-      return false;
-    }
     const editorInterface = selectedContentTypes.reduce((acc, contentType) => {
       return {
         ...acc,
@@ -90,7 +88,7 @@ function ConfigScreen() {
           Naming
         </Subheading>
 
-        <FormControl isRequired isInvalid={!parameters.cloneText}>
+        <FormControl>
           <FormControl.Label className={styles.textInputLabel}>Clone text</FormControl.Label>
           <TextInput
             value={parameters.cloneText}
@@ -99,16 +97,12 @@ function ConfigScreen() {
             onChange={(e) => setParameters({ ...parameters, cloneText: e.target.value })}
           />
           <FormControl.HelpText>
-            This text will display at the beginning or end of the cloned entry name
+            This text will display at the beginning or end of each cloned entry's name. Leave it
+            empty to keep the original names.
           </FormControl.HelpText>
-          {!parameters.cloneText && (
-            <FormControl.ValidationMessage>
-              Please, provide a clone text
-            </FormControl.ValidationMessage>
-          )}
         </FormControl>
 
-        <FormControl isInvalid={!parameters.cloneTextBefore}>
+        <FormControl>
           <FormControl.Label className={styles.textInputLabel} marginBottom="spacingM">
             Display "clone text" before or after the cloned entry's name?
           </FormControl.Label>
@@ -118,6 +112,7 @@ function ConfigScreen() {
               id="cloneTextBefore"
               testId="cloneTextBefore"
               name="clone-text-before"
+              isDisabled={!hasCloneText}
               isChecked={parameters.cloneTextBefore}
               onChange={() => setParameters({ ...parameters, cloneTextBefore: true })}>
               Before
@@ -126,6 +121,7 @@ function ConfigScreen() {
               id="cloneTextAfter"
               testId="cloneTextAfter"
               name="clone-text-before"
+              isDisabled={!hasCloneText}
               isChecked={!parameters.cloneTextBefore}
               onChange={() => setParameters({ ...parameters, cloneTextBefore: false })}>
               After
