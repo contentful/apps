@@ -17,6 +17,7 @@ import { ConfigAppSDK } from '@contentful/app-sdk';
 import {
   Button,
   Card,
+  Checkbox,
   Flex,
   Note,
   Paragraph,
@@ -29,7 +30,8 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { css } from 'emotion';
 import { useCallback, useEffect, useState } from 'react';
 import SwatchEditor from '../components/SwatchEditor';
-import { AppInstallationParameters, Color } from '../types';
+import { formatHexColor } from '../utils/color.js';
+import type { AppInstallationParameters, Color } from '../types';
 
 const styles = {
   body: css({
@@ -52,6 +54,7 @@ const styles = {
 const ConfigScreen = () => {
   const [isInstalled, setIsInstalled] = useState(false);
   const [parameters, setParameters] = useState<AppInstallationParameters>({
+    enableOpacity: false,
     themes: [
       {
         id: 'default',
@@ -103,7 +106,11 @@ const ConfigScreen = () => {
           ...parameters.themes[0],
           colors: [
             ...parameters.themes[0].colors,
-            { id: window.crypto.randomUUID(), name: '', value: '#0088cc' },
+            {
+              id: window.crypto.randomUUID(),
+              name: '',
+              value: formatHexColor('#0088cc', parameters.enableOpacity ?? false),
+            },
           ],
         },
       ],
@@ -126,13 +133,31 @@ const ConfigScreen = () => {
     const theme = parameters.themes[0];
     const newTheme = {
       ...theme,
-      colors: theme.colors.map((color) => (color.id === swatch.id ? swatch : color)),
+      colors: theme.colors.map((color) =>
+        color.id === swatch.id
+          ? { ...swatch, value: formatHexColor(swatch.value, parameters.enableOpacity ?? false) }
+          : color
+      ),
     };
 
     setParameters({
       ...parameters,
       themes: [newTheme],
     });
+  };
+
+  const updateOpacity = (enableOpacity: boolean) => {
+    setParameters((previous) => ({
+      ...previous,
+      enableOpacity,
+      themes: previous.themes.map((theme) => ({
+        ...theme,
+        colors: theme.colors.map((color) => ({
+          ...color,
+          value: formatHexColor(color.value, enableOpacity),
+        })),
+      })),
+    }));
   };
 
   const onConfigure = useCallback(async () => {
@@ -162,7 +187,10 @@ const ConfigScreen = () => {
       const currentParameters = await sdk.app.getParameters<AppInstallationParameters>();
 
       if (currentParameters) {
-        setParameters(currentParameters);
+        setParameters({
+          ...currentParameters,
+          enableOpacity: currentParameters.enableOpacity ?? false,
+        });
       }
 
       sdk.app.setReady();
@@ -198,6 +226,12 @@ const ConfigScreen = () => {
               handle beside each row to change the order shown in the entry editor.
             </Paragraph>
 
+            <Checkbox
+              isChecked={parameters.enableOpacity ?? false}
+              onChange={(event) => updateOpacity(event.target.checked)}
+              helpText="When enabled, color values use #RRGGBBAA, including alpha opacity.">
+              Enable opacity
+            </Checkbox>
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
@@ -211,6 +245,7 @@ const ConfigScreen = () => {
                     swatch={swatch}
                     onChange={updateSwatch}
                     onRemove={removeSwatch}
+                    enableOpacity={parameters.enableOpacity ?? false}
                   />
                 ))}
               </SortableContext>
